@@ -12,7 +12,7 @@ For more information, as well as an immediately useable, binary version of the U
 
 License
 -------
-The UNIGRID daemon and wallet are released under the terms of the GNU Affero GPL license. See [COPYING](COPYING) for more information.
+Janus is released under the terms of the GNU Affero GPL license. See [COPYING](COPYING) for more information.
 
 Development process
 -------------------
