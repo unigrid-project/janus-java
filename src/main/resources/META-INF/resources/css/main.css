@@ -1,0 +1,94 @@
+:root {
+	--header-background: linear-gradient(to right, rgb(240, 90, 20), rgb(255, 120, 20));
+	--resize-virtual-border-size: 6px;
+}
+
+html {
+	background-color: rgba(0,0,0,0);
+}
+
+body {
+	margin: 0;
+	background-color: rgba(0, 0, 0, 0);
+
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
+	background-color: rgba(0,0,0,0);
+}
+
+header {
+	display: flex;
+	background-image: var(--header-background);
+	margin-bottom: 10px;
+	overflow: hidden;
+}
+
+header > div {
+	width: 100%;
+}
+
+header > div:active {
+	cursor: move;
+}
+
+header > .ui-button {
+	border: none !important;
+	background-color: rgba(0, 0, 0, 0) !important;
+	margin-left: 2px;
+	margin-right: 2px;
+	transition: all .1s ease-in-out;
+}
+
+header > .ui-button:last-child {
+	margin-right: 0px;
+}
+
+header > .ui-button > span {
+	backface-visibility: hidden;
+}
+
+header > .ui-button:hover {
+	transform-origin: center;
+	transform: scale(1.4);
+}
+
+div[data-direction] {
+	z-index: 1000;
+}
+
+div[data-direction="NORTHWEST"], div[data-direction="NORTHEAST"],
+div[data-direction="SOUTHWEST"], div[data-direction="SOUTHEAST"] {
+	width: var(--resize-virtual-border-size);
+	height: var(--resize-virtual-border-size);
+}
+
+div[data-direction="NORTHWEST"], div[data-direction="SOUTHWEST"] {
+	align-self: start;
+}
+
+div[data-direction="NORTH"], div[data-direction="SOUTH"] {
+	display: flex;
+	position: absolute;
+	justify-content: space-between;
+	width: 100%;
+	height: var(--resize-virtual-border-size);
+}
+
+div[data-direction="SOUTH"] {
+	bottom: 0px;
+}
+
+div[data-direction="NORTHEAST"], div[data-direction="SOUTHEAST"] {
+	align-self: end;
+}
+
+div[data-direction="WEST"], div[data-direction="EAST"] {
+	position: absolute;
+	top: var(--resize-virtual-border-size);
+	width: var(--resize-virtual-border-size);
+	height: calc(100% - calc(var(--resize-virtual-border-size) * 2));
+}
+
+div[data-direction="EAST"] {
+	right: 0px;
+}

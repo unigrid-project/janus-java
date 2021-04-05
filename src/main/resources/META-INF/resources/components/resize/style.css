@@ -1,0 +1,31 @@
+div[data-direction="NORTH"]:hover {
+	cursor: n-resize;
+}
+
+div[data-direction="NORTHWEST"]:hover {
+	cursor: nw-resize;
+}
+
+div[data-direction="NORTHEAST"]:hover {
+	cursor: ne-resize;
+}
+
+div[data-direction="SOUTH"]:hover {
+	cursor: s-resize;
+}
+
+div[data-direction="SOUTHWEST"]:hover {
+	cursor: sw-resize;
+}
+
+div[data-direction="SOUTHEAST"]:hover {
+	cursor: se-resize;
+}
+
+div[data-direction="WEST"]:hover {
+	cursor: w-resize;
+}
+
+div[data-direction="EAST"]:hover {
+	cursor: e-resize;
+}

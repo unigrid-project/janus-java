@@ -1,0 +1,11 @@
+joinfaces:
+  jsf:
+    config-files: config/faces-config-joinfaces.xml, config/faces-config-omnifaces.xml,
+                  config/faces-config-primefaces.xml, config/faces-config-primefaces_extensions.xml
+    PROJECT_STAGE: Development
+
+server.tomcat.max-threads: 4
+
+#spring.devtools.restart.enabled: true
+#spring.devtools.restart.additional-paths: /META-INF/resources, /resources, **
+#joinfaces.jsf.facelets-refresh-period: 0
