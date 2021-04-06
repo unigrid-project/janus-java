@@ -1,9 +1,9 @@
 package org.unigrid.janus.model;
 
 import org.apache.commons.configuration2.SystemConfiguration;
-import org.unigrid.janus.Janus;
 
 public class Preferences {
+	private static final String ROOT_NODE = "janus";
 	public static final SystemConfiguration PROPS = new SystemConfiguration();
 
 	public static <T> void changePropertyDefault(Class<T> type, String key, T defaultValue) {
@@ -11,6 +11,6 @@ public class Preferences {
 	}
 
 	public static java.util.prefs.Preferences get() {
-		return java.util.prefs.Preferences.userRoot().node(Janus.class.getSimpleName().toLowerCase());
+		return java.util.prefs.Preferences.userRoot().node(ROOT_NODE);
 	}
 }

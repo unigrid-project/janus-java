@@ -7,16 +7,12 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.Getter;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.unigrid.janus.Janus;
 import org.unigrid.janus.fx.view.decorator.DecoratableWindow;
 import org.unigrid.janus.fx.view.decorator.MovableWindow;
 import org.unigrid.janus.fx.view.decorator.ResizableWindow;
 import org.unigrid.janus.model.Direction;
 
 public class MainWindow extends Application implements DecoratableWindow {
-	private ConfigurableApplicationContext applicationContext;
 	@Getter private static MainWindow instance;
 	@Getter private Stage stage;
 
@@ -43,7 +39,6 @@ public class MainWindow extends Application implements DecoratableWindow {
 	public void start(Stage stage) {
 		instance = this;
 		this.stage = stage;
-		applicationContext = SpringApplication.run(Janus.class);
 
 		stage.setScene(new Scene(new Browser()));
 		stage.setTitle("Janus Not Electron Wallet Proof of Concept");
@@ -67,6 +62,5 @@ public class MainWindow extends Application implements DecoratableWindow {
 	@Override
 	public void stop() {
 		stage.close();
-		applicationContext.stop();
 	}
 }

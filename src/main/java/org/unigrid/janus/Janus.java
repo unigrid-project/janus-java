@@ -1,8 +1,10 @@
 package org.unigrid.janus;
 
 import javafx.application.Application;
+import org.springframework.boot.SpringApplication;
 import org.unigrid.janus.fx.view.MainWindow;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.setup.Certificate;
 
@@ -12,6 +14,8 @@ public class Janus {
 		final Certificate certificate = new Certificate();
 		certificate.getCurrent();
 
+		final ConfigurableApplicationContext applicationContext = SpringApplication.run(Janus.class);
+
 		/* Effectively changes the default values of these properties as used in JavaFX, we do this to speed up
 		   refreshes and custom resizing of undecorated windows. */
 
@@ -19,5 +23,6 @@ public class Janus {
 		Preferences.changePropertyDefault(String.class, "prism.order", "sw");
 
 		Application.launch(MainWindow.class, args);
+		applicationContext.stop();
 	}
 }
