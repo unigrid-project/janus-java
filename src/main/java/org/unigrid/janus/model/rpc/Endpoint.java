@@ -14,32 +14,15 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.service;
+package org.unigrid.janus.model.rpc;
 
-import java.net.URI;
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import org.unigrid.janus.model.rpc.JsonConfiguration;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Stateless
-public class RPCService {
-	private WebTarget target;
-
-	private URI findDaemonEndpoint() {
-		return null;
-	}
-
-	@PostConstruct
-	private void init() {
-		target = ClientBuilder.newBuilder()
-			.register(new JsonConfiguration())
-			.build().target(findDaemonEndpoint());
-	}
-
-	public <T> T call() {
-		//target.path(path);
-		return null;
-	}
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Endpoint {
+	String value();
 }

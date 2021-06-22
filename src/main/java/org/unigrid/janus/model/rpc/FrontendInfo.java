@@ -16,10 +16,12 @@
 
 package org.unigrid.janus.model.rpc;
 
+import javax.json.bind.annotation.JsonbProperty;
 import lombok.Data;
 
 @Data
+@Endpoint("getfrontendinfo")
 public class FrontendInfo {
-	//@JsonbProperty("resize-virtual-border-size") private String resizeVirtualBorderSize;
-	//@JsonbProperty("resize-virtual-border-size", ) private String resizeVirtualBorderSize;
+	@JsonbProperty private String headerBackground;
+	@JsonbProperty private String resizeVirtualBorderSize;
 }

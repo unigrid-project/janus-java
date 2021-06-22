@@ -14,32 +14,23 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.service;
+package org.unigrid.janus.model.rpc;
 
-import java.net.URI;
-import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import org.unigrid.janus.model.rpc.JsonConfiguration;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
+import javax.json.bind.config.PropertyNamingStrategy;
+import javax.ws.rs.ext.ContextResolver;
 
-@Stateless
-public class RPCService {
-	private WebTarget target;
-
-	private URI findDaemonEndpoint() {
-		return null;
+public class JsonConfiguration implements ContextResolver<Jsonb> {
+	private JsonbConfig getJsonbConfig() {
+		return new JsonbConfig().withPropertyNamingStrategy(
+			PropertyNamingStrategy.LOWER_CASE_WITH_DASHES
+		);
 	}
 
-	@PostConstruct
-	private void init() {
-		target = ClientBuilder.newBuilder()
-			.register(new JsonConfiguration())
-			.build().target(findDaemonEndpoint());
-	}
-
-	public <T> T call() {
-		//target.path(path);
-		return null;
+	@Override
+	public Jsonb getContext(Class<?> type) {
+		return JsonbBuilder.newBuilder().withConfig(getJsonbConfig()).build();
 	}
 }
