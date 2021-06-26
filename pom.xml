@@ -8,6 +8,11 @@
 	<packaging>jar</packaging>
 	<name>Janus</name>
 
+	<organization>
+		<name>The Unigrid Foundation</name>
+		<url>https://www.unigrid.org</url>
+	</organization>
+
 	<properties>
 		<endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -208,15 +213,20 @@
 			<version>15.0.1</versiol<<	11n>
 			<classifier>mac</classifier>l
 		</dependency>-->
+		<!--<dependency>
+			<groupId>com.gluonhq</groupId>
+			<artifactId></artifactId>
+			<version></version>
+		</dependency>-->
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
-			<version>17-ea+5</version>
+			<version>11-ea+25</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-web</artifactId>
-			<version>17-ea+5</version>
+			<version>11-ea+25</version>
 		</dependency>
 		<!--<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -360,7 +370,7 @@
 				<configuration>
 					<compilerArgument>-Xlint:unchecked</compilerArgument>
 					<compilerArgument>-Xlint:deprecation</compilerArgument>
-					<release>15</release>
+					<release>11</release>
 					<debug>true</debug>
 				</configuration>
 			</plugin>

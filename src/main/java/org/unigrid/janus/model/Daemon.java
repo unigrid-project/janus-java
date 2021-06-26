@@ -66,9 +66,9 @@ public class Daemon {
 			}
 		} else {
 			new Alert(AlertType.NONE).show();
-			throw new ConfigurationException(("No location to the daemon specified in property '%s'. "
-				+ "This should point to either a local file, "
-				+ "or a remote http location.").formatted(PROPERTY_LOCATION_KEY)
+			throw new ConfigurationException(String.format("No location to the daemon specified in "
+				+ " property '%s'. This should point to either a local file, "
+				+ "or a remote http location.", PROPERTY_LOCATION_KEY)
 			);
 		}
 	}
