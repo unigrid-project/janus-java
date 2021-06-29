@@ -125,7 +125,7 @@ public class ResizableWindowDecorator implements Decorator {
 	public void resize(Decoratable decoratable, Direction direction) {
 		final Scene scene = decoratable.getStage().getScene();
 
-		switch(direction) {
+		switch (direction) {
 			case NORTH -> scene.setCursor(Cursor.N_RESIZE);
 			case NORTHWEST -> scene.setCursor(Cursor.NW_RESIZE);
 			case NORTHEAST -> scene.setCursor(Cursor.NE_RESIZE);
