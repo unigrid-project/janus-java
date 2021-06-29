@@ -14,30 +14,10 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.controller;
+package org.unigrid.janus.view.decorator;
 
-import java.io.Serializable;
-import javax.faces.view.ViewScoped;
-import javax.inject.Named;
-import lombok.Data;
+import javafx.scene.Node;
 
-@Data
-@Named
-@ViewScoped
-public class WelcomeController implements Serializable {
-	private String name;
-	private String sir = "testytestaa";
-
-	public String getName(String name) {
-		return name + "momodd";
-	}
-
-	public void setName(String name) {
-		//logger.info(name);
-		this.name = name + "MMx";
-	}
-
-	public void onPress() {
-		//logger.info("Pickle pressed the button");
-	}
+public interface Decorator {
+	void decorate(Decoratable decoratable, Node node);
 }

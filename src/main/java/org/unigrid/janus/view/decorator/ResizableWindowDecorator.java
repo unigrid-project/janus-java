@@ -14,17 +14,19 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.fx.view.decorator;
+package org.unigrid.janus.view.decorator;
 
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Optional;
 import javafx.application.Platform;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.stage.Window;
 import org.unigrid.janus.model.Direction;
 
-public class ResizableWindow {
+public class ResizableWindowDecorator implements Decorator {
 	private Optional<Direction> dragDirection = Optional.empty();
 
 	private final Point clickedPoint = new Point();
@@ -79,14 +81,15 @@ public class ResizableWindow {
 		}
 	}
 
-	public void decorate(DecoratableWindow window) {
-		/* Slightly speeds up rendering? */
-		window.getStage().getScene().getWindow().setForceIntegerRenderScale(true);
+	@Override
+	public void decorate(Decoratable decoratable, Node node) {
+		// Slightly speeds up rendering?
+		decoratable.getStage().getScene().getWindow().setForceIntegerRenderScale(true);
 
-		window.getStage().getScene().addEventFilter(MouseEvent.MOUSE_PRESSED, (e) -> {
+		node.setOnMousePressed(e -> {
 			origin.setRect(
-				window.getStage().getX(), window.getStage().getY(),
-				window.getStage().getWidth(), window.getStage().getHeight()
+				decoratable.getStage().getX(), decoratable.getStage().getY(),
+				decoratable.getStage().getWidth(), decoratable.getStage().getHeight()
 			);
 
 			current.setRect(origin);
@@ -98,24 +101,41 @@ public class ResizableWindow {
 			y2 = origin.getMaxY();
 		});
 
-		window.getStage().getScene().addEventFilter(MouseEvent.MOUSE_RELEASED, (e) -> {
+		node.setOnMouseReleased(e -> {
 			dragDirection = Optional.empty();
 		});
 
-		window.getStage().getScene().addEventFilter(MouseEvent.MOUSE_DRAGGED, (e) -> {
+		node.setOnMouseExited(e -> {
+			decoratable.getStage().getScene().setCursor(Cursor.DEFAULT);
+		});
+
+		node.setOnMouseDragged(e -> {
 			if (dragDirection.isPresent() && !stillResizing) {
 				stillResizing = true;
 				refreshCoordinates(e.getScreenX(), e.getScreenY());
 
 				Platform.runLater(() -> {
-					refreshFXWindowPosition(window.getStage().getScene().getWindow());
+					refreshFXWindowPosition(decoratable.getStage().getScene().getWindow());
 					stillResizing = false;
 				});
 			}
 		});
 	}
 
-	public void resize(Direction direction) {
+	public void resize(Decoratable decoratable, Direction direction) {
+		final Scene scene = decoratable.getStage().getScene();
+
+		switch(direction) {
+			case NORTH -> scene.setCursor(Cursor.N_RESIZE);
+			case NORTHWEST -> scene.setCursor(Cursor.NW_RESIZE);
+			case NORTHEAST -> scene.setCursor(Cursor.NE_RESIZE);
+			case WEST -> scene.setCursor(Cursor.W_RESIZE);
+			case EAST -> scene.setCursor(Cursor.E_RESIZE);
+			case SOUTHWEST -> scene.setCursor(Cursor.SW_RESIZE);
+			case SOUTH -> scene.setCursor(Cursor.S_RESIZE);
+			case SOUTHEAST -> scene.setCursor(Cursor.SE_RESIZE);
+		}
+
 		dragDirection = Optional.of(direction);
 	}
 }

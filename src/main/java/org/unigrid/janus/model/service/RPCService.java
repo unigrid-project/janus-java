@@ -18,14 +18,14 @@ package org.unigrid.janus.model.service;
 
 import java.net.URI;
 import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import org.unigrid.janus.model.rpc.JsonConfiguration;
+//import javax.ejb.Stateless;
+//import javax.ws.rs.client.ClientBuilder;
+//import javax.ws.rs.client.WebTarget;
+//import org.unigrid.janus.model.rpc.JsonConfiguration;
 
-@Stateless
+//@Stateless
 public class RPCService {
-	private WebTarget target;
+	//private WebTarget target;
 
 	private URI findDaemonEndpoint() {
 		return null;
@@ -33,9 +33,9 @@ public class RPCService {
 
 	@PostConstruct
 	private void init() {
-		target = ClientBuilder.newBuilder()
+		/*target = ClientBuilder.newBuilder()
 			.register(new JsonConfiguration())
-			.build().target(findDaemonEndpoint());
+			.build().target(findDaemonEndpoint());*/
 	}
 
 	public <T> T call() {

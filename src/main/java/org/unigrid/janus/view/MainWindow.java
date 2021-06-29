@@ -14,16 +14,25 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.event;
+package org.unigrid.janus.view;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import lombok.SneakyThrows;
 
-@AllArgsConstructor
-public class WindowHeaderEvent {
-	@Getter private final Type eventType;
+public class MainWindow extends Application {
+	@Override
+	@SneakyThrows
+	public void start(Stage primaryStage) {
+		final FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(getClass().getResource("mainWindow.fxml"));
+		final Stage stage = loader.load();
 
-	public enum Type {
-		CLOSE, MAXIMIZE, MINIMIZE, MOVE
+		stage.centerOnScreen();
+		stage.initStyle(StageStyle.UNDECORATED);
+		stage.setResizable(true);
+		stage.show();
 	}
 }

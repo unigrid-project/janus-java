@@ -14,36 +14,32 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.fx.view.decorator;
+package org.unigrid.janus.view.decorator;
 
 import java.awt.Point;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 
-public class MovableWindow {
+public class MovableWindowDecorator implements Decorator {
 	private final Point clickedPoint = new Point(0, 0);
-	private boolean moving;
 
-	public void move() {
-		moving = true;
-	}
-
-	public void decorate(DecoratableWindow window) {
-		window.getStage().getScene().addEventFilter(MouseEvent.MOUSE_PRESSED, (e) -> {
+	@Override
+	public void decorate(Decoratable decoratable, Node node) {
+		node.setOnMousePressed(e -> {
 			clickedPoint.setLocation(
-				window.getStage().getX() - e.getScreenX(),
-				window.getStage().getY() - e.getScreenY()
+				decoratable.getStage().getX() - e.getScreenX(),
+				decoratable.getStage().getY() - e.getScreenY()
 			);
+			decoratable.getStage().getScene().setCursor(Cursor.MOVE);
 		});
 
-		window.getStage().getScene().addEventFilter(MouseEvent.MOUSE_RELEASED, (e) -> {
-			moving = false;
+		node.setOnMouseReleased(e -> {
+			decoratable.getStage().getScene().setCursor(Cursor.DEFAULT);
 		});
 
-		window.getStage().getScene().addEventFilter(MouseEvent.MOUSE_DRAGGED, (e) -> {
-			if (moving) {
-				window.getStage().setX(e.getScreenX() + clickedPoint.getX());
-				window.getStage().setY(e.getScreenY() + clickedPoint.getY());
-			}
+		node.setOnMouseDragged(e -> {
+			decoratable.getStage().setX(e.getScreenX() + clickedPoint.getX());
+			decoratable.getStage().setY(e.getScreenY() + clickedPoint.getY());
 		});
 	}
 }

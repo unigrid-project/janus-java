@@ -16,14 +16,14 @@
 
 package org.unigrid.janus.model.rpc;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
-import javax.json.bind.config.PropertyNamingStrategy;
-import javax.ws.rs.ext.ContextResolver;
+//import javax.json.bind.Jsonb;
+//import javax.json.bind.JsonbBuilder;
+//import javax.json.bind.JsonbConfig;
+//import javax.json.bind.config.PropertyNamingStrategy;
+//import javax.ws.rs.ext.ContextResolver;
 
-public class JsonConfiguration implements ContextResolver<Jsonb> {
-	private JsonbConfig getJsonbConfig() {
+public class JsonConfiguration /*implements ContextResolver<Jsonb>*/ {
+	/*private JsonbConfig getJsonbConfig() {
 		return new JsonbConfig().withPropertyNamingStrategy(
 			PropertyNamingStrategy.LOWER_CASE_WITH_DASHES
 		);
@@ -32,5 +32,5 @@ public class JsonConfiguration implements ContextResolver<Jsonb> {
 	@Override
 	public Jsonb getContext(Class<?> type) {
 		return JsonbBuilder.newBuilder().withConfig(getJsonbConfig()).build();
-	}
+	}*/
 }

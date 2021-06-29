@@ -14,13 +14,10 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.event;
+package org.unigrid.janus.view.decorator;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.unigrid.janus.model.Direction;
+import javafx.stage.Stage;
 
-@AllArgsConstructor
-public class WindowResizeEvent {
-	@Getter private final Direction direction;
+public interface Decoratable {
+	Stage getStage();
 }

@@ -14,11 +14,8 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.fx.view.decorator;
+package org.unigrid.janus.view;
 
-import javafx.stage.Stage;
+public class SplashWindow {
 
-public interface DecoratableWindow {
-	/* Should be the primary (root) stage of the window */
-	Stage getStage();
 }
