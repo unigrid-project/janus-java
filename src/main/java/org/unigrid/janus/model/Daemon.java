@@ -16,13 +16,13 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javax.annotation.PostConstruct;
 import javax.naming.ConfigurationException;
 //import javax.transaction.Transactional;
 //import lombok.Getter;

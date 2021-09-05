@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.model.setup;
 
-import org.unigrid.janus.model.Preferences;
+/*import org.unigrid.janus.model.Preferences;
 import io.github.stephenc.crypto.sscg.SelfSignedCertificate;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -29,10 +29,10 @@ import java.util.Locale;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.RandomUtils;*/
 
 public class Certificate {
-	private static final String CERTIFICATE_SETTINGS_KEY = "certificate";
+	/*private static final String CERTIFICATE_SETTINGS_KEY = "certificate";
 	private static final String CERTIFICATE_TYPE_SETTINGS_KEY = "certificate.type";
 	private static final String CERTIFICATE_SIZE_SETTINGS_KEY = "certificate.size";
 	private static final String KEYSTORE_TYPE = "PKCS12";
@@ -92,5 +92,5 @@ public class Certificate {
 
 		current = File.createTempFile(RandomStringUtils.randomAlphanumeric(12), TEMPFILE_SUFFIX);
 		writeKeyStoreFile(cert);
-	}
+	}*/
 }

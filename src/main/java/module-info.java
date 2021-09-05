@@ -14,32 +14,16 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.service;
-
-import jakarta.annotation.PostConstruct;
-import java.net.URI;
-//import javax.ejb.Stateless;
-//import javax.ws.rs.client.ClientBuilder;
-//import javax.ws.rs.client.WebTarget;
-//import org.unigrid.janus.model.rpc.JsonConfiguration;
-
-//@Stateless
-public class RPCService {
-	//private WebTarget target;
-
-	private URI findDaemonEndpoint() {
-		return null;
-	}
-
-	@PostConstruct
-	private void init() {
-		/*target = ClientBuilder.newBuilder()
-			.register(new JsonConfiguration())
-			.build().target(findDaemonEndpoint());*/
-	}
-
-	public <T> T call() {
-		//target.path(path);
-		return null;
-	}
+module org.unigrid.janus {
+	requires static lombok;
+	requires javafx.controls;
+	requires javafx.graphics;
+	requires javafx.fxml;
+	requires org.apache.commons.lang3;
+	requires org.apache.commons.configuration2;
+	requires weld.se.shaded;
+	requires java.annotation;
+	requires java.desktop;
+	requires java.prefs;
+	requires java.naming;
 }
