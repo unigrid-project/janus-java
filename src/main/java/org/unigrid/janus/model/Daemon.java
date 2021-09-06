@@ -60,10 +60,10 @@ public class Daemon {
 				connect();
 			}
 		} else {
-			/*throw new ConfigurationException(String.format("No location to the daemon specified in "
+			throw new ConfigurationException(String.format("No location to the daemon specified in "
 				+ " property '%s'. This should point to either a local file, "
 				+ "or a remote HTTP location.", PROPERTY_LOCATION_KEY)
-			);*/
+			);
 		}
 	}
 
