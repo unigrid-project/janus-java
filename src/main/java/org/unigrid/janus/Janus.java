@@ -32,6 +32,9 @@ public class Janus extends BaseApplication {
 	@Inject
 	private Daemon daemon;
 
+	@Inject
+	private MainWindow mainWindow;
+
 	@PostConstruct @SneakyThrows
 	private void init() {
 		daemon.startOrConnect();
@@ -49,8 +52,6 @@ public class Janus extends BaseApplication {
 
 		Preferences.changePropertyDefault(Boolean.class, "prism.vsync", false);
 		Preferences.changePropertyDefault(String.class, "prism.order", "sw");
-
-		final MainWindow mw = new MainWindow();
-		mw.show();
+		mainWindow.show();
 	}
 }
