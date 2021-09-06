@@ -18,41 +18,39 @@ package org.unigrid.janus;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javafx.application.Application;
+import javafx.stage.Stage;
 import lombok.SneakyThrows;
-import org.jboss.weld.environment.se.Weld;
-import org.unigrid.janus.view.MainWindow;
 import org.unigrid.janus.model.Daemon;
 import org.unigrid.janus.model.Preferences;
+import org.unigrid.janus.view.MainWindow;
 
-public class Janus {
+@ApplicationScoped
+public class Janus extends BaseApplication {
 	@Inject
 	private Daemon daemon;
 
 	@PostConstruct @SneakyThrows
 	private void init() {
-		System.out.println(daemon);
-		//daemon.startOrConnect();
+		daemon.startOrConnect();
 	}
 
 	@PreDestroy @SneakyThrows
 	private void destroy() {
-		//daemon.stopOrDisconnect();
+		daemon.stopOrDisconnect();
 	}
 
-	public static void main(String[] args) throws Exception {
-		final Weld weld = new Weld();
-
-		//final ConfigurableApplicationContext applicationContext = SpringApplication.run(Janus.class);
-
+	@Override
+	public void start(Stage stage, Application.Parameters parameters) throws Exception {
 		/* Effectively changes the default values of these properties as used in JavaFX, we do this to speed up
 		   refreshes and custom resizing of undecorated windows. */
 
 		Preferences.changePropertyDefault(Boolean.class, "prism.vsync", false);
 		Preferences.changePropertyDefault(String.class, "prism.order", "sw");
 
-		Application.launch(MainWindow.class, args);
-		weld.shutdown();
+		final MainWindow mw = new MainWindow();
+		mw.show();
 	}
 }

@@ -14,13 +14,26 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.view;
+package org.unigrid.janus;
 
-import org.apache.commons.lang3.NotImplementedException;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.se.SeContainer;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
-public class SplashWindow implements Window {
+public class ApplicationLoader extends Application {
+	private BaseApplication	application;
+
 	@Override
-	public void show() {
-		throw new NotImplementedException("Not yet implemented.");
+	public void init() throws Exception {
+		final SeContainer container = SeContainerInitializer.newInstance().initialize();
+		final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
+		application = applicationInstance.get();
+	}
+
+	@Override
+	public void start(Stage stage) throws Exception {
+		application.start(stage, getParameters());
 	}
 }

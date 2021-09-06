@@ -21,28 +21,23 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javax.naming.ConfigurationException;
-//import javax.transaction.Transactional;
-//import lombok.Getter;
-//import org.apache.commons.lang3.RandomStringUtils;
+import lombok.Getter;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-//import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
-//import org.springframework.stereotype.Service;
 
 @ApplicationScoped
 public class Daemon {
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
 	private static final String PROPERTY_LOCATION = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY);
 	private Optional<Process> process = Optional.empty();
-	//@Getter private User rpcCredentials;
+	@Getter private User rpcCredentials;
 
 	@PostConstruct
 	private void init() {
-		//rpcCredentials = new User();
-		//rpcCredentials.setName(RandomStringUtils.randomAlphabetic(30));
-		//rpcCredentials.setPassword(RandomStringUtils.randomAlphabetic(50));
+		rpcCredentials = new User();
+		rpcCredentials.setName(RandomStringUtils.randomAlphabetic(30));
+		rpcCredentials.setPassword(RandomStringUtils.randomAlphabetic(50));
 	}
 
 	private boolean isLocalFile(String path) {
@@ -65,11 +60,10 @@ public class Daemon {
 				connect();
 			}
 		} else {
-			new Alert(AlertType.NONE).show();
-			throw new ConfigurationException(String.format("No location to the daemon specified in "
+			/*throw new ConfigurationException(String.format("No location to the daemon specified in "
 				+ " property '%s'. This should point to either a local file, "
-				+ "or a remote http location.", PROPERTY_LOCATION_KEY)
-			);
+				+ "or a remote HTTP location.", PROPERTY_LOCATION_KEY)
+			);*/
 		}
 	}
 

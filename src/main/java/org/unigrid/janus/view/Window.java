@@ -16,11 +16,6 @@
 
 package org.unigrid.janus.view;
 
-import org.apache.commons.lang3.NotImplementedException;
-
-public class SplashWindow implements Window {
-	@Override
-	public void show() {
-		throw new NotImplementedException("Not yet implemented.");
-	}
+public interface Window {
+	void show();
 }

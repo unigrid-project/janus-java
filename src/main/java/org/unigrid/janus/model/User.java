@@ -14,13 +14,12 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.view;
+package org.unigrid.janus.model;
 
-import org.apache.commons.lang3.NotImplementedException;
+import lombok.Data;
 
-public class SplashWindow implements Window {
-	@Override
-	public void show() {
-		throw new NotImplementedException("Not yet implemented.");
-	}
+@Data
+public class User {
+	private String name;
+	private String password;
 }

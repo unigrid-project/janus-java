@@ -16,16 +16,14 @@
 
 package org.unigrid.janus.view;
 
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.SneakyThrows;
 
-public class MainWindow extends Application {
-	@Override
+public class MainWindow implements Window {
 	@SneakyThrows
-	public void start(Stage primaryStage) {
+	public void show() {
 		final FXMLLoader loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("mainWindow.fxml"));
 		final Stage stage = loader.load();
