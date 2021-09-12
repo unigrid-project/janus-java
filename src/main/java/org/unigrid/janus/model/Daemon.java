@@ -20,6 +20,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 import javax.naming.ConfigurationException;
 import lombok.Getter;
@@ -38,26 +40,30 @@ public class Daemon {
 		rpcCredentials = new User();
 		rpcCredentials.setName(RandomStringUtils.randomAlphabetic(30));
 		rpcCredentials.setPassword(RandomStringUtils.randomAlphabetic(50));
+		DataDirectory.get();
+	}
+
+	private boolean isHttp(String path) throws MalformedURLException {
+		return "http".equals(new URL(path).getProtocol());
 	}
 
 	private boolean isLocalFile(String path) {
 		return new File(path).exists();
 	}
 
-	private void start() throws IOException {
+	private void runDaemon() throws IOException {
 		process = Optional.of(Runtime.getRuntime().exec(new String[]{PROPERTY_LOCATION}));
 	}
 
-	private void connect() {
-		/* TODO: Implement connecting to remote instances */
-	}
-
-	public void startOrConnect() throws ConfigurationException, IOException {
+	public void start() throws ConfigurationException, IOException, MalformedURLException {
 		if (StringUtils.isNotBlank(PROPERTY_LOCATION)) {
 			if (isLocalFile(PROPERTY_LOCATION)) {
-				start();
-			} else {
-				connect();
+				runDaemon();
+			} else if (!isHttp(PROPERTY_LOCATION)) {
+				throw new ConfigurationException(String.format("Invalid protocol specified for RPC "
+					+ "daemon backend in property '%s'. This has to point to a valid "
+					+ "HTTP endpoint.", PROPERTY_LOCATION_KEY)
+				);
 			}
 		} else {
 			throw new ConfigurationException(String.format("No location to the daemon specified in "
@@ -67,12 +73,10 @@ public class Daemon {
 		}
 	}
 
-	public void stopOrDisconnect() throws InterruptedException {
+	public void stop() throws InterruptedException {
 		if (process.isPresent()) {
 			process.get().destroy();
 			process.get().waitFor();
 		}
-
-		/* TODO: Implement disconnecting from remote instances whenever we are not on a local daemon */
 	}
 }

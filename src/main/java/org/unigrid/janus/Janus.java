@@ -36,12 +36,12 @@ public class Janus extends BaseApplication {
 
 	@PostConstruct @SneakyThrows
 	private void init() {
-		daemon.startOrConnect();
+		daemon.start();
 	}
 
 	@PreDestroy @SneakyThrows
 	private void destroy() {
-		daemon.stopOrDisconnect();
+		daemon.stop();
 	}
 
 	@Override
