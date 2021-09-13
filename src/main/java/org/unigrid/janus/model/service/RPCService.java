@@ -28,7 +28,6 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.unigrid.janus.model.Daemon;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.User;

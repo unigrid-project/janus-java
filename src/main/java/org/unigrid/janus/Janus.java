@@ -23,7 +23,7 @@ import jakarta.inject.Inject;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
-import org.unigrid.janus.model.Daemon;
+import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.rpc.entity.BlockCount;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.service.RPCService;

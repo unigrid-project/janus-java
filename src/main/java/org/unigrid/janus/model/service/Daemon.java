@@ -14,7 +14,7 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.model.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;
@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.Optional;
 import javax.naming.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
+import org.unigrid.janus.model.Preferences;
 
 @ApplicationScoped
 public class Daemon {
