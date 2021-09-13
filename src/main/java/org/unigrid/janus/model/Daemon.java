@@ -16,7 +16,6 @@
 
 package org.unigrid.janus.model;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.io.IOException;
@@ -24,42 +23,32 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import javax.naming.ConfigurationException;
-import lombok.Getter;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 @ApplicationScoped
 public class Daemon {
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
-	private static final String PROPERTY_LOCATION = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY);
+	public static final String PROPERTY_LOCATION = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY);
+
 	private Optional<Process> process = Optional.empty();
-	@Getter private User rpcCredentials;
-
-	@PostConstruct
-	private void init() {
-		rpcCredentials = new User();
-		rpcCredentials.setName(RandomStringUtils.randomAlphabetic(30));
-		rpcCredentials.setPassword(RandomStringUtils.randomAlphabetic(50));
-		DataDirectory.get();
-	}
-
-	private boolean isHttp(String path) throws MalformedURLException {
-		return "http".equals(new URL(path).getProtocol());
-	}
-
-	private boolean isLocalFile(String path) {
-		return new File(path).exists();
-	}
 
 	private void runDaemon() throws IOException {
 		process = Optional.of(Runtime.getRuntime().exec(new String[]{PROPERTY_LOCATION}));
 	}
 
+	public boolean isHttp() throws MalformedURLException {
+		return "http".equals(new URL(PROPERTY_LOCATION).getProtocol());
+	}
+
+	public boolean isLocalFile() {
+		return new File(PROPERTY_LOCATION).exists();
+	}
+
 	public void start() throws ConfigurationException, IOException, MalformedURLException {
 		if (StringUtils.isNotBlank(PROPERTY_LOCATION)) {
-			if (isLocalFile(PROPERTY_LOCATION)) {
+			if (isLocalFile()) {
 				runDaemon();
-			} else if (!isHttp(PROPERTY_LOCATION)) {
+			} else if (!isHttp()) {
 				throw new ConfigurationException(String.format("Invalid protocol specified for RPC "
 					+ "daemon backend in property '%s'. This has to point to a valid "
 					+ "HTTP endpoint.", PROPERTY_LOCATION_KEY)

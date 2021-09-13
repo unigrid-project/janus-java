@@ -14,15 +14,16 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.rpc;
+package org.unigrid.janus.model.rpc.entity;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import lombok.Data;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Endpoint {
-	String value();
+@Data
+public class BaseRequest<T> {
+	private String method;
+	private T params;
+
+	protected BaseRequest(String method) {
+		this.method = method;
+	}
 }

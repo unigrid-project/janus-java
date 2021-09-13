@@ -17,29 +17,75 @@
 package org.unigrid.janus.model.service;
 
 import jakarta.annotation.PostConstruct;
-import java.net.URI;
-//import javax.ejb.Stateless;
-//import javax.ws.rs.client.ClientBuilder;
-//import javax.ws.rs.client.WebTarget;
-//import org.unigrid.janus.model.rpc.JsonConfiguration;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import javax.naming.ConfigurationException;
+import lombok.SneakyThrows;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.unigrid.janus.model.Daemon;
+import org.unigrid.janus.model.DataDirectory;
+import org.unigrid.janus.model.Preferences;
+import org.unigrid.janus.model.User;
+import org.unigrid.janus.model.rpc.JsonConfiguration;
 
-//@Stateless
+@ApplicationScoped
 public class RPCService {
-	//private WebTarget target;
+	private static final String PROPERTY_USERNAME_KEY = "janus.rpc.username";
+	private static final String PROPERTY_USERNAME = Preferences.PROPS.getString(PROPERTY_USERNAME_KEY);
+	private static final String PROPERTY_PASSWORD_KEY = "janus.rpc.password";
+	private static final String PROPERTY_PASSWORD = Preferences.PROPS.getString(PROPERTY_PASSWORD_KEY);
 
-	private URI findDaemonEndpoint() {
-		return null;
+	private User credentials;
+	@Inject private Daemon daemon;
+
+	private WebTarget target;
+
+	private String getRPCProperty(Configuration config, String key, String value, String dataDirConfig,
+	                              boolean randomizeOnMissingProperty) throws ConfigurationException {
+		if (StringUtils.isNotBlank(value)) {
+			return value;
+		}
+
+		String propertyValue = config.getString(dataDirConfig);
+
+		if (propertyValue == null) {
+			if (randomizeOnMissingProperty) {
+				propertyValue = RandomStringUtils.randomAlphabetic(40);
+			} else {
+				throw new ConfigurationException(String.format("Username for RPC endpoint not "
+					+ "found in either '%s' property or the configuration file '%s'.",
+					key, DataDirectory.getConfigFile().getAbsolutePath())
+				);
+			}
+		}
+
+		return propertyValue;
 	}
 
-	@PostConstruct
+	@PostConstruct @SneakyThrows
 	private void init() {
-		/*target = ClientBuilder.newBuilder()
+		Configuration config = DataDirectory.getConfig();
+		credentials = new User();
+
+		credentials.setName(getRPCProperty(config, PROPERTY_USERNAME_KEY, PROPERTY_USERNAME,
+		                    DataDirectory.DATADIR_CONFIG_RPCUSER_KEY, daemon.isLocalFile()));
+
+		credentials.setPassword(getRPCProperty(config, PROPERTY_PASSWORD_KEY, PROPERTY_PASSWORD,
+		                        DataDirectory.DATADIR_CONFIG_RPCPASSWORD_KEY, daemon.isLocalFile()));
+
+		target = ClientBuilder.newBuilder()
 			.register(new JsonConfiguration())
-			.build().target(findDaemonEndpoint());*/
+			.register(HttpAuthenticationFeature.basic(credentials.getName(), credentials.getPassword()))
+			.build().target(Daemon.PROPERTY_LOCATION);
 	}
 
-	public <T> T call() {
-		//target.path(path);
-		return null;
+	public <R, T> T call(R request, Class<T> clazz) {
+		return target.request().post(Entity.json(request)).readEntity(clazz);
 	}
 }

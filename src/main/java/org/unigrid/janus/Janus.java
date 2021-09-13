@@ -24,12 +24,18 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.Daemon;
+import org.unigrid.janus.model.rpc.entity.BlockCount;
+import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.view.MainWindow;
 
 @ApplicationScoped
 public class Janus extends BaseApplication {
 	@Inject
 	private Daemon daemon;
+
+	@Inject
+	private RPCService rpc;
 
 	@Inject
 	private MainWindow mainWindow;
@@ -47,5 +53,11 @@ public class Janus extends BaseApplication {
 	@Override
 	public void start(Stage stage, Application.Parameters parameters) throws Exception {
 		mainWindow.show();
+
+		final Info info = rpc.call(new Info.Request(), Info.class);
+		System.out.println(info.getResult());
+
+		final BlockCount count = rpc.call(new BlockCount.Request(), BlockCount.class);
+		System.out.println(count.getResult());
 	}
 }

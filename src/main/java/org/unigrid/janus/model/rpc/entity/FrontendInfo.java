@@ -14,23 +14,13 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.rpc;
+package org.unigrid.janus.model.rpc.entity;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import jakarta.json.bind.JsonbConfig;
-import jakarta.json.bind.config.PropertyNamingStrategy;
-import jakarta.ws.rs.ext.ContextResolver;
+//import javax.json.bind.annotation.JsonbProperty;
+import lombok.Data;
 
-public class JsonConfiguration implements ContextResolver<Jsonb> {
-	private JsonbConfig getJsonbConfig() {
-		return new JsonbConfig().withPropertyNamingStrategy(
-			PropertyNamingStrategy.LOWER_CASE_WITH_DASHES
-		);
-	}
-
-	@Override
-	public Jsonb getContext(Class<?> type) {
-		return JsonbBuilder.newBuilder().withConfig(getJsonbConfig()).build();
-	}
+@Data
+public class FrontendInfo {
+	//@JsonbProperty private String headerBackground;
+	//@JsonbProperty private String resizeVirtualBorderSize;
 }

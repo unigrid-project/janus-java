@@ -14,14 +14,24 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.rpc;
+package org.unigrid.janus.model.rpc.entity;
 
-//import javax.json.bind.annotation.JsonbProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-@Endpoint("getfrontendinfo")
-public class FrontendInfo {
-	//@JsonbProperty private String headerBackground;
-	//@JsonbProperty private String resizeVirtualBorderSize;
+@EqualsAndHashCode(callSuper = false)
+public class Info extends BaseResult<Info.Result> {
+	private static final String METHOD = "getinfo";
+
+	public static class Request extends BaseRequest {
+		public Request() {
+			super(METHOD);
+		}
+	}
+
+	@Data
+	public static class Result {
+		private int version;
+	}
 }

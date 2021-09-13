@@ -12,24 +12,35 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model;
 
 import com.sun.jna.platform.win32.KnownFolders;
 import com.sun.jna.platform.win32.Shell32Util;
+import java.io.File;
 import java.nio.file.Paths;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.FileBasedConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.SystemUtils;
 
 public class DataDirectory {
 	private static final String APPLICATION_NAME = "UNIGRID";
+	public static final String CONFIG_FILE = "unigrid.conf";
 	private static final String OSX_SUPPORT_DIR = "Library/Application Support";
+
+	public static final String DATADIR_CONFIG_RPCUSER_KEY = "rpcuser";
+	public static final String DATADIR_CONFIG_RPCPASSWORD_KEY = "rpcpassword";
 
 	public static String get() {
 		String head;
 		String tail;
 
-		if  (SystemUtils.IS_OS_WINDOWS) {
+		if (SystemUtils.IS_OS_WINDOWS) {
 			head = Shell32Util.getKnownFolderPath(KnownFolders.FOLDERID_ProgramData);
 			tail = APPLICATION_NAME;
 		} else {
@@ -44,5 +55,19 @@ public class DataDirectory {
 		}
 
 		return Paths.get(head, tail).toString();
+	}
+
+	public static Configuration getConfig() throws ConfigurationException {
+		final Parameters parameters = new Parameters();
+
+		final FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
+			new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
+				.configure(parameters.properties().setFile(getConfigFile()));
+
+		return builder.getConfiguration();
+	}
+
+	public static File getConfigFile() {
+		return Paths.get(get(), CONFIG_FILE).toFile();
 	}
 }
