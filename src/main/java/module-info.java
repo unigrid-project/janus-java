@@ -21,9 +21,16 @@ module org.unigrid.janus {
 	requires javafx.fxml;
 	requires org.apache.commons.lang3;
 	requires org.apache.commons.configuration2;
-	requires weld.se.shaded;
 	requires java.annotation;
 	requires java.desktop;
 	requires java.prefs;
 	requires java.naming;
+	requires jakarta.annotation;
+	requires jakarta.cdi;
+	requires jakarta.inject;
+	requires jakarta.json.bind;
+	requires jakarta.ws.rs;
+	requires com.sun.jna.platform;
+	requires com.sun.jna;
+	requires jersey.client;
 }

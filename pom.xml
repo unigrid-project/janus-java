@@ -55,9 +55,9 @@
 			<version>2.7</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.weld.se</groupId>
-			<artifactId>weld-se-shaded</artifactId>
-			<version>4.0.2.Final</version>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.4</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.annotation</groupId>
@@ -68,6 +68,21 @@
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna-platform</artifactId>
 			<version>5.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>3.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-cdi2-se</artifactId>
+			<version>3.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-binding</artifactId>
+			<version>3.0.2</version>
 		</dependency>
 	</dependencies>
 	<build>
