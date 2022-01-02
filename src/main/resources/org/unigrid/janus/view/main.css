@@ -1,0 +1,57 @@
+.button {
+	-fx-background-color: #ccc3;
+	-fx-text-fill: #cccc;
+	-fx-border-color: transparent;
+}
+
+.button:hover {
+	-fx-background-color: #ccc5;
+}
+
+.button-active {
+	-fx-background-color: #ccc3;
+	-fx-text-fill: #cccf;
+	-fx-border-color: #ccc8;
+}
+
+.sidebar {
+	-fx-border-color: transparent #ccc8 transparent transparent;
+}
+
+.sidebar .button-active {
+	-fx-border-color: #ccc8 black #ccc8 #ccc8;
+}
+
+.tab-header-background {
+	-fx-background-color : black;
+}
+
+.tab-header-area .tab-header-background {
+	-fx-border-color: black black #aaff black;
+}
+
+.tab {
+	-fx-background-color: #55f3;
+	-fx-border-color: #55ff #55ff #aaff #55ff;
+}
+
+.tab:hover {
+	-fx-background-color: #aaf5;
+}
+
+.tab-label {
+	-fx-text-fill: #55ff;
+}
+
+.tab:selected {
+	-fx-border-color: #aaff #aaff black #aaff;
+}
+
+.tab:selected .tab-label {
+	-fx-text-fill: #aaff;
+}
+
+.tab-content-area .pane {
+	-fx-background-color: white;
+	-fx-margin: 5 5 5 5;
+}

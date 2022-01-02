@@ -21,6 +21,10 @@ import jakarta.inject.Inject;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.SneakyThrows;
+import javafx.scene.Node;
+import javafx.scene.control.Control;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ListCell;
 
 @Dependent
 public class MainWindow implements Window {
@@ -33,5 +37,31 @@ public class MainWindow implements Window {
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.setResizable(true);
 		stage.show();
+	}
+
+	public Node lookup(String id) {
+		return stage.getScene().lookup("#" + id);
+	}
+
+	public void bindDebugListViewWidth(double multiplier) {
+		ListView list = (ListView) lookup("lstDebug");
+		list.setCellFactory(param -> new ListCell<String>() {
+			{
+				prefWidthProperty().bind(list.widthProperty().multiply(multiplier));
+				setMaxWidth(Control.USE_PREF_SIZE);
+				setWrapText(true);
+			}
+
+			@Override
+			protected void updateItem(String item, boolean empty) {
+				super.updateItem(item, empty);
+
+				if (item != null && !empty) {
+					setText(item);
+				} else {
+					setText(null);
+				}
+			}
+		});
 	}
 }

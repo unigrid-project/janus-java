@@ -34,10 +34,12 @@ import org.unigrid.janus.model.rpc.entity.ListAddressGroupings;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.WalletInfo;
 import org.unigrid.janus.model.service.RPCService;
+import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.view.MainWindow;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ListView;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 
@@ -50,6 +52,9 @@ public class Janus extends BaseApplication {
 	private RPCService rpc;
 
 	@Inject
+	private DebugService debug;
+
+	@Inject
 	private MainWindow mainWindow;
 
 	@PostConstruct @SneakyThrows
@@ -60,6 +65,7 @@ public class Janus extends BaseApplication {
 			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
 			a.showAndWait();
 		}
+		debug.log("Daemon start done.");
 	}
 
 	@PreDestroy @SneakyThrows
@@ -72,28 +78,30 @@ public class Janus extends BaseApplication {
 		try {
 			mainWindow.show();
 
+			mainWindow.bindDebugListViewWidth(0.98);
+			debug.setListView((ListView) mainWindow.lookup("lstDebug"));
+
 			final Info info = rpc.call(new Info.Request(), Info.class);
 			Jsonb jsonb = JsonbBuilder.create();
 			String result = String.format("Info result: %s", jsonb.toJson(info.getResult()));
-			// System.out.println(info.getResult());
-			Alert a = new Alert(AlertType.INFORMATION, result, ButtonType.OK);
-			a.showAndWait();
 
-			rpc.alert(new BlockCount.Request());
+			debug.log(result);
 
-			rpc.alert(new Balance.Request());
+			debug.log(rpc.callToJson(new BlockCount.Request()));
 
-			rpc.alert(new ConnectionCount.Request());
+			debug.log(rpc.callToJson(new Balance.Request()));
 
-			rpc.alert(new DataDirectory.Request());
+			debug.log(rpc.callToJson(new ConnectionCount.Request()));
 
-			rpc.alert(new ListTransactions.Request());
+			debug.log(rpc.callToJson(new DataDirectory.Request()));
 
-			rpc.alert(new ListAddressGroupings.Request());
+			debug.log(rpc.callToJson(new ListTransactions.Request()));
 
-			rpc.alert(new StakingStatus.Request());
+			debug.log(rpc.callToJson(new ListAddressGroupings.Request()));
 
-			rpc.alert(new WalletInfo.Request());
+			debug.log(rpc.callToJson(new StakingStatus.Request()));
+
+			debug.log(rpc.callToJson(new WalletInfo.Request()));
 		} catch (Exception e) {
 			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
 			a.showAndWait();
