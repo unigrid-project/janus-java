@@ -24,12 +24,13 @@ import java.net.URL;
 import java.util.Optional;
 import javax.naming.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
-import org.unigrid.janus.model.Preferences;
+// import org.unigrid.janus.model.Preferences;
 
 @ApplicationScoped
 public class Daemon {
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
-	public static final String PROPERTY_LOCATION = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY);
+//	public static final String PROPERTY_LOCATION = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY);
+	public static final String PROPERTY_LOCATION = "http://127.0.0.1:51993"; // :51993
 
 	private Optional<Process> process = Optional.empty();
 

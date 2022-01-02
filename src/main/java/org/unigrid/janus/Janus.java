@@ -24,10 +24,22 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
+import org.unigrid.janus.model.rpc.entity.Balance;
 import org.unigrid.janus.model.rpc.entity.BlockCount;
+import org.unigrid.janus.model.rpc.entity.ConnectionCount;
+import org.unigrid.janus.model.rpc.entity.DataDirectory;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.rpc.entity.ListTransactions;
+import org.unigrid.janus.model.rpc.entity.ListAddressGroupings;
+import org.unigrid.janus.model.rpc.entity.StakingStatus;
+import org.unigrid.janus.model.rpc.entity.WalletInfo;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.view.MainWindow;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 
 @ApplicationScoped
 public class Janus extends BaseApplication {
@@ -42,7 +54,12 @@ public class Janus extends BaseApplication {
 
 	@PostConstruct @SneakyThrows
 	private void init() {
-		daemon.start();
+		try {
+			daemon.start();
+		} catch (Exception e) {
+			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
+			a.showAndWait();
+		}
 	}
 
 	@PreDestroy @SneakyThrows
@@ -52,12 +69,34 @@ public class Janus extends BaseApplication {
 
 	@Override
 	public void start(Stage stage, Application.Parameters parameters) throws Exception {
-		mainWindow.show();
+		try {
+			mainWindow.show();
 
-		final Info info = rpc.call(new Info.Request(), Info.class);
-		System.out.println(info.getResult());
+			final Info info = rpc.call(new Info.Request(), Info.class);
+			Jsonb jsonb = JsonbBuilder.create();
+			String result = String.format("Info result: %s", jsonb.toJson(info.getResult()));
+			// System.out.println(info.getResult());
+			Alert a = new Alert(AlertType.INFORMATION, result, ButtonType.OK);
+			a.showAndWait();
 
-		final BlockCount count = rpc.call(new BlockCount.Request(), BlockCount.class);
-		System.out.println(count.getResult());
+			rpc.alert(new BlockCount.Request());
+
+			rpc.alert(new Balance.Request());
+
+			rpc.alert(new ConnectionCount.Request());
+
+			rpc.alert(new DataDirectory.Request());
+
+			rpc.alert(new ListTransactions.Request());
+
+			rpc.alert(new ListAddressGroupings.Request());
+
+			rpc.alert(new StakingStatus.Request());
+
+			rpc.alert(new WalletInfo.Request());
+		} catch (Exception e) {
+			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
+			a.showAndWait();
+		}
 	}
 }
