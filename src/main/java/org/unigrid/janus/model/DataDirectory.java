@@ -41,7 +41,7 @@ public class DataDirectory {
 		String tail;
 
 		if (SystemUtils.IS_OS_WINDOWS) {
-			head = Shell32Util.getKnownFolderPath(KnownFolders.FOLDERID_ProgramData);
+			head = Shell32Util.getKnownFolderPath(KnownFolders.FOLDERID_RoamingAppData);
 			tail = APPLICATION_NAME;
 		} else {
 			head = SystemUtils.getUserHome().getAbsolutePath();
