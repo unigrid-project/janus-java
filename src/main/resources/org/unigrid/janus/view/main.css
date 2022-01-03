@@ -21,6 +21,10 @@
 	-fx-border-color: transparent;
 }
 
+.toggle-button:hover {
+	-fx-background-color: #ccc5;
+}
+
 .toggle-button:selected {
 	-fx-background-color: #ccc3;
 	-fx-text-fill: #cccf;
