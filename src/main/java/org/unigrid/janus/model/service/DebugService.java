@@ -17,26 +17,30 @@
 package org.unigrid.janus.model.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import javafx.stage.Stage;
-import javafx.scene.Node;
+import javafx.scene.control.ListView;
+import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
 
 @ApplicationScoped
-public class WindowService {
-	private static Stage stage;
+public class DebugService {
+	private static ListView output;
+	private static ObservableList<String> items;
 
-	public Stage getStage() {
-		return this.stage;
+	public void setListView(ListView lv) {
+		output = lv;
+		if (lv != null && items != null) {
+			output.setItems(items);
+		}
 	}
 
-	public void setStage(Stage value) {
-		this.stage = value;
-	}
-
-	public Node lookup(String id) {
-		if (stage != null) {
-			return stage.getScene().lookup("#" + id);
+	public void log(String msg) {
+		if (output != null) {
+			output.getItems().add(msg);
 		} else {
-			return null;
+			if (items == null) {
+				items = FXCollections.observableArrayList();
+			}
+			items.add(msg);
 		}
 	}
 }

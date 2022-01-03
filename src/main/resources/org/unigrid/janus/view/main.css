@@ -11,7 +11,20 @@
 .button-active {
 	-fx-background-color: #ccc3;
 	-fx-text-fill: #cccf;
-	-fx-border-color: #ccc8;
+	-fx-border-color: #ccc8 black #ccc8 #ccc8;
+}
+
+.toggle-button {
+	-fx-background-color: #ccc3;
+	-fx-background-radius: 0;
+	-fx-text-fill: #cccc;
+	-fx-border-color: transparent;
+}
+
+.toggle-button:selected {
+	-fx-background-color: #ccc3;
+	-fx-text-fill: #cccf;
+	-fx-border-color: #ccc8 black #ccc8 #ccc8;
 }
 
 .sidebar {

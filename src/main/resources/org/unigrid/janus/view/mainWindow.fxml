@@ -9,6 +9,9 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.effect.Glow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -31,43 +34,63 @@
                         <fx:include source="component/windowBar.fxml" />
                      </top>
                      <left>
-                        <VBox styleClass="sidebar" BorderPane.alignment="CENTER">
-                           <children>
-                              <Button mnemonicParsing="false" onMouseClicked="#onWalletTap" onTouchReleased="#onWalletTap" prefWidth="140.0" styleClass="button-active" text="Wallet" textAlignment="JUSTIFY">
-                                 <font>
-                                    <Font name="System Bold" size="14.0" />
-                                 </font>
-                                 <opaqueInsets>
+                        <BorderPane BorderPane.alignment="CENTER">
+                           <center>
+                              <VBox styleClass="sidebar">
+                                 <children>
+                                    <ToggleButton fx:id="btnWallet" mnemonicParsing="false" onMouseClicked="#onWalletTap" prefWidth="140.0" selected="true" text="Wallet">
+                                       <padding>
+                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                       </padding>
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="sidepane" />
+                                       </toggleGroup>
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" />
+                                       </VBox.margin>
+                                    </ToggleButton>
+                                    <ToggleButton fx:id="btnTransactions" mnemonicParsing="false" onMouseClicked="#onTransactionsTap" prefWidth="140.0" text="Transactions" toggleGroup="$sidepane">
+                                       <padding>
+                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                       </padding>
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" />
+                                       </VBox.margin>
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </ToggleButton>
+                                    <ToggleButton fx:id="btnNodes" mnemonicParsing="false" onMouseClicked="#onNodesTap" prefWidth="140.0" text="Nodes" toggleGroup="$sidepane">
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" />
+                                       </VBox.margin>
+                                       <padding>
+                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                       </padding>
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </ToggleButton>
+                                 </children>
+                                 <padding>
+                                    <Insets right="-1.0" top="29.0" />
+                                 </padding>
+                              </VBox>
+                           </center>
+                           <bottom>
+                              <FlowPane alignment="CENTER" columnHalignment="CENTER" prefWidth="140.0" style="-fx-border-color: transparent #ccc8 transparent transparent;" BorderPane.alignment="CENTER">
+                                 <children>
+                                    <Label text="0.1.0" textFill="#ffa621" />
+                                 </children>
+                                 <BorderPane.margin>
                                     <Insets />
-                                 </opaqueInsets>
-                                 <padding>
-                                    <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-                                 </padding>
-                                 <VBox.margin>
-                                    <Insets />
-                                 </VBox.margin>
-                              </Button>
-                              <Button mnemonicParsing="false" onMouseClicked="#onTransactionsTap" onTouchReleased="#onTransactionsTap" prefWidth="140.0" text="Transactions">
-                                 <font>
-                                    <Font name="System Bold" size="14.0" />
-                                 </font>
-                                 <padding>
-                                    <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-                                 </padding>
-                              </Button>
-                              <Button mnemonicParsing="false" prefWidth="140.0" text="Nodes">
-                                 <padding>
-                                    <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-                                 </padding>
-                                 <font>
-                                    <Font name="System Bold" size="14.0" />
-                                 </font>
-                              </Button>
-                           </children>
-                           <padding>
-                              <Insets right="-1.0" top="29.0" />
-                           </padding>
-                        </VBox>
+                                 </BorderPane.margin>
+                              </FlowPane>
+                           </bottom>
+                        </BorderPane>
                      </left>
                      <opaqueInsets>
                         <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
@@ -91,6 +114,9 @@
                                                                      <image>
                                                                         <Image url="@images/unigrid-round_77x77.png" />
                                                                      </image>
+                                                                     <effect>
+                                                                        <Glow />
+                                                                     </effect>
                                                                   </ImageView>
                                                                   <Button layoutY="160.0" mnemonicParsing="false" prefWidth="100.0" style="-fx-background-radius: 50;" text="Send">
                                                                      <font>
@@ -126,8 +152,9 @@
                                                    <children>
                                                       <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                         <columns>
-                                                          <TableColumn prefWidth="75.0" text="Transaction" />
                                                           <TableColumn prefWidth="75.0" text="Date" />
+                                                            <TableColumn prefWidth="75.0" text="Type" />
+                                                          <TableColumn prefWidth="75.0" text="Address" />
                                                             <TableColumn prefWidth="75.0" text="Amount" />
                                                         </columns>
                                                       </TableView>
@@ -144,11 +171,25 @@
                                              <children>
                                                 <TableView>
                                                   <columns>
-                                                    <TableColumn prefWidth="75.0" text="Transaction" />
                                                     <TableColumn prefWidth="75.0" text="Date" />
+                                                      <TableColumn prefWidth="75.0" text="Type" />
+                                                    <TableColumn prefWidth="75.0" text="Address" />
                                                       <TableColumn prefWidth="75.0" text="Amount" />
                                                   </columns>
                                                 </TableView>
+                                             </children>
+                                          </VBox>
+                                          <VBox fx:id="pnlNodes" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <children>
+                                                <FlowPane alignment="CENTER" columnHalignment="CENTER" VBox.vgrow="ALWAYS">
+                                                   <children>
+                                                      <Label text="Nodes" textFill="#ff8b2d">
+                                                         <font>
+                                                            <Font size="48.0" />
+                                                         </font>
+                                                      </Label>
+                                                   </children>
+                                                </FlowPane>
                                              </children>
                                           </VBox>
                                        </children></AnchorPane>

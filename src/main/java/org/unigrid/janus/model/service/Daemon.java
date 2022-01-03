@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.Optional;
 import javax.naming.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
-import org.unigrid.janus.model.Preferences;
+// import org.unigrid.janus.model.Preferences;
 
 @ApplicationScoped
 public class Daemon {

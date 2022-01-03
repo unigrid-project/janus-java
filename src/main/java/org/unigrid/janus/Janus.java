@@ -22,11 +22,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.scene.control.ListView;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.rpc.entity.BlockCount;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.service.RPCService;
+import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 
 @ApplicationScoped
@@ -38,11 +41,22 @@ public class Janus extends BaseApplication {
 	private RPCService rpc;
 
 	@Inject
+	private DebugService debug;
+
+	@Inject
+	private WindowService window;
+
+	@Inject
 	private MainWindow mainWindow;
 
 	@PostConstruct @SneakyThrows
 	private void init() {
-		daemon.start();
+		try {
+			daemon.start();
+		} catch (Exception e) {
+			debug.log(String.format("ERROR: %s", e.getMessage()));
+		}
+		debug.log("Daemon start done.");
 	}
 
 	@PreDestroy @SneakyThrows
@@ -52,12 +66,19 @@ public class Janus extends BaseApplication {
 
 	@Override
 	public void start(Stage stage, Application.Parameters parameters) throws Exception {
-		mainWindow.show();
+		try {
+			mainWindow.show();
 
-		final Info info = rpc.call(new Info.Request(), Info.class);
-		System.out.println(info.getResult());
+			mainWindow.bindDebugListViewWidth(0.98);
+			debug.setListView((ListView) window.lookup("lstDebug"));
 
-		final BlockCount count = rpc.call(new BlockCount.Request(), BlockCount.class);
-		System.out.println(count.getResult());
+			final Info info = rpc.call(new Info.Request(), Info.class);
+			System.out.println(info.getResult());
+
+			final BlockCount count = rpc.call(new BlockCount.Request(), BlockCount.class);
+			System.out.println(count.getResult());
+		} catch (Exception e) {
+			debug.log(String.format("ERROR: %s", e.getMessage()));
+		}
 	}
 }
