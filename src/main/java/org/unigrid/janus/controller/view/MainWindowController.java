@@ -23,19 +23,26 @@ import javafx.fxml.Initializable;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 // import org.unigrid.janus.model.rpc.entity.NewAddress;
+import javafx.scene.control.Label;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import org.unigrid.janus.model.Wallet;
 
-public class MainWindowController implements Initializable {
+public class MainWindowController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
+	private static Wallet wallet = new Wallet();
 	private static WindowService window = new WindowService();
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
+		wallet.addPropertyChangeListener(this);
 	}
 
 	@FXML
@@ -104,6 +111,17 @@ public class MainWindowController implements Initializable {
 			debug.log("Nodes clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (nodes click) %s", e.getMessage()));
+		}
+	}
+
+	public void propertyChange(PropertyChangeEvent event) {
+		Stage stage = window.getStage();
+		debug.log("Main Window change fired!");
+		debug.log(event.getPropertyName());
+		debug.log(String.format("Value: %.8f", (double) event.getNewValue()));
+		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
+			Label lblBalance = (Label) stage.getScene().lookup("#lblBalance");
+			lblBalance.setText(String.format("%.8fugd", (double) event.getNewValue()));
 		}
 	}
 }

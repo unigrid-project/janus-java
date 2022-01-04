@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.Timer;
 
 @ApplicationScoped
 public class RPCService {
@@ -49,6 +50,8 @@ public class RPCService {
 	private static final String PROPERTY_USERNAME = Preferences.PROPS.getString(PROPERTY_USERNAME_KEY);
 	private static final String PROPERTY_PASSWORD_KEY = "janus.rpc.password";
 	private static final String PROPERTY_PASSWORD = Preferences.PROPS.getString(PROPERTY_PASSWORD_KEY);
+
+	private static Timer pollingTimer;
 
 	private User credentials;
 	@Inject private Daemon daemon;
@@ -96,6 +99,18 @@ public class RPCService {
 			.register(new JsonConfiguration())
 			.register(HttpAuthenticationFeature.basic(credentials.getName(), credentials.getPassword()))
 			.build().target(Daemon.PROPERTY_LOCATION);
+	}
+
+	public void pollForInfo(int interval) {
+		pollingTimer = new Timer(true);
+		pollingTimer.scheduleAtFixedRate(new PollingTask(), 0, interval);
+	}
+
+	public void stopPolling() {
+		if (pollingTimer != null) {
+			pollingTimer.cancel();
+			pollingTimer.purge();
+		}
 	}
 
 	public <R, T> T call(R request, Class<T> clazz) {

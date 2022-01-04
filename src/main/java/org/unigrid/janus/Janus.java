@@ -22,7 +22,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import javafx.scene.control.ListView;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.rpc.entity.Balance;
@@ -38,9 +37,6 @@ import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -106,6 +102,9 @@ public class Janus extends BaseApplication {
 			debug.log(rpc.callToJson(new StakingStatus.Request()));
 
 			debug.log(rpc.callToJson(new WalletInfo.Request()));
+
+			// poll info call every 30 seconds
+			rpc.pollForInfo(30 * 1000);
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: %s", e.getMessage()));
 		}

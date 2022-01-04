@@ -110,7 +110,7 @@
                                                          <children>
                                                             <Pane styleClass="h-centered">
                                                                <children>
-                                                                  <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="70.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" scaleX="0.5" scaleY="0.5" translateX="-37.5" translateY="-37.5">
+                                                                  <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="142.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" scaleX="0.5" scaleY="0.5" translateX="-37.5" translateY="-37.5">
                                                                      <image>
                                                                         <Image url="@images/unigrid-round_77x77.png" />
                                                                      </image>
@@ -118,7 +118,7 @@
                                                                         <Glow />
                                                                      </effect>
                                                                   </ImageView>
-                                                                  <Button layoutY="160.0" mnemonicParsing="false" prefWidth="100.0" style="-fx-background-radius: 50;" text="Send">
+                                                                  <Button layoutX="70.0" layoutY="160.0" mnemonicParsing="false" prefWidth="100.0" style="-fx-background-radius: 50;" text="Send">
                                                                      <font>
                                                                         <Font size="18.0" />
                                                                      </font>
@@ -126,7 +126,7 @@
                                                                         <Insets bottom="1.0" top="1.0" />
                                                                      </padding>
                                                                   </Button>
-                                                                  <Button layoutX="120.0" layoutY="160.0" mnemonicParsing="false" prefWidth="100.0" style="-fx-background-radius: 50;" text="Receive">
+                                                                  <Button layoutX="190.0" layoutY="160.0" mnemonicParsing="false" prefWidth="100.0" style="-fx-background-radius: 50;" text="Receive">
                                                                      <font>
                                                                         <Font size="18.0" />
                                                                      </font>
@@ -134,9 +134,9 @@
                                                                         <Insets bottom="1.0" top="1.0" />
                                                                      </padding>
                                                                   </Button>
-                                                                  <Label fx:id="lblBalance" alignment="CENTER" layoutY="80.0" prefWidth="220.0" style="-fx-text-fill: orange;" text="0" textAlignment="CENTER" textFill="#ee7722">
+                                                                  <Label fx:id="lblBalance" alignment="CENTER" layoutY="80.0" prefWidth="360.0" style="-fx-text-fill: orange;" text="0" textAlignment="CENTER" textFill="#ee7722" textOverrun="CLIP">
                                                                      <font>
-                                                                        <Font name="Arial" size="48.0" />
+                                                                        <Font name="Arial" size="36.0" />
                                                                      </font>
                                                                   </Label>
                                                                </children>
