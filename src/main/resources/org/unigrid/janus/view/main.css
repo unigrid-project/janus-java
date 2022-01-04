@@ -8,10 +8,21 @@
 	-fx-background-color: #ccc5;
 }
 
-.button-active {
+.toggle-button {
+	-fx-background-color: #ccc3;
+	-fx-background-radius: 0;
+	-fx-text-fill: #cccc;
+	-fx-border-color: transparent;
+}
+
+.toggle-button:hover {
+	-fx-background-color: #ccc5;
+}
+
+.toggle-button:selected {
 	-fx-background-color: #ccc3;
 	-fx-text-fill: #cccf;
-	-fx-border-color: #ccc8;
+	-fx-border-color: #ccc8 black #ccc8 #ccc8;
 }
 
 .sidebar {
@@ -54,4 +65,32 @@
 .tab-content-area .pane {
 	-fx-background-color: white;
 	-fx-margin: 5 5 5 5;
+}
+
+.table-view {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background .label{
+    -fx-text-fill: #55f8;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background .filler {
+    -fx-background-color: transparent;
+}
+
+.table-view .corner {
+    -fx-background-color: transparent;
+}
+
+.table-view .table-cell{
+    -fx-text-fill: #55f8;
 }

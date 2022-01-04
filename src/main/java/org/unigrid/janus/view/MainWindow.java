@@ -20,31 +20,30 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import lombok.SneakyThrows;
-import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ListCell;
+import lombok.SneakyThrows;
+import org.unigrid.janus.model.service.WindowService;
 
 @Dependent
 public class MainWindow implements Window {
 	@Inject
 	private Stage stage;
+	private WindowService window = new WindowService();
 
 	@SneakyThrows
 	public void show() {
+		window.setStage(stage);
 		stage.centerOnScreen();
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.setResizable(true);
 		stage.show();
 	}
 
-	public Node lookup(String id) {
-		return stage.getScene().lookup("#" + id);
-	}
-
 	public void bindDebugListViewWidth(double multiplier) {
-		ListView list = (ListView) lookup("lstDebug");
+		ListView list = (ListView) window.lookup("lstDebug");
+
 		list.setCellFactory(param -> new ListCell<String>() {
 			{
 				prefWidthProperty().bind(list.widthProperty().multiply(multiplier));

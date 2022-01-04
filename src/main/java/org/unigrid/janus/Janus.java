@@ -22,6 +22,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.scene.control.ListView;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.rpc.entity.Balance;
@@ -35,6 +36,7 @@ import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.WalletInfo;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -55,6 +57,9 @@ public class Janus extends BaseApplication {
 	private DebugService debug;
 
 	@Inject
+	private WindowService window;
+
+	@Inject
 	private MainWindow mainWindow;
 
 	@PostConstruct @SneakyThrows
@@ -62,8 +67,7 @@ public class Janus extends BaseApplication {
 		try {
 			daemon.start();
 		} catch (Exception e) {
-			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
-			a.showAndWait();
+			debug.log(String.format("ERROR: %s", e.getMessage()));
 		}
 		debug.log("Daemon start done.");
 	}
@@ -79,7 +83,7 @@ public class Janus extends BaseApplication {
 			mainWindow.show();
 
 			mainWindow.bindDebugListViewWidth(0.98);
-			debug.setListView((ListView) mainWindow.lookup("lstDebug"));
+			debug.setListView((ListView) window.lookup("lstDebug"));
 
 			final Info info = rpc.call(new Info.Request(), Info.class);
 			Jsonb jsonb = JsonbBuilder.create();
@@ -103,8 +107,7 @@ public class Janus extends BaseApplication {
 
 			debug.log(rpc.callToJson(new WalletInfo.Request()));
 		} catch (Exception e) {
-			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
-			a.showAndWait();
+			debug.log(String.format("ERROR: %s", e.getMessage()));
 		}
 	}
 }
