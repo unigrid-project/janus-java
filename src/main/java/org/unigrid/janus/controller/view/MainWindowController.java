@@ -22,27 +22,61 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 // import org.unigrid.janus.model.rpc.entity.NewAddress;
+import org.unigrid.janus.model.rpc.entity.ListTransactions.Transaction;
 import javafx.scene.control.Label;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import org.unigrid.janus.model.Wallet;
+import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
 
 public class MainWindowController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
 	private static WindowService window = new WindowService();
+	private final ObservableList<Transaction> walletTransactionData = 
+		FXCollections.observableArrayList(
+			new Transaction("Test1", "blah", "received", 1.0, 1234567),
+			new Transaction("Test2", "blah", "received", 1.0, 1234567),
+			new Transaction("Test3", "blah", "received", 1.0, 1234567)
+		);
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
 		wallet.addPropertyChangeListener(this);
+		setupWalletTransactions();
+	}
+
+	private void setupWalletTransactions() {
+		try {
+			TableView tblWalletTrans = (TableView) window.lookup("tblWalletTrans");
+			TableColumn colWalletTransDate = (TableColumn) window.lookup("colWalletTransDate");
+			TableColumn colWalletTransType = (TableColumn) window.lookup("colWalletTransType");
+			TableColumn colWalletTransAddress = (TableColumn) window.lookup("colWalletTransAddress");
+			TableColumn colWalletTransAmount = (TableColumn) window.lookup("colWalletTransAmount");
+	        colWalletTransDate.setCellValueFactory(
+                new PropertyValueFactory<Transaction, int>("time"));
+	        colWalletTransType.setCellValueFactory(
+                new PropertyValueFactory<Transaction, String>("category"));
+	        colWalletTransAddress.setCellValueFactory(
+                new PropertyValueFactory<Transaction, String>("account"));
+	        colWalletTransAmount.setCellValueFactory(
+                new PropertyValueFactory<Transaction, double>("amount"));
+	        tblWalletTrans.setItems(walletTransactionData);
+		} catch (Exception e) {
+			debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
+		}
 	}
 
 	@FXML

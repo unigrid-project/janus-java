@@ -35,4 +35,27 @@ public class ListTransactions extends BaseResult<ListTransactions.Result> {
 	public static class Result {
 
 	}
+
+	@Data
+	public static class Transaction {
+		private String account;
+		private String address;
+		private String category;
+		private double amount;
+		private String blockhash;
+		private int blockindex;
+		private int blocktime;
+		private String txid;
+		private int time;
+		private int timereceived;
+
+		public Transaction(String acct, String addr, String cat, double amt, int tm) {
+			this.account = acct;
+			this.address = addr;
+			this.category = cat;
+			this.amount = amt;
+			this.time = tm;
+			this.timereceived = tm;
+		}
+	}
 }
