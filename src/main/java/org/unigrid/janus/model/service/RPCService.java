@@ -32,6 +32,17 @@ import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.User;
 import org.unigrid.janus.model.rpc.JsonConfiguration;
+import jakarta.ws.rs.core.Response;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.Timer;
 
 @ApplicationScoped
 public class RPCService {
@@ -40,10 +51,12 @@ public class RPCService {
 	private static final String PROPERTY_PASSWORD_KEY = "janus.rpc.password";
 	private static final String PROPERTY_PASSWORD = Preferences.PROPS.getString(PROPERTY_PASSWORD_KEY);
 
+	private static Timer pollingTimer;
+
 	private User credentials;
 	@Inject private Daemon daemon;
 
-	private WebTarget target;
+	private static WebTarget target;
 
 	private String getRPCProperty(Configuration config, String key, String value, String dataDirConfig,
 	                              boolean randomizeOnMissingProperty) throws ConfigurationException {
@@ -69,6 +82,10 @@ public class RPCService {
 
 	@PostConstruct @SneakyThrows
 	private void init() {
+		if (target != null) {
+			return;
+		}
+
 		Configuration config = DataDirectory.getConfig();
 		credentials = new User();
 
@@ -84,7 +101,65 @@ public class RPCService {
 			.build().target(Daemon.PROPERTY_LOCATION);
 	}
 
+	public void pollForInfo(int interval) {
+		pollingTimer = new Timer(true);
+		pollingTimer.scheduleAtFixedRate(new PollingTask(), 0, interval);
+	}
+
+	public void stopPolling() {
+		if (pollingTimer != null) {
+			pollingTimer.cancel();
+			pollingTimer.purge();
+		}
+	}
+
 	public <R, T> T call(R request, Class<T> clazz) {
 		return target.request().post(Entity.json(request)).readEntity(clazz);
+	}
+
+	public <R> String callToJson(R request) {
+		Response r = target.request().post(Entity.json(request));
+		String result = "{}";
+		if (r.hasEntity()) {
+			InputStream instream = (InputStream) r.getEntity();
+			Jsonb jsonb = JsonbBuilder.create();
+			String sRequest = jsonb.toJson(request);
+			result = String.format("RPC call: %s\n"
+				                 + "Response: %s",
+				                   sRequest,
+				                   convertStreamToString(instream));
+		}
+		return result;
+	}
+
+	public <R> String alert(R request) {
+		String result = callToJson(request);
+		Alert a = new Alert(AlertType.INFORMATION,
+							result,
+							ButtonType.OK);
+		a.showAndWait();
+		return result;
+	}
+
+	private static String convertStreamToString(InputStream is) {
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		StringBuilder sb = new StringBuilder();
+
+		String line = null;
+		try {
+			while ((line = reader.readLine()) != null) {
+				sb.append(line + "\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return sb.toString();
 	}
 }

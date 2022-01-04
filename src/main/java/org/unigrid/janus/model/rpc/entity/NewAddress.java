@@ -18,41 +18,16 @@ package org.unigrid.janus.model.rpc.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Map;
-import jakarta.json.bind.annotation.JsonbProperty;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Info extends BaseResult<Info.Result> {
-	private static final String METHOD = "getinfo";
+public class NewAddress extends BaseResult<String> {
+	private static final String METHOD = "getnewaddress";
 
 	public static class Request extends BaseRequest {
-		public Request() {
+		public Request(String name) {
 			super(METHOD);
-		}
-	}
-
-	@Data
-	public static class Result {
-		@JsonbProperty("version")
-		private int version;
-		@JsonbProperty("walletversion")
-		private int walletVersion;
-		@JsonbProperty("protocolversion")
-		private int protocolVersion;
-		@JsonbProperty("totalbalance")
-		private float totalbalance;
-		@JsonbProperty("balance")
-		private float balance;
-
-		// unpacked from nested bootstrapping
-		private double moneysupply;
-		private double blacklisted;
-
-		@JsonbProperty("bootstrapping")
-		private void unpackNested(Map<String, Object> bootstrapping) {
-			this.moneysupply = (double) bootstrapping.get("moneysupply");
-			this.blacklisted = (double) bootstrapping.get("blacklisted");
+			this.setParams(new Object[]{name});
 		}
 	}
 }

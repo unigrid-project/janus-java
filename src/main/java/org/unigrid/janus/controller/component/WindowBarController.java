@@ -21,6 +21,7 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -29,14 +30,35 @@ import lombok.Getter;
 import org.unigrid.janus.view.decorator.Decoratable;
 import org.unigrid.janus.view.decorator.Decorator;
 import org.unigrid.janus.view.decorator.MovableWindowDecorator;
+import org.unigrid.janus.model.service.RPCService;
+import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.Wallet;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
-public class WindowBarController implements Decoratable, Initializable {
+public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
 	private Decorator movableWindowDecorator;
 	@Getter private Stage stage;
+	private static RPCService rpc = new RPCService();
+	private static Wallet wallet = new Wallet();
+	private static DebugService debug = new DebugService();
+	private static WindowService window = new WindowService();
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
+		wallet.addPropertyChangeListener(this);
+	}
+
+	public void propertyChange(PropertyChangeEvent event) {
+		debug.log("Window Bar change fired!");
+		if (event.getPropertyName().equals(wallet.MONEYSUPPLY_PROPERTY)) {
+			Label supply = (Label) window.lookup("txtSupply");
+			if (supply != null) {
+				supply.setText(String.format("%.8f", (double) event.getNewValue()));
+			}
+		}
 	}
 
 	@FXML
@@ -50,6 +72,9 @@ public class WindowBarController implements Decoratable, Initializable {
 
 	@FXML
 	private void onExit(MouseEvent event) {
+		// TODO: find a place to do this that is guaranteed to be called when
+		// application is closed
+		rpc.stopPolling();
 		final Window window = ((Node) event.getSource()).getScene().getWindow();
 		window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
 	}
