@@ -95,7 +95,7 @@ public class Janus extends BaseApplication {
 
 			debug.log(rpc.callToJson(new DataDirectory.Request()));
 
-			debug.log(rpc.callToJson(new ListTransactions.Request()));
+			debug.log(rpc.callToJson(new ListTransactions.Request(0, 10)));
 
 			debug.log(rpc.callToJson(new ListAddressGroupings.Request()));
 

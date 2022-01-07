@@ -1,82 +1,207 @@
 /*
-    The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+	The Janus Wallet
+	Copyright © 2021 The Unigrid Foundation
 
-    This program is free software: you can redistribute it and/or modify it under the terms of the
-    addended GNU Affero General Public License as published by the Free Software Foundation, version 3
-    of the License (see COPYING and COPYING.addendum).
+	This program is free software: you can redistribute it and/or modify it under the terms of the
+	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
+	of the License (see COPYING and COPYING.addendum).
 
-    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received an addended copy of the GNU Affero General Public License with this program.
-    If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
+	You should have received an addended copy of the GNU Affero General Public License with this program.
+	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
 package org.unigrid.janus.controller.view;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Date;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.WindowEvent;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Callback;
+import javafx.beans.value.ObservableValue;
+// import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 // import org.unigrid.janus.model.rpc.entity.NewAddress;
-import org.unigrid.janus.model.rpc.entity.ListTransactions.Transaction;
+import org.unigrid.janus.model.Transaction;
+import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import javafx.scene.control.Label;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import org.unigrid.janus.model.Wallet;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import java.text.SimpleDateFormat;
+import javafx.application.Platform;
 
 public class MainWindowController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
 	private static WindowService window = new WindowService();
-	private final ObservableList<Transaction> walletTransactionData = 
+	private final ObservableList<Transaction> walletTransactionData =
 		FXCollections.observableArrayList(
-			new Transaction("Test1", "blah", "received", 1.0, 1234567),
-			new Transaction("Test2", "blah", "received", 1.0, 1234567),
-			new Transaction("Test3", "blah", "received", 1.0, 1234567)
+			new Transaction("Wilcokat007",
+				            "HSBc3LHzwR5UEK2VdSuckyaqpQUSkmfpiG",
+				            "received",
+				            0.27203151,
+				            1640012594),
+			new Transaction("Wilcokat007",
+				            "HSBc3LHzwR5UEK2VdSuckyaqpQUSkmfpiG",
+				            "generate",
+				            0.26931119,
+				            1640938301),
+			new Transaction("Wilcokat007",
+				            "HSBc3LHzwR5UEK2VdSuckyaqpQUSkmfpiG",
+				            "generate",
+				            0.26931119,
+				            1641291780),
+			new Transaction("Wilcokat007",
+				            "HSBc3LHzwR5UEK2VdSuckyaqpQUSkmfpiG",
+				            "generate",
+				            0.26931119,
+				            1641336495)
 		);
+
+	@FXML
+	private TableView tblWalletTrans;
+	@FXML
+	private TableColumn colWalletTransDate;
+	@FXML
+	private TableColumn colWalletTransType;
+	@FXML
+	private TableColumn colWalletTransAddress;
+	@FXML
+	private TableColumn colWalletTransAmount;
+	@FXML
+	private TableView tblTransactions;
+	@FXML
+	private TableColumn colTransDate;
+	@FXML
+	private TableColumn colTransType;
+	@FXML
+	private TableColumn colTransAddress;
+	@FXML
+	private TableColumn colTransAmount;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
 		wallet.addPropertyChangeListener(this);
 		setupWalletTransactions();
+		setupTransactions();
 	}
 
 	private void setupWalletTransactions() {
 		try {
-			TableView tblWalletTrans = (TableView) window.lookup("tblWalletTrans");
-			TableColumn colWalletTransDate = (TableColumn) window.lookup("colWalletTransDate");
-			TableColumn colWalletTransType = (TableColumn) window.lookup("colWalletTransType");
-			TableColumn colWalletTransAddress = (TableColumn) window.lookup("colWalletTransAddress");
-			TableColumn colWalletTransAmount = (TableColumn) window.lookup("colWalletTransAmount");
-	        colWalletTransDate.setCellValueFactory(
-                new PropertyValueFactory<Transaction, int>("time"));
-	        colWalletTransType.setCellValueFactory(
-                new PropertyValueFactory<Transaction, String>("category"));
-	        colWalletTransAddress.setCellValueFactory(
-                new PropertyValueFactory<Transaction, String>("account"));
-	        colWalletTransAmount.setCellValueFactory(
-                new PropertyValueFactory<Transaction, double>("amount"));
-	        tblWalletTrans.setItems(walletTransactionData);
+			colWalletTransDate.setCellValueFactory(
+				new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
+					public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
+						long time = t.getValue().getTime();
+						Date date = new Date(time * 1000L);
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						return new ReadOnlyStringWrapper(sdf.format(date));
+						// return new ReadOnlyStringWrapper("n/a");
+					}
+				});
+			colWalletTransType.setCellValueFactory(
+				new PropertyValueFactory<Transaction, String>("category"));
+			colWalletTransAddress.setCellValueFactory(
+				new PropertyValueFactory<Transaction, String>("account"));
+			colWalletTransAmount.setCellValueFactory(
+				new PropertyValueFactory<Transaction, Double>("amount"));
+			tblWalletTrans.setItems(walletTransactionData);
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
 		}
+	}
+
+	private void loadWalletPreviewTrans() {
+		ListTransactions transactions = rpc.call(new ListTransactions.Request(0, 10),
+			                                     ListTransactions.class);
+		ObservableList<Transaction> walletTransactions = FXCollections.observableArrayList();
+
+		for (Transaction t : transactions.getResult()) {
+			walletTransactions.add(t);
+		}
+
+		tblWalletTrans.setItems(walletTransactions);
+	}
+
+	private void setupTransactions() {
+		try {
+			colTransDate.setCellValueFactory(
+				new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
+					public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
+						long time = t.getValue().getTime();
+						Date date = new Date(time * 1000L);
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						return new ReadOnlyStringWrapper(sdf.format(date));
+						// return new ReadOnlyStringWrapper("n/a");
+					}
+				});
+			colTransType.setCellValueFactory(
+				new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
+					public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
+						Transaction trans = t.getValue();
+						if (trans.isGenerated()) {
+							return new ReadOnlyStringWrapper(String.format("%s:%s",
+								                             trans.getCategory(),
+								                             trans.getGeneratedfrom()));
+						} else {
+							return new ReadOnlyStringWrapper(trans.getCategory());
+						}
+					}
+				});
+			colTransAddress.setCellValueFactory(
+				new PropertyValueFactory<Transaction, String>("account"));
+			colTransAmount.setCellValueFactory(
+				new PropertyValueFactory<Transaction, Double>("amount"));
+			tblTransactions.setItems(walletTransactionData);
+		} catch (Exception e) {
+			debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
+		}
+	}
+
+	private void loadTransactions(int page) {
+		ListTransactions trans = rpc.call(new ListTransactions.Request(page * 100, 100),
+			                                     ListTransactions.class);
+		ObservableList<Transaction> transactions = FXCollections.observableArrayList();
+
+		for (Transaction t : trans.getResult()) {
+			transactions.add(t);
+		}
+
+		tblTransactions.setItems(transactions);
+	}
+
+	@FXML
+	private void onShown(WindowEvent event) {
+		debug.log("Shown event fired!");
+		Platform.runLater(() -> {
+			try {
+				debug.log("Shown event executing.");
+				loadWalletPreviewTrans();
+				loadTransactions(1);
+			} catch (Exception e) {
+				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
+			}
+		});
 	}
 
 	@FXML
@@ -155,7 +280,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		debug.log(String.format("Value: %.8f", (double) event.getNewValue()));
 		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
 			Label lblBalance = (Label) stage.getScene().lookup("#lblBalance");
-			lblBalance.setText(String.format("%.8fugd", (double) event.getNewValue()));
+			lblBalance.setText(String.format("%.8f", (double) event.getNewValue()));
 		}
 	}
 }

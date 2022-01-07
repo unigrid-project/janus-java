@@ -14,26 +14,31 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.unigrid.janus.model.Transaction;
-import java.util.List;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class ListTransactions extends BaseResult<List<ListTransactions.Result>> {
-	private static final String METHOD = "listtransactions";
+public class Transaction {
+	private String account;
+	private String address;
+	private String category;
+	private double amount;
+	private long time;
+	private long timereceived;
+	private String txid;
+	private boolean generated;
+	private String generatedfrom;
 
-	public static class Request extends BaseRequest {
-		public Request(int offset, int perPage) {
-			super(METHOD);
-			this.setParams(new Object[]{"*", perPage, offset, true});
-		}
+	public Transaction() {
+		/* empty on purpose */
 	}
 
-	@Data
-	public static class Result extends Transaction {
+	public Transaction(String acct, String addr, String cat, double amt, long tm) {
+		this.account = acct;
+		this.address = addr;
+		this.category = cat;
+		this.amount = amt;
+		this.time = tm;
 	}
 }
