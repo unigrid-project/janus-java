@@ -43,10 +43,6 @@ public class MainWindow implements Window {
 
 	public void bindDebugListViewWidth(double multiplier) {
 		ListView list = (ListView) window.lookup("lstDebug");
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 		list.setCellFactory(param -> new ListCell<String>() {
 			{
 				prefWidthProperty().bind(list.widthProperty().multiply(multiplier));
