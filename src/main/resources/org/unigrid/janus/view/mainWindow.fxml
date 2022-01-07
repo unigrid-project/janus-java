@@ -17,13 +17,14 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.stage.Stage?>
 
-<Stage title="Unigrid Janus Wallet" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.MainWindowController">
+<Stage onShown="#onShown" title="Unigrid Janus Wallet" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.MainWindowController">
    <scene>
       <Scene fill="#000024" stylesheets="@main.css">
          <root>
@@ -134,11 +135,24 @@
                                                                         <Insets bottom="1.0" top="1.0" />
                                                                      </padding>
                                                                   </Button>
-                                                                  <Label fx:id="lblBalance" alignment="CENTER" layoutY="80.0" prefWidth="360.0" style="-fx-text-fill: orange;" text="0" textAlignment="CENTER" textFill="#ee7722" textOverrun="CLIP">
-                                                                     <font>
-                                                                        <Font name="Arial" size="36.0" />
-                                                                     </font>
-                                                                  </Label>
+                                                                  <FlowPane alignment="CENTER" layoutY="80.0">
+                                                                     <children>
+                                                                        <HBox alignment="BOTTOM_LEFT">
+                                                                           <children>
+                                                                              <Label fx:id="lblBalance" alignment="CENTER" style="-fx-text-fill: orange;" text="0" textAlignment="CENTER" textFill="#ee7722" textOverrun="CLIP" HBox.hgrow="ALWAYS">
+                                                                                 <font>
+                                                                                    <Font name="Arial" size="36.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                              <Label alignment="BOTTOM_RIGHT" contentDisplay="BOTTOM" text="UGD" textFill="#ffa033">
+                                                                                 <font>
+                                                                                    <Font size="18.0" />
+                                                                                 </font>
+                                                                              </Label>
+                                                                           </children>
+                                                                        </HBox>
+                                                                     </children>
+                                                                  </FlowPane>
                                                                </children>
                                                                <padding>
                                                                   <Insets bottom="8.0" />
@@ -150,15 +164,15 @@
                                                 </AnchorPane>
                                                 <AnchorPane VBox.vgrow="ALWAYS">
                                                    <children>
-                                                      <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                                                      <TableView fx:id="tblWalletTrans" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                                                         <columns>
-                                                          <TableColumn prefWidth="75.0" text="Date" />
-                                                            <TableColumn prefWidth="75.0" text="Type" />
-                                                          <TableColumn prefWidth="75.0" text="Address" />
-                                                            <TableColumn prefWidth="75.0" text="Amount" />
+                                                          <TableColumn fx:id="colWalletTransDate" minWidth="100.0" prefWidth="130.0" sortType="DESCENDING" text="Date" />
+                                                            <TableColumn fx:id="colWalletTransType" prefWidth="75.0" text="Type" />
+                                                            <TableColumn fx:id="colWalletTransAmount" prefWidth="75.0" text="Amount" />
+                                                          <TableColumn fx:id="colWalletTransAddress" prefWidth="170.0" text="Address" />
                                                         </columns>
                                                       </TableView>
-                                                      <Label alignment="TOP_CENTER" layoutX="216.0" layoutY="6.0" text="Recent Transactions" textAlignment="CENTER" textFill="#5757ff80" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="3.0">
+                                                      <Label alignment="TOP_CENTER" layoutX="216.0" layoutY="6.0" text="Recent Transactions" textAlignment="CENTER" textFill="#aaaadd" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="3.0">
                                                          <font>
                                                             <Font size="18.0" />
                                                          </font>
@@ -169,12 +183,12 @@
                                           </VBox>
                                           <VBox fx:id="pnlTransactions" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <children>
-                                                <TableView>
+                                                <TableView fx:id="tblTransactions" VBox.vgrow="ALWAYS">
                                                   <columns>
-                                                    <TableColumn prefWidth="75.0" text="Date" />
-                                                      <TableColumn prefWidth="75.0" text="Type" />
-                                                    <TableColumn prefWidth="75.0" text="Address" />
-                                                      <TableColumn prefWidth="75.0" text="Amount" />
+                                                    <TableColumn fx:id="colTransDate" prefWidth="130.0" sortType="DESCENDING" text="Date" />
+                                                      <TableColumn fx:id="colTransType" prefWidth="85.0" text="Type" />
+                                                      <TableColumn fx:id="colTransAmount" prefWidth="75.0" text="Amount" />
+                                                    <TableColumn fx:id="colTransAddress" prefWidth="170.0" text="Address" />
                                                   </columns>
                                                 </TableView>
                                              </children>
