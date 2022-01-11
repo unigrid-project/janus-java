@@ -54,50 +54,24 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
 	private static WindowService window = new WindowService();
-	private final ObservableList<Transaction> walletTransactionData =
-		FXCollections.observableArrayList(
-			new Transaction("Wilcokat007",
-				            "HSBc3LHzwR5UEK2VdSuckyaqpQUSkmfpiG",
-				            "received",
-				            0.27203151,
-				            1640012594),
-			new Transaction("Wilcokat007",
-				            "HSBc3LHzwR5UEK2VdSuckyaqpQUSkmfpiG",
-				            "generate",
-				            0.26931119,
-				            1640938301),
-			new Transaction("Wilcokat007",
-				            "HSBc3LHzwR5UEK2VdSuckyaqpQUSkmfpiG",
-				            "generate",
-				            0.26931119,
-				            1641291780),
-			new Transaction("Wilcokat007",
-				            "HSBc3LHzwR5UEK2VdSuckyaqpQUSkmfpiG",
-				            "generate",
-				            0.26931119,
-				            1641336495)
-		);
 
-	@FXML
-	private TableView tblWalletTrans;
-	@FXML
-	private TableColumn colWalletTransDate;
-	@FXML
-	private TableColumn colWalletTransType;
-	@FXML
-	private TableColumn colWalletTransAddress;
-	@FXML
-	private TableColumn colWalletTransAmount;
-	@FXML
-	private TableView tblTransactions;
-	@FXML
-	private TableColumn colTransDate;
-	@FXML
-	private TableColumn colTransType;
-	@FXML
-	private TableColumn colTransAddress;
-	@FXML
-	private TableColumn colTransAmount;
+	/* Injected fx:id from FXML */
+	@FXML private TableView tblWalletTrans;
+	@FXML private TableColumn colWalletTransDate;
+	@FXML private TableColumn colWalletTransType;
+	@FXML private TableColumn colWalletTransAddress;
+	@FXML private TableColumn colWalletTransAmount;
+	@FXML private TableView tblTransactions;
+	@FXML private TableColumn colTransDate;
+	@FXML private TableColumn colTransType;
+	@FXML private TableColumn colTransAddress;
+	@FXML private TableColumn colTransAmount;
+	@FXML private ToggleButton btnWallet;
+	@FXML private ToggleButton btnTransactions;
+	@FXML private ToggleButton btnNodes;
+	@FXML private VBox pnlWallet;
+	@FXML private VBox pnlTransactions;
+	@FXML private VBox pnlNodes;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -125,7 +99,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				new PropertyValueFactory<Transaction, String>("account"));
 			colWalletTransAmount.setCellValueFactory(
 				new PropertyValueFactory<Transaction, Double>("amount"));
-			tblWalletTrans.setItems(walletTransactionData);
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
 		}
@@ -172,7 +145,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				new PropertyValueFactory<Transaction, String>("account"));
 			colTransAmount.setCellValueFactory(
 				new PropertyValueFactory<Transaction, Double>("amount"));
-			tblTransactions.setItems(walletTransactionData);
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
 		}
@@ -213,15 +185,9 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private void onWalletTap(MouseEvent event) {
 		try {
-			ToggleButton btnWallet = (ToggleButton) window.lookup("btnWallet");
-			ToggleButton btnTransactions = (ToggleButton) window.lookup("btnTransactions");
-			ToggleButton btnNodes = (ToggleButton) window.lookup("btnNodes");
 			btnTransactions.setSelected(false);
 			btnNodes.setSelected(false);
 			btnWallet.setSelected(true);
-			VBox pnlWallet = (VBox) window.lookup("pnlWallet");
-			VBox pnlTransactions = (VBox) window.lookup("pnlTransactions");
-			VBox pnlNodes = (VBox) window.lookup("pnlNodes");
 			pnlTransactions.setVisible(false);
 			pnlNodes.setVisible(false);
 			pnlWallet.setVisible(true);
@@ -234,15 +200,9 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private void onTransactionsTap(MouseEvent event) {
 		try {
-			ToggleButton btnWallet = (ToggleButton) window.lookup("btnWallet");
-			ToggleButton btnTransactions = (ToggleButton) window.lookup("btnTransactions");
-			ToggleButton btnNodes = (ToggleButton) window.lookup("btnNodes");
 			btnNodes.setSelected(false);
 			btnWallet.setSelected(false);
 			btnTransactions.setSelected(true);
-			VBox pnlWallet = (VBox) window.lookup("pnlWallet");
-			VBox pnlTransactions = (VBox) window.lookup("pnlTransactions");
-			VBox pnlNodes = (VBox) window.lookup("pnlNodes");
 			pnlWallet.setVisible(false);
 			pnlNodes.setVisible(false);
 			pnlTransactions.setVisible(true);
@@ -255,15 +215,9 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private void onNodesTap(MouseEvent event) {
 		try {
-			ToggleButton btnWallet = (ToggleButton) window.lookup("btnWallet");
-			ToggleButton btnTransactions = (ToggleButton) window.lookup("btnTransactions");
-			ToggleButton btnNodes = (ToggleButton) window.lookup("btnNodes");
 			btnWallet.setSelected(false);
 			btnTransactions.setSelected(false);
 			btnNodes.setSelected(true);
-			VBox pnlWallet = (VBox) window.lookup("pnlWallet");
-			VBox pnlTransactions = (VBox) window.lookup("pnlTransactions");
-			VBox pnlNodes = (VBox) window.lookup("pnlNodes");
 			pnlWallet.setVisible(false);
 			pnlTransactions.setVisible(false);
 			pnlNodes.setVisible(true);
