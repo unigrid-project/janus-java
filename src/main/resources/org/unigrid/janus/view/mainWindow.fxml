@@ -75,6 +75,17 @@
                                           <Font name="System Bold" size="14.0" />
                                        </font>
                                     </ToggleButton>
+                                    <ToggleButton fx:id="btnSettings" mnemonicParsing="false" prefWidth="140.0" text="Settings">
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" />
+                                       </VBox.margin>
+                                       <padding>
+                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                       </padding>
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </ToggleButton>
                                  </children>
                                  <padding>
                                     <Insets right="-1.0" top="29.0" />
