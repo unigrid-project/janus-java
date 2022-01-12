@@ -69,9 +69,11 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML private ToggleButton btnWallet;
 	@FXML private ToggleButton btnTransactions;
 	@FXML private ToggleButton btnNodes;
+	@FXML private ToggleButton btnSettings;
 	@FXML private VBox pnlWallet;
 	@FXML private VBox pnlTransactions;
 	@FXML private VBox pnlNodes;
+	@FXML private VBox pnlSettings;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -187,9 +189,11 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		try {
 			btnTransactions.setSelected(false);
 			btnNodes.setSelected(false);
+			btnSettings.setSelected(false);
 			btnWallet.setSelected(true);
 			pnlTransactions.setVisible(false);
 			pnlNodes.setVisible(false);
+			pnlSettings.setVisible(false);
 			pnlWallet.setVisible(true);
 			debug.log("Wallet clicked!");
 		} catch (Exception e) {
@@ -202,9 +206,11 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		try {
 			btnNodes.setSelected(false);
 			btnWallet.setSelected(false);
+			btnSettings.setSelected(false);
 			btnTransactions.setSelected(true);
 			pnlWallet.setVisible(false);
 			pnlNodes.setVisible(false);
+			pnlSettings.setVisible(false);
 			pnlTransactions.setVisible(true);
 			debug.log("Transactions clicked!");
 		} catch (Exception e) {
@@ -217,13 +223,32 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		try {
 			btnWallet.setSelected(false);
 			btnTransactions.setSelected(false);
+			btnSettings.setSelected(false);
 			btnNodes.setSelected(true);
 			pnlWallet.setVisible(false);
 			pnlTransactions.setVisible(false);
+			pnlSettings.setVisible(false);
 			pnlNodes.setVisible(true);
 			debug.log("Nodes clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (nodes click) %s", e.getMessage()));
+		}
+	}
+
+	@FXML
+	private void onSettingsTap(MouseEvent event) {
+		try {
+			btnWallet.setSelected(false);
+			btnTransactions.setSelected(false);
+			btnNodes.setSelected(false);
+			btnSettings.setSelected(true);
+			pnlWallet.setVisible(false);
+			pnlTransactions.setVisible(false);
+			pnlNodes.setVisible(false);
+			pnlSettings.setVisible(true);
+			debug.log("Settings clicked!");
+		} catch (Exception e) {
+			debug.log(String.format("ERROR: (settings click) %s", e.getMessage()));
 		}
 	}
 

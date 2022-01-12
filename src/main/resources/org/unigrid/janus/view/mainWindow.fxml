@@ -39,12 +39,12 @@
                            <center>
                               <VBox styleClass="sidebar">
                                  <children>
-                                    <ToggleButton fx:id="btnWallet" mnemonicParsing="false" onMouseClicked="#onWalletTap" prefWidth="140.0" selected="true" text="Wallet">
+                                    <ToggleButton fx:id="btnWallet" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onWalletTap" prefWidth="140.0" selected="true" text="Wallet">
                                        <padding>
-                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                          <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
                                        </padding>
                                        <font>
-                                          <Font name="System Bold" size="14.0" />
+                                          <Font size="14.0" />
                                        </font>
                                        <toggleGroup>
                                           <ToggleGroup fx:id="sidepane" />
@@ -52,43 +52,78 @@
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
                                        </VBox.margin>
+                                       <graphic>
+                                          <ImageView blendMode="COLOR_DODGE" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-2.0">
+                                             <image>
+                                                <Image url="@images/orange_wallet_icon.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnTransactions" mnemonicParsing="false" onMouseClicked="#onTransactionsTap" prefWidth="140.0" text="Transactions" toggleGroup="$sidepane">
+                                    <ToggleButton fx:id="btnTransactions" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onTransactionsTap" prefWidth="140.0" text="Transactions" toggleGroup="$sidepane">
                                        <padding>
-                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                          <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
                                        </padding>
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
                                        </VBox.margin>
                                        <font>
-                                          <Font name="System Bold" size="14.0" />
+                                          <Font size="14.0" />
                                        </font>
+                                       <graphic>
+                                          <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-2.0">
+                                             <image>
+                                                <Image url="@images/exchange_icon.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnNodes" mnemonicParsing="false" onMouseClicked="#onNodesTap" prefWidth="140.0" text="Nodes" toggleGroup="$sidepane">
+                                    <ToggleButton fx:id="btnNodes" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onNodesTap" prefWidth="140.0" text="Nodes" toggleGroup="$sidepane">
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
                                        </VBox.margin>
                                        <padding>
-                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                          <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
                                        </padding>
                                        <font>
-                                          <Font name="System Bold" size="14.0" />
+                                          <Font size="14.0" />
                                        </font>
+                                       <graphic>
+                                          <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-2.0">
+                                             <image>
+                                                <Image url="@images/unigrid-round_77x77.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnSettings" mnemonicParsing="false" prefWidth="140.0" text="Settings">
+                                    <VBox alignment="BOTTOM_LEFT" VBox.vgrow="ALWAYS">
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
                                        </VBox.margin>
-                                       <padding>
-                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-                                       </padding>
-                                       <font>
-                                          <Font name="System Bold" size="14.0" />
-                                       </font>
-                                    </ToggleButton>
+                                       <children>
+                                          <ToggleButton fx:id="btnSettings" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onSettingsTap" prefWidth="140.0" text="Settings">
+                                             <padding>
+                                                <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
+                                             </padding>
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                             <graphic>
+                                                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-2.0">
+                                                   <image>
+                                                      <Image url="@images/settings_icon_02.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                             <VBox.margin>
+                                                <Insets top="2.0" />
+                                             </VBox.margin>
+                                          </ToggleButton>
+                                       </children>
+                                    </VBox>
                                  </children>
                                  <padding>
-                                    <Insets right="-1.0" top="29.0" />
+                                    <Insets right="-1.0" top="30.0" />
                                  </padding>
                               </VBox>
                            </center>
@@ -122,7 +157,7 @@
                                                          <children>
                                                             <Pane styleClass="h-centered">
                                                                <children>
-                                                                  <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="142.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" scaleX="0.5" scaleY="0.5" translateX="-37.5" translateY="-37.5">
+                                                                  <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="160.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" scaleX="0.5" scaleY="0.5" translateX="-37.5" translateY="-37.5">
                                                                      <image>
                                                                         <Image url="@images/unigrid-round_77x77.png" />
                                                                      </image>
@@ -130,23 +165,23 @@
                                                                         <Glow />
                                                                      </effect>
                                                                   </ImageView>
-                                                                  <Button layoutX="70.0" layoutY="160.0" mnemonicParsing="false" prefWidth="100.0" style="-fx-background-radius: 50;" text="Send">
+                                                                  <Button layoutX="70.0" layoutY="160.0" mnemonicParsing="false" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2;" text="Send">
                                                                      <font>
-                                                                        <Font size="18.0" />
+                                                                        <Font size="14.0" />
                                                                      </font>
                                                                      <padding>
-                                                                        <Insets bottom="1.0" top="1.0" />
+                                                                        <Insets bottom="3.0" top="3.0" />
                                                                      </padding>
                                                                   </Button>
-                                                                  <Button layoutX="190.0" layoutY="160.0" mnemonicParsing="false" prefWidth="100.0" style="-fx-background-radius: 50;" text="Receive">
+                                                                  <Button layoutX="210.0" layoutY="160.0" mnemonicParsing="false" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2;" text="Receive">
                                                                      <font>
-                                                                        <Font size="18.0" />
+                                                                        <Font size="14.0" />
                                                                      </font>
                                                                      <padding>
-                                                                        <Insets bottom="1.0" top="1.0" />
+                                                                        <Insets bottom="3.0" top="3.0" />
                                                                      </padding>
                                                                   </Button>
-                                                                  <FlowPane alignment="CENTER" layoutY="80.0">
+                                                                  <FlowPane alignment="CENTER" layoutY="90.0">
                                                                      <children>
                                                                         <HBox alignment="BOTTOM_LEFT">
                                                                            <children>
@@ -217,6 +252,7 @@
                                                 </FlowPane>
                                              </children>
                                           </VBox>
+                                          <VBox fx:id="pnlSettings" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                        </children></AnchorPane>
                               </content>
                             </Tab>
