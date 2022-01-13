@@ -55,17 +55,26 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private static Wallet wallet = new Wallet();
 	private static WindowService window = new WindowService();
 
+	private static final int TAB_SETTINGS_GENERAL = 1;
+	private static final int TAB_SETTINGS_DISPLAY = 2;
+	private static final int TAB_SETTINGS_PASSPHRASE = 3;
+	private static final int TAB_SETTINGS_EXPORT = 4;
+	private static final int TAB_SETTINGS_DEBUG = 5;
+
 	/* Injected fx:id from FXML */
+	// wallet table
 	@FXML private TableView tblWalletTrans;
 	@FXML private TableColumn colWalletTransDate;
 	@FXML private TableColumn colWalletTransType;
 	@FXML private TableColumn colWalletTransAddress;
 	@FXML private TableColumn colWalletTransAmount;
+	// transactions table
 	@FXML private TableView tblTransactions;
 	@FXML private TableColumn colTransDate;
 	@FXML private TableColumn colTransType;
 	@FXML private TableColumn colTransAddress;
 	@FXML private TableColumn colTransAmount;
+	// main navigation
 	@FXML private ToggleButton btnWallet;
 	@FXML private ToggleButton btnTransactions;
 	@FXML private ToggleButton btnNodes;
@@ -74,6 +83,12 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML private VBox pnlTransactions;
 	@FXML private VBox pnlNodes;
 	@FXML private VBox pnlSettings;
+	// settings navigation
+	@FXML private VBox pnlSetGeneral;
+	@FXML private VBox pnlSetDisplay;
+	@FXML private VBox pnlSetPassphrase;
+	@FXML private VBox pnlSetExport;
+	@FXML private VBox pnlSetDebug;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -250,6 +265,54 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (settings click) %s", e.getMessage()));
 		}
+	}
+
+	private void settingSelected(int tab) {
+		pnlSetGeneral.setVisible(false);
+		pnlSetDisplay.setVisible(false);
+		pnlSetPassphrase.setVisible(false);
+		pnlSetExport.setVisible(false);
+		pnlSetDebug.setVisible(false);
+		switch (tab) {
+			case TAB_SETTINGS_GENERAL: pnlSetGeneral.setVisible(true);
+						break;
+			case TAB_SETTINGS_DISPLAY: pnlSetDisplay.setVisible(true);
+						break;
+			case TAB_SETTINGS_PASSPHRASE: pnlSetPassphrase.setVisible(true);
+						break;
+			case TAB_SETTINGS_EXPORT: pnlSetExport.setVisible(true);
+						break;
+			case TAB_SETTINGS_DEBUG: pnlSetDebug.setVisible(true);
+						break;
+			default: pnlSetDebug.setVisible(true);
+						break;
+		}
+
+	}
+
+	@FXML
+	private void onSetGeneralTap(MouseEvent event) {
+		settingSelected(TAB_SETTINGS_GENERAL);
+	}
+
+	@FXML
+	private void onSetDisplayTap(MouseEvent event) {
+		settingSelected(TAB_SETTINGS_DISPLAY);
+	}
+
+	@FXML
+	private void onSetPassphraseTap(MouseEvent event) {
+		settingSelected(TAB_SETTINGS_PASSPHRASE);
+	}
+
+	@FXML
+	private void onSetExportTap(MouseEvent event) {
+		settingSelected(TAB_SETTINGS_EXPORT);
+	}
+
+	@FXML
+	private void onSetDebugTap(MouseEvent event) {
+		settingSelected(TAB_SETTINGS_DEBUG);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {

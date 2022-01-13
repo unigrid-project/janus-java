@@ -25,6 +25,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ListCell;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.WindowService;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 
 @Dependent
 public class MainWindow implements Window {
@@ -34,11 +37,18 @@ public class MainWindow implements Window {
 
 	@SneakyThrows
 	public void show() {
-		window.setStage(stage);
-		stage.centerOnScreen();
-		stage.initStyle(StageStyle.UNDECORATED);
-		stage.setResizable(true);
-		stage.show();
+		try {
+			window.setStage(stage);
+			stage.centerOnScreen();
+			stage.initStyle(StageStyle.UNDECORATED);
+			stage.setResizable(true);
+			stage.show();
+		} catch (Exception e) {
+			Alert a = new Alert(AlertType.ERROR,
+				  				e.getMessage(),
+				  				ButtonType.OK);
+			a.showAndWait();
+		}
 	}
 
 	public void bindDebugListViewWidth(double multiplier) {
