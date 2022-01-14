@@ -73,11 +73,15 @@ public class ResizableWindowDecorator implements Decorator {
 		}
 
 		if (current.getWidth() != window.getWidth()) {
-			window.setWidth(current.getWidth());
+			if (current.getWidth() >= 600) {
+				window.setWidth(current.getWidth());
+			}
 		}
 
 		if (current.getHeight() != window.getHeight()) {
-			window.setHeight(current.getHeight());
+			if (current.getHeight() >= 400) {
+				window.setHeight(current.getHeight());
+			}
 		}
 	}
 

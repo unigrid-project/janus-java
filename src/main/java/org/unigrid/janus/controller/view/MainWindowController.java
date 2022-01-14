@@ -48,6 +48,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 import java.text.SimpleDateFormat;
 import javafx.application.Platform;
+import javafx.scene.paint.Color;
 
 public class MainWindowController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
@@ -62,6 +63,9 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private static final int TAB_SETTINGS_DEBUG = 5;
 
 	/* Injected fx:id from FXML */
+	@FXML private Label lblBalance;
+	@FXML private Label lblBlockCount;
+	@FXML private Label lblConnection;
 	// wallet table
 	@FXML private TableView tblWalletTrans;
 	@FXML private TableColumn colWalletTransDate;
@@ -319,10 +323,31 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		Stage stage = window.getStage();
 		debug.log("Main Window change fired!");
 		debug.log(event.getPropertyName());
-		debug.log(String.format("Value: %.8f", (double) event.getNewValue()));
 		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
-			Label lblBalance = (Label) stage.getScene().lookup("#lblBalance");
+			debug.log(String.format("Value: %.8f", (double) event.getNewValue()));
 			lblBalance.setText(String.format("%.8f", (double) event.getNewValue()));
+		}
+		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
+			debug.log(String.format("blocks: %d", (int) event.getNewValue()));
+			int blocks = (int) event.getNewValue();
+			if (blocks > 0) {
+				lblBlockCount.setText(String.format("Block Count:%d", blocks));
+				lblBlockCount.setTextFill(Color.web("#e72"));
+			} else {
+				lblBlockCount.setText("Block Count: (out of sync)");
+				lblBlockCount.setTextFill(Color.RED);
+			}
+		}
+		if (event.getPropertyName().equals(wallet.CONNECTIONS_PROPERTY)) {
+			debug.log(String.format("connections: %d", (int) event.getNewValue()));
+			int connections = (int) event.getNewValue();
+			if (connections > 0) {
+				lblConnection.setText(String.format("Connected (%d)", connections));
+				lblConnection.setTextFill(Color.web("#1dab00"));
+			} else {
+				lblConnection.setText("Disconnected");
+				lblConnection.setTextFill(Color.RED);
+			}
 		}
 	}
 }

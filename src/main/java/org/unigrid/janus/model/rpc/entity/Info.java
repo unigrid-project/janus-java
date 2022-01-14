@@ -48,11 +48,15 @@ public class Info extends BaseResult<Info.Result> {
 		// unpacked from nested bootstrapping
 		private double moneysupply;
 		private double blacklisted;
+		private int blocks;
+		private int connections;
 
 		@JsonbProperty("bootstrapping")
 		private void unpackNested(Map<String, Object> bootstrapping) {
 			this.moneysupply = (double) bootstrapping.get("moneysupply");
 			this.blacklisted = (double) bootstrapping.get("blacklisted");
+			this.blocks = (int) bootstrapping.get("blocks");
+			this.connections = (int) bootstrapping.get("connections");
 		}
 	}
 }

@@ -1,7 +1,10 @@
 .button {
 	-fx-background-color: #ccc3;
+	-fx-background-radius: 50;
 	-fx-text-fill: #cccc;
-	-fx-border-color: transparent;
+	-fx-border-color: #e72;
+	-fx-border-width: 2;
+	-fx-border-radius: 50;
 }
 
 .button:hover {
@@ -29,12 +32,30 @@
 	-fx-border-color: transparent #ccc8 transparent transparent;
 }
 
-.sidebar .button-active {
-	-fx-border-color: #ccc8 black #ccc8 #ccc8;
+.settings .sidebar {
+	-fx-border-color: transparent #e72 transparent transparent;
+	-fx-background-color: black;
+}
+
+.settings .sidebar .toggle-button {
+	-fx-background-color: #aaf3;
+	-fx-background-radius: 50 0 0 50;
+	-fx-border-radius: 50 0 0 50;
+	-fx-text-fill: #e72;
+}
+
+.settings .sidebar .toggle-button:hover {
+	-fx-background-color: #aaf5;
+}
+
+.settings .sidebar .toggle-button:selected {
+	-fx-background-color: #aaf1;
+	-fx-border-color: #ff9500 black #ff9500 #ff9500;
+	-fx-text-fill: #ff9500;
 }
 
 .tab-header-background {
-	-fx-background-color : black;
+	-fx-background-color: black;
 }
 
 .tab-header-area .tab-header-background {
@@ -103,4 +124,13 @@
 
 .table-row-cell:even {
 	-fx-background-color: #bbc1;
+}
+
+.text-area {
+	-fx-text-fill: white;
+}
+
+.text-area .content{
+	-fx-background-color: #336a;
+	-fx-text-fill: white;
 }
