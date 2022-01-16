@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -151,7 +152,7 @@
                                  <children>
                                     <AnchorPane>
                                        <children>
-                                          <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" rowValignment="TOP" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <FlowPane fx:id="pnlBalance" alignment="TOP_CENTER" columnHalignment="CENTER" rowValignment="TOP" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <children>
                                                 <Pane styleClass="h-centered">
                                                    <children>
@@ -201,6 +202,23 @@
                                                    <padding>
                                                       <Insets bottom="8.0" />
                                                    </padding>
+                                                </Pane>
+                                             </children>
+                                          </FlowPane>
+                                          <FlowPane fx:id="pnlLocked" alignment="TOP_CENTER" columnHalignment="CENTER" prefHeight="200.0" rowValignment="TOP" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <children>
+                                                <Pane prefHeight="200.0" prefWidth="150.0">
+                                                   <children>
+                                                      <ImageView fitHeight="150.0" fitWidth="150.0" layoutY="10.0" onMouseClicked="#onUnlock" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@images/lock.png" />
+                                                         </image>
+                                                         <cursor>
+                                                            <Cursor fx:constant="HAND" />
+                                                         </cursor>
+                                                      </ImageView>
+                                                      <Button layoutX="25.0" layoutY="166.0" mnemonicParsing="false" onMouseClicked="#onUnlock" prefWidth="100.0" text="Unlock" />
+                                                   </children>
                                                 </Pane>
                                              </children>
                                           </FlowPane>
@@ -274,13 +292,32 @@
                                                       </Label>
                                                    </children>
                                                 </VBox>
-                                                <VBox fx:id="pnlSetPassphrase" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                <VBox fx:id="pnlSetPassphrase" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                    <children>
-                                                      <Label text="Passphrase" textFill="#ee7722">
-                                                         <font>
-                                                            <Font name="System Bold" size="24.0" />
-                                                         </font>
+                                                      <Label layoutX="26.0" layoutY="18.0" text="Warning! This will encrypt your wallet with a passphrase. Write down your passphrase and keep it safe." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
+                                                         <VBox.margin>
+                                                            <Insets bottom="8.0" />
+                                                         </VBox.margin>
                                                       </Label>
+                                                      <Label text="If you have not backed up your wallet yet please do so first. An automatic wallet restart will also be performed." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
+                                                         <VBox.margin>
+                                                            <Insets bottom="8.0" />
+                                                         </VBox.margin>
+                                                      </Label>
+                                                      <AnchorPane>
+                                                         <children>
+                                                            <Label alignment="CENTER" contentDisplay="RIGHT" graphicTextGap="8.0" text="Passphrase" textFill="#ee7722" AnchorPane.leftAnchor="0.0">
+                                                               <font>
+                                                                  <Font size="14.0" />
+                                                               </font>
+                                                            </Label>
+                                                            <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="0.0">
+                                                               <image>
+                                                                  <Image url="@images/settings_icon.png" />
+                                                               </image>
+                                                            </ImageView>
+                                                         </children>
+                                                      </AnchorPane>
                                                       <TextArea prefHeight="40.0">
                                                          <VBox.margin>
                                                             <Insets bottom="8.0" />
@@ -301,7 +338,7 @@
                                                             <Insets top="8.0" />
                                                          </VBox.margin>
                                                          <children>
-                                                            <Button mnemonicParsing="false" text="Update">
+                                                            <Button mnemonicParsing="false" onMouseClicked="#onLock" text="Update">
                                                                <HBox.margin>
                                                                   <Insets right="8.0" />
                                                                </HBox.margin>
@@ -322,7 +359,7 @@
                                                       </Label>
                                                    </children>
                                                 </VBox>
-                                                <VBox fx:id="pnlSetDebug" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                <VBox fx:id="pnlSetDebug" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                    <children>
                                                       <ListView fx:id="lstDebug" VBox.vgrow="ALWAYS" />
                                                    </children>
@@ -352,7 +389,7 @@
                                                       <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
                                                    </padding>
                                                 </ToggleButton>
-                                                <ToggleButton alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetPassphraseTap" prefWidth="100.0" text="Passphrase" toggleGroup="$settings">
+                                                <ToggleButton alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetPassphraseTap" prefWidth="100.0" selected="true" text="Passphrase" toggleGroup="$settings">
                                                    <VBox.margin>
                                                       <Insets bottom="4.0" />
                                                    </VBox.margin>
@@ -368,7 +405,7 @@
                                                       <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
                                                    </padding>
                                                 </ToggleButton>
-                                                <ToggleButton alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onMouseClicked="#onSetDebugTap" prefWidth="100.0" selected="true" text="Debug" toggleGroup="$settings">
+                                                <ToggleButton alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onMouseClicked="#onSetDebugTap" prefWidth="100.0" text="Debug" toggleGroup="$settings">
                                                    <VBox.margin>
                                                       <Insets bottom="4.0" />
                                                    </VBox.margin>

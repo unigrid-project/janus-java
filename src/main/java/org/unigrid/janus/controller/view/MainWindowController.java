@@ -29,6 +29,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.beans.value.ObservableValue;
@@ -56,6 +57,11 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private static Wallet wallet = new Wallet();
 	private static WindowService window = new WindowService();
 
+	private static final int TAB_WALLET = 1;
+	private static final int TAB_TRANSACTIONS = 2;
+	private static final int TAB_NODES = 3;
+	private static final int TAB_SETTINGS = 4;
+
 	private static final int TAB_SETTINGS_GENERAL = 1;
 	private static final int TAB_SETTINGS_DISPLAY = 2;
 	private static final int TAB_SETTINGS_PASSPHRASE = 3;
@@ -66,6 +72,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML private Label lblBalance;
 	@FXML private Label lblBlockCount;
 	@FXML private Label lblConnection;
+	@FXML private FlowPane pnlBalance;
+	@FXML private FlowPane pnlLocked;
 	// wallet table
 	@FXML private TableView tblWalletTrans;
 	@FXML private TableColumn colWalletTransDate;
@@ -204,16 +212,54 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	}
 
 	@FXML
+	private void onUnlock(MouseEvent event) {
+		debug.log("Unlock clicked!");
+		pnlLocked.setVisible(false);
+		pnlBalance.setVisible(true);
+	}
+
+	@FXML
+	private void onLock(MouseEvent event) {
+		debug.log("Update passphrase clicked!");
+		pnlBalance.setVisible(false);
+		pnlLocked.setVisible(true);
+		tabSelect(TAB_WALLET);
+	}
+
+	private void tabSelect(int tab) {
+		btnWallet.setSelected(false);
+		btnTransactions.setSelected(false);
+		btnNodes.setSelected(false);
+		btnSettings.setSelected(false);
+		pnlWallet.setVisible(false);
+		pnlTransactions.setVisible(false);
+		pnlNodes.setVisible(false);
+		pnlSettings.setVisible(false);
+		switch (tab) {
+			case TAB_WALLET: pnlWallet.setVisible(true);
+						btnWallet.setSelected(true);
+						break;
+			case TAB_TRANSACTIONS: pnlTransactions.setVisible(true);
+						btnTransactions.setSelected(true);
+						break;
+			case TAB_NODES: pnlNodes.setVisible(true);
+						btnNodes.setSelected(true);
+						break;
+			case TAB_SETTINGS: pnlSettings.setVisible(true);
+						btnSettings.setSelected(true);
+						break;
+			default: pnlWallet.setVisible(true);
+					 	btnWallet.setSelected(true);
+						break;
+		}
+
+	}
+
+	@FXML
 	private void onWalletTap(MouseEvent event) {
 		try {
-			btnTransactions.setSelected(false);
-			btnNodes.setSelected(false);
-			btnSettings.setSelected(false);
-			btnWallet.setSelected(true);
-			pnlTransactions.setVisible(false);
-			pnlNodes.setVisible(false);
-			pnlSettings.setVisible(false);
-			pnlWallet.setVisible(true);
+			tabSelect(TAB_WALLET);
+			loadWalletPreviewTrans();
 			debug.log("Wallet clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (wallet click) %s", e.getMessage()));
@@ -223,14 +269,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private void onTransactionsTap(MouseEvent event) {
 		try {
-			btnNodes.setSelected(false);
-			btnWallet.setSelected(false);
-			btnSettings.setSelected(false);
-			btnTransactions.setSelected(true);
-			pnlWallet.setVisible(false);
-			pnlNodes.setVisible(false);
-			pnlSettings.setVisible(false);
-			pnlTransactions.setVisible(true);
+			tabSelect(TAB_TRANSACTIONS);
+			loadTransactions(1);
 			debug.log("Transactions clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (transactions click) %s", e.getMessage()));
@@ -240,14 +280,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private void onNodesTap(MouseEvent event) {
 		try {
-			btnWallet.setSelected(false);
-			btnTransactions.setSelected(false);
-			btnSettings.setSelected(false);
-			btnNodes.setSelected(true);
-			pnlWallet.setVisible(false);
-			pnlTransactions.setVisible(false);
-			pnlSettings.setVisible(false);
-			pnlNodes.setVisible(true);
+			tabSelect(TAB_NODES);
 			debug.log("Nodes clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (nodes click) %s", e.getMessage()));
@@ -257,14 +290,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private void onSettingsTap(MouseEvent event) {
 		try {
-			btnWallet.setSelected(false);
-			btnTransactions.setSelected(false);
-			btnNodes.setSelected(false);
-			btnSettings.setSelected(true);
-			pnlWallet.setVisible(false);
-			pnlTransactions.setVisible(false);
-			pnlNodes.setVisible(false);
-			pnlSettings.setVisible(true);
+			tabSelect(TAB_SETTINGS);
 			debug.log("Settings clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (settings click) %s", e.getMessage()));
