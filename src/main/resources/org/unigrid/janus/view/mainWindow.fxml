@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.effect.Glow?>
@@ -28,9 +28,9 @@
    <scene>
       <Scene fill="#000024" stylesheets="@main.css">
          <root>
-            <StackPane>
+            <StackPane minHeight="0.0" minWidth="0.0">
                <children>
-                  <BorderPane pickOnBounds="false" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
+                  <BorderPane pickOnBounds="false" prefHeight="300.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
                      <top>
                         <fx:include source="component/windowBar.fxml" />
                      </top>
@@ -39,12 +39,12 @@
                            <center>
                               <VBox styleClass="sidebar">
                                  <children>
-                                    <ToggleButton fx:id="btnWallet" mnemonicParsing="false" onMouseClicked="#onWalletTap" prefWidth="140.0" selected="true" text="Wallet">
+                                    <ToggleButton fx:id="btnWallet" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onWalletTap" prefWidth="140.0" selected="true" text="Wallet">
                                        <padding>
-                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                          <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
                                        </padding>
                                        <font>
-                                          <Font name="System Bold" size="14.0" />
+                                          <Font size="14.0" />
                                        </font>
                                        <toggleGroup>
                                           <ToggleGroup fx:id="sidepane" />
@@ -52,32 +52,78 @@
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
                                        </VBox.margin>
+                                       <graphic>
+                                          <ImageView blendMode="COLOR_DODGE" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-2.0">
+                                             <image>
+                                                <Image url="@images/orange_wallet_icon.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnTransactions" mnemonicParsing="false" onMouseClicked="#onTransactionsTap" prefWidth="140.0" text="Transactions" toggleGroup="$sidepane">
+                                    <ToggleButton fx:id="btnTransactions" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onTransactionsTap" prefWidth="140.0" text="Transactions" toggleGroup="$sidepane">
                                        <padding>
-                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                          <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
                                        </padding>
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
                                        </VBox.margin>
                                        <font>
-                                          <Font name="System Bold" size="14.0" />
+                                          <Font size="14.0" />
                                        </font>
+                                       <graphic>
+                                          <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-2.0">
+                                             <image>
+                                                <Image url="@images/exchange_icon.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnNodes" mnemonicParsing="false" onMouseClicked="#onNodesTap" prefWidth="140.0" text="Nodes" toggleGroup="$sidepane">
+                                    <ToggleButton fx:id="btnNodes" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onNodesTap" prefWidth="140.0" text="Nodes" toggleGroup="$sidepane">
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
                                        </VBox.margin>
                                        <padding>
-                                          <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                          <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
                                        </padding>
                                        <font>
-                                          <Font name="System Bold" size="14.0" />
+                                          <Font size="14.0" />
                                        </font>
+                                       <graphic>
+                                          <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-2.0">
+                                             <image>
+                                                <Image url="@images/unigrid-round_77x77.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
                                     </ToggleButton>
+                                    <VBox alignment="BOTTOM_LEFT" VBox.vgrow="ALWAYS">
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" />
+                                       </VBox.margin>
+                                       <children>
+                                          <ToggleButton fx:id="btnSettings" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onSettingsTap" prefWidth="140.0" text="Settings" toggleGroup="$sidepane">
+                                             <padding>
+                                                <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
+                                             </padding>
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                             <VBox.margin>
+                                                <Insets top="2.0" />
+                                             </VBox.margin>
+                                             <graphic>
+                                                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-2.0">
+                                                   <image>
+                                                      <Image url="@images/settings_icon_03.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </ToggleButton>
+                                       </children>
+                                    </VBox>
                                  </children>
                                  <padding>
-                                    <Insets right="-1.0" top="29.0" />
+                                    <Insets right="-1.0" top="30.0" />
                                  </padding>
                               </VBox>
                            </center>
@@ -89,6 +135,9 @@
                                  <BorderPane.margin>
                                     <Insets />
                                  </BorderPane.margin>
+                                 <padding>
+                                    <Insets bottom="1.0" top="1.0" />
+                                 </padding>
                               </FlowPane>
                            </bottom>
                         </BorderPane>
@@ -97,129 +146,291 @@
                         <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                      </opaqueInsets>
                      <center>
-                        <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-                          <tabs>
-                            <Tab text="Main">
-                              <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 200px 25px to 0px 100px, #2235, #1125);">
+                        <AnchorPane>
+                           <children>
+                              <VBox fx:id="pnlWallet" AnchorPane.bottomAnchor="24.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <AnchorPane>
                                        <children>
-                                          <VBox fx:id="pnlWallet" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <FlowPane fx:id="pnlBalance" alignment="TOP_CENTER" columnHalignment="CENTER" rowValignment="TOP" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <children>
-                                                <AnchorPane>
+                                                <Pane styleClass="h-centered">
                                                    <children>
-                                                      <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" rowValignment="TOP" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="160.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" scaleX="0.5" scaleY="0.5" translateX="-37.5" translateY="-37.5">
+                                                         <image>
+                                                            <Image url="@images/unigrid-round_77x77.png" />
+                                                         </image>
+                                                         <effect>
+                                                            <Glow />
+                                                         </effect>
+                                                      </ImageView>
+                                                      <Button layoutX="70.0" layoutY="160.0" mnemonicParsing="false" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2;" text="Send">
+                                                         <font>
+                                                            <Font size="14.0" />
+                                                         </font>
+                                                         <padding>
+                                                            <Insets bottom="3.0" top="3.0" />
+                                                         </padding>
+                                                      </Button>
+                                                      <Button layoutX="210.0" layoutY="160.0" mnemonicParsing="false" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2;" text="Receive">
+                                                         <font>
+                                                            <Font size="14.0" />
+                                                         </font>
+                                                         <padding>
+                                                            <Insets bottom="3.0" top="3.0" />
+                                                         </padding>
+                                                      </Button>
+                                                      <FlowPane alignment="CENTER" layoutY="90.0">
                                                          <children>
-                                                            <Pane styleClass="h-centered">
+                                                            <HBox alignment="BOTTOM_LEFT">
                                                                <children>
-                                                                  <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="142.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" scaleX="0.5" scaleY="0.5" translateX="-37.5" translateY="-37.5">
-                                                                     <image>
-                                                                        <Image url="@images/unigrid-round_77x77.png" />
-                                                                     </image>
-                                                                     <effect>
-                                                                        <Glow />
-                                                                     </effect>
-                                                                  </ImageView>
-                                                                  <Button layoutX="70.0" layoutY="160.0" mnemonicParsing="false" prefWidth="100.0" style="-fx-background-radius: 50;" text="Send">
+                                                                  <Label fx:id="lblBalance" alignment="CENTER" style="-fx-text-fill: orange;" text="0" textAlignment="CENTER" textFill="#ee7722" textOverrun="CLIP" HBox.hgrow="ALWAYS">
+                                                                     <font>
+                                                                        <Font name="Arial" size="36.0" />
+                                                                     </font>
+                                                                  </Label>
+                                                                  <Label alignment="BOTTOM_RIGHT" contentDisplay="BOTTOM" text="UGD" textFill="#ffa033">
                                                                      <font>
                                                                         <Font size="18.0" />
                                                                      </font>
-                                                                     <padding>
-                                                                        <Insets bottom="1.0" top="1.0" />
-                                                                     </padding>
-                                                                  </Button>
-                                                                  <Button layoutX="190.0" layoutY="160.0" mnemonicParsing="false" prefWidth="100.0" style="-fx-background-radius: 50;" text="Receive">
-                                                                     <font>
-                                                                        <Font size="18.0" />
-                                                                     </font>
-                                                                     <padding>
-                                                                        <Insets bottom="1.0" top="1.0" />
-                                                                     </padding>
-                                                                  </Button>
-                                                                  <FlowPane alignment="CENTER" layoutY="80.0">
-                                                                     <children>
-                                                                        <HBox alignment="BOTTOM_LEFT">
-                                                                           <children>
-                                                                              <Label fx:id="lblBalance" alignment="CENTER" style="-fx-text-fill: orange;" text="0" textAlignment="CENTER" textFill="#ee7722" textOverrun="CLIP" HBox.hgrow="ALWAYS">
-                                                                                 <font>
-                                                                                    <Font name="Arial" size="36.0" />
-                                                                                 </font>
-                                                                              </Label>
-                                                                              <Label alignment="BOTTOM_RIGHT" contentDisplay="BOTTOM" text="UGD" textFill="#ffa033">
-                                                                                 <font>
-                                                                                    <Font size="18.0" />
-                                                                                 </font>
-                                                                              </Label>
-                                                                           </children>
-                                                                        </HBox>
-                                                                     </children>
-                                                                  </FlowPane>
+                                                                  </Label>
                                                                </children>
-                                                               <padding>
-                                                                  <Insets bottom="8.0" />
-                                                               </padding>
-                                                            </Pane>
+                                                            </HBox>
                                                          </children>
                                                       </FlowPane>
                                                    </children>
-                                                </AnchorPane>
-                                                <AnchorPane VBox.vgrow="ALWAYS">
-                                                   <children>
-                                                      <TableView fx:id="tblWalletTrans" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
-                                                        <columns>
-                                                          <TableColumn fx:id="colWalletTransDate" minWidth="100.0" prefWidth="130.0" sortType="DESCENDING" text="Date" />
-                                                            <TableColumn fx:id="colWalletTransType" prefWidth="75.0" text="Type" />
-                                                            <TableColumn fx:id="colWalletTransAmount" prefWidth="75.0" text="Amount" />
-                                                          <TableColumn fx:id="colWalletTransAddress" prefWidth="170.0" text="Address" />
-                                                        </columns>
-                                                      </TableView>
-                                                      <Label alignment="TOP_CENTER" layoutX="216.0" layoutY="6.0" text="Recent Transactions" textAlignment="CENTER" textFill="#aaaadd" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="3.0">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                      </Label>
-                                                   </children>
-                                                </AnchorPane>
+                                                   <padding>
+                                                      <Insets bottom="8.0" />
+                                                   </padding>
+                                                </Pane>
                                              </children>
-                                          </VBox>
-                                          <VBox fx:id="pnlTransactions" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          </FlowPane>
+                                          <FlowPane fx:id="pnlLocked" alignment="TOP_CENTER" columnHalignment="CENTER" prefHeight="200.0" rowValignment="TOP" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <children>
-                                                <TableView fx:id="tblTransactions" VBox.vgrow="ALWAYS">
-                                                  <columns>
-                                                    <TableColumn fx:id="colTransDate" prefWidth="130.0" sortType="DESCENDING" text="Date" />
-                                                      <TableColumn fx:id="colTransType" prefWidth="85.0" text="Type" />
-                                                      <TableColumn fx:id="colTransAmount" prefWidth="75.0" text="Amount" />
-                                                    <TableColumn fx:id="colTransAddress" prefWidth="170.0" text="Address" />
-                                                  </columns>
-                                                </TableView>
-                                             </children>
-                                          </VBox>
-                                          <VBox fx:id="pnlNodes" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                             <children>
-                                                <FlowPane alignment="CENTER" columnHalignment="CENTER" VBox.vgrow="ALWAYS">
+                                                <Pane prefHeight="200.0" prefWidth="150.0">
                                                    <children>
-                                                      <Label text="Nodes" textFill="#ff8b2d">
-                                                         <font>
-                                                            <Font size="48.0" />
-                                                         </font>
-                                                      </Label>
+                                                      <ImageView fitHeight="150.0" fitWidth="150.0" layoutY="10.0" onMouseClicked="#onUnlock" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@images/lock.png" />
+                                                         </image>
+                                                         <cursor>
+                                                            <Cursor fx:constant="HAND" />
+                                                         </cursor>
+                                                      </ImageView>
+                                                      <Button layoutX="25.0" layoutY="166.0" mnemonicParsing="false" onMouseClicked="#onUnlock" prefWidth="100.0" text="Unlock" />
                                                    </children>
-                                                </FlowPane>
+                                                </Pane>
                                              </children>
-                                          </VBox>
-                                       </children></AnchorPane>
-                              </content>
-                            </Tab>
-                            <Tab text="Debug">
-                              <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                       <children>
-                                          <ListView fx:id="lstDebug" layoutX="6.0" layoutY="7.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                                          </FlowPane>
                                        </children>
                                     </AnchorPane>
-                              </content>
-                            </Tab>
-                          </tabs>
-                        </TabPane>
+                                    <AnchorPane VBox.vgrow="ALWAYS">
+                                       <children>
+                                          <TableView fx:id="tblWalletTrans" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                                            <columns>
+                                              <TableColumn fx:id="colWalletTransDate" minWidth="100.0" prefWidth="130.0" sortType="DESCENDING" text="Date" />
+                                                <TableColumn fx:id="colWalletTransType" prefWidth="75.0" text="Type" />
+                                                <TableColumn fx:id="colWalletTransAmount" prefWidth="75.0" text="Amount" />
+                                              <TableColumn fx:id="colWalletTransAddress" prefWidth="170.0" text="Address" />
+                                            </columns>
+                                          </TableView>
+                                          <Label alignment="TOP_CENTER" layoutX="216.0" layoutY="6.0" text="Recent Transactions" textAlignment="CENTER" textFill="#aaaadd" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="3.0">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </AnchorPane>
+                                 </children>
+                              </VBox>
+                              <VBox fx:id="pnlTransactions" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="24.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              	<children>
+                              		<fx:include source="transactions.fxml" VBox.vgrow="ALWAYS" />
+                              	</children>
+                              </VBox>
+                              <VBox fx:id="pnlNodes" visible="false" AnchorPane.bottomAnchor="24.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <FlowPane alignment="CENTER" columnHalignment="CENTER" VBox.vgrow="ALWAYS">
+                                       <children>
+                                          <Label text="Nodes" textFill="#ff8b2d">
+                                             <font>
+                                                <Font size="48.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </FlowPane>
+                                 </children>
+                              </VBox>
+                              <VBox fx:id="pnlSettings" alignment="CENTER" styleClass="settings" visible="false" AnchorPane.bottomAnchor="24.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <BorderPane VBox.vgrow="ALWAYS">
+                                       <center>
+                                          <AnchorPane>
+                                             <children>
+                                                <VBox fx:id="pnlSetGeneral" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <children>
+                                                      <Label text="General" textFill="#ee7722">
+                                                         <font>
+                                                            <Font name="System Bold" size="24.0" />
+                                                         </font>
+                                                      </Label>
+                                                   </children>
+                                                </VBox>
+                                                <VBox fx:id="pnlSetDisplay" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <children>
+                                                      <Label text="Display" textFill="#ee7722">
+                                                         <font>
+                                                            <Font name="System Bold" size="24.0" />
+                                                         </font>
+                                                      </Label>
+                                                   </children>
+                                                </VBox>
+                                                <VBox fx:id="pnlSetPassphrase" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <children>
+                                                      <Label layoutX="26.0" layoutY="18.0" text="Warning! This will encrypt your wallet with a passphrase. Write down your passphrase and keep it safe." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
+                                                         <VBox.margin>
+                                                            <Insets bottom="8.0" />
+                                                         </VBox.margin>
+                                                      </Label>
+                                                      <Label text="If you have not backed up your wallet yet please do so first. An automatic wallet restart will also be performed." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
+                                                         <VBox.margin>
+                                                            <Insets bottom="8.0" />
+                                                         </VBox.margin>
+                                                      </Label>
+                                                      <AnchorPane>
+                                                         <children>
+                                                            <Label alignment="CENTER" contentDisplay="RIGHT" graphicTextGap="8.0" text="Passphrase" textFill="#ee7722" AnchorPane.leftAnchor="0.0">
+                                                               <font>
+                                                                  <Font size="14.0" />
+                                                               </font>
+                                                            </Label>
+                                                            <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="0.0">
+                                                               <image>
+                                                                  <Image url="@images/settings_icon.png" />
+                                                               </image>
+                                                            </ImageView>
+                                                         </children>
+                                                      </AnchorPane>
+                                                      <TextArea fx:id="taPassphrase" prefHeight="40.0">
+                                                         <VBox.margin>
+                                                            <Insets bottom="8.0" />
+                                                         </VBox.margin>
+                                                      </TextArea>
+                                                      <Label text="Repeat passphrase" textFill="#ee7722">
+                                                         <font>
+                                                            <Font size="14.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <TextArea fx:id="taRepeatPassphrase" onKeyTyped="#onRepeatPassphraseChange" prefHeight="40.0">
+                                                         <VBox.margin>
+                                                            <Insets bottom="8.0" />
+                                                         </VBox.margin>
+                                                      </TextArea>
+                                                      <HBox alignment="TOP_CENTER">
+                                                         <VBox.margin>
+                                                            <Insets top="8.0" />
+                                                         </VBox.margin>
+                                                         <children>
+                                                            <Button fx:id="btnUpdatePassphrase" disable="true" mnemonicParsing="false" onMouseClicked="#onLock" text="Update">
+                                                               <HBox.margin>
+                                                                  <Insets right="8.0" />
+                                                               </HBox.margin>
+                                                            </Button>
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                   <padding>
+                                                      <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
+                                                   </padding>
+                                                </VBox>
+                                                <VBox fx:id="pnlSetExport" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <children>
+                                                      <Label text="Import/Export" textFill="#ee7722">
+                                                         <font>
+                                                            <Font name="System Bold" size="24.0" />
+                                                         </font>
+                                                      </Label>
+                                                   </children>
+                                                </VBox>
+                                                <VBox fx:id="pnlSetDebug" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <children>
+                                                      <ListView fx:id="lstDebug" VBox.vgrow="ALWAYS" />
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                          </AnchorPane>
+                                       </center>
+                                       <left>
+                                          <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="100.0" styleClass="sidebar" BorderPane.alignment="TOP_RIGHT">
+                                             <children>
+                                                <ToggleButton alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetGeneralTap" prefWidth="100.0" text="General">
+                                                   <toggleGroup>
+                                                      <ToggleGroup fx:id="settings" />
+                                                   </toggleGroup>
+                                                   <VBox.margin>
+                                                      <Insets bottom="4.0" />
+                                                   </VBox.margin>
+                                                   <padding>
+                                                      <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                                                   </padding>
+                                                </ToggleButton>
+                                                <ToggleButton alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetDisplayTap" prefWidth="100.0" text="Display" toggleGroup="$settings">
+                                                   <VBox.margin>
+                                                      <Insets bottom="4.0" />
+                                                   </VBox.margin>
+                                                   <padding>
+                                                      <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                                                   </padding>
+                                                </ToggleButton>
+                                                <ToggleButton alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetPassphraseTap" prefWidth="100.0" selected="true" text="Passphrase" toggleGroup="$settings">
+                                                   <VBox.margin>
+                                                      <Insets bottom="4.0" />
+                                                   </VBox.margin>
+                                                   <padding>
+                                                      <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                                                   </padding>
+                                                </ToggleButton>
+                                                <ToggleButton alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetExportTap" prefWidth="100.0" text="Import/Export" toggleGroup="$settings">
+                                                   <VBox.margin>
+                                                      <Insets bottom="4.0" />
+                                                   </VBox.margin>
+                                                   <padding>
+                                                      <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                                                   </padding>
+                                                </ToggleButton>
+                                                <ToggleButton alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onMouseClicked="#onSetDebugTap" prefWidth="100.0" text="Debug" toggleGroup="$settings">
+                                                   <VBox.margin>
+                                                      <Insets bottom="4.0" />
+                                                   </VBox.margin>
+                                                   <padding>
+                                                      <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                                                   </padding>
+                                                </ToggleButton>
+                                             </children>
+                                             <padding>
+                                                <Insets right="-1.0" />
+                                             </padding>
+                                          </VBox>
+                                       </left>
+                                    </BorderPane>
+                                 </children>
+                              </VBox>
+                              <HBox alignment="TOP_RIGHT" layoutY="627.0" style="-fx-border-color: #ccc8 transparent transparent transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <children>
+                                    <Label fx:id="lblBlockCount" text="Block Count: 1234" textFill="#ee7722">
+                                       <padding>
+                                          <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                                       </padding>
+                                    </Label>
+                                    <Label fx:id="lblConnection" alignment="CENTER_RIGHT" contentDisplay="RIGHT" text="Disconnected" textFill="RED">
+                                       <padding>
+                                          <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                                       </padding>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
                      </center>
                   </BorderPane>
                   <fx:include source="component/windowBorder.fxml" />

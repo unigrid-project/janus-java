@@ -40,6 +40,9 @@ import org.unigrid.janus.view.MainWindow;
 import javafx.scene.control.ListView;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 
 @ApplicationScoped
 public class Janus extends BaseApplication {
@@ -63,7 +66,10 @@ public class Janus extends BaseApplication {
 		try {
 			daemon.start();
 		} catch (Exception e) {
-			debug.log(String.format("ERROR: %s", e.getMessage()));
+			Alert a = new Alert(AlertType.ERROR,
+				  				e.getMessage(),
+				  				ButtonType.OK);
+			a.showAndWait();
 		}
 		debug.log("Daemon start done.");
 	}
@@ -106,7 +112,10 @@ public class Janus extends BaseApplication {
 			// poll info call every 30 seconds
 			rpc.pollForInfo(30 * 1000);
 		} catch (Exception e) {
-			debug.log(String.format("ERROR: %s", e.getMessage()));
+			Alert a = new Alert(AlertType.ERROR,
+				  				e.getMessage(),
+				  				ButtonType.OK);
+			a.showAndWait();
 		}
 	}
 }

@@ -24,6 +24,8 @@ public class Wallet {
 	public static final String BALANCE_PROPERTY = "balance";
 	public static final String TOTALBALANCE_PROPERTY = "totalbalance";
 	public static final String MONEYSUPPLY_PROPERTY = "moneysupply";
+	public static final String BLOCKS_PROPERTY = "blocks";
+	public static final String CONNECTIONS_PROPERTY = "connections";
 	private static  PropertyChangeSupport pcs;
 
 	public Wallet() {
@@ -93,6 +95,31 @@ public class Wallet {
 		this.pcs.firePropertyChange("blacklisted", oldValue, newValue);
 	}
 
+	// blocks property
+	private static int blocks;
+
+	public int getBlocks() {
+		return this.blocks;
+	}
+
+	public void setBlocks(int newValue) {
+		int oldValue = this.blocks;
+		this.blocks = newValue;
+		this.pcs.firePropertyChange(this.BLOCKS_PROPERTY, oldValue, newValue);
+	}
+
+	private static int connections;
+
+	public int getConnections() {
+		return this.connections;
+	}
+
+	public void setConnections(int newValue) {
+		int oldValue = this.connections;
+		this.connections = newValue;
+		this.pcs.firePropertyChange(this.CONNECTIONS_PROPERTY, oldValue, newValue);
+	}
+
 	// version property
 	private static int version;
 
@@ -123,6 +150,8 @@ public class Wallet {
 		this.setBalance(newInfo.getResult().getBalance());
 		this.setTotalBalance(newInfo.getResult().getTotalbalance());
 		this.setMoneysupply(newInfo.getResult().getMoneysupply());
+		this.setBlocks(newInfo.getResult().getBlocks());
+		this.setConnections(newInfo.getResult().getConnections());
 	}
 
 }
