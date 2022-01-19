@@ -24,13 +24,13 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.stage.Stage?>
 
-<Stage minHeight="400.0" minWidth="600.0" onShown="#onShown" title="Unigrid Janus Wallet" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.MainWindowController">
+<Stage onShown="#onShown" title="Unigrid Janus Wallet" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.MainWindowController">
    <scene>
       <Scene fill="#000024" stylesheets="@main.css">
          <root>
-            <StackPane minHeight="400.0" minWidth="600.0">
+            <StackPane minHeight="0.0" minWidth="0.0">
                <children>
-                  <BorderPane pickOnBounds="false" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
+                  <BorderPane pickOnBounds="false" prefHeight="300.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
                      <top>
                         <fx:include source="component/windowBar.fxml" />
                      </top>
@@ -244,16 +244,9 @@
                                  </children>
                               </VBox>
                               <VBox fx:id="pnlTransactions" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="24.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <children>
-                                    <TableView fx:id="tblTransactions" VBox.vgrow="ALWAYS">
-                                      <columns>
-                                        <TableColumn fx:id="colTransDate" prefWidth="130.0" sortType="DESCENDING" text="Date" />
-                                          <TableColumn fx:id="colTransType" prefWidth="85.0" text="Type" />
-                                          <TableColumn fx:id="colTransAmount" prefWidth="75.0" text="Amount" />
-                                        <TableColumn fx:id="colTransAddress" prefWidth="170.0" text="Address" />
-                                      </columns>
-                                    </TableView>
-                                 </children>
+                              	<children>
+                              		<fx:include source="transactions.fxml" VBox.vgrow="ALWAYS" />
+                              	</children>
                               </VBox>
                               <VBox fx:id="pnlNodes" visible="false" AnchorPane.bottomAnchor="24.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
@@ -318,7 +311,7 @@
                                                             </ImageView>
                                                          </children>
                                                       </AnchorPane>
-                                                      <TextArea prefHeight="40.0">
+                                                      <TextArea fx:id="taPassphrase" prefHeight="40.0">
                                                          <VBox.margin>
                                                             <Insets bottom="8.0" />
                                                          </VBox.margin>
@@ -328,7 +321,7 @@
                                                             <Font size="14.0" />
                                                          </font>
                                                       </Label>
-                                                      <TextArea prefHeight="40.0">
+                                                      <TextArea fx:id="taRepeatPassphrase" onKeyTyped="#onRepeatPassphraseChange" prefHeight="40.0">
                                                          <VBox.margin>
                                                             <Insets bottom="8.0" />
                                                          </VBox.margin>
@@ -338,7 +331,7 @@
                                                             <Insets top="8.0" />
                                                          </VBox.margin>
                                                          <children>
-                                                            <Button mnemonicParsing="false" onMouseClicked="#onLock" text="Update">
+                                                            <Button fx:id="btnUpdatePassphrase" disable="true" mnemonicParsing="false" onMouseClicked="#onLock" text="Update">
                                                                <HBox.margin>
                                                                   <Insets right="8.0" />
                                                                </HBox.margin>
