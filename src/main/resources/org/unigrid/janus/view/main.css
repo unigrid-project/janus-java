@@ -130,7 +130,23 @@
 	-fx-text-fill: white;
 }
 
-.text-area .content{
+.text-area .content {
 	-fx-background-color: #336a;
 	-fx-text-fill: white;
+}
+
+.dialog-pane {
+    -fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);
+}
+
+.dialog-pane .label {
+    -fx-text-fill: #e72;
+}
+
+.dialog-pane:header .header-panel {
+    -fx-background-color: transparent;
+}
+
+.dialog-pane:header .header-panel .label {
+	-fx-text-fill: #ccccff;
 }
