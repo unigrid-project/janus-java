@@ -341,6 +341,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				}
 			});
 
+			dialog.getDialogPane().getStylesheets().add("/org/unigrid/janus/view/main.css");
+
 			Optional<Passphrase> result = dialog.showAndWait();
 
 			if (result.isPresent()) {
@@ -359,13 +361,14 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		try {
 			Dialog<ButtonType> dialog = new Dialog<ButtonType>();
 			dialog.setTitle("Confirmation");
-			dialog.setContentText("Be sure that you have saved the passphrase.\n"
+			dialog.setHeaderText("Be sure that you have saved the passphrase.\n"
 								  + "Are you sure you're ready to lock your wallet now?\n"
 				 				  + "This cannot be undone without your passphrase.");
 			ButtonType btnYes = new ButtonType("Yes", ButtonData.YES);
 			ButtonType btnNo = new ButtonType("No", ButtonData.NO);
 			dialog.getDialogPane().getButtonTypes().add(btnYes);
 			dialog.getDialogPane().getButtonTypes().add(btnNo);
+			dialog.getDialogPane().getStylesheets().add("/org/unigrid/janus/view/main.css");
 			Optional<ButtonType> response = dialog.showAndWait();
 			debug.log(String.format("Response: %s", response.get()));
 			if (response.isPresent()) {
