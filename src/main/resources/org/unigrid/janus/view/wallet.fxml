@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="360.0" prefWidth="500.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.WalletController">
+   <children>
+      <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <AnchorPane>
+               <children>
+                  <FlowPane fx:id="pnlBalance" alignment="TOP_CENTER" columnHalignment="CENTER" rowValignment="TOP" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Pane styleClass="h-centered">
+                           <children>
+                              <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="160.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true" scaleX="0.5" scaleY="0.5" translateX="-37.5" translateY="-37.5">
+                                 <image>
+                                    <Image url="@images/unigrid-round_77x77.png" />
+                                 </image>
+                              </ImageView>
+                              <Button layoutX="70.0" layoutY="160.0" mnemonicParsing="false" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2;" text="Send">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="3.0" top="3.0" />
+                                 </padding>
+                              </Button>
+                              <Button layoutX="210.0" layoutY="160.0" mnemonicParsing="false" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2;" text="Receive">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="3.0" top="3.0" />
+                                 </padding>
+                              </Button>
+                              <FlowPane alignment="CENTER" layoutY="90.0">
+                                 <children>
+                                    <HBox alignment="BOTTOM_LEFT">
+                                       <children>
+                                          <Label fx:id="lblBalance" alignment="CENTER" style="-fx-text-fill: orange;" text="0" textAlignment="CENTER" textFill="#ee7722" textOverrun="CLIP" HBox.hgrow="ALWAYS">
+                                             <font>
+                                                <Font name="Arial" size="36.0" />
+                                             </font>
+                                          </Label>
+                                          <Label alignment="BOTTOM_RIGHT" contentDisplay="BOTTOM" text="UGD" textFill="#ffa033">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </FlowPane>
+                           </children>
+                           <padding>
+                              <Insets bottom="8.0" />
+                           </padding>
+                        </Pane>
+                     </children>
+                  </FlowPane>
+                  <FlowPane fx:id="pnlLocked" alignment="TOP_CENTER" columnHalignment="CENTER" prefHeight="200.0" rowValignment="TOP" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Pane prefHeight="200.0" prefWidth="150.0">
+                           <children>
+                              <ImageView fitHeight="150.0" fitWidth="150.0" layoutY="10.0" onMouseClicked="#onUnlock" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/lock.png" />
+                                 </image>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </ImageView>
+                              <Button layoutX="25.0" layoutY="166.0" mnemonicParsing="false" onMouseClicked="#onUnlock" prefWidth="100.0" text="Unlock" />
+                           </children>
+                        </Pane>
+                     </children>
+                  </FlowPane>
+               </children>
+            </AnchorPane>
+            <AnchorPane>
+               <children>
+                  <TableView fx:id="tblWalletTrans" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                     <columns>
+                        <TableColumn fx:id="colWalletTransDate" minWidth="100.0" prefWidth="130.0" sortType="DESCENDING" text="Date" />
+                        <TableColumn fx:id="colWalletTransType" prefWidth="75.0" text="Type" />
+                        <TableColumn fx:id="colWalletTransAmount" prefWidth="75.0" text="Amount" />
+                        <TableColumn fx:id="colWalletTransAddress" prefWidth="170.0" text="Address" />
+                     </columns>
+                  </TableView>
+                  <Label alignment="TOP_CENTER" layoutX="216.0" layoutY="6.0" text="Recent Transactions" textAlignment="CENTER" textFill="#aaaadd" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="3.0">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
