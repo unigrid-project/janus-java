@@ -20,11 +20,14 @@ import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.Wallet;
 import java.util.TimerTask;
 import javafx.application.Platform;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 
 public class PollingTask extends TimerTask {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
+	private static Jsonb jsonb = JsonbBuilder.create();
 
 	public PollingTask() {
 		debug.log("Polling task created!");
@@ -34,6 +37,8 @@ public class PollingTask extends TimerTask {
 		Platform.runLater(() -> {
 			debug.log(rpc.callToJson(new Info.Request()));
 			final Info info = rpc.call(new Info.Request(), Info.class);
+			String sInfo = jsonb.toJson(info);
+			debug.log(sInfo);
 			wallet.setInfo(info);
 		});
 	}

@@ -26,6 +26,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.AnchorPane;
 import javafx.application.Platform;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
@@ -50,6 +51,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	/* Injected fx:id from FXML */
 	@FXML private Label lblBlockCount;
 	@FXML private Label lblConnection;
+	@FXML private AnchorPane pnlMain;
+	@FXML private AnchorPane pnlSplash;
 	// main navigation
 	@FXML private ToggleButton btnWallet;
 	@FXML private ToggleButton btnTransactions;
@@ -185,6 +188,14 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			boolean locked = (boolean) event.getNewValue();
 			if (locked) {
 				tabSelect(TAB_WALLET);
+			}
+		}
+		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
+			String status = (String) event.getNewValue();
+			if (status.equals("Done loading")) {
+				pnlSplash.setVisible(false);
+			} else {
+				pnlSplash.setVisible(true);
 			}
 		}
 	}
