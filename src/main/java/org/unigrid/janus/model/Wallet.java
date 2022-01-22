@@ -27,6 +27,7 @@ public class Wallet {
 	public static final String BLOCKS_PROPERTY = "blocks";
 	public static final String CONNECTIONS_PROPERTY = "connections";
 	public static final String LOCKED_PROPERTY = "locked";
+	public static final String STATUS_PROPERTY = "walletstatus";
 	private static  PropertyChangeSupport pcs;
 
 	public Wallet() {
@@ -161,12 +162,26 @@ public class Wallet {
 		this.pcs.firePropertyChange(this.LOCKED_PROPERTY, oldValue, newValue);
 	}
 
+	// status property
+	private static String status;
+
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String newValue) {
+		String oldValue = this.status;
+		this.status = newValue;
+		this.pcs.firePropertyChange(this.STATUS_PROPERTY, oldValue, newValue);
+	}
+
 	public void setInfo(Info newInfo) {
 		this.setBalance(newInfo.getResult().getBalance());
 		this.setTotalBalance(newInfo.getResult().getTotalbalance());
 		this.setMoneysupply(newInfo.getResult().getMoneysupply());
 		this.setBlocks(newInfo.getResult().getBlocks());
 		this.setConnections(newInfo.getResult().getConnections());
+		this.setStatus(newInfo.getResult().getBootstrapping().getWalletstatus());
 	}
 
 }
