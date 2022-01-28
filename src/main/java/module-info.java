@@ -33,4 +33,5 @@ module org.unigrid.janus {
 	requires com.sun.jna.platform;
 	requires com.sun.jna;
 	requires jersey.client;
+	requires org.kordamp.ikonli.javafx;
 }

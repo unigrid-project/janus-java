@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.controller.component;
 
@@ -36,6 +36,7 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
 	private Decorator movableWindowDecorator;
@@ -44,6 +45,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	private static Wallet wallet = new Wallet();
 	private static DebugService debug = new DebugService();
 	private static WindowService window = new WindowService();
+	@FXML private FontIcon spinnerIcn;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -57,6 +59,14 @@ public class WindowBarController implements Decoratable, Initializable, Property
 			Label supply = (Label) window.lookup("txtSupply");
 			if (supply != null) {
 				supply.setText(String.format("%.8f", (double) event.getNewValue()));
+			}
+		}
+		if (event.getPropertyName().equals(wallet.PROCESSING_PROPERTY)) {
+			//spinnerIcn.setVisible(wallet.getProcessingStatus());
+			if (wallet.getProcessingStatus()) {
+				String status = String.format("processing status %s",
+					(boolean) wallet.getProcessingStatus());
+				debug.log(status);
 			}
 		}
 	}
