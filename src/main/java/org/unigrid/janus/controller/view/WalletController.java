@@ -12,36 +12,22 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.controller.view;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.Optional;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.paint.Color;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.CornerRadii;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 import javafx.application.Platform;
@@ -50,15 +36,16 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.scene.layout.BorderPane;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
-import org.unigrid.janus.model.Passphrase;
 import org.unigrid.janus.model.Wallet;
 
 public class WalletController implements Initializable, PropertyChangeListener {
+
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
@@ -66,15 +53,23 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 
 	/* Injected fx:id from FXML */
-	@FXML private Label lblBalance;
-	@FXML private FlowPane pnlBalance;
-	@FXML private FlowPane pnlLocked;
+	@FXML
+	private Label lblBalance;
+	@FXML
+	private FlowPane pnlBalance;
 	// wallet table
-	@FXML private TableView tblWalletTrans;
-	@FXML private TableColumn colWalletTransDate;
-	@FXML private TableColumn colWalletTransType;
-	@FXML private TableColumn colWalletTransAddress;
-	@FXML private TableColumn colWalletTransAmount;
+	@FXML
+	private TableView tblWalletTrans;
+	@FXML
+	private TableColumn colWalletTransDate;
+	@FXML
+	private TableColumn colWalletTransType;
+	@FXML
+	private TableColumn colWalletTransAddress;
+	@FXML
+	private TableColumn colWalletTransAmount;
+	@FXML
+	private BorderPane pnlUnlock;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -82,6 +77,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		debug.log("Initializing wallet transactions");
 		wallet.addPropertyChangeListener(this);
 		setupWalletTransactions();
+		//setupLockScreen();
 		Platform.runLater(() -> {
 			try {
 				debug.log("Loading wallet transactions");
@@ -90,6 +86,10 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				debug.log(String.format("ERROR: (wallet trans init) %s", e.getMessage()));
 			}
 		});
+	}
+
+	private void setupLockScreen() {
+		pnlUnlock.setVisible(false);
 	}
 
 	private void setupWalletTransactions() {
@@ -103,7 +103,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
 						return new ReadOnlyStringWrapper(sdf.format(date));
 						// return new ReadOnlyStringWrapper("n/a");
 					}
-				});
+				}
+			);
 			colWalletTransType.setCellValueFactory(
 				new PropertyValueFactory<Transaction, String>("category"));
 			colWalletTransAddress.setCellValueFactory(
@@ -117,7 +118,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	private void loadWalletPreviewTrans() {
 		ListTransactions transactions = rpc.call(new ListTransactions.Request(0, 10),
-			                                     ListTransactions.class);
+			ListTransactions.class);
 		ObservableList<Transaction> walletTransactions = FXCollections.observableArrayList();
 
 		for (Transaction t : transactions.getResult()) {
@@ -125,76 +126,6 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		}
 
 		tblWalletTrans.setItems(walletTransactions);
-	}
-
-	@FXML
-	private void onUnlock(MouseEvent event) {
-		debug.log("Unlock clicked!");
-		try {
-			Dialog<Passphrase> dialog = new Dialog<>();
-			dialog.setTitle("Unlock Wallet");
-			dialog.setHeaderText("Enter your pass phrase to unlock the wallet.\n"
-				                 + "This will be the same as you used to lock it.");
-			Label label1 = new Label("Passphrase:");
-			Label label2 = new Label("Repeat Passphrase:");
-			TextArea phrase = new TextArea();
-			TextArea repeat = new TextArea();
-			phrase.setPrefHeight(40);
-			repeat.setPrefHeight(40);
-
-			GridPane grid = new GridPane();
-			grid.add(label1, 1, 1);
-			grid.add(phrase, 1, 2);
-			grid.add(label2, 1, 3);
-			grid.add(repeat, 1, 4);
-			dialog.getDialogPane().setContent(grid);
-
-			ButtonType buttonTypeOk = new ButtonType("Unlock", ButtonData.OK_DONE);
-			dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
-			dialog.getDialogPane().lookupButton(buttonTypeOk).setDisable(true);
-
-			repeat.setOnKeyTyped((KeyEvent evt) -> {
-				String sPhrase = phrase.getText();
-				String sRepeat = repeat.getText();
-				if (sPhrase.equals(sRepeat)) {
-					repeat.setBorder(new Border(
-						new BorderStroke(Color.web("#1dab00"),
-							BorderStrokeStyle.SOLID,
-							new CornerRadii(3),
-							new BorderWidths(1))));
-					dialog.getDialogPane().lookupButton(buttonTypeOk).setDisable(false);
-				} else {
-					repeat.setBorder(new Border(
-						new BorderStroke(Color.RED,
-							BorderStrokeStyle.SOLID,
-							new CornerRadii(3),
-							new BorderWidths(1))));
-					dialog.getDialogPane().lookupButton(buttonTypeOk).setDisable(true);
-				}
-			});
-
-			dialog.setResultConverter(new Callback<ButtonType, Passphrase>() {
-				@Override
-				public Passphrase call(ButtonType b) {
-					if (b == buttonTypeOk) {
-						return new Passphrase(phrase.getText(), repeat.getText());
-					}
-
-					return null;
-				}
-			});
-
-			dialog.getDialogPane().getStylesheets().add("/org/unigrid/janus/view/main.css");
-
-			Optional<Passphrase> result = dialog.showAndWait();
-
-			if (result.isPresent()) {
-				debug.log(String.format("Unlock dialog result: %s", result.get()));
-				wallet.setLocked(false);
-			}
-		} catch (Exception e) {
-			debug.log(String.format("ERROR: (passphrase unlock) %s", e.getMessage()));
-		}
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -206,9 +137,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		}
 		if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
 			boolean locked = (boolean) event.getNewValue();
-			debug.log(String.format("Lock changed: %b", locked));
-			pnlLocked.setVisible(locked);
-			pnlBalance.setVisible(!locked);
+			// can determine from this if a send transaction needs a passphrase
 		}
 	}
 
