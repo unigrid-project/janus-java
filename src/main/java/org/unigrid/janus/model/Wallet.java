@@ -12,22 +12,47 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model;
 
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
+import java.util.Calendar;
+import java.util.Date;
+import lombok.Getter;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.rpc.entity.StakingStatus;
+import org.unigrid.janus.model.service.DebugService;
 
 public class Wallet {
+
 	public static final String BALANCE_PROPERTY = "balance";
 	public static final String TOTALBALANCE_PROPERTY = "totalbalance";
 	public static final String MONEYSUPPLY_PROPERTY = "moneysupply";
 	public static final String BLOCKS_PROPERTY = "blocks";
 	public static final String CONNECTIONS_PROPERTY = "connections";
 	public static final String LOCKED_PROPERTY = "locked";
-	private static  PropertyChangeSupport pcs;
+	public static final String STAKING_PROPERTY = "staking";
+	public static final String PROCESSING_PROPERTY = "processing";
+	private static PropertyChangeSupport pcs;
+	private static double balance;
+	private static double totalbalance;
+	private static double moneysupply;
+	private static double blacklisted;
+	private static int blocks;
+	private static int connections;
+	private static int version;
+	private static int walletVersion;
+	private static Boolean locked;
+	private static Boolean isStaking;
+	private static Boolean processingStatus = false;
+	@Getter
+	private static long stakingStartTime = 45126460800000L;
+
+	@Inject
+	private static DebugService debug = new DebugService();
 
 	public Wallet() {
 		if (this.pcs != null) {
@@ -44,9 +69,6 @@ public class Wallet {
 		this.pcs.removePropertyChangeListener(listener);
 	}
 
-	// balance property
-	private static double balance;
-
 	public double getBalance() {
 		return this.balance;
 	}
@@ -56,9 +78,6 @@ public class Wallet {
 		this.balance = newValue;
 		this.pcs.firePropertyChange(this.BALANCE_PROPERTY, oldValue, newValue);
 	}
-
-	// totalbalance property
-	private static double totalbalance;
 
 	public double getTotalBalance() {
 		return this.totalbalance;
@@ -70,9 +89,6 @@ public class Wallet {
 		this.pcs.firePropertyChange(this.TOTALBALANCE_PROPERTY, oldValue, newValue);
 	}
 
-	// moneysupply property
-	private static double moneysupply;
-
 	public double getMoneysupply() {
 		return this.moneysupply;
 	}
@@ -82,9 +98,6 @@ public class Wallet {
 		this.moneysupply = newValue;
 		this.pcs.firePropertyChange(this.MONEYSUPPLY_PROPERTY, oldValue, newValue);
 	}
-
-	// blacklisted property
-	private static double blacklisted;
 
 	public double getBlacklisted() {
 		return this.blacklisted;
@@ -96,9 +109,6 @@ public class Wallet {
 		this.pcs.firePropertyChange("blacklisted", oldValue, newValue);
 	}
 
-	// blocks property
-	private static int blocks;
-
 	public int getBlocks() {
 		return this.blocks;
 	}
@@ -108,9 +118,6 @@ public class Wallet {
 		this.blocks = newValue;
 		this.pcs.firePropertyChange(this.BLOCKS_PROPERTY, oldValue, newValue);
 	}
-
-	// connections property
-	private static int connections;
 
 	public int getConnections() {
 		return this.connections;
@@ -122,9 +129,6 @@ public class Wallet {
 		this.pcs.firePropertyChange(this.CONNECTIONS_PROPERTY, oldValue, newValue);
 	}
 
-	// version property
-	private static int version;
-
 	public double getVersion() {
 		return this.version;
 	}
@@ -134,9 +138,6 @@ public class Wallet {
 		this.version = newValue;
 		this.pcs.firePropertyChange("version", oldValue, newValue);
 	}
-
-	// walletVersion property
-	private static int walletVersion;
 
 	public double getWalletVersion() {
 		return this.walletVersion;
@@ -148,17 +149,31 @@ public class Wallet {
 		this.pcs.firePropertyChange("walletVersion", oldValue, newValue);
 	}
 
-	// locked property
-	private static boolean locked;
+	public Boolean getLocked() {
 
-	public boolean getLocked() {
 		return this.locked;
 	}
 
-	public void setLocked(boolean newValue) {
-		boolean oldValue = this.locked;
+	public void setLocked(Boolean newValue) {
+		Boolean oldValue = this.locked;
 		this.locked = newValue;
 		this.pcs.firePropertyChange(this.LOCKED_PROPERTY, oldValue, newValue);
+	}
+
+	public Boolean getStakingStatus() {
+		return this.isStaking;
+	}
+
+	public void setIsStaking(Boolean newValue) {
+		Boolean oldValue = this.isStaking;
+		this.isStaking = newValue;
+		this.pcs.firePropertyChange(this.STAKING_PROPERTY, oldValue, newValue);
+	}
+
+	public void setStakingStatus(StakingStatus staking) {
+		this.setIsStaking(staking.getResult().getStakingStatus());
+		String unlocked = String.format("Locked Status: %s", this.getLocked());
+		debug.log(unlocked);
 	}
 
 	public void setInfo(Info newInfo) {
@@ -167,6 +182,42 @@ public class Wallet {
 		this.setMoneysupply(newInfo.getResult().getMoneysupply());
 		this.setBlocks(newInfo.getResult().getBlocks());
 		this.setConnections(newInfo.getResult().getConnections());
+		//disable processing indicator
+		this.setProcessingStatus();
+		long timestamp = newInfo.getResult().getUnlockUntil();
+		long time = timestamp;
+		Date date = new Date(time);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.get(Calendar.YEAR);
+		int yearFromDaemon = calendar.get(Calendar.YEAR);
+		debug.log(String.format("Year from daemon: %s", (int) calendar.get(Calendar.YEAR)));
+		Date date2 = new Date(stakingStartTime);
+		calendar.setTime(date2);
+		calendar.get(Calendar.YEAR);
+		int yeahFromGui = calendar.get(Calendar.YEAR);
+		debug.log(String.format("Year from GUI: %s", (int) calendar.get(Calendar.YEAR)));
+
+		if (yearFromDaemon >= yeahFromGui) {
+			this.setLocked(true);
+			debug.log(String.format("Wallet Unlocked for staking only"));
+		} else if (timestamp > 0) {
+			this.setLocked(false);
+		} else if (timestamp == 0) {
+			this.setLocked(true);
+		}
+		//String unlock = String.format("Unlock Until: %s", newInfo.getResult().getUnlockUntil());
+		//debug.log(unlock);
+	}
+
+	public Boolean getProcessingStatus() {
+		return this.processingStatus;
+	}
+
+	public void setProcessingStatus() {
+		Boolean oldValue = this.processingStatus;
+		this.processingStatus ^= true;
+		this.pcs.firePropertyChange(this.PROCESSING_PROPERTY, oldValue, this.getProcessingStatus());
 	}
 
 }
