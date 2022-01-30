@@ -231,7 +231,7 @@
                               </VBox>
                               <VBox fx:id="pnlSettings" alignment="CENTER" styleClass="settings" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                               	<children>
-                              		<fx:include source="settings.fxml" />
+                              		<fx:include source="settings.fxml" VBox.vgrow="ALWAYS" />
                               	</children>
                               </VBox>
                            </children>

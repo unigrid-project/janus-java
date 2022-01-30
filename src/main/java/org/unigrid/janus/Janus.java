@@ -23,13 +23,12 @@ import jakarta.inject.Inject;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
+import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.rpc.entity.Balance;
 import org.unigrid.janus.model.rpc.entity.BlockCount;
 import org.unigrid.janus.model.rpc.entity.ConnectionCount;
-import org.unigrid.janus.model.rpc.entity.DataDirectory;
 import org.unigrid.janus.model.rpc.entity.Info;
-import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.ListAddressGroupings;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.WalletInfo;
@@ -103,17 +102,15 @@ public class Janus extends BaseApplication {
 
 			debug.log(rpc.callToJson(new ConnectionCount.Request()));
 
-			debug.log(rpc.callToJson(new DataDirectory.Request()));
-
-			debug.log(rpc.callToJson(new ListTransactions.Request(0, 10)));
-
 			debug.log(rpc.callToJson(new ListAddressGroupings.Request()));
 
 			debug.log(rpc.callToJson(new StakingStatus.Request()));
 
 			debug.log(rpc.callToJson(new WalletInfo.Request()));
-
+\
 			debug.log(rpc.callToJson(new UnlockWallet.Request(new Object[] {"fail", 0, true})));
+
+			debug.log(String.format("Data keys: %s", DataDirectory.getConfigKeys()));
 
 			// poll info call every 30 seconds
 			rpc.pollForInfo(30 * 1000);

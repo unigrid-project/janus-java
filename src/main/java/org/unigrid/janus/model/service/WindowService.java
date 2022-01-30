@@ -19,6 +19,7 @@ package org.unigrid.janus.model.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import javafx.stage.Stage;
 import javafx.scene.Node;
+import org.unigrid.janus.controller.component.WindowBarController;
 
 @ApplicationScoped
 public class WindowService {
@@ -38,5 +39,15 @@ public class WindowService {
 		} else {
 			return null;
 		}
+	}
+
+	private static WindowBarController wbController;
+
+	public WindowBarController getWindowBarController() {
+		return this.wbController;
+	}
+
+	public void setWindowBarController(WindowBarController controller) {
+		this.wbController = controller;
 	}
 }

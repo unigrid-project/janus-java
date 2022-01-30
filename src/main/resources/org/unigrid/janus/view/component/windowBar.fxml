@@ -11,7 +11,7 @@
    <children>
       <HBox fx:id="handle" onMouseEntered="#onDecorateMove" HBox.hgrow="ALWAYS">
          <children>
-            <Label fx:id="txtSupply" text="SUPPLY" textFill="WHITE">
+            <Label fx:id="txtSupply" text="DECENTRALIZE" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
