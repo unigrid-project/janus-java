@@ -107,7 +107,7 @@ public class Janus extends BaseApplication {
 			debug.log(rpc.callToJson(new StakingStatus.Request()));
 
 			debug.log(rpc.callToJson(new WalletInfo.Request()));
-\
+
 			debug.log(rpc.callToJson(new UnlockWallet.Request(new Object[] {"fail", 0, true})));
 
 			debug.log(String.format("Data keys: %s", DataDirectory.getConfigKeys()));
