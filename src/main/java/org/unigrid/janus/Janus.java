@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus;
 
@@ -43,9 +43,11 @@ import jakarta.json.bind.JsonbBuilder;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 
 @ApplicationScoped
 public class Janus extends BaseApplication {
+
 	@Inject
 	private Daemon daemon;
 
@@ -61,20 +63,22 @@ public class Janus extends BaseApplication {
 	@Inject
 	private MainWindow mainWindow;
 
-	@PostConstruct @SneakyThrows
+	@PostConstruct
+	@SneakyThrows
 	private void init() {
 		try {
 			daemon.start();
 		} catch (Exception e) {
 			Alert a = new Alert(AlertType.ERROR,
-				  				e.getMessage(),
-				  				ButtonType.OK);
+				e.getMessage(),
+				ButtonType.OK);
 			a.showAndWait();
 		}
 		debug.log("Daemon start done.");
 	}
 
-	@PreDestroy @SneakyThrows
+	@PreDestroy
+	@SneakyThrows
 	private void destroy() {
 		daemon.stop();
 	}
@@ -109,12 +113,14 @@ public class Janus extends BaseApplication {
 
 			debug.log(rpc.callToJson(new WalletInfo.Request()));
 
+			debug.log(rpc.callToJson(new UnlockWallet.Request(new Object[] {"fail", 0, true})));
+
 			// poll info call every 30 seconds
 			rpc.pollForInfo(30 * 1000);
 		} catch (Exception e) {
 			Alert a = new Alert(AlertType.ERROR,
-				  				e.getMessage(),
-				  				ButtonType.OK);
+				e.getMessage(),
+				ButtonType.OK);
 			a.showAndWait();
 		}
 	}

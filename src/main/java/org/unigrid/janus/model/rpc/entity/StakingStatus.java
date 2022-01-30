@@ -12,21 +12,34 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model.rpc.entity;
 
+import jakarta.json.bind.annotation.JsonbProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class StakingStatus extends BaseResult<String> {
+public class StakingStatus extends BaseResult<StakingStatus.Result> {
+
 	private static final String METHOD = "getstakingstatus";
 
 	public static class Request extends BaseRequest {
+
 		public Request() {
 			super(METHOD);
 		}
+	}
+
+	@Data
+	public static class Result {
+
+		@JsonbProperty("walletunlocked")
+		private Boolean walletUnlocked;
+
+		@JsonbProperty("staking status")
+		private Boolean stakingStatus;
 	}
 }

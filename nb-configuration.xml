@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-shared-configuration>
-	<libraries xmlns="http://www.netbeans.org/ns/cdnjs-libraries/1"/>
-	<properties xmlns="http://www.netbeans.org/ns/maven-properties-data/1">
-		<netbeans.compile.on.save>all</netbeans.compile.on.save>
-		<netbeans.hint.jdkPlatform>JDK_15</netbeans.hint.jdkPlatform>
-	</properties>
+    <libraries xmlns="http://www.netbeans.org/ns/cdnjs-libraries/1"/>
+    <properties xmlns="http://www.netbeans.org/ns/maven-properties-data/1">
+        <netbeans.compile.on.save>all</netbeans.compile.on.save>
+        <netbeans.hint.jdkPlatform>JDK_15</netbeans.hint.jdkPlatform>
+    </properties>
 </project-shared-configuration>

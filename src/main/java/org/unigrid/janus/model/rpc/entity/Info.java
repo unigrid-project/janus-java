@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model.rpc.entity;
 
@@ -23,9 +23,11 @@ import jakarta.json.bind.annotation.JsonbProperty;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Info extends BaseResult<Info.Result> {
+
 	private static final String METHOD = "getinfo";
 
 	public static class Request extends BaseRequest {
+
 		public Request() {
 			super(METHOD);
 		}
@@ -33,6 +35,7 @@ public class Info extends BaseResult<Info.Result> {
 
 	@Data
 	public static class Result {
+
 		@JsonbProperty("version")
 		private int version;
 		@JsonbProperty("walletversion")
@@ -43,7 +46,8 @@ public class Info extends BaseResult<Info.Result> {
 		private float totalbalance;
 		@JsonbProperty("balance")
 		private float balance;
-
+		@JsonbProperty("unlocked_until")
+		private long unlockUntil;
 		// unpacked from nested bootstrapping
 		@JsonbProperty("moneysupply")
 		private double moneysupply;

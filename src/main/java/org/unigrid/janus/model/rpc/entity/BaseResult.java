@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model.rpc.entity;
 
@@ -21,10 +21,16 @@ import lombok.Data;
 @Data
 public class BaseResult<T> {
 	private T result;
-	private String error;
+	private ErrorResult error;
 	private String id;
 
 	protected BaseResult() {
 		/* Can only be instantiated during inheritance */
+	}
+
+	@Data
+	public static class ErrorResult {
+		private int code;
+		private String message;
 	}
 }
