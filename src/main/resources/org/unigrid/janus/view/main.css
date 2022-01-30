@@ -150,3 +150,16 @@
 .dialog-pane:header .header-panel .label {
 	-fx-text-fill: #ccccff;
 }
+
+.progress-indicator {
+	-fx-progress-color: #e72;
+}
+
+.progress-indicator .indicator {
+	-fx-border-color: #e72;
+	-fx-background-color: transparent;
+}
+
+.progress-indicator .percentage {
+	-fx-fill: #ee7722;
+}

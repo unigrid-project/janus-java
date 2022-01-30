@@ -36,7 +36,6 @@ public class Wallet {
 	public static final String LOCKED_PROPERTY = "locked";
 	public static final String STAKING_PROPERTY = "staking";
 	public static final String PROCESSING_PROPERTY = "processing";
-	private static PropertyChangeSupport pcs;
 	private static double balance;
 	private static double totalbalance;
 	private static double moneysupply;
@@ -48,11 +47,14 @@ public class Wallet {
 	private static Boolean locked;
 	private static Boolean isStaking;
 	private static Boolean processingStatus = false;
+	private static String status;
 	@Getter
 	private static long stakingStartTime = 45126460800000L;
 
 	@Inject
 	private static DebugService debug = new DebugService();
+	public static final String STATUS_PROPERTY = "walletstatus";
+	private static PropertyChangeSupport pcs;
 
 	public Wallet() {
 		if (this.pcs != null) {
@@ -176,6 +178,16 @@ public class Wallet {
 		debug.log(unlocked);
 	}
 
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String newValue) {
+		String oldValue = this.status;
+		this.status = newValue;
+		this.pcs.firePropertyChange(this.STATUS_PROPERTY, oldValue, newValue);
+	}
+
 	public void setInfo(Info newInfo) {
 		this.setBalance(newInfo.getResult().getBalance());
 		this.setTotalBalance(newInfo.getResult().getTotalbalance());
@@ -185,6 +197,7 @@ public class Wallet {
 		//disable processing indicator
 		this.setProcessingStatus();
 		long timestamp = newInfo.getResult().getUnlockUntil();
+		this.setStatus(newInfo.getResult().getBootstrapping().getWalletstatus());
 		long time = timestamp;
 		Date date = new Date(time);
 		Calendar calendar = Calendar.getInstance();
@@ -208,6 +221,7 @@ public class Wallet {
 		}
 		//String unlock = String.format("Unlock Until: %s", newInfo.getResult().getUnlockUntil());
 		//debug.log(unlock);
+
 	}
 
 	public Boolean getProcessingStatus() {
