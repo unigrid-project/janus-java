@@ -51,6 +51,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
 		wallet.addPropertyChangeListener(this);
+		window.setWindowBarController(this);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {

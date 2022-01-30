@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="360.0" prefWidth="500.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.WalletController">
+<AnchorPane prefHeight="300.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.WalletController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>

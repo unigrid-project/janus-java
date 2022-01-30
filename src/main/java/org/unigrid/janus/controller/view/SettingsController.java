@@ -17,10 +17,13 @@
 package org.unigrid.janus.controller.view;
 
 import java.net.URL;
+import java.io.File;
 import java.util.ResourceBundle;
 import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -38,6 +41,8 @@ import javafx.scene.layout.CornerRadii;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.rpc.entity.DumpWallet;
+import org.unigrid.janus.model.rpc.entity.BackupWallet;
 import org.unigrid.janus.model.Wallet;
 
 public class SettingsController implements Initializable {
@@ -171,5 +176,40 @@ public class SettingsController implements Initializable {
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (passphrase change) %s", e.getMessage()));
 		}
+	}
+
+	@FXML
+	private void onImportWallet(MouseEvent event) {
+		debug.log("Import wallet clicked!");
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Import");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
+		fileChooser.setInitialFileName("wallet.txt");
+		File file = fileChooser.showOpenDialog(window.getStage());
+		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
+	}
+
+	@FXML
+	private void onDumpWallet(MouseEvent event) {
+		debug.log("Dump wallet clicked!");
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Export");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
+		fileChooser.setInitialFileName("wallet.txt");
+		File file = fileChooser.showSaveDialog(window.getStage());
+		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
+		debug.log(rpc.callToJson(new DumpWallet.Request(file.getAbsolutePath())));
+	}
+
+	@FXML
+	private void onBackupWallet(MouseEvent event) {
+		debug.log("Backup wallet clicked!");
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Backup");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.dat"));
+		fileChooser.setInitialFileName("wallet.dat");
+		File file = fileChooser.showSaveDialog(window.getStage());
+		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
+		debug.log(rpc.callToJson(new BackupWallet.Request(file.getAbsolutePath())));
 	}
 }

@@ -20,6 +20,7 @@ import com.sun.jna.platform.win32.KnownFolders;
 import com.sun.jna.platform.win32.Shell32Util;
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -65,6 +66,16 @@ public class DataDirectory {
 				.configure(parameters.properties().setFile(getConfigFile()));
 
 		return builder.getConfiguration();
+	}
+
+	public static String getConfigKeys() throws ConfigurationException {
+		Configuration config = getConfig();
+		Iterator<String> keys = config.getKeys();
+		String result = "";
+		while (keys.hasNext()) {
+			result = String.format("%s\n%s", result, keys.next());
+		}
+		return result;
 	}
 
 	public static File getConfigFile() {
