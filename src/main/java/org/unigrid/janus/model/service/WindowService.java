@@ -19,7 +19,11 @@ package org.unigrid.janus.model.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import javafx.stage.Stage;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import org.unigrid.janus.controller.component.WindowBarController;
+import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @ApplicationScoped
 public class WindowService {
@@ -49,5 +53,14 @@ public class WindowService {
 
 	public void setWindowBarController(WindowBarController controller) {
 		this.wbController = controller;
+	}
+
+	public void notifyIfError(BaseResult result) {
+		if (result.hasError()) {
+			Alert a = new Alert(AlertType.ERROR,
+				String.format("Daemon Error: %s", result.getError().getMessage()),
+				ButtonType.OK);
+			a.showAndWait();
+		}
 	}
 }

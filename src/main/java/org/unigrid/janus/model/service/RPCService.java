@@ -32,6 +32,7 @@ import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.User;
 import org.unigrid.janus.model.rpc.JsonConfiguration;
+import org.unigrid.janus.model.rpc.entity.BaseResult;
 import jakarta.ws.rs.core.Response;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -130,6 +131,11 @@ public class RPCService {
 				                   convertStreamToString(instream));
 		}
 		return result;
+	}
+
+	public String resultToJson(BaseResult result) {
+		Jsonb jsonb = JsonbBuilder.create();
+		return jsonb.toJson(result);
 	}
 
 	public <R> String alert(R request) {

@@ -198,7 +198,10 @@ public class SettingsController implements Initializable {
 		fileChooser.setInitialFileName("wallet.txt");
 		File file = fileChooser.showSaveDialog(window.getStage());
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
-		debug.log(rpc.callToJson(new DumpWallet.Request(file.getAbsolutePath())));
+		// debug.log(rpc.callToJson(new DumpWallet.Request(file.getAbsolutePath())));
+		final DumpWallet result = rpc.call(new DumpWallet.Request(file.getAbsolutePath()), DumpWallet.class);
+		window.notifyIfError(result);
+		debug.log(String.format("Dump wallet result: %s", rpc.resultToJson(result)));
 	}
 
 	@FXML
@@ -210,6 +213,9 @@ public class SettingsController implements Initializable {
 		fileChooser.setInitialFileName("wallet.dat");
 		File file = fileChooser.showSaveDialog(window.getStage());
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
-		debug.log(rpc.callToJson(new BackupWallet.Request(file.getAbsolutePath())));
+		// debug.log(rpc.callToJson(new BackupWallet.Request(file.getAbsolutePath())));
+		final BackupWallet result = rpc.call(new BackupWallet.Request(file.getAbsolutePath()), BackupWallet.class);
+		window.notifyIfError(result);
+		debug.log(String.format("Backup wallet result: %s", rpc.resultToJson(result)));
 	}
 }

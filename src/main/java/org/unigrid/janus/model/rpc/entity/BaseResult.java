@@ -33,4 +33,8 @@ public class BaseResult<T> {
 		private int code;
 		private String message;
 	}
+
+	public boolean hasError() {
+		return (error != null);
+	}
 }
