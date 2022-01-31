@@ -297,7 +297,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@FXML
 	private void onCoinsPressed(MouseEvent event) {
-		if (getStaking()) {
+		if (getStaking() || !getWalletLocked()) {
 			return;
 		}
 		setUnlockState(1);
