@@ -47,7 +47,7 @@ public class Info extends BaseResult<Info.Result> {
 		@JsonbProperty("balance")
 		private float balance;
 		@JsonbProperty("unlocked_until")
-		private long unlockUntil;
+		private long unlockUntil = 4999;
 		// unpacked from nested bootstrapping
 		@JsonbProperty("moneysupply")
 		private double moneysupply;

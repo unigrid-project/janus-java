@@ -22,6 +22,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Calendar;
 import java.util.Date;
 import lombok.Getter;
+import lombok.Setter;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.service.DebugService;
@@ -50,7 +51,8 @@ public class Wallet {
 	private static String status;
 	@Getter
 	private static long stakingStartTime = 45126460800000L;
-
+	@Getter @Setter
+	private Boolean encrypted;
 	@Inject
 	private static DebugService debug = new DebugService();
 	public static final String STATUS_PROPERTY = "walletstatus";
@@ -174,8 +176,8 @@ public class Wallet {
 
 	public void setStakingStatus(StakingStatus staking) {
 		this.setIsStaking(staking.getResult().getStakingStatus());
-		String unlocked = String.format("Locked Status: %s", this.getLocked());
-		debug.log(unlocked);
+		//String unlocked = String.format("Locked Status: %s", this.getLocked());
+		//debug.log(unlocked);
 	}
 
 	public String getStatus() {
@@ -197,6 +199,9 @@ public class Wallet {
 		//disable processing indicator
 		this.setProcessingStatus();
 		long timestamp = newInfo.getResult().getUnlockUntil();
+		setEncrypted(timestamp != 4999);
+		//debug.log(String.format("ENCRYPTED: %s", getEncrypted()));
+
 		this.setStatus(newInfo.getResult().getBootstrapping().getWalletstatus());
 		long time = timestamp;
 		Date date = new Date(time);
@@ -204,16 +209,16 @@ public class Wallet {
 		calendar.setTime(date);
 		calendar.get(Calendar.YEAR);
 		int yearFromDaemon = calendar.get(Calendar.YEAR);
-		debug.log(String.format("Year from daemon: %s", (int) calendar.get(Calendar.YEAR)));
+		//debug.log(String.format("Year from daemon: %s", (int) calendar.get(Calendar.YEAR)));
 		Date date2 = new Date(stakingStartTime);
 		calendar.setTime(date2);
 		calendar.get(Calendar.YEAR);
 		int yeahFromGui = calendar.get(Calendar.YEAR);
-		debug.log(String.format("Year from GUI: %s", (int) calendar.get(Calendar.YEAR)));
+		//debug.log(String.format("Year from GUI: %s", (int) calendar.get(Calendar.YEAR)));
 
 		if (yearFromDaemon >= yeahFromGui) {
 			this.setLocked(true);
-			debug.log(String.format("Wallet Unlocked for staking only"));
+			//debug.log(String.format("Wallet Unlocked for staking only"));
 		} else if (timestamp > 0) {
 			this.setLocked(false);
 		} else if (timestamp == 0) {
