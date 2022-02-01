@@ -16,8 +16,6 @@
 
 package org.unigrid.janus.controller.view;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -25,31 +23,22 @@ import javafx.fxml.Initializable;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.WindowEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.application.Platform;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.text.Text;
 import lombok.Getter;
 import lombok.Setter;
-// import javafx.beans.property.ReadOnlyObjectWrapper;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 // import org.unigrid.janus.model.rpc.entity.NewAddress;
 import org.unigrid.janus.model.Wallet;
-import org.unigrid.janus.model.rpc.entity.UnlockWallet;
-import org.kordamp.ikonli.javafx.FontIcon;
-import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.LockWallet;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public class MainWindowController implements Initializable, PropertyChangeListener {
 
@@ -63,8 +52,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private static final int TAB_NODES = 3;
 	private static final int TAB_SETTINGS = 4;
 	/* Injected fx:id from FXML */
-	@FXML private Label lblBlockCount;
-	@FXML private Label lblConnection;
+	// @FXML private Label lblBlockCount;
+	// @FXML private Label lblConnection;
 	@FXML private AnchorPane pnlMain;
 	@FXML private AnchorPane pnlSplash;
 	// main navigation
@@ -85,19 +74,9 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private VBox pnlSettings;
 	@FXML
-	private BorderPane pnlUnlock;
+	private AnchorPane pnlOverlay;
 	@FXML
 	private FontIcon lockBtn;
-	@FXML
-	private TextField passphraseInput;
-	@FXML
-	private Text errorTxt;
-	@FXML
-	private ImageView spinnerIcon;
-	@FXML
-	private Button submitBtn;
-	@FXML
-	private Text unlockCopy;
 	@FXML
 	private FontIcon satelliteIcn;
 	@FXML
@@ -120,8 +99,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
+		hideOverlay();
 		wallet.addPropertyChangeListener(this);
-		pnlUnlock.setVisible(false);
 		window.setMainWIndowController(this);
 	}
 
@@ -279,16 +258,21 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		}
 	}
 
+	public void showOverlay() {
+		pnlOverlay.setVisible(true);
+	}
+
+	public void hideOverlay() {
+		pnlOverlay.setVisible(false);
+	}
+
 	@FXML
 	private void onLockPressed(MouseEvent event) {
 		if (!getWalletLocked()) {
 			return;
 		}
-		pnlUnlock.setVisible(true);
-		submitBtn.setText("UNLOCK");
-		unlockCopy.setText("Unlock your wallet by entering your passphrase and "
-			+ "pressing the UNLOCK button.");
-		wallet.setUnlockState(2);
+		window.getOverlayController().startLockOverlay();
+		showOverlay();
 	}
 
 	@FXML
@@ -301,93 +285,17 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		if (getStaking() || !getWalletLocked()) {
 			return;
 		}
-		wallet.setUnlockState(1);
-		pnlUnlock.setVisible(true);
-		submitBtn.setText("STAKE");
-		unlockCopy.setText("Enable staking in your wallet by entering your passphrase and "
-			+ "pressing the STAKE button.");
+		window.getOverlayController().startStakingOverlay();
+		showOverlay();
 	}
 
 	public void unlockForTime() {
-		debug.log("UNLOCK FOR TIME");
-		wallet.setUnlockState(4);
-		pnlUnlock.setVisible(true);
-		submitBtn.setText("UNLOCK");
-		unlockCopy.setText("Please enter your passphrase in order to perform this task. "
-			+ "The wallet will automatically lock itself after 30 seconds.");
+		window.getOverlayController().startUnlockForTimeOverlay();
+		showOverlay();
 	}
 
 	public void unlockForSending() {
-		debug.log("UNLOCK FOR SENDING");
-		wallet.setUnlockState(3);
-		pnlUnlock.setVisible(true);
-		submitBtn.setText("SEND");
-		unlockCopy.setText("Please enter your passphrase to send Unigrid tokens. "
-			+ "If your wallet was staking you will need to enable again after the transaction completes.");
-	}
-
-	@FXML
-	private void onCancelLockPressed(MouseEvent event) {
-		closeUnlockScreen();
-	}
-
-	@FXML
-	private void onSubmitPassphrasePressed(MouseEvent event) {
-		submitBtn.setDisable(true);
-		Object[] sendArgs;
-		long stakingStartTime = wallet.getStakingStartTime();
-		switch (wallet.getUnlockState()) {
-			case 1:
-				sendArgs = new Object[]{passphraseInput.getText(), stakingStartTime, true};
-				break;
-			case 2:
-				sendArgs = new Object[]{passphraseInput.getText(), 0};
-				break;
-			case 3:
-			case 4:
-				// unlock for 30 seconds only
-				sendArgs = new Object[]{passphraseInput.getText(), 30};
-				break;
-			default:
-				throw new AssertionError();
-		}
-
-		if (passphraseInput.getText() == "") {
-			errorTxt.setText("Please enter a passphrase");
-			submitBtn.setDisable(false);
-		} else {
-			final UnlockWallet call = rpc.call(
-				new UnlockWallet.Request(sendArgs), UnlockWallet.class);
-			Jsonb jsonb = JsonbBuilder.create();
-			if (call.getError() != null) {
-				final Info info = rpc.call(new Info.Request(), Info.class);
-				wallet.setInfo(info);
-				String result = call.getError().getMessage();
-				if (result != null) {
-					submitBtn.setDisable(false);
-					debug.log(result);
-					errorTxt.setText(result);
-					passphraseInput.setText("");
-				}
-			} else {
-				errorTxt.setText("Wallet unlocked!");
-				passphraseInput.setText("");
-				if (wallet.getUnlockState() == 3) {
-					// send transaction
-					window.getWalletController().sendTransactionAfterUnlock();
-				}
-				closeUnlockScreen();
-			}
-		}
-	}
-
-	private void closeUnlockScreen() {
-		wallet.setUnlockState(0);
-		unlockCopy.setText("");
-		spinnerIcon.setVisible(false);
-		errorTxt.setText("");
-		passphraseInput.setText("");
-		pnlUnlock.setVisible(false);
-		submitBtn.setDisable(false);
+		window.getOverlayController().startUnlockForSendingOverlay();
+		showOverlay();
 	}
 }
