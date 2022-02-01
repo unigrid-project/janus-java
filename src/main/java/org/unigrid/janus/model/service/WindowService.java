@@ -23,11 +23,16 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import org.unigrid.janus.controller.component.WindowBarController;
+import org.unigrid.janus.controller.view.MainWindowController;
+import org.unigrid.janus.controller.view.WalletController;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @ApplicationScoped
 public class WindowService {
 	private static Stage stage;
+	private static WindowBarController wbController;
+	private static MainWindowController mwController;
+	private static WalletController wController;
 
 	public Stage getStage() {
 		return this.stage;
@@ -45,14 +50,28 @@ public class WindowService {
 		}
 	}
 
-	private static WindowBarController wbController;
-
 	public WindowBarController getWindowBarController() {
 		return this.wbController;
 	}
 
 	public void setWindowBarController(WindowBarController controller) {
 		this.wbController = controller;
+	}
+
+	public MainWindowController getMainWindowController() {
+		return this.mwController;
+	}
+
+	public void setMainWIndowController(MainWindowController controller) {
+		this.mwController = controller;
+	}
+
+	public WalletController getWalletController() {
+		return this.wController;
+	}
+
+	public void setWalletController(WalletController controller) {
+		this.wController = controller;
 	}
 
 	public void notifyIfError(BaseResult result) {
