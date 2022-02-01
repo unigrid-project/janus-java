@@ -34,12 +34,10 @@ import javafx.application.Platform;
 import javafx.util.Callback;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import java.io.IOException;
 import java.util.function.UnaryOperator;
 import javafx.animation.PauseTransition;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TextFormatter.Change;
@@ -240,7 +238,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			onSuccessMessage("TRANSACTION SENT!");
 			debug.log(send.getResult());
 			resetText();
-			wallet.setSendArgs(null);	
+			wallet.setSendArgs(null);
 		}
 	}
 
