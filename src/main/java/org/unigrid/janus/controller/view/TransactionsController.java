@@ -94,7 +94,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 					}
 				});
 			colTransAddress.setCellValueFactory(
-				new PropertyValueFactory<Transaction, String>("account"));
+				new PropertyValueFactory<Transaction, String>("address"));
 			colTransAmount.setCellValueFactory(
 				new PropertyValueFactory<Transaction, Double>("amount"));
 		} catch (Exception e) {

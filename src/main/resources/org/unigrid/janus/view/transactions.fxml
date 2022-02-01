@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
+<?import org.unigrid.janus.view.component.PTableColumn?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.TransactionsController">
    <children>
@@ -11,10 +11,10 @@
          <children>
             <TableView fx:id="tblTransactions" VBox.vgrow="ALWAYS">
                <columns>
-                  <TableColumn fx:id="colTransDate" prefWidth="130.0" sortType="DESCENDING" text="Date" />
-                  <TableColumn fx:id="colTransType" prefWidth="85.0" text="Type" />
-                  <TableColumn fx:id="colTransAmount" prefWidth="75.0" text="Amount" />
-                  <TableColumn fx:id="colTransAddress" prefWidth="170.0" text="Address" />
+                  <PTableColumn fx:id="colTransAddress" editable="false" percentageWidth="0.41" prefWidth="170.0" sortable="false" text="Address" />
+                  <PTableColumn fx:id="colTransAmount" editable="false" percentageWidth="0.15" prefWidth="75.0" sortable="false" text="Amount" />
+                  <PTableColumn fx:id="colTransDate" editable="false" percentageWidth="0.27" prefWidth="130.0" sortType="DESCENDING" sortable="false" text="Date" />
+                  <PTableColumn fx:id="colTransType" editable="false" percentageWidth="0.17" prefWidth="85.0" sortable="false" text="Type" />
                </columns>
             </TableView>
          </children>
