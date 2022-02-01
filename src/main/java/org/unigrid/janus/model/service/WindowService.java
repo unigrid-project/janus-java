@@ -25,6 +25,7 @@ import javafx.scene.control.ButtonType;
 import org.unigrid.janus.controller.component.WindowBarController;
 import org.unigrid.janus.controller.view.MainWindowController;
 import org.unigrid.janus.controller.view.WalletController;
+import org.unigrid.janus.controller.view.OverlayController;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @ApplicationScoped
@@ -33,6 +34,7 @@ public class WindowService {
 	private static WindowBarController wbController;
 	private static MainWindowController mwController;
 	private static WalletController wController;
+	private static OverlayController olController;
 
 	public Stage getStage() {
 		return this.stage;
@@ -56,6 +58,14 @@ public class WindowService {
 
 	public void setWindowBarController(WindowBarController controller) {
 		this.wbController = controller;
+	}
+
+	public OverlayController getOverlayController() {
+		return this.olController;
+	}
+
+	public void setOverlayController(OverlayController controller) {
+		this.olController = controller;
 	}
 
 	public MainWindowController getMainWindowController() {
