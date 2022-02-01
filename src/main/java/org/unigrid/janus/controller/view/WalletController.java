@@ -34,15 +34,30 @@ import javafx.application.Platform;
 import javafx.util.Callback;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.io.IOException;
+import java.util.function.UnaryOperator;
+import javafx.animation.PauseTransition;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.TextFormatter.Change;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.util.Duration;
+import javafx.util.converter.IntegerStringConverter;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.rpc.entity.SendTransaction;
+import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 
 public class WalletController implements Initializable, PropertyChangeListener {
 
@@ -56,7 +71,15 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	@FXML
 	private Label lblBalance;
 	@FXML
+	private Label lblBalanceSend;
+	@FXML
 	private FlowPane pnlBalance;
+	@FXML
+	private VBox sendTransactionPnl;
+	@FXML
+	private Text sendWarnMsg;
+	@FXML
+	private TextField ugdAddressTxt;
 	// wallet table
 	@FXML
 	private TableView tblWalletTrans;
@@ -70,14 +93,16 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	private TableColumn colWalletTransAmount;
 	@FXML
 	private BorderPane pnlUnlock;
+	@FXML
+	private TextField amountToSend;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
 		debug.log("Initializing wallet transactions");
 		wallet.addPropertyChangeListener(this);
+		window.setWalletController(this);
 		setupWalletTransactions();
-		//setupLockScreen();
 		Platform.runLater(() -> {
 			try {
 				debug.log("Loading wallet transactions");
@@ -86,6 +111,14 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				debug.log(String.format("ERROR: (wallet trans init) %s", e.getMessage()));
 			}
 		});
+	}
+
+	@FXML
+	private void setupFormatter(MouseEvent event) {
+		// need a way to remove this
+		amountToSend.setTextFormatter(
+			new TextFormatter<Integer>(new IntegerStringConverter(), 0, integerFilter));
+		amountToSend.setPromptText("UGD TO SEND");
 	}
 
 	private void setupLockScreen() {
@@ -134,6 +167,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
 			debug.log(String.format("Value: %.8f", (double) event.getNewValue()));
 			lblBalance.setText(String.format("%.8f", (double) event.getNewValue()));
+			lblBalanceSend.setText(String.format("%.8f", (double) event.getNewValue()));
 		}
 		if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
 			boolean locked = (boolean) event.getNewValue();
@@ -141,4 +175,114 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		}
 	}
 
+	private UnaryOperator<Change> integerFilter = change -> {
+		String newText = change.getControlNewText();
+
+		if (newText.matches("\\d*|\\d+\\.\\d*")) {
+			return change;
+		}
+		return null;
+	};
+
+	@FXML
+	private void onSendTransactionClicked(MouseEvent event) {
+		if (amountToSend.getText() == "" || amountToSend.getText() == null
+			|| Integer.parseInt(amountToSend.getText()) == 0) {
+			onErrorMessage("Please enter an amount of Unigrid to send.");
+			return;
+		} else {
+			onErrorMessage("> 0");
+		}
+
+		//check if address is valid
+		if (ugdAddressTxt.getText() == "" && ugdAddressTxt.getText() != null) {
+			onErrorMessage("Please enter a valid Unigrid address.");
+			return;
+		}
+		final ValidateAddress call = rpc.call(
+			new ValidateAddress.Request(ugdAddressTxt.getText()), ValidateAddress.class);
+		if (call.getError() != null) {
+			debug.log(String.format("ERROR: %s", call.getError()));
+			onErrorMessage("Please enter a valid Unigrid address.");
+		} else {
+			if (!call.getResult().getValid()) {
+				ugdAddressTxt.setText("");
+				onErrorMessage("Please enter a valid Unigrid address.");
+			} else {
+				wallet.setSendArgs(new Object[]{ugdAddressTxt.getText(),
+						Integer.parseInt(amountToSend.getText())});
+				if (wallet.getLocked()) {
+					onErrorMessage("Locked wallet");
+					window.getMainWindowController().unlockForSending();
+					return;
+				} else {
+					//Object[] sendArgs = new Object[]{ugdAddressTxt.getText(),
+						//Integer.parseInt(amountToSend.getText())};
+					final SendTransaction send = rpc.call(
+						new SendTransaction.Request(wallet.getSendArgs()), SendTransaction.class);
+					if (send.getError() != null) {
+						onErrorMessage(send.getError().getMessage());
+					} else {
+						onSuccessMessage("TRANSACTION SENT!");
+						resetText();
+					}
+				}
+			}
+		}
+	}
+
+	public void sendTransactionAfterUnlock() {
+		final SendTransaction send = rpc.call(
+				new SendTransaction.Request(wallet.getSendArgs()), SendTransaction.class);
+		if (send.getError() != null) {
+			onErrorMessage(send.getError().getMessage());
+		} else {
+			onSuccessMessage("TRANSACTION SENT!");
+			debug.log(send.getResult());
+			resetText();
+			wallet.setSendArgs(null);	
+		}
+	}
+
+	@FXML
+	private void onCloseSendClicked(MouseEvent event) {
+		sendTransactionPnl.setVisible(false);
+		resetText();
+	}
+
+	private void resetText() {
+		amountToSend.setText("");
+		amountToSend.setPromptText("UGD TO SEND");
+		ugdAddressTxt.setText("");
+		ugdAddressTxt.setPromptText("UGD ADDRESS");
+	}
+
+	@FXML
+	private void onOpenSendClicked(MouseEvent event) {
+		sendTransactionPnl.setVisible(true);
+	}
+
+	private void onErrorMessage(String message) {
+		sendWarnMsg.setFill(Color.RED);
+		sendWarnMsg.setText(message);
+		sendWarnMsg.setVisible(true);
+		PauseTransition pause = new PauseTransition(Duration.seconds(3));
+		pause.setOnFinished(e -> {
+			sendWarnMsg.setVisible(false);
+			sendWarnMsg.setText("");
+		});
+		pause.play();
+	}
+
+	private void onSuccessMessage(String message) {
+		sendWarnMsg.setFill(Color.GREEN);
+		sendWarnMsg.setText(message);
+		sendWarnMsg.setVisible(true);
+		PauseTransition pause = new PauseTransition(Duration.seconds(3));
+		pause.setOnFinished(e -> {
+			sendWarnMsg.setVisible(false);
+			sendWarnMsg.setText("");
+		});
+		pause.play();
+	}
 }

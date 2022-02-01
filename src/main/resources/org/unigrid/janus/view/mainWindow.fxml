@@ -148,8 +148,8 @@
                                        <graphic>
                                           <StackedFontIcon>
                                              <children>
-                                                <FontIcon fx:id="lockBtn" iconColor="#ffce52" iconLiteral="fas-lock" iconSize="20" onMouseClicked="#onLockPressed" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
-                                                <FontIcon fx:id="unlockedBtn" iconColor="#ffce52" iconLiteral="fas-unlock" iconSize="20" onMouseClicked="#onUnlockPressed" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
+                                                <FontIcon fx:id="lockBtn" iconColor="#bf0c0c" iconLiteral="fas-lock" iconSize="20" onMouseClicked="#onLockPressed" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
+                                                <FontIcon fx:id="unlockedBtn" iconColor="#ffce52" iconLiteral="fas-unlock" iconSize="20" onMouseClicked="#onUnlockPressed" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" visible="false" />
                                              </children>
                                           </StackedFontIcon>
                                        </graphic>

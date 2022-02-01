@@ -113,8 +113,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private Tooltip blocksTltp;
 	@Getter @Setter
-	private int unlockState = 0;
-	@Getter @Setter
 	private Boolean staking = false;
 	@Getter @Setter
 	private Boolean walletLocked = false;
@@ -124,6 +122,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		/* Empty on purpose */
 		wallet.addPropertyChangeListener(this);
 		pnlUnlock.setVisible(false);
+		window.setMainWIndowController(this);
 	}
 
 	@FXML
@@ -233,8 +232,10 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			connectionTltp.setText(String.format("Connections: %d", (int) event.getNewValue()));
 			int connections = (int) event.getNewValue();
 			if (connections > 0 && connections < 5) {
-				satelliteIcn.iconColorProperty().setValue(Color.YELLOW);
-			} else if (connections > 5) {
+				satelliteIcn.iconColorProperty().setValue(Color.ORANGE);
+			} else if (connections >= 5 && connections < 10) {
+				satelliteIcn.iconColorProperty().setValue(Color.YELLOWGREEN);
+			} else if (connections >= 10) {
 				satelliteIcn.iconColorProperty().setValue(Color.GREEN);
 			} else {
 				satelliteIcn.iconColorProperty().setValue(Color.RED);
@@ -287,7 +288,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		submitBtn.setText("UNLOCK");
 		unlockCopy.setText("Unlock your wallet by entering your passphrase and "
 			+ "pressing the UNLOCK button.");
-		setUnlockState(2);
+		wallet.setUnlockState(2);
 	}
 
 	@FXML
@@ -300,16 +301,29 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		if (getStaking() || !getWalletLocked()) {
 			return;
 		}
-		setUnlockState(1);
+		wallet.setUnlockState(1);
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("STAKE");
 		unlockCopy.setText("Enable staking in your wallet by entering your passphrase and "
 			+ "pressing the STAKE button.");
 	}
 
-	@FXML
-	private void unlockForTime(MouseEvent event) {
-		setUnlockState(3);
+	public void unlockForTime() {
+		debug.log("UNLOCK FOR TIME");
+		wallet.setUnlockState(4);
+		pnlUnlock.setVisible(true);
+		submitBtn.setText("UNLOCK");
+		unlockCopy.setText("Please enter your passphrase in order to perform this task. "
+			+ "The wallet will automatically lock itself after 30 seconds.");
+	}
+
+	public void unlockForSending() {
+		debug.log("UNLOCK FOR SENDING");
+		wallet.setUnlockState(3);
+		pnlUnlock.setVisible(true);
+		submitBtn.setText("SEND");
+		unlockCopy.setText("Please enter your passphrase to send Unigrid tokens. "
+			+ "If your wallet was staking you will need to enable again after the transaction completes.");
 	}
 
 	@FXML
@@ -322,7 +336,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		submitBtn.setDisable(true);
 		Object[] sendArgs;
 		long stakingStartTime = wallet.getStakingStartTime();
-		switch (getUnlockState()) {
+		switch (wallet.getUnlockState()) {
 			case 1:
 				sendArgs = new Object[]{passphraseInput.getText(), stakingStartTime, true};
 				break;
@@ -330,6 +344,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				sendArgs = new Object[]{passphraseInput.getText(), 0};
 				break;
 			case 3:
+			case 4:
 				// unlock for 30 seconds only
 				sendArgs = new Object[]{passphraseInput.getText(), 30};
 				break;
@@ -357,14 +372,17 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			} else {
 				errorTxt.setText("Wallet unlocked!");
 				passphraseInput.setText("");
+				if (wallet.getUnlockState() == 3) {
+					// send transaction
+					window.getWalletController().sendTransactionAfterUnlock();
+				}
 				closeUnlockScreen();
 			}
-
 		}
 	}
 
 	private void closeUnlockScreen() {
-		setUnlockState(0);
+		wallet.setUnlockState(0);
 		unlockCopy.setText("");
 		spinnerIcon.setVisible(false);
 		errorTxt.setText("");

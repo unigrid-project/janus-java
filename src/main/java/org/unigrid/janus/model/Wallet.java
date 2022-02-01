@@ -45,14 +45,18 @@ public class Wallet {
 	private static int connections;
 	private static int version;
 	private static int walletVersion;
-	private static Boolean locked;
+	private static Boolean locked = true;
 	private static Boolean isStaking;
 	private static Boolean processingStatus = false;
 	private static String status;
+	@Getter @Setter
+	private int unlockState = 0;
 	@Getter
 	private static long stakingStartTime = 45126460800000L;
 	@Getter @Setter
-	private Boolean encrypted;
+	private Boolean encrypted = false;
+	@Getter @Setter
+	private Object[] sendArgs;
 	@Inject
 	private static DebugService debug = new DebugService();
 	public static final String STATUS_PROPERTY = "walletstatus";
