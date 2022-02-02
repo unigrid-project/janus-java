@@ -91,10 +91,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private Tooltip stakingTltp;
 	@FXML
 	private Tooltip blocksTltp;
-	@Getter @Setter
-	private Boolean staking = false;
-	@Getter @Setter
-	private Boolean walletLocked = false;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -222,7 +218,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		}
 		if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
 			boolean locked = (boolean) event.getNewValue();
-			setWalletLocked(locked);
 			debug.log(String.format("Wallet Locked: %s", locked));
 			if (locked) {
 				//tabSelect(TAB_WALLET);
@@ -239,7 +234,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		}
 		if (event.getPropertyName().equals(wallet.STAKING_PROPERTY)) {
 			boolean staking = (boolean) event.getNewValue();
-			setStaking(staking);
 			if (staking) {
 				stakingTltp.setText("Staking On");
 				coinsBtn.iconColorProperty().setValue(Color.ORANGE);
@@ -268,7 +262,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@FXML
 	private void onLockPressed(MouseEvent event) {
-		if (!getWalletLocked()) {
+		if (!wallet.getLocked()) {
 			return;
 		}
 		window.getOverlayController().startLockOverlay();
@@ -282,7 +276,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@FXML
 	private void onCoinsPressed(MouseEvent event) {
-		if (getStaking() || !getWalletLocked()) {
+		if (wallet.getStakingStatus() || !wallet.getLocked()) {
 			return;
 		}
 		window.getOverlayController().startStakingOverlay();
