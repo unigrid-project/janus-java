@@ -158,7 +158,6 @@ public class Wallet {
 	}
 
 	public Boolean getLocked() {
-
 		return this.locked;
 	}
 
