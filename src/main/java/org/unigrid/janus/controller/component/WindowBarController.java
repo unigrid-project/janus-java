@@ -36,6 +36,10 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
+import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
@@ -45,7 +49,8 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	private static Wallet wallet = new Wallet();
 	private static DebugService debug = new DebugService();
 	private static WindowService window = new WindowService();
-	@FXML private FontIcon spinnerIcn;
+	@FXML private FontIcon spinner;
+	private RotateTransition rt;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -63,7 +68,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 			}
 		}
 		if (event.getPropertyName().equals(wallet.PROCESSING_PROPERTY)) {
-			//spinnerIcn.setVisible(wallet.getProcessingStatus());
 			if (wallet.getProcessingStatus()) {
 				String status = String.format("processing status %s",
 					(boolean) wallet.getProcessingStatus());
@@ -100,5 +104,20 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	private void onMinimize(MouseEvent event) {
 		final Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 		stage.setIconified(!stage.isIconified());
+	}
+
+	public void startSpinner() {
+		spinner.setVisible(true);
+		rt = new RotateTransition(Duration.millis(50000), spinner);
+		rt.setByAngle(20000);
+		rt.setCycleCount(Animation.INDEFINITE);
+		rt.setAutoReverse(true);
+		rt.setInterpolator(Interpolator.LINEAR);
+		rt.play();
+	}
+
+	public void stopSpinner() {
+		rt.stop();
+		spinner.setVisible(false);
 	}
 }

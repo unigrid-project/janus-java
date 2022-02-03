@@ -30,8 +30,6 @@ import javafx.application.Platform;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javafx.scene.control.Tooltip;
-import lombok.Getter;
-import lombok.Setter;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
@@ -271,6 +269,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@FXML
 	private void onUnlockPressed(MouseEvent event) {
+		wallet.setLocked(Boolean.TRUE);
 		final LockWallet call = rpc.call(new LockWallet.Request(), LockWallet.class);
 	}
 

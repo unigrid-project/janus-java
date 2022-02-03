@@ -12,7 +12,7 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.controller.view;
 
@@ -108,6 +108,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		submitBtn.setDisable(true);
 		Object[] sendArgs;
 		long stakingStartTime = wallet.getStakingStartTime();
+		window.getWindowBarController().startSpinner();
 		switch (wallet.getUnlockState()) {
 			case 1:
 				sendArgs = new Object[]{passphraseInput.getText(), stakingStartTime, true};
@@ -127,7 +128,10 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		if (passphraseInput.getText() == "") {
 			errorTxt.setText("Please enter a passphrase");
 			submitBtn.setDisable(false);
+			window.getWindowBarController().stopSpinner();
+
 		} else {
+
 			final UnlockWallet call = rpc.call(
 				new UnlockWallet.Request(sendArgs), UnlockWallet.class);
 			Jsonb jsonb = JsonbBuilder.create();
@@ -148,8 +152,11 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 					// send transaction
 					window.getWalletController().sendTransactionAfterUnlock();
 				}
+				wallet.setLocked(Boolean.FALSE);
+
 				closeUnlockOverlay();
 			}
+			window.getWindowBarController().stopSpinner();
 		}
 	}
 
