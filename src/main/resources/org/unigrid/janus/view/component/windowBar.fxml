@@ -7,7 +7,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import org.unigrid.janus.view.component.WindowBarButton?>
 
-<HBox alignment="TOP_RIGHT" maxHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" style="-fx-background-color: linear-gradient(from 25px 25px to 100px 100px, #e72, #ff9500);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.WindowBarController">
+<HBox alignment="TOP_RIGHT" maxHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" style="-fx-background-color: linear-gradient(from 25px 25px to 100px 100px, #e72, #ff9500);" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.WindowBarController">
    <children>
       <HBox fx:id="handle" onMouseEntered="#onDecorateMove" HBox.hgrow="ALWAYS">
          <children>
@@ -20,14 +20,14 @@
                </HBox.margin>
             </Label>
          </children></HBox>
-      <FontIcon iconColor="WHITE" iconLiteral="fas-spinner" iconSize="20">
+      <FontIcon fx:id="spinner" iconColor="WHITE" iconLiteral="fas-spinner" iconSize="20" styleClass="spinner" visible="false">
          <HBox.margin>
             <Insets top="8.0" />
          </HBox.margin>
       </FontIcon>
       <WindowBarButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#onMinimize" prefHeight="20.0" prefWidth="20.0" style="-fx-shape: &quot;M18,3.25H6A2.75,2.75,0,0,0,3.25,6v6a.75.75,0,0,0,1.5,0V6A1.25,1.25,0,0,1,6,4.75H18A1.25,1.25,0,0,1,19.25,6V18A1.25,1.25,0,0,1,18,19.25H12a.75.75,0,0,0,0,1.5h6A2.75,2.75,0,0,0,20.75,18V6A2.75,2.75,0,0,0,18,3.25Z M11.21,13.19a.75.75,0,0,0,.29.06h4a.75.75,0,0,0,0-1.5H13.31l3.22-3.22a.75.75,0,0,0-1.06-1.06l-3.22,3.22V8.5a.75.75,0,0,0-1.5,0v4a.75.75,0,0,0,.06.29A.71.71,0,0,0,11.21,13.19Z M8,14.25H5A1.76,1.76,0,0,0,3.25,16v3A1.76,1.76,0,0,0,5,20.75H8A1.76,1.76,0,0,0,9.75,19V16A1.76,1.76,0,0,0,8,14.25ZM8.25,19a.25.25,0,0,1-.25.25H5A.25.25,0,0,1,4.75,19V16A.25.25,0,0,1,5,15.75H8a.25.25,0,0,1,.25.25Z&quot;; -fx-background-size: 25px; -fx-background-color: white;">
          <HBox.margin>
-            <Insets bottom="8.0" left="8.0" top="8.0" />
+            <Insets bottom="8.0" left="14.0" top="8.0" />
          </HBox.margin>
       </WindowBarButton>
       <WindowBarButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#onMaximize" prefHeight="20.0" prefWidth="20.0" style="-fx-shape: &quot;M18,20.75H12a.75.75,0,0,1,0-1.5h6A1.25,1.25,0,0,0,19.25,18V6A1.25,1.25,0,0,0,18,4.75H6A1.25,1.25,0,0,0,4.75,6v6a.75.75,0,0,1-1.5,0V6A2.75,2.75,0,0,1,6,3.25H18A2.75,2.75,0,0,1,20.75,6V18A2.75,2.75,0,0,1,18,20.75Z M16,12.75a.76.76,0,0,1-.75-.75V8.75H12a.75.75,0,0,1,0-1.5h4a.76.76,0,0,1,.75.75v4A.76.76,0,0,1,16,12.75Z M11.5,13.25A.74.74,0,0,1,11,13,.75.75,0,0,1,11,12l4.5-4.5a.75.75,0,0,1,1.06,1.06L12,13A.74.74,0,0,1,11.5,13.25Z M8,20.75H5A1.76,1.76,0,0,1,3.25,19V16A1.76,1.76,0,0,1,5,14.25H8A1.76,1.76,0,0,1,9.75,16v3A1.76,1.76,0,0,1,8,20.75Zm-3-5a.25.25,0,0,0-.25.25v3a.25.25,0,0,0,.25.25H8A.25.25,0,0,0,8.25,19V16A.25.25,0,0,0,8,15.75Z&quot;; -fx-background-size: 25px; -fx-background-color: white;">
