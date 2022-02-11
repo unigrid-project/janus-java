@@ -152,7 +152,9 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 					// send transaction
 					window.getWalletController().sendTransactionAfterUnlock();
 				}
-				wallet.setLocked(Boolean.FALSE);
+				if (wallet.getUnlockState() != 1) {
+					wallet.setLocked(Boolean.FALSE);
+				}
 
 				closeUnlockOverlay();
 			}
