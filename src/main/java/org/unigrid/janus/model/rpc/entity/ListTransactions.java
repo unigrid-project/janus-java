@@ -27,9 +27,9 @@ public class ListTransactions extends BaseResult<List<ListTransactions.Result>> 
 	private static final String METHOD = "listtransactions";
 
 	public static class Request extends BaseRequest {
-		public Request(int offset, int perPage) {
+		public Request(int offset, int count) {
 			super(METHOD);
-			this.setParams(new Object[]{"*", perPage, offset, true});
+			this.setParams(new Object[]{"*", count, offset, true});
 		}
 	}
 

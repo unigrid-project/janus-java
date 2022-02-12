@@ -17,6 +17,8 @@
 package org.unigrid.janus.model;
 
 import lombok.Data;
+import java.util.List;
+import java.util.ArrayList;
 
 @Data
 public class Transaction {
@@ -29,6 +31,7 @@ public class Transaction {
 	private String txid;
 	private boolean generated;
 	private String generatedfrom;
+	private List<Transaction> parts = new ArrayList<Transaction>();
 
 	public Transaction() {
 		/* empty on purpose */
@@ -40,5 +43,54 @@ public class Transaction {
 		this.category = cat;
 		this.amount = amt;
 		this.time = tm;
+	}
+
+	public boolean hasPart(Transaction trans) {
+		boolean result = false;
+		// it can't be a part unless it has same txid
+		if (trans.txid != this.txid) {
+			return false;
+		}
+		for (Transaction t : this.parts) {
+			if ((t.address.equals(trans.address))
+				&& (t.category.equals(trans.category))
+				&& (t.amount == trans.amount)
+				&& (t.time == trans.time)) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public boolean addPart(Transaction trans) {
+		boolean result = false;
+		// TODO: add up transaction amount of parent from transaction parts.
+		if (!hasPart(trans)) {
+			this.parts.add(trans);
+			this.amount += trans.getAmount();
+			result = true;
+		}
+		return result;
+	}
+
+	public Transaction convertToMultiPart() {
+		Transaction result = new Transaction(
+			this.account,
+			this.address,
+			"multipart",
+			this.amount,
+			this.time);
+		result.setTxid(this.txid);
+		result.addPart(this);
+		return result;
+	}
+
+	public boolean equals(Transaction trans) {
+		return (trans.txid.equals(this.txid)
+			&& trans.address.equals(this.address)
+			&& trans.category.equals(this.category)
+			&& (trans.amount == this.amount)
+			&& (trans.time == this.time));
 	}
 }
