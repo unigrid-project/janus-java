@@ -139,7 +139,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			colWalletTransType.setCellValueFactory(
 				new PropertyValueFactory<Transaction, String>("category"));
 			colWalletTransAddress.setCellValueFactory(
-				new PropertyValueFactory<Transaction, String>("account"));
+				new PropertyValueFactory<Transaction, String>("address"));
 			colWalletTransAmount.setCellValueFactory(
 				new PropertyValueFactory<Transaction, Double>("amount"));
 		} catch (Exception e) {
@@ -153,7 +153,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		ObservableList<Transaction> walletTransactions = FXCollections.observableArrayList();
 
 		for (Transaction t : transactions.getResult()) {
-			walletTransactions.add(t);
+			walletTransactions.add(0, t);
 		}
 
 		tblWalletTrans.setItems(walletTransactions);
