@@ -16,21 +16,27 @@
 
 package org.unigrid.janus.controller.view;
 
+import java.awt.Desktop;
+import java.net.URI;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
 import javafx.util.Callback;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.geometry.Orientation;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javafx.beans.value.ObservableValue;
@@ -91,20 +97,71 @@ public class TransactionsController implements Initializable, PropertyChangeList
 					}
 				});
 			colTransType.setCellValueFactory(
-				new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
-					public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
+				new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
+					public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
 						Transaction trans = t.getValue();
-						if (trans.isGenerated()) {
-							return new ReadOnlyStringWrapper(String.format("%s:%s",
+						String text = trans.getCategory();
+						if (trans.getCategory().equals("multipart")) {
+							text = "More details";
+						} else if (trans.isGenerated()) {
+							text = String.format("%s:%s",
 								trans.getCategory(),
-								trans.getGeneratedfrom()));
-						} else {
-							return new ReadOnlyStringWrapper(trans.getCategory());
+								trans.getGeneratedfrom());
 						}
+						Hyperlink link = new Hyperlink();
+						link.setText(text);
+						link.setOnAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent e) {
+								try {
+									if (Desktop.isDesktopSupported()
+										&& Desktop.getDesktop().isSupported(
+											Desktop.Action.BROWSE)) {
+										Desktop.getDesktop().browse(
+											new URI(
+												"https://explorer"
+												+ ".unigrid.org/tx/"
+												+ trans.getTxid()));
+									}
+								} catch (Exception ex) {
+									debug.log(String.format(
+										"ERROR: (transaction txid) %s",
+										ex.getMessage()));
+								}
+							}
+						});
+						return new ReadOnlyObjectWrapper(link);
 					}
 				});
 			colTransAddress.setCellValueFactory(
-				new PropertyValueFactory<Transaction, String>("address"));
+				new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
+					public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
+						Hyperlink link = new Hyperlink();
+						Transaction trans = t.getValue();
+						link.setText(trans.getAddress());
+						link.setOnAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent e) {
+								try {
+									if (Desktop.isDesktopSupported()
+										&& Desktop.getDesktop().isSupported(
+											Desktop.Action.BROWSE)) {
+										Desktop.getDesktop().browse(
+											new URI(
+												"https://explorer"
+												+ ".unigrid.org/address/"
+												+ trans.getAddress()));
+									}
+								} catch (Exception ex) {
+									debug.log(String.format(
+										"ERROR: (transaction address) %s",
+										ex.getMessage()));
+								}
+							}
+						});
+						return new ReadOnlyObjectWrapper(link);
+					}
+				});
 			colTransAmount.setCellValueFactory(
 				new PropertyValueFactory<Transaction, Double>("amount"));
 		} catch (Exception e) {

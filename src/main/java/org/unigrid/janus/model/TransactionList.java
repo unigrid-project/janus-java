@@ -51,6 +51,10 @@ public class TransactionList {
 		return this.transactions;
 	}
 
+	public ObservableList<Transaction> getLatestTransactions(int count) {
+		return (ObservableList<Transaction>) FXCollections.observableArrayList(this.transactions.subList(0, count));
+	}
+
 	public int loadNewTransactions() {
 		ListTransactions trans = rpc.call(new ListTransactions.Request(0, 10),
 			ListTransactions.class);

@@ -163,3 +163,15 @@
 .progress-indicator .percentage {
 	-fx-fill: #ee7722;
 }
+
+.hyperlink:hover {
+	-fx-text-fill: #00c;
+}
+
+.hyperlink:visited {
+	-fx-text-fill: #aad;
+}
+
+.hyperlink:visited:hover {
+	-fx-text-fill: #33d;
+}
