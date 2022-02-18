@@ -23,7 +23,7 @@
    <scene>
       <Scene fill="#000024" stylesheets="@main.css">
          <root>
-            <StackPane minHeight="0.0" minWidth="0.0" prefHeight="400.0" prefWidth="600.0">
+            <StackPane minHeight="0.0" minWidth="0.0" prefHeight="600.0" prefWidth="1000.0">
                <children>
                   <BorderPane pickOnBounds="false" prefHeight="300.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
                      <top>
@@ -231,7 +231,7 @@
                         </AnchorPane>
                      </center>
                   </BorderPane>
-                  <AnchorPane fx:id="pnlOverlay" prefHeight="200.0" prefWidth="200.0">
+                  <AnchorPane fx:id="pnlOverlay" prefHeight="200.0" prefWidth="200.0" visible="false">
                      <StackPane.margin>
                         <Insets top="36.0" />
                      </StackPane.margin>

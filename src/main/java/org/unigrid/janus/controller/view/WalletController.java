@@ -16,21 +16,24 @@
 
 package org.unigrid.janus.controller.view;
 
+import java.awt.Desktop;
+import java.net.URI;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
 import javafx.collections.ObservableList;
-import javafx.collections.FXCollections;
-import javafx.application.Platform;
 import javafx.util.Callback;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
@@ -38,6 +41,7 @@ import java.util.function.UnaryOperator;
 import javafx.animation.PauseTransition;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TextFormatter.Change;
@@ -52,8 +56,8 @@ import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Transaction;
-import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.TransactionList;
 import org.unigrid.janus.model.rpc.entity.SendTransaction;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 
@@ -62,6 +66,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
+	private static TransactionList transList = new TransactionList();
 	private static WindowService window = new WindowService();
 
 
@@ -99,16 +104,9 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		/* Empty on purpose */
 		debug.log("Initializing wallet transactions");
 		wallet.addPropertyChangeListener(this);
+		transList.addPropertyChangeListener(this);
 		window.setWalletController(this);
 		setupWalletTransactions();
-		Platform.runLater(() -> {
-			try {
-				debug.log("Loading wallet transactions");
-				loadWalletPreviewTrans();
-			} catch (Exception e) {
-				debug.log(String.format("ERROR: (wallet trans init) %s", e.getMessage()));
-			}
-		});
 	}
 
 	@FXML
@@ -137,9 +135,71 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				}
 			);
 			colWalletTransType.setCellValueFactory(
-				new PropertyValueFactory<Transaction, String>("category"));
+				new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
+					public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
+						Transaction trans = t.getValue();
+						String text = trans.getCategory();
+						if (trans.getCategory().equals("multipart")) {
+							text = "More details";
+						} else if (trans.isGenerated()) {
+							text = String.format("%s:%s",
+								trans.getCategory(),
+								trans.getGeneratedfrom());
+						}
+						Hyperlink link = new Hyperlink();
+						link.setText(text);
+						link.setOnAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent e) {
+								try {
+									if (Desktop.isDesktopSupported()
+										&& Desktop.getDesktop().isSupported(
+											Desktop.Action.BROWSE)) {
+										Desktop.getDesktop().browse(
+											new URI(
+												"https://explorer"
+												+ ".unigrid.org/tx/"
+												+ trans.getTxid()));
+									}
+								} catch (Exception ex) {
+									debug.log(String.format(
+										"ERROR: (transaction txid) %s",
+										ex.getMessage()));
+								}
+							}
+						});
+						return new ReadOnlyObjectWrapper(link);
+					}
+				});
 			colWalletTransAddress.setCellValueFactory(
-				new PropertyValueFactory<Transaction, String>("address"));
+				new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
+					public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
+						Hyperlink link = new Hyperlink();
+						Transaction trans = t.getValue();
+						link.setText(trans.getAddress());
+						link.setOnAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent e) {
+								try {
+									if (Desktop.isDesktopSupported()
+										&& Desktop.getDesktop().isSupported(
+											Desktop.Action.BROWSE)) {
+										Desktop.getDesktop().browse(
+											new URI(
+												"https://explorer"
+												+ ".unigrid.org/address/"
+												+ trans.getAddress()));
+									}
+								} catch (Exception ex) {
+									debug.log(String.format(
+										"ERROR: (transaction address) %s",
+										ex.getMessage()));
+								}
+							}
+						});
+						return new ReadOnlyObjectWrapper(link);
+					}
+				});
 			colWalletTransAmount.setCellValueFactory(
 				new PropertyValueFactory<Transaction, Double>("amount"));
 		} catch (Exception e) {
@@ -147,21 +207,9 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		}
 	}
 
-	private void loadWalletPreviewTrans() {
-		ListTransactions transactions = rpc.call(new ListTransactions.Request(0, 10),
-			ListTransactions.class);
-		ObservableList<Transaction> walletTransactions = FXCollections.observableArrayList();
-
-		for (Transaction t : transactions.getResult()) {
-			walletTransactions.add(0, t);
-		}
-
-		tblWalletTrans.setItems(walletTransactions);
-	}
-
 	public void propertyChange(PropertyChangeEvent event) {
-		debug.log("Wallet property change fired!");
-		debug.log(event.getPropertyName());
+		// debug.log("Wallet property change fired!");
+		// debug.log(event.getPropertyName());
 		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
 			debug.log(String.format("Value: %.8f", (double) event.getNewValue()));
 			lblBalance.setText(String.format("%.8f", (double) event.getNewValue()));
@@ -170,6 +218,11 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
 			boolean locked = (boolean) event.getNewValue();
 			// can determine from this if a send transaction needs a passphrase
+		}
+		if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
+			ObservableList<Transaction> list = transList.getLatestTransactions(10);
+			debug.log(String.format("Wallet transactions: %d", list.size()));
+			tblWalletTrans.setItems(list);
 		}
 	}
 
