@@ -16,6 +16,8 @@
 
 package org.unigrid.janus.model.service;
 
+import java.awt.Desktop;
+import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
 import javafx.stage.Stage;
 import javafx.scene.Node;
@@ -32,6 +34,7 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @ApplicationScoped
 public class WindowService {
+	private static DebugService debug = new DebugService();
 	private static Stage stage;
 	private static WindowBarController wbController;
 	private static MainWindowController mwController;
@@ -53,6 +56,29 @@ public class WindowService {
 			return stage.getScene().lookup("#" + id);
 		} else {
 			return null;
+		}
+	}
+
+	public void browseURL(String url) {
+		try {
+			String os = System.getProperty("os.name").toLowerCase();
+			if (os.indexOf("win") >= 0) {
+				if (Desktop.isDesktopSupported()
+					&& Desktop.getDesktop().isSupported(
+						Desktop.Action.BROWSE)) {
+					Desktop.getDesktop().browse(
+						new URI(url));
+				}
+			} else if (os.indexOf("mac") >= 0) {
+				Runtime rt = Runtime.getRuntime();
+				rt.exec("open " + url);
+			} else { // linux
+				new ProcessBuilder("x-www-browser", url).start();
+			}
+		} catch (Exception ex) {
+			debug.log(String.format(
+				"ERROR: (browse url) %s",
+				ex.getMessage()));
 		}
 	}
 

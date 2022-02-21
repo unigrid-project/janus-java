@@ -16,8 +16,6 @@
 
 package org.unigrid.janus.controller.view;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -151,21 +149,9 @@ public class WalletController implements Initializable, PropertyChangeListener {
 						link.setOnAction(new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent e) {
-								try {
-									if (Desktop.isDesktopSupported()
-										&& Desktop.getDesktop().isSupported(
-											Desktop.Action.BROWSE)) {
-										Desktop.getDesktop().browse(
-											new URI(
-												"https://explorer"
+								window.browseURL("https://explorer"
 												+ ".unigrid.org/tx/"
-												+ trans.getTxid()));
-									}
-								} catch (Exception ex) {
-									debug.log(String.format(
-										"ERROR: (transaction txid) %s",
-										ex.getMessage()));
-								}
+												+ trans.getTxid());
 							}
 						});
 						return new ReadOnlyObjectWrapper(link);
@@ -180,21 +166,9 @@ public class WalletController implements Initializable, PropertyChangeListener {
 						link.setOnAction(new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent e) {
-								try {
-									if (Desktop.isDesktopSupported()
-										&& Desktop.getDesktop().isSupported(
-											Desktop.Action.BROWSE)) {
-										Desktop.getDesktop().browse(
-											new URI(
-												"https://explorer"
+								window.browseURL("https://explorer"
 												+ ".unigrid.org/address/"
-												+ trans.getAddress()));
-									}
-								} catch (Exception ex) {
-									debug.log(String.format(
-										"ERROR: (transaction address) %s",
-										ex.getMessage()));
-								}
+												+ trans.getAddress());
 							}
 						});
 						return new ReadOnlyObjectWrapper(link);
