@@ -42,6 +42,7 @@ import jakarta.json.bind.JsonbBuilder;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 
 @ApplicationScoped
@@ -112,6 +113,11 @@ public class Janus extends BaseApplication {
 
 			debug.log(String.format("Data keys: %s", DataDirectory.getConfigKeys()));
 
+			//debug.log(rpc.callToJson(new GridnodeEntity.Request(new Object[] {"list-conf"})));
+
+			debug.log(rpc.callToJson(new GridnodeList.Request(new Object[] {"list-conf"})));
+			debug.log("Trying to start masternodes:");
+			debug.log(rpc.callToJson(new GridnodeList.Request(new Object[] {"start-missing", "0"})));
 			// poll info call every 30 seconds
 			rpc.pollForInfo(30 * 1000);
 		} catch (Exception e) {

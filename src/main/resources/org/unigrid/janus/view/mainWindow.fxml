@@ -231,7 +231,7 @@
                         </AnchorPane>
                      </center>
                   </BorderPane>
-                  <AnchorPane fx:id="pnlOverlay" prefHeight="200.0" prefWidth="200.0">
+                  <AnchorPane fx:id="pnlOverlay" prefHeight="200.0" prefWidth="200.0" visible="false">
                      <StackPane.margin>
                         <Insets top="36.0" />
                      </StackPane.margin>

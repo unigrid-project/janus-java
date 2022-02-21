@@ -291,4 +291,9 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		window.getOverlayController().startUnlockForSendingOverlay();
 		showOverlay();
 	}
+
+	public void unlockForGridnode() {
+		window.getOverlayController().startUnlockForGridnodeOverlay();
+		showOverlay();
+	}
 }

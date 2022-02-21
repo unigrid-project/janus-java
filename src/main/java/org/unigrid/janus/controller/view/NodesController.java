@@ -13,34 +13,47 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus.controller.view;
 
 import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import java.io.ByteArrayOutputStream;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import org.unigrid.janus.model.Gridnode;
+import org.unigrid.janus.model.GridnodeListModel;
+import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.rpc.entity.GridnodeEntity;
+import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 
-public class NodesController implements Initializable {
+public class NodesController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static WindowService window = new WindowService();
+	private static GridnodeListModel nodes = new GridnodeListModel();
+	private static Wallet wallet = new Wallet();
 
 	@FXML
 	private TextField vpsPassword;
@@ -50,20 +63,90 @@ public class NodesController implements Initializable {
 	private TextArea vpsOutput;
 	@FXML
 	private VBox vpsConect;
+	@FXML
+	private TableView tblGridnodes;
+	@FXML
+	private TableColumn colNodeStatus;
+	@FXML
+	private TableColumn colNodeAlias;
+	@FXML
+	private TableColumn colNodeAddress;
+	@FXML
+	private TableColumn colNodeStart;
 
 	private String serverResponse;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		vpsOutput.textProperty().addListener(new ChangeListener() {
-			public void changed(ObservableValue ov, Object oldValue, Object newValue) {
-				vpsOutput.setScrollTop(Double.MAX_VALUE);    //top
-				//vpsOutput.setScrollTop(Double.MIN_VALUE);   //down
+		setupNodeList();
+		nodes.addPropertyChangeListener(this);
+		window.setNodeController(this);
+		Platform.runLater(() -> {
+			try {
+				vpsConect.setVisible(false);
+				vpsOutput.textProperty().addListener(new ChangeListener() {
+					public void changed(ObservableValue ov, Object oldValue, Object newValue) {
+						vpsOutput.setScrollTop(Double.MAX_VALUE);    //top
+						//vpsOutput.setScrollTop(Double.MIN_VALUE);   //down
+					}
+				});
+				debug.log("Loading gridnode list");
+				this.getNodeList();
+			} catch (Exception e) {
+				debug.log(String.format("ERROR: (gridnode init) %s", e.getMessage()));
 			}
 		});
-		vpsConect.setVisible(false);
 	}
-	
+
+	private void setupNodeList() {
+		try {
+			colNodeStatus.setCellValueFactory(
+				new PropertyValueFactory<Gridnode, String>("status"));
+			colNodeAlias.setCellValueFactory(
+				new PropertyValueFactory<Gridnode, String>("alias"));
+			colNodeAddress.setCellValueFactory(
+				new PropertyValueFactory<Gridnode, String>("address"));
+
+		} catch (Exception e) {
+			debug.log(String.format("ERROR: (setup node table) %s", e.getMessage()));
+		}
+	}
+
+	private void updateTerminal(String str) {
+		serverResponse = serverResponse + str;
+		vpsOutput.setText(serverResponse);
+		vpsOutput.setScrollTop(Double.MAX_VALUE);
+	}
+
+	private void getNodeList() {
+		window.getWindowBarController().startSpinner();
+		GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
+		nodes.setGridnodes(result);
+		window.getWindowBarController().stopSpinner();
+		//debug.log(String.format("gridnode result: %s", nodes.getGridnodes()));
+	}
+
+	@FXML
+	private void onRefreshNodeListPressed(MouseEvent e) {
+		debug.log("Calling node list refresh");
+		getNodeList();
+	}
+
+	@FXML
+	private void onStartAllNodesPressed(MouseEvent e) {
+		if (wallet.getLocked()) {
+			window.getMainWindowController().unlockForGridnode();
+		} else {
+			startMissingNodes();
+		}
+	}
+
+	public void startMissingNodes() {
+		rpc.callToJson(new GridnodeEntity.Request(new Object[]{"start-missing", "0"}));
+		getNodeList();
+		debug.log("ATTEMPTING TO START NODES");
+	}
+
 	@FXML
 	public void connectToVps() throws Exception {
 		int port = 22;
@@ -77,8 +160,8 @@ public class NodesController implements Initializable {
 			session.connect();
 			channel = session.openChannel("shell");
 
-			OutputStream inputstream_for_the_channel = channel.getOutputStream();
-			PrintStream commander = new PrintStream(inputstream_for_the_channel, true);
+			OutputStream inputStream = channel.getOutputStream();
+			PrintStream commander = new PrintStream(inputStream, true);
 
 			channel.setOutputStream(System.out, true);
 
@@ -86,9 +169,6 @@ public class NodesController implements Initializable {
 
 			commander.println("ls -la");
 			commander.close();
-			//commander.println("bash -ic \"$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/gridnode-setup/master/unigridd.sh)\" ; source ~/.bashrc");
-			//commander.println("ls -la");
-			//commander.println("exit");
 			readChannelOutput(channel);
 			commander.close();
 
@@ -122,7 +202,7 @@ public class NodesController implements Initializable {
 						break;
 					}
 					line = new String(buffer, 0, i);
-					if(line.contains("txhash:")){
+					if (line.contains("txhash:")) {
 						debug.log("ENTER COMMAND HERE");
 					}
 					updateTerminal(line);
@@ -146,9 +226,9 @@ public class NodesController implements Initializable {
 
 	}
 
-	private void updateTerminal(String str) {
-		serverResponse = serverResponse + str;
-		vpsOutput.setText(serverResponse);
-		vpsOutput.setScrollTop(Double.MAX_VALUE);
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getPropertyName().equals(nodes.GRIDNODE_LIST)) {
+			tblGridnodes.setItems(nodes.getGridnodes());
+		}
 	}
 }

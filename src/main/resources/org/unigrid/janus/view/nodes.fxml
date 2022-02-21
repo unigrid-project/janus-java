@@ -13,22 +13,22 @@
 <?import javafx.scene.text.Font?>
 <?import org.unigrid.janus.view.component.PTableColumn?>
 
-<AnchorPane prefHeight="364.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.NodesController">
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="364.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.NodesController">
    <children>
-      <VBox prefHeight="364.0" prefWidth="450.0">
+      <VBox maxWidth="1.7976931348623157E308" prefHeight="364.0">
          <children>
-            <FlowPane alignment="CENTER" columnHalignment="CENTER">
+            <FlowPane alignment="CENTER" columnHalignment="CENTER" VBox.vgrow="ALWAYS">
                <children>
-                  <Label text="Gridnodes" textFill="#ff8b2d">
+                  <Label alignment="CENTER" contentDisplay="CENTER" text="Gridnodes" textAlignment="CENTER" textFill="#ff8b2d">
                      <font>
                         <Font size="24.0" />
                      </font>
                   </Label>
                </children>
             </FlowPane>
-            <FlowPane prefHeight="50.0" prefWidth="450.0">
+            <FlowPane alignment="CENTER" prefHeight="50.0" prefWidth="450.0" VBox.vgrow="ALWAYS">
                <children>
-                  <Button mnemonicParsing="false" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Start All">
+                  <Button mnemonicParsing="false" onMouseClicked="#onStartAllNodesPressed" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Start">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -39,7 +39,7 @@
                         <Insets left="10.0" top="10.0" />
                      </FlowPane.margin>
                   </Button>
-                  <Button mnemonicParsing="false" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Create">
+                  <Button mnemonicParsing="false" onMouseClicked="#onRefreshNodeListPressed" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Refresh">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -55,7 +55,7 @@
                   <Insets bottom="10.0" />
                </VBox.margin>
             </FlowPane>
-            <StackPane>
+            <StackPane VBox.vgrow="ALWAYS">
                <children>
                   <VBox fx:id="vpsConect" prefHeight="335.0" prefWidth="450.0" visible="false">
                      <children>
@@ -91,15 +91,18 @@
                            </VBox.margin></TextArea>
                      </children>
                   </VBox>
-                  <VBox prefHeight="220.0" prefWidth="100.0">
+                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" StackPane.alignment="CENTER">
                      <children>
-                        <TableView fx:id="tblTransactions">
+                        <TableView fx:id="tblGridnodes" VBox.vgrow="ALWAYS">
                            <columns>
-                              <PTableColumn fx:id="colTransAddress" editable="false" percentageWidth="0.15" prefWidth="170.0" sortable="false" text="Status" />
-                              <PTableColumn fx:id="colTransAmount" editable="false" percentageWidth="0.2" prefWidth="75.0" sortable="false" text="Alias" />
-                              <PTableColumn fx:id="colTransDate" editable="false" percentageWidth="0.441" prefWidth="130.0" sortType="DESCENDING" sortable="false" text="Address" />
-                              <PTableColumn fx:id="colTransType" editable="false" percentageWidth="0.17" prefWidth="85.0" sortable="false" text="Start" />
+                              <PTableColumn fx:id="colNodeStatus" editable="false" percentageWidth="0.17" prefWidth="170.0" sortable="false" text="Status" />
+                              <PTableColumn fx:id="colNodeAlias" editable="false" percentageWidth="0.2" prefWidth="75.0" sortable="false" text="Alias" />
+                              <PTableColumn fx:id="colNodeAddress" editable="false" percentageWidth="0.46" prefWidth="130.0" sortType="DESCENDING" sortable="false" text="Address" />
+                              <PTableColumn fx:id="colNodeStart" editable="false" percentageWidth="0.15" prefWidth="85.0" sortable="false" text="Start" />
                            </columns>
+                           <VBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" />
+                           </VBox.margin>
                         </TableView>
                      </children>
                   </VBox>

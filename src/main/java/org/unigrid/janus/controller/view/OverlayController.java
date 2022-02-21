@@ -97,6 +97,15 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		unlockCopy.setText("Please enter your passphrase to send Unigrid tokens. "
 			+ "If your wallet was staking you will need to enable again after the transaction completes.");
 	}
+	
+	public void startUnlockForGridnodeOverlay() {
+		debug.log("UNLOCK FOR GRIDNODE");
+		wallet.setUnlockState(4);
+		pnlUnlock.setVisible(true);
+		submitBtn.setText("START");
+		unlockCopy.setText("Please enter your passphrase to enable your gridnodes. "
+			+ "If your wallet was staking you will need to enable again after the task completes.");
+	}
 
 	@FXML
 	private void onCancelLockPressed(MouseEvent event) {
@@ -151,6 +160,8 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 				if (wallet.getUnlockState() == 3) {
 					// send transaction
 					window.getWalletController().sendTransactionAfterUnlock();
+				} else if (wallet.getUnlockState() == 4){
+					window.getNodeController().startMissingNodes();
 				}
 				if (wallet.getUnlockState() != 1) {
 					wallet.setLocked(Boolean.FALSE);
