@@ -30,6 +30,7 @@ import org.unigrid.janus.model.rpc.entity.BlockCount;
 import org.unigrid.janus.model.rpc.entity.ConnectionCount;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.ListAddressGroupings;
+import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.WalletInfo;
 import org.unigrid.janus.model.service.RPCService;
@@ -102,6 +103,8 @@ public class Janus extends BaseApplication {
 			debug.log(rpc.callToJson(new Balance.Request()));
 
 			debug.log(rpc.callToJson(new ConnectionCount.Request()));
+
+			debug.log(rpc.callToJson(new ListTransactions.Request(0, 10)));
 
 			debug.log(rpc.callToJson(new ListAddressGroupings.Request()));
 

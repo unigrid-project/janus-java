@@ -105,7 +105,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		Platform.runLater(() -> {
 			try {
 				debug.log("Shown event executing.");
-				// loadWalletPreviewTrans();
+				window.getTransactionsController().onShown();
 			} catch (Exception e) {
 				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
 			}

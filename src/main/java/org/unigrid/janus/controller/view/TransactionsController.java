@@ -16,19 +16,27 @@
 
 package org.unigrid.janus.controller.view;
 
+import java.awt.Desktop;
+import java.net.URI;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
 import javafx.util.Callback;
 import javafx.fxml.FXML;
-import javafx.application.Platform;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.geometry.Orientation;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javafx.beans.value.ObservableValue;
@@ -38,6 +46,7 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.TransactionList;
+import org.unigrid.janus.model.TransactionList.LoadReport;
 
 public class TransactionsController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
@@ -56,16 +65,23 @@ public class TransactionsController implements Initializable, PropertyChangeList
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
 		debug.log("Initializing transactions");
+		window.setTransactionsController(this);
 		transList.addPropertyChangeListener(this);
 		setupTransactions();
-		Platform.runLater(() -> {
-			try {
-				debug.log("Loading transactions");
-				loadTransactions(0);
-			} catch (Exception e) {
-				debug.log(String.format("ERROR: (trans init) %s", e.getMessage()));
+	}
+
+	public void onShown() {
+		try {
+			debug.log("Loading transactions");
+			loadTransactions(0);
+			ScrollBar bar = getVerticalScrollbar(tblTransactions);
+			debug.log(String.format("Was scrollbar found: %b", (bar != null)));
+			if (bar != null) {
+				bar.valueProperty().addListener(this::scrolled);
 			}
-		});
+		} catch (Exception e) {
+			debug.log(String.format("ERROR: (transactions shown) %s", e.getMessage()));
+		}
 	}
 
 	private void setupTransactions() {
@@ -81,20 +97,71 @@ public class TransactionsController implements Initializable, PropertyChangeList
 					}
 				});
 			colTransType.setCellValueFactory(
-				new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
-					public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
+				new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
+					public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
 						Transaction trans = t.getValue();
-						if (trans.isGenerated()) {
-							return new ReadOnlyStringWrapper(String.format("%s:%s",
-								                             trans.getCategory(),
-								                             trans.getGeneratedfrom()));
-						} else {
-							return new ReadOnlyStringWrapper(trans.getCategory());
+						String text = trans.getCategory();
+						if (trans.getCategory().equals("multipart")) {
+							text = "More details";
+						} else if (trans.isGenerated()) {
+							text = String.format("%s:%s",
+								trans.getCategory(),
+								trans.getGeneratedfrom());
 						}
+						Hyperlink link = new Hyperlink();
+						link.setText(text);
+						link.setOnAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent e) {
+								try {
+									if (Desktop.isDesktopSupported()
+										&& Desktop.getDesktop().isSupported(
+											Desktop.Action.BROWSE)) {
+										Desktop.getDesktop().browse(
+											new URI(
+												"https://explorer"
+												+ ".unigrid.org/tx/"
+												+ trans.getTxid()));
+									}
+								} catch (Exception ex) {
+									debug.log(String.format(
+										"ERROR: (transaction txid) %s",
+										ex.getMessage()));
+								}
+							}
+						});
+						return new ReadOnlyObjectWrapper(link);
 					}
 				});
 			colTransAddress.setCellValueFactory(
-				new PropertyValueFactory<Transaction, String>("address"));
+				new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
+					public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
+						Hyperlink link = new Hyperlink();
+						Transaction trans = t.getValue();
+						link.setText(trans.getAddress());
+						link.setOnAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent e) {
+								try {
+									if (Desktop.isDesktopSupported()
+										&& Desktop.getDesktop().isSupported(
+											Desktop.Action.BROWSE)) {
+										Desktop.getDesktop().browse(
+											new URI(
+												"https://explorer"
+												+ ".unigrid.org/address/"
+												+ trans.getAddress()));
+									}
+								} catch (Exception ex) {
+									debug.log(String.format(
+										"ERROR: (transaction address) %s",
+										ex.getMessage()));
+								}
+							}
+						});
+						return new ReadOnlyObjectWrapper(link);
+					}
+				});
 			colTransAmount.setCellValueFactory(
 				new PropertyValueFactory<Transaction, Double>("amount"));
 		} catch (Exception e) {
@@ -104,15 +171,35 @@ public class TransactionsController implements Initializable, PropertyChangeList
 
 	public void loadTransactions(int page) {
 		ListTransactions trans = rpc.call(new ListTransactions.Request(page * 100, 100),
-			                                     ListTransactions.class);
+												 ListTransactions.class);
 		transList.setTransactions(trans, 0);
-		/* ObservableList<Transaction> transactions = FXCollections.observableArrayList();
+	}
 
-		for (Transaction t : trans.getResult()) {
-			transactions.add(t);
+	private ScrollBar getVerticalScrollbar(TableView<?> table) {
+		ScrollBar result = null;
+		for (Node n : table.lookupAll(".scroll-bar")) {
+			if (n instanceof ScrollBar) {
+				ScrollBar bar = (ScrollBar) n;
+				if (bar.getOrientation().equals(Orientation.VERTICAL)) {
+					result = bar;
+				}
+			}
 		}
+		return result;
+	}
 
-		tblTransactions.setItems(transactions); */
+	private void scrolled(ObservableValue<? extends Number> observable,
+		Number oldValue,
+		Number newValue) {
+		double value = newValue.doubleValue();
+		debug.log("Scrolled to " + value);
+		ScrollBar bar = getVerticalScrollbar(tblTransactions);
+		if (value == bar.getMax()) {
+			debug.log("Adding new transactions.");
+			// TODO: put logic in to modify scroll position
+			LoadReport report = transList.loadTransactions(40);
+			bar.setValue(value * report.getOldSize() / report.getNewSize());
+		}
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
