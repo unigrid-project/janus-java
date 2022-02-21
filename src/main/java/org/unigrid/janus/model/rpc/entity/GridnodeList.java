@@ -12,27 +12,32 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-module org.unigrid.janus {
-	requires static lombok;
-	requires javafx.controls;
-	requires javafx.graphics;
-	requires javafx.fxml;
-	requires org.apache.commons.lang3;
-	requires org.apache.commons.configuration2;
-	requires java.annotation;
-	requires java.desktop;
-	requires java.prefs;
-	requires java.naming;
-	requires jakarta.annotation;
-	requires jakarta.cdi;
-	requires jakarta.inject;
-	requires jakarta.json.bind;
-	requires jakarta.ws.rs;
-	requires com.sun.jna.platform;
-	requires com.sun.jna;
-	requires jersey.client;
-	requires org.kordamp.ikonli.javafx;
-	requires jsch;
+package org.unigrid.janus.model.rpc.entity;
+
+import java.util.List;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.unigrid.janus.model.Gridnode;
+
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class GridnodeList extends BaseResult<List<GridnodeList.Result>> {
+
+	private static final String METHOD = "masternode";
+
+	// masternode <start|start-alias|start-many|stop|stop-alias|stop-many|list|list-conf|
+	// count|debug|current|winners|genkey|enforce|outputs> [passphrase]
+	public static class Request extends BaseRequest {
+		public Request(Object[] args) {
+			super(METHOD);
+			this.setParams(args);
+		}
+	}
+
+	@Data
+	public static class Result extends Gridnode {
+
+	}
 }

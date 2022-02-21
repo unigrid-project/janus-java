@@ -20,7 +20,7 @@
                </HBox.margin>
             </Label>
          </children></HBox>
-      <FontIcon fx:id="spinner" iconColor="WHITE" iconLiteral="fas-spinner" iconSize="20" styleClass="spinner" visible="false">
+      <FontIcon fx:id="spinner" iconColor="WHITE" iconLiteral="fas-spinner" iconSize="20" styleClass="spinner">
          <HBox.margin>
             <Insets top="8.0" />
          </HBox.margin>
