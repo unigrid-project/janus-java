@@ -80,6 +80,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	public void initialize(URL url, ResourceBundle rb) {
 		setupNodeList();
 		nodes.addPropertyChangeListener(this);
+		wallet.addPropertyChangeListener(this);
 		window.setNodeController(this);
 		Platform.runLater(() -> {
 			try {
@@ -90,8 +91,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 						//vpsOutput.setScrollTop(Double.MIN_VALUE);   //down
 					}
 				});
-				debug.log("Loading gridnode list");
-				this.getNodeList();
+				// this.getNodeList();
 			} catch (Exception e) {
 				debug.log(String.format("ERROR: (gridnode init) %s", e.getMessage()));
 			}
@@ -119,6 +119,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	}
 
 	private void getNodeList() {
+		debug.log("Loading gridnode list");
 		window.getWindowBarController().startSpinner();
 		GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
 		nodes.setGridnodes(result);
@@ -229,6 +230,12 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(nodes.GRIDNODE_LIST)) {
 			tblGridnodes.setItems(nodes.getGridnodes());
+		}
+		// after wallet is done loading, load the gridnodes.
+		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
+			if (!wallet.isLoading()) {
+				getNodeList();
+			}
 		}
 	}
 }

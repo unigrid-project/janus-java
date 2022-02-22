@@ -187,6 +187,16 @@ public class Wallet {
 		return this.status;
 	}
 
+	public boolean isLoading() {
+		boolean result = true;
+		if (this.status != null) {
+			if (this.status.equals("Done loading")) {
+				result = false;
+			}
+		}
+		return result;
+	}
+
 	public void setStatus(String newValue) {
 		String oldValue = this.status;
 		this.status = newValue;

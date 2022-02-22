@@ -23,28 +23,28 @@ import jakarta.inject.Inject;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
-import org.unigrid.janus.model.DataDirectory;
+// import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.service.Daemon;
-import org.unigrid.janus.model.rpc.entity.Balance;
-import org.unigrid.janus.model.rpc.entity.BlockCount;
-import org.unigrid.janus.model.rpc.entity.ConnectionCount;
-import org.unigrid.janus.model.rpc.entity.Info;
-import org.unigrid.janus.model.rpc.entity.ListAddressGroupings;
-import org.unigrid.janus.model.rpc.entity.ListTransactions;
-import org.unigrid.janus.model.rpc.entity.StakingStatus;
-import org.unigrid.janus.model.rpc.entity.WalletInfo;
+// import org.unigrid.janus.model.rpc.entity.Balance;
+// import org.unigrid.janus.model.rpc.entity.BlockCount;
+// import org.unigrid.janus.model.rpc.entity.ConnectionCount;
+// import org.unigrid.janus.model.rpc.entity.Info;
+// import org.unigrid.janus.model.rpc.entity.ListAddressGroupings;
+// import org.unigrid.janus.model.rpc.entity.ListTransactions;
+// import org.unigrid.janus.model.rpc.entity.StakingStatus;
+// import org.unigrid.janus.model.rpc.entity.WalletInfo;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 import javafx.scene.control.ListView;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+// import jakarta.json.bind.Jsonb;
+// import jakarta.json.bind.JsonbBuilder;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
-import org.unigrid.janus.model.rpc.entity.GridnodeList;
-import org.unigrid.janus.model.rpc.entity.UnlockWallet;
+// import org.unigrid.janus.model.rpc.entity.GridnodeList;
+// import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 
 @ApplicationScoped
 public class Janus extends BaseApplication {
@@ -92,7 +92,7 @@ public class Janus extends BaseApplication {
 			mainWindow.bindDebugListViewWidth(0.98);
 			debug.setListView((ListView) window.lookup("lstDebug"));
 
-			final Info info = rpc.call(new Info.Request(), Info.class);
+			/*final Info info = rpc.call(new Info.Request(), Info.class);
 			Jsonb jsonb = JsonbBuilder.create();
 			String result = String.format("Info result: %s", jsonb.toJson(info.getResult()));
 
@@ -120,7 +120,7 @@ public class Janus extends BaseApplication {
 
 			debug.log(rpc.callToJson(new GridnodeList.Request(new Object[] {"list-conf"})));
 			debug.log("Trying to start masternodes:");
-			debug.log(rpc.callToJson(new GridnodeList.Request(new Object[] {"start-missing", "0"})));
+			debug.log(rpc.callToJson(new GridnodeList.Request(new Object[] {"start-missing", "0"})));*/
 			// poll info call every 30 seconds
 			rpc.pollForInfo(30 * 1000);
 		} catch (Exception e) {
