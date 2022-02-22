@@ -60,11 +60,12 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		debug.log("Window Bar change fired!");
 		if (event.getPropertyName().equals(wallet.MONEYSUPPLY_PROPERTY)) {
+			String sValue = String.format("%.8f", (double) event.getNewValue());
+			debug.log(String.format("Money supply: %s", sValue));
 			Label supply = (Label) window.lookup("txtSupply");
 			if (supply != null) {
-				supply.setText(String.format("%.8f", (double) event.getNewValue()));
+				supply.setText(sValue);
 			}
 		}
 		if (event.getPropertyName().equals(wallet.PROCESSING_PROPERTY)) {

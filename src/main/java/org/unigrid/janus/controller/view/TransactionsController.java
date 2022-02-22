@@ -42,6 +42,7 @@ import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Transaction;
+import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.TransactionList;
 import org.unigrid.janus.model.TransactionList.LoadReport;
@@ -50,6 +51,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static TransactionList transList = new TransactionList();
+	private static Wallet wallet = new Wallet();
 	private static WindowService window = new WindowService();
 
 	// transactions table
@@ -65,18 +67,14 @@ public class TransactionsController implements Initializable, PropertyChangeList
 		debug.log("Initializing transactions");
 		window.setTransactionsController(this);
 		transList.addPropertyChangeListener(this);
+		wallet.addPropertyChangeListener(this);
 		setupTransactions();
 	}
 
 	public void onShown() {
 		try {
-			debug.log("Loading transactions");
-			loadTransactions(0);
-			ScrollBar bar = getVerticalScrollbar(tblTransactions);
-			debug.log(String.format("Was scrollbar found: %b", (bar != null)));
-			if (bar != null) {
-				bar.valueProperty().addListener(this::scrolled);
-			}
+			// TODO: anything to render after the app is shown (not transactions tab)
+			debug.log("Transactions shown called.");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (transactions shown) %s", e.getMessage()));
 		}
@@ -144,6 +142,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 	}
 
 	public void loadTransactions(int page) {
+		debug.log("Loading transactions");
 		ListTransactions trans = rpc.call(new ListTransactions.Request(page * 100, 100),
 												 ListTransactions.class);
 		transList.setTransactions(trans, 0);
@@ -166,11 +165,9 @@ public class TransactionsController implements Initializable, PropertyChangeList
 		Number oldValue,
 		Number newValue) {
 		double value = newValue.doubleValue();
-		debug.log("Scrolled to " + value);
 		ScrollBar bar = getVerticalScrollbar(tblTransactions);
 		if (value == bar.getMax()) {
 			debug.log("Adding new transactions.");
-			// TODO: put logic in to modify scroll position
 			LoadReport report = transList.loadTransactions(40);
 			bar.setValue(value * report.getOldSize() / report.getNewSize());
 		}
@@ -180,6 +177,18 @@ public class TransactionsController implements Initializable, PropertyChangeList
 		if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
 			debug.log("Transactions list changed");
 			tblTransactions.setItems(transList.getTransactions());
+			ScrollBar bar = getVerticalScrollbar(tblTransactions);
+			debug.log(String.format("Was scrollbar found: %b", (bar != null)));
+			if (bar != null) {
+				bar.valueProperty().addListener(this::scrolled);
+			}
+		}
+		// after wallet is done loading, load the transactions.
+		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
+			if (!wallet.isLoading()
+				&& transList.getTransactions().size() == 0) {
+				loadTransactions(0);
+			}
 		}
 	}
 }
