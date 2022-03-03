@@ -12,7 +12,7 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.controller.view;
 
@@ -20,6 +20,7 @@ import java.net.URL;
 import java.io.File;
 import java.util.ResourceBundle;
 import java.util.Optional;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
@@ -31,6 +32,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Border;
@@ -44,6 +46,8 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.rpc.entity.DumpWallet;
 import org.unigrid.janus.model.rpc.entity.BackupWallet;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.rpc.entity.EncryptWallet;
+import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 
 public class SettingsController implements Initializable {
 	private static DebugService debug = new DebugService();
@@ -67,10 +71,35 @@ public class SettingsController implements Initializable {
 	@FXML private Button btnUpdatePassphrase;
 	@FXML private TextArea taPassphrase;
 	@FXML private TextArea taRepeatPassphrase;
+	@FXML private Label txtPassphraseOne;
+	@FXML private Label txtPassphraseTwo;
+	@FXML private Label txtPassWarningOne;
+	@FXML private Label txtPassWarningTwo;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		/* Empty on purpose */
+		Platform.runLater(() -> {
+			try {
+				if (wallet.getEncrypted()) {
+					txtPassphraseOne.setText("Old Passphrase");
+					txtPassphraseTwo.setText("New Passphrase");
+					txtPassWarningOne.setText("Update and change your wallets passphrase.");
+					txtPassWarningTwo.setText("Please be sure to backup "
+						+ "your passphrase in a safe location.");
+				} else {
+					txtPassphraseOne.setText("Passphrase");
+					txtPassphraseTwo.setText("Repeat passphrase");
+					txtPassWarningOne.setText("Warning! This will encrypt your "
+						+ "wallet with a passphrase. "
+						+ "Write down your passphrase and keep it safe.");
+					txtPassWarningTwo.setText("If you have not backed up your "
+						+ "wallet yet please do so first. An automatic wallet restart "
+						+ "will also be performed.");
+				}
+			} catch (Exception e) {
+				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
+			}
+		});
 	}
 
 	private void settingSelected(int tab) {
@@ -80,18 +109,24 @@ public class SettingsController implements Initializable {
 		pnlSetExport.setVisible(false);
 		pnlSetDebug.setVisible(false);
 		switch (tab) {
-			case TAB_SETTINGS_GENERAL: pnlSetGeneral.setVisible(true);
-						break;
-			case TAB_SETTINGS_DISPLAY: pnlSetDisplay.setVisible(true);
-						break;
-			case TAB_SETTINGS_PASSPHRASE: pnlSetPassphrase.setVisible(true);
-						break;
-			case TAB_SETTINGS_EXPORT: pnlSetExport.setVisible(true);
-						break;
-			case TAB_SETTINGS_DEBUG: pnlSetDebug.setVisible(true);
-						break;
-			default: pnlSetDebug.setVisible(true);
-						break;
+			case TAB_SETTINGS_GENERAL:
+				pnlSetGeneral.setVisible(true);
+				break;
+			case TAB_SETTINGS_DISPLAY:
+				pnlSetDisplay.setVisible(true);
+				break;
+			case TAB_SETTINGS_PASSPHRASE:
+				pnlSetPassphrase.setVisible(true);
+				break;
+			case TAB_SETTINGS_EXPORT:
+				pnlSetExport.setVisible(true);
+				break;
+			case TAB_SETTINGS_DEBUG:
+				pnlSetDebug.setVisible(true);
+				break;
+			default:
+				pnlSetDebug.setVisible(true);
+				break;
 		}
 
 	}
@@ -123,22 +158,44 @@ public class SettingsController implements Initializable {
 
 	@FXML
 	private void onLock(MouseEvent event) {
-		debug.log("Update passphrase clicked!");
 		try {
 			Dialog<ButtonType> dialog = new Dialog<ButtonType>();
 			dialog.setTitle("Confirmation");
-			dialog.setHeaderText("Be sure that you have saved the passphrase.\n"
-								  + "Are you sure you're ready to lock your wallet now?\n"
-				 				  + "This cannot be undone without your passphrase.");
+			dialog.setHeaderText("Be sure that you have saved the passphrase somewhere secure.\n"
+				+ "A wallet restart will be performed to encrypt your wallet.\n"
+				+ "This cannot be undone without your passphrase.");
 			ButtonType btnYes = new ButtonType("Yes", ButtonData.YES);
 			ButtonType btnNo = new ButtonType("No", ButtonData.NO);
 			dialog.getDialogPane().getButtonTypes().add(btnYes);
 			dialog.getDialogPane().getButtonTypes().add(btnNo);
 			dialog.getDialogPane().getStylesheets().add("/org/unigrid/janus/view/main.css");
 			Optional<ButtonType> response = dialog.showAndWait();
-			debug.log(String.format("Response: %s", response.get()));
 			if (response.isPresent()) {
 				if (response.get() == btnYes) {
+
+					// IF WALLET IS ALREADY ENCRYPTED THE CALL MUST BE
+					// MADE TO walletpassphrasechange
+					// walletpassphrasechange "oldpassphrase" "newpassphrase"
+					if (wallet.getEncrypted()) {
+						final UpdatePassphrase update = rpc.call(
+							new UpdatePassphrase.Request(taPassphrase.getText(),
+								taRepeatPassphrase.getText()),
+							UpdatePassphrase.class
+						);
+
+					} else {
+						final EncryptWallet encrypt = rpc.call(
+							new EncryptWallet.Request(new Object[]{taPassphrase.getText()}),
+							EncryptWallet.class
+						);
+
+						//TODO
+						//THIS IS ONLY NEEDED FOR THE INITIAL ENCRYPTION
+						//SHOW LOAD SCREEN WHILE DAEMON STOPS
+						//PAUSE CALLS TO THE DAEMON
+						//CALL unigridd TO RESTART AGAIN
+						//window.getMainWindowController().showSplash();
+					}
 					taPassphrase.setText("");
 					taRepeatPassphrase.setText("");
 					taRepeatPassphrase.setBorder(new Border(
@@ -146,7 +203,7 @@ public class SettingsController implements Initializable {
 							BorderStrokeStyle.SOLID,
 							new CornerRadii(3),
 							new BorderWidths(1))));
-					wallet.setLocked(true);
+					//wallet.setLocked(true);
 				}
 			}
 		} catch (Exception e) {
@@ -158,20 +215,24 @@ public class SettingsController implements Initializable {
 	private void onRepeatPassphraseChange(KeyEvent event) {
 		// debug.log("passphrase change event fired!");
 		try {
-			if (taPassphrase.getText().equals(taRepeatPassphrase.getText())) {
-				taRepeatPassphrase.setBorder(new Border(
+			if (wallet.getEncrypted() && taRepeatPassphrase.getText() != "") {
+				btnUpdatePassphrase.setDisable(false);
+			} else {
+				if (taPassphrase.getText().equals(taRepeatPassphrase.getText())) {
+					taRepeatPassphrase.setBorder(new Border(
 						new BorderStroke(Color.web("#1dab00"),
 							BorderStrokeStyle.SOLID,
 							new CornerRadii(3),
 							new BorderWidths(1))));
-				btnUpdatePassphrase.setDisable(false);
-			} else {
-				taRepeatPassphrase.setBorder(new Border(
+					btnUpdatePassphrase.setDisable(false);
+				} else {
+					taRepeatPassphrase.setBorder(new Border(
 						new BorderStroke(Color.RED,
 							BorderStrokeStyle.SOLID,
 							new CornerRadii(3),
 							new BorderWidths(1))));
-				btnUpdatePassphrase.setDisable(true);
+					btnUpdatePassphrase.setDisable(true);
+				}
 			}
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (passphrase change) %s", e.getMessage()));
