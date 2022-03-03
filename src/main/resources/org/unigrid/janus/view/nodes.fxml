@@ -101,7 +101,7 @@
                               <PTableColumn fx:id="colNodeStart" editable="false" percentageWidth="0.15" prefWidth="85.0" sortable="false" text="Start" />
                            </columns>
                            <VBox.margin>
-                              <Insets bottom="5.0" left="5.0" right="5.0" />
+                              <Insets />
                            </VBox.margin>
                         </TableView>
                      </children>

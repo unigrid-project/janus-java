@@ -41,19 +41,19 @@
                   </VBox>
                   <VBox fx:id="pnlSetPassphrase" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <Label layoutX="26.0" layoutY="18.0" text="Warning! This will encrypt your wallet with a passphrase. Write down your passphrase and keep it safe." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
+                        <Label fx:id="txtPassWarningOne" layoutX="26.0" layoutY="18.0" text="Warning! This will encrypt your wallet with a passphrase. Write down your passphrase and keep it safe." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
                            <VBox.margin>
                               <Insets bottom="8.0" />
                            </VBox.margin>
                         </Label>
-                        <Label text="If you have not backed up your wallet yet please do so first. An automatic wallet restart will also be performed." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
+                        <Label fx:id="txtPassWarningTwo" text="If you have not backed up your wallet yet please do so first. An automatic wallet restart will also be performed." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
                            <VBox.margin>
                               <Insets bottom="8.0" />
                            </VBox.margin>
                         </Label>
                         <AnchorPane>
                            <children>
-                              <Label alignment="CENTER" contentDisplay="RIGHT" graphicTextGap="8.0" text="Passphrase" textFill="#ee7722" AnchorPane.leftAnchor="0.0">
+                              <Label fx:id="txtPassphraseOne" alignment="CENTER" contentDisplay="RIGHT" graphicTextGap="8.0" text="Passphrase" textFill="#ee7722" AnchorPane.leftAnchor="0.0">
                                  <font>
                                     <Font size="14.0" />
                                  </font>
@@ -70,7 +70,7 @@
                               <Insets bottom="8.0" />
                            </VBox.margin>
                         </TextArea>
-                        <Label text="Repeat passphrase" textFill="#ee7722">
+                        <Label fx:id="txtPassphraseTwo" text="Repeat passphrase" textFill="#ee7722">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -172,14 +172,6 @@
                      <toggleGroup>
                         <ToggleGroup fx:id="settings" />
                      </toggleGroup>
-                     <VBox.margin>
-                        <Insets bottom="4.0" />
-                     </VBox.margin>
-                     <padding>
-                        <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
-                     </padding>
-                  </ToggleButton>
-                  <ToggleButton alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetDisplayTap" prefWidth="100.0" text="Display" toggleGroup="$settings">
                      <VBox.margin>
                         <Insets bottom="4.0" />
                      </VBox.margin>
