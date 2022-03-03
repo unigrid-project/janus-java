@@ -21,13 +21,13 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class EncryptWallet extends BaseResult<EncryptWallet.Result> {
-	private static final String METHOD = "encryptwallet";
+public class UpdatePassphrase extends BaseResult<UpdatePassphrase.Result> {
+	private static final String METHOD = "walletpassphrasechange";
 
 	public static class Request extends BaseRequest {
-		public Request(Object[] args) {
+		public Request(String oldpassphrase, String newpassphrase) {
 			super(METHOD);
-			this.setParams(args);
+			this.setParams(new Object[]{oldpassphrase, newpassphrase});
 		}
 	}
 

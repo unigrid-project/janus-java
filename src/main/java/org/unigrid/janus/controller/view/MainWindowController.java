@@ -246,6 +246,14 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		pnlOverlay.setVisible(false);
 	}
 
+	public void showSplash() {
+		pnlSplash.setVisible(true);
+	}
+
+	public void hideSpalsh() {
+		pnlSplash.setVisible(false);
+	}
+
 	@FXML
 	private void onLockPressed(MouseEvent event) {
 		if (!wallet.getLocked()) {
@@ -257,6 +265,9 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@FXML
 	private void onUnlockPressed(MouseEvent event) {
+		if (!wallet.getLocked()) {
+			return;
+		}
 		wallet.setLocked(Boolean.TRUE);
 		final LockWallet call = rpc.call(new LockWallet.Request(), LockWallet.class);
 	}
