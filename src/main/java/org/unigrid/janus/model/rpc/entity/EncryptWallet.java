@@ -25,9 +25,9 @@ public class EncryptWallet extends BaseResult<EncryptWallet.Result> {
 	private static final String METHOD = "encryptwallet";
 
 	public static class Request extends BaseRequest {
-		public Request(String passphrase) {
+		public Request(Object[] args) {
 			super(METHOD);
-			this.setParams(new Object[]{passphrase});
+			this.setParams(args);
 		}
 	}
 
