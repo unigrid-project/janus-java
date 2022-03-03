@@ -83,7 +83,7 @@ public class Janus extends BaseApplication {
 			Jsonb jsonb = JsonbBuilder.create();
 			String result = String.format("Info result: %s", jsonb.toJson(info.getResult()));
 			debug.log(result);
-			*/
+      */
 			// poll info call every 30 seconds
 			rpc.pollForInfo(30 * 1000);
 		} catch (Exception e) {

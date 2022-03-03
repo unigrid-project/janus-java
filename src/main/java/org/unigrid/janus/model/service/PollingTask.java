@@ -37,15 +37,19 @@ public class PollingTask extends TimerTask {
 
 	public void run() {
 		Platform.runLater(() -> {
-			//debug.log(rpc.callToJson(new Info.Request()));
+			debug.log(rpc.callToJson(new Info.Request()));
 			wallet.setProcessingStatus();
 			final Info info = rpc.call(new Info.Request(), Info.class);
 			String sInfo = jsonb.toJson(info);
 			debug.log(sInfo);
 			wallet.setInfo(info);
-			final StakingStatus staking = rpc.call(new StakingStatus.Request(), StakingStatus.class);
-			wallet.setStakingStatus(staking);
-			debug.log(rpc.callToJson(new StakingStatus.Request()));
+			if (!wallet.isLoading()) {
+				final StakingStatus staking = rpc.call(new StakingStatus.Request(), StakingStatus.class);
+				wallet.setStakingStatus(staking);
+				debug.log(rpc.callToJson(new StakingStatus.Request()));
+			} else {
+				debug.log("Wallet loading, polling calls deferred.");
+			}
 		});
 	}
 }

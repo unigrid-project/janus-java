@@ -182,8 +182,6 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		// debug.log("Wallet property change fired!");
-		// debug.log(event.getPropertyName());
 		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
 			debug.log(String.format("Value: %.8f", (double) event.getNewValue()));
 			lblBalance.setText(String.format("%.8f", (double) event.getNewValue()));
@@ -195,7 +193,6 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		}
 		if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
 			ObservableList<Transaction> list = transList.getLatestTransactions(10);
-			debug.log(String.format("Wallet transactions: %d", list.size()));
 			tblWalletTrans.setItems(list);
 		}
 	}

@@ -112,12 +112,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		});
 	}
 
-	@FXML
-	private void onGetAddress(MouseEvent event) {
-		debug.log("Get address clicked!");
-		// debug.log(rpc.callToJson(new NewAddress.Request("Wilcokat007")));
-	}
-
 	private void tabSelect(int tab) {
 		btnWallet.setSelected(false);
 		btnTransactions.setSelected(false);
@@ -156,8 +150,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private void onWalletTap(MouseEvent event) {
 		try {
 			tabSelect(TAB_WALLET);
-			// loadWalletPreviewTrans();
-			debug.log("Wallet clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (wallet click) %s", e.getMessage()));
 		}
@@ -167,8 +159,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private void onTransactionsTap(MouseEvent event) {
 		try {
 			tabSelect(TAB_TRANSACTIONS);
-			// loadTransactions(1);
-			debug.log("Transactions clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (transactions click) %s", e.getMessage()));
 		}
@@ -178,7 +168,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private void onNodesTap(MouseEvent event) {
 		try {
 			tabSelect(TAB_NODES);
-			debug.log("Nodes clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (nodes click) %s", e.getMessage()));
 		}
@@ -188,14 +177,13 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private void onSettingsTap(MouseEvent event) {
 		try {
 			tabSelect(TAB_SETTINGS);
-			debug.log("Settings clicked!");
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (settings click) %s", e.getMessage()));
 		}
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		debug.log("Main Window change fired!");
+		debug.log("Property changed:");
 		debug.log(event.getPropertyName());
 		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
 			String blocks = String.format("Blocks: %d", (int) event.getNewValue());
