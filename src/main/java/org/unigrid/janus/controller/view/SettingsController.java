@@ -80,28 +80,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		wallet.addPropertyChangeListener(this);
-		/*Platform.runLater(() -> {
-			try {
-				if (wallet.getEncrypted()) {
-					txtPassphraseOne.setText("Old Passphrase");
-					txtPassphraseTwo.setText("New Passphrase");
-					txtPassWarningOne.setText("Update and change your wallets passphrase.");
-					txtPassWarningTwo.setText("Please be sure to backup "
-						+ "your passphrase in a safe location.");
-				} else {
-					txtPassphraseOne.setText("Passphrase");
-					txtPassphraseTwo.setText("Repeat passphrase");
-					txtPassWarningOne.setText("Warning! This will encrypt your "
-						+ "wallet with a passphrase. "
-						+ "Write down your passphrase and keep it safe.");
-					txtPassWarningTwo.setText("If you have not backed up your "
-						+ "wallet yet please do so first. An automatic wallet restart "
-						+ "will also be performed.");
-				}
-			} catch (Exception e) {
-				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
-			}
-		});*/
+		window.setSettingsController(this);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -277,6 +256,15 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML
 	private void onDumpWallet(MouseEvent event) {
 		debug.log("Dump wallet clicked!");
+		// check for encrypted wallet
+		if (wallet.getLocked()) {
+			window.getMainWindowController().unlockForDump();
+		} else {
+			dumpKeys();
+		}
+	}
+
+	public void dumpKeys() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Export");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
