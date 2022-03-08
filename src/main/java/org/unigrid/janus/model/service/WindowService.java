@@ -30,6 +30,7 @@ import org.unigrid.janus.controller.view.NodesController;
 import org.unigrid.janus.controller.view.WalletController;
 import org.unigrid.janus.controller.view.TransactionsController;
 import org.unigrid.janus.controller.view.OverlayController;
+import org.unigrid.janus.controller.view.SettingsController;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @ApplicationScoped
@@ -42,6 +43,7 @@ public class WindowService {
 	private static OverlayController olController;
 	private static NodesController noController;
 	private static TransactionsController transController;
+	private static SettingsController settingsController;
 
 	public Stage getStage() {
 		return this.stage;
@@ -128,6 +130,14 @@ public class WindowService {
 
 	public void setTransactionsController(TransactionsController controller) {
 		this.transController = controller;
+	}
+
+	public SettingsController getSettingsController() {
+		return this.settingsController;
+	}
+
+	public void setSettingsController(SettingsController controller) {
+		this.settingsController = controller;
 	}
 
 	public void notifyIfError(BaseResult result) {

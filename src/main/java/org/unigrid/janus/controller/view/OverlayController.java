@@ -107,6 +107,15 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 			+ "If your wallet was staking you will need to enable again after the task completes.");
 	}
 
+	public void startUnlockForDump() {
+		debug.log("UNLOCK FOR DUMP");
+		wallet.setUnlockState(5);
+		pnlUnlock.setVisible(true);
+		submitBtn.setText("EXPORT");
+		unlockCopy.setText("Please enter your passphrase to export your private keys. "
+			+ "If your wallet was staking you will need to enable again after the task completes.");
+	}
+
 	@FXML
 	private void onCancelLockPressed(MouseEvent event) {
 		closeUnlockOverlay();
@@ -127,6 +136,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 				break;
 			case 3:
 			case 4:
+			case 5:
 				// unlock for 30 seconds only
 				sendArgs = new Object[]{passphraseInput.getText(), 30};
 				break;
@@ -162,6 +172,8 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 					window.getWalletController().sendTransactionAfterUnlock();
 				} else if (wallet.getUnlockState() == 4) {
 					window.getNodeController().startMissingNodes();
+				} else if (wallet.getUnlockState() == 5) {
+					window.getSettingsController().dumpKeys();
 				}
 				if (wallet.getUnlockState() != 1) {
 					wallet.setLocked(Boolean.FALSE);
