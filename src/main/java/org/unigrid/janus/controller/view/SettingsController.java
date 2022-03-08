@@ -16,11 +16,12 @@
 
 package org.unigrid.janus.controller.view;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.io.File;
 import java.util.ResourceBundle;
 import java.util.Optional;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
@@ -49,7 +50,7 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.EncryptWallet;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 
-public class SettingsController implements Initializable {
+public class SettingsController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
@@ -78,7 +79,8 @@ public class SettingsController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		Platform.runLater(() -> {
+		wallet.addPropertyChangeListener(this);
+		/*Platform.runLater(() -> {
 			try {
 				if (wallet.getEncrypted()) {
 					txtPassphraseOne.setText("Old Passphrase");
@@ -99,7 +101,29 @@ public class SettingsController implements Initializable {
 			} catch (Exception e) {
 				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
 			}
-		});
+		});*/
+	}
+
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getPropertyName().equals(wallet.ENCRYPTED_STATUS)) {
+			if (wallet.getEncrypted()) {
+				debug.log(String.format("wallet.getEncrypted(): %s", wallet.getEncrypted()));
+				txtPassphraseOne.setText("Old Passphrase");
+				txtPassphraseTwo.setText("New Passphrase");
+				txtPassWarningOne.setText("Update and change your wallets passphrase.");
+				txtPassWarningTwo.setText("Please be sure to backup "
+					+ "your passphrase in a safe location.");
+			} else {
+				txtPassphraseOne.setText("Passphrase");
+				txtPassphraseTwo.setText("Repeat passphrase");
+				txtPassWarningOne.setText("Warning! This will encrypt your "
+					+ "wallet with a passphrase. "
+					+ "Write down your passphrase and keep it safe.");
+				txtPassWarningTwo.setText("If you have not backed up your "
+					+ "wallet yet please do so first. An automatic wallet restart "
+					+ "will also be performed.");
+			}
+		}
 	}
 
 	private void settingSelected(int tab) {

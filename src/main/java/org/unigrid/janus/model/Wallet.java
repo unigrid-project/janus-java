@@ -37,6 +37,7 @@ public class Wallet {
 	public static final String LOCKED_PROPERTY = "locked";
 	public static final String STAKING_PROPERTY = "staking";
 	public static final String PROCESSING_PROPERTY = "processing";
+	public static final String ENCRYPTED_STATUS = "encrypted";
 	private static double balance;
 	private static double totalbalance;
 	private static double moneysupply;
@@ -50,11 +51,10 @@ public class Wallet {
 	private static Boolean processingStatus = false;
 	private static String status;
 	@Getter @Setter
-	private int unlockState = 0;
+	private static int unlockState = 0;
 	@Getter
 	private static long stakingStartTime = 45126460800000L;
-	@Getter @Setter
-	private Boolean encrypted = false;
+	private static Boolean encrypted;
 	@Getter @Setter
 	private Object[] sendArgs;
 	@Inject
@@ -167,6 +167,16 @@ public class Wallet {
 		this.pcs.firePropertyChange(this.LOCKED_PROPERTY, oldValue, newValue);
 	}
 
+	public void setEncrypted(Boolean newValue) {
+		Boolean oldValue = this.getEncrypted();
+		this.encrypted = newValue;
+		this.pcs.firePropertyChange(this.ENCRYPTED_STATUS, oldValue, newValue);
+	}
+
+	public Boolean getEncrypted() {
+		return this.encrypted;
+	}
+
 	public Boolean getStakingStatus() {
 		return this.isStaking;
 	}
@@ -212,9 +222,9 @@ public class Wallet {
 		//disable processing indicator
 		this.setProcessingStatus();
 		long timestamp = newInfo.getResult().getUnlockUntil();
-		setEncrypted(timestamp != 4999);
+		// only 4999 == an unencrypted wallet
+		this.setEncrypted(timestamp != 4999);
 		//debug.log(String.format("ENCRYPTED: %s", getEncrypted()));
-
 		this.setStatus(newInfo.getResult().getBootstrapping().getWalletstatus());
 		long time = timestamp;
 		Date date = new Date(time);
