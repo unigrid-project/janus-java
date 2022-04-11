@@ -21,8 +21,18 @@ jobs:
         java-version: '16'
         distribution: 'temurin'
         cache: maven
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: download daemon
+      uses: duhow/download-github-release-assets@v1
+      with:
+        repository: unigrid-project/daemon
+        files: unigrid-2.0.1-x86_64-linux-gnu.tar.gz
+        target: unigridd.tar.gz
+    - name: Extract
+      run: | 
+        tar xzvf unigridd.tar.gz
     - run: mkdir staging && cp target/*.* staging   
     - uses: actions/upload-artifact@v3
       with:
