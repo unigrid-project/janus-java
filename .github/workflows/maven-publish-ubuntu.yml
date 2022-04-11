@@ -4,9 +4,7 @@
 name: Maven Package
 
 on:
-  push:
-    tags:
-      - 'release'
+  workflow_dispatch:
 
 jobs:
   build:
