@@ -21,15 +21,17 @@ import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import org.unigrid.janus.model.service.Daemon;
 
 public class ApplicationLoader extends Application {
 	private BaseApplication	application;
-
+	
 	@Override
 	public void init() throws Exception {
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
 		final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
 		application = applicationInstance.get();
+
 	}
 
 	@Override
