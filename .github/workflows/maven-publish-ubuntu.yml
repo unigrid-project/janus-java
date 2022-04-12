@@ -32,10 +32,12 @@ jobs:
         repository: unigrid-project/daemon
         tag: 2.0.1
         files: unigrid-2.0.1-x86_64-linux-gnu.tar.gz
-        target: staging/unigridd.tar.gz
+        target: unigridd.tar.gz
     - name: Extract
       run: | 
-        tar xzvf staging/unigridd.tar.gz
+        tar -x unigridd.tar.gz
+        mkdir staging/daemon
+        cp unigridd staging/daemon
     - uses: actions/upload-artifact@v3
       with:
        name: Package
