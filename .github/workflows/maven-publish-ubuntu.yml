@@ -35,9 +35,7 @@ jobs:
         target: unigridd.tar.gz
     - name: Extract
       run: | 
-        tar -xvf unigridd.tar.gz &&
-        mkdir staging/daemon &&
-        cp unigridd staging/daemon
+        mkdir staging/daemon && tar -xvf unigridd.tar.gz -C staging/daemon
     - uses: actions/upload-artifact@v3
       with:
        name: Package
