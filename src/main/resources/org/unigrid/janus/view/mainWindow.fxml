@@ -82,7 +82,7 @@
                                           <Font size="14.0" />
                                        </font>
                                        <graphic>
-                                          <FontIcon fx:id="transactionIcn" iconLiteral="fas-coins" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5">
+                                          <FontIcon fx:id="transactionIcn" iconLiteral="fas-money-bill-alt" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5">
                                               <iconColor>
                                                 <LinearGradient endX="1.0" endY="1.0">
                                                    <stops>
@@ -135,23 +135,11 @@
                                                 <Insets top="2.0" />
                                              </VBox.margin>
                                              <graphic>
-                                                <FontIcon fx:id="settingsIcn" iconLiteral="fas-wrench" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5">
-                                              <iconColor>
-                                                <LinearGradient endX="1.0" endY="1.0">
-                                                   <stops>
-                                                      <Stop>
-                                                         <color>
-                                                            <Color red="0.8815789222717285" green="0.4282051920890808" blue="0.004081383813172579" />
-                                                         </color>
-                                                      </Stop>
-                                                      <Stop offset="1.0">
-                                                         <color>
-                                                            <Color red="0.8947368264198303" green="0.6130604147911072" blue="0.049707602709531784" />
-                                                         </color>
-                                                      </Stop>
-                                                   </stops>
-                                                </LinearGradient>
-                                             </iconColor></FontIcon>
+                                                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="-2.0">
+                                                   <image>
+                                                      <Image url="@images/settings_icon_03.png" />
+                                                   </image>
+                                                </ImageView>
                                              </graphic>
                                              <tooltip>
                                                 <Tooltip text="Open Settings" />
@@ -279,7 +267,7 @@
                   		<fx:include source="overlays.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS" />
                   	</children>
                   </AnchorPane>
-                  <AnchorPane fx:id="pnlSplash" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" visible="false">
+                  <AnchorPane fx:id="pnlSplash" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
                      <StackPane.margin>
                         <Insets top="36.0" />
                      </StackPane.margin>
