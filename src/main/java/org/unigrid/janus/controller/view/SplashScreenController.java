@@ -13,32 +13,25 @@
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus.controller.view;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ProgressIndicator;
 
-/**
- *
- * @author marcus
- */
 public class SplashScreenController implements Initializable, PropertyChangeListener {
-    
-    
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-	
-    }
+	@Override
+	public void initialize(URL url, ResourceBundle rb) {
 
-    @Override
-    public void propertyChange(PropertyChangeEvent pce) {
+	}
 
-    }
-        
+	@Override
+	public void propertyChange(PropertyChangeEvent pce) {
+
+	}
+
 }

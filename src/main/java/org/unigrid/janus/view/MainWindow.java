@@ -17,6 +17,8 @@
 package org.unigrid.janus.view;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -28,12 +30,18 @@ import org.unigrid.janus.model.service.WindowService;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import org.unigrid.janus.model.event.CloseJanusEvent;
 
 @Dependent
 public class MainWindow implements Window {
+
 	@Inject
 	private Stage stage;
+
 	private WindowService window = new WindowService();
+
+	@Inject
+	private Event<CloseJanusEvent> closeJanusEvent;
 
 	@SneakyThrows
 	public void show() {
@@ -45,14 +53,13 @@ public class MainWindow implements Window {
 			stage.show();
 		} catch (Exception e) {
 			Alert a = new Alert(AlertType.ERROR,
-				  				e.getMessage(),
-				  				ButtonType.OK);
+				e.getMessage(),
+				ButtonType.OK);
 			a.showAndWait();
 		}
 	}
-	
-	public void hide(){
-	    
+
+	public void hide() {
 	}
 
 	public void bindDebugListViewWidth(double multiplier) {
@@ -75,5 +82,11 @@ public class MainWindow implements Window {
 				}
 			}
 		});
+	}
+
+	private void onClose(@Observes Event<CloseJanusEvent> event) {
+		System.out.println("shitpickle");
+		this.stage.setWidth(900);
+		this.stage.hide();
 	}
 }

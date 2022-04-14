@@ -30,6 +30,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.SystemUtils;
 
 public class DataDirectory {
+
 	private static final String APPLICATION_NAME = "UNIGRID";
 	public static final String CONFIG_FILE = "unigrid.conf";
 	private static final String OSX_SUPPORT_DIR = "Library/Application Support";
@@ -61,8 +62,8 @@ public class DataDirectory {
 	public static Configuration getConfig() throws ConfigurationException {
 		final Parameters parameters = new Parameters();
 
-		final FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
-			new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
+		final FileBasedConfigurationBuilder<FileBasedConfiguration> builder
+			= new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
 				.configure(parameters.properties().setFile(getConfigFile()));
 
 		return builder.getConfiguration();
@@ -81,8 +82,5 @@ public class DataDirectory {
 	public static File getConfigFile() {
 		return Paths.get(get(), CONFIG_FILE).toFile();
 	}
-	
-	public static String getRPCPort(){
-	    return "";
-	}
+
 }

@@ -99,7 +99,7 @@ public class RPCService {
 		target = ClientBuilder.newBuilder()
 			.register(new JsonConfiguration())
 			.register(HttpAuthenticationFeature.basic(credentials.getName(), credentials.getPassword()))
-			.build().target(Daemon.PROPERTY_LOCATION);
+			.build().target(daemon.getRPCAdress());
 	}
 
 	public void pollForInfo(int interval) {

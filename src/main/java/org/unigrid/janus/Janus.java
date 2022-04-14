@@ -13,15 +13,12 @@
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
@@ -34,7 +31,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
-import org.apache.commons.lang3.ThreadUtils;
 import org.unigrid.janus.model.rpc.entity.Info;
 
 @ApplicationScoped
@@ -54,18 +50,18 @@ public class Janus extends BaseApplication {
 
 	@Inject
 	private MainWindow mainWindow;
-	
+
 	@Inject
 	private JanusPreloader preloader;
 
 	@PostConstruct
 	@SneakyThrows
 	private void init() {
-	    startDaemon();
+		startDaemon();
 	}
-	
-	public void startDaemon(){
-	    //TODO: should this change to spalshScreenInsted
+
+	public void startDaemon() {
+		//TODO: should this change to spalshScreenInsted
 		try {
 			daemon.start();
 		} catch (Exception e) {
@@ -76,24 +72,27 @@ public class Janus extends BaseApplication {
 		}
 		debug.log("Daemon start done.");
 	}
-	
+
 	@PreDestroy
 	@SneakyThrows
 	private void destroy() {
-	    //TODO: should this change to spalshScreenInsted
-	    daemon.stop();
+		//TODO: should this change to spalshScreenInsted
+		daemon.stop();
 	}
 
 	@Override
 	public void start(Stage stage, Application.Parameters parameters) throws Exception {
 
-	    startSplashScreen();
-	    
-	    startMainWindow();
+		System.out.println("mee");
+		startSplashScreen();
+
+		System.out.println("moo");
+		startMainWindow();
+		System.out.println("shit");
 	}
-	
-	private void startMainWindow(){
-	    		try {
+
+	private void startMainWindow() {
+		try {
 			mainWindow.show();
 
 			mainWindow.bindDebugListViewWidth(0.98);
@@ -103,8 +102,7 @@ public class Janus extends BaseApplication {
 			Jsonb jsonb = JsonbBuilder.create();
 			String result = String.format("Info result: %s", jsonb.toJson(info.getResult()));
 			debug.log(result);
-      */
-			
+			 */
 		} catch (Exception e) {
 			Alert a = new Alert(AlertType.ERROR,
 				e.getMessage(),
@@ -112,53 +110,51 @@ public class Janus extends BaseApplication {
 			a.showAndWait();
 		}
 	}
+
 	@SneakyThrows
 	private void startSplashScreen() {
+		Object lock = new Object();
 
-	    preloader.show();
+		preloader.show();
 
-	    // poll info call every 30 seconds
-	    rpc.pollForInfo(30 * 1000);
+		// poll info call every 30 seconds
+		rpc.pollForInfo(30 * 1000);
 
-	    new Thread(() -> {
+		final Thread thread = new Thread(() -> {
+			int blockCount = -1;
 
-		int blockCount = -1;
+			preloader.startSpinner();
+
+			while (blockCount == -1) {
+
+				Info.Result result = rpc.call(Info.METHOD, Info.Result.class);
+
+				blockCount = result.getBlocks();
+				System.out.println(blockCount);
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException ex) {
+					//TODO: Fix eception handling
+				}
+
+			}
+
+			preloader.stopSpinner();
+			preloader.hide();
+			Thread.currentThread().notify();
+
+		});
 		
-		double progress = 0;
-		
-		preloader.startSpinner();
+		thread.start();
 
-		try {
-			Thread.sleep(3000);
-		    } catch (InterruptedException ex) {
-			//TODO: Fix eception handling
-		    }
-		
-		while (blockCount == -1) {
-		    
-		    Info.Result result = rpc.call(Info.METHOD, Info.Result.class);
 
-		    blockCount = result.getBlocks();
-		    		    
-		    try {
-			Thread.sleep(3000);
-		    } catch (InterruptedException ex) {
-			//TODO: Fix eception handling
-		    }
-		    
-	        }
-		    this.notify();
-		    preloader.stopSpinner();
-	    }).start();
-
-	    synchronized (this) {
-		this.wait();
-	    }   
+		synchronized (thread) {
+			thread.wait();
+		}
 	}
-	
-	public void restartDaemon(){
-	    destroy();
-	    startDaemon();
+
+	public void restartDaemon() {
+		destroy();
+		startDaemon();
 	}
-	
 }

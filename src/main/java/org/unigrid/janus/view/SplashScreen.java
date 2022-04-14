@@ -16,7 +16,10 @@
 
 package org.unigrid.janus.view;
 
+import com.sun.jna.platform.win32.WinDef;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
@@ -28,29 +31,29 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.NotImplementedException;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.event.CloseJanusEvent;
 import org.unigrid.janus.model.service.WindowService;
 
 @Dependent
 public class SplashScreen implements Window {
-    
+
 	@Inject
 	private Stage stageSplash;
 	private WindowService window = new WindowService();
-	
-	@FXML private FontIcon spinnerPreLoad;
+
+	@FXML
+	private FontIcon spinnerPreLoad;
 	private RotateTransition rt;
 
-    
-	public SplashScreen(){
-	    
-	    startSpinner();
+	public SplashScreen() {
+
+		startSpinner();
 	}
-	
+
 	@SneakyThrows
 	public void show() {
-	    try {
+		try {
 			window.setStage(stageSplash);
 			stageSplash.centerOnScreen();
 			stageSplash.initStyle(StageStyle.UNDECORATED);
@@ -58,29 +61,33 @@ public class SplashScreen implements Window {
 			stageSplash.show();
 		} catch (Exception e) {
 			Alert a = new Alert(Alert.AlertType.ERROR,
-				  				e.getMessage(),
-				  				ButtonType.OK);
+				e.getMessage(),
+				ButtonType.OK);
 			a.showAndWait();
 		}
 	}
-	
+
 	@Override
-	public void hide(){
-	    
+	public void hide() {
+		stageSplash.hide();
 	}
-	
+
 	public void startSpinner() {
-	    //spinnerPreLoad.setVisible(true);
-	    rt = new RotateTransition(Duration.millis(50000), spinnerPreLoad);
-	    rt.setByAngle(20000);
-	    rt.setCycleCount(Animation.INDEFINITE);
-	    rt.setAutoReverse(true);
-	    rt.setInterpolator(Interpolator.LINEAR);
-	    rt.play();
+		//spinnerPreLoad.setVisible(true);
+		rt = new RotateTransition(Duration.millis(50000), spinnerPreLoad);
+		rt.setByAngle(20000);
+		rt.setCycleCount(Animation.INDEFINITE);
+		rt.setAutoReverse(true);
+		rt.setInterpolator(Interpolator.LINEAR);
+		rt.play();
 	}
 
 	public void stopSpinner() {
-	    rt.stop();
-	    spinnerPreLoad.setVisible(false);
+		rt.stop();
+		//spinnerPreLoad.setVisible(false);
+	}
+	
+	private void onClose(@Observes Event<CloseJanusEvent> event) {
+		this.stageSplash.close();
 	}
 }
