@@ -20,54 +20,47 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
-import javafx.application.Preloader;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ProgressIndicator;
-import javafx.stage.Stage;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.view.SplashScreen;
 
-/**
- *
- * @author marcus
- */
 @ApplicationScoped
 public class JanusPreloader {
-        
-    @Inject
-    private Daemon daemon;
-    
-    @Inject
-    private SplashScreen splashScreen;
-    
-    @FXML private ProgressIndicator progress;
-    
-    public JanusPreloader(){
-    }
-        
-    public void UpdateProgress(double value){
-	
-	progress.setProgress(value);
-	
-    }
-    
-    public void show(){
-	splashScreen.show();
-	
-    }
-    
-    public void hide(){
-	splashScreen.hide();
-    }
-    
-    public void startSpinner(){
-	splashScreen.startSpinner();
-    }
-    
-    public void stopSpinner(){
-	splashScreen.stopSpinner();
-    }
-    
+
+	@Inject
+	private Daemon daemon;
+
+	@Inject
+	private SplashScreen splashScreen;
+
+	@FXML
+	private ProgressIndicator progress;
+
+	public JanusPreloader() {
+	}
+
+	public void updateProgress(double value) {
+
+		progress.setProgress(value);
+
+	}
+
+	public void show() {
+		splashScreen.show();
+
+	}
+
+	public void hide() {
+		splashScreen.hide();
+	}
+
+	public void startSpinner() {
+		splashScreen.startSpinner();
+	}
+
+	public void stopSpinner() {
+		splashScreen.stopSpinner();
+	}
+
 }
