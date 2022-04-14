@@ -18,11 +18,13 @@ package org.unigrid.janus;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 import javafx.application.Preloader;
+import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ProgressIndicator;
 import javafx.stage.Stage;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.view.SplashScreen;
@@ -32,7 +34,7 @@ import org.unigrid.janus.view.SplashScreen;
  * @author marcus
  */
 @ApplicationScoped
-public class JanusPreloader extends Preloader {
+public class JanusPreloader {
         
     @Inject
     private Daemon daemon;
@@ -40,52 +42,32 @@ public class JanusPreloader extends Preloader {
     @Inject
     private SplashScreen splashScreen;
     
+    @FXML private ProgressIndicator progress;
+    
     public JanusPreloader(){
-	
     }
-    
-    public void init() throws Exception{
-        daemonStart();	
-	
-    }
-    
-    public void start(Stage primaryStage) throws Exception{
         
+    public void UpdateProgress(double value){
+	
+	progress.setProgress(value);
+	
+    }
+    
+    public void show(){
 	splashScreen.show();
-    }
-    
-    public void handelApplicationNotification(PreloaderNotification info){
-        
-    }
-    
-    public void handelStadeChangeNotification(StateChangeNotification info){
-        
-	StateChangeNotification.Type type = info.getType();
-	switch (type){
-	    case BEFORE_START:
-		splashScreen.hide();
-		break;
-	}
 	
     }
     
-    private void daemonStart(){
-        try {
-            daemon.start();
-	} catch (Exception e) {
-            Alert a = new Alert(Alert.AlertType.ERROR,
-                    e.getMessage(),
-                    ButtonType.OK);
-                    a.showAndWait();
-	}
+    public void hide(){
+	splashScreen.hide();
     }
     
-    private void daemonStop(){	
-	try {
-	    daemon.stop();
-	} catch (InterruptedException ex) {
-	    //TODO: Fix how the exception is handeld
-	    Logger.getLogger(JanusPreloader.class.getName()).log(Level.SEVERE, null, ex);
-	}
+    public void startSpinner(){
+	splashScreen.startSpinner();
     }
+    
+    public void stopSpinner(){
+	splashScreen.stopSpinner();
+    }
+    
 }

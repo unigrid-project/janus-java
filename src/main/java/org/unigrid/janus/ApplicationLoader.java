@@ -30,8 +30,13 @@ public class ApplicationLoader extends Application {
 	public void init() throws Exception {
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
 		final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
+		
+		
+		//Must be done after splashScreen is done
 		application = applicationInstance.get();
-
+		
+		
+		
 	}
 
 	@Override

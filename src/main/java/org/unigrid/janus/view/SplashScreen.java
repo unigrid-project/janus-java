@@ -18,11 +18,18 @@ package org.unigrid.janus.view;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
+import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.NotImplementedException;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.service.WindowService;
 
 @Dependent
@@ -31,14 +38,23 @@ public class SplashScreen implements Window {
 	@Inject
 	private Stage stageSplash;
 	private WindowService window = new WindowService();
+	
+	@FXML private FontIcon spinnerPreLoad;
+	private RotateTransition rt;
+
     
-	@Override
+	public SplashScreen(){
+	    
+	    startSpinner();
+	}
+	
+	@SneakyThrows
 	public void show() {
 	    try {
 			window.setStage(stageSplash);
 			stageSplash.centerOnScreen();
 			stageSplash.initStyle(StageStyle.UNDECORATED);
-			stageSplash.setResizable(true);
+			stageSplash.setResizable(false);
 			stageSplash.show();
 		} catch (Exception e) {
 			Alert a = new Alert(Alert.AlertType.ERROR,
@@ -51,5 +67,20 @@ public class SplashScreen implements Window {
 	@Override
 	public void hide(){
 	    
+	}
+	
+	public void startSpinner() {
+	    //spinnerPreLoad.setVisible(true);
+	    rt = new RotateTransition(Duration.millis(50000), spinnerPreLoad);
+	    rt.setByAngle(20000);
+	    rt.setCycleCount(Animation.INDEFINITE);
+	    rt.setAutoReverse(true);
+	    rt.setInterpolator(Interpolator.LINEAR);
+	    rt.play();
+	}
+
+	public void stopSpinner() {
+	    rt.stop();
+	    spinnerPreLoad.setVisible(false);
 	}
 }

@@ -20,6 +20,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
@@ -32,6 +34,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import org.apache.commons.lang3.ThreadUtils;
+import org.unigrid.janus.model.rpc.entity.Info;
 
 @ApplicationScoped
 public class Janus extends BaseApplication {
@@ -50,10 +54,18 @@ public class Janus extends BaseApplication {
 
 	@Inject
 	private MainWindow mainWindow;
+	
+	@Inject
+	private JanusPreloader preloader;
 
 	@PostConstruct
 	@SneakyThrows
 	private void init() {
+	    startDaemon();
+	}
+	
+	public void startDaemon(){
+	    //TODO: should this change to spalshScreenInsted
 		try {
 			daemon.start();
 		} catch (Exception e) {
@@ -64,16 +76,24 @@ public class Janus extends BaseApplication {
 		}
 		debug.log("Daemon start done.");
 	}
-
+	
 	@PreDestroy
 	@SneakyThrows
 	private void destroy() {
-		daemon.stop();
+	    //TODO: should this change to spalshScreenInsted
+	    daemon.stop();
 	}
 
 	@Override
 	public void start(Stage stage, Application.Parameters parameters) throws Exception {
-		try {
+
+	    startSplashScreen();
+	    
+	    startMainWindow();
+	}
+	
+	private void startMainWindow(){
+	    		try {
 			mainWindow.show();
 
 			mainWindow.bindDebugListViewWidth(0.98);
@@ -84,8 +104,7 @@ public class Janus extends BaseApplication {
 			String result = String.format("Info result: %s", jsonb.toJson(info.getResult()));
 			debug.log(result);
       */
-			// poll info call every 30 seconds
-			rpc.pollForInfo(30 * 1000);
+			
 		} catch (Exception e) {
 			Alert a = new Alert(AlertType.ERROR,
 				e.getMessage(),
@@ -93,4 +112,53 @@ public class Janus extends BaseApplication {
 			a.showAndWait();
 		}
 	}
+	@SneakyThrows
+	private void startSplashScreen() {
+
+	    preloader.show();
+
+	    // poll info call every 30 seconds
+	    rpc.pollForInfo(30 * 1000);
+
+	    new Thread(() -> {
+
+		int blockCount = -1;
+		
+		double progress = 0;
+		
+		preloader.startSpinner();
+
+		try {
+			Thread.sleep(3000);
+		    } catch (InterruptedException ex) {
+			//TODO: Fix eception handling
+		    }
+		
+		while (blockCount == -1) {
+		    
+		    Info.Result result = rpc.call(Info.METHOD, Info.Result.class);
+
+		    blockCount = result.getBlocks();
+		    		    
+		    try {
+			Thread.sleep(3000);
+		    } catch (InterruptedException ex) {
+			//TODO: Fix eception handling
+		    }
+		    
+	        }
+		    this.notify();
+		    preloader.stopSpinner();
+	    }).start();
+
+	    synchronized (this) {
+		this.wait();
+	    }   
+	}
+	
+	public void restartDaemon(){
+	    destroy();
+	    startDaemon();
+	}
+	
 }

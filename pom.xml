@@ -100,7 +100,12 @@
 			<artifactId>ikonli-fontawesome5-pack</artifactId>
 			<version>12.3.0</version>
 		</dependency>
-
+	 <dependency>
+	  <groupId>org.openjfx</groupId>
+	  <artifactId>javafx-web</artifactId>
+	  <version>17</version>
+	  <type>jar</type>
+	 </dependency>
 	</dependencies>
 	<build>
 		<plugins>

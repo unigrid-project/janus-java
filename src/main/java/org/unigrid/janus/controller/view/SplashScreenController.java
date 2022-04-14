@@ -30,20 +30,15 @@ import javafx.scene.control.ProgressIndicator;
 public class SplashScreenController implements Initializable, PropertyChangeListener {
     
     
-    @FXML private ProgressIndicator splashScreenProgress;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-	throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+	
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent pce) {
-	throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+
     }
-    
-    public void updateProgressBar(int value){
-	splashScreenProgress.setProgress(value);
-    }
-    
+        
 }

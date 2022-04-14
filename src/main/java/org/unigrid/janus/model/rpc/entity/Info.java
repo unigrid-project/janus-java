@@ -24,7 +24,7 @@ import jakarta.json.bind.annotation.JsonbProperty;
 @EqualsAndHashCode(callSuper = false)
 public class Info extends BaseResult<Info.Result> {
 
-	private static final String METHOD = "getinfo";
+	public static final String METHOD = "getinfo";
 
 	public static class Request extends BaseRequest {
 

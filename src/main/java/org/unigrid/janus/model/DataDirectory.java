@@ -81,4 +81,8 @@ public class DataDirectory {
 	public static File getConfigFile() {
 		return Paths.get(get(), CONFIG_FILE).toFile();
 	}
+	
+	public static String getRPCPort(){
+	    return "";
+	}
 }
