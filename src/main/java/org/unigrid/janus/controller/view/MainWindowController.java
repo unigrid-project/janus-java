@@ -228,14 +228,16 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				coinsBtn.iconColorProperty().setValue(Color.RED);
 			}
 		}
+		/*
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
 			String status = (String) event.getNewValue();
 			if (status.equals("Done loading")) {
 				pnlSplash.setVisible(false);
 			} else {
 				pnlSplash.setVisible(true);
-			}
+			}			
 		}
+		*/
 	}
 
 	public void showOverlay() {

@@ -60,6 +60,7 @@ public class MainWindow implements Window {
 	}
 
 	public void hide() {
+		stage.hide();
 	}
 
 	public void bindDebugListViewWidth(double multiplier) {
