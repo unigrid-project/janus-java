@@ -27,6 +27,7 @@ import javafx.animation.RotateTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -42,13 +43,11 @@ public class SplashScreen implements Window {
 	private Stage stageSplash;
 	private WindowService window = new WindowService();
 
-	@FXML
 	private FontIcon spinnerPreLoad;
 	private RotateTransition rt;
 
 	public SplashScreen() {
 
-		startSpinner();
 	}
 
 	@SneakyThrows
@@ -59,6 +58,7 @@ public class SplashScreen implements Window {
 			stageSplash.initStyle(StageStyle.UNDECORATED);
 			stageSplash.setResizable(false);
 			stageSplash.show();
+			startSpinner();
 		} catch (Exception e) {
 			Alert a = new Alert(Alert.AlertType.ERROR,
 				e.getMessage(),
@@ -69,16 +69,20 @@ public class SplashScreen implements Window {
 
 	@Override
 	public void hide() {
-		stageSplash.hide();
+		stageSplash.close();
 	}
 
 	public void startSpinner() {
+		spinnerPreLoad = (FontIcon) stageSplash.getScene().lookup("#spinnerPreLoad");
 		//spinnerPreLoad.setVisible(true);
+		spinnerPreLoad.setFill(Color.ORANGE);
 		rt = new RotateTransition(Duration.millis(50000), spinnerPreLoad);
-		rt.setByAngle(20000);
+		rt.setRate(1.0);
+		rt.setByAngle(180);
 		rt.setCycleCount(Animation.INDEFINITE);
 		rt.setAutoReverse(true);
 		rt.setInterpolator(Interpolator.LINEAR);
+		
 		rt.play();
 	}
 

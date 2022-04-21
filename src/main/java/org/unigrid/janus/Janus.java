@@ -19,7 +19,15 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.util.HashSet;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.application.Preloader;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
@@ -31,6 +39,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import org.unigrid.janus.model.rpc.entity.BlockCount;
 import org.unigrid.janus.model.rpc.entity.Info;
 
 @ApplicationScoped
@@ -53,6 +62,10 @@ public class Janus extends BaseApplication {
 
 	@Inject
 	private JanusPreloader preloader;
+
+	BooleanProperty ready = new SimpleBooleanProperty(false);
+	private int block = -1;
+	private Info info = new Info();
 
 	@PostConstruct
 	@SneakyThrows
@@ -86,9 +99,22 @@ public class Janus extends BaseApplication {
 		System.out.println("mee");
 		startSplashScreen();
 
-		System.out.println("moo");
-		startMainWindow();
-		System.out.println("shit");
+		ready.addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
+				Platform.runLater(new Runnable() {
+					public void run() {
+						preloader.stopSpinner();
+						preloader.hide();
+						System.out.println("moo");
+						startMainWindow();
+						System.out.println("shit");
+					}
+				});
+			}
+
+		});;
+
 	}
 
 	private void startMainWindow() {
@@ -113,44 +139,39 @@ public class Janus extends BaseApplication {
 
 	@SneakyThrows
 	private void startSplashScreen() {
-		Object lock = new Object();
 
 		preloader.show();
 
-		// poll info call every 30 seconds
 		rpc.pollForInfo(30 * 1000);
 
-		final Thread thread = new Thread(() -> {
-			int blockCount = -1;
+		startUp();
 
-			preloader.startSpinner();
+	}
 
-			while (blockCount == -1) {
+	private void startUp() {
+		Task task = new Task<Void>() {
+			@Override
+			protected Void call() throws Exception {
+				while (block <= 0) {
 
-				Info.Result result = rpc.call(Info.METHOD, Info.Result.class);
+					info = rpc.call(new Info.Request(), Info.class);
 
-				blockCount = result.getBlocks();
-				System.out.println(blockCount);
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException ex) {
+					block = info.getResult().getBlocks();
+					System.out.println(block);
+
+					//try {
+					//	Thread.sleep(3000);
+					//} catch (InterruptedException ex) {
 					//TODO: Fix eception handling
+					//}
 				}
+				ready.setValue(Boolean.TRUE);
 
+				return null;
 			}
+		};
+		new Thread(task).start();
 
-			preloader.stopSpinner();
-			preloader.hide();
-			Thread.currentThread().notify();
-
-		});
-		
-		thread.start();
-
-
-		synchronized (thread) {
-			thread.wait();
-		}
 	}
 
 	public void restartDaemon() {
