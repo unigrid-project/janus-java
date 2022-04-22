@@ -16,8 +16,6 @@
 
 package org.unigrid.janus.controller.component;
 
-import jakarta.enterprise.event.Event;
-import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -26,8 +24,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-import javafx.stage.Window;
-import javafx.stage.WindowEvent;
 import lombok.Getter;
 import org.unigrid.janus.view.decorator.Decoratable;
 import org.unigrid.janus.view.decorator.Decorator;
@@ -43,18 +39,20 @@ import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.unigrid.janus.model.event.CloseJanusEvent;
 
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
+
 	private Decorator movableWindowDecorator;
-	@Getter private Stage stage;
+	@Getter
+	private Stage stage;
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
 	private static DebugService debug = new DebugService();
 	private static WindowService window = new WindowService();
-	@FXML private FontIcon spinner;
+	@FXML
+	private FontIcon spinner;
 	private RotateTransition rt;
-	
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
@@ -112,6 +110,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	}
 
 	public void startSpinner() {
+
 		spinner.setVisible(true);
 		rt = new RotateTransition(Duration.millis(50000), spinner);
 		rt.setByAngle(20000);

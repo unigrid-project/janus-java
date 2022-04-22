@@ -52,8 +52,10 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	/* Injected fx:id from FXML */
 	// @FXML private Label lblBlockCount;
 	// @FXML private Label lblConnection;
-	@FXML private AnchorPane pnlMain;
-	@FXML private AnchorPane pnlSplash;
+	@FXML
+	private AnchorPane pnlMain;
+	@FXML
+	private AnchorPane pnlSplash;
 	// main navigation
 	@FXML
 	private ToggleButton btnWallet;
@@ -235,9 +237,9 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				pnlSplash.setVisible(false);
 			} else {
 				pnlSplash.setVisible(true);
-			}			
+			}
 		}
-		*/
+		 */
 	}
 
 	public void showOverlay() {

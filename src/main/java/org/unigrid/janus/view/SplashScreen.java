@@ -12,22 +12,25 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.view;
 
-import com.sun.jna.platform.win32.WinDef;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import java.io.InputStream;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
-import javafx.fxml.FXML;
+import javafx.animation.Timeline;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.paint.Color;
+import javafx.scene.control.Label;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -45,6 +48,8 @@ public class SplashScreen implements Window {
 
 	private FontIcon spinnerPreLoad;
 	private RotateTransition rt;
+	private Label text;
+	private Label status;
 
 	public SplashScreen() {
 
@@ -74,15 +79,15 @@ public class SplashScreen implements Window {
 
 	public void startSpinner() {
 		spinnerPreLoad = (FontIcon) stageSplash.getScene().lookup("#spinnerPreLoad");
-		//spinnerPreLoad.setVisible(true);
-		spinnerPreLoad.setFill(Color.ORANGE);
+		spinnerPreLoad.setVisible(true);
+
 		rt = new RotateTransition(Duration.millis(50000), spinnerPreLoad);
-		rt.setRate(1.0);
-		rt.setByAngle(180);
+		//rt.setRate(1.0);
+		rt.setByAngle(20000);
 		rt.setCycleCount(Animation.INDEFINITE);
 		rt.setAutoReverse(true);
 		rt.setInterpolator(Interpolator.LINEAR);
-		
+
 		rt.play();
 	}
 
@@ -90,8 +95,35 @@ public class SplashScreen implements Window {
 		rt.stop();
 		//spinnerPreLoad.setVisible(false);
 	}
-	
+
 	private void onClose(@Observes Event<CloseJanusEvent> event) {
 		this.stageSplash.close();
+	}
+
+	public void initText() {
+		text = (Label) stageSplash.getScene().lookup("#lblText");
+		status = (Label) stageSplash.getScene().lookup("#lblStatus");
+
+		InputStream in = getClass().getResourceAsStream("fonts/PressStart2P-vaV7.ttf");
+
+		Font font = Font.loadFont(in, 10);
+		
+		text.setFont(font);
+		
+		text.setAlignment(Pos.CENTER);
+		text.setText("Starting unigrid backend");
+		
+		status.setFont(font);
+		status.setText("...");
+		
+		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.7), evt -> status.setVisible(false)),
+			new KeyFrame(Duration.seconds(0.2), evt -> status.setVisible(true)));
+		timeline.setCycleCount(Animation.INDEFINITE);
+		
+		timeline.play();
+	}
+
+	public void setText(String s) {
+		text.setText(s);
 	}
 }
