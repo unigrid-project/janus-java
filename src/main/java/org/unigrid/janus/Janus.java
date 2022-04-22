@@ -13,6 +13,7 @@
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus;
 
 import jakarta.annotation.PostConstruct;
@@ -22,7 +23,6 @@ import jakarta.inject.Inject;
 import java.util.HashSet;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.application.Preloader;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -39,7 +39,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
-import org.unigrid.janus.model.rpc.entity.BlockCount;
 import org.unigrid.janus.model.rpc.entity.Info;
 
 @ApplicationScoped
@@ -63,7 +62,7 @@ public class Janus extends BaseApplication {
 	@Inject
 	private JanusPreloader preloader;
 
-	BooleanProperty ready = new SimpleBooleanProperty(false);
+	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
 	private Info info = new Info();
 
@@ -113,7 +112,7 @@ public class Janus extends BaseApplication {
 				});
 			}
 
-		});;
+		});
 
 	}
 
@@ -142,6 +141,8 @@ public class Janus extends BaseApplication {
 
 		preloader.show();
 
+		preloader.initText();
+
 		rpc.pollForInfo(30 * 1000);
 
 		startUp();
@@ -152,13 +153,14 @@ public class Janus extends BaseApplication {
 		Task task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
+				
 				while (block <= 0) {
 
 					info = rpc.call(new Info.Request(), Info.class);
 
 					block = info.getResult().getBlocks();
 					System.out.println(block);
-
+					
 					//try {
 					//	Thread.sleep(3000);
 					//} catch (InterruptedException ex) {

@@ -18,12 +18,10 @@ package org.unigrid.janus;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import javafx.application.Preloader;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
-import javafx.stage.Stage;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.view.SplashScreen;
 
@@ -48,6 +46,14 @@ public class JanusPreloader {
 
 	}
 
+	public void initText() {
+		splashScreen.initText();
+	}
+
+	public void setText(String s) {
+		splashScreen.setText(s);
+	}
+
 	public void show() {
 		splashScreen.show();
 
@@ -64,6 +70,5 @@ public class JanusPreloader {
 	public void stopSpinner() {
 		splashScreen.stopSpinner();
 	}
-
 
 }

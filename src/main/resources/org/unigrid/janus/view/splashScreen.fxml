@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.Scene?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.text.Font?>
 <?import javafx.stage.Stage?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
@@ -11,14 +15,28 @@
     <scene>
         <Scene>
             <root>
-            <AnchorPane id="AnchorPane" prefHeight="200.0" prefWidth="620.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="pane" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1">
+            <AnchorPane id="AnchorPane" prefHeight="220.0" prefWidth="620.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="pane" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1">
                 <children>
                     <ImageView fitHeight="90.0" fitWidth="400.0" layoutX="110.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="40.0">
                         <image>
                             <Image url="@images/unigrid-wide-nf.png" />
                         </image>
                     </ImageView>
-                  <FontIcon fx:id="spinnerPreLoad" iconColor="WHITE" iconLiteral="fas-spinner" iconSize="40" layoutX="289.0" layoutY="166.0" wrappingWidth="43.0" AnchorPane.bottomAnchor="19.0" />
+                  <FontIcon fx:id="spinnerPreLoad" iconColor="WHITE" iconLiteral="fas-spinner" iconSize="40" layoutX="289.0" layoutY="166.0" wrappingWidth="43.0" AnchorPane.bottomAnchor="40.0" />
+                  <FlowPane alignment="CENTER" columnHalignment="CENTER" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="180.0">
+                     <children>
+                        <Label fx:id="lblText" text="Starting Daemon ..." textAlignment="CENTER" textFill="WHITE">
+                           <font>
+                              <Font name="Saab" size="13.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="lblStatus" text="Label" textFill="WHITE">
+                           <padding>
+                              <Insets left="3.0" />
+                           </padding>
+                        </Label>
+                     </children>
+                  </FlowPane>
                 </children>
             </AnchorPane>
             </root>
