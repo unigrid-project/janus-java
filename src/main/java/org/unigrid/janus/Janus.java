@@ -20,6 +20,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.util.HashSet;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -112,7 +113,7 @@ public class Janus extends BaseApplication {
 						System.out.println("shit");
 					}
 				});
-
+        
 			}
 
 		});
@@ -156,7 +157,7 @@ public class Janus extends BaseApplication {
 		Task task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-
+        
 				while (block <= 0) {
 
 					info = rpc.call(new Info.Request(), Info.class);
