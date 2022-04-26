@@ -20,7 +20,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.HashSet;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -104,14 +103,16 @@ public class Janus extends BaseApplication {
 				Platform.runLater(new Runnable() {
 					public void run() {
 						rpc.stopPolling();
-						preloader.stopSpinner();
-						preloader.hide();
+
 						System.out.println("moo");
 						rpc.pollForInfo(30 * 1000);
 						startMainWindow();
+						preloader.stopSpinner();
+						preloader.hide();
 						System.out.println("shit");
 					}
 				});
+
 			}
 
 		});
