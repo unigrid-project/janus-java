@@ -103,13 +103,17 @@ public class Janus extends BaseApplication {
 			public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
 				Platform.runLater(new Runnable() {
 					public void run() {
+						rpc.stopPolling();
+
+						System.out.println("moo");
+						rpc.pollForInfo(30 * 1000);
+						startMainWindow();
 						preloader.stopSpinner();
 						preloader.hide();
-						System.out.println("moo");
-						startMainWindow();
 						System.out.println("shit");
 					}
 				});
+        
 			}
 
 		});
@@ -153,14 +157,14 @@ public class Janus extends BaseApplication {
 		Task task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-				
+        
 				while (block <= 0) {
 
 					info = rpc.call(new Info.Request(), Info.class);
 
 					block = info.getResult().getBlocks();
 					System.out.println(block);
-					
+
 					//try {
 					//	Thread.sleep(3000);
 					//} catch (InterruptedException ex) {
