@@ -107,19 +107,19 @@ public class SplashScreen implements Window {
 		InputStream in = getClass().getResourceAsStream("fonts/PressStart2P-vaV7.ttf");
 
 		Font font = Font.loadFont(in, 10);
-		
+
 		text.setFont(font);
-		
+
 		text.setAlignment(Pos.CENTER);
 		text.setText("Starting unigrid backend");
-		
+
 		status.setFont(font);
 		status.setText("...");
-		
+
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.7), evt -> status.setVisible(false)),
 			new KeyFrame(Duration.seconds(0.2), evt -> status.setVisible(true)));
 		timeline.setCycleCount(Animation.INDEFINITE);
-		
+
 		timeline.play();
 	}
 
