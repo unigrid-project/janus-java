@@ -35,7 +35,7 @@ jobs:
     - name: Extract
       run: | 
         mkdir target/daemon && tar -xvf unigridd.tar.gz -C target/daemon
-    - run: mvn jpackage:jpackage
+    - run: mvn jpackage
     - run: mkdir staging && cp target/*.* staging
     - uses: actions/upload-artifact@v3
       with:
