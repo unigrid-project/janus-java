@@ -21,7 +21,9 @@ jobs:
         java-version: '16'
         distribution: 'temurin'
         cache: maven
-      
+        
+    - run: mkdir target
+    
     - name: download daemon
       uses: duhow/download-github-release-assets@v1
       with:
