@@ -22,7 +22,8 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
-    - run: mkdir target
+    - run: mvn initialize
+    - run: mkdir target/classes/daemon
     
     - name: download daemon
       uses: duhow/download-github-release-assets@v1
@@ -33,7 +34,7 @@ jobs:
         target: unigridd.tar.gz
     - name: Extract
       run: | 
-        mkdir target/daemon && tar -xvf unigridd.tar.gz -C target/daemon
+        tar -xvf unigridd.tar.gz -C && cp unigridd target/classes/daemon
     - name: Build with Maven
       run: mvn install
     
