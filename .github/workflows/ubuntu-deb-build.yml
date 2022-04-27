@@ -22,7 +22,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
-    - run: mkdir .p target/classes/daemon
+    - run: mkdir -p target/classes/daemon
     
     - name: download daemon
       uses: duhow/download-github-release-assets@v1
