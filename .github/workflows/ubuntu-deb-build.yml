@@ -33,7 +33,7 @@ jobs:
         target: unigridd.tar.gz
     - name: Extract
       run: | 
-        tar -xvf unigridd.tar.gz -C && cp unigridd target/classes/daemon
+        tar -xvf unigridd.tar.gz && cp unigridd target/classes/daemon
     - name: Build with Maven
       run: mvn install
     
