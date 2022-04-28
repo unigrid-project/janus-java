@@ -52,7 +52,9 @@ public class TransactionList {
 	}
 
 	public ObservableList<Transaction> getLatestTransactions(int count) {
-		return (ObservableList<Transaction>) FXCollections.observableArrayList(this.transactions.subList(0, count));
+		System.out.println(this.transactions.size());
+		return (ObservableList<Transaction>) FXCollections.observableArrayList(this.transactions.subList(0, 
+			count = this.transactions.size() < count ? this.transactions.size() : count));
 	}
 
 	public int loadNewTransactions() {
