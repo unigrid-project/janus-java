@@ -181,6 +181,11 @@
 					</execution>
 				</executions>
 			</plugin>
+                        <plugin>
+                            <groupId>com.github.akman</groupId>
+                            <artifactId>jpackage-maven-plugin</artifactId>
+                            <version>0.1.3</version>
+                        </plugin>
 		</plugins>
 	</build>
 </project>
