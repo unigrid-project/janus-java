@@ -30,8 +30,8 @@ public class Daemon {
 
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
 	//public static final String PROPERTY_LOCATION = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY);
-	public static final String PROPERTY_LOCATION = "/home/marcus/Documents/unigrid/daemon/daemon/unigridd";
-	//public static final String PROPERTY_LOCATION = "http://127.0.0.1:51993"; // :51993
+	//public static final String PROPERTY_LOCATION = "/home/evan/work/daemons/unigridd";
+	public static final String PROPERTY_LOCATION = "http://127.0.0.1:51993"; // :51993
 
 	private Optional<Process> process = Optional.empty();
 
