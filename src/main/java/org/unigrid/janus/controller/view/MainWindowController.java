@@ -48,7 +48,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private static final int TAB_WALLET = 1;
 	private static final int TAB_TRANSACTIONS = 2;
 	private static final int TAB_NODES = 3;
-	private static final int TAB_SETTINGS = 4;
+	private static final int TAB_ADDRESS = 4;
+	private static final int TAB_SETTINGS = 5;
 	/* Injected fx:id from FXML */
 	// @FXML private Label lblBlockCount;
 	// @FXML private Label lblConnection;
@@ -64,6 +65,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private ToggleButton btnNodes;
 	@FXML
+	private ToggleButton btnAddress;
+	@FXML
 	private ToggleButton btnSettings;
 	@FXML
 	private VBox pnlWallet;
@@ -71,6 +74,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private VBox pnlTransactions;
 	@FXML
 	private VBox pnlNodes;
+	@FXML
+	private VBox pnlAddress;
 	@FXML
 	private VBox pnlSettings;
 	@FXML
@@ -108,6 +113,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			try {
 				debug.log("Shown event executing.");
 				window.getTransactionsController().onShown();
+				window.getAddressController().onShown();
 			} catch (Exception e) {
 				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
 			}
@@ -123,6 +129,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		pnlTransactions.setVisible(false);
 		pnlNodes.setVisible(false);
 		pnlSettings.setVisible(false);
+		pnlAddress.setVisible(false);
+		btnAddress.setSelected(false);
 		switch (tab) {
 			case TAB_WALLET:
 				pnlWallet.setVisible(true);
@@ -135,6 +143,10 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			case TAB_NODES:
 				pnlNodes.setVisible(true);
 				btnNodes.setSelected(true);
+				break;
+			case TAB_ADDRESS:
+				pnlAddress.setVisible(true);
+				btnAddress.setSelected(true);
 				break;
 			case TAB_SETTINGS:
 				pnlSettings.setVisible(true);
@@ -172,6 +184,15 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			tabSelect(TAB_NODES);
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (nodes click) %s", e.getMessage()));
+		}
+	}
+
+	@FXML
+	private void onAddressTap(MouseEvent event) {
+		try {
+			tabSelect(TAB_ADDRESS);
+		} catch (Exception e) {
+			debug.log(String.format("ERROR: (address click) %s", e.getMessage()));
 		}
 	}
 

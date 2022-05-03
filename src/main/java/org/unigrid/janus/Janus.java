@@ -159,7 +159,6 @@ public class Janus extends BaseApplication {
 		Task task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-
 				while (walletStatus != "Done loading" && status != "downloading"
 					&& status != "unarchiving") {
 

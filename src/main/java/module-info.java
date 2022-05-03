@@ -35,4 +35,5 @@ module org.unigrid.janus {
 	requires jersey.client;
 	requires org.kordamp.ikonli.javafx;
 	requires jsch;
+	requires org.controlsfx.controls;
 }
