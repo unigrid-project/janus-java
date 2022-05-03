@@ -149,7 +149,7 @@ public class Janus extends BaseApplication {
 
 		preloader.initText();
 
-		rpc.pollForInfo(3 * 1000);
+		rpc.pollForInfo(10 * 1000);
 
 		startUp();
 
@@ -159,10 +159,11 @@ public class Janus extends BaseApplication {
 		Task task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-				while (walletStatus != "Done loading" && status != "downloading"
-					&& status != "unarchiving") {
+				while (block <= 0) {
+				//while (walletStatus != "Done loading") {
 
 					info = rpc.call(new Info.Request(), Info.class);
+					block = info.getResult().getBlocks();
 					walletStatus = info.getResult().getBootstrapping().getWalletstatus();
 					status = info.getResult().getBootstrapping().getStatus();
 					progress = info.getResult().getBootstrapping().getProgress();
@@ -173,9 +174,9 @@ public class Janus extends BaseApplication {
 							checkForStatus = false;
 						}
 					}
-					if(!checkForStatus && progress == "none") {
-						
-					}
+					/*if (!checkForStatus && progress == "none") {
+
+					}*/
 				}
 				ready.setValue(Boolean.TRUE);
 

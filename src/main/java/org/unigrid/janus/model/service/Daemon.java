@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model.service;
 
@@ -32,7 +32,6 @@ public class Daemon {
 	//public static final String PROPERTY_LOCATION = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY);
 	//public static final String PROPERTY_LOCATION = "/home/evan/work/daemons/unigridd";
 	public static final String PROPERTY_LOCATION = "http://127.0.0.1:51993"; // :51993
-
 
 	private Optional<Process> process = Optional.empty();
 

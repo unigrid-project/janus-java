@@ -142,7 +142,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		};
 
 		colBtn.setCellFactory(cellFactory);
-		tblAddresses.getColumns().add(colBtn);	
+		tblAddresses.getColumns().add(colBtn);
 	}
 
 	public void onShown() {
