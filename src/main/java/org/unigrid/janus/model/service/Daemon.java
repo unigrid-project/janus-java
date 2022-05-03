@@ -33,6 +33,7 @@ public class Daemon {
 	//public static final String PROPERTY_LOCATION = "/home/evan/work/daemons/unigridd";
 	public static final String PROPERTY_LOCATION = "http://127.0.0.1:51993"; // :51993
 
+
 	private Optional<Process> process = Optional.empty();
 
 	private void runDaemon() throws IOException {

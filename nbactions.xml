@@ -15,39 +15,7 @@
                 <exec.appArgs>-d</exec.appArgs>
                 <exec.mainClass>${packageClassName}</exec.mainClass>
                 <exec.executable>java</exec.executable>
-                <janus.daemon.location>/home/marcus/Documents/unigrid/daemon/daemon/unigridd</janus.daemon.location>
-                <exec.workingdir>/home/evan/work/janus-java</exec.workingdir>
-            </properties>
-        </action>
-        <action>
-            <actionName>debug</actionName>
-            <packagings>
-                <packaging>jar</packaging>
-            </packagings>
-            <goals>
-                <goal>process-classes</goal>
-                <goal>org.codehaus.mojo:exec-maven-plugin:1.5.0:exec</goal>
-            </goals>
-            <properties>
-                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath ${packageClassName} -d -classpath %classpath ${packageClassName} ${exec.vmArgs} -classpath %classpath ${exec.mainClass}</exec.args>
-                <exec.executable>java</exec.executable>
-                <jpda.listen>true</jpda.listen>
-                <exec.workingdir>/home/evan/work/janus-java</exec.workingdir>
-            </properties>
-        </action>
-        <action>
-            <actionName>profile</actionName>
-            <packagings>
-                <packaging>jar</packaging>
-            </packagings>
-            <goals>
-                <goal>process-classes</goal>
-                <goal>org.codehaus.mojo:exec-maven-plugin:1.5.0:exec</goal>
-            </goals>
-            <properties>
-                <exec.args>-classpath %classpath ${packageClassName} -d -classpath %classpath ${packageClassName} ${exec.vmArgs} -classpath %classpath ${exec.mainClass}</exec.args>
-                <exec.executable>java</exec.executable>
-                <exec.workingdir>/home/evan/work/janus-java</exec.workingdir>
+                <janus.daemon.location>/home/evan/work/daemons/unigridd</janus.daemon.location>
             </properties>
         </action>
     </actions>
