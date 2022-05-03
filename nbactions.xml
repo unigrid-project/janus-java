@@ -18,4 +18,21 @@
                 <janus.daemon.location>/home/marcus/Documents/unigrid/daemon/daemon/unigridd</janus.daemon.location>
             </properties>
         </action>
+        <action>
+            <actionName>CUSTOM-jpackage test</actionName>
+            <displayName>jpackage test</displayName>
+            <goals>
+                <goal>-e</goal>
+                <goal>jpackage:jpackage</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-jlinkandjpackage</actionName>
+            <displayName>jlinkandjpackage</displayName>
+            <goals>
+                <goal>-e</goal>
+                <goal>jlink:jlink</goal>
+                <goal>jpackage:jpackage</goal>
+            </goals>
+        </action>
     </actions>
