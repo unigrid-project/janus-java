@@ -64,6 +64,11 @@ public class Info extends BaseResult<Info.Result> {
 
 	@Data
 	public static class Bootstrap {
-		private String walletstatus = "none";
+		@JsonbProperty("walletstatus")
+		private String walletstatus;
+		@JsonbProperty("status")
+		private String status;
+		@JsonbProperty("progress")
+		private String progress;
 	}
 }
