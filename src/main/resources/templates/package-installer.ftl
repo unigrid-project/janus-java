@@ -4,11 +4,13 @@
 --win-menu-group Unigrid
 --win-shortcut
 --win-per-user-install
+--type "msi"
 <#elseif osName?upper_case?contains("MAC")>
 --mac-package-identifier Janus
 --mac-package-name Janus
-
+--type "dmg"
 <#else>
+--type "app-image"
 --linux-menu-group unigrid
 --linux-shortcut
 --linux-package-name janus
