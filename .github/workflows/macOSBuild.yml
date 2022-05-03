@@ -1,14 +1,14 @@
 # This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
 # For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
 
-name: ubuntu/deb build x64
+name: MacOS_build
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: mac-latest
+    runs-on: macos-latest
     permissions:
       contents: read
       packages: write
@@ -22,10 +22,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
 
-    - run: mkdir staging && cp target/*.* staging
     - name: download daemon
       uses: duhow/download-github-release-assets@v1
       with:
@@ -35,7 +32,12 @@ jobs:
         target: unigridd.tar.gz
     - name: Extract
       run: | 
-        mkdir staging/daemon && tar -xvf unigridd.tar.gz -C staging/daemon
+        mkdir -p target/daemon && tar -xvf unigridd.tar.gz -C target/daemon
+    - run: cp target/daemon/unigrid-2.0.1/bin/unigridd deamon    
+    - name: Build with Maven
+      run: mvn install
+      
+    - run: mkdir staging && cp target/release/*.* staging
     - uses: actions/upload-artifact@v3
       with:
        name: Package
