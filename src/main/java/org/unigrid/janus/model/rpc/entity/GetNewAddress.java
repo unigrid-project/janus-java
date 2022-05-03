@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class NewAddress extends BaseResult<String> {
+public class GetNewAddress extends BaseResult<String> {
 	private static final String METHOD = "getnewaddress";
 
 	public static class Request extends BaseRequest {

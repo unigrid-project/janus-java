@@ -20,7 +20,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.unigrid.janus.model.rpc.entity.ListAddressGroupings;
+import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.service.DebugService;
 
 public class AddressListModel {
@@ -48,7 +48,7 @@ public class AddressListModel {
 		return this.addresses;
 	}
 
-	public void setAddresses(ListAddressGroupings list) {
+	public void setAddresses(ListAddressBalances list) {
 		int oldCount = 0;
 		addresses.clear();
 		int newCount = 0;

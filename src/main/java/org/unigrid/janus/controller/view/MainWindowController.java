@@ -113,6 +113,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			try {
 				debug.log("Shown event executing.");
 				window.getTransactionsController().onShown();
+				window.getAddressController().onShown();
 			} catch (Exception e) {
 				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
 			}

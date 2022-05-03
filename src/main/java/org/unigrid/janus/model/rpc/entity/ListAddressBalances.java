@@ -23,14 +23,13 @@ import org.unigrid.janus.model.Address;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class ListReceivedByAddress extends BaseResult<List<ListReceivedByAddress.Result>> {
+public class ListAddressBalances extends BaseResult<List<ListAddressBalances.Result>> {
 
-	private static final String METHOD = "listreceivedbyaddress";
+	private static final String METHOD = "listaddressbalances";
 
 	public static class Request extends BaseRequest {
 		public Request() {
 			super(METHOD);
-			this.setParams(new Object[]{0, true});
 		}
 	}
 
