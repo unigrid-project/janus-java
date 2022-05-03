@@ -38,7 +38,7 @@ jobs:
         target: unigridd.zip
     - name: Extract
       run: | 
-        mkdir staging/daemon && unzip unigridd.zip -d staging/daemon && cp staging/daemon/unigrid-2.0.1/bin/unigridd.exe daemon
+        mkdir -p download/daemon && unzip unigridd.zip -d download/daemon && cp download/daemon/unigrid-2.0.1/bin/unigridd.exe daemon
     
     - name: Build with Maven
       run: mvn install
