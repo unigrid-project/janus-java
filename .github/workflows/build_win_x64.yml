@@ -43,7 +43,7 @@ jobs:
     - name: Build with Maven
       run: mvn install
       
-    - run: mkdir staging && cp target/release/*.* staging
+    - run: cp target/release/*.* staging
     - uses: actions/upload-artifact@v3
       with:
        name: Package
