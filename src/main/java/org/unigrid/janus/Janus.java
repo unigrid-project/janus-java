@@ -63,7 +63,11 @@ public class Janus extends BaseApplication {
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
+	private String status = "inactive";
+	private String walletStatus = "none";
+	private String progress = "0";
 	private Info info = new Info();
+	private Boolean checkForStatus = true;
 
 	@PostConstruct
 	@SneakyThrows
@@ -94,7 +98,6 @@ public class Janus extends BaseApplication {
 	@Override
 	public void start(Stage stage, Application.Parameters parameters) throws Exception {
 
-		System.out.println("mee");
 		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {
@@ -146,7 +149,7 @@ public class Janus extends BaseApplication {
 
 		preloader.initText();
 
-		rpc.pollForInfo(30 * 1000);
+		rpc.pollForInfo(3 * 1000);
 
 		startUp();
 
@@ -157,18 +160,23 @@ public class Janus extends BaseApplication {
 			@Override
 			protected Void call() throws Exception {
 
-				while (block <= 0) {
+				while (walletStatus != "Done loading" && status != "downloading"
+					&& status != "unarchiving") {
 
 					info = rpc.call(new Info.Request(), Info.class);
-
-					block = info.getResult().getBlocks();
-					System.out.println(block);
-
-					//try {
-					//	Thread.sleep(3000);
-					//} catch (InterruptedException ex) {
-					//TODO: Fix eception handling
-					//}
+					walletStatus = info.getResult().getBootstrapping().getWalletstatus();
+					status = info.getResult().getBootstrapping().getStatus();
+					progress = info.getResult().getBootstrapping().getProgress();
+					if (checkForStatus) {
+						if (status == "downloading") {
+							// fire property to show progres bar
+							preloader.setText("Downloading blockchain");
+							checkForStatus = false;
+						}
+					}
+					if(!checkForStatus && progress == "none") {
+						
+					}
 				}
 				ready.setValue(Boolean.TRUE);
 
