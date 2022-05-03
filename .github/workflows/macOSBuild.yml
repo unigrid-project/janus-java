@@ -33,7 +33,7 @@ jobs:
     - name: Extract
       run: | 
         mkdir -p target/daemon && tar -xvf unigridd.tar.gz -C target/daemon
-    - run: cp target/daemon/unigrid-2.0.1-osx64/bin/unigridd deamon    
+    - run: cp target/daemon/unigrid-2.0.1/bin/unigridd deamon    
     - name: Build with Maven
       run: mvn install
       
