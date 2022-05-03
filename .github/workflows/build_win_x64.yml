@@ -39,7 +39,7 @@ jobs:
     - name: Extract
       run: | 
         mkdir staging/daemon && unzip unigridd.zip -d staging/daemon
-    - run: cp stating/daemon/unigrid daemon
+    - run: cp staging/daemon/unigrid daemon
 
     - name: Build with Maven
       run: mvn install
