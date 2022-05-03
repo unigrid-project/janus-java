@@ -18,4 +18,3 @@
 --description "JavaFX wallet for the Unigrid Network"
 --vendor "UGD software AB, Sweden"
 --dest target/release
---input daemon

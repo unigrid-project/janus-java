@@ -6,4 +6,4 @@
 <#else>
 
 </#if>
---icon ${project}/unigrid-round_77x77.png
+--icon src/main/resources/org/unigrid/janus/view/images/unigrid-round_77x77.ico
