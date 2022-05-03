@@ -10,7 +10,7 @@
 --mac-package-name Janus
 --type dmg
 <#else>
---type app-image
+--type deb
 --linux-menu-group unigrid
 --linux-shortcut
 --linux-package-name janus
