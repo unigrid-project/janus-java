@@ -21,10 +21,8 @@ jobs:
         java-version: '16'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
-      run: mvn install
-    
-    - run: mkdir target/classes/daemon
+        
+    - run: mkdir daemon
     
     - name: download daemon
       uses: duhow/download-github-release-assets@v1
@@ -35,11 +33,12 @@ jobs:
         target: unigridd.tar.gz
     - name: Extract
       run: | 
-        tar -xvf unigridd.tar.gz && cp unigrid-2.0.1/bin/unigridd target/classes/daemon
+        tar -xvf unigridd.tar.gz && cp unigrid-2.0.1/bin/unigridd daemon
         
-    - run: mvn jpackage:jpackage
-    
-    - run: mkdir staging && cp target/*.* staging
+    - name: Build with Maven
+      run: mvn install
+      
+    - run: mkdir staging && cp target/release/*.* staging
     - uses: actions/upload-artifact@v3
       with:
        name: Package
