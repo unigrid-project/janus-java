@@ -27,8 +27,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - run: mkdir daemon staging
-
-    - run: mkdir staging && cp target/*.* staging
+    
     - name: download daemon
       uses: duhow/download-github-release-assets@v1
       with:
