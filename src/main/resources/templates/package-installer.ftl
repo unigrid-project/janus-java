@@ -18,3 +18,4 @@
 --description "JavaFX wallet for the Unigrid Network"
 --vendor "UGD software AB, Sweden"
 --dest target/release
+--java-options '--add-opens java.base/java.lang=ALL-UNNAMED'
