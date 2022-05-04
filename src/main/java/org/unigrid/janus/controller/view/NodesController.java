@@ -233,9 +233,8 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		}
 		// after wallet is done loading, load the gridnodes.
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
-			if (!wallet.isLoading()) {
-				getNodeList();
-			}
+			debug.log("loading gridnode list");
+			getNodeList();
 		}
 	}
 }

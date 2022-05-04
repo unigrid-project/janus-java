@@ -111,7 +111,7 @@ public class Janus extends BaseApplication {
 						public void run() {
 							rpc.stopPolling();
 
-							rpc.pollForInfo(30 * 1000);
+							rpc.pollForInfo(5 * 1000);
 							startMainWindow();
 							preloader.stopSpinner();
 							preloader.hide();

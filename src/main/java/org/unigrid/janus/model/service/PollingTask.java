@@ -16,13 +16,15 @@
 
 package org.unigrid.janus.model.service;
 
-import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.Wallet;
 import java.util.TimerTask;
 import javafx.application.Platform;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import org.unigrid.janus.model.rpc.entity.GetBlockCount;
+import org.unigrid.janus.model.rpc.entity.GetConnectionCount;
+import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 
 public class PollingTask extends TimerTask {
 
@@ -37,19 +39,23 @@ public class PollingTask extends TimerTask {
 
 	public void run() {
 		Platform.runLater(() -> {
-			debug.log(rpc.callToJson(new Info.Request()));
+			//debug.log(rpc.callToJson(new Info.Request()));
 			wallet.setProcessingStatus();
-			final Info info = rpc.call(new Info.Request(), Info.class);
-			String sInfo = jsonb.toJson(info);
-			debug.log(sInfo);
-			wallet.setInfo(info);
-			if (!wallet.isLoading()) {
-				final StakingStatus staking = rpc.call(new StakingStatus.Request(), StakingStatus.class);
-				wallet.setStakingStatus(staking);
-				debug.log(rpc.callToJson(new StakingStatus.Request()));
-			} else {
-				debug.log("Wallet loading, polling calls deferred.");
-			}
+			//final Info info = rpc.call(new Info.Request(), Info.class);
+			final GetWalletInfo walletInfo = rpc.call(new GetWalletInfo.Request(), GetWalletInfo.class);
+			final GetBlockCount blockCount = rpc.call(new GetBlockCount.Request(), GetBlockCount.class);
+			final GetConnectionCount connCount = rpc.call(new GetConnectionCount.Request(),
+				GetConnectionCount.class);
+			final StakingStatus staking = rpc.call(new StakingStatus.Request(), StakingStatus.class);
+			//String sInfo = jsonb.toJson(info);
+			//debug.log(sInfo);
+			//wallet.setInfo(info);
+			wallet.setBalance(walletInfo.getResult().getBalance());
+			wallet.setBlocks(Integer.parseInt(blockCount.getResult().toString()));
+			wallet.setConnections(Integer.parseInt(connCount.getResult().toString()));
+			wallet.setWalletState(walletInfo);
+			wallet.setStakingStatus(staking);
+			wallet.setStatus("done");
 		});
 	}
 }
