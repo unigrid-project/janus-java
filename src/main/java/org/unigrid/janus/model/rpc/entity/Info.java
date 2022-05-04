@@ -36,39 +36,29 @@ public class Info extends BaseResult<Info.Result> {
 	@Data
 	public static class Result {
 
-		@JsonbProperty("version")
 		private int version;
 		@JsonbProperty("walletversion")
 		private int walletVersion;
 		@JsonbProperty("protocolversion")
 		private int protocolVersion;
-		@JsonbProperty("totalbalance")
 		private float totalbalance;
-		@JsonbProperty("balance")
 		private float balance;
 		@JsonbProperty("unlocked_until")
 		private long unlockUntil = 4999;
 		// unpacked from nested bootstrapping
-		@JsonbProperty("moneysupply")
 		private double moneysupply;
-		@JsonbProperty("blacklisted")
 		private double blacklisted;
-		@JsonbProperty("blocks")
 		private int blocks;
 		@JsonbProperty("connections")
 		private int connections;
-
-		@JsonbProperty("bootstrapping")
+		private String status;
 		private Bootstrap bootstrapping;
 	}
 
 	@Data
 	public static class Bootstrap {
-		@JsonbProperty("walletstatus")
 		private String walletstatus;
-		@JsonbProperty("status")
 		private String status;
-		@JsonbProperty("progress")
 		private String progress;
 	}
 }

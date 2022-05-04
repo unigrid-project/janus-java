@@ -65,6 +65,7 @@ public class Janus extends BaseApplication {
 	private int block = -1;
 	private String status = "inactive";
 	private String walletStatus = "none";
+	private String startupStatus;
 	private String progress = "0";
 	private Info info = new Info();
 	private Boolean checkForStatus = true;
@@ -107,12 +108,10 @@ public class Janus extends BaseApplication {
 					public void run() {
 						rpc.stopPolling();
 
-						System.out.println("moo");
-						rpc.pollForInfo(30 * 1000);
+						rpc.pollForInfo(10 * 1000);
 						startMainWindow();
 						preloader.stopSpinner();
 						preloader.hide();
-						System.out.println("shit");
 					}
 				});
 
@@ -159,14 +158,15 @@ public class Janus extends BaseApplication {
 		Task task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-				while (block <= 0) {
-				//while (walletStatus != "Done loading") {
-
+				//while (block <= 0) {
+				do {
 					info = rpc.call(new Info.Request(), Info.class);
 					block = info.getResult().getBlocks();
 					walletStatus = info.getResult().getBootstrapping().getWalletstatus();
 					status = info.getResult().getBootstrapping().getStatus();
 					progress = info.getResult().getBootstrapping().getProgress();
+					startupStatus = info.getResult().getStatus();
+					System.out.println(startupStatus);
 					if (checkForStatus) {
 						if (status == "downloading") {
 							// fire property to show progres bar
@@ -177,7 +177,7 @@ public class Janus extends BaseApplication {
 					/*if (!checkForStatus && progress == "none") {
 
 					}*/
-				}
+				} while (!status.equals("inactive") || (status.equals("inactive") && startupStatus != null)); //&& !progress.equals("none")))
 				ready.setValue(Boolean.TRUE);
 
 				return null;
