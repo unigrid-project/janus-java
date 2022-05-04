@@ -101,23 +101,25 @@ public class Janus extends BaseApplication {
 
 		startSplashScreen();
 
-		ready.addListener(new ChangeListener<Boolean>() {
-			@Override
-			public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
-				Platform.runLater(new Runnable() {
-					public void run() {
-						rpc.stopPolling();
+		ready.addListener(
+			new ChangeListener<Boolean>() {
+				@Override
+				public void changed(ObservableValue<? extends Boolean> ov, Boolean t,
+					Boolean t1
+				) {
+					Platform.runLater(new Runnable() {
+						public void run() {
+							rpc.stopPolling();
 
-						rpc.pollForInfo(10 * 1000);
-						startMainWindow();
-						preloader.stopSpinner();
-						preloader.hide();
-					}
-				});
-
+							rpc.pollForInfo(30 * 1000);
+							startMainWindow();
+							preloader.stopSpinner();
+							preloader.hide();
+						}
+					});
+				}
 			}
-
-		});
+		);
 
 	}
 
@@ -177,7 +179,7 @@ public class Janus extends BaseApplication {
 					/*if (!checkForStatus && progress == "none") {
 
 					}*/
-				} while (!status.equals("inactive") || (status.equals("inactive") && startupStatus != null)); //&& !progress.equals("none")))
+				} while (!status.equals("inactive") || (status.equals("inactive") && startupStatus != null));
 				ready.setValue(Boolean.TRUE);
 
 				return null;
