@@ -145,18 +145,13 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		tblAddresses.getColumns().add(colBtn);
 	}
 
-	public void onShown() {
-		try {
-			loadAddresses();
-		} catch (Exception e) {
-			debug.log(String.format("ERROR: (addresses shown) %s", e.getMessage()));
-		}
-	}
-
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(addresses.ADDRESS_LIST)) {
 			debug.log("ADDRESS_LIST change");
 			tblAddresses.setItems(addresses.getAddresses());
+		}
+		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
+			loadAddresses();
 		}
 	}
 

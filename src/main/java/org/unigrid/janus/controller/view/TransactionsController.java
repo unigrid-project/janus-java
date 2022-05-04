@@ -183,10 +183,9 @@ public class TransactionsController implements Initializable, PropertyChangeList
 				bar.valueProperty().addListener(this::scrolled);
 			}
 		}
-		// after wallet is done loading, load the transactions.
-		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
-			if (!wallet.isLoading()
-				&& transList.getTransactions().size() == 0) {
+		// if balance changes, load the transactions.
+		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
+			if (transList.getTransactions().size() == 0) {
 				loadTransactions(0);
 			}
 		}

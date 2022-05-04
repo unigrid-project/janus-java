@@ -113,7 +113,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			try {
 				debug.log("Shown event executing.");
 				window.getTransactionsController().onShown();
-				window.getAddressController().onShown();
+				//window.getAddressController().onShown();
 				// testing
 				//window.getWindowBarController().startSpinner();
 			} catch (Exception e) {
@@ -208,8 +208,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		debug.log("Property changed:");
-		debug.log(event.getPropertyName());
+		//debug.log("Property changed:");
+		//debug.log(event.getPropertyName());
 		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
 			String blocks = String.format("Blocks: %d", (int) event.getNewValue());
 			blocksTltp.setText(blocks);

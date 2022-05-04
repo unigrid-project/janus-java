@@ -72,7 +72,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 			if (wallet.getProcessingStatus()) {
 				String status = String.format("processing status %s",
 					(boolean) wallet.getProcessingStatus());
-				debug.log(status);
+				//debug.log(status);
 			}
 		}
 	}
