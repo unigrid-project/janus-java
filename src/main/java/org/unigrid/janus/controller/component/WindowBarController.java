@@ -21,7 +21,6 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import lombok.Getter;
@@ -61,19 +60,19 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getPropertyName().equals(wallet.MONEYSUPPLY_PROPERTY)) {
+		/*if (event.getPropertyName().equals(wallet.MONEYSUPPLY_PROPERTY)) {
 			String sValue = String.format("%.8f", (double) event.getNewValue());
 			debug.log(String.format("Money supply: %s", sValue));
 			Label supply = (Label) window.lookup("txtSupply");
 			if (supply != null) {
 				supply.setText(sValue);
 			}
-		}
+		}*/
 		if (event.getPropertyName().equals(wallet.PROCESSING_PROPERTY)) {
 			if (wallet.getProcessingStatus()) {
 				String status = String.format("processing status %s",
 					(boolean) wallet.getProcessingStatus());
-				debug.log(status);
+				//debug.log(status);
 			}
 		}
 	}
@@ -110,7 +109,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	}
 
 	public void startSpinner() {
-
 		spinner.setVisible(true);
 		rt = new RotateTransition(Duration.millis(50000), spinner);
 		rt.setByAngle(20000);
