@@ -6,4 +6,4 @@
 <#else>
 --icon src/main/resources/org/unigrid/janus/view/images/unigrid-round_77x77.png
 </#if>
---java-options "--add-opens 'java.base/java.lang=ALL-UNNAMED'"
+--java-options "'--add-opens java.base/java.lang=ALL-UNNAMED'"
