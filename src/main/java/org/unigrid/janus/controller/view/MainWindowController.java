@@ -114,6 +114,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				debug.log("Shown event executing.");
 				window.getTransactionsController().onShown();
 				window.getAddressController().onShown();
+				// testing
+				//window.getWindowBarController().startSpinner();
 			} catch (Exception e) {
 				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
 			}
