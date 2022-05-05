@@ -110,15 +110,7 @@
     </dependencies>
     <build>
   
-        <resources>
-            <resource>
-                <directory>scr/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>daemon</directory>
-            </resource>
-        </resources>
-        
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
