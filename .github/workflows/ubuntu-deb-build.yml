@@ -28,7 +28,7 @@ jobs:
       uses: duhow/download-github-release-assets@v1
       with:
         repository: unigrid-project/daemon
-        tag: Latest
+        
         files: unigrid-*-x86_64-linux-gnu.tar.gz
         target: unigridd.tar.gz
     - name: Extract
