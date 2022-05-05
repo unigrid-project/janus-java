@@ -10,12 +10,12 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
             </goals>
             <properties>
-                <exec.vmArgs></exec.vmArgs>
+                <exec.vmArgs> --add-opens java.base/java.lang=ALL-UNNAMED</exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.appArgs>-d -classpath %classpath ${packageClassName} ${exec.vmArgs} -classpath %classpath ${exec.mainClass}</exec.appArgs>
                 <exec.mainClass>${packageClassName}</exec.mainClass>
                 <exec.executable>java</exec.executable>
-                <janus.daemon.location>/home/evan/work/daemons/unigridd</janus.daemon.location>
+                <janus.daemon.location>/home/marcus/Documents/unigrid/daemon/daemon/unigridd</janus.daemon.location>
             </properties>
         </action>
         <action>
