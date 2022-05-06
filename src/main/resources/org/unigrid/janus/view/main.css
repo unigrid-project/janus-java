@@ -89,33 +89,40 @@
 }
 
 .table-view {
-    -fx-background-color: transparent;
+	-fx-background-color: transparent;
 }
 
 .table-view .column-header-background {
-    -fx-background-color: transparent;
+	-fx-background-color: transparent;
 }
 
 .table-view .column-header-background .label {
-    -fx-text-fill: #aad;
+	-fx-text-fill: #aad;
 }
 
 .table-view .column-header {
-    -fx-background-color: transparent;
+	-fx-background-color: transparent;
 }
 
 .table-view .column-header-background .filler {
-    -fx-background-color: transparent;
+	-fx-background-color: transparent;
 }
 
 .table-view .corner {
-    -fx-background-color: transparent;
+	-fx-background-color: transparent;
 }
 
 .table-view .table-cell {
-    -fx-text-fill: #aad;
-    -fx-text-alignment: right;
-    -fx-border-color: transparent #aad transparent transparent;
+	-fx-text-fill: #aad;
+	-fx-text-alignment: right;
+	-fx-border-color: transparent #aad transparent transparent;
+}
+
+.table-view .table-cell .button {
+	-fx-background-radius: 0;
+	-fx-border-color: transparent;
+	-fx-border-width: 0;
+	-fx-border-radius: 0;
 }
 
 .table-row-cell:odd {
@@ -136,15 +143,15 @@
 }
 
 .dialog-pane {
-    -fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);
+	-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);
 }
 
 .dialog-pane .label {
-    -fx-text-fill: #e72;
+	-fx-text-fill: #e72;
 }
 
 .dialog-pane:header .header-panel {
-    -fx-background-color: transparent;
+	-fx-background-color: transparent;
 }
 
 .dialog-pane:header .header-panel .label {
@@ -177,44 +184,44 @@
 }
 
 :root{
-    --s-loader-wrapper-bg-color: rgb(21, 22, 43);
-    --s-loader-width: 20px;
-    --s-loader-heigth: var(--s-loader-width);
-    --s-loader-border-color-trans: rgba(29, 161, 242, 0.2);
-    --s-loader-border-color-full: rgb(29, 161, 242);
+	--s-loader-wrapper-bg-color: rgb(21, 22, 43);
+	--s-loader-width: 20px;
+	--s-loader-heigth: var(--s-loader-width);
+	--s-loader-border-color-trans: rgba(29, 161, 242, 0.2);
+	--s-loader-border-color-full: rgb(29, 161, 242);
 }
 
 body{
-    margin: 0;
-    background: var(--s-loader-wrapper-bg-color, rgb(21,22,43));
-    height: 100vh;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	margin: 0;
+	background: var(--s-loader-wrapper-bg-color, rgb(21,22,43));
+	height: 100vh;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .spinner-loader{
-    width: var(--s-loader-width);
-    height: var(--s-loader-heigth);
-    
-    border: 5px solid var(--s-loader-color-trans);
-    border-left-color: var(--s-loader-colot-full);
-    border-radius: 50%;
-    background: transparent;
-    
-    animation-name: rotat-s-loader;
-    animation-iteration-count: infinite;
-    animation-duration: 1s;
-    animation-timing-function: linear;
-    position: relative;
+	width: var(--s-loader-width);
+	height: var(--s-loader-heigth);
+	
+	border: 5px solid var(--s-loader-color-trans);
+	border-left-color: var(--s-loader-colot-full);
+	border-radius: 50%;
+	background: transparent;
+	
+	animation-name: rotat-s-loader;
+	animation-iteration-count: infinite;
+	animation-duration: 1s;
+	animation-timing-function: linear;
+	position: relative;
 }
 
 @keyframes rotate-s-loader{
-    from{
-        transform: rotate(0);
-    }
-    to{
-        transform: rotate(360deg);
-    }
+	from{
+		transform: rotate(0);
+	}
+	to{
+		transform: rotate(360deg);
+	}
 }

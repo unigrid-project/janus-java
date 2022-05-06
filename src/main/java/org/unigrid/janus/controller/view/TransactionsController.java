@@ -38,6 +38,14 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.paint.Paint;
+import org.apache.commons.lang3.SystemUtils;
+import org.controlsfx.control.Notifications;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
@@ -126,11 +134,40 @@ public class TransactionsController implements Initializable, PropertyChangeList
 						link.setOnAction(new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent e) {
-								window.browseURL("https://explorer"
+								if (e.getTarget().equals(link)) {
+									window.browseURL("https://explorer"
 												+ ".unigrid.org/address/"
 												+ trans.getAddress());
+								}
 							}
 						});
+						Button btn = new Button();
+						FontIcon fontIcon = new FontIcon("fas-clipboard");
+						fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+						btn.setGraphic(fontIcon);
+						btn.setOnAction((ActionEvent event) -> {
+							final Clipboard cb = Clipboard.getSystemClipboard();
+							final ClipboardContent content = new  ClipboardContent();
+							content.putString(trans.getAddress());
+							cb.setContent(content);
+							if (SystemUtils.IS_OS_MAC_OSX) {
+								Notifications
+									.create()
+									.title("Address copied to clipboard")
+									.text(trans.getAddress())
+									.position(Pos.TOP_RIGHT)
+									.showInformation();
+							} else {
+								Notifications
+									.create()
+									.title("Address copied to clipboard")
+									.text(trans.getAddress())
+									.showInformation();
+							}
+						});
+						link.setGraphic(btn);
+						link.setAlignment(Pos.CENTER_RIGHT);
+						// link.setContentDisplay(ContentDisplay.RIGHT);
 						return new ReadOnlyObjectWrapper(link);
 					}
 				});

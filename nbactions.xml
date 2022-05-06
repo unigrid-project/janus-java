@@ -50,6 +50,7 @@
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.mainClass>${packageClassName}</exec.mainClass>
                 <exec.executable>java</exec.executable>
+
                 <exec.appArgs>-d -classpath %classpath ${packageClassName} ${exec.vmArgs} -classpath %classpath ${exec.mainClass}</exec.appArgs>
             </properties>
         </action>
