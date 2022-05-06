@@ -15,7 +15,7 @@
                 <exec.appArgs>-d -classpath %classpath ${packageClassName} ${exec.vmArgs} -classpath %classpath ${exec.mainClass}</exec.appArgs>
                 <exec.mainClass>${packageClassName}</exec.mainClass>
                 <exec.executable>java</exec.executable>
-                <janus.daemon.location>/home/evan/work/daemons/unigridd</janus.daemon.location>
+                <janus.daemon.location>/home/marcus/Documents/unigrid/daemon/daemon/unigridd</janus.daemon.location>
             </properties>
         </action>
         <action>
