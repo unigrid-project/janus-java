@@ -112,22 +112,17 @@ jobs:
   job4:
     if: ${{ always() }}
     needs: [job1, job2, job3]
-
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:   
       - uses: actions/upload-artifact@v3
         with:
           name: Package
           path: staging
       
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        with: 
-          draft: true
-          prerelease: true
-          release_name: alpha 0.0.1
-          tag_name: alpha
-          body: alpha test realease
+
       
       - run: echo ${{ steps.create_release.outputs.upload_url }}
 
