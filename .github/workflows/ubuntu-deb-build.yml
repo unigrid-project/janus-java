@@ -50,6 +50,8 @@ jobs:
         - name: Create release
           id: create_release
           uses: actions/create-release@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with: 
             draft: true
             prerelease: true
@@ -62,6 +64,8 @@ jobs:
         - name: Upload release assets
           id: upload_realse_assets
           uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
             upload_url: ${{ steps.create_release.outputs.upload_url }}
             asset_path: ./staging
