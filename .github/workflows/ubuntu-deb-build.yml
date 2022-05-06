@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  job: 1
-  build:
+  job1:
+    build:
       runs-on: ubuntu-latest
       permissions:
         contents: read
@@ -41,7 +41,7 @@ jobs:
         
       - run: mkdir staging && cp target/release/*.* staging
 
-  job: 2
+  job2:
     build:
       runs-on: windows-latest
       permissions:
@@ -76,7 +76,7 @@ jobs:
       - run: cp target/release/*.* staging
       - run: cd staging && ls && cd ..
 
-  job: 3
+  job3:
     build:
       runs-on: macos-latest
       permissions:
@@ -109,7 +109,10 @@ jobs:
       
       - run: mkdir staging && cp target/release/*.* staging
       - run: cd staging && ls && cd ..
-  job: 4
+  job4:
+    if: ${{ always() }}
+    needs: [job1, job2, job3]
+
     steps:   
       - uses: actions/upload-artifact@v3
         with:
