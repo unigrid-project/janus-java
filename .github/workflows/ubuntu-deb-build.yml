@@ -43,8 +43,8 @@ jobs:
         - run: mkdir staging && cp target/release/*.* staging
         - uses: actions/upload-artifact@v3
           with:
-          name: Package
-          path: staging
+            name: Package
+            path: staging
       
       
         - name: Create release
