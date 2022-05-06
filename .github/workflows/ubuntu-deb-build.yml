@@ -13,7 +13,17 @@ jobs:
       permissions:
         contents: read
         packages: write
-
+      
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        with: 
+          draft: true
+          prerelease: true
+          release_name: alpha 0.0.1
+          tag_name: alpha
+          body: alpha test realease
+      
       steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 16
@@ -40,8 +50,20 @@ jobs:
         run: mvn install
         
       - run: mkdir staging && cp target/release/*.* staging
+      
+      - run: echo ${{ steps.create_release.outputs.upload_url }}
+
+      - name: Upload release assets
+        id: upload_realse_assets
+        uses: actions/upload_release_asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./staging
+          asset_name: janus_*_amd64.deb
+          asset_content_type: application/zip
 
   job2:
+    needs: job1
     build:
       runs-on: windows-latest
       permissions:
@@ -75,8 +97,20 @@ jobs:
       
       - run: cp target/release/*.* staging
       - run: cd staging && ls && cd ..
+      
+      - run: echo ${{ steps.create_release.outputs.upload_url }}
+
+      - name: Upload release assets
+        id: upload_realse_assets
+        uses: actions/upload_release_asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./staging
+          asset_name: Janus-*.msi
+          asset_content_type: application/zip
 
   job3:
+    needs: job1
     build:
       runs-on: macos-latest
       permissions:
@@ -109,6 +143,17 @@ jobs:
       
       - run: mkdir staging && cp target/release/*.* staging
       - run: cd staging && ls && cd ..
+      
+      - run: echo ${{ steps.create_release.outputs.upload_url }}
+
+      - name: Upload release assets
+        id: upload_realse_assets
+        uses: actions/upload_release_asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./staging
+          asset_name: Janus-*.dmg
+          asset_content_type: application/zip
   job4:
     if: ${{ always() }}
     needs: [job1, job2, job3]
@@ -121,16 +166,3 @@ jobs:
         with:
           name: Package
           path: staging
-      
-
-      
-      - run: echo ${{ steps.create_release.outputs.upload_url }}
-
-      - name: Upload release assets
-        id: upload_realse_assets
-        uses: actions/upload_release_asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./staging
-          asset_name: 
-          asset_content_type: application/zip
