@@ -45,12 +45,8 @@ jobs:
         with:
         name: Package
         path: staging
-  job: 2
-
-  job: 3
-
-  job: 4
-    steps: 
+    
+    
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
