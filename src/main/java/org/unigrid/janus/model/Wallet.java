@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
+import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.service.DebugService;
@@ -221,11 +222,17 @@ public class Wallet {
 		this.setConnections(newInfo.getResult().getConnections());
 		//disable processing indicator
 		this.setProcessingStatus();
-		long timestamp = newInfo.getResult().getUnlockUntil();
+		this.setStatus(newInfo.getResult().getBootstrapping().getWalletstatus());
+		//String unlock = String.format("Unlock Until: %s", newInfo.getResult().getUnlockUntil());
+		//debug.log(unlock);
+
+	}
+
+	public void setWalletState(GetWalletInfo walletInfo) {
+		long timestamp = walletInfo.getResult().getUnlockUntil();
 		// only 4999 == an unencrypted wallet
 		this.setEncrypted(timestamp != 4999);
 		//debug.log(String.format("ENCRYPTED: %s", getEncrypted()));
-		this.setStatus(newInfo.getResult().getBootstrapping().getWalletstatus());
 		long time = timestamp;
 		Date date = new Date(time);
 		Calendar calendar = Calendar.getInstance();
@@ -247,9 +254,6 @@ public class Wallet {
 		} else if (timestamp == 0) {
 			this.setLocked(true);
 		}
-		//String unlock = String.format("Unlock Until: %s", newInfo.getResult().getUnlockUntil());
-		//debug.log(unlock);
-
 	}
 
 	public Boolean getProcessingStatus() {

@@ -2,16 +2,23 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import org.unigrid.janus.view.component.WindowBarButton?>
 
-<HBox alignment="TOP_RIGHT" maxHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" style="-fx-background-color: linear-gradient(from 25px 25px to 100px 100px, #e72, #ff9500);" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.WindowBarController">
+<HBox alignment="TOP_RIGHT" maxHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" style="-fx-background-color: linear-gradient(from 25px 25px to 100px 100px, #e72, #ff9500);" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.WindowBarController">
    <children>
-      <HBox fx:id="handle" onMouseEntered="#onDecorateMove" HBox.hgrow="ALWAYS">
+      <HBox fx:id="handle" alignment="CENTER_LEFT" onMouseEntered="#onDecorateMove" HBox.hgrow="ALWAYS">
          <children>
-            <Label fx:id="txtSupply" text="DECENTRALIZE" textFill="WHITE">
+            <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../images/unigrid-round_77x77.png" />
+               </image>
+            </ImageView>
+            <Label text="UNIGRID" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
@@ -19,8 +26,14 @@
                   <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                </HBox.margin>
             </Label>
-         </children></HBox>
-      <FontIcon fx:id="spinner" iconColor="WHITE" iconLiteral="fas-spinner" iconSize="20" styleClass="spinner">
+         </children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <padding>
+            <Insets left="10.0" />
+         </padding></HBox>
+      <FontIcon fx:id="spinner" iconColor="WHITE" iconLiteral="fas-spinner" iconSize="20" styleClass="spinner" visible="false">
          <HBox.margin>
             <Insets top="8.0" />
          </HBox.margin>

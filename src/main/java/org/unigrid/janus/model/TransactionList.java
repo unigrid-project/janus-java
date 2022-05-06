@@ -12,7 +12,7 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model;
 
@@ -52,7 +52,10 @@ public class TransactionList {
 	}
 
 	public ObservableList<Transaction> getLatestTransactions(int count) {
-		return (ObservableList<Transaction>) FXCollections.observableArrayList(this.transactions.subList(0, count));
+		System.out.println(this.transactions.size());
+		count = this.transactions.size() < count ? this.transactions.size() : count;
+		return (ObservableList<Transaction>) FXCollections.observableArrayList(this.transactions.subList(0,
+			count));
 	}
 
 	public int loadNewTransactions() {
@@ -98,13 +101,15 @@ public class TransactionList {
 		return result;
 	}
 
-	/** Add transaction if its not duplicate, or aggregate into multipart
-		if the new transaction is a part of a multipart.
-		@param index If this is not a part of another transaction, insert at index.
-		@param trans The new transaction to add (maybe)
-		@return True if added as new, false if added to multipart or not added.
-				This is used to determine if transaction count changed.
-	*/
+	/**
+	 * Add transaction if its not duplicate, or aggregate into multipart if the new transaction is a part of a multipart.
+	 *
+	 * @param index If this is not a part of another transaction, insert at index.
+	 * @param trans The new transaction to add (maybe)
+	 * @return True if added as new, false if added to multipart or not added.
+	 * This is used to determine if transaction count
+	 * changed.
+	 */
 	public boolean addTransaction(int index, Transaction trans) {
 		boolean result = false;
 		try {

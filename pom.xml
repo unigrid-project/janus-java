@@ -89,7 +89,7 @@
             <artifactId>jersey-media-json-binding</artifactId>
             <version>3.0.2</version>
         </dependency>
-
+      
         <!-- IKONLI ICONS -->
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
