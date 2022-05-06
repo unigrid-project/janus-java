@@ -12,7 +12,7 @@
             <properties>
                 <exec.vmArgs> --add-opens java.base/java.lang=ALL-UNNAMED</exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
-                <exec.appArgs>-d -classpath %classpath ${packageClassName} ${exec.vmArgs} -classpath %classpath ${exec.mainClass} --add-opens java.base/java.lang=ALL-UNNAMED</exec.appArgs>
+                <exec.appArgs>-d -classpath %classpath ${packageClassName} ${exec.vmArgs} -classpath %classpath ${exec.mainClass}</exec.appArgs>
                 <exec.mainClass>${packageClassName}</exec.mainClass>
                 <exec.executable>java</exec.executable>
                 <janus.daemon.location>/home/evan/work/daemons/unigridd</janus.daemon.location>
