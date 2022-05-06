@@ -6,7 +6,7 @@ name: ubuntu/deb build x64
 on:
   workflow_dispatch:
 
-jobs:
+  jobs:
     job: 1
       build:
         runs-on: ubuntu-latest
