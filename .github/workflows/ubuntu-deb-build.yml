@@ -70,6 +70,9 @@ jobs:
         - shell: bash
           run: |
             value='cat uploadPath.txt'
+        
+        - run: cat uploadPath.txt
+        - run: echo $value
         - name: Upload release assets
           id: upload_realse_assets
           uses: shogo82148/actions-upload-release-asset@v1
