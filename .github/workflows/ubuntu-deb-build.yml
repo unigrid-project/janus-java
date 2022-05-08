@@ -22,6 +22,12 @@ jobs:
           release_name: alpha 0.0.1
           tag_name: alpha
           body: alpha test realease
+      - run: echo ${{ steps.create_release.outputs.upload_url }} | tee uploadPath.txt
+      - name: Upload path for other jobs
+        uses: actions/upload-artifact@v3
+        with:
+          name: path
+          path: uploadPath.txt
   job1:
     needs: job0
     
@@ -57,15 +63,20 @@ jobs:
         
         - run: mkdir staging && cp target/release/*.* staging
       
-        - run: echo ${{ steps.create_release.outputs.upload_url }}
-
+        - name: Download path from job0
+          uses: actions/download-artifact@v3
+          with:
+            name: path
+        - shell: bash
+          run: |
+            value='cat uploadPath.txt'
         - name: Upload release assets
           id: upload_realse_assets
           uses: actions/upload_release_asset@v1
           env:
             GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
           with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            upload_url: value
             asset_path: ./staging/janus_*_amd64.deb
             asset_name: janus_*_amd64.deb
             asset_content_type: application/zip
@@ -111,7 +122,13 @@ jobs:
       - run: cp target/release/*.* staging
       - run: cd staging && ls && cd ..
       
-      - run: echo ${{ steps.create_release.outputs.upload_url }}
+      - name: Download path from job0
+        uses: actions/download-artifact@v3
+        with:
+          name: path
+      - shell: bash
+        run: |
+          value='cat uploadPath.txt'
 
       - name: Upload release assets
         id: upload_realse_assets
@@ -119,7 +136,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: value
           asset_path: ./staging/Janus-*.msi
           asset_name: Janus-*.msi
           asset_content_type: application/zip
@@ -164,7 +181,13 @@ jobs:
       - run: mkdir staging && cp target/release/*.* staging
       - run: cd staging && ls && cd ..
       
-      - run: echo ${{ steps.create_release.outputs.upload_url }}
+      - name: Download path from job0
+        uses: actions/download-artifact@v3
+        with:
+          name: path
+      - shell: bash
+        run: |
+          value='cat uploadPath.txt'
 
       - name: Upload release assets
         id: upload_realse_assets
@@ -172,7 +195,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: value
           asset_path: ./staging/Janus-*.dmg
           asset_name: Janus-*.dmg
           asset_content_type: application/zip
