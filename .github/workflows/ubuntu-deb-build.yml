@@ -15,7 +15,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.SKITPICKLE }}
+          GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with: 
           draft: true
           prerelease: true
@@ -63,7 +63,7 @@ jobs:
           id: upload_realse_assets
           uses: actions/upload_release_asset@v1
           env:
-            GITHUB_TOKEN: ${{ secrets.SKITPICKLE }}
+            GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
           with:
             upload_url: ${{ steps.create_release.outputs.upload_url }}
             asset_path: ./staging
@@ -117,7 +117,7 @@ jobs:
         id: upload_realse_assets
         uses: actions/upload_release_asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.SKITPICKLE }}
+          GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./staging
@@ -170,7 +170,7 @@ jobs:
         id: upload_realse_assets
         uses: actions/upload_release_asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.SKITPICKLE }}
+          GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./staging
