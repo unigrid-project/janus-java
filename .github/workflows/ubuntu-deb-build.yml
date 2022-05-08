@@ -76,7 +76,7 @@ jobs:
           env:
             GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
           with:
-            upload_url: value
+            upload_url: $value
             asset_path: ./staging/janus_*_amd64.deb
             asset_name: janus_*_amd64.deb
             asset_content_type: application/zip
@@ -136,7 +136,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
-          upload_url: value
+          upload_url: $value
           asset_path: ./staging/Janus-*.msi
           asset_name: Janus-*.msi
           asset_content_type: application/zip
@@ -195,7 +195,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
-          upload_url: value
+          upload_url: $value
           asset_path: ./staging/Janus-*.dmg
           asset_name: Janus-*.dmg
           asset_content_type: application/zip
