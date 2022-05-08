@@ -72,16 +72,17 @@ jobs:
             value='cat uploadPath.txt'
         
         - name: path
-          id: path
-          run: cat uploadPath.txt
-        - run: echo $path
+          id: vars
+          run: echo ::set-output name=path::$(cat uploadPath.txt)
+          
+        - run: echo ${{ steps.vars.outputs.path }}
         - name: Upload release assets
           id: upload_realse_assets
           uses: shogo82148/actions-upload-release-asset@v1
           env:
             GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
           with:
-            upload_url: ${{ steps.path }}
+            upload_url: ${{ steps.vars.outputs.path }}
             asset_path: ./staging/janus_*_amd64.deb
             asset_name: janus_*_amd64.deb
             asset_content_type: application/zip
@@ -135,13 +136,17 @@ jobs:
         run: |
           value='cat uploadPath.txt'
 
+      - name: path
+        id: vars
+        run: echo ::set-output name=path::$(cat uploadPath.txt)
+
       - name: Upload release assets
         id: upload_realse_assets
         uses: shogo82148/actions-upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
-          upload_url: $value
+          upload_url: ${{ steps.vars.outputs.path }}
           asset_path: ./staging/Janus-*.msi
           asset_name: Janus-*.msi
           asset_content_type: application/zip
@@ -194,13 +199,17 @@ jobs:
         run: |
           value='cat uploadPath.txt'
 
+      - name: path
+        id: vars
+        run: echo ::set-output name=path::$(cat uploadPath.txt)
+          
       - name: Upload release assets
         id: upload_realse_assets
         uses: shogo82148/actions-upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
-          upload_url: $value
+          upload_url: ${{ steps.vars.outputs.path }}
           asset_path: ./staging/Janus-*.dmg
           asset_name: Janus-*.dmg
           asset_content_type: application/zip
