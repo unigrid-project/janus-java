@@ -71,15 +71,17 @@ jobs:
           run: |
             value='cat uploadPath.txt'
         
-        - run: cat uploadPath.txt
-        - run: echo $value
+        - name: path
+          id: path
+          run: cat uploadPath.txt
+        - run: echo $path
         - name: Upload release assets
           id: upload_realse_assets
           uses: shogo82148/actions-upload-release-asset@v1
           env:
             GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
           with:
-            upload_url: $value
+            upload_url: $path
             asset_path: ./staging/janus_*_amd64.deb
             asset_name: janus_*_amd64.deb
             asset_content_type: application/zip
