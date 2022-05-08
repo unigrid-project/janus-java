@@ -81,7 +81,8 @@ jobs:
           env:
             GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
           with:
-            upload_url: $path
+            upload_url: |
+              run cat uploadPath.txt
             asset_path: ./staging/janus_*_amd64.deb
             asset_name: janus_*_amd64.deb
             asset_content_type: application/zip
