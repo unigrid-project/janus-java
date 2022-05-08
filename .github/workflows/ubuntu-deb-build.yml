@@ -72,7 +72,7 @@ jobs:
             value='cat uploadPath.txt'
         - name: Upload release assets
           id: upload_realse_assets
-          uses: actions/upload_release_asset@v1
+          uses: shogo82148/actions-upload-release-asset@v1
           env:
             GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
           with:
@@ -132,7 +132,7 @@ jobs:
 
       - name: Upload release assets
         id: upload_realse_assets
-        uses: actions/upload_release_asset@v1
+        uses: shogo82148/actions-upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
@@ -191,7 +191,7 @@ jobs:
 
       - name: Upload release assets
         id: upload_realse_assets
-        uses: actions/upload_release_asset@v1
+        uses: shogo82148/actions-upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with:
