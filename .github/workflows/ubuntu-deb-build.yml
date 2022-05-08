@@ -17,7 +17,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
         with: 
-          draft: true
+          draft: false
           prerelease: true
           release_name: alpha 0.0.1
           tag_name: alpha
