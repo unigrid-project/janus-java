@@ -21,7 +21,7 @@
          <children>
             <FlowPane alignment="CENTER" columnHalignment="CENTER" VBox.vgrow="ALWAYS">
                <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" text="Address" textAlignment="CENTER" textFill="#ff8b2d">
+                  <Label alignment="CENTER" contentDisplay="CENTER" text="Addresses" textAlignment="CENTER" textFill="#ff8b2d">
                      <font>
                         <Font size="24.0" />
                      </font>

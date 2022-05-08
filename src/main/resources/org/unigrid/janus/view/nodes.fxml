@@ -13,7 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.unigrid.janus.view.component.PTableColumn?>
 
-<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="364.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.NodesController">
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="364.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.NodesController">
    <children>
       <VBox maxWidth="1.7976931348623157E308" prefHeight="364.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -57,7 +57,7 @@
             </FlowPane>
             <StackPane VBox.vgrow="ALWAYS">
                <children>
-                  <VBox fx:id="vpsConect" prefHeight="335.0" prefWidth="450.0" visible="false">
+                  <VBox fx:id="vpsConect" prefHeight="335.0" prefWidth="450.0">
                      <children>
                         <FlowPane>
                            <children>
@@ -91,7 +91,7 @@
                            </VBox.margin></TextArea>
                      </children>
                   </VBox>
-                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" StackPane.alignment="CENTER">
+                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" visible="false" StackPane.alignment="CENTER">
                      <children>
                         <TableView fx:id="tblGridnodes" VBox.vgrow="ALWAYS">
                            <columns>
