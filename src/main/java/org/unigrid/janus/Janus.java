@@ -203,8 +203,8 @@ public class Janus extends BaseApplication {
 								window.getSplashScreenController().
 									setText("Downloading blockchain");
 								window.getSplashScreenController().
-									updateProgress((float)(f / 100));
-						});
+									updateProgress((float) (f / 100));
+							});
 					}
 					if (status.equals("unarchiving")) {
 						Platform.runLater(
@@ -216,8 +216,7 @@ public class Janus extends BaseApplication {
 									setText("Unarchiving blockchain");
 								window.getSplashScreenController().
 									updateProgress((float) (f / 100));
-						});
-						
+							});
 					}
 				} while (walletInfo.hasError());
 				//while (!status.equals("inactive") || (status.equals("inactive")
