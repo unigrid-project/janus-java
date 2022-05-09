@@ -44,7 +44,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
 	private static WindowService window = new WindowService();
-
+	private static WarningController warning = new WarningController();
 	private static final int TAB_WALLET = 1;
 	private static final int TAB_TRANSACTIONS = 2;
 	private static final int TAB_NODES = 3;
@@ -81,6 +81,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private AnchorPane pnlOverlay;
 	@FXML
+	private AnchorPane pnlWarning;
+	@FXML
 	private FontIcon lockBtn;
 	@FXML
 	private FontIcon satelliteIcn;
@@ -99,8 +101,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		/* Empty on purpose */
 		hideOverlay();
+		hideWarning();
 		wallet.addPropertyChangeListener(this);
 		window.setMainWIndowController(this);
 	}
@@ -253,6 +255,12 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				coinsBtn.iconColorProperty().setValue(Color.RED);
 			}
 		}
+
+		if (event.getPropertyName().equals(wallet.IS_OFFLINE)) {
+			showWarning();
+		}
+		if (event.getPropertyName().equals(warning.STATUS_PROPERTY)) {
+		}
 		/*
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
 			String status = (String) event.getNewValue();
@@ -271,6 +279,14 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	public void hideOverlay() {
 		pnlOverlay.setVisible(false);
+	}
+
+	public void showWarning() {
+		pnlWarning.setVisible(true);
+	}
+
+	public void hideWarning() {
+		pnlWarning.setVisible(false);
 	}
 
 	public void showSplash() {

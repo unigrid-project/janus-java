@@ -39,6 +39,8 @@ public class Wallet {
 	public static final String STAKING_PROPERTY = "staking";
 	public static final String PROCESSING_PROPERTY = "processing";
 	public static final String ENCRYPTED_STATUS = "encrypted";
+	public static final String IS_OFFLINE = "offline";
+	public static final String STATUS_PROPERTY = "walletstatus";
 	private static double balance;
 	private static double totalbalance;
 	private static double moneysupply;
@@ -56,11 +58,11 @@ public class Wallet {
 	@Getter
 	private static long stakingStartTime = 45126460800000L;
 	private static Boolean encrypted;
+	private static Boolean offline = false;
 	@Getter @Setter
 	private Object[] sendArgs;
 	@Inject
 	private static DebugService debug = new DebugService();
-	public static final String STATUS_PROPERTY = "walletstatus";
 	private static PropertyChangeSupport pcs;
 
 	public Wallet() {
@@ -176,6 +178,16 @@ public class Wallet {
 
 	public Boolean getEncrypted() {
 		return this.encrypted;
+	}
+
+	public void setOffline(Boolean newValue) {
+		Boolean oldValue = this.getOffline();
+		this.offline = newValue;
+		this.pcs.firePropertyChange(this.IS_OFFLINE, oldValue, newValue);
+	}
+
+	public Boolean getOffline() {
+		return this.offline;
 	}
 
 	public Boolean getStakingStatus() {
