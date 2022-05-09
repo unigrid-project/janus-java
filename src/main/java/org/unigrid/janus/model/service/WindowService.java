@@ -34,6 +34,7 @@ import org.unigrid.janus.controller.view.WalletController;
 import org.unigrid.janus.controller.view.TransactionsController;
 import org.unigrid.janus.controller.view.OverlayController;
 import org.unigrid.janus.controller.view.SettingsController;
+import org.unigrid.janus.controller.view.SplashScreenController;
 import org.unigrid.janus.controller.view.WarningController;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 
@@ -51,6 +52,7 @@ public class WindowService {
 	private static SettingsController settingsController;
 	private static AddressController addrController;
 	private static WarningController warnController;
+	private static SplashScreenController splashController;
 
 	public Stage getStage() {
 		return this.stage;
@@ -161,6 +163,14 @@ public class WindowService {
 
 	public void setSettingsController(SettingsController controller) {
 		this.settingsController = controller;
+	}
+
+	public void setSplashScreenController(SplashScreenController controller) {
+		this.splashController = controller;
+	}
+
+	public SplashScreenController getSplashScreenController() {
+		return this.splashController;
 	}
 
 	public void notifyIfError(BaseResult result) {
