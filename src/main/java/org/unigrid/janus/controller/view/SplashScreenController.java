@@ -39,6 +39,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	private Label lblText;
 
 	private float ind = (float) 0.6;
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		window.setSplashScreenController(this);
@@ -62,7 +63,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 		spinnerPreLoad.setVisible(false);
 		progBar.setVisible(true);
 	}
-	
+
 	public void setText(String s) {
 		lblText.setText(s);
 	}
