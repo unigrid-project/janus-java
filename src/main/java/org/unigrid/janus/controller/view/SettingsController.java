@@ -41,6 +41,7 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
+import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
@@ -157,6 +158,18 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML
 	private void onSetDebugTap(MouseEvent event) {
 		settingSelected(TAB_SETTINGS_DEBUG);
+	}
+
+	@FXML
+	private void onOpenConf(MouseEvent event) {
+		File conf = DataDirectory.getConfigFile();
+		window.getHostServices().showDocument(conf.getAbsolutePath());
+	}
+
+	@FXML
+	private void onOpenGridnode(MouseEvent event) {
+		File gridnode = DataDirectory.getGridnodeFile();
+		window.getHostServices().showDocument(gridnode.getAbsolutePath());
 	}
 
 	@FXML

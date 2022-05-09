@@ -21,6 +21,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -107,9 +108,10 @@ public class Janus extends BaseApplication {
 	}
 
 	@Override
-	public void start(Stage stage, Application.Parameters parameters) throws Exception {
+	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
 
 		startSplashScreen();
+		window.setHostServices(hostServices);
 
 		ready.addListener(
 			new ChangeListener<Boolean>() {
@@ -179,7 +181,7 @@ public class Janus extends BaseApplication {
 					}
 
 					//walletVersion = walletInfo.getResult().getWalletversion();
-					System.out.println("walletVersion: " + walletVersion);
+					//System.out.println("walletVersion: " + walletVersion);
 					//System.out.println(blockCount.getResult());
 					/*if (checkForStatus) {
 						if (status == "downloading") {

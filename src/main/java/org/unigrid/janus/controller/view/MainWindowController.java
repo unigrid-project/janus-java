@@ -259,8 +259,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		if (event.getPropertyName().equals(wallet.IS_OFFLINE)) {
 			showWarning();
 		}
-		if (event.getPropertyName().equals(warning.STATUS_PROPERTY)) {
-		}
+
 		/*
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
 			String status = (String) event.getNewValue();
