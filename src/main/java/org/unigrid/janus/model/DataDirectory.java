@@ -33,6 +33,7 @@ public class DataDirectory {
 
 	private static final String APPLICATION_NAME = "UNIGRID";
 	public static final String CONFIG_FILE = "unigrid.conf";
+	public static final String GRIDNODE_FILE = "masternode.conf";
 	private static final String OSX_SUPPORT_DIR = "Library/Application Support";
 
 	public static final String DATADIR_CONFIG_RPCUSER_KEY = "rpcuser";
@@ -81,6 +82,10 @@ public class DataDirectory {
 
 	public static File getConfigFile() {
 		return Paths.get(get(), CONFIG_FILE).toFile();
+	}
+
+	public static File getGridnodeFile() {
+		return Paths.get(get(), GRIDNODE_FILE).toFile();
 	}
 
 }

@@ -19,6 +19,8 @@ package org.unigrid.janus.model.service;
 import java.awt.Desktop;
 import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
+import javafx.application.HostServices;
+
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -39,6 +41,7 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 public class WindowService {
 	private static DebugService debug = new DebugService();
 	private static Stage stage;
+	private static HostServices hostServices;
 	private static WindowBarController wbController;
 	private static MainWindowController mwController;
 	private static WalletController wController;
@@ -55,6 +58,14 @@ public class WindowService {
 
 	public void setStage(Stage value) {
 		this.stage = value;
+	}
+
+	public HostServices getHostServices() {
+		return this.hostServices;
+	}
+
+	public void setHostServices(HostServices host) {
+		this.hostServices = host;
 	}
 
 	public Node lookup(String id) {

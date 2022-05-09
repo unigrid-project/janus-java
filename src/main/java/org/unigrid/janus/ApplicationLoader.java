@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus;
 
@@ -20,11 +20,13 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.stage.Stage;
 
 public class ApplicationLoader extends Application {
 
 	private BaseApplication application;
+	private HostServices hostServices = getHostServices();
 
 	@Override
 	public void init() throws Exception {
@@ -32,11 +34,10 @@ public class ApplicationLoader extends Application {
 		final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
 
 		application = applicationInstance.get();
-
 	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		application.start(stage, getParameters());
+		application.start(stage, getParameters(), getHostServices());
 	}
 }
