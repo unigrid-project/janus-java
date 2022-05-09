@@ -22,5 +22,6 @@ public class GetWalletInfo extends BaseResult<GetWalletInfo.Result> {
 		private float balance;
 		@JsonbProperty("unlocked_until")
 		private long unlockUntil = 4999;
+		private String walletversion = "0";
 	}
 }
