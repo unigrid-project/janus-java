@@ -179,7 +179,7 @@ public class Janus extends BaseApplication {
 						System.out.println("walletVersion "
 							+ walletInfo.getResult().getWalletversion());
 					}
-
+					Thread.sleep(100);
 					//walletVersion = walletInfo.getResult().getWalletversion();
 					//System.out.println("walletVersion: " + walletVersion);
 					//System.out.println(blockCount.getResult());
