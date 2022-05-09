@@ -41,6 +41,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
+import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
 
@@ -78,6 +79,7 @@ public class Janus extends BaseApplication {
 	private Info info = new Info();
 	private GetWalletInfo walletInfo = new GetWalletInfo();
 	private GetBlockCount blockCount = new GetBlockCount();
+	private GetBootstrappingInfo boostrapInfo = new GetBootstrappingInfo();
 	private Boolean checkForStatus = true;
 
 	@PostConstruct
@@ -179,17 +181,44 @@ public class Janus extends BaseApplication {
 						System.out.println("walletVersion "
 							+ walletInfo.getResult().getWalletversion());
 					}
-					Thread.sleep(100);
+					boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
+						GetBootstrappingInfo.class);
+					walletStatus = boostrapInfo.getResult().getWalletstatus();
+					System.out.println("walletStatus: " + walletStatus);
+					progress = boostrapInfo.getResult().getProgress();
+					System.out.println("progress: " + progress);
+					status = boostrapInfo.getResult().getStatus();
+					System.out.println("status: " + status);
+					Thread.sleep(1000);
 					//walletVersion = walletInfo.getResult().getWalletversion();
 					//System.out.println("walletVersion: " + walletVersion);
 					//System.out.println(blockCount.getResult());
-					/*if (checkForStatus) {
-						if (status == "downloading") {
-							// fire property to show progres bar
-							preloader.setText("Downloading blockchain");
-							checkForStatus = false;
-						}
-					}*/
+
+					if (status.equals("downloading")) {
+						Platform.runLater(
+								() -> {
+								float f = Float.parseFloat(progress);
+								window.getSplashScreenController().
+										showProgressBar();
+								window.getSplashScreenController().
+									setText("Downloading blockchain");
+								window.getSplashScreenController().
+									updateProgress((float)(f / 100));
+						});
+					}
+					if (status.equals("unarchiving")) {
+						Platform.runLater(
+								() -> {
+								float f = Float.parseFloat(progress);
+								window.getSplashScreenController().
+									showProgressBar();
+								window.getSplashScreenController().
+									setText("Unarchiving blockchain");
+								window.getSplashScreenController().
+									updateProgress((float) (f / 100));
+						});
+						
+					}
 				} while (walletInfo.hasError());
 				//while (!status.equals("inactive") || (status.equals("inactive")
 				//&& startupStatus != null));

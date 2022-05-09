@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -22,6 +23,7 @@
                             <Image url="@images/unigrid-wide-nf.png" />
                         </image>
                     </ImageView>
+                  <ProgressBar fx:id="progBar" layoutX="92.0" layoutY="144.0" opacity="0.62" prefHeight="32.0" prefWidth="420.0" progress="0.0" styleClass="button" />
                   <FontIcon fx:id="spinnerPreLoad" iconColor="WHITE" iconLiteral="fas-spinner" iconSize="40" layoutX="289.0" layoutY="166.0" wrappingWidth="43.0" AnchorPane.bottomAnchor="40.0" />
                   <FlowPane alignment="CENTER" columnHalignment="CENTER" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="180.0">
                      <children>
