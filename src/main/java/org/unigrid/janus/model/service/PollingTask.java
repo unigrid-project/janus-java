@@ -48,10 +48,7 @@ public class PollingTask extends TimerTask {
 				final GetConnectionCount connCount = rpc.call(new GetConnectionCount.Request(),
 					GetConnectionCount.class);
 				final StakingStatus staking = rpc.call(new StakingStatus.Request(), StakingStatus.class);
-				//String sInfo = jsonb.toJson(info);
-				//debug.log(sInfo);
-				//wallet.setInfo(info);
-				wallet.setBalance(walletInfo.getResult().getBalance());
+				wallet.setBalance(walletInfo.getResult().getTotalbalance());
 				wallet.setBlocks(Integer.parseInt(blockCount.getResult().toString()));
 				wallet.setConnections(Integer.parseInt(connCount.getResult().toString()));
 				wallet.setWalletState(walletInfo);
