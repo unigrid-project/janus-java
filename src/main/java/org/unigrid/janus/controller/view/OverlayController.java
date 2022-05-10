@@ -144,7 +144,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 				throw new AssertionError();
 		}
 
-		if (passphraseInput.getText() == "") {
+		if (passphraseInput.getText().equals("")) {
 			errorTxt.setText("Please enter a passphrase");
 			submitBtn.setDisable(false);
 			window.getWindowBarController().stopSpinner();

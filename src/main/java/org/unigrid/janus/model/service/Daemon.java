@@ -17,6 +17,7 @@
 package org.unigrid.janus.model.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,30 +25,59 @@ import java.net.URL;
 import java.util.Optional;
 import javax.naming.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
+import org.unigrid.janus.model.Preferences;
+import org.unigrid.janus.model.rpc.entity.BlockCount;
 
 @ApplicationScoped
 public class Daemon {
 
+	@Inject
+	private RPCService rpc;
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
-	//public static final String PROPERTY_LOCATION = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY);
-	//public static final String PROPERTY_LOCATION = "/home/evan/work/daemons/unigridd";
-	public static final String PROPERTY_LOCATION = "http://127.0.0.1:51993"; // :51993
+	private static final String PROPERTY_LOCATION_DEFAULT = Daemon.class.getResource("/daemon/unigridd").getFile();
+
+	public static final String PROPERTY_LOCATION
+		= Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, PROPERTY_LOCATION_DEFAULT);
 
 	private Optional<Process> process = Optional.empty();
 
 	private void runDaemon() throws IOException {
-		process = Optional.of(Runtime.getRuntime().exec(new String[]{PROPERTY_LOCATION}));
+		System.out.println("starting daemon");
+		if (isDaemonRunning()) {
+			process = Optional.of(Runtime.getRuntime().exec(new String[]{PROPERTY_LOCATION}));
+		}
+	}
+
+	private boolean isDaemonRunning() {
+		boolean isRunning = true;
+		try {
+			BlockCount blocks = rpc.call(new BlockCount(), BlockCount.class);
+
+
+			isRunning = false;
+		} catch (jakarta.ws.rs.ProcessingException e) {
+
+			isRunning = true;
+		}
+
+		return isRunning;
 	}
 
 	public boolean isHttp() throws MalformedURLException {
 		return "http".equals(new URL(PROPERTY_LOCATION).getProtocol());
 	}
 
+	public boolean isHttp(String value) throws MalformedURLException {
+		return "http".equals(new URL(value).getProtocol());
+	}
+
 	public boolean isLocalFile() {
+
 		return new File(PROPERTY_LOCATION).exists();
 	}
 
 	public void start() throws ConfigurationException, IOException, MalformedURLException {
+
 		if (StringUtils.isNotBlank(PROPERTY_LOCATION)) {
 			if (isLocalFile()) {
 				runDaemon();
@@ -76,11 +106,18 @@ public class Daemon {
 
 		String s = "";
 
-		if (isLocalFile()) {
-			s = "51993";
+		try {
+			System.out.println(PROPERTY_LOCATION);
+			if (isHttp(PROPERTY_LOCATION)) {
+				s = PROPERTY_LOCATION;
+			} else if (isLocalFile()) {
+				s = "http://127.0.0.1:51993";
+			}
+		} catch (MalformedURLException e) {
+			s = "http://127.0.0.1:51993";
 		}
-		//TODO:Add else to this
 
-		return "http://127.0.0.1:51993";
+
+		return s;
 	}
 }
