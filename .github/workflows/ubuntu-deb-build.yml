@@ -51,7 +51,8 @@ jobs:
           uses: duhow/download-github-release-assets@v1
           with:
             repository: unigrid-project/daemon
-            release-id: latest
+            #release-id: latest
+            tag: 2.9.0
             files: unigrid-*-x86_64-linux-gnu.tar.gz
             target: unigridd.tar.gz
         - name: Extract
@@ -63,29 +64,29 @@ jobs:
         
         - run: mkdir staging && cp target/release/*.* staging
       
-        - name: Download path from job0
-          uses: actions/download-artifact@v3
-          with:
-            name: path
-        - shell: bash
-          run: |
-            value='cat uploadPath.txt'
-        
-        - name: path
-          id: vars
-          run: echo ::set-output name=path::$(cat uploadPath.txt)
-          
-        - run: echo ${{ steps.vars.outputs.path }}
-        - name: Upload release assets
-          id: upload_realse_assets
-          uses: shogo82148/actions-upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
-          with:
-            upload_url: ${{ steps.vars.outputs.path }}
-            asset_path: ./staging/janus_*_amd64.deb
-            asset_name: janus_amd64.deb
-            asset_content_type: application/zip
+       # - name: Download path from job0
+       #   uses: actions/download-artifact@v3
+       #   with:
+       #     name: path
+       # - shell: bash
+       #   run: |
+       #     value='cat uploadPath.txt'
+       # 
+       # - name: path
+       #   id: vars
+       #   run: echo ::set-output name=path::$(cat uploadPath.txt)
+       #   
+       # - run: echo ${{ steps.vars.outputs.path }}
+       # - name: Upload release assets
+       #   id: upload_realse_assets
+       #   uses: shogo82148/actions-upload-release-asset@v1
+       #   env:
+       #     GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
+       #   with:
+       #     upload_url: ${{ steps.vars.outputs.path }}
+       #     asset_path: ./staging/janus_*_amd64.deb
+       #     asset_name: janus_amd64.deb
+       #     asset_content_type: application/zip
       
         - uses: actions/upload-artifact@v3
           with:
@@ -115,7 +116,8 @@ jobs:
         uses: duhow/download-github-release-assets@v1
         with:
           repository: unigrid-project/daemon
-          release-id: latest
+          #release-id: latest
+          tag: 2.9.0
           files: unigrid-win64.zip
           target: unigridd.zip
       - name: Extract
@@ -128,28 +130,28 @@ jobs:
       - run: cp target/release/*.* staging
       - run: cd staging && ls && cd ..
       
-      - name: Download path from job0
-        uses: actions/download-artifact@v3
-        with:
-          name: path
-      - shell: bash
-        run: |
-          value='cat uploadPath.txt'
+      #- name: Download path from job0
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: path
+      #- shell: bash
+      #  run: |
+      #    value='cat uploadPath.txt'
 
-      - name: path
-        id: vars
-        run: echo ::set-output name=path::$(cat uploadPath.txt)
+      #- name: path
+      #  id: vars
+      #  run: echo ::set-output name=path::$(cat uploadPath.txt)
 
-      - name: Upload release assets
-        id: upload_realse_assets
-        uses: shogo82148/actions-upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
-        with:
-          upload_url: ${{ steps.vars.outputs.path }}
-          asset_path: ./staging/Janus-*.msi
-          asset_name: Janus-*.msi
-          asset_content_type: application/zip
+      #- name: Upload release assets
+      #  id: upload_realse_assets
+      #  uses: shogo82148/actions-upload-release-asset@v1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
+      #  with:
+      #    upload_url: ${{ steps.vars.outputs.path }}
+      #    asset_path: ./staging/Janus-*.msi
+      #    asset_name: Janus-*.msi
+      #    asset_content_type: application/zip
       
       - uses: actions/upload-artifact@v3
         with:
@@ -178,7 +180,8 @@ jobs:
         uses: duhow/download-github-release-assets@v1
         with:
           repository: unigrid-project/daemon
-          release-id: latest
+          #release-id: latest
+          tag: 2.9.0
           files: unigrid-*-osx64.tar.gz
           target: unigridd.tar.gz
       - name: Extract
@@ -191,28 +194,28 @@ jobs:
       - run: mkdir staging && cp target/release/*.* staging
       - run: cd staging && ls && cd ..
       
-      - name: Download path from job0
-        uses: actions/download-artifact@v3
-        with:
-          name: path
-      - shell: bash
-        run: |
-          value='cat uploadPath.txt'
+      #- name: Download path from job0
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: path
+      #- shell: bash
+      #  run: |
+      #    value='cat uploadPath.txt'
 
-      - name: path
-        id: vars
-        run: echo ::set-output name=path::$(cat uploadPath.txt)
+      #- name: path
+      #  id: vars
+      #  run: echo ::set-output name=path::$(cat uploadPath.txt)
           
-      - name: Upload release assets
-        id: upload_realse_assets
-        uses: shogo82148/actions-upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
-        with:
-          upload_url: ${{ steps.vars.outputs.path }}
-          asset_path: ./staging/Janus-*.dmg
-          asset_name: Janus-macos.dmg
-          asset_content_type: application/zip
+      #- name: Upload release assets
+      #  id: upload_realse_assets
+      #  uses: shogo82148/actions-upload-release-asset@v1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.SKITPICKEL }}
+      #  with:
+      #    upload_url: ${{ steps.vars.outputs.path }}
+      #    asset_path: ./staging/Janus-*.dmg
+      #    asset_name: Janus-macos.dmg
+      #    asset_content_type: application/zip
         
       - uses: actions/upload-artifact@v3
         with:
