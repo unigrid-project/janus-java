@@ -124,7 +124,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 					btn.setOnAction((ActionEvent event) -> {
 						Address data = getTableView().getItems().get(getIndex());
 						copyToClipboard(data.getAddress().toString());
-						debug.log("selectedData: " + data.getAddress().toString());
+						//debug.log("selectedData: " + data.getAddress().toString());
 					});
 				}
 
@@ -147,7 +147,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(addresses.ADDRESS_LIST)) {
-			debug.log("ADDRESS_LIST change");
+			//debug.log("ADDRESS_LIST change");
 			tblAddresses.setItems(addresses.getAddresses());
 		}
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
@@ -162,7 +162,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	@FXML
 	private void onLoadPressed(MouseEvent e) {
-		debug.log("Calling address list refresh");
+		//debug.log("Calling address list refresh");
 		loadAddresses();
 	}
 
@@ -182,12 +182,12 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	@FXML
 	private void onCopyToClipboardClicked(MouseEvent event) {
-		content.putString(addressDisplay.getText());
-		clipboard.setContent(content);
 		copyToClipboard(addressDisplay.getText());
 	}
 
 	private void copyToClipboard(String address) {
+		content.putString(address);
+		clipboard.setContent(content);
 		Notifications
 			.create()
 			.title("Address copied to clipboard")

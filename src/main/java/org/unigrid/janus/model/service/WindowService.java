@@ -19,6 +19,8 @@ package org.unigrid.janus.model.service;
 import java.awt.Desktop;
 import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
+import javafx.application.HostServices;
+
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -32,12 +34,15 @@ import org.unigrid.janus.controller.view.WalletController;
 import org.unigrid.janus.controller.view.TransactionsController;
 import org.unigrid.janus.controller.view.OverlayController;
 import org.unigrid.janus.controller.view.SettingsController;
+import org.unigrid.janus.controller.view.SplashScreenController;
+import org.unigrid.janus.controller.view.WarningController;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @ApplicationScoped
 public class WindowService {
 	private static DebugService debug = new DebugService();
 	private static Stage stage;
+	private static HostServices hostServices;
 	private static WindowBarController wbController;
 	private static MainWindowController mwController;
 	private static WalletController wController;
@@ -46,6 +51,8 @@ public class WindowService {
 	private static TransactionsController transController;
 	private static SettingsController settingsController;
 	private static AddressController addrController;
+	private static WarningController warnController;
+	private static SplashScreenController splashController;
 
 	public Stage getStage() {
 		return this.stage;
@@ -53,6 +60,14 @@ public class WindowService {
 
 	public void setStage(Stage value) {
 		this.stage = value;
+	}
+
+	public HostServices getHostServices() {
+		return this.hostServices;
+	}
+
+	public void setHostServices(HostServices host) {
+		this.hostServices = host;
 	}
 
 	public Node lookup(String id) {
@@ -148,6 +163,14 @@ public class WindowService {
 
 	public void setSettingsController(SettingsController controller) {
 		this.settingsController = controller;
+	}
+
+	public void setSplashScreenController(SplashScreenController controller) {
+		this.splashController = controller;
+	}
+
+	public SplashScreenController getSplashScreenController() {
+		return this.splashController;
 	}
 
 	public void notifyIfError(BaseResult result) {

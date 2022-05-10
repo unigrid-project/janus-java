@@ -21,6 +21,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -38,6 +39,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import org.unigrid.janus.model.JanusModel;
+import org.unigrid.janus.model.rpc.entity.GetBlockCount;
+import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
+import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
 
 @ApplicationScoped
@@ -61,19 +66,27 @@ public class Janus extends BaseApplication {
 	@Inject
 	private JanusPreloader preloader;
 
+	@Inject
+	private JanusModel janusModel;
+
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
 	private String status = "inactive";
 	private String walletStatus = "none";
 	private String startupStatus;
+	private String walletVersion;
 	private String progress = "0";
 	private Info info = new Info();
+	private GetWalletInfo walletInfo = new GetWalletInfo();
+	private GetBlockCount blockCount = new GetBlockCount();
+	private GetBootstrappingInfo boostrapInfo = new GetBootstrappingInfo();
 	private Boolean checkForStatus = true;
 
 	@PostConstruct
 	@SneakyThrows
 	private void init() {
 		startDaemon();
+		//janusModel.getAppState().addObserver
 	}
 
 	public void startDaemon() {
@@ -97,9 +110,10 @@ public class Janus extends BaseApplication {
 	}
 
 	@Override
-	public void start(Stage stage, Application.Parameters parameters) throws Exception {
+	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
 
 		startSplashScreen();
+		window.setHostServices(hostServices);
 
 		ready.addListener(
 			new ChangeListener<Boolean>() {
@@ -145,12 +159,10 @@ public class Janus extends BaseApplication {
 
 	@SneakyThrows
 	private void startSplashScreen() {
-
+		janusModel.setAppState(JanusModel.AppState.STARTING);
 		preloader.show();
 
 		preloader.initText();
-
-		rpc.pollForInfo(10 * 1000);
 
 		startUp();
 
@@ -162,24 +174,53 @@ public class Janus extends BaseApplication {
 			protected Void call() throws Exception {
 				//while (block <= 0) {
 				do {
-					info = rpc.call(new Info.Request(), Info.class);
-					block = info.getResult().getBlocks();
-					walletStatus = info.getResult().getBootstrapping().getWalletstatus();
-					status = info.getResult().getBootstrapping().getStatus();
-					progress = info.getResult().getBootstrapping().getProgress();
-					startupStatus = info.getResult().getStatus();
-					System.out.println(startupStatus);
-					if (checkForStatus) {
-						if (status.equals("downloading")) {
-							// fire property to show progres bar
-							preloader.setText("Downloading blockchain");
-							checkForStatus = false;
-						}
+					try {
+						walletInfo = rpc.call(new GetWalletInfo.Request(),
+							GetWalletInfo.class);
+					} catch (Exception e) {
+						System.out.println("walletVersion "
+							+ walletInfo.getResult().getWalletversion());
 					}
-					/*if (!checkForStatus && progress == "none") {
+					boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
+						GetBootstrappingInfo.class);
+					walletStatus = boostrapInfo.getResult().getWalletstatus();
+					System.out.println("walletStatus: " + walletStatus);
+					progress = boostrapInfo.getResult().getProgress();
+					System.out.println("progress: " + progress);
+					status = boostrapInfo.getResult().getStatus();
+					System.out.println("status: " + status);
+					Thread.sleep(1000);
+					//walletVersion = walletInfo.getResult().getWalletversion();
+					//System.out.println("walletVersion: " + walletVersion);
+					//System.out.println(blockCount.getResult());
 
-					}*/
-				} while (!status.equals("inactive") || (status.equals("inactive") && startupStatus != null));
+					if (status.equals("downloading")) {
+						Platform.runLater(
+								() -> {
+								float f = Float.parseFloat(progress);
+								window.getSplashScreenController().
+										showProgressBar();
+								window.getSplashScreenController().
+									setText("Downloading blockchain");
+								window.getSplashScreenController().
+									updateProgress((float) (f / 100));
+							});
+					}
+					if (status.equals("unarchiving")) {
+						Platform.runLater(
+								() -> {
+								float f = Float.parseFloat(progress);
+								window.getSplashScreenController().
+									showProgressBar();
+								window.getSplashScreenController().
+									setText("Unarchiving blockchain");
+								window.getSplashScreenController().
+									updateProgress((float) (f / 100));
+							});
+					}
+				} while (walletInfo.hasError());
+				//while (!status.equals("inactive") || (status.equals("inactive")
+				//&& startupStatus != null));
 				ready.setValue(Boolean.TRUE);
 
 				return null;

@@ -17,6 +17,7 @@
 package org.unigrid.janus;
 
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.stage.Stage;
 import org.unigrid.janus.model.Preferences;
 
@@ -31,5 +32,6 @@ abstract class BaseApplication {
 		ApplicationLoader.launch(ApplicationLoader.class, args);
 	}
 
-	public abstract void start(Stage primaryStage, Application.Parameters parameters) throws Exception;
+	public abstract void start(Stage primaryStage, Application.Parameters parameters,
+		HostServices hostServices) throws Exception;
 }

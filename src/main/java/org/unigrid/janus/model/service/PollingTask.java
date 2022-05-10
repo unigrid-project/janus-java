@@ -42,20 +42,24 @@ public class PollingTask extends TimerTask {
 			//debug.log(rpc.callToJson(new Info.Request()));
 			wallet.setProcessingStatus();
 			//final Info info = rpc.call(new Info.Request(), Info.class);
-			final GetWalletInfo walletInfo = rpc.call(new GetWalletInfo.Request(), GetWalletInfo.class);
-			final GetBlockCount blockCount = rpc.call(new GetBlockCount.Request(), GetBlockCount.class);
-			final GetConnectionCount connCount = rpc.call(new GetConnectionCount.Request(),
-				GetConnectionCount.class);
-			final StakingStatus staking = rpc.call(new StakingStatus.Request(), StakingStatus.class);
-			//String sInfo = jsonb.toJson(info);
-			//debug.log(sInfo);
-			//wallet.setInfo(info);
-			wallet.setBalance(walletInfo.getResult().getBalance());
-			wallet.setBlocks(Integer.parseInt(blockCount.getResult().toString()));
-			wallet.setConnections(Integer.parseInt(connCount.getResult().toString()));
-			wallet.setWalletState(walletInfo);
-			wallet.setStakingStatus(staking);
-			wallet.setStatus("done");
+			try {
+				final GetWalletInfo walletInfo = rpc.call(new GetWalletInfo.Request(), GetWalletInfo.class);
+				final GetBlockCount blockCount = rpc.call(new GetBlockCount.Request(), GetBlockCount.class);
+				final GetConnectionCount connCount = rpc.call(new GetConnectionCount.Request(),
+					GetConnectionCount.class);
+				final StakingStatus staking = rpc.call(new StakingStatus.Request(), StakingStatus.class);
+				wallet.setBalance(walletInfo.getResult().getTotalbalance());
+				wallet.setBlocks(Integer.parseInt(blockCount.getResult().toString()));
+				wallet.setConnections(Integer.parseInt(connCount.getResult().toString()));
+				wallet.setWalletState(walletInfo);
+				wallet.setStakingStatus(staking);
+				wallet.setStatus("done");
+			} catch (Exception e) {
+				wallet.setOffline(Boolean.TRUE);
+				debug.log("error catch in polling");
+				debug.log(e.toString());
+			}
+
 		});
 	}
 }
