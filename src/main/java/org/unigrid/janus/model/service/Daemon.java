@@ -39,8 +39,6 @@ public class Daemon {
 	public static final String PROPERTY_LOCATION
 		= Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, PROPERTY_LOCATION_DEFAULT);
 
-	//public static final String PROPERTY_LOCATION = "/home/marcus/Documents/unigrid/daemons/unigridd";
-//http://127.0.0.1:51993";  :51993
 	private Optional<Process> process = Optional.empty();
 
 	private void runDaemon() throws IOException {
@@ -54,11 +52,11 @@ public class Daemon {
 		boolean isRunning = true;
 		try {
 			BlockCount blocks = rpc.call(new BlockCount(), BlockCount.class);
-			System.out.println("block count: " + blocks.getResult());
+
 
 			isRunning = false;
 		} catch (jakarta.ws.rs.ProcessingException e) {
-			System.out.println("Block count failed set to true");
+
 			isRunning = true;
 		}
 
@@ -74,12 +72,12 @@ public class Daemon {
 	}
 
 	public boolean isLocalFile() {
-		System.out.println(new File(PROPERTY_LOCATION).exists());
+
 		return new File(PROPERTY_LOCATION).exists();
 	}
 
 	public void start() throws ConfigurationException, IOException, MalformedURLException {
-		System.out.println(PROPERTY_LOCATION);
+
 		if (StringUtils.isNotBlank(PROPERTY_LOCATION)) {
 			if (isLocalFile()) {
 				runDaemon();
@@ -105,7 +103,7 @@ public class Daemon {
 	}
 
 	public String getRPCAdress() {
-		System.out.println("Finding the address to the daemon");
+
 		String s = "";
 
 		try {
@@ -119,8 +117,7 @@ public class Daemon {
 			s = "http://127.0.0.1:51993";
 		}
 
-		//TODO:Add else to this
-		System.out.println("Adress for daemon: " + s);
+
 		return s;
 	}
 }
