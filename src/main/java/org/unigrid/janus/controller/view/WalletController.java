@@ -54,7 +54,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import javafx.util.converter.IntegerStringConverter;
+import javafx.util.converter.DoubleStringConverter;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -119,7 +119,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	private void setupFormatter(MouseEvent event) {
 		// need a way to remove this
 		amountToSend.setTextFormatter(
-			new TextFormatter<Integer>(new IntegerStringConverter(), 0, integerFilter));
+			new TextFormatter<Double>(new DoubleStringConverter(), 0.0, integerFilter));
 		amountToSend.setPromptText("UGD TO SEND");
 	}
 

@@ -53,7 +53,6 @@ public class Daemon {
 		try {
 			BlockCount blocks = rpc.call(new BlockCount(), BlockCount.class);
 
-
 			isRunning = false;
 		} catch (jakarta.ws.rs.ProcessingException e) {
 
@@ -116,7 +115,6 @@ public class Daemon {
 		} catch (MalformedURLException e) {
 			s = "http://127.0.0.1:51993";
 		}
-
 
 		return s;
 	}
