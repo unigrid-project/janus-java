@@ -7,7 +7,7 @@
 --type msi
 <#elseif osName?upper_case?contains("MAC")>
 --mac-package-identifier Janus
---mac-package-name Janus
+--mac-package-name Unigrid Janus
 --type dmg
 <#else>
 --type deb
