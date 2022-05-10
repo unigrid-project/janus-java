@@ -17,6 +17,7 @@
 package org.unigrid.janus.model.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,30 +25,61 @@ import java.net.URL;
 import java.util.Optional;
 import javax.naming.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
+import org.unigrid.janus.model.Preferences;
+import org.unigrid.janus.model.rpc.entity.BlockCount;
 
 @ApplicationScoped
 public class Daemon {
 
+	@Inject
+	private RPCService rpc;
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
-	//public static final String PROPERTY_LOCATION = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY);
-	//public static final String PROPERTY_LOCATION = "/home/evan/work/daemons/unigridd";
-	public static final String PROPERTY_LOCATION = "http://127.0.0.1:51993"; // :51993
+	private static final String PROPERTY_LOCATION_DEFAULT = Daemon.class.getResource("/daemon/unigridd").getFile();
 
+	public static final String PROPERTY_LOCATION
+		= Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, PROPERTY_LOCATION_DEFAULT);
+
+	//public static final String PROPERTY_LOCATION = "/home/marcus/Documents/unigrid/daemons/unigridd";
+//http://127.0.0.1:51993";  :51993
 	private Optional<Process> process = Optional.empty();
 
 	private void runDaemon() throws IOException {
-		process = Optional.of(Runtime.getRuntime().exec(new String[]{PROPERTY_LOCATION}));
+		System.out.println("starting daemon");
+		if (isDaemonRunning()) {
+			process = Optional.of(Runtime.getRuntime().exec(new String[]{PROPERTY_LOCATION}));
+		}
+	}
+
+	private boolean isDaemonRunning() {
+		boolean isRunning = true;
+		try {
+			BlockCount blocks = rpc.call(new BlockCount(), BlockCount.class);
+			System.out.println("block count: " + blocks.getResult());
+
+			isRunning = false;
+		} catch (jakarta.ws.rs.ProcessingException e) {
+			System.out.println("Block count failed set to true");
+			isRunning = true;
+		}
+
+		return isRunning;
 	}
 
 	public boolean isHttp() throws MalformedURLException {
 		return "http".equals(new URL(PROPERTY_LOCATION).getProtocol());
 	}
 
+	public boolean isHttp(String value) throws MalformedURLException {
+		return "http".equals(new URL(value).getProtocol());
+	}
+
 	public boolean isLocalFile() {
+		System.out.println(new File(PROPERTY_LOCATION).exists());
 		return new File(PROPERTY_LOCATION).exists();
 	}
 
 	public void start() throws ConfigurationException, IOException, MalformedURLException {
+		System.out.println(PROPERTY_LOCATION);
 		if (StringUtils.isNotBlank(PROPERTY_LOCATION)) {
 			if (isLocalFile()) {
 				runDaemon();
@@ -73,14 +105,22 @@ public class Daemon {
 	}
 
 	public String getRPCAdress() {
-
+		System.out.println("Finding the address to the daemon");
 		String s = "";
 
-		if (isLocalFile()) {
-			s = "51993";
+		try {
+			System.out.println(PROPERTY_LOCATION);
+			if (isHttp(PROPERTY_LOCATION)) {
+				s = PROPERTY_LOCATION;
+			} else if (isLocalFile()) {
+				s = "http://127.0.0.1:51993";
+			}
+		} catch (MalformedURLException e) {
+			s = "http://127.0.0.1:51993";
 		}
-		//TODO:Add else to this
 
-		return "http://127.0.0.1:51993";
+		//TODO:Add else to this
+		System.out.println("Adress for daemon: " + s);
+		return s;
 	}
 }

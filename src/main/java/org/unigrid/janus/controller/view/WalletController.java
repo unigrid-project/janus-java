@@ -244,7 +244,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	@FXML
 	private void onSendTransactionClicked(MouseEvent event) {
-		if (amountToSend.getText() == "" || amountToSend.getText() == null
+		if (amountToSend.getText().equals("") || amountToSend.getText() == null
 			|| Integer.parseInt(amountToSend.getText()) == 0) {
 			onErrorMessage("Please enter an amount of Unigrid to send.");
 			return;
@@ -253,7 +253,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		}
 
 		//check if address is valid
-		if (ugdAddressTxt.getText() == "" && ugdAddressTxt.getText() != null) {
+		if (ugdAddressTxt.getText().equals("") && ugdAddressTxt.getText() != null) {
 			onErrorMessage("Please enter a valid Unigrid address.");
 			return;
 		}

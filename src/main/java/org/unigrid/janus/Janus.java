@@ -170,7 +170,7 @@ public class Janus extends BaseApplication {
 					startupStatus = info.getResult().getStatus();
 					System.out.println(startupStatus);
 					if (checkForStatus) {
-						if (status == "downloading") {
+						if (status.equals("downloading")) {
 							// fire property to show progres bar
 							preloader.setText("Downloading blockchain");
 							checkForStatus = false;
