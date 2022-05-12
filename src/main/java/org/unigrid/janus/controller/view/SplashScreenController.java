@@ -37,6 +37,8 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	private FontIcon spinnerPreLoad;
 	@FXML
 	private Label lblText;
+	@FXML
+	private Label lblStatus;
 
 	private float ind = (float) 0.6;
 
@@ -46,12 +48,15 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 		Platform.runLater(() -> {
 			progBar.setVisible(false);
+			//Font font = Font.loadFont("fonts/PressStart2P-vaV7.ttf", 10);
+			//lblText.setFont(font);
+			//lblStatus.setFont(font);
 		});
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent pce) {
-
+		//
 	}
 
 	public void updateProgress(float prog) {

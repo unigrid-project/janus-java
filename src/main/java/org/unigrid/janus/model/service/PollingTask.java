@@ -56,8 +56,7 @@ public class PollingTask extends TimerTask {
 				wallet.setStatus("done");
 			} catch (Exception e) {
 				wallet.setOffline(Boolean.TRUE);
-				debug.log("error catch in polling");
-				debug.log(e.toString());
+				rpc.stopPolling();
 			}
 
 		});

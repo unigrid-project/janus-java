@@ -20,21 +20,26 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import lombok.Getter;
+import lombok.Setter;
 
 @ApplicationScoped
 public class JanusModel {
 
-	public static final String RESTART_WALLET = "restartwallet";
+	public static final String APP_STATE_CHANGE = "appstatechange";
+	public static final String APP_RESTARTING = "apprestarting";
 	private static PropertyChangeSupport pcs;
 
+	@Getter
 	public enum AppState {
 		STARTING,
 		LOADED,
 		RESTARTING
 	}
 
-	@Getter
 	private AppState appState;
+
+	@Getter @Setter
+	private Boolean hasRun;
 
 	public JanusModel() {
 		if (this.pcs != null) {
@@ -52,13 +57,12 @@ public class JanusModel {
 	}
 
 	public void setAppState(AppState state) {
-		AppState oldState = appState;
-		appState = state;
-		AppState newState = state;
+		this.appState = state;
 
+		System.out.println("appState " + state);
 		if (state == AppState.RESTARTING) {
-			System.out.println("RESTART_WALLET");
-			this.pcs.firePropertyChange(this.RESTART_WALLET, oldState, newState);
+			this.pcs.firePropertyChange(this.APP_RESTARTING,
+				Math.random(), Math.random());
 		}
 	}
 }
