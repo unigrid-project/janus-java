@@ -20,6 +20,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -46,7 +48,7 @@ import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
 
 @ApplicationScoped
-public class Janus extends BaseApplication {
+public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@Inject
 	private Daemon daemon;
@@ -86,7 +88,13 @@ public class Janus extends BaseApplication {
 	@SneakyThrows
 	private void init() {
 		startDaemon();
-		//janusModel.getAppState().addObserver
+		janusModel.addPropertyChangeListener(this);
+	}
+
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getPropertyName().equals(janusModel.RESTART_WALLET)) {
+			this.restartDaemon();
+		}
 	}
 
 	public void startDaemon() {
@@ -94,6 +102,7 @@ public class Janus extends BaseApplication {
 		try {
 			daemon.start();
 		} catch (Exception e) {
+			System.out.println("startDaemon: " + e.getMessage());
 			Alert a = new Alert(AlertType.ERROR,
 				e.getMessage(),
 				ButtonType.OK);
@@ -231,7 +240,9 @@ public class Janus extends BaseApplication {
 	}
 
 	public void restartDaemon() {
+		mainWindow.hide();
 		destroy();
 		startDaemon();
+		startSplashScreen();
 	}
 }

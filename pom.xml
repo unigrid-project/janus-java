@@ -86,7 +86,11 @@
 			<artifactId>jersey-media-json-binding</artifactId>
 			<version>3.0.2</version>
 		</dependency>
-      
+		<dependency>
+			<groupId>de.perdoctus.fx</groupId>
+			<artifactId>javafx-cdi-bootstrap</artifactId>
+			<version>2.0.0</version>
+		</dependency>
 		<!-- IKONLI ICONS -->
 		<dependency>
 			<groupId>org.kordamp.ikonli</groupId>

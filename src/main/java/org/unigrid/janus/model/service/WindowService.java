@@ -181,4 +181,12 @@ public class WindowService {
 			a.showAndWait();
 		}
 	}
+
+	public void setWarnController(WarningController controller) {
+		this.warnController = controller;
+	}
+
+	public WarningController getWarningController() {
+		return this.warnController;
+	}
 }
