@@ -33,7 +33,6 @@ import javafx.scene.control.Tooltip;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
-// import org.unigrid.janus.model.rpc.entity.NewAddress;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.LockWallet;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -217,7 +216,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			blocksTltp.setText(blocks);
 		}
 		if (event.getPropertyName().equals(wallet.CONNECTIONS_PROPERTY)) {
-			connectionTltp.setText(String.format("Connections: %d", (int) event.getNewValue()));
+			connectionTltp.setText(String.format("Connections: %d",
+				(int) event.getNewValue()));
 			int connections = (int) event.getNewValue();
 			if (connections > 0 && connections < 5) {
 				satelliteIcn.iconColorProperty().setValue(Color.ORANGE);
@@ -257,6 +257,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		}
 
 		if (event.getPropertyName().equals(wallet.IS_OFFLINE)) {
+			System.out.println("wallet.IS_OFFLINE");
 			showWarning();
 		}
 

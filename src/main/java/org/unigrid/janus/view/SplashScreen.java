@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.view;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
@@ -55,13 +56,17 @@ public class SplashScreen implements Window {
 
 	}
 
+	@PostConstruct
+	private void init() {
+		stageSplash.centerOnScreen();
+		stageSplash.initStyle(StageStyle.UNDECORATED);
+		stageSplash.setResizable(false);
+	}
+
 	@SneakyThrows
 	public void show() {
 		try {
 			window.setStage(stageSplash);
-			stageSplash.centerOnScreen();
-			stageSplash.initStyle(StageStyle.UNDECORATED);
-			stageSplash.setResizable(false);
 			stageSplash.show();
 			startSpinner();
 		} catch (Exception e) {

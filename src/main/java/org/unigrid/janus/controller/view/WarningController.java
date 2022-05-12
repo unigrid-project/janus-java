@@ -35,6 +35,7 @@ public class WarningController implements Initializable {
 	private static Wallet wallet = new Wallet();
 	private static JanusModel janusModel = new JanusModel();
 	private static WindowService window = new WindowService();
+
 	//@Inject
 	//private Event<WarningController> warningEvent;
 
@@ -44,10 +45,11 @@ public class WarningController implements Initializable {
 	}
 
 	public void onRestartClicked(MouseEvent event) {
-		debug.log("onRestartClicked");
+		System.out.println("onRestartClicked");
 		// will be implemented once CDI is working
 		//warningEvent.fire(this);
 		janusModel.setAppState(JanusModel.AppState.RESTARTING);
-		//window.getMainWindowController().hideWarning();
+		window.getMainWindowController().hideWarning();
 	}
+
 }
