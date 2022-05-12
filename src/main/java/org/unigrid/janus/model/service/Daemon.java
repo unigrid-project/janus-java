@@ -34,7 +34,10 @@ public class Daemon {
 	@Inject
 	private RPCService rpc;
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
-	private static final String PROPERTY_LOCATION_DEFAULT = Daemon.class.getResource("/daemon/unigridd").getFile();
+	private static final String PROPERTY_LOCATION_DEFAULT
+		= (Daemon.class.getResource("/daemon/unigridd").getFile() == null)
+		? Daemon.class.getResource("/daemon/unigridd.exe").getFile()
+		: Daemon.class.getResource("/daemon/unigridd").getFile();
 
 	public static final String PROPERTY_LOCATION
 		= Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, PROPERTY_LOCATION_DEFAULT);
