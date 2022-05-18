@@ -62,11 +62,9 @@ public class DataDirectory {
 
 	public static Configuration getConfig() throws ConfigurationException {
 		final Parameters parameters = new Parameters();
-
 		final FileBasedConfigurationBuilder<FileBasedConfiguration> builder
 			= new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
 				.configure(parameters.properties().setFile(getConfigFile()));
-
 		return builder.getConfiguration();
 	}
 

@@ -9,7 +9,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import org.unigrid.janus.view.component.WindowBarButton?>
 
-<HBox alignment="TOP_RIGHT" maxHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" style="-fx-background-color: linear-gradient(from 25px 25px to 100px 100px, #e72, #ff9500);" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.WindowBarController">
+<HBox alignment="TOP_RIGHT" maxHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" style="-fx-background-color: linear-gradient(from 25px 25px to 100px 100px, #e72, #ff9500);" stylesheets="@../main.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.WindowBarController">
    <children>
       <HBox fx:id="handle" alignment="CENTER_LEFT" onMouseEntered="#onDecorateMove" HBox.hgrow="ALWAYS">
          <children>

@@ -79,7 +79,7 @@ public class Daemon {
 	}
 
 	public void start() throws ConfigurationException, IOException, MalformedURLException {
-
+		runDaemon();
 		if (StringUtils.isNotBlank(PROPERTY_LOCATION)) {
 			if (isLocalFile()) {
 				runDaemon();

@@ -19,6 +19,7 @@ module org.unigrid.janus {
 	requires javafx.controls;
 	requires javafx.graphics;
 	requires javafx.fxml;
+	requires transitive javafx.base;
 	requires org.apache.commons.lang3;
 	requires org.apache.commons.configuration2;
 	requires java.annotation;
@@ -36,4 +37,5 @@ module org.unigrid.janus {
 	requires org.kordamp.ikonli.javafx;
 	requires jsch;
 	requires org.controlsfx.controls;
+	opens org.unigrid.janus to javafx.graphics;
 }

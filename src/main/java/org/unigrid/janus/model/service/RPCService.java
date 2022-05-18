@@ -22,7 +22,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
-import javax.naming.ConfigurationException;
+//import javax.naming.ConfigurationException;
 import lombok.SneakyThrows;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -60,22 +60,22 @@ public class RPCService {
 	private static WebTarget target;
 
 	private String getRPCProperty(Configuration config, String key, String value, String dataDirConfig,
-	                              boolean randomizeOnMissingProperty) throws ConfigurationException {
+	                              boolean randomizeOnMissingProperty)  {
 		if (StringUtils.isNotBlank(value)) {
 			return value;
 		}
-
+//throws ConfigurationException
 		String propertyValue = config.getString(dataDirConfig);
 
 		if (propertyValue == null) {
 			if (randomizeOnMissingProperty) {
 				propertyValue = RandomStringUtils.randomAlphabetic(40);
-			} else {
+			} /*else {
 				throw new ConfigurationException(String.format("Username for RPC endpoint not "
 					+ "found in either '%s' property or the configuration file '%s'.",
 					key, DataDirectory.getConfigFile().getAbsolutePath())
 				);
-			}
+			}*/
 		}
 
 		return propertyValue;
@@ -88,6 +88,7 @@ public class RPCService {
 		}
 
 		Configuration config = DataDirectory.getConfig();
+
 		credentials = new User();
 
 		credentials.setName(getRPCProperty(config, PROPERTY_USERNAME_KEY, PROPERTY_USERNAME,

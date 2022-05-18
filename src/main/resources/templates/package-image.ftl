@@ -2,7 +2,10 @@
 <#if osName?upper_case?contains("WIN")>
 --icon src/main/resources/org/unigrid/janus/view/images/unigrid-256-256.ico
 <#elseif osName?upper_case?contains("MAC")>
---icon src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.icns
+--icon src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.icns 
+--input target/dependency 
+--main-jar janus-0.9.0.jar
+--main-class org.unigrid.janus.Janus
 <#else>
 --icon src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png
 </#if>

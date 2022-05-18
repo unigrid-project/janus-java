@@ -6,8 +6,8 @@
 --win-per-user-install
 --type msi
 <#elseif osName?upper_case?contains("MAC")>
---mac-package-identifier Janus
---mac-package-name Unigrid Janus
+--mac-package-identifier org.unigrid.janus.Janus
+--mac-package-name Janus
 --type dmg
 <#else>
 --type deb

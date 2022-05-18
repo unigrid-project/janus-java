@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane pickOnBounds="false" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.WindowBorderController">
+<GridPane pickOnBounds="false" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.WindowBorderController">
    <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="8.0" minWidth="8.0" prefWidth="8.0" />
       <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="8.0" />
