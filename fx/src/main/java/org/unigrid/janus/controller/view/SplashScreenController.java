@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.controller.view;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -28,9 +29,11 @@ import javafx.scene.control.ProgressBar;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.service.WindowService;
 
+@ApplicationScoped
 public class SplashScreenController implements Initializable, PropertyChangeListener {
 
-	private static WindowService window = new WindowService();
+	private WindowService window;
+
 	@FXML
 	private ProgressBar progBar;
 	@FXML
@@ -40,10 +43,15 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	@FXML
 	private Label lblStatus;
 
+	//@Inject
+	//private SplashScreen splashScreen;
+
 	private float ind = (float) 0.6;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		System.out.println("ADDRESS   :" + this);
+		window = window.getInstance();
 		window.setSplashScreenController(this);
 
 		Platform.runLater(() -> {
@@ -52,6 +60,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 			//lblText.setFont(font);
 			//lblStatus.setFont(font);
 		});
+
 	}
 
 	@Override
@@ -60,6 +69,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	public void updateProgress(float prog) {
+		System.out.println("address: " + this);
 		System.out.println("progress: " + prog);
 		progBar.setProgress(prog);
 	}
@@ -70,6 +80,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	public void setText(String s) {
+		System.out.println("ADDRESS              :" + this);
 		lblText.setText(s);
 	}
 }

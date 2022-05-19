@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.controller.view;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -67,13 +68,16 @@ import org.unigrid.janus.model.TransactionList;
 import org.unigrid.janus.model.rpc.entity.SendTransaction;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 
+@ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {
 
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
-	private static Wallet wallet = new Wallet();
+
+	private Wallet wallet;
+
 	private static TransactionList transList = new TransactionList();
-	private static WindowService window = new WindowService();
+	private static WindowService window = WindowService.getInstance();
 
 
 	/* Injected fx:id from FXML */
@@ -109,6 +113,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
 		debug.log("Initializing wallet transactions");
+		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		transList.addPropertyChangeListener(this);
 		window.setWalletController(this);
@@ -228,6 +233,10 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			// can determine from this if a send transaction needs a passphrase
 		}
 		if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
+			ObservableList<Transaction> list = transList.getLatestTransactions(10);
+			tblWalletTrans.setItems(list);
+		}
+		if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
 			ObservableList<Transaction> list = transList.getLatestTransactions(10);
 			tblWalletTrans.setItems(list);
 		}

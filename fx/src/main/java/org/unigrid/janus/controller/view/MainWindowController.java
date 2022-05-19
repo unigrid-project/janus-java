@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.controller.view;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -37,12 +38,15 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.LockWallet;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+@ApplicationScoped
 public class MainWindowController implements Initializable, PropertyChangeListener {
 
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
-	private static Wallet wallet = new Wallet();
-	private static WindowService window = new WindowService();
+
+	private Wallet wallet;
+
+	private static WindowService window = WindowService.getInstance();
 	private static WarningController warning = new WarningController();
 	private static final int TAB_WALLET = 1;
 	private static final int TAB_TRANSACTIONS = 2;
@@ -100,6 +104,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		wallet = window.getWallet();
 		hideOverlay();
 		hideWarning();
 		wallet.addPropertyChangeListener(this);

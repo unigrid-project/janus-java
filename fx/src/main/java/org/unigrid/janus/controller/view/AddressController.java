@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.controller.view;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -50,12 +51,14 @@ import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 
+@ApplicationScoped
 public class AddressController implements Initializable, PropertyChangeListener {
+
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
-	private static Wallet wallet = new Wallet();
+	private static Wallet wallet;
 	private static AddressListModel addresses = new AddressListModel();
-	private static WindowService window = new WindowService();
+	private static WindowService window = WindowService.getInstance();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
@@ -72,6 +75,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		wallet = window.getWallet();
 		window.setAddressController(this);
 		wallet.addPropertyChangeListener(this);
 		addresses.addPropertyChangeListener(this);
@@ -83,24 +87,24 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		try {
 			colAddress.setCellValueFactory(
 				new Callback<TableColumn.CellDataFeatures<Address, Hyperlink>,
-					ObservableValue<Hyperlink>>() {
-						public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address,
-							Hyperlink> t) {
-							Address address = t.getValue();
-							String text = address.getAddress();
+						ObservableValue<Hyperlink>>() {
+					public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address,
+						Hyperlink> t) {
+						Address address = t.getValue();
+						String text = address.getAddress();
 
-							Hyperlink link = new Hyperlink();
-							link.setText(text);
-							link.setOnAction(new EventHandler<ActionEvent>() {
-								@Override
-								public void handle(ActionEvent e) {
-									window.browseURL("https://explorer"
-										+ ".unigrid.org/address/"
-										+ address.getAddress());
-								}
-							});
-							return new ReadOnlyObjectWrapper(link);
-						}
+						Hyperlink link = new Hyperlink();
+						link.setText(text);
+						link.setOnAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent e) {
+								window.browseURL("https://explorer"
+									+ ".unigrid.org/address/"
+									+ address.getAddress());
+							}
+						});
+						return new ReadOnlyObjectWrapper(link);
+					}
 				});
 			colAddressBalance.setCellValueFactory(
 				new PropertyValueFactory<Address, String>("amount"));
@@ -117,6 +121,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		cellFactory = (final TableColumn<Address, Void> param) -> {
 			final TableCell<Address, Void> cell = new TableCell<Address, Void>() {
 				private final Button btn = new Button();
+
 				{
 					FontIcon fontIcon = new FontIcon("fas-clipboard");
 					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
@@ -142,7 +147,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		};
 
 		colBtn.setCellFactory(cellFactory);
-		tblAddresses.getColumns().add(colBtn);
+		// TODO: tblAddresses.getColumns().add(colBtn);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -151,6 +156,9 @@ public class AddressController implements Initializable, PropertyChangeListener 
 			tblAddresses.setItems(addresses.getAddresses());
 		}
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
+			loadAddresses();
+		}
+		if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
 			loadAddresses();
 		}
 	}

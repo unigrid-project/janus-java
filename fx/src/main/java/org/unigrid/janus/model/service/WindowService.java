@@ -26,6 +26,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.controller.component.WindowBarController;
 import org.unigrid.janus.controller.view.AddressController;
 import org.unigrid.janus.controller.view.MainWindowController;
@@ -36,10 +38,13 @@ import org.unigrid.janus.controller.view.OverlayController;
 import org.unigrid.janus.controller.view.SettingsController;
 import org.unigrid.janus.controller.view.SplashScreenController;
 import org.unigrid.janus.controller.view.WarningController;
+import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class WindowService {
+
 	private static DebugService debug = new DebugService();
 	private static Stage stage;
 	private static HostServices hostServices;
@@ -53,6 +58,20 @@ public class WindowService {
 	private static AddressController addrController;
 	private static WarningController warnController;
 	private static SplashScreenController splashController;
+	@NonNull private Wallet wallet;
+
+	private static WindowService serviceInstance = null;
+
+	public WindowService() {
+		wallet = new Wallet();
+	}
+
+	public static WindowService getInstance() {
+		if (serviceInstance == null) {
+			serviceInstance = new WindowService();
+		}
+		return serviceInstance;
+	}
 
 	public Stage getStage() {
 		return this.stage;
@@ -76,6 +95,10 @@ public class WindowService {
 		} else {
 			return null;
 		}
+	}
+
+	public Wallet getWallet() {
+		return wallet;
 	}
 
 	public void browseURL(String url) {

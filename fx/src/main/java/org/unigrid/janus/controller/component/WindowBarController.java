@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.controller.component;
 
+import jakarta.enterprise.context.Dependent;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -39,15 +40,20 @@ import javafx.animation.RotateTransition;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+@Dependent
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
 
 	private Decorator movableWindowDecorator;
+
 	@Getter
 	private Stage stage;
+
 	private static RPCService rpc = new RPCService();
-	private static Wallet wallet = new Wallet();
+
+	private Wallet wallet;
+
 	private static DebugService debug = new DebugService();
-	private static WindowService window = new WindowService();
+	private static WindowService window = WindowService.getInstance();
 	@FXML
 	private FontIcon spinner;
 	private RotateTransition rt;
@@ -55,6 +61,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
+		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setWindowBarController(this);
 	}

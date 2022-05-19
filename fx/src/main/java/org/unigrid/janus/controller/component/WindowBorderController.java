@@ -12,10 +12,11 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.controller.component;
 
+import jakarta.enterprise.context.Dependent;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.ResourceBundle;
@@ -30,10 +31,13 @@ import org.unigrid.janus.model.Direction;
 import org.unigrid.janus.view.decorator.Decoratable;
 import org.unigrid.janus.view.decorator.ResizableWindowDecorator;
 
+@Dependent
 public class WindowBorderController implements Decoratable, Initializable {
+
 	private Set<Node> decoratedNodes = new HashSet();
 	private ResizableWindowDecorator resizableWindowDecorator = new ResizableWindowDecorator();
-	@Getter private Stage stage;
+	@Getter
+	private Stage stage;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {

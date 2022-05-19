@@ -20,6 +20,7 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.InputStream;
@@ -48,12 +49,14 @@ import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 
+@ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
-	private static WindowService window = new WindowService();
+	private static WindowService window = WindowService.getInstance();
 	private static GridnodeListModel nodes = new GridnodeListModel();
-	private static Wallet wallet = new Wallet();
+
+	private Wallet wallet;
 
 	@FXML
 	private TextField vpsPassword;
@@ -78,6 +81,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		wallet = window.getWallet();
 		setupNodeList();
 		nodes.addPropertyChangeListener(this);
 		wallet.addPropertyChangeListener(this);
