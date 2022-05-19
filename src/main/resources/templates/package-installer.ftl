@@ -10,11 +10,6 @@
 --mac-package-name Unigrid Janus
 --type dmg
 <#else>
---type deb
---linux-menu-group unigrid
---linux-shortcut
---linux-package-name janus
+--type deb --linux-menu-group unigrid --linux-shortcut --linux-package-name janus
 </#if>
---description "JavaFX wallet for the Unigrid Network"
---vendor "UGD software AB, Sweden"
---dest target/release
+--description "JavaFX wallet for the Unigrid Network" --name Janus --vendor "UGD software AB, Sweden" --resource-dir src/main/resources/org/unigrid/janus/view/icons --dest target/release

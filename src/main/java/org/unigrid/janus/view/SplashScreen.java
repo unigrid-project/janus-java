@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.view;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -34,26 +34,26 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import lombok.Data;
 import lombok.SneakyThrows;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.event.CloseJanusEvent;
 import org.unigrid.janus.model.service.WindowService;
 
-@Dependent
+@Data
+@ApplicationScoped
 public class SplashScreen implements Window {
 
 	@Inject
 	private Stage stageSplash;
-	private WindowService window = new WindowService();
+
+	@Inject
+	private WindowService window;
 
 	private FontIcon spinnerPreLoad;
 	private RotateTransition rt;
 	private Label text;
 	private Label status;
-
-	public SplashScreen() {
-
-	}
 
 	@SneakyThrows
 	public void show() {

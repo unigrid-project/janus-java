@@ -190,16 +190,16 @@ public class Janus extends BaseApplication {
 					status = boostrapInfo.getResult().getStatus();
 					System.out.println("status: " + status);
 					Thread.sleep(1000);
+
 					//walletVersion = walletInfo.getResult().getWalletversion();
 					//System.out.println("walletVersion: " + walletVersion);
 					//System.out.println(blockCount.getResult());
-
 					if (status.equals("downloading")) {
 						Platform.runLater(
-								() -> {
+							() -> {
 								float f = Float.parseFloat(progress);
 								window.getSplashScreenController().
-										showProgressBar();
+									showProgressBar();
 								window.getSplashScreenController().
 									setText("Downloading blockchain");
 								window.getSplashScreenController().
@@ -208,7 +208,7 @@ public class Janus extends BaseApplication {
 					}
 					if (status.equals("unarchiving")) {
 						Platform.runLater(
-								() -> {
+							() -> {
 								float f = Float.parseFloat(progress);
 								window.getSplashScreenController().
 									showProgressBar();

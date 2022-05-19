@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.controller.view;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -51,11 +52,12 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.EncryptWallet;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 
+@ApplicationScoped
 public class SettingsController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
-	private static Wallet wallet = new Wallet();
-	private static WindowService window = new WindowService();
+	private static Wallet wallet;
+	private static WindowService window = WindowService.getInstance();
 
 	private static final int TAB_SETTINGS_GENERAL = 1;
 	private static final int TAB_SETTINGS_DISPLAY = 2;
@@ -80,6 +82,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setSettingsController(this);
 	}

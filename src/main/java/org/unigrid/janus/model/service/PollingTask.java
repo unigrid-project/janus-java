@@ -53,6 +53,7 @@ public class PollingTask extends TimerTask {
 				wallet.setConnections(Integer.parseInt(connCount.getResult().toString()));
 				wallet.setWalletState(walletInfo);
 				wallet.setStakingStatus(staking);
+				wallet.setTransactionCount(walletInfo.getResult().getTxcount());
 				wallet.setStatus("done");
 			} catch (Exception e) {
 				wallet.setOffline(Boolean.TRUE);

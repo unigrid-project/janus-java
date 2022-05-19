@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
@@ -28,6 +29,7 @@ import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.service.DebugService;
 
+@ApplicationScoped
 public class Wallet {
 
 	public static final String BALANCE_PROPERTY = "balance";
@@ -41,6 +43,7 @@ public class Wallet {
 	public static final String ENCRYPTED_STATUS = "encrypted";
 	public static final String IS_OFFLINE = "offline";
 	public static final String STATUS_PROPERTY = "walletstatus";
+	public static final String TRANSACTION_COUNT = "transactioncount";
 	private static double balance;
 	private static double totalbalance;
 	private static double moneysupply;
@@ -49,6 +52,7 @@ public class Wallet {
 	private static int connections;
 	private static int version;
 	private static int walletVersion;
+	private static long transactionCount;
 	private static Boolean locked = true;
 	private static Boolean isStaking;
 	private static Boolean processingStatus = false;
@@ -88,6 +92,16 @@ public class Wallet {
 		double oldValue = this.balance;
 		this.balance = newValue;
 		this.pcs.firePropertyChange(this.BALANCE_PROPERTY, oldValue, newValue);
+	}
+
+	public long getTransactionCount() {
+		return this.transactionCount;
+	}
+
+	public void setTransactionCount(long newValue) {
+		long oldValue = this.transactionCount;
+		this.transactionCount = newValue;
+		this.pcs.firePropertyChange(this.TRANSACTION_COUNT, oldValue, newValue);
 	}
 
 	public double getTotalBalance() {

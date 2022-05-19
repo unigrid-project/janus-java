@@ -152,6 +152,21 @@
                             </arguments>
                         </configuration>
                     </execution>
+		    <execution>
+                        <id>exec2</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>chmod</executable>
+                            <workingDirectory>${project.build.directory}/classes/daemon</workingDirectory>
+                            <arguments>
+                                <argument>0755</argument>
+                                <argument>unigridd</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -199,6 +214,8 @@
                 </configuration>
                 <executions>
                     <execution>
+			    <id>check</id>
+			    <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>

@@ -16,7 +16,6 @@
 
 package org.unigrid.janus;
 
-import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import javafx.application.Application;
@@ -31,9 +30,9 @@ public class ApplicationLoader extends Application {
 	@Override
 	public void init() throws Exception {
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
-		final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
+		//final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
 
-		application = applicationInstance.get();
+		application = container.select(Janus.class).get();
 	}
 
 	@Override

@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.view;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -32,13 +32,13 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.event.CloseJanusEvent;
 
-@Dependent
+@ApplicationScoped
 public class MainWindow implements Window {
 
 	@Inject
 	private Stage stage;
 
-	private WindowService window = new WindowService();
+	private WindowService window = WindowService.getInstance();
 
 	@Inject
 	private Event<CloseJanusEvent> closeJanusEvent;

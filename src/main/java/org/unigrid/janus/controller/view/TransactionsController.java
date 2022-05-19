@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.controller.view;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -55,12 +56,15 @@ import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.TransactionList;
 import org.unigrid.janus.model.TransactionList.LoadReport;
 
+@ApplicationScoped
 public class TransactionsController implements Initializable, PropertyChangeListener {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static TransactionList transList = new TransactionList();
-	private static Wallet wallet = new Wallet();
-	private static WindowService window = new WindowService();
+
+	private Wallet wallet;
+
+	private static WindowService window = WindowService.getInstance();
 
 	// transactions table
 	@FXML private TableView tblTransactions;
@@ -72,6 +76,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
+		wallet = window.getWallet();
 		debug.log("Initializing transactions");
 		window.setTransactionsController(this);
 		transList.addPropertyChangeListener(this);
@@ -225,6 +230,9 @@ public class TransactionsController implements Initializable, PropertyChangeList
 			if (transList.getTransactions().size() == 0) {
 				loadTransactions(0);
 			}
+		}
+		if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
+			loadTransactions(0);
 		}
 	}
 }

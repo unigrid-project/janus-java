@@ -37,7 +37,7 @@
                            <center>
                               <VBox styleClass="sidebar">
                                  <children>
-                                    <ToggleButton fx:id="btnWallet" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onWalletTap" prefWidth="140.0" selected="true" style="-fx-cursor: hand;" text="Wallet">
+                                    <ToggleButton fx:id="btnWallet" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onWalletTap" prefWidth="150.0" selected="true" style="-fx-cursor: hand;" text="Wallet">
                                        <padding>
                                           <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
                                        </padding>
@@ -71,7 +71,7 @@
 
                                        </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnTransactions" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onTransactionsTap" prefWidth="140.0" style="-fx-cursor: hand;" text="Transactions" toggleGroup="$sidepane">
+                                    <ToggleButton fx:id="btnTransactions" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onTransactionsTap" prefWidth="150.0" style="-fx-cursor: hand;" text="Transactions" toggleGroup="$sidepane">
                                        <padding>
                                           <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
                                        </padding>
@@ -82,7 +82,7 @@
                                           <Font size="14.0" />
                                        </font>
                                        <graphic>
-                                          <FontIcon fx:id="transactionIcn" iconLiteral="fas-money-bill-alt" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5">
+                                          <FontIcon fx:id="transactionIcn" iconLiteral="fas-exchange-alt" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5">
                                               <iconColor>
                                                 <LinearGradient endX="1.0" endY="1.0">
                                                    <stops>
@@ -101,7 +101,7 @@
                                              </iconColor></FontIcon>
                                        </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnNodes" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onNodesTap" prefWidth="140.0" style="-fx-cursor: hand;" text="Nodes" toggleGroup="$sidepane">
+                                    <ToggleButton fx:id="btnNodes" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onNodesTap" prefWidth="150.0" style="-fx-cursor: hand;" text="Nodes" toggleGroup="$sidepane">
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
                                        </VBox.margin>
@@ -119,7 +119,7 @@
                                           </ImageView>
                                        </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnAddress" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onAddressTap" prefWidth="140.0" style="-fx-cursor: hand;" text="Address">
+                                    <ToggleButton fx:id="btnAddress" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onAddressTap" prefWidth="150.0" style="-fx-cursor: hand;" text="Address">
                                        <toggleGroup>
                                           <ToggleGroup fx:id="sidepane1" />
                                        </toggleGroup>
@@ -130,7 +130,7 @@
                                           <Font size="14.0" />
                                        </font>
                                        <graphic>
-                                          <FontIcon fx:id="addressIcn" iconLiteral="far-address-book" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5">
+                                          <FontIcon fx:id="addressIcn" iconLiteral="far-address-book" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" lineSpacing="0.5" >
                                              <iconColor>
                                                 <LinearGradient endX="1.0" endY="1.0">
                                                    <stops>
@@ -155,7 +155,7 @@
                                           <Insets bottom="2.0" />
                                        </VBox.margin>
                                        <children>
-                                          <ToggleButton fx:id="btnSettings" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onSettingsTap" prefWidth="140.0" style="-fx-cursor: hand;" text="Settings" toggleGroup="$sidepane">
+                                          <ToggleButton fx:id="btnSettings" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onSettingsTap" prefWidth="150.0" style="-fx-cursor: hand;" text="Settings" toggleGroup="$sidepane">
                                              <padding>
                                                 <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
                                              </padding>
@@ -185,7 +185,7 @@
                               </VBox>
                            </center>
                            <bottom>
-                              <FlowPane alignment="CENTER_LEFT" columnHalignment="CENTER" prefWidth="140.0" style="-fx-border-color: transparent #ccc8 transparent transparent;" BorderPane.alignment="CENTER">
+                              <FlowPane alignment="CENTER_LEFT" columnHalignment="CENTER" prefWidth="150.0" style="-fx-border-color: transparent #ccc8 transparent transparent;" BorderPane.alignment="CENTER">
                                  <children>
                                     <StackedFontIcon />
                                     <Button maxWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;">

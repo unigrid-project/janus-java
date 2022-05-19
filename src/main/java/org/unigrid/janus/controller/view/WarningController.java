@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.controller.view;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javafx.scene.input.MouseEvent;
@@ -24,16 +25,18 @@ import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 
+@ApplicationScoped
 public class WarningController {
 	public static final String HIDE_WARNING = "hidewarning";
 	public static final String STATUS_PROPERTY = "walletstatus";
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
-	private static Wallet wallet = new Wallet();
-	private static WindowService window = new WindowService();
+	private static Wallet wallet;
+	private static WindowService window = WindowService.getInstance();
 	private static PropertyChangeSupport pcs;
 
 	public WarningController() {
+		wallet = window.getWallet();
 		if (this.pcs != null) {
 			return;
 		}

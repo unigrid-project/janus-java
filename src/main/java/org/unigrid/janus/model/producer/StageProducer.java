@@ -34,7 +34,9 @@ public class StageProducer {
 		final Class<?> clazz = point.getMember().getDeclaringClass();
 		final String name = Introspector.decapitalize(clazz.getSimpleName());
 
+		System.out.println(name.concat(FXML_SUFFIX));
 		loader.setLocation(clazz.getResource(name.concat(FXML_SUFFIX)));
+		System.out.println("SHITTTTTTTTTTTTTTTT " + point.getType());
 		return loader.load();
 	}
 }
