@@ -116,8 +116,8 @@ jobs:
         uses: duhow/download-github-release-assets@v1
         with:
           repository: unigrid-project/daemon
-          #release-id: latest
-          tag: 2.9.0
+          release-id: latest
+          #tag: 2.9.0
           files: unigrid-win64.zip
           target: unigridd.zip
       - name: Extract
