@@ -52,7 +52,7 @@ jobs:
           with:
             repository: unigrid-project/daemon
             #release-id: latest
-            tag: 2.9.0
+            tag: 2.0.1
             files: unigrid-*-x86_64-linux-gnu.tar.gz
             target: unigridd.tar.gz
         - name: Extract
@@ -116,8 +116,8 @@ jobs:
         uses: duhow/download-github-release-assets@v1
         with:
           repository: unigrid-project/daemon
-          release-id: latest
-          #tag: 2.9.0
+          #release-id: latest
+          tag: 2.0.1
           files: unigrid-win64.zip
           target: unigridd.zip
       - name: Extract
@@ -181,7 +181,7 @@ jobs:
         with:
           repository: unigrid-project/daemon
           #release-id: latest
-          tag: 2.9.0
+          tag: 2.0.1
           files: unigrid-*-osx64.tar.gz
           target: unigridd.tar.gz
       - name: Extract
