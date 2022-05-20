@@ -130,7 +130,7 @@
                                           <Font size="14.0" />
                                        </font>
                                        <graphic>
-                                          <FontIcon fx:id="addressIcn" iconLiteral="far-address-book" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" lineSpacing="0.5" >
+                                          <FontIcon fx:id="addressIcn" iconLiteral="fas-address-book" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5">
                                              <iconColor>
                                                 <LinearGradient endX="1.0" endY="1.0">
                                                    <stops>
@@ -215,7 +215,7 @@
                                           <Tooltip fx:id="stakingTltp" text="Staking Off" />
                                        </tooltip>
                                        <padding>
-                                          <Insets right="5.0" />
+                                          <Insets left="5.0" right="5.0" />
                                        </padding>
                                        <FlowPane.margin>
                                           <Insets bottom="5.0" top="5.0" />
@@ -229,7 +229,7 @@
                                           <Tooltip fx:id="connectionTltp" text="Connections: 0" />
                                        </tooltip>
                                        <padding>
-                                          <Insets right="5.0" />
+                                          <Insets left="5.0" right="5.0" />
                                        </padding>
                                        <FlowPane.margin>
                                           <Insets bottom="5.0" top="5.0" />
@@ -243,7 +243,7 @@
                                           <Tooltip fx:id="blocksTltp" text="Blocks: 0" />
                                        </tooltip>
                                        <padding>
-                                          <Insets right="5.0" />
+                                          <Insets left="5.0" right="5.0" />
                                        </padding>
                                        <FlowPane.margin>
                                           <Insets bottom="5.0" top="5.0" />
