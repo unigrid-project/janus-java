@@ -1,11 +1,11 @@
-/target/
-socomo.html
+**/socomo.html
+**/nb-configuration.xml
+
 .vscode/
-  
-
-/targetOLD/
-/targetOLD2/
-
 **/.DS_Store  
 
 /src/main/resources/daemon/
+
+/target/
+/fx/target/
+/desktop/target/
