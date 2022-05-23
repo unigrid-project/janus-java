@@ -197,7 +197,11 @@ public class Wallet {
 	public void setOffline(Boolean newValue) {
 		Boolean oldValue = this.getOffline();
 		this.offline = newValue;
-		this.pcs.firePropertyChange(this.IS_OFFLINE, oldValue, newValue);
+		if (newValue) {
+			this.pcs.firePropertyChange(this.IS_OFFLINE, oldValue, newValue);
+		} else {
+			System.out.println("WALLET ONLINE!");
+		}
 	}
 
 	public Boolean getOffline() {

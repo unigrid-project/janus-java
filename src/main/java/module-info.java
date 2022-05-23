@@ -14,7 +14,7 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-module org.unigrid.janus {
+module janus {
 	requires static lombok;
 	requires javafx.controls;
 	requires javafx.graphics;
@@ -36,4 +36,6 @@ module org.unigrid.janus {
 	requires org.kordamp.ikonli.javafx;
 	requires jsch;
 	requires org.controlsfx.controls;
+
+	opens org.unigrid.janus to javafx.graphics;
 }

@@ -7,3 +7,5 @@ socomo.html
 /targetOLD2/
 
 **/.DS_Store  
+
+/src/main/resources/daemon/

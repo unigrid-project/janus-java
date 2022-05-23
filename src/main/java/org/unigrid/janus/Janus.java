@@ -20,6 +20,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -40,13 +42,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.JanusModel;
+import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
 
 @ApplicationScoped
-public class Janus extends BaseApplication {
+public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@Inject
 	private Daemon daemon;
@@ -69,6 +72,9 @@ public class Janus extends BaseApplication {
 	@Inject
 	private JanusModel janusModel;
 
+	@Inject
+	private Wallet wallet;
+
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
 	private String status = "inactive";
@@ -86,7 +92,13 @@ public class Janus extends BaseApplication {
 	@SneakyThrows
 	private void init() {
 		startDaemon();
-		//janusModel.getAppState().addObserver
+		janusModel.addPropertyChangeListener(this);
+	}
+
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getPropertyName().equals(janusModel.APP_RESTARTING)) {
+			this.restartDaemon();
+		}
 	}
 
 	public void startDaemon() {
@@ -99,13 +111,12 @@ public class Janus extends BaseApplication {
 				ButtonType.OK);
 			a.showAndWait();
 		}
-		debug.log("Daemon start done.");
+		System.out.println("Daemon start done.");
 	}
 
 	@PreDestroy
 	@SneakyThrows
 	private void destroy() {
-		//TODO: should this change to spalshScreenInsted
 		daemon.stop();
 	}
 
@@ -121,16 +132,20 @@ public class Janus extends BaseApplication {
 				public void changed(ObservableValue<? extends Boolean> ov, Boolean t,
 					Boolean t1
 				) {
-					Platform.runLater(new Runnable() {
-						public void run() {
-							rpc.stopPolling();
-
-							rpc.pollForInfo(5 * 1000);
-							startMainWindow();
-							preloader.stopSpinner();
-							preloader.hide();
-						}
-					});
+					if (t1) {
+						ready.setValue(Boolean.FALSE);
+						Platform.runLater(new Runnable() {
+							public void run() {
+								rpc.stopPolling();
+								wallet.setOffline(Boolean.FALSE);
+								rpc.pollForInfo(5 * 1000);
+								startMainWindow();
+								janusModel.setAppState(JanusModel.AppState.LOADED);
+								preloader.stopSpinner();
+								preloader.hide();
+							}
+						});
+					}
 				}
 			}
 		);
@@ -144,11 +159,6 @@ public class Janus extends BaseApplication {
 			mainWindow.bindDebugListViewWidth(0.98);
 			debug.setListView((ListView) window.lookup("lstDebug"));
 
-			/*final Info info = rpc.call(new Info.Request(), Info.class);
-			Jsonb jsonb = JsonbBuilder.create();
-			String result = String.format("Info result: %s", jsonb.toJson(info.getResult()));
-			debug.log(result);
-			 */
 		} catch (Exception e) {
 			Alert a = new Alert(AlertType.ERROR,
 				e.getMessage(),
@@ -160,40 +170,32 @@ public class Janus extends BaseApplication {
 	@SneakyThrows
 	private void startSplashScreen() {
 		janusModel.setAppState(JanusModel.AppState.STARTING);
-		preloader.show();
 
 		preloader.initText();
-
+		preloader.show();
 		startUp();
-
 	}
 
 	private void startUp() {
 		Task task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-				//while (block <= 0) {
 				do {
 					try {
 						walletInfo = rpc.call(new GetWalletInfo.Request(),
 							GetWalletInfo.class);
 					} catch (Exception e) {
-						System.out.println("walletVersion "
-							+ walletInfo.getResult().getWalletversion());
+						System.out.println("walletInfo: "
+							+ e.getMessage());
 					}
 					boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
 						GetBootstrappingInfo.class);
+					System.out.println("boostrapInfo: " + boostrapInfo.getResult().getStatus());
 					walletStatus = boostrapInfo.getResult().getWalletstatus();
-					System.out.println("walletStatus: " + walletStatus);
 					progress = boostrapInfo.getResult().getProgress();
-					System.out.println("progress: " + progress);
 					status = boostrapInfo.getResult().getStatus();
-					System.out.println("status: " + status);
 					Thread.sleep(1000);
-
-					//walletVersion = walletInfo.getResult().getWalletversion();
-					//System.out.println("walletVersion: " + walletVersion);
-					//System.out.println(blockCount.getResult());
+					System.out.println("walletInfo.hasError() " + walletInfo.hasError());
 					if (status.equals("downloading")) {
 						Platform.runLater(
 							() -> {
@@ -219,8 +221,7 @@ public class Janus extends BaseApplication {
 							});
 					}
 				} while (walletInfo.hasError());
-				//while (!status.equals("inactive") || (status.equals("inactive")
-				//&& startupStatus != null));
+
 				ready.setValue(Boolean.TRUE);
 
 				return null;
@@ -231,7 +232,17 @@ public class Janus extends BaseApplication {
 	}
 
 	public void restartDaemon() {
-		destroy();
 		startDaemon();
+		try {
+			// need to wait a few seconds for the daemon to start
+			// otherwise walletInfo will not give us a response
+			Thread.sleep(1000);
+		} catch (InterruptedException ex) {
+			System.out.println("error on sleep");
+		}
+		ready.setValue(Boolean.FALSE);
+		startSplashScreen();
+		mainWindow.hide();
+		janusModel.addPropertyChangeListener(this);
 	}
 }

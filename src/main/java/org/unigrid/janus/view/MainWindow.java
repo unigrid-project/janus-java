@@ -43,13 +43,17 @@ public class MainWindow implements Window {
 	@Inject
 	private Event<CloseJanusEvent> closeJanusEvent;
 
+	@PostConstruct
+	private void init() {
+		stage.centerOnScreen();
+		stage.initStyle(StageStyle.UNDECORATED);
+		stage.setResizable(true);
+	}
+
 	@SneakyThrows
 	public void show() {
 		try {
 			window.setStage(stage);
-			stage.centerOnScreen();
-			stage.initStyle(StageStyle.UNDECORATED);
-			stage.setResizable(true);
 			stage.show();
 		} catch (Exception e) {
 			Alert a = new Alert(AlertType.ERROR,
@@ -86,7 +90,6 @@ public class MainWindow implements Window {
 	}
 
 	private void onClose(@Observes Event<CloseJanusEvent> event) {
-		System.out.println("shitpickle");
 		this.stage.setWidth(900);
 		this.stage.hide();
 	}

@@ -59,9 +59,6 @@ public class SplashScreen implements Window {
 	public void show() {
 		try {
 			window.setStage(stageSplash);
-			stageSplash.centerOnScreen();
-			stageSplash.initStyle(StageStyle.UNDECORATED);
-			stageSplash.setResizable(false);
 			stageSplash.show();
 			startSpinner();
 		} catch (Exception e) {
