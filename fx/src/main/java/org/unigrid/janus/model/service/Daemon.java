@@ -24,6 +24,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javax.naming.ConfigurationException;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -46,13 +50,13 @@ public class Daemon {
 		"/opt/bin/"
 	};
 	
+	private URL primary = null;
+	
 	private static final String[] EXEC = new String[] { "unigridd", "unigridd.exe" };
 	
 	@PostConstruct
 	@SneakyThrows
-	private void init() {
-		URL primary = null;
-		
+	private void init() {		
 		for (int i = 0; i < LOCATIONS.length - 1; i++) {
 			for (int j = 0; j < EXEC.length - 1; j++) {
 				if (isLocalFile(LOCATIONS[i] + EXEC[j])) {
@@ -117,13 +121,40 @@ public class Daemon {
 					+ "daemon backend in property '%s'. This has to point to a valid "
 					+ "HTTP endpoint.", PROPERTY_LOCATION_KEY)
 				);
+			} else {
+				findFile();
+				start();
 			}
 		} else {
-			throw new ConfigurationException(String.format("No location to the daemon specified in "
+			/**throw new ConfigurationException(String.format("No location to the daemon specified in "
 				+ " property '%s'. This should point to either a local file, "
 				+ "or a remote HTTP location.", PROPERTY_LOCATION_KEY)
-			);
+			);**/
+			findFile();
+			start();
 		}
+	}
+	
+	@SneakyThrows
+	private void findFile(){
+		
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Unigrid Janus");
+		alert.setHeaderText("Unigrid backend program not found!");
+		alert.setContentText("Set the path to unigridd");
+		alert.showAndWait();
+		
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Pick file unigridd");
+		
+		File temp = fileChooser.showOpenDialog(new Stage());
+		if (temp.getAbsoluteFile() == null){ return; }
+		location = temp.getAbsolutePath();
+		addPathAsDefault(location);
+	}
+	
+	private void addPathAsDefault(String path){
+		
 	}
 
 	public void stop() throws InterruptedException {
