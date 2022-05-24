@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.Optional;
 import javax.naming.ConfigurationException;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.rpc.entity.BlockCount;
@@ -39,15 +40,31 @@ public class Daemon {
 	@Getter private String location;
 	private Optional<Process> process = Optional.empty();
 
+	private static final String[] LOCATIONS = new String[] {
+		System.getProperty("user.dir") + "/", 
+		"/usr/bin/", 
+		"/opt/bin/"
+	};
+	
+	private static final String[] EXEC = new String[] { "unigridd", "unigridd.exe" };
+	
 	@PostConstruct
+	@SneakyThrows
 	private void init() {
-		final URL primary = Daemon.class.getResource("/daemon/unigridd");
-		final URL secondary = Daemon.class.getResource("/daemon/unigridd.exe");
+		URL primary = null;
+		
+		for (int i = 0; i < LOCATIONS.length - 1; i++) {
+			for (int j = 0; j < EXEC.length - 1; j++) {
+				if (isLocalFile(LOCATIONS[i] + EXEC[j])) {
+					System.out.println(LOCATIONS[i] + EXEC[j]);
+					primary = new URL("file:// " + LOCATIONS[i] + EXEC[j]);
+					break;
+				}
+			}
+		}
 
 		if (primary != null && isLocalFile(primary.getFile())) {
 			location = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, primary.getFile());
-		} else if (secondary != null && isLocalFile(secondary.getFile())) {
-			location = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, secondary.getFile());
 		} else {
 			location = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, "http://127.0.0.1:51993");			
 		}
