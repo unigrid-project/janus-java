@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.unigrid.janus</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
@@ -67,31 +67,44 @@
 				<groupId>org.panteleyev</groupId>
 				<artifactId>jpackage-maven-plugin</artifactId>
 				<version>1.5.2</version>
-				<configuration>
-					<name>janus</name>
-					<appVersion>1.0.0</appVersion>
-					<vendor>org.unigrid</vendor>
-					<destination>target/dist</destination>
-					<module>fx/org.unigrid.janus.Janus</module>
-					<modulePaths>
-						<modulePath>target/mp</modulePath>
-					</modulePaths>
-					<runtimeImage>target/jlink</runtimeImage>
-					<javaOptions>
-						<option>--add-opens</option>
-						<option>java.base/java.lang=ALL-UNNAMED</option>
-						<option>--add-opens</option>
-						<option>java.base/java.lang=weld.core.impl</option>
-					</javaOptions>
-				</configuration>
 				<executions>
 					<execution>
+						<id>appimage</id>
 						<phase>package</phase>
 						<goals>
 							<goal>jpackage</goal>
 						</goals>
+						<configuration>
+							<appVersion>1.0.0</appVersion>
+							<vendor>org.unigrid</vendor>
+							<module>fx/org.unigrid.janus.Janus</module>
+							<modulePaths>
+								<modulePath>target/mp</modulePath>
+							</modulePaths>
+							<runtimeImage>target/jlink</runtimeImage>
+							<type>APP_IMAGE</type>
+							<javaOptions>
+								<option>--add-opens</option>
+								<option>java.base/java.lang=ALL-UNNAMED</option>
+								<option>--add-opens</option>
+								<option>java.base/java.lang=weld.core.impl</option>
+							</javaOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>installer</id>
+						<goals>
+							<goal>jpackage</goal>
+						</goals>
+						<configuration>
+							<appImage>target/dist/janus</appImage>
+						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<name>janus</name>
+					<destination>target/dist</destination>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -104,80 +117,101 @@
 		</plugins>
 	</build>
 	<profiles>
-        <profile>
-		  <id>windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
-            <properties>
-                <libusb4java.classifier>windows-x86_64</libusb4java.classifier>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.panteleyev</groupId>
-                        <artifactId>jpackage-maven-plugin</artifactId>
-                        <configuration>
-							<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-256-256.ico</icon>
-                            <winMenu>true</winMenu>
-                        </configuration>
-                    </plugin>
-                </plugins> 
-            </build>
+		<profile>
+			<id>windows</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.panteleyev</groupId>
+						<artifactId>jpackage-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>appimage</id>
+								<configuration>
+									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-256-256.ico</icon>
+								</configuration>
+							</execution>
+							<execution>
+								<id>installer</id>
+								<configuration>
+									<type>MSI</type>
+									<winMenu>true</winMenu>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins> 
+			</build>
 		</profile>
 		<profile>
-            <id>mac</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
-            <properties>
-                <libusb4java.classifier>darwin-x86-64</libusb4java.classifier>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.panteleyev</groupId>
-                        <artifactId>jpackage-maven-plugin</artifactId>
-                        <configuration>
-							<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.icns</icon>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-		 <profile>
-            <id>linux</id>
-            <activation>
-                <os>
-                    <family>linux</family>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
-            <properties>
-                <libusb4java.classifier>linux-x86_64</libusb4java.classifier>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.panteleyev</groupId>
-                        <artifactId>jpackage-maven-plugin</artifactId>
-                        <configuration>
-							<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
-                            <linuxShortcut>true</linuxShortcut>
-							<linuxPackageName>janus</linuxPackageName>
-							<linuxAppCategory>Utilities</linuxAppCategory>
-							<linuxMenuGroup>Utilities</linuxMenuGroup>	
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+			<id>mac</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.panteleyev</groupId>
+						<artifactId>jpackage-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>appimage</id>
+								<configuration>
+									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.icns</icon>
+								</configuration>
+							</execution>
+							<execution>
+								<id>installer</id>
+								<configuration>
+									<type>DMG</type>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>linux</id>
+			<activation>
+				<os>
+					<family>linux</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.panteleyev</groupId>
+						<artifactId>jpackage-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>appimage</id>
+								<configuration>
+									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
+								</configuration>
+							</execution>
+							<execution>
+								<id>installer</id>
+								<configuration>
+									<type>DEB</type>
+									<linuxShortcut>true</linuxShortcut>
+									<linuxPackageName>janus</linuxPackageName>
+									<linuxAppCategory>Utilities</linuxAppCategory>
+									<linuxMenuGroup>Utilities</linuxMenuGroup>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 	<reporting>
 		<plugins>
