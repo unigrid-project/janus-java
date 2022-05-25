@@ -48,7 +48,8 @@ public class Daemon {
 	private static final String[] LOCATIONS = new String[] {
 		System.getProperty("user.dir") + "/", 
 		"/usr/bin/", 
-		"/opt/bin/"
+		"/opt/bin/",
+		System.getProperty("user.dir") + "/runtime/bin/"
 	};
 	
 	private URL primary = null;
