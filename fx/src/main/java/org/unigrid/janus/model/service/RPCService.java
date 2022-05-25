@@ -23,7 +23,6 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import javax.naming.ConfigurationException;
-import lombok.SneakyThrows;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,13 +80,14 @@ public class RPCService {
 		return propertyValue;
 	}
 
-	@PostConstruct @SneakyThrows
+	@PostConstruct
 	private void init() {
 		if (target != null) {
 			return;
 		}
 
-		Configuration config = DataDirectory.getConfig();
+		try{
+		Configuration config = DataDirectory.getConfig(true);
 		credentials = new User();
 
 		credentials.setName(getRPCProperty(config, PROPERTY_USERNAME_KEY, PROPERTY_USERNAME,
@@ -100,6 +100,10 @@ public class RPCService {
 			.register(new JsonConfiguration())
 			.register(HttpAuthenticationFeature.basic(credentials.getName(), credentials.getPassword()))
 			.build().target(daemon.getRPCAdress());
+			
+		} catch (ConfigurationException | org.apache.commons.configuration2.ex.ConfigurationException ex) {
+			System.out.println("Bajs det gick åt helvete!!!!!!!!!!!!!!!!");
+		}
 	}
 
 	public void pollForInfo(int interval) {

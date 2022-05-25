@@ -91,7 +91,6 @@ public class MainWindow implements Window {
 	}
 
 	private void onClose(@Observes Event<CloseJanusEvent> event) {
-		System.out.println("shitpickle");
 		this.stage.setWidth(900);
 		this.stage.hide();
 	}

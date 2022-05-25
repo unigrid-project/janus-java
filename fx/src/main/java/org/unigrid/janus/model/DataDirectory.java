@@ -21,6 +21,7 @@ import com.sun.jna.platform.win32.Shell32Util;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import lombok.SneakyThrows;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -60,18 +61,32 @@ public class DataDirectory {
 		return Paths.get(head, tail).toString();
 	}
 
-	public static Configuration getConfig() throws ConfigurationException {
+	public static Configuration getConfig(boolean blocking) throws ConfigurationException {
 		final Parameters parameters = new Parameters();
 
-		final FileBasedConfigurationBuilder<FileBasedConfiguration> builder
+		System.out.println("Create config builder!!!");
+		FileBasedConfigurationBuilder<FileBasedConfiguration> builder
 			= new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
 				.configure(parameters.properties().setFile(getConfigFile()));
-
+		
+		//System.out.println("found folder = " + builder.getFileHandler().locate());
+		//System.out.println(builder.getFileHandler().getPath());
+		
+		do {
+			System.out.println("init loop DataDirectory!!!");
+			try{
+			Thread.sleep(250);
+			} 
+			catch (InterruptedException e) { 
+				System.out.println("Somthing whent wrong with the thread");
+			}
+		} while (blocking && !builder.getFileHandler().locate());
+		
 		return builder.getConfiguration();
 	}
 
 	public static String getConfigKeys() throws ConfigurationException {
-		Configuration config = getConfig();
+		Configuration config = getConfig(true);
 		Iterator<String> keys = config.getKeys();
 		String result = "";
 		while (keys.hasNext()) {
