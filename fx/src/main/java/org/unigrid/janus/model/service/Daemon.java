@@ -42,7 +42,7 @@ public class Daemon {
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
 	private static final String DEFAULT_PATH_TO_DAEMON_KEY = "path.to.daemon";
 	
-	@Getter private String location;
+	@Getter private String location = "";
 	private Optional<Process> process = Optional.empty();
 
 	private static final String[] LOCATIONS = new String[] {
@@ -175,13 +175,9 @@ public class Daemon {
 	
 	@SneakyThrows
 	private String getDefaultPathToDaemon(){
-		if (Preferences.get().nodeExists(DEFAULT_PATH_TO_DAEMON_KEY)) {
-			Preferences.get().get(DEFAULT_PATH_TO_DAEMON_KEY, location);
-			System.out.println("Get path from config " + location);
-			return location;
-		} else {
-			return "";
-		}
+		location = Preferences.get().get(DEFAULT_PATH_TO_DAEMON_KEY, location);
+		System.out.println("Get path from config " + location);
+		return location;
 	}
 
 	public void stop() throws InterruptedException {
