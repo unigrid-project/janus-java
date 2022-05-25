@@ -36,6 +36,7 @@ public class JanusModel {
 		RESTARTING
 	}
 
+	@Getter
 	private AppState appState;
 
 	@Getter @Setter

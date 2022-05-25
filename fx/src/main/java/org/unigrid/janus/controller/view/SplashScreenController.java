@@ -83,4 +83,8 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 		System.out.println("ADDRESS              :" + this);
 		lblText.setText(s);
 	}
+	
+	public void hideProgBar() {
+		progBar.setVisible(false);
+	}
 }

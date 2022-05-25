@@ -17,24 +17,29 @@
 package org.unigrid.janus.controller.view;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.fxml.Initializable;
 import javafx.scene.input.MouseEvent;
+import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 
 @ApplicationScoped
-public class WarningController {
+public class WarningController implements Initializable{
 	public static final String HIDE_WARNING = "hidewarning";
 	public static final String STATUS_PROPERTY = "walletstatus";
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet;
+	private static JanusModel janusModel = new JanusModel();
 	private static WindowService window = WindowService.getInstance();
 	private static PropertyChangeSupport pcs;
 
+	/**
 	public WarningController() {
 		wallet = window.getWallet();
 		if (this.pcs != null) {
@@ -50,9 +55,17 @@ public class WarningController {
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
 	}
-
+**/
 	public void onRestartClicked(MouseEvent event) {
 		debug.log("onRestartClicked");
+		// will be implemented once CDI is working
+		//warningEvent.fire(this);
+		janusModel.setAppState(JanusModel.AppState.RESTARTING);
 		window.getMainWindowController().hideWarning();
+	}
+
+	@Override
+	public void initialize(URL url, ResourceBundle rb) {
+		window.setWarnController(this);
 	}
 }

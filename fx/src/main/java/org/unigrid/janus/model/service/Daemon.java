@@ -40,7 +40,8 @@ public class Daemon {
 	@Inject
 	private RPCService rpc;
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
-
+	private static final String DEFAULT_PATH_TO_DAEMON_KEY = "path.to.daemon";
+	
 	@Getter private String location;
 	private Optional<Process> process = Optional.empty();
 
@@ -56,7 +57,15 @@ public class Daemon {
 	
 	@PostConstruct
 	@SneakyThrows
-	private void init() {		
+	private void init() {
+		System.out.println("start init");
+		System.out.println("blää");
+                System.out.println("2");
+		if (!getDefaultPathToDaemon().equals("")){
+			System.out.println("The path is set to default");
+			return;
+		}
+		System.out.println("Init Before for");
 		for (int i = 0; i < LOCATIONS.length - 1; i++) {
 			for (int j = 0; j < EXEC.length - 1; j++) {
 				if (isLocalFile(LOCATIONS[i] + EXEC[j])) {
@@ -66,19 +75,24 @@ public class Daemon {
 				}
 			}
 		}
+		System.out.println("init after for");
 
 		if (primary != null && isLocalFile(primary.getFile())) {
 			location = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, primary.getFile());
 		} else {
 			location = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, "http://127.0.0.1:51993");			
 		}
+		System.out.println("end of init");
+
 	}
 
 	private void runDaemon() throws IOException {
 		System.out.println("starting daemon");
-		if (isDaemonRunning()) {
+		
+		//if (isDaemonRunning()) {
 			process = Optional.of(Runtime.getRuntime().exec(new String[]{ location }));
-		}
+			
+		//}
 	}
 
 	private boolean isDaemonRunning() {
@@ -153,8 +167,20 @@ public class Daemon {
 		addPathAsDefault(location);
 	}
 	
+	@SneakyThrows
 	private void addPathAsDefault(String path){
-		
+		Preferences.get().put(DEFAULT_PATH_TO_DAEMON_KEY, path);
+	}
+	
+	@SneakyThrows
+	private String getDefaultPathToDaemon(){
+		if (Preferences.get().nodeExists(DEFAULT_PATH_TO_DAEMON_KEY)) {
+			Preferences.get().get(DEFAULT_PATH_TO_DAEMON_KEY, location);
+			System.out.println("Get path from config " + location);
+			return location;
+		} else {
+			return "";
+		}
 	}
 
 	public void stop() throws InterruptedException {
