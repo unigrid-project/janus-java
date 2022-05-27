@@ -54,6 +54,8 @@ public class Daemon {
 	
 	private URL primary = null;
 	
+	private DebugService debug = new DebugService();
+	
 	private static final String[] EXEC = new String[] { "unigridd", "unigridd.exe" };
 	
 	@PostConstruct
@@ -67,10 +69,12 @@ public class Daemon {
 			return;
 		}
 		System.out.println("Init Before for");
-		for (int i = 0; i < LOCATIONS.length - 1; i++) {
-			for (int j = 0; j < EXEC.length - 1; j++) {
+		for (int i = 0; i < LOCATIONS.length; i++) {
+			for (int j = 0; j < EXEC.length; j++) {
+				System.out.println(LOCATIONS[i] + EXEC[j]);
+				debug.log(LOCATIONS[i] + EXEC[j]);
 				if (isLocalFile(LOCATIONS[i] + EXEC[j])) {
-					System.out.println(LOCATIONS[i] + EXEC[j]);
+					debug.log(LOCATIONS[i] + EXEC[j]);
 					primary = new URL("file:// " + LOCATIONS[i] + EXEC[j]);
 					break;
 				}
@@ -91,7 +95,7 @@ public class Daemon {
 		System.out.println("starting daemon");
 		
 		//if (isDaemonRunning()) {
-			process = Optional.of(Runtime.getRuntime().exec(new String[]{ location }));
+		process = Optional.of(Runtime.getRuntime().exec(new String[]{ location }));
 			
 		//}
 	}
@@ -176,6 +180,7 @@ public class Daemon {
 	@SneakyThrows
 	private String getDefaultPathToDaemon(){
 		location = Preferences.get().get(DEFAULT_PATH_TO_DAEMON_KEY, location);
+		//location = "";
 		System.out.println("Get path from config " + location);
 		return location;
 	}
