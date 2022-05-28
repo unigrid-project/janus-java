@@ -16,6 +16,13 @@
 
 package org.unigrid.janus.model.service;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import javafx.scene.control.ListView;
 import javafx.collections.ObservableList;
@@ -43,4 +50,21 @@ public class DebugService {
 			items.add(msg);
 		}
 	}
+
+	public void print(String msg, String className) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("debug.log", true))) {
+            bw.write(getCurrentDate().concat(": ").concat(className).concat("- ").concat(msg));
+            System.out.println(msg);
+            bw.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getCurrentDate() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd.HH.mm");
+        Date date = new Date();
+        String dateS = dateFormat.format(date);
+        return dateS;
+    }
 }

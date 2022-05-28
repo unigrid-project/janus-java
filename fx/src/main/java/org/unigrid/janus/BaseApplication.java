@@ -21,6 +21,7 @@ import javafx.application.HostServices;
 import javafx.stage.Stage;
 import org.unigrid.janus.model.Preferences;
 
+
 abstract class BaseApplication {
 	public static void main(String[] args) {
 		/* Effectively changes the default values of these properties as used in JavaFX, we do this to speed up
@@ -30,6 +31,7 @@ abstract class BaseApplication {
 		Preferences.changePropertyDefault(String.class, "prism.order", "sw");
 
 		ApplicationLoader.launch(ApplicationLoader.class, args);
+
 	}
 
 	public abstract void start(Stage primaryStage, Application.Parameters parameters,
