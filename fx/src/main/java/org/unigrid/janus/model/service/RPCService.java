@@ -55,7 +55,7 @@ public class RPCService {
 
 	private User credentials;
 	@Inject private Daemon daemon;
-
+	@Inject private DebugService debug;
 	private static WebTarget target;
 
 	private String getRPCProperty(Configuration config, String key, String value, String dataDirConfig,
@@ -82,6 +82,7 @@ public class RPCService {
 
 	@PostConstruct
 	private void init() {
+		debug.print("RPC init called", RPCService.class.getSimpleName());
 		if (target != null) {
 			return;
 		}
@@ -103,10 +104,12 @@ public class RPCService {
 			
 		} catch (ConfigurationException | org.apache.commons.configuration2.ex.ConfigurationException ex) {
 			System.out.println("Bajs det gick åt helvete!!!!!!!!!!!!!!!!");
+			debug.print("Bajs det gick åt helvete!!!!!!!!!!!!!!!!", RPCService.class.getSimpleName());
 		}
 	}
 
 	public void pollForInfo(int interval) {
+		debug.print("pollForInfo", RPCService.class.getSimpleName());
 		pollingTimer = new Timer(true);
 		pollingTimer.scheduleAtFixedRate(new PollingTask(), 0, interval);
 	}
@@ -119,6 +122,7 @@ public class RPCService {
 	}
 
 	public <R, T> T call(R request, Class<T> clazz) {
+		debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
 		return target.request().post(Entity.json(request)).readEntity(clazz);
 	}
 

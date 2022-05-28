@@ -92,8 +92,7 @@ public class Daemon {
 	}
 
 	private void runDaemon() throws IOException {
-		System.out.println("starting daemon");
-		
+		debug.print("starting daemon", Daemon.class.getSimpleName());
 		//if (isDaemonRunning()) {
 		process = Optional.of(Runtime.getRuntime().exec(new String[]{ location }));
 			
@@ -141,6 +140,7 @@ public class Daemon {
 					+ "HTTP endpoint.", PROPERTY_LOCATION_KEY)
 				);
 			} else {
+				debug.print("findFile", Daemon.class.getSimpleName());
 				findFile();
 				start();
 			}
@@ -179,8 +179,8 @@ public class Daemon {
 	
 	@SneakyThrows
 	private String getDefaultPathToDaemon(){
-		location = Preferences.get().get(DEFAULT_PATH_TO_DAEMON_KEY, location);
-		//location = "";
+		//location = Preferences.get().get(DEFAULT_PATH_TO_DAEMON_KEY, location);
+		location = "";
 		System.out.println("Get path from config " + location);
 		return location;
 	}
