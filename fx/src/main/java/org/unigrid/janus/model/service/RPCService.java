@@ -54,12 +54,14 @@ public class RPCService {
 	private static Timer pollingTimer;
 
 	private User credentials;
-	@Inject private Daemon daemon;
-	@Inject private DebugService debug;
+	@Inject
+	private Daemon daemon;
+	@Inject
+	private DebugService debug;
 	private static WebTarget target;
 
 	private String getRPCProperty(Configuration config, String key, String value, String dataDirConfig,
-	                              boolean randomizeOnMissingProperty) throws ConfigurationException {
+			boolean randomizeOnMissingProperty) throws ConfigurationException {
 		if (StringUtils.isNotBlank(value)) {
 			return value;
 		}
@@ -71,9 +73,8 @@ public class RPCService {
 				propertyValue = RandomStringUtils.randomAlphabetic(40);
 			} else {
 				throw new ConfigurationException(String.format("Username for RPC endpoint not "
-					+ "found in either '%s' property or the configuration file '%s'.",
-					key, DataDirectory.getConfigFile().getAbsolutePath())
-				);
+						+ "found in either '%s' property or the configuration file '%s'.",
+						key, DataDirectory.getConfigFile().getAbsolutePath()));
 			}
 		}
 
@@ -84,28 +85,33 @@ public class RPCService {
 	private void init() {
 		debug.print("RPC init called", RPCService.class.getSimpleName());
 		if (target != null) {
+			debug.print("target is not null", RPCService.class.getSimpleName());
 			return;
 		}
 
-		try{
-		Configuration config = DataDirectory.getConfig(true);
-		credentials = new User();
+		try {
+			debug.print("before DataDirectory getConfig", RPCService.class.getSimpleName());
 
-		credentials.setName(getRPCProperty(config, PROPERTY_USERNAME_KEY, PROPERTY_USERNAME,
-		                    DataDirectory.DATADIR_CONFIG_RPCUSER_KEY, daemon.isLocalFile()));
+			Configuration config = DataDirectory.getConfig(true);
+			debug.print("called getConfig", RPCService.class.getSimpleName());
+			credentials = new User();
 
-		credentials.setPassword(getRPCProperty(config, PROPERTY_PASSWORD_KEY, PROPERTY_PASSWORD,
-		                        DataDirectory.DATADIR_CONFIG_RPCPASSWORD_KEY, daemon.isLocalFile()));
+			credentials.setName(getRPCProperty(config, PROPERTY_USERNAME_KEY, PROPERTY_USERNAME,
+					DataDirectory.DATADIR_CONFIG_RPCUSER_KEY, daemon.isLocalFile()));
 
-		target = ClientBuilder.newBuilder()
-			.register(new JsonConfiguration())
-			.register(HttpAuthenticationFeature.basic(credentials.getName(), credentials.getPassword()))
-			.build().target(daemon.getRPCAdress());
-			
+			credentials.setPassword(getRPCProperty(config, PROPERTY_PASSWORD_KEY, PROPERTY_PASSWORD,
+					DataDirectory.DATADIR_CONFIG_RPCPASSWORD_KEY, daemon.isLocalFile()));
+
+			target = ClientBuilder.newBuilder()
+					.register(new JsonConfiguration())
+					.register(HttpAuthenticationFeature.basic(credentials.getName(), 
+					credentials.getPassword()))
+					.build().target(daemon.getRPCAdress());
+
 		} catch (ConfigurationException | org.apache.commons.configuration2.ex.ConfigurationException ex) {
-			System.out.println("Bajs det gick åt helvete!!!!!!!!!!!!!!!!");
 			debug.print("Bajs det gick åt helvete!!!!!!!!!!!!!!!!", RPCService.class.getSimpleName());
 		}
+		debug.print("after DataDirectory getConfig", RPCService.class.getSimpleName());
 	}
 
 	public void pollForInfo(int interval) {
@@ -134,9 +140,9 @@ public class RPCService {
 			Jsonb jsonb = JsonbBuilder.create();
 			String sRequest = jsonb.toJson(request);
 			result = String.format("RPC call: %s\n"
-				                 + "Response: %s",
-				                   sRequest,
-				                   convertStreamToString(instream));
+					+ "Response: %s",
+					sRequest,
+					convertStreamToString(instream));
 		}
 		return result;
 	}
@@ -149,8 +155,8 @@ public class RPCService {
 	public <R> String alert(R request) {
 		String result = callToJson(request);
 		Alert a = new Alert(AlertType.INFORMATION,
-							result,
-							ButtonType.OK);
+				result,
+				ButtonType.OK);
 		a.showAndWait();
 		return result;
 	}

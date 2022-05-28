@@ -23,6 +23,7 @@ import jakarta.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
 import org.unigrid.janus.model.service.Daemon;
+import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.view.SplashScreen;
 
 @ApplicationScoped
@@ -30,6 +31,9 @@ public class JanusPreloader {
 
 	@Inject
 	private Daemon daemon;
+
+	@Inject
+    private RPCService rpc;
 
 	@Inject
 	private SplashScreen splashScreen;
