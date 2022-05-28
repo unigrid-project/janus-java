@@ -21,7 +21,6 @@ import com.sun.jna.platform.win32.Shell32Util;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Iterator;
-import lombok.SneakyThrows;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -29,9 +28,12 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.SystemUtils;
+import org.unigrid.janus.model.service.DebugService;
+
+import jakarta.inject.Inject;
 
 public class DataDirectory {
-
+	@Inject static private DebugService debug;
 	private static final String APPLICATION_NAME = "UNIGRID";
 	public static final String CONFIG_FILE = "unigrid.conf";
 	public static final String GRIDNODE_FILE = "masternode.conf";
@@ -47,6 +49,7 @@ public class DataDirectory {
 		if (SystemUtils.IS_OS_WINDOWS) {
 			head = Shell32Util.getKnownFolderPath(KnownFolders.FOLDERID_RoamingAppData);
 			tail = APPLICATION_NAME;
+			debug.print("OS is windows", DataDirectory.class.getSimpleName());
 		} else {
 			head = SystemUtils.getUserHome().getAbsolutePath();
 
@@ -62,25 +65,30 @@ public class DataDirectory {
 	}
 
 	public static Configuration getConfig(boolean blocking) throws ConfigurationException {
+		debug.print("Create config builder!!!", DataDirectory.class.getSimpleName());
 		final Parameters parameters = new Parameters();
 
-		System.out.println("Create config builder!!!");
 		FileBasedConfigurationBuilder<FileBasedConfiguration> builder
 			= new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
 				.configure(parameters.properties().setFile(getConfigFile()));
 		
 		//System.out.println("found folder = " + builder.getFileHandler().locate());
 		//System.out.println(builder.getFileHandler().getPath());
+		debug.print("Path: ".concat(builder.getFileHandler().getPath()), DataDirectory.class.getSimpleName());
+		try {
+			do {
+				debug.print("init loop DataDirectory!!!", DataDirectory.class.getSimpleName());
+				try{
+				Thread.sleep(250);
+				} 
+				catch (InterruptedException e) { 
+					debug.print("Somthing whent wrong with the thread", DataDirectory.class.getSimpleName());
+				}
+			} while (blocking && !builder.getFileHandler().locate());
+		} catch (Exception e) {
+			debug.print("dowhile: ".concat(e.getMessage()), DataDirectory.class.getSimpleName());
+		}
 		
-		do {
-			System.out.println("init loop DataDirectory!!!");
-			try{
-			Thread.sleep(250);
-			} 
-			catch (InterruptedException e) { 
-				System.out.println("Somthing whent wrong with the thread");
-			}
-		} while (blocking && !builder.getFileHandler().locate());
 		
 		return builder.getConfiguration();
 	}
