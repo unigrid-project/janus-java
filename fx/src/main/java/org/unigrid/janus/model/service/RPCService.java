@@ -37,6 +37,7 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import lombok.SneakyThrows;
 import javafx.scene.control.ButtonType;
 import java.io.InputStream;
 import java.io.BufferedReader;
@@ -128,7 +129,8 @@ public class RPCService {
 	}
 
 	public <R, T> T call(R request, Class<T> clazz) {
-		debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
+		//debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
+		//debug.print("RPC target ".concat(target.request().post(Entity.json(request)).readEntity(clazz).toString()), RPCService.class.getSimpleName());
 		return target.request().post(Entity.json(request)).readEntity(clazz);
 	}
 

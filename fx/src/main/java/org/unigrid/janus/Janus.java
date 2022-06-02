@@ -123,6 +123,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
                     ButtonType.OK);
             a.showAndWait();
         }
+
         debug.print("Daemon start done", Janus.class.getSimpleName());
     }
 
@@ -148,10 +149,11 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
                             ready.setValue(Boolean.FALSE);
                             Platform.runLater(new Runnable() {
                                 public void run() {
-                                    rpc.stopPolling();
+                                    debug.print("run poll", Janus.class.getSimpleName());
+                                    //rpc.stopPolling();
                                     wallet.setOffline(Boolean.FALSE);
-                                    rpc.pollForInfo(5 * 1000);
                                     startMainWindow();
+                                    rpc.pollForInfo(5 * 1000);
                                     janusModel.setAppState(JanusModel.AppState.LOADED);
                                     preloader.stopSpinner();
                                     preloader.hide();
@@ -192,32 +194,41 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
     private void startUp() {
         debug.print("startup called...", Janus.class.getSimpleName());
+        
         Task task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
                 debug.print("started while loop and calling unigridd RPC...", Janus.class.getSimpleName());
+                Thread.sleep(2000);
                 do {
-                    debug.print(String.valueOf(walletInfo.hasError()), Janus.class.getSimpleName());
                     try {
+                        debug.print("do loop", Janus.class.getSimpleName());
                         walletInfo = rpc.call(new GetWalletInfo.Request(),
-                                GetWalletInfo.class);
-                                boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
-                                GetBootstrappingInfo.class);
+                            GetWalletInfo.class);
+                        debug.print("after wallet info call ".concat(String.valueOf(walletInfo.hasError())), Janus.class.getSimpleName());
+                        boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
+                            GetBootstrappingInfo.class);
                         walletStatus = boostrapInfo.getResult().getWalletstatus();
-                        System.out.println("walletStatus: " + walletStatus);
+                        //System.out.println("walletStatus: " + walletStatus);
                         debug.print("walletStatus: " + walletStatus, Janus.class.getSimpleName());
                         progress = boostrapInfo.getResult().getProgress();
-                        System.out.println("progress: " + progress);
+                        //System.out.println("progress: " + progress);
                         status = boostrapInfo.getResult().getStatus();
-                        System.out.println("status: " + status);
+                        //System.out.println("status: " + status);
                         Thread.sleep(1000);
-                        System.out.println("walletInfo.hasError() " + walletInfo.hasError());
                     } catch (Exception e) {
-                        debug.print("walletVersion: " +
-                                walletInfo.getResult().getWalletversion(),
-                                Janus.class.getSimpleName());
+                        debug.print("RPC call error: " + e.getMessage().toString(), Janus.class.getSimpleName());
+                       // debug.print("RPC call error: " + e., Janus.class.getSimpleName());
+
+                        for (var x : e.getSuppressed())
+                            debug.print("RPC call error: " + x.getCause().getMessage(), Janus.class.getSimpleName());
+
+                        debug.print("RPC call error: " + e.getCause().getMessage(), Janus.class.getSimpleName());
+
+                        for (var x : e.getStackTrace())
+                            debug.print("RPC call error: " + x.toString(), Janus.class.getSimpleName());
                     }
-                    
+
                     if (status.equals("downloading")) {
                         Platform.runLater(
                                 () -> {

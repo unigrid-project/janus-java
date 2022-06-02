@@ -164,8 +164,12 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	}
 
 	public void loadAddresses() {
-		ListAddressBalances addr = rpc.call(new ListAddressBalances.Request(), ListAddressBalances.class);
-		addresses.setAddresses(addr);
+		//try {
+			ListAddressBalances addr = rpc.call(new ListAddressBalances.Request(), ListAddressBalances.class);
+			addresses.setAddresses(addr);
+		//} catch (Exception e) {
+		//	debug.print("loadAddresses " + e.getCause().getMessage().toString(), AddressController.class.getSimpleName());
+		//}
 	}
 
 	@FXML
