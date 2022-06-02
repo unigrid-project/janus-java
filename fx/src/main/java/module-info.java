@@ -29,12 +29,16 @@ module fx {
 	requires jakarta.cdi;
 	requires jakarta.inject;
 	requires jakarta.json.bind;
+	requires jakarta.json;
 	requires jakarta.ws.rs;
 	requires com.sun.jna.platform;
 	requires com.sun.jna;
 	requires jersey.client;
 	requires org.kordamp.ikonli.javafx;
+	requires org.eclipse.yasson;
+
 	requires jsch;
+	requires java.sql;
 	requires org.controlsfx.controls;
 
 	opens org.unigrid.janus to weld.core.impl;
@@ -42,8 +46,8 @@ module fx {
 	opens org.unigrid.janus.controller.view to javafx.fxml;
 	opens org.unigrid.janus.view to weld.core.impl;
 	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml;
-	opens org.unigrid.janus.model to weld.core.impl;
-	opens org.unigrid.janus.model.rpc.entity to weld.core.impl;
+	opens org.unigrid.janus.model to weld.core.impl, javafx.base;
+	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson;
 	opens org.unigrid.janus.model.service to weld.core.impl;
 
 	exports org.unigrid.janus;
@@ -55,4 +59,5 @@ module fx {
 	exports org.unigrid.janus.model.rpc to weld.core.impl;
 	exports org.unigrid.janus.view.component to weld.core.impl;
 	exports org.unigrid.janus.view.decorator to weld.core.impl;
+	exports org.unigrid.janus.model to org.eclipse.yasson;
 }

@@ -39,8 +39,8 @@ public class PollingTask extends TimerTask {
 
 	public void run() {
 		Platform.runLater(() -> {
-			//debug.log(rpc.callToJson(new Info.Request()));
-			wallet.setProcessingStatus();
+			debug.print("polling task", PollingTask.class.getSimpleName());
+			//wallet.setProcessingStatus();
 			//final Info info = rpc.call(new Info.Request(), Info.class);
 			try {
 				final GetWalletInfo walletInfo = rpc.call(new GetWalletInfo.Request(), GetWalletInfo.class);
@@ -56,10 +56,11 @@ public class PollingTask extends TimerTask {
 				wallet.setTransactionCount(walletInfo.getResult().getTxcount());
 				wallet.setStatus("done");
 			} catch (Exception e) {
+				//debug.print(e.getMessage(), PollingTask.class.getSimpleName());
+				debug.print(e.getMessage(), PollingTask.class.getSimpleName());	
 				wallet.setOffline(Boolean.TRUE);
 				rpc.stopPolling();
 			}
-
 		});
 	}
 }

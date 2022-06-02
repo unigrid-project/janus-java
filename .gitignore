@@ -9,3 +9,7 @@
 /target/
 /fx/target/
 /desktop/target/
+
+fx/debug.log
+fx/unigrid-cli.exe
+fx/unigridd.exe

@@ -33,7 +33,7 @@ import org.unigrid.janus.model.service.DebugService;
 import jakarta.inject.Inject;
 
 public class DataDirectory {
-	@Inject static private DebugService debug;
+
 	private static final String APPLICATION_NAME = "UNIGRID";
 	public static final String CONFIG_FILE = "unigrid.conf";
 	public static final String GRIDNODE_FILE = "masternode.conf";
@@ -49,7 +49,7 @@ public class DataDirectory {
 		if (SystemUtils.IS_OS_WINDOWS) {
 			head = Shell32Util.getKnownFolderPath(KnownFolders.FOLDERID_RoamingAppData);
 			tail = APPLICATION_NAME;
-			debug.print("OS is windows", DataDirectory.class.getSimpleName());
+			System.out.println("OS is windows");
 		} else {
 			head = SystemUtils.getUserHome().getAbsolutePath();
 
@@ -65,7 +65,7 @@ public class DataDirectory {
 	}
 
 	public static Configuration getConfig(boolean blocking) throws ConfigurationException {
-		debug.print("Create config builder!!!", DataDirectory.class.getSimpleName());
+		System.out.println("Create config builder!!!");
 		final Parameters parameters = new Parameters();
 
 		FileBasedConfigurationBuilder<FileBasedConfiguration> builder
@@ -74,19 +74,19 @@ public class DataDirectory {
 		
 		//System.out.println("found folder = " + builder.getFileHandler().locate());
 		//System.out.println(builder.getFileHandler().getPath());
-		debug.print("Path: ".concat(builder.getFileHandler().getPath()), DataDirectory.class.getSimpleName());
+		System.out.println("Path: ".concat(builder.getFileHandler().getPath()));
 		try {
 			do {
-				debug.print("init loop DataDirectory!!!", DataDirectory.class.getSimpleName());
+				System.out.println("init loop DataDirectory!!!");
 				try{
 				Thread.sleep(250);
 				} 
 				catch (InterruptedException e) { 
-					debug.print("Somthing whent wrong with the thread", DataDirectory.class.getSimpleName());
+					System.out.println("Somthing whent wrong with the thread");
 				}
 			} while (blocking && !builder.getFileHandler().locate());
 		} catch (Exception e) {
-			debug.print("dowhile: ".concat(e.getMessage()), DataDirectory.class.getSimpleName());
+			System.out.println("dowhile");
 		}
 		
 		

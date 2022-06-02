@@ -25,7 +25,5 @@ public class Address {
 	@Getter @Setter
 	private String address;
 	@Getter @Setter
-	private String account = "unnamed";
-	@Getter @Setter
-	private double amount = 0;
+	private double amount;
 }

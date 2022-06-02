@@ -12,11 +12,11 @@
 <?import javafx.stage.Stage?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<Stage title="Unigrid Janus Splash Screen" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.SplashScreenController">
+<Stage title="Unigrid Janus Splash Screen" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.SplashScreenController">
     <scene>
         <Scene>
             <root>
-            <AnchorPane id="AnchorPane" prefHeight="220.0" prefWidth="620.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="pane" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1">
+            <AnchorPane id="AnchorPane" prefHeight="220.0" prefWidth="620.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="pane" stylesheets="@main.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
                 <children>
                     <ImageView fitHeight="90.0" fitWidth="400.0" layoutX="110.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="40.0">
                         <image>
