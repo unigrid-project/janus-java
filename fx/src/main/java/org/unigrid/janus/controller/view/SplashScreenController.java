@@ -87,4 +87,8 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	public void hideProgBar() {
 		progBar.setVisible(false);
 	}
+
+	public void showSpinner() {
+		spinnerPreLoad.setVisible(true);
+	}
 }
