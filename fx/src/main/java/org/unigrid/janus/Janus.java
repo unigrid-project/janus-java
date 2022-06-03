@@ -247,6 +247,14 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
                                     window.getSplashScreenController().updateProgress((float) (f / 100));
                                 });
                     }
+                    if (status.equals("complete")) {
+                        Platform.runLater(
+                                () -> {
+                                    window.getSplashScreenController().hideProgBar();
+                                    window.getSplashScreenController().showSpinner();
+                                    window.getSplashScreenController().setText("Starting unigrid backend");
+                                });
+                    }
                 } while (walletInfo.hasError());
                 debug.print("startup completed should load main screen..." + walletStatus, Janus.class.getSimpleName());
                 window.getSplashScreenController().hideProgBar();
