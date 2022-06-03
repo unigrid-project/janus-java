@@ -23,6 +23,7 @@ import java.net.URL;
 import java.io.File;
 import java.util.ResourceBundle;
 import java.util.Optional;
+import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
@@ -42,6 +43,7 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
+import javafx.util.Duration;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
@@ -79,6 +81,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML private Label txtPassphraseTwo;
 	@FXML private Label txtPassWarningOne;
 	@FXML private Label txtPassWarningTwo;
+	@FXML private Label txtErrorMessage;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -173,6 +176,36 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private void onOpenGridnode(MouseEvent event) {
 		File gridnode = DataDirectory.getGridnodeFile();
 		window.getHostServices().showDocument(gridnode.getAbsolutePath());
+	}
+	
+	@FXML
+	private void onOpenBackendLogClick(MouseEvent event) {
+		File backendLog = DataDirectory.getBackendLog();
+		if(backendLog.exists()) {
+			window.getHostServices().showDocument(backendLog.getAbsolutePath());
+		}
+		else {
+			txtErrorMessage.setText("Can't find backend log file");
+		}
+	}
+	
+	@FXML
+	private void onOpenWalletLogClick(MouseEvent event) {
+		File walletLog = DataDirectory.getWalletLog();
+		if(walletLog.exists()) {
+			window.getHostServices().showDocument(walletLog.getAbsolutePath());
+		}
+		else {
+			txtErrorMessage.setText("Can't find wallet log file");
+		}
+	}
+	
+	private void setErrorMessage(String message) {
+		txtErrorMessage.setText(message);
+		FadeTransition fadeTransition = new FadeTransition(Duration.seconds(5), txtErrorMessage);
+		fadeTransition.setFromValue(1.0);
+		fadeTransition.setToValue(0.0);
+		fadeTransition.play();
 	}
 
 	@FXML

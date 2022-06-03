@@ -110,5 +110,12 @@ public class DataDirectory {
 	public static File getGridnodeFile() {
 		return Paths.get(get(), GRIDNODE_FILE).toFile();
 	}
-
+	
+	public static File getBackendLog() {
+		return Paths.get(get(), "debug.log").toFile();
+	}
+	
+	public static File getWalletLog() {
+		return Paths.get(get(), "wallet.log").toFile();
+	}
 }

@@ -195,9 +195,6 @@
 						<executions>
 							<execution>
 								<id>appimage</id>
-								<configuration>
-									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
-								</configuration>
 							</execution>
 							<execution>
 								<id>installer</id>
@@ -207,6 +204,7 @@
 									<linuxPackageName>janus</linuxPackageName>
 									<linuxAppCategory>Utilities</linuxAppCategory>
 									<linuxMenuGroup>Utilities</linuxMenuGroup>
+                                                                        <icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
 								</configuration>
 							</execution>
 						</executions>

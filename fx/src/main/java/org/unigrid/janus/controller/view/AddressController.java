@@ -27,6 +27,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableCell;
@@ -40,6 +41,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.AddressListModel;
@@ -101,6 +103,30 @@ public class AddressController implements Initializable, PropertyChangeListener 
 								window.browseURL("https://explorer"
 									+ ".unigrid.org/address/"
 									+ address.getAddress());
+							}
+						});
+						Button btn = new Button();
+						FontIcon fontIcon = new FontIcon("fas-clipboard");
+						fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+						btn.setGraphic(fontIcon);
+						btn.setOnAction((ActionEvent event) -> {
+							final Clipboard cb = Clipboard.getSystemClipboard();
+							final ClipboardContent content = new  ClipboardContent();
+							content.putString(address.getAddress());
+							cb.setContent(content);
+							if (SystemUtils.IS_OS_MAC_OSX) {
+								Notifications
+									.create()
+									.title("Address copied to clipboard")
+									.text(address.getAddress())
+									.position(Pos.TOP_RIGHT)
+									.showInformation();
+							} else {
+								Notifications
+									.create()
+									.title("Address copied to clipboard")
+									.text(address.getAddress())
+									.showInformation();
 							}
 						});
 						return new ReadOnlyObjectWrapper(link);
