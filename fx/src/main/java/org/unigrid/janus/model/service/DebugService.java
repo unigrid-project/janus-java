@@ -54,7 +54,7 @@ public class DebugService {
 	}
 
 	public void print(String msg, String className) {
-        String path = DataDirectory.get().concat("/janus.log");
+        String path = DataDirectory.get().concat("/wallet.log");
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(path, true))) {
             bw.write(getCurrentDate().concat(": ").concat(className).concat("- ").concat(msg));
             System.out.println(msg);
