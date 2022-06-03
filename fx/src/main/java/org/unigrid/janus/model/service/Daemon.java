@@ -49,10 +49,11 @@ public class Daemon {
 
 	private static final String[] LOCATIONS = new String[] {
 		System.getProperty("user.dir"), 
-		"/usr/bin/", 
+		"/usr/bin/",
 		"/opt/bin/",
 		"/opt/unigrid/bin/",
-		System.getProperty("user.dir") + "/runtime/bin/"
+		System.getProperty("user.dir") + "/runtime/bin/",
+		System.getProperty("APPDIR") + "/"
 	};
 
 	private URL primary = null;
@@ -66,7 +67,10 @@ public class Daemon {
 			System.out.println("The path is set to default");
 			return;
 		}
-		System.out.println("Init Before for");
+		//String loc = System.getProperty("APPDIR");
+		//String root = System.getProperty("ROOTDIR");
+		//debug.print("$APPDIR "+ loc, Daemon.class.getSimpleName());
+		//debug.print("$ROOTDIR "+ root, Daemon.class.getSimpleName());
 		for (int i = 0; i < LOCATIONS.length; i++) {
 			for (int j = 0; j < EXEC.length; j++) {
 				System.out.println(LOCATIONS[i] + EXEC[j]);

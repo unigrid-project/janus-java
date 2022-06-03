@@ -101,6 +101,10 @@
 						<configuration>
                             <appVersion>1.0.0</appVersion>
 							<appImage>target/dist/Unigrid</appImage>
+							<javaOptions>
+								<option>-DAPPDIR=$APPDIR</option>
+								<option>-DROOTDIR=$ROOTDIR</option>
+							</javaOptions>
 						</configuration>
 					</execution>
 				</executions>
