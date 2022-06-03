@@ -89,6 +89,7 @@
 								<option>java.base/java.lang=ALL-UNNAMED</option>
 								<option>--add-opens</option>
 								<option>java.base/java.lang=weld.core.impl</option>
+								<option>-DAPPDIR=$APPDIR</option>
 							</javaOptions>
 						</configuration>
 					</execution>
@@ -98,7 +99,7 @@
 							<goal>jpackage</goal>
 						</goals>
 						<configuration>
-                                                        <appVersion>1.0.0</appVersion>
+                            <appVersion>1.0.0</appVersion>
 							<appImage>target/dist/janus</appImage>
 						</configuration>
 					</execution>
@@ -195,18 +196,16 @@
 						<executions>
 							<execution>
 								<id>appimage</id>
-								<configuration>
-									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
-								</configuration>
 							</execution>
 							<execution>
 								<id>installer</id>
 								<configuration>
 									<type>DEB</type>
 									<linuxShortcut>true</linuxShortcut>
-									<linuxPackageName>janus</linuxPackageName>
-									<linuxAppCategory>Utilities</linuxAppCategory>
-									<linuxMenuGroup>Utilities</linuxMenuGroup>
+									<linuxPackageName>unigrid</linuxPackageName>
+									<linuxAppCategory>Network</linuxAppCategory>
+									<linuxMenuGroup>Network</linuxMenuGroup>
+									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
 								</configuration>
 							</execution>
 						</executions>
