@@ -24,7 +24,7 @@ To build a working package, you first need to create an app-image that can hold 
 ```
 mvn clean package # will build a jlink distribution and an app-image
 ```
-Next, you should copy the unigrid daemon executables for your operating system into `desktop/target/dist/janus/bin/`. This can
+Next, you should copy the unigrid daemon executables for your operating system into OSX:`desktop/target/dist/Unigrid.app/Contents/app` Linux:`desktop/target/dist/Unigrid/bin/`. This can
 be done by GitHub Actions as an intermediate step. However, doing it by hand also works just fine.
 
 Finally, we create the actual installer image with everything;
