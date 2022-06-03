@@ -15,7 +15,7 @@
 <?import org.unigrid.janus.view.component.PTableColumn?>
 <?import org.unigrid.janus.view.component.WindowBarButton?>
 
-<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="364.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.AddressController">
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="364.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.AddressController">
    <children>
       <VBox maxWidth="1.7976931348623157E308" prefHeight="364.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -44,7 +44,7 @@
                         <Tooltip text="Generate a new address" />
                      </tooltip>
                   </Button>
-                  <HBox fx:id="newAddressDisplay" alignment="CENTER" prefHeight="40.0" visible="false">
+                  <HBox fx:id="newAddressDisplay" alignment="CENTER" prefHeight="40.0">
                      <children>
                         <Text fx:id="addressDisplay" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0">
                            <font>
@@ -73,7 +73,7 @@
                               <Insets right="5.0" />
                            </padding>
                            <graphic>
-                              <WindowBarButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#onClearAddressClicked" prefHeight="20.0" prefWidth="20.0" style="-fx-shape: &quot;M160 400C160 408.8 152.8 416 144 416C135.2 416 128 408.8 128 400V192C128 183.2 135.2 176 144 176C152.8 176 160 183.2 160 192V400zM240 400C240 408.8 232.8 416 224 416C215.2 416 208 408.8 208 400V192C208 183.2 215.2 176 224 176C232.8 176 240 183.2 240 192V400zM320 400C320 408.8 312.8 416 304 416C295.2 416 288 408.8 288 400V192C288 183.2 295.2 176 304 176C312.8 176 320 183.2 320 192V400zM317.5 24.94L354.2 80H424C437.3 80 448 90.75 448 104C448 117.3 437.3 128 424 128H416V432C416 476.2 380.2 512 336 512H112C67.82 512 32 476.2 32 432V128H24C10.75 128 0 117.3 0 104C0 90.75 10.75 80 24 80H93.82L130.5 24.94C140.9 9.357 158.4 0 177.1 0H270.9C289.6 0 307.1 9.358 317.5 24.94H317.5zM151.5 80H296.5L277.5 51.56C276 49.34 273.5 48 270.9 48H177.1C174.5 48 171.1 49.34 170.5 51.56L151.5 80zM80 432C80 449.7 94.33 464 112 464H336C353.7 464 368 449.7 368 432V128H80V432z&quot;; -fx-background-size: 25px; -fx-background-color: white;" />
+                              <WindowBarButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#onClearAddressClicked" prefHeight="20.0" prefWidth="20.0" style="-fx-shape: &quot;M308.003,374.4V336c0-2.758-1.421-5.322-3.76-6.784l-60.24-37.656V24c0-13.255-10.745-24-24-24s-24,10.745-24,24v267.56l-60.24,37.656c-2.339,1.462-3.76,4.026-3.76,6.784v40c0.051,0.521,0.156,1.036,0.312,1.536L92.667,468.8c-1.767,4.049,0.083,8.765,4.132,10.532c1.011,0.441,2.101,0.668,3.204,0.668h240c4.418,0,8-3.581,8.001-7.999c0-1.058-0.209-2.105-0.617-3.081L308.003,374.4z M212.003,24c0-4.418,3.582-8,8-8s8,3.582,8,8v232h-16V24z M212.003,272h16v16h-16V272z M148.003,340.432L206.299,304h27.408l58.296,36.432V368h-144V340.432z M305.763,464l-14.176-42.528c-1.396-4.197-5.931-6.468-10.128-5.072c-4.197,1.396-6.468,5.931-5.072,10.128L288.907,464h-23.144l-14.176-42.528c-1.396-4.197-5.931-6.468-10.128-5.072c-4.197,1.396-6.468,5.931-5.072,10.128L248.907,464h-57.808l12.488-37.472c1.396-4.197-0.875-8.732-5.072-10.128c-4.197-1.396-8.732,0.875-10.128,5.072L174.243,464h-23.144l12.488-37.472c1.396-4.197-0.875-8.732-5.072-10.128c-4.197-1.396-8.732,0.875-10.128,5.072L134.243,464h-22.048l34.752-80h147.72l33.336,80H305.763z&quot;; -fx-background-size: 30px; -fx-background-color: white;" />
                            </graphic>
                         </Button>
                      </children>
