@@ -44,7 +44,7 @@
                         <Tooltip text="Generate a new address" />
                      </tooltip>
                   </Button>
-                  <HBox fx:id="newAddressDisplay" alignment="CENTER" prefHeight="40.0">
+                  <HBox fx:id="newAddressDisplay" alignment="CENTER" prefHeight="40.0" visible="false">
                      <children>
                         <Text fx:id="addressDisplay" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0">
                            <font>
