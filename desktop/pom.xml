@@ -101,10 +101,6 @@
 						<configuration>
                             <appVersion>1.0.0</appVersion>
 							<appImage>target/dist/Unigrid</appImage>
-							<javaOptions>
-								<option>-DAPPDIR=$APPDIR</option>
-								<option>-DROOTDIR=$ROOTDIR</option>
-							</javaOptions>
 						</configuration>
 					</execution>
 				</executions>
@@ -172,12 +168,22 @@
 								<id>appimage</id>
 								<configuration>
 									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.icns</icon>
+									<macPackageIdentifier>org.unigrid.janus</macPackageIdentifier>
+									<macPackageName>"Unigrid"</macPackageName>
+									<macPackageSigningPrefix>"UnigridJanus"</macPackageSigningPrefix>
+									<macSigningKeyUserName>"Developer ID Application: ***"</macSigningKeyUserName>
 								</configuration>
 							</execution>
 							<execution>
 								<id>installer</id>
 								<configuration>
 									<type>DMG</type>
+									<appImage>target/dist/Unigrid.app</appImage>
+									<macSign>true</macSign>
+									<macPackageIdentifier>org.unigrid.janus</macPackageIdentifier>
+									<macPackageName>"Unigrid"</macPackageName>
+									<macPackageSigningPrefix>"UnigridJanus"</macPackageSigningPrefix>
+									<macSigningKeyUserName>"Developer ID Installer:***"</macSigningKeyUserName>
 								</configuration>
 							</execution>
 						</executions>
