@@ -14,7 +14,7 @@
                   <PTableColumn fx:id="colTransAddress" editable="false" percentageWidth="0.41" prefWidth="170.0" sortable="false" text="Address" />
                   <PTableColumn fx:id="colTransAmount" editable="false" percentageWidth="0.15" prefWidth="75.0" sortable="false" text="Amount" />
                   <PTableColumn fx:id="colTransDate" editable="false" percentageWidth="0.24" prefWidth="130.0" sortType="DESCENDING" sortable="false" text="Date" />
-                  <PTableColumn fx:id="colTransType" editable="false" percentageWidth="0.17" prefWidth="85.0" sortable="false" text="Type" />
+                  <PTableColumn fx:id="colTransType" editable="false" percentageWidth="0.17" prefWidth="85.0" sortable="false" style="-fx-padding: 0px 0px 0px 10px; -fx-alignment: CENTER;" text="Type" />
                </columns>
             </TableView>
          </children>
