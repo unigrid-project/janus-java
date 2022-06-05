@@ -8,6 +8,7 @@
 
 /target/
 /fx/target/
+/fx/runtime/
 /desktop/target/
 
 fx/debug.log

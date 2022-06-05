@@ -158,6 +158,7 @@ public class TransactionList {
 			// transactions.add(result.oldSize, t);
 			this.addTransaction(result.getOldSize(), t);
 		}
+		this.processMultipart();
 		result.setNewSize(transactions.size());
 		debug.log(String.format("New size: %d", result.getNewSize()));
 		return result;
@@ -173,8 +174,55 @@ public class TransactionList {
 			this.addTransaction(0, t);
 			newCount++;
 		}
+		this.processMultipart();
 
 		this.pcs.firePropertyChange(this.TRANSACTION_LIST, oldCount, newCount);
+	}
+
+	public void processMultipart() {
+		for (Transaction t : this.transactions) {
+			if (t.getCategory().equals("multipart")) {
+				String address = "";
+				double sendAmount = 0;
+				double receiveAmount = 0;
+				double fee = 0;
+				for (Transaction trans : t.getParts()) {
+					if (trans.getCategory().equals("send")) {
+						sendAmount += trans.getAmount();
+						// fee is going to be the same for each send transactions
+						// and there is only one fee
+						fee = trans.getFee();
+					} else if (trans.getCategory().equals("receive")) {
+						receiveAmount += trans.getAmount();
+						address = trans.getAddress();
+					}
+				}
+				if (t.getParts().size() == 2) {
+					t.setAddress(address);
+					t.setCategory("fee");
+					t.setAmount(sendAmount + receiveAmount + fee);
+					t.setFee(fee);
+				} else {
+					double total = sendAmount + receiveAmount + fee;
+					if (total > 0) {
+						t.setAddress(address);
+						t.setCategory("receive");
+						t.setAmount(receiveAmount);
+						t.setFee(fee);
+					} else {
+						t.setCategory("send");
+						t.setAmount(total - fee);
+						t.setFee(fee);
+						for (Transaction trans : t.getParts()) {
+							if (trans.getCategory().equals("send") &&
+								!trans.getAddress().equals(address)) {
+								t.setAddress(trans.getAddress());
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Data
