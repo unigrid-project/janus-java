@@ -26,6 +26,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -48,7 +49,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 	@FXML
 	private GridPane pnlUnlock;
 	@FXML
-	private TextField passphraseInput;
+	private PasswordField passphraseInput;
 	@FXML
 	private Text errorTxt;
 	@FXML
