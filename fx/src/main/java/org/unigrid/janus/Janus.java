@@ -194,7 +194,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
     private void startUp() {
         debug.print("startup called...", Janus.class.getSimpleName());
-        
+
         Task task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
@@ -202,15 +202,12 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
                 Thread.sleep(2000);
                 do {
                     try {
-                        debug.print("do loop", Janus.class.getSimpleName());
                         walletInfo = rpc.call(new GetWalletInfo.Request(),
                             GetWalletInfo.class);
-                        debug.print("after wallet info call ".concat(String.valueOf(walletInfo.hasError())), Janus.class.getSimpleName());
                         boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
                             GetBootstrappingInfo.class);
                         walletStatus = boostrapInfo.getResult().getWalletstatus();
                         //System.out.println("walletStatus: " + walletStatus);
-                        debug.print("walletStatus: " + walletStatus, Janus.class.getSimpleName());
                         progress = boostrapInfo.getResult().getProgress();
                         //System.out.println("progress: " + progress);
                         status = boostrapInfo.getResult().getStatus();

@@ -39,7 +39,6 @@ public class PollingTask extends TimerTask {
 
 	public void run() {
 		Platform.runLater(() -> {
-			debug.print("polling task", PollingTask.class.getSimpleName());
 			//wallet.setProcessingStatus();
 			//final Info info = rpc.call(new Info.Request(), Info.class);
 			try {
@@ -56,8 +55,7 @@ public class PollingTask extends TimerTask {
 				wallet.setTransactionCount(walletInfo.getResult().getTxcount());
 				wallet.setStatus("done");
 			} catch (Exception e) {
-				//debug.print(e.getMessage(), PollingTask.class.getSimpleName());
-				debug.print(e.getMessage(), PollingTask.class.getSimpleName());	
+				debug.print("Daemon offline: ".concat(e.getMessage()), PollingTask.class.getSimpleName());	
 				wallet.setOffline(Boolean.TRUE);
 				rpc.stopPolling();
 			}
