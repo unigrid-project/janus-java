@@ -27,6 +27,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableCell;
@@ -40,6 +41,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+
+import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.AddressListModel;
@@ -80,34 +83,60 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		wallet.addPropertyChangeListener(this);
 		addresses.addPropertyChangeListener(this);
 		setupAddressList();
-		addButtonToTable();
+		// addButtonToTable();
 	}
 
 	private void setupAddressList() {
 		try {
 			colAddress.setCellValueFactory(
-				new Callback<TableColumn.CellDataFeatures<Address, Hyperlink>,
-						ObservableValue<Hyperlink>>() {
-					public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address,
-						Hyperlink> t) {
-						Address address = t.getValue();
-						String text = address.getAddress();
+					new Callback<TableColumn.CellDataFeatures<Address, Hyperlink>, ObservableValue<Hyperlink>>() {
+						public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address, Hyperlink> t) {
+							Address address = t.getValue();
+							String text = address.getAddress();
 
-						Hyperlink link = new Hyperlink();
-						link.setText(text);
-						link.setOnAction(new EventHandler<ActionEvent>() {
-							@Override
-							public void handle(ActionEvent e) {
-								window.browseURL("https://explorer"
-									+ ".unigrid.org/address/"
-									+ address.getAddress());
-							}
-						});
-						return new ReadOnlyObjectWrapper(link);
-					}
-				});
+							Hyperlink link = new Hyperlink();
+							link.setText(text);
+							link.setOnAction(new EventHandler<ActionEvent>() {
+								@Override
+								public void handle(ActionEvent e) {
+									if (e.getTarget().equals(link)) {
+										window.browseURL("https://explorer"
+												+ ".unigrid.org/address/"
+												+ address.getAddress());
+									}
+								}
+							});
+							Button btn = new Button();
+							FontIcon fontIcon = new FontIcon("fas-clipboard");
+							fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+							btn.setGraphic(fontIcon);
+							btn.setOnAction((ActionEvent event) -> {
+								final Clipboard cb = Clipboard.getSystemClipboard();
+								final ClipboardContent content = new ClipboardContent();
+								content.putString(address.getAddress());
+								cb.setContent(content);
+								if (SystemUtils.IS_OS_MAC_OSX) {
+									Notifications
+											.create()
+											.title("Address copied to clipboard")
+											.text(address.getAddress())
+											.position(Pos.TOP_RIGHT)
+											.showInformation();
+								} else {
+									Notifications
+											.create()
+											.title("Address copied to clipboard")
+											.text(address.getAddress())
+											.showInformation();
+								}
+							});
+							link.setGraphic(btn);
+							link.setAlignment(Pos.CENTER_RIGHT);
+							return new ReadOnlyObjectWrapper(link);
+						}
+					});
 			colAddressBalance.setCellValueFactory(
-				new PropertyValueFactory<Address, String>("amount"));
+					new PropertyValueFactory<Address, String>("amount"));
 
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup address table) %s", e.getMessage()));
@@ -129,7 +158,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 					btn.setOnAction((ActionEvent event) -> {
 						Address data = getTableView().getItems().get(getIndex());
 						copyToClipboard(data.getAddress().toString());
-						//debug.log("selectedData: " + data.getAddress().toString());
+						// debug.log("selectedData: " + data.getAddress().toString());
 					});
 				}
 
@@ -152,7 +181,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(addresses.ADDRESS_LIST)) {
-			//debug.log("ADDRESS_LIST change");
+			// debug.log("ADDRESS_LIST change");
 			tblAddresses.setItems(addresses.getAddresses());
 		}
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
@@ -164,17 +193,18 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	}
 
 	public void loadAddresses() {
-		//try {
-			ListAddressBalances addr = rpc.call(new ListAddressBalances.Request(), ListAddressBalances.class);
-			addresses.setAddresses(addr);
-		//} catch (Exception e) {
-		//	debug.print("loadAddresses " + e.getCause().getMessage().toString(), AddressController.class.getSimpleName());
-		//}
+		// try {
+		ListAddressBalances addr = rpc.call(new ListAddressBalances.Request(), ListAddressBalances.class);
+		addresses.setAddresses(addr);
+		// } catch (Exception e) {
+		// debug.print("loadAddresses " + e.getCause().getMessage().toString(),
+		// AddressController.class.getSimpleName());
+		// }
 	}
 
 	@FXML
 	private void onLoadPressed(MouseEvent e) {
-		//debug.log("Calling address list refresh");
+		// debug.log("Calling address list refresh");
 		loadAddresses();
 	}
 
@@ -201,9 +231,9 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		content.putString(address);
 		clipboard.setContent(content);
 		Notifications
-			.create()
-			.title("Address copied to clipboard")
-			.text(address)
-			.showInformation();
+				.create()
+				.title("Address copied to clipboard")
+				.text(address)
+				.showInformation();
 	}
 }
