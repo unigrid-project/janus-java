@@ -182,36 +182,6 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		File gridnode = DataDirectory.getGridnodeFile();
 		window.getHostServices().showDocument(gridnode.getAbsolutePath());
 	}
-	
-	@FXML
-	private void onOpenBackendDebugLogClick(MouseEvent event) {
-		File backendLog = DataDirectory.getBackendLog();
-		if(backendLog.exists()) {
-			window.getHostServices().showDocument(backendLog.getAbsolutePath());
-		}
-		else {
-			setErrorMessage("Can't find backend log file");
-		}
-	}
-	
-	@FXML
-	private void onWalletDebugLogClick(MouseEvent event) {
-		File walletLog = DataDirectory.getWalletLog();
-		if(walletLog.exists()) {
-			window.getHostServices().showDocument(walletLog.getAbsolutePath());
-		}
-		else {
-			setErrorMessage("Can't find wallet log file");
-		}
-	}
-	
-	private void setErrorMessage(String message) {
-		txtErrorMessage.setText(message);
-		FadeTransition fadeTransition = new FadeTransition(Duration.seconds(5), txtErrorMessage);
-		fadeTransition.setFromValue(1.0);
-		fadeTransition.setToValue(0.0);
-		fadeTransition.play();
-	}
 
 	@FXML
 	private void onOpenUnigrid(MouseEvent event) {

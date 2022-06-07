@@ -15,11 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<<<<<<< HEAD
-<AnchorPane prefHeight="300.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.SettingsController">
-=======
 <AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.SettingsController">
->>>>>>> 4f28912e3fa806880c46863a180c883adf522c54
    <children>
       <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
@@ -93,44 +89,11 @@
                         </Button>
                         <AnchorPane>
                            <children>
-<<<<<<< HEAD
-                              <Label text="Debug file" textFill="#ee7722">
-=======
                               <Label text="Blockchain data" textFill="#ee7722">
->>>>>>> 4f28912e3fa806880c46863a180c883adf522c54
                                  <font>
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-<<<<<<< HEAD
-                              <Label layoutY="27.0" text="Open the backend and/or wallet debug file." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                                 <opaqueInsets>
-                                    <Insets bottom="10.0" />
-                                 </opaqueInsets>
-                              </Label>
-                              <HBox layoutY="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                                 <children>
-                                    <Button mnemonicParsing="false" onMouseClicked="#onOpenBackendDebugLogClick" text="Backend">
-                                       <HBox.margin>
-                                          <Insets right="10.0" />
-                                       </HBox.margin>
-                                    </Button>
-                                    <Button mnemonicParsing="false" onMouseClicked="#onWalletDebugLogClick" text="Wallet">
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin>
-                                    </Button>
-                                 </children>
-                              </HBox>
-                              <Label fx:id="txtErrorMessage" layoutY="83.0" textFill="RED" />
-                           </children>
-                           <opaqueInsets>
-                              <Insets />
-                           </opaqueInsets>
-                           <padding>
-                              <Insets bottom="15.0" />
-                           </padding>
-=======
                               <Label layoutY="27.0" text="This will open the directory of your locally stored blockchain where your wallet.dat, logs, and configuration files are stored." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                                  <padding>
                                     <Insets bottom="10.0" />
@@ -155,7 +118,6 @@
                            <VBox.margin>
                               <Insets top="10.0" />
                            </VBox.margin>
->>>>>>> 4f28912e3fa806880c46863a180c883adf522c54
                         </AnchorPane>
                      </children>
                      <padding>
