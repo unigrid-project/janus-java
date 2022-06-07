@@ -29,6 +29,7 @@ public class Transaction {
 	private double fee;
 	private long time;
 	private long timereceived;
+	private int confirmations;
 	private String txid;
 	private boolean generated;
 	private String generatedfrom;

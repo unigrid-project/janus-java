@@ -69,8 +69,8 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	public void updateProgress(float prog) {
-		System.out.println("address: " + this);
-		System.out.println("progress: " + prog);
+		//System.out.println("address: " + this);
+		//System.out.println("progress: " + prog);
 		progBar.setProgress(prog);
 	}
 

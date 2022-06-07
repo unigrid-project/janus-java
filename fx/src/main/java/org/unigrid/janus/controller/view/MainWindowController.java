@@ -315,11 +315,13 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@FXML
 	private void onUnlockPressed(MouseEvent event) {
-		if (!wallet.getLocked()) {
+		debug.print("Locking wallet pressed", MainWindowController.class.getSimpleName());
+		if (wallet.getLocked()) {
 			return;
 		}
 		wallet.setLocked(Boolean.TRUE);
 		final LockWallet call = rpc.call(new LockWallet.Request(), LockWallet.class);
+		debug.print("Locking wallet", MainWindowController.class.getSimpleName());
 	}
 
 	@FXML

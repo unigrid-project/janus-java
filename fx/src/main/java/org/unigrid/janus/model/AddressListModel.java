@@ -53,7 +53,7 @@ public class AddressListModel {
 		addresses.clear();
 		int newCount = 0;
 		for (Address g : list.getResult()) {
-			debug.log(String.format("address: %s", g.getAddress()));
+			//debug.log(String.format("address: %s", g.getAddress()));
 			addresses.add(g);
 			newCount++;
 		}

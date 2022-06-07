@@ -88,52 +88,52 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	private void setupAddressList() {
 		try {
 			colAddress.setCellValueFactory(
-				new Callback<TableColumn.CellDataFeatures<Address, Hyperlink>,
-						ObservableValue<Hyperlink>>() {
-					public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address,
-						Hyperlink> t) {
-						Address address = t.getValue();
-						String text = address.getAddress();
+					new Callback<TableColumn.CellDataFeatures<Address, Hyperlink>, ObservableValue<Hyperlink>>() {
+						public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address, Hyperlink> t) {
+							Address address = t.getValue();
+							String text = address.getAddress();
 
-						Hyperlink link = new Hyperlink();
-						link.setText(text);
-						link.setOnAction(new EventHandler<ActionEvent>() {
-							@Override
-							public void handle(ActionEvent e) {
-								window.browseURL("https://explorer"
-									+ ".unigrid.org/address/"
-									+ address.getAddress());
-							}
-						});
-						Button btn = new Button();
-						FontIcon fontIcon = new FontIcon("fas-clipboard");
-						fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-						btn.setGraphic(fontIcon);
-						btn.setOnAction((ActionEvent event) -> {
-							final Clipboard cb = Clipboard.getSystemClipboard();
-							final ClipboardContent content = new  ClipboardContent();
-							content.putString(address.getAddress());
-							cb.setContent(content);
-							if (SystemUtils.IS_OS_MAC_OSX) {
-								Notifications
-									.create()
-									.title("Address copied to clipboard")
-									.text(address.getAddress())
-									.position(Pos.TOP_RIGHT)
-									.showInformation();
-							} else {
-								Notifications
-									.create()
-									.title("Address copied to clipboard")
-									.text(address.getAddress())
-									.showInformation();
-							}
-						});
-						link.setGraphic(btn);
-						link.setAlignment(Pos.CENTER_RIGHT);
-						return new ReadOnlyObjectWrapper(link);
-					}
-				});
+							Hyperlink link = new Hyperlink();
+							link.setText(text);
+							link.setOnAction(new EventHandler<ActionEvent>() {
+								@Override
+								public void handle(ActionEvent e) {
+									if (e.getTarget().equals(link)) {
+										window.browseURL("https://explorer"
+												+ ".unigrid.org/address/"
+												+ address.getAddress());
+									}
+								}
+							});
+							Button btn = new Button();
+							FontIcon fontIcon = new FontIcon("fas-clipboard");
+							fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+							btn.setGraphic(fontIcon);
+							btn.setOnAction((ActionEvent event) -> {
+								final Clipboard cb = Clipboard.getSystemClipboard();
+								final ClipboardContent content = new ClipboardContent();
+								content.putString(address.getAddress());
+								cb.setContent(content);
+								if (SystemUtils.IS_OS_MAC_OSX) {
+									Notifications
+											.create()
+											.title("Address copied to clipboard")
+											.text(address.getAddress())
+											.position(Pos.TOP_RIGHT)
+											.showInformation();
+								} else {
+									Notifications
+											.create()
+											.title("Address copied to clipboard")
+											.text(address.getAddress())
+											.showInformation();
+								}
+							});
+							link.setGraphic(btn);
+							link.setAlignment(Pos.CENTER_RIGHT);
+							return new ReadOnlyObjectWrapper(link);
+						}
+					});
 			colAddressBalance.setCellValueFactory(
 					new PropertyValueFactory<Address, String>("amount"));
 
