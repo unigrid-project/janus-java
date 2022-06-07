@@ -20,8 +20,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
@@ -44,7 +46,7 @@ public class Wallet {
 	public static final String IS_OFFLINE = "offline";
 	public static final String STATUS_PROPERTY = "walletstatus";
 	public static final String TRANSACTION_COUNT = "transactioncount";
-	private static double balance;
+	private static BigDecimal balance = new BigDecimal(0);
 	private static double totalbalance;
 	private static double moneysupply;
 	private static double blacklisted;
@@ -68,6 +70,23 @@ public class Wallet {
 	@Inject
 	private static DebugService debug = new DebugService();
 	private static PropertyChangeSupport pcs;
+	
+	@AllArgsConstructor
+	public static enum LockState {
+		UNLOCKED("unlocked"),
+		LOCKED("locked"),
+		UNLOCKED_FOR_STAKING("unlocked-for-staking");
+		
+		@Getter private String currentState;
+
+		public static LockState from(String s) {
+			return switch(s) {
+				case "locked" -> LockState.LOCKED;
+				case "unlocked" -> LockState.UNLOCKED;
+				default -> LockState.UNLOCKED_FOR_STAKING;
+			};
+		}
+	}
 
 	public Wallet() {
 		if (this.pcs != null) {
@@ -84,12 +103,12 @@ public class Wallet {
 		this.pcs.removePropertyChangeListener(listener);
 	}
 
-	public double getBalance() {
+	public BigDecimal getBalance() {
 		return this.balance;
 	}
 
-	public void setBalance(double newValue) {
-		double oldValue = this.balance;
+	public void setBalance(BigDecimal newValue) {
+		BigDecimal oldValue = this.balance;
 		this.balance = newValue;
 		this.pcs.firePropertyChange(this.BALANCE_PROPERTY, oldValue, newValue);
 	}
@@ -257,33 +276,9 @@ public class Wallet {
 		//debug.log(unlock);
 
 	}
-
-	public void setWalletState(GetWalletInfo walletInfo) {
-		long timestamp = walletInfo.getResult().getUnlockUntil();
-		// only 4999 == an unencrypted wallet
-		this.setEncrypted(timestamp != 4999);
-		//debug.log(String.format("ENCRYPTED: %s", getEncrypted()));
-		long time = timestamp;
-		Date date = new Date(time);
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.get(Calendar.YEAR);
-		int yearFromDaemon = calendar.get(Calendar.YEAR);
-		//debug.log(String.format("Year from daemon: %s", (int) calendar.get(Calendar.YEAR)));
-		Date date2 = new Date(stakingStartTime);
-		calendar.setTime(date2);
-		calendar.get(Calendar.YEAR);
-		int yeahFromGui = calendar.get(Calendar.YEAR);
-		//debug.log(String.format("Year from GUI: %s", (int) calendar.get(Calendar.YEAR)));
-
-		if (yearFromDaemon >= yeahFromGui) {
-			this.setLocked(true);
-			//debug.log(String.format("Wallet Unlocked for staking only"));
-		} else if (timestamp > 0) {
-			this.setLocked(false);
-		} else if (timestamp == 0) {
-			this.setLocked(true);
-		}
+	
+	public void setWalletState(LockState state) {
+		setLocked(state == LockState.LOCKED);
 	}
 
 	public Boolean getProcessingStatus() {

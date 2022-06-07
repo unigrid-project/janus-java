@@ -24,6 +24,7 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetConnectionCount;
+import org.unigrid.janus.model.rpc.entity.GetUnlockState;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 
 public class PollingTask extends TimerTask {
@@ -47,10 +48,12 @@ public class PollingTask extends TimerTask {
 				final GetConnectionCount connCount = rpc.call(new GetConnectionCount.Request(),
 					GetConnectionCount.class);
 				final StakingStatus staking = rpc.call(new StakingStatus.Request(), StakingStatus.class);
+				final GetUnlockState unlockState = rpc.call(new GetUnlockState.Request(), GetUnlockState.class);
 				wallet.setBalance(walletInfo.getResult().getTotalbalance());
 				wallet.setBlocks(Integer.parseInt(blockCount.getResult().toString()));
 				wallet.setConnections(Integer.parseInt(connCount.getResult().toString()));
-				wallet.setWalletState(walletInfo);
+				//wallet.setWalletState(Wallet.LockState(unlockState.getResult().getState());
+				wallet.setWalletState(Wallet.LockState.from(unlockState.getResult().getState()));
 				wallet.setStakingStatus(staking);
 				wallet.setTransactionCount(walletInfo.getResult().getTxcount());
 				wallet.setStatus("done");
