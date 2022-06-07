@@ -129,6 +129,8 @@ public class AddressController implements Initializable, PropertyChangeListener 
 									.showInformation();
 							}
 						});
+						link.setGraphic(btn);
+						link.setAlignment(Pos.CENTER_RIGHT);
 						return new ReadOnlyObjectWrapper(link);
 					}
 				});

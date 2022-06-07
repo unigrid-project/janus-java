@@ -179,24 +179,24 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	}
 	
 	@FXML
-	private void onOpenBackendLogClick(MouseEvent event) {
+	private void onOpenBackendDebugLogClick(MouseEvent event) {
 		File backendLog = DataDirectory.getBackendLog();
 		if(backendLog.exists()) {
 			window.getHostServices().showDocument(backendLog.getAbsolutePath());
 		}
 		else {
-			txtErrorMessage.setText("Can't find backend log file");
+			setErrorMessage("Can't find backend log file");
 		}
 	}
 	
 	@FXML
-	private void onOpenWalletLogClick(MouseEvent event) {
+	private void onWalletDebugLogClick(MouseEvent event) {
 		File walletLog = DataDirectory.getWalletLog();
 		if(walletLog.exists()) {
 			window.getHostServices().showDocument(walletLog.getAbsolutePath());
 		}
 		else {
-			txtErrorMessage.setText("Can't find wallet log file");
+			setErrorMessage("Can't find wallet log file");
 		}
 	}
 	

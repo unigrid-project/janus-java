@@ -48,7 +48,7 @@ public class Daemon {
 	private Optional<Process> process = Optional.empty();
 
 	private static final String[] LOCATIONS = new String[] {
-		System.getProperty("user.dir"), 
+		System.getProperty("user.dir") + "/", 
 		"/usr/bin/", 
 		"/opt/bin/",
 		"/opt/unigrid/bin/",

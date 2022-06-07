@@ -173,6 +173,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
             debug.setListView((ListView) window.lookup("lstDebug"));
 
         } catch (Exception e) {
+		System.out.print(e.getMessage());
+		System.out.print(e.getCause().toString());
             Alert a = new Alert(AlertType.ERROR,
                     e.getMessage(),
                     ButtonType.OK);
