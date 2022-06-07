@@ -86,6 +86,7 @@ public class TransactionList {
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (TransactionList isDuplicate) %s", e.getMessage()));
 		}
+		debug.print("is duplicate transaction index: " + result, TransactionList.class.getSimpleName());
 		return result;
 	}
 
@@ -114,7 +115,7 @@ public class TransactionList {
 		boolean result = false;
 		try {
 			boolean beginning = (index == 0);
-			int idx = isDuplicate(trans, beginning);
+			int idx = -1; //isDuplicate(trans, beginning);
 			if (idx != -1) {
 				// TODO: check for multipart and add, or create multipart if needed.
 				Transaction t = transactions.get(idx);
