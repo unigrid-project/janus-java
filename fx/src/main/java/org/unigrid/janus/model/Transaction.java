@@ -26,6 +26,7 @@ public class Transaction {
 	private String address;
 	private String category;
 	private double amount;
+	private double fee;
 	private long time;
 	private long timereceived;
 	private String txid;

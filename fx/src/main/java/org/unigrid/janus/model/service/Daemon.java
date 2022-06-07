@@ -48,11 +48,17 @@ public class Daemon {
 	private Optional<Process> process = Optional.empty();
 
 	private static final String[] LOCATIONS = new String[] {
+<<<<<<< HEAD
 		System.getProperty("user.dir") + "/", 
 		"/usr/bin/", 
+=======
+		System.getProperty("user.dir"), 
+		"/usr/bin/",
+>>>>>>> 4f28912e3fa806880c46863a180c883adf522c54
 		"/opt/bin/",
 		"/opt/unigrid/bin/",
-		System.getProperty("user.dir") + "/runtime/bin/"
+		System.getProperty("user.dir") + "/runtime/bin/",
+		System.getProperty("APPDIR") + "/"
 	};
 
 	private URL primary = null;
@@ -66,7 +72,10 @@ public class Daemon {
 			System.out.println("The path is set to default");
 			return;
 		}
-		System.out.println("Init Before for");
+		//String loc = System.getProperty("APPDIR");
+		//String root = System.getProperty("ROOTDIR");
+		//debug.print("$APPDIR "+ loc, Daemon.class.getSimpleName());
+		//debug.print("$ROOTDIR "+ root, Daemon.class.getSimpleName());
 		for (int i = 0; i < LOCATIONS.length; i++) {
 			for (int j = 0; j < EXEC.length; j++) {
 				System.out.println(LOCATIONS[i] + EXEC[j]);

@@ -17,6 +17,8 @@
 package org.unigrid.janus.controller.view;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -36,6 +38,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Border;
@@ -45,6 +48,7 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
 import javafx.util.Duration;
 import org.unigrid.janus.model.DataDirectory;
+import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
@@ -66,6 +70,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private static final int TAB_SETTINGS_PASSPHRASE = 3;
 	private static final int TAB_SETTINGS_EXPORT = 4;
 	private static final int TAB_SETTINGS_DEBUG = 5;
+	private static JanusModel janusModel = new JanusModel();
 
 	// settings navigation
 	@FXML private VBox pnlSetGeneral;
@@ -75,8 +80,8 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML private VBox pnlSetDebug;
 	// passphrase
 	@FXML private Button btnUpdatePassphrase;
-	@FXML private TextArea taPassphrase;
-	@FXML private TextArea taRepeatPassphrase;
+	@FXML private PasswordField taPassphrase;
+	@FXML private PasswordField taRepeatPassphrase;
 	@FXML private Label txtPassphraseOne;
 	@FXML private Label txtPassphraseTwo;
 	@FXML private Label txtPassWarningOne;
@@ -209,6 +214,12 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	}
 
 	@FXML
+	private void onOpenUnigrid(MouseEvent event) {
+		String gridnode = DataDirectory.get();
+		window.getHostServices().showDocument(gridnode);
+	}
+
+	@FXML
 	private void onLock(MouseEvent event) {
 		try {
 			Dialog<ButtonType> dialog = new Dialog<ButtonType>();
@@ -255,6 +266,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 							BorderStrokeStyle.SOLID,
 							new CornerRadii(3),
 							new BorderWidths(1))));
+					janusModel.setAppState(JanusModel.AppState.RESTARTING);
 					//wallet.setLocked(true);
 				}
 			}
@@ -265,7 +277,6 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	@FXML
 	private void onRepeatPassphraseChange(KeyEvent event) {
-		// debug.log("passphrase change event fired!");
 		try {
 			if (wallet.getEncrypted() && taRepeatPassphrase.getText() != "") {
 				btnUpdatePassphrase.setDisable(false);

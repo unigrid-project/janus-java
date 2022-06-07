@@ -30,7 +30,6 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
@@ -46,6 +45,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TextFormatter.Change;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
@@ -149,17 +149,9 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
 					public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
 						Transaction trans = t.getValue();
-						String text = trans.getCategory();
-						if (trans.getCategory().equals("multipart")) {
-							text = "More details";
-						} else if (trans.isGenerated()) {
-							text = String.format("%s:%s",
-								trans.getCategory(),
-								trans.getGeneratedfrom());
-						}
-						Hyperlink link = new Hyperlink();
-						link.setText(text);
-						link.setOnAction(new EventHandler<ActionEvent>() {
+						Button btn = new Button();
+						btn.setTooltip(new Tooltip(trans.getCategory()));
+						btn.setOnAction(new EventHandler<ActionEvent>() {
 							@Override
 							public void handle(ActionEvent e) {
 								window.browseURL("https://explorer"
@@ -167,7 +159,27 @@ public class WalletController implements Initializable, PropertyChangeListener {
 												+ trans.getTxid());
 							}
 						});
-						return new ReadOnlyObjectWrapper(link);
+						FontIcon fontIcon = new FontIcon("fas-wallet");
+						if (trans.isGenerated()) {
+							if (trans.getGeneratedfrom().equals("stake")) {
+								fontIcon = new FontIcon("fas-coins");
+								fontIcon.setIconColor(Color.ORANGE);
+							} else {
+								fontIcon = new FontIcon("fas-cubes");
+								fontIcon.setIconColor(Paint.valueOf("#68C5FF"));
+							}
+							btn.setTooltip(new Tooltip(trans.getGeneratedfrom()));
+						} else if (trans.getCategory().equals("send") ||
+								trans.getCategory().equals("fee")) {
+							fontIcon = new FontIcon("fas-arrow-right");
+							fontIcon.setIconColor(Paint.valueOf("#FF0000"));
+						} else if (trans.getCategory().equals("receive")) {
+							fontIcon = new FontIcon("fas-arrow-left");
+							fontIcon.setIconColor(Paint.valueOf("#00FF00"));
+						}
+						btn.setGraphic(fontIcon);
+
+						return new ReadOnlyObjectWrapper(btn);
 					}
 				});
 			colWalletTransAddress.setCellValueFactory(
@@ -216,7 +228,17 @@ public class WalletController implements Initializable, PropertyChangeListener {
 					}
 				});
 			colWalletTransAmount.setCellValueFactory(
-				new PropertyValueFactory<Transaction, Double>("amount"));
+				new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
+					public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
+						Transaction trans = t.getValue();
+						double amount = trans.getAmount();
+						if (trans.getCategory().equals("send")) {
+							amount += trans.getFee();
+						}
+						return new ReadOnlyStringWrapper(String.format("%.8f", amount));
+					}
+				}
+			);
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
 		}

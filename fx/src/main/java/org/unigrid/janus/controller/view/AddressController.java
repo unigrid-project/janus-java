@@ -82,7 +82,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		wallet.addPropertyChangeListener(this);
 		addresses.addPropertyChangeListener(this);
 		setupAddressList();
-		addButtonToTable();
+		// addButtonToTable();
 	}
 
 	private void setupAddressList() {
@@ -135,7 +135,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 					}
 				});
 			colAddressBalance.setCellValueFactory(
-				new PropertyValueFactory<Address, String>("amount"));
+					new PropertyValueFactory<Address, String>("amount"));
 
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup address table) %s", e.getMessage()));
@@ -157,7 +157,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 					btn.setOnAction((ActionEvent event) -> {
 						Address data = getTableView().getItems().get(getIndex());
 						copyToClipboard(data.getAddress().toString());
-						//debug.log("selectedData: " + data.getAddress().toString());
+						// debug.log("selectedData: " + data.getAddress().toString());
 					});
 				}
 
@@ -180,7 +180,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(addresses.ADDRESS_LIST)) {
-			//debug.log("ADDRESS_LIST change");
+			// debug.log("ADDRESS_LIST change");
 			tblAddresses.setItems(addresses.getAddresses());
 		}
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
@@ -192,17 +192,18 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	}
 
 	public void loadAddresses() {
-		//try {
-			ListAddressBalances addr = rpc.call(new ListAddressBalances.Request(), ListAddressBalances.class);
-			addresses.setAddresses(addr);
-		//} catch (Exception e) {
-		//	debug.print("loadAddresses " + e.getCause().getMessage().toString(), AddressController.class.getSimpleName());
-		//}
+		// try {
+		ListAddressBalances addr = rpc.call(new ListAddressBalances.Request(), ListAddressBalances.class);
+		addresses.setAddresses(addr);
+		// } catch (Exception e) {
+		// debug.print("loadAddresses " + e.getCause().getMessage().toString(),
+		// AddressController.class.getSimpleName());
+		// }
 	}
 
 	@FXML
 	private void onLoadPressed(MouseEvent e) {
-		//debug.log("Calling address list refresh");
+		// debug.log("Calling address list refresh");
 		loadAddresses();
 	}
 
@@ -229,9 +230,9 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		content.putString(address);
 		clipboard.setContent(content);
 		Notifications
-			.create()
-			.title("Address copied to clipboard")
-			.text(address)
-			.showInformation();
+				.create()
+				.title("Address copied to clipboard")
+				.text(address)
+				.showInformation();
 	}
 }
