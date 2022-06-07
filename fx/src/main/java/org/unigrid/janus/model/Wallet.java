@@ -60,7 +60,7 @@ public class Wallet {
 	@Getter @Setter
 	private static int unlockState = 0;
 	@Getter
-	private static long stakingStartTime = 45126460800000L;
+	private static long stakingStartTime = 100000000L;
 	private static Boolean encrypted;
 	private static Boolean offline = false;
 	@Getter @Setter

@@ -65,14 +65,14 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 
 		window.setOverlayController(this);
 		wallet.addPropertyChangeListener(this);
-		//TODO: pnlUnlock.setVisible(false);
+		// TODO: pnlUnlock.setVisible(false);
 	}
 
 	public void startLockOverlay() {
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("UNLOCK");
 		unlockCopy.setText("Unlock your wallet by entering your passphrase and "
-			+ "pressing the UNLOCK button.");
+				+ "pressing the UNLOCK button.");
 		wallet.setUnlockState(2);
 	}
 
@@ -81,7 +81,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("STAKE");
 		unlockCopy.setText("Enable staking in your wallet by entering your passphrase and "
-			+ "pressing the STAKE button.");
+				+ "pressing the STAKE button.");
 	}
 
 	public void startUnlockForTimeOverlay() {
@@ -90,7 +90,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("UNLOCK");
 		unlockCopy.setText("Please enter your passphrase in order to perform this task. "
-			+ "The wallet will automatically lock itself after 30 seconds.");
+				+ "The wallet will automatically lock itself after 30 seconds.");
 	}
 
 	public void startUnlockForSendingOverlay() {
@@ -99,7 +99,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("SEND");
 		unlockCopy.setText("Please enter your passphrase to send Unigrid tokens. "
-			+ "If your wallet was staking you will need to enable again after the transaction completes.");
+				+ "If your wallet was staking you will need to enable again after the transaction completes.");
 	}
 
 	public void startUnlockForGridnodeOverlay() {
@@ -108,7 +108,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("START");
 		unlockCopy.setText("Please enter your passphrase to enable your gridnodes. "
-			+ "If your wallet was staking you will need to enable again after the task completes.");
+				+ "If your wallet was staking you will need to enable again after the task completes.");
 	}
 
 	public void startUnlockForDump() {
@@ -117,7 +117,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("EXPORT");
 		unlockCopy.setText("Please enter your passphrase to export your private keys. "
-			+ "If your wallet was staking you will need to enable again after the task completes.");
+				+ "If your wallet was staking you will need to enable again after the task completes.");
 	}
 
 	@FXML
@@ -133,16 +133,16 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		window.getWindowBarController().startSpinner();
 		switch (wallet.getUnlockState()) {
 			case 1:
-				sendArgs = new Object[]{passphraseInput.getText(), stakingStartTime, true};
+				sendArgs = new Object[] { passphraseInput.getText(), stakingStartTime, true };
 				break;
 			case 2:
-				sendArgs = new Object[]{passphraseInput.getText(), 0};
+				sendArgs = new Object[] { passphraseInput.getText(), 0 };
 				break;
 			case 3:
 			case 4:
 			case 5:
 				// unlock for 30 seconds only
-				sendArgs = new Object[]{passphraseInput.getText(), 30};
+				sendArgs = new Object[] { passphraseInput.getText(), 30 };
 				break;
 			default:
 				throw new AssertionError();
@@ -154,37 +154,42 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 			window.getWindowBarController().stopSpinner();
 
 		} else {
-
-			final UnlockWallet call = rpc.call(
-				new UnlockWallet.Request(sendArgs), UnlockWallet.class);
-			Jsonb jsonb = JsonbBuilder.create();
-			if (call.getError() != null) {
-				final Info info = rpc.call(new Info.Request(), Info.class);
-				wallet.setInfo(info);
-				String result = call.getError().getMessage();
-				if (result != null) {
-					submitBtn.setDisable(false);
-					debug.log(result);
-					errorTxt.setText(result);
+			try {
+				final UnlockWallet call = rpc.call(
+						new UnlockWallet.Request(sendArgs), UnlockWallet.class);
+				Jsonb jsonb = JsonbBuilder.create();
+				if (call.getError() != null) {
+					final Info info = rpc.call(new Info.Request(), Info.class);
+					wallet.setInfo(info);
+					String result = call.getError().getMessage();
+					if (result != null) {
+						submitBtn.setDisable(false);
+						debug.print("Error unlocking wallet: ".concat(result), OverlayController.class.getSimpleName());
+						errorTxt.setText(result);
+						passphraseInput.setText("");
+					}
+				} else {
+					errorTxt.setText("Wallet unlocked!");
+					debug.print("Successfuly unlocked wallet", OverlayController.class.getSimpleName());
 					passphraseInput.setText("");
-				}
-			} else {
-				errorTxt.setText("Wallet unlocked!");
-				passphraseInput.setText("");
-				if (wallet.getUnlockState() == 3) {
-					// send transaction
-					window.getWalletController().sendTransactionAfterUnlock();
-				} else if (wallet.getUnlockState() == 4) {
-					window.getNodeController().startMissingNodes();
-				} else if (wallet.getUnlockState() == 5) {
-					window.getSettingsController().dumpKeys();
-				}
-				if (wallet.getUnlockState() != 1) {
-					wallet.setLocked(Boolean.FALSE);
-				}
+					if (wallet.getUnlockState() == 3) {
+						// send transaction
+						window.getWalletController().sendTransactionAfterUnlock();
+					} else if (wallet.getUnlockState() == 4) {
+						window.getNodeController().startMissingNodes();
+					} else if (wallet.getUnlockState() == 5) {
+						window.getSettingsController().dumpKeys();
+					}
+					if (wallet.getUnlockState() != 1) {
+						wallet.setLocked(Boolean.FALSE);
+					}
 
-				closeUnlockOverlay();
+					closeUnlockOverlay();
+				}
+			} catch (Exception e) {
+				debug.print(e.getMessage() , OverlayController.class.getSimpleName());
 			}
+
 			window.getWindowBarController().stopSpinner();
 		}
 	}
