@@ -16,16 +16,14 @@
 
 package org.unigrid.janus.model.rpc.entity;
 
-import jakarta.json.bind.annotation.JsonbProperty;
-import java.math.BigDecimal;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class GetWalletInfo extends BaseResult<GetWalletInfo.Result> {
+public class GetUnlockState extends BaseResult<GetUnlockState.Result> {
 
-	public static final String METHOD = "getwalletinfo";
+	public static final String METHOD = "getunlockstate";
 
 	public static class Request extends BaseRequest {
 
@@ -36,11 +34,7 @@ public class GetWalletInfo extends BaseResult<GetWalletInfo.Result> {
 
 	@Data
 	public static class Result {
-		private BigDecimal balance;
-		private BigDecimal totalbalance;
-		@JsonbProperty("unlocked_until")
-		private long unlockUntil = 4999;
-		private String walletversion = "0";
-		private long txcount;
+		private String state;
+		private int remainingtime;
 	}
 }

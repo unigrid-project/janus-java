@@ -19,6 +19,7 @@ package org.unigrid.janus.model.rpc.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.json.bind.annotation.JsonbProperty;
+import java.math.BigDecimal;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -42,7 +43,7 @@ public class Info extends BaseResult<Info.Result> {
 		@JsonbProperty("protocolversion")
 		private int protocolVersion;
 		private float totalbalance;
-		private float balance;
+		private BigDecimal balance;
 		@JsonbProperty("unlocked_until")
 		private long unlockUntil = 4999;
 		// unpacked from nested bootstrapping

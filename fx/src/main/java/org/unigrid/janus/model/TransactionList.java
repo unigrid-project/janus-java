@@ -53,9 +53,8 @@ public class TransactionList {
 
 	public ObservableList<Transaction> getLatestTransactions(int count) {
 		System.out.println(this.transactions.size());
-		count = this.transactions.size() < count ? this.transactions.size() : count;
-		return (ObservableList<Transaction>) FXCollections.observableArrayList(this.transactions.subList(0,
-			count));
+		count = count > transactions.size() ? transactions.size() : count;
+		return (ObservableList<Transaction>) FXCollections.observableArrayList(transactions.subList(0, count));
 	}
 
 	public int loadNewTransactions() {
@@ -114,7 +113,7 @@ public class TransactionList {
 	public boolean addTransaction(int index, Transaction trans) {
 		boolean result = false;
 		try {
-			boolean beginning = (index == 0);
+			//boolean beginning = (index == 0);
 			int idx = -1; //isDuplicate(trans, beginning);
 			if (idx != -1) {
 				// TODO: check for multipart and add, or create multipart if needed.

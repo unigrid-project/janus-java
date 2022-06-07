@@ -75,7 +75,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
     private Wallet wallet;
 
-    private static TransactionList transList = new TransactionList();
+    private TransactionList transList = new TransactionList();
     private static WindowService window = WindowService.getInstance();
 
 
@@ -250,18 +250,18 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
     public void propertyChange(PropertyChangeEvent event) {
         if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
-            debug.log(String.format("Value: %.8f", (double) event.getNewValue()));
-            lblBalance.setText(String.format("%.8f", (double) event.getNewValue()));
-            lblBalanceSend.setText(String.format("%.8f", (double) event.getNewValue()));
+            debug.log("Value: " + event.getNewValue().toString());
+            lblBalance.setText(event.getNewValue().toString());
+            lblBalanceSend.setText(event.getNewValue().toString());
         }
         if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
             boolean locked = (boolean) event.getNewValue();
             // can determine from this if a send transaction needs a passphrase
         }
-        if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
+        /*if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
             ObservableList<Transaction> list = transList.getLatestTransactions(10);
             tblWalletTrans.setItems(list);
-        }
+        }*/
         if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
             ObservableList<Transaction> list = transList.getLatestTransactions(10);
             tblWalletTrans.setItems(list);
