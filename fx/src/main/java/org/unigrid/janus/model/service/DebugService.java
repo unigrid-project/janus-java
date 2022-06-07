@@ -23,6 +23,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.unigrid.janus.model.DataDirectory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import javafx.scene.control.ListView;
 import javafx.collections.ObservableList;
@@ -52,7 +54,8 @@ public class DebugService {
 	}
 
 	public void print(String msg, String className) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("debug.log", true))) {
+        String path = DataDirectory.get().concat("/wallet.log");
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(path, true))) {
             bw.write(getCurrentDate().concat(": ").concat(className).concat("- ").concat(msg));
             System.out.println(msg);
             bw.newLine();

@@ -89,6 +89,7 @@
 								<option>java.base/java.lang=ALL-UNNAMED</option>
 								<option>--add-opens</option>
 								<option>java.base/java.lang=weld.core.impl</option>
+								<option>-DAPPDIR=$APPDIR</option>
 							</javaOptions>
 						</configuration>
 					</execution>
@@ -98,13 +99,13 @@
 							<goal>jpackage</goal>
 						</goals>
 						<configuration>
-                                                        <appVersion>1.0.0</appVersion>
-							<appImage>target/dist/janus</appImage>
+                            <appVersion>1.0.0</appVersion>
+							<appImage>target/dist/Unigrid</appImage>
 						</configuration>
 					</execution>
 				</executions>
 				<configuration>
-					<name>janus</name>
+					<name>Unigrid</name>
 					<destination>target/dist</destination>
 				</configuration>
 			</plugin>

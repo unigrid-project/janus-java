@@ -39,6 +39,8 @@ import org.unigrid.janus.model.rpc.entity.BlockCount;
 public class Daemon {
 	@Inject
 	private RPCService rpc;
+	@Inject
+	private DebugService debug;
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
 	private static final String DEFAULT_PATH_TO_DAEMON_KEY = "path.to.daemon";
 	
@@ -46,24 +48,20 @@ public class Daemon {
 	private Optional<Process> process = Optional.empty();
 
 	private static final String[] LOCATIONS = new String[] {
-		System.getProperty("user.dir") + "/", 
+		System.getProperty("user.dir"), 
 		"/usr/bin/", 
 		"/opt/bin/",
+		"/opt/unigrid/bin/",
 		System.getProperty("user.dir") + "/runtime/bin/"
 	};
-	
+
 	private URL primary = null;
-	
-	private DebugService debug = new DebugService();
 	
 	private static final String[] EXEC = new String[] { "unigridd", "unigridd.exe" };
 	
 	@PostConstruct
 	@SneakyThrows
 	private void init() {
-		System.out.println("start init");
-		System.out.println("blää");
-                System.out.println("2");
 		if (!getDefaultPathToDaemon().equals("")){
 			System.out.println("The path is set to default");
 			return;
@@ -72,9 +70,9 @@ public class Daemon {
 		for (int i = 0; i < LOCATIONS.length; i++) {
 			for (int j = 0; j < EXEC.length; j++) {
 				System.out.println(LOCATIONS[i] + EXEC[j]);
-				debug.log(LOCATIONS[i] + EXEC[j]);
+				debug.print(LOCATIONS[i] + EXEC[j], Daemon.class.getSimpleName());
 				if (isLocalFile(LOCATIONS[i] + EXEC[j])) {
-					debug.log(LOCATIONS[i] + EXEC[j]);
+					debug.print(LOCATIONS[i] + EXEC[j], Daemon.class.getSimpleName());
 					primary = new URL("file:// " + LOCATIONS[i] + EXEC[j]);
 					break;
 				}
