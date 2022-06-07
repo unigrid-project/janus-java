@@ -115,7 +115,8 @@
 .table-view .table-cell {
 	-fx-text-fill: #aad;
 	-fx-text-alignment: right;
-	-fx-border-color: transparent #aad transparent transparent;
+	-fx-alingnment: center-rigth;
+        -fx-border-color: transparent #aad transparent transparent;
 }
 
 .table-view .table-cell .button {

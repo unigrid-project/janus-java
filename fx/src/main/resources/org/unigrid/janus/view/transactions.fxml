@@ -5,11 +5,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.unigrid.janus.view.component.PTableColumn?>
 
-<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.TransactionsController">
+<AnchorPane stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.TransactionsController">
    <children>
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <TableView fx:id="tblTransactions" VBox.vgrow="ALWAYS">
+            <TableView fx:id="tblTransactions" stylesheets="@main.css" VBox.vgrow="ALWAYS">
                <columns>
                   <PTableColumn fx:id="colTransAddress" editable="false" percentageWidth="0.41" prefWidth="170.0" sortable="false" text="Address" />
                   <PTableColumn fx:id="colTransAmount" editable="false" percentageWidth="0.15" prefWidth="75.0" sortable="false" text="Amount" />

@@ -25,6 +25,7 @@ import java.net.URL;
 import java.io.File;
 import java.util.ResourceBundle;
 import java.util.Optional;
+import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
@@ -45,6 +46,7 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
+import javafx.util.Duration;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.service.DebugService;
@@ -84,6 +86,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML private Label txtPassphraseTwo;
 	@FXML private Label txtPassWarningOne;
 	@FXML private Label txtPassWarningTwo;
+	@FXML private Label txtErrorMessage;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {

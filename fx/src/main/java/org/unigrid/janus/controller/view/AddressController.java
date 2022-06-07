@@ -41,7 +41,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
-
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
