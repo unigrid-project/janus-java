@@ -43,7 +43,7 @@ module fx {
 
 	opens org.unigrid.janus to weld.core.impl;
 	opens org.unigrid.janus.controller.component to javafx.fxml;
-	opens org.unigrid.janus.controller.view to javafx.fxml;
+	opens org.unigrid.janus.controller.view to javafx.fxml, weld.core.impl;
 	opens org.unigrid.janus.view to weld.core.impl;
 	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml;
 	opens org.unigrid.janus.model to weld.core.impl, javafx.base;
