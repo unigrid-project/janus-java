@@ -245,9 +245,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
         }
     }
 
-    private Color setColor(int r, int g, int b, int confrimations) {
-        float clampedColor = 0.1f * confrimations > 1.0f ? 1.0f : 0.1f * confrimations;
-        return Color.rgb(r, g, b, clampedColor);
+    private Color setColor(int r, int g, int b, int confirmations) {
+        return Color.rgb(r, g, b, Math.min(1.0f, Math.max(0.1f, 0.1f))); //confirmations * 0.1f)));
     }
 
     public void propertyChange(PropertyChangeEvent event) {
