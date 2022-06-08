@@ -33,6 +33,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
 import java.beans.PropertyChangeListener;
+import java.math.BigDecimal;
 import java.beans.PropertyChangeEvent;
 import java.util.function.UnaryOperator;
 import javafx.animation.PauseTransition;
@@ -252,8 +253,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent event) {
         if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
             debug.log("Value: " + event.getNewValue().toString());
-            lblBalance.setText(event.getNewValue().toString());
-            lblBalanceSend.setText(event.getNewValue().toString());
+            lblBalance.setText(((BigDecimal) event.getNewValue()).toPlainString());
+            lblBalanceSend.setText(((BigDecimal) event.getNewValue()).toPlainString());
         }
         if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
             boolean locked = (boolean) event.getNewValue();
