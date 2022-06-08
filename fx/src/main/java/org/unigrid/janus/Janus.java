@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
+import java.util.Properties;
 
 import javafx.application.Application;
 import javafx.application.HostServices;
@@ -103,7 +105,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
         // janusModel.getAppState().addObserver
         janusModel.addPropertyChangeListener(this);
         // PropertyConfigurator.configure(getClass().getResource("log4j.properties"));
-
     }
 
     public void propertyChange(PropertyChangeEvent event) {
@@ -150,7 +151,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
                             Platform.runLater(new Runnable() {
                                 public void run() {
                                     debug.print("run poll", Janus.class.getSimpleName());
-                                    //rpc.stopPolling();
+                                    // rpc.stopPolling();
                                     wallet.setOffline(Boolean.FALSE);
                                     startMainWindow();
                                     rpc.pollForInfo(5 * 1000);
@@ -173,8 +174,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
             debug.setListView((ListView) window.lookup("lstDebug"));
 
         } catch (Exception e) {
-		System.out.print("error: " + e.getMessage());
-		System.out.print("error: " + e.getCause().toString());
+            System.out.print("error: " + e.getMessage());
+            System.out.print("error: " + e.getCause().toString());
             Alert a = new Alert(AlertType.ERROR,
                     e.getMessage(),
                     ButtonType.OK);
@@ -185,6 +186,16 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
     @SneakyThrows
     private void startSplashScreen() {
         debug.print("opening splash screen...", Janus.class.getSimpleName());
+        Properties myProperties = new Properties();
+        try {
+            myProperties.load(getClass().getResourceAsStream("application.properties"));
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+        String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
+        String filteredVer = fullVer.replace("-SNAPSHOT", "");
+        janusModel.setVersion(filteredVer);
+        System.out.println("version: " + filteredVer);
         janusModel.setAppState(JanusModel.AppState.STARTING);
 
         preloader.initText();
@@ -205,19 +216,19 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
                 do {
                     try {
                         walletInfo = rpc.call(new GetWalletInfo.Request(),
-                            GetWalletInfo.class);
+                                GetWalletInfo.class);
                         boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
-                            GetBootstrappingInfo.class);
+                                GetBootstrappingInfo.class);
                         walletStatus = boostrapInfo.getResult().getWalletstatus();
-                        //System.out.println("walletStatus: " + walletStatus);
+                        // System.out.println("walletStatus: " + walletStatus);
                         progress = boostrapInfo.getResult().getProgress();
-                        //System.out.println("progress: " + progress);
+                        // System.out.println("progress: " + progress);
                         status = boostrapInfo.getResult().getStatus();
-                        //System.out.println("status: " + status);
+                        // System.out.println("status: " + status);
                         Thread.sleep(1000);
                     } catch (Exception e) {
                         debug.print("RPC call error: " + e.getMessage().toString(), Janus.class.getSimpleName());
-                       // debug.print("RPC call error: " + e., Janus.class.getSimpleName());
+                        // debug.print("RPC call error: " + e., Janus.class.getSimpleName());
 
                         for (var x : e.getSuppressed())
                             debug.print("RPC call error: " + x.getCause().getMessage(), Janus.class.getSimpleName());

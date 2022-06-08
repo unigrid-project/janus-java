@@ -90,6 +90,7 @@
 								<option>--add-opens</option>
 								<option>java.base/java.lang=weld.core.impl</option>
 								<option>-DAPPDIR=$APPDIR</option>
+								<option>-DAPPVER=${project.version}</option>
 							</javaOptions>
 						</configuration>
 					</execution>
