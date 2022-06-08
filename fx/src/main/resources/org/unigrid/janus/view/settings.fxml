@@ -169,13 +169,13 @@
                               </ImageView>
                            </children>
                         </AnchorPane>
-                        <PasswordField fx:id="taPassphrase" prefHeight="35.0" />
+                        <PasswordField fx:id="taPassphrase" onKeyPressed="#onButtonClicked" prefHeight="35.0" />
                         <Label fx:id="txtPassphraseTwo" text="Repeat passphrase" textFill="#ee7722">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </Label>
-                        <PasswordField fx:id="taRepeatPassphrase" onKeyTyped="#onRepeatPassphraseChange" prefHeight="35.0" />
+                        <PasswordField fx:id="taRepeatPassphrase" onKeyPressed="#onButtonClicked" onKeyTyped="#onRepeatPassphraseChange" prefHeight="35.0" />
                         <HBox alignment="TOP_CENTER">
                            <VBox.margin>
                               <Insets top="8.0" />

@@ -20,8 +20,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeSupport;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.service.DebugService;
@@ -38,7 +42,7 @@ public class WarningController implements Initializable{
 	private static JanusModel janusModel = new JanusModel();
 	private static WindowService window = WindowService.getInstance();
 	private static PropertyChangeSupport pcs;
-
+	
 	/**
 	public WarningController() {
 		wallet = window.getWallet();
@@ -60,6 +64,10 @@ public class WarningController implements Initializable{
 		debug.log("onRestartClicked");
 		// will be implemented once CDI is working
 		//warningEvent.fire(this);
+		restartWallet();
+	}
+	
+	public void restartWallet() {
 		janusModel.setAppState(JanusModel.AppState.RESTARTING);
 		window.getMainWindowController().hideWarning();
 	}
@@ -67,5 +75,13 @@ public class WarningController implements Initializable{
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		window.setWarnController(this);
+	}	
+	
+	@FXML
+	private void onButtonClicked(KeyEvent e) {
+		if (e.getCode() == KeyCode.ENTER) {
+			System.out.println("enter clicked");
+			restartWallet();
+		}
 	}
 }

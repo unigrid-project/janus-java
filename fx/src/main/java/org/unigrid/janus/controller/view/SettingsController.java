@@ -37,6 +37,7 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderWidths;
@@ -191,6 +192,14 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		String gridnode = DataDirectory.get();
 		window.getHostServices().showDocument(gridnode);
 	}
+	
+	@FXML
+	private void onButtonClicked(KeyEvent e) {
+		if (e.getCode() == KeyCode.ENTER && btnUpdatePassphrase.isDisabled()) {
+			System.out.println("enter clicked");
+			updatePassFrase();
+		}
+	}
 
 	@FXML
 	private void onLock(MouseEvent event) {
@@ -328,5 +337,9 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	public void setVersion(String version) {
 		verLbl.setText("version: ".concat(version));
+	}
+	
+	private void updatePassFrase() {
+		System.out.println("updating passfrase");
 	}
 }

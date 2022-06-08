@@ -3,7 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
@@ -17,7 +16,7 @@
 <?import javafx.scene.text.Text?>
 <?import org.unigrid.janus.view.component.PTableColumn?>
 
-<AnchorPane prefHeight="300.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.WalletController">
+<AnchorPane prefHeight="300.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.WalletController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -113,12 +112,12 @@
                   <Insets left="20.0" right="20.0" top="10.0" />
                </VBox.margin>
             </HBox>
-            <TextField fx:id="amountToSend" onMouseClicked="#setupFormatter" promptText="UGD TO SEND">
+            <TextField fx:id="amountToSend" onKeyPressed="#onButtonClicked" onMouseClicked="#setupFormatter" promptText="UGD TO SEND">
                <VBox.margin>
                   <Insets left="20.0" right="20.0" top="20.0" />
                </VBox.margin>
             </TextField>
-            <TextField fx:id="ugdAddressTxt" promptText="UGD ADDRESS">
+            <TextField fx:id="ugdAddressTxt" onKeyPressed="#onButtonClicked" promptText="UGD ADDRESS">
                <VBox.margin>
                   <Insets left="20.0" right="20.0" top="20.0" />
                </VBox.margin>
