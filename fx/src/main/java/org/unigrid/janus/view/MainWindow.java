@@ -31,6 +31,8 @@ import org.unigrid.janus.model.service.WindowService;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+
+import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.event.CloseJanusEvent;
 
 @ApplicationScoped
@@ -38,6 +40,8 @@ public class MainWindow implements Window {
 
 	@Inject
 	private Stage stage;
+	@Inject
+	private JanusModel janusModel;
 
 	private WindowService window = WindowService.getInstance();
 
@@ -55,6 +59,7 @@ public class MainWindow implements Window {
 	public void show() {
 		try {
 			window.setStage(stage);
+			window.getSettingsController().setVersion(janusModel.getVersion());
 			stage.show();
 		} catch (Exception e) {
 			Alert a = new Alert(AlertType.ERROR,

@@ -17,6 +17,8 @@
 package org.unigrid.janus.controller.view;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -27,6 +29,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.service.WindowService;
 
 @ApplicationScoped
@@ -42,6 +45,8 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	private Label lblText;
 	@FXML
 	private Label lblStatus;
+	@FXML
+	private Label verLbl;
 
 	//@Inject
 	//private SplashScreen splashScreen;
@@ -59,6 +64,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 			//Font font = Font.loadFont("fonts/PressStart2P-vaV7.ttf", 10);
 			//lblText.setFont(font);
 			//lblStatus.setFont(font);
+			System.out.println("init splash controller");
 		});
 
 	}

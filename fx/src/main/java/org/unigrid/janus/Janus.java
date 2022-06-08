@@ -51,6 +51,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
+import org.unigrid.janus.controller.view.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
@@ -81,6 +82,9 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
     @Inject
     private JanusModel janusModel;
+
+    @Inject
+    private SplashScreenController splashController;
 
     @Inject
     private Wallet wallet;
@@ -195,19 +199,18 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
         String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
         String filteredVer = fullVer.replace("-SNAPSHOT", "");
         janusModel.setVersion(filteredVer);
-        System.out.println("version: " + filteredVer);
+
+        //System.out.println("version: " + filteredVer);
         janusModel.setAppState(JanusModel.AppState.STARTING);
 
         preloader.initText();
-
+        preloader.setVersion(filteredVer);
         preloader.show();
         startUp();
-
     }
 
     private void startUp() {
         debug.print("startup called...", Janus.class.getSimpleName());
-
         Task task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {

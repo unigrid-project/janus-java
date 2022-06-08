@@ -55,6 +55,7 @@ public class SplashScreen implements Window {
 	private RotateTransition rt;
 	private Label text;
 	private Label status;
+	private Label lbl;
 
 	public SplashScreen() {
 
@@ -134,5 +135,10 @@ public class SplashScreen implements Window {
 
 	public void setText(String s) {
 		text.setText(s);
+	}
+
+	public void setVersion(String version) {
+		lbl = (Label) stageSplash.getScene().lookup("#verLbl");
+		lbl.setText("version: ".concat(version));
 	}
 }
