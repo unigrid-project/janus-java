@@ -64,6 +64,7 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.TransactionList;
+import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.SendTransaction;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 
@@ -259,13 +260,13 @@ public class WalletController implements Initializable, PropertyChangeListener {
             boolean locked = (boolean) event.getNewValue();
             // can determine from this if a send transaction needs a passphrase
         }
-        /*if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
-            ObservableList<Transaction> list = transList.getLatestTransactions(10);
-            tblWalletTrans.setItems(list);
-        }*/
+        if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
+            tblWalletTrans.setItems(transList.getTransactions());
+        }
         if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
-            ObservableList<Transaction> list = transList.getLatestTransactions(10);
-            tblWalletTrans.setItems(list);
+		ListTransactions trans = rpc.call(new ListTransactions.Request(0, 10),
+			ListTransactions.class);
+		transList.setTransactions(trans, 0);
         }
     }
 
@@ -281,7 +282,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
     @FXML
     private void onSendTransactionClicked(MouseEvent event) {
         if (amountToSend.getText().equals("") || amountToSend.getText() == null
-                || Integer.parseInt(amountToSend.getText()) == 0) {
+                || Double.parseDouble(amountToSend.getText()) == 0) {
             onErrorMessage("Please enter an amount of Unigrid to send.");
             return;
         } else {
@@ -304,7 +305,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
                 onErrorMessage("Please enter a valid Unigrid address.");
             } else {
                 wallet.setSendArgs(new Object[]{ugdAddressTxt.getText(),
-                    Integer.parseInt(amountToSend.getText())});
+                    Double.parseDouble(amountToSend.getText())});
                 if (wallet.getLocked()) {
                     onErrorMessage("Locked wallet");
                     window.getMainWindowController().unlockForSending();
