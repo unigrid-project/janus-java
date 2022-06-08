@@ -179,7 +179,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
                         fontIcon.setIconColor(setColor(48, 186, 69, confrimations));
                     }
                     btn.setGraphic(fontIcon);
-                    debug.print(trans.getCategory(), WalletController.class.getSimpleName());
+                    //debug.print(trans.getCategory(), WalletController.class.getSimpleName());
                     return new ReadOnlyObjectWrapper(btn);
                 }
             });

@@ -22,6 +22,8 @@ import jakarta.inject.Inject;
 //import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
+
+import org.unigrid.janus.controller.view.SplashScreenController;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.view.SplashScreen;
@@ -38,6 +40,8 @@ public class JanusPreloader {
 	@Inject
 	private SplashScreen splashScreen;
 
+	@Inject
+	private SplashScreenController splashController;
 	@FXML
 	private ProgressIndicator progress;
 
@@ -73,6 +77,10 @@ public class JanusPreloader {
 
 	public void stopSpinner() {
 		splashScreen.stopSpinner();
+	}
+
+	public void setVersion(String version) {
+		splashScreen.setVersion(version);
 	}
 
 }

@@ -69,6 +69,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private static final int TAB_SETTINGS_DEBUG = 5;
 	private static JanusModel janusModel = new JanusModel();
 
+	@FXML private Label verLbl;
 	// settings navigation
 	@FXML private VBox pnlSetGeneral;
 	@FXML private VBox pnlSetDisplay;
@@ -323,5 +324,9 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		final BackupWallet result = rpc.call(new BackupWallet.Request(file.getAbsolutePath()), BackupWallet.class);
 		window.notifyIfError(result);
 		debug.log(String.format("Backup wallet result: %s", rpc.resultToJson(result)));
+	}
+
+	public void setVersion(String version) {
+		verLbl.setText("version: ".concat(version));
 	}
 }
