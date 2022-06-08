@@ -13,7 +13,6 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.controller.view;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,7 +29,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.application.Platform;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import javafx.animation.FadeTransition;
+import javafx.animation.Timeline;
 import javafx.scene.control.Tooltip;
+import javafx.util.Duration;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
@@ -216,6 +218,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	public void propertyChange(PropertyChangeEvent event) {
 		//debug.log("Property changed:");
 		//debug.log(event.getPropertyName());
+		
+
 		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
 			String blocks = String.format("Blocks: %d", (int) event.getNewValue());
 			blocksTltp.setText(blocks);
@@ -249,6 +253,19 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				unlockedBtn.setVisible(true);
 				lockBtn.setVisible(false);
 			}
+
+		}
+		if (event.getPropertyName().equals(wallet.LOCKED_STATE_PROPERTY)) {
+			Wallet.LockState lockedState = (Wallet.LockState) event.getNewValue();
+			System.out.println(lockedState);
+			if (lockedState.equals(Wallet.LockState.UNLOCKED_FOR_STAKING) && !wallet.getStakingStatus()) {
+				FadeTransition ft = new FadeTransition(Duration.millis(500), coinsBtn);
+				ft.setFromValue(1.0);
+				ft.setToValue(0.3);
+				ft.setCycleCount(40);
+				ft.setAutoReverse(true);
+				ft.play();
+			}
 		}
 		if (event.getPropertyName().equals(wallet.STAKING_PROPERTY)) {
 			boolean staking = (boolean) event.getNewValue();
@@ -263,7 +280,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 		if (event.getPropertyName().equals(wallet.IS_OFFLINE)) {
 			System.out.println("wallet.IS_OFFLINE");
-			if(wallet.getOffline()) {
+			if (wallet.getOffline()) {
 				showWarning();
 			}
 		}

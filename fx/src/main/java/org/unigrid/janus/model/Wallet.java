@@ -40,6 +40,7 @@ public class Wallet {
 	public static final String BLOCKS_PROPERTY = "blocks";
 	public static final String CONNECTIONS_PROPERTY = "connections";
 	public static final String LOCKED_PROPERTY = "locked";
+	public static final String LOCKED_STATE_PROPERTY = "null";
 	public static final String STAKING_PROPERTY = "staking";
 	public static final String PROCESSING_PROPERTY = "processing";
 	public static final String ENCRYPTED_STATUS = "encrypted";
@@ -70,7 +71,8 @@ public class Wallet {
 	@Inject
 	private static DebugService debug = new DebugService();
 	private static PropertyChangeSupport pcs;
-	
+	@Getter @Setter
+	private LockState lockState = LockState.LOCKED;
 	@AllArgsConstructor
 	public static enum LockState {
 		UNLOCKED("unlocked"),
@@ -276,9 +278,12 @@ public class Wallet {
 		//debug.log(unlock);
 
 	}
-	
+
 	public void setWalletState(LockState state) {
-		setLocked(state == LockState.LOCKED);
+		LockState oldValue = this.lockState;
+		lockState = state;
+		setLocked(state == LockState.LOCKED || state == LockState.UNLOCKED_FOR_STAKING);
+		this.pcs.firePropertyChange(this.LOCKED_STATE_PROPERTY, oldValue, state);
 	}
 
 	public Boolean getProcessingStatus() {

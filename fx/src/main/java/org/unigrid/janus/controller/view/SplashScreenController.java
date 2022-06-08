@@ -64,9 +64,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 			//Font font = Font.loadFont("fonts/PressStart2P-vaV7.ttf", 10);
 			//lblText.setFont(font);
 			//lblStatus.setFont(font);
-			System.out.println("init splash controller");
 		});
-
 	}
 
 	@Override

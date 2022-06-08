@@ -158,7 +158,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
                                     // rpc.stopPolling();
                                     wallet.setOffline(Boolean.FALSE);
                                     startMainWindow();
-                                    rpc.pollForInfo(5 * 1000);
+                                    rpc.pollForInfo(10 * 1000);
                                     janusModel.setAppState(JanusModel.AppState.LOADED);
                                     preloader.stopSpinner();
                                     preloader.hide();
