@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.unigrid.janus</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
     <properties>
         <mainClass>org.unigrid.janus.Janus</mainClass>
@@ -146,7 +146,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-            <!--<plugin>
+           <!--<plugin>
                     <groupId>org.tentackle</groupId>
                     <artifactId>tentackle-jlink-maven-plugin</artifactId>
             </plugin>-->

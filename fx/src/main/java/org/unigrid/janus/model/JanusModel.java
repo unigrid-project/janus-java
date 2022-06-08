@@ -27,6 +27,8 @@ public class JanusModel {
 
 	public static final String APP_STATE_CHANGE = "appstatechange";
 	public static final String APP_RESTARTING = "apprestarting";
+	@Getter @Setter
+	private String version;
 	private static PropertyChangeSupport pcs;
 
 	@Getter
