@@ -17,7 +17,6 @@
 package org.unigrid.janus.controller.view;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -25,7 +24,6 @@ import java.net.URL;
 import java.io.File;
 import java.util.ResourceBundle;
 import java.util.Optional;
-import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
@@ -39,14 +37,12 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
-import javafx.util.Duration;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.service.DebugService;
@@ -56,6 +52,7 @@ import org.unigrid.janus.model.rpc.entity.DumpWallet;
 import org.unigrid.janus.model.rpc.entity.BackupWallet;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.EncryptWallet;
+import org.unigrid.janus.model.rpc.entity.ImportWallet;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 
 @ApplicationScoped
@@ -126,21 +123,26 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		switch (tab) {
 			case TAB_SETTINGS_GENERAL:
 				pnlSetGeneral.setVisible(true);
+				System.out.println("general visable");
 				break;
 			case TAB_SETTINGS_DISPLAY:
 				pnlSetDisplay.setVisible(true);
+				System.out.println("settings visable");
 				break;
 			case TAB_SETTINGS_PASSPHRASE:
 				pnlSetPassphrase.setVisible(true);
+				System.out.println("passfrase visable");
 				break;
 			case TAB_SETTINGS_EXPORT:
 				pnlSetExport.setVisible(true);
+				System.out.println("export visable");
 				break;
 			case TAB_SETTINGS_DEBUG:
 				pnlSetDebug.setVisible(true);
 				break;
 			default:
 				pnlSetDebug.setVisible(true);
+				System.out.println("debug visable");
 				break;
 		}
 
@@ -277,10 +279,11 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		debug.log("Import wallet clicked!");
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Import");
-		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Wallet file", "*.txt"));
 		fileChooser.setInitialFileName("wallet.txt");
 		File file = fileChooser.showOpenDialog(window.getStage());
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
+		rpc.call(new ImportWallet.Request(file.getAbsolutePath()), ImportWallet.class);
 	}
 
 	@FXML
