@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.unigrid.janus</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>1.0.5-SNAPSHOT</version>
     </parent>
     <properties>
         <mainClass>org.unigrid.janus.Janus</mainClass>
