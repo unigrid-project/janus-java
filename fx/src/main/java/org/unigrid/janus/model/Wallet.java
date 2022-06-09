@@ -29,6 +29,7 @@ import lombok.Setter;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
+import org.unigrid.janus.model.rpc.entity.WalletInfo;
 import org.unigrid.janus.model.service.DebugService;
 
 @ApplicationScoped
@@ -203,6 +204,12 @@ public class Wallet {
 		Boolean oldValue = this.locked;
 		this.locked = newValue;
 		this.pcs.firePropertyChange(this.LOCKED_PROPERTY, oldValue, newValue);
+	}
+
+	public void setEncryptedState(GetWalletInfo walletInfo) {
+		long timestamp = walletInfo.getResult().getUnlockUntil();
+		// only 4999 == an unencrypted wallet
+		this.setEncrypted(timestamp != 4999);
 	}
 
 	public void setEncrypted(Boolean newValue) {

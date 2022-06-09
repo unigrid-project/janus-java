@@ -132,7 +132,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 				break;
 			case TAB_SETTINGS_PASSPHRASE:
 				pnlSetPassphrase.setVisible(true);
-				System.out.println("passfrase visable");
+				System.out.println("passphrase visable");
 				break;
 			case TAB_SETTINGS_EXPORT:
 				pnlSetExport.setVisible(true);
@@ -177,13 +177,21 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML
 	private void onOpenConf(MouseEvent event) {
 		File conf = DataDirectory.getConfigFile();
-		window.getHostServices().showDocument(conf.getAbsolutePath());
+		try {
+			window.getHostServices().showDocument(conf.getAbsolutePath());
+		} catch (Exception e) {
+			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
+		}
 	}
 
 	@FXML
 	private void onOpenGridnode(MouseEvent event) {
 		File gridnode = DataDirectory.getGridnodeFile();
-		window.getHostServices().showDocument(gridnode.getAbsolutePath());
+		try {
+			window.getHostServices().showDocument(gridnode.getAbsolutePath());
+		} catch (Exception e) {
+			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
+		}
 	}
 
 	@FXML
@@ -239,6 +247,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 							BorderStrokeStyle.SOLID,
 							new CornerRadii(3),
 							new BorderWidths(1))));
+					window.getMainWindowController().tabSelect(1);
 					janusModel.setAppState(JanusModel.AppState.RESTARTING);
 					//wallet.setLocked(true);
 				}
