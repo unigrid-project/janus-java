@@ -130,7 +130,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		});
 	}
 
-	private void tabSelect(int tab) {
+	public void tabSelect(int tab) {
 		btnWallet.setSelected(false);
 		btnTransactions.setSelected(false);
 		btnNodes.setSelected(false);

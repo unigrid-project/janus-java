@@ -357,6 +357,11 @@ public class WalletController implements Initializable, PropertyChangeListener {
         sendTransactionPnl.setVisible(true);
     }
 
+    @FXML
+    private void onReceiveClicked(MouseEvent event) {
+        window.getMainWindowController().tabSelect(4);
+    }
+
     private void onErrorMessage(String message) {
         sendWarnMsg.setFill(Color.RED);
         sendWarnMsg.setText(message);
