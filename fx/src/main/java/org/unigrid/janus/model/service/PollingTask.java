@@ -52,7 +52,7 @@ public class PollingTask extends TimerTask {
 				wallet.setBalance(walletInfo.getResult().getTotalbalance());
 				wallet.setBlocks(Integer.parseInt(blockCount.getResult().toString()));
 				wallet.setConnections(Integer.parseInt(connCount.getResult().toString()));
-				//wallet.setWalletState(Wallet.LockState(unlockState.getResult().getState());
+				wallet.setEncryptedState(walletInfo);
 				wallet.setWalletState(Wallet.LockState.from(unlockState.getResult().getState()));
 				wallet.setStakingStatus(staking);
 				wallet.setTransactionCount(walletInfo.getResult().getTxcount());
