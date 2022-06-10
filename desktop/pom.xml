@@ -145,6 +145,8 @@
 								<configuration>
 									<type>MSI</type>
 									<winMenu>true</winMenu>
+                                                                        <winMenuGroup>Unigrid</winMenuGroup>
+                                                                        <winShortcut>true</winShortcut>
 								</configuration>
 							</execution>
 						</executions>
