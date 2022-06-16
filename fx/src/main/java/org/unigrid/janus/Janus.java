@@ -43,6 +43,7 @@ import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 
@@ -67,6 +68,9 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
     @Inject
     private RPCService rpc;
+
+    @Inject
+    private PollingService pollService;
 
     @Inject
     private DebugService debug;
@@ -159,6 +163,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
                                     wallet.setOffline(Boolean.FALSE);
                                     startMainWindow();
                                     rpc.pollForInfo(10 * 1000);
+                                    pollService.poll(3600 * 1000);
                                     janusModel.setAppState(JanusModel.AppState.LOADED);
                                     preloader.stopSpinner();
                                     preloader.hide();
@@ -167,7 +172,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
                         }
                     }
                 });
-
     }
 
     private void startMainWindow() {

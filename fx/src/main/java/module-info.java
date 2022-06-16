@@ -36,7 +36,7 @@ module fx {
 	requires jersey.client;
 	requires org.kordamp.ikonli.javafx;
 	requires org.eclipse.yasson;
-
+	requires com.fasterxml.jackson.databind;
 	requires jsch;
 	requires java.sql;
 	requires org.controlsfx.controls;
@@ -46,7 +46,7 @@ module fx {
 	opens org.unigrid.janus.controller.view to javafx.fxml, weld.core.impl;
 	opens org.unigrid.janus.view to weld.core.impl;
 	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml;
-	opens org.unigrid.janus.model to weld.core.impl, javafx.base;
+	opens org.unigrid.janus.model to weld.core.impl, javafx.base, com.fasterxml.jackson.databind;
 	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson;
 	opens org.unigrid.janus.model.service to weld.core.impl;
 

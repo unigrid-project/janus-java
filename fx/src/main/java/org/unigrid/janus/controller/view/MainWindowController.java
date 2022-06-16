@@ -55,6 +55,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private static final int TAB_NODES = 3;
 	private static final int TAB_ADDRESS = 4;
 	private static final int TAB_SETTINGS = 5;
+	private static final int TAB_DOCS = 6;
 	/* Injected fx:id from FXML */
 	// @FXML private Label lblBlockCount;
 	// @FXML private Label lblConnection;
@@ -72,6 +73,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private ToggleButton btnAddress;
 	@FXML
+	private ToggleButton btnDocs;
+	@FXML
 	private ToggleButton btnSettings;
 	@FXML
 	private VBox pnlWallet;
@@ -83,6 +86,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	private VBox pnlAddress;
 	@FXML
 	private VBox pnlSettings;
+	@FXML
+	private VBox pnlDocs;
 	@FXML
 	private AnchorPane pnlOverlay;
 	@FXML
@@ -141,6 +146,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		pnlSettings.setVisible(false);
 		pnlAddress.setVisible(false);
 		btnAddress.setSelected(false);
+		btnDocs.setSelected(false);
+		pnlDocs.setVisible(false);
 		switch (tab) {
 			case TAB_WALLET:
 				pnlWallet.setVisible(true);
@@ -161,6 +168,10 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			case TAB_SETTINGS:
 				pnlSettings.setVisible(true);
 				btnSettings.setSelected(true);
+				break;
+			case TAB_DOCS:
+				pnlDocs.setVisible(true);
+				btnDocs.setSelected(true);
 				break;
 			default:
 				pnlWallet.setVisible(true);
@@ -203,6 +214,15 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			tabSelect(TAB_ADDRESS);
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (address click) %s", e.getMessage()));
+		}
+	}
+
+	@FXML
+	private void onDocsClicked(MouseEvent event) {
+		try {
+			tabSelect(TAB_DOCS);
+		} catch (Exception e) {
+			debug.print(String.format("ERROR: (docs click) %s", e.getMessage()), MainWindowController.class.getSimpleName());
 		}
 	}
 
