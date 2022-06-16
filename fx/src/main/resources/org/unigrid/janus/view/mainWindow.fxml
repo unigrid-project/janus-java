@@ -150,6 +150,37 @@
                                           </FontIcon>
                                        </graphic>
                                     </ToggleButton>
+                                    <ToggleButton fx:id="btnDocs" alignment="CENTER_LEFT" layoutX="11.0" layoutY="161.0" mnemonicParsing="false" onMouseClicked="#onDocsClicked" prefWidth="150.0" style="-fx-cursor: hand;" text="Help">
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="sidepane12" />
+                                       </toggleGroup>
+                                       <padding>
+                                          <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
+                                       </padding>
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <graphic>
+                                          <FontIcon fx:id="addressIcn2" iconLiteral="far-newspaper" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5">
+                                             <iconColor>
+                                                <LinearGradient endX="1.0" endY="1.0">
+                                                   <stops>
+                                                      <Stop>
+                                                         <color>
+                                                            <Color red="0.8815789222717285" green="0.4282051920890808" blue="0.004081383813172579" />
+                                                         </color>
+                                                      </Stop>
+                                                      <Stop offset="1.0">
+                                                         <color>
+                                                            <Color red="0.8947368264198303" green="0.6130604147911072" blue="0.049707602709531784" />
+                                                         </color>
+                                                      </Stop>
+                                                   </stops>
+                                                </LinearGradient>
+                                             </iconColor>
+                                          </FontIcon>
+                                       </graphic>
+                                    </ToggleButton>
                                     <VBox alignment="BOTTOM_LEFT" VBox.vgrow="ALWAYS">
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
@@ -295,6 +326,11 @@
                               <VBox fx:id="pnlAddress" layoutX="10.0" layoutY="10.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
                                     <fx:include source="address.fxml" VBox.vgrow="ALWAYS" />
+                                 </children>
+                              </VBox>
+			      <VBox fx:id="pnlDocs" alignment="CENTER" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <fx:include source="documentation.fxml" VBox.vgrow="ALWAYS" />
                                  </children>
                               </VBox>
                               <VBox fx:id="pnlSettings" alignment="CENTER" styleClass="settings" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
