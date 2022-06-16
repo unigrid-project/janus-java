@@ -40,6 +40,7 @@ module fx {
 	requires jsch;
 	requires java.sql;
 	requires org.controlsfx.controls;
+	requires jdk.crypto.ec;
 
 	opens org.unigrid.janus to weld.core.impl;
 	opens org.unigrid.janus.controller.component to javafx.fxml;
