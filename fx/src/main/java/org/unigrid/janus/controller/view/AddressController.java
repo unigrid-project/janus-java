@@ -29,6 +29,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -74,6 +75,8 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	private HBox newAddressDisplay;
 	@FXML
 	private Text addressDisplay;
+	@FXML
+	private CheckBox chkAddress;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -82,6 +85,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		wallet.addPropertyChangeListener(this);
 		addresses.addPropertyChangeListener(this);
 		setupAddressList();
+		addresses.setSelected(chkAddress.isSelected());
 		// addButtonToTable();
 	}
 
@@ -234,5 +238,11 @@ public class AddressController implements Initializable, PropertyChangeListener 
 				.title("Address copied to clipboard")
 				.text(address)
 				.showInformation();
+	}
+
+	@FXML
+	private void onChecboxChange(MouseEvent event) {
+		addresses.setSelected(chkAddress.isSelected());
+		loadAddresses();
 	}
 }
