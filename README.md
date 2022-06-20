@@ -36,7 +36,7 @@ The resulting installer image is placed under `desktop/target/dist/`.
 
 Troubleshooting
 ---------------
-If you are running into issues starting the wallet a good place to look is our documentation page [docs](https://docs.unigrid.org/)
+If you are running into issues starting the wallet a good place to look is our [documentation](https://docs.unigrid.org/) page.
 
 
 Automated Testing
