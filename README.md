@@ -34,6 +34,11 @@ mvn jpackage:jpackage@installer
 
 The resulting installer image is placed under `desktop/target/dist/`.
 
+Troubleshooting
+---------------
+If you are running into issues starting the wallet a good place to look is our documentation page [docs](https://docs.unigrid.org/)
+
+
 Automated Testing
 -----------------
 Developers are strongly encouraged to write unit tests for new code, and to submit new unit tests for old code.
