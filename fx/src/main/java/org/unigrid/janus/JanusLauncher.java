@@ -34,6 +34,7 @@ public class JanusLauncher implements Launcher {
 	@Override @SneakyThrows
 	public void run(LaunchContext lc) {
 		System.out.println("before cotainer init");
+		Stage stage = new Stage();
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
 		
 		Janus janus = container.select(Janus.class).get();
@@ -42,7 +43,7 @@ public class JanusLauncher implements Launcher {
 		System.out.println("launcher start");
 		
 		try {
-			janus.startFromBootstrap(primaryStage);
+			janus.startFromBootstrap(stage);
 		}
 		catch(Exception e) {
 			System.exit(1);

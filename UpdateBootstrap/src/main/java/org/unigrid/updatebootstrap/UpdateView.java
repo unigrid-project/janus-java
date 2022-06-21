@@ -121,13 +121,6 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					protected Void call() throws Exception {
 						System.out.println("calling the zip");
 						Path zip = Paths.get("/home/marcus/Documents/unigrid/wallet-update.zip");
-						/*try{
-							config.update(UpdateOptions.archive(zip));
-							System.out.println("Öhhhhh");
-						}
-						catch(Exception e) {
-							System.out.println(e.getMessage());
-						}*/
 						
 						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException() == null) {
 							System.out.println("Do the install");

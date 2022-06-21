@@ -40,6 +40,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
@@ -176,7 +177,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	}
 	
 	public void startFromBootstrap(Stage stage) throws Exception {
-		
 		
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
