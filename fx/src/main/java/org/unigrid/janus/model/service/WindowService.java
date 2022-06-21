@@ -30,6 +30,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.controller.component.WindowBarController;
 import org.unigrid.janus.controller.view.AddressController;
+import org.unigrid.janus.controller.view.DocumentationController;
 import org.unigrid.janus.controller.view.MainWindowController;
 import org.unigrid.janus.controller.view.NodesController;
 import org.unigrid.janus.controller.view.WalletController;
@@ -56,6 +57,7 @@ public class WindowService {
 	private static TransactionsController transController;
 	private static SettingsController settingsController;
 	private static AddressController addrController;
+	private static DocumentationController docsController;
 	private static WarningController warnController;
 	private static SplashScreenController splashController;
 	@NonNull private Wallet wallet;
@@ -178,6 +180,14 @@ public class WindowService {
 
 	public void setAddressController(AddressController controller) {
 		this.addrController = controller;
+	}
+
+	public DocumentationController getDocsController() {
+		return this.docsController;
+	}
+
+	public void setDocsController(DocumentationController controller) {
+		this.docsController = controller;
 	}
 
 	public SettingsController getSettingsController() {

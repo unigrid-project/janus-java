@@ -28,7 +28,6 @@
     <module>fx</module>
     	  
     <module>UpdateBootstrap</module>
-    <module>updateBootstrapConfig</module>
   </modules>
   	
   <dependencyManagement>
