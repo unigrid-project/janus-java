@@ -51,6 +51,7 @@ public class Daemon {
 		System.getProperty("user.dir") + "/", 
 		"/usr/bin/", 
 		"/opt/bin/",
+		"/opt/janus/bin/",
 		"/opt/unigrid/bin/",
 		System.getProperty("user.dir") + "/runtime/bin/",
 		System.getProperty("APPDIR") + "/"

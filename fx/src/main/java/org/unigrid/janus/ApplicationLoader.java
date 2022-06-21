@@ -39,4 +39,5 @@ public class ApplicationLoader extends Application {
 	public void start(Stage stage) throws Exception {
 		application.start(stage, getParameters(), getHostServices());
 	}
+	
 }

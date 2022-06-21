@@ -35,7 +35,7 @@ public class JanusPreloader {
 	private Daemon daemon;
 
 	@Inject
-    private RPCService rpc;
+	private RPCService rpc;
 
 	@Inject
 	private SplashScreen splashScreen;
