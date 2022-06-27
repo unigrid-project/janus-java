@@ -7,7 +7,6 @@
     <artifactId>fx</artifactId>
     <packaging>jar</packaging>
     <name>Unigrid Janus FX Frontend</name>
-
     <parent>
         <groupId>org.unigrid.janus</groupId>
         <artifactId>parent</artifactId>

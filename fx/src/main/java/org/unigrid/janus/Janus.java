@@ -20,6 +20,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -57,6 +58,7 @@ import javafx.scene.control.ButtonType;
 import org.unigrid.janus.controller.view.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
@@ -65,6 +67,7 @@ import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
 import org.update4j.service.Launcher;
 
+@Eager
 @ApplicationScoped
 public class Janus extends BaseApplication implements PropertyChangeListener {
 
@@ -175,9 +178,10 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		});
 
 	}
-	
+
 	public void startFromBootstrap(Stage stage) throws Exception {
-		
+		System.out.println(CDI.current());
+
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
 		startSplashScreen();
@@ -241,9 +245,13 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		//System.out.println("version: " + filteredVer);
 		janusModel.setAppState(JanusModel.AppState.STARTING);
 
+		System.out.println(preloader);
 		preloader.initText();
+		System.out.println("a");
 		preloader.setVersion(filteredVer);
+		System.out.println("b");
 		preloader.show();
+		System.out.println("c");
 		startUp();
 	}
 

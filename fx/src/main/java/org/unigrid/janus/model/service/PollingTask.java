@@ -32,7 +32,7 @@ public class PollingTask extends TimerTask {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
-	private static Jsonb jsonb = JsonbBuilder.create();
+	//private static Jsonb jsonb = JsonbBuilder.create();
 
 	public PollingTask() {
 		debug.log("Polling task created!");
@@ -42,6 +42,7 @@ public class PollingTask extends TimerTask {
 		Platform.runLater(() -> {
 			//wallet.setProcessingStatus();
 			//final Info info = rpc.call(new Info.Request(), Info.class);
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 			try {
 				final GetWalletInfo walletInfo = rpc.call(new GetWalletInfo.Request(), GetWalletInfo.class);
 				final GetBlockCount blockCount = rpc.call(new GetBlockCount.Request(), GetBlockCount.class);

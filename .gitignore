@@ -16,3 +16,5 @@ fx/unigrid-cli.exe
 fx/unigridd.exe
 fx/unigridd
 fx/unigrid-cli
+/UpdateBootstrap/target/
+/updateBootstrapConfig/target/

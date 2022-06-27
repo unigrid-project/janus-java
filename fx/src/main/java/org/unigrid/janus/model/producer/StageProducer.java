@@ -20,6 +20,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import java.beans.Introspector;
+import java.io.IOException;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
@@ -28,15 +30,24 @@ import lombok.SneakyThrows;
 public class StageProducer {
 	private static final String FXML_SUFFIX = ".fxml";
 
-	@Produces @SneakyThrows
+	@Produces
 	public Stage produce(final InjectionPoint point) {
 		final FXMLLoader loader = new FXMLLoader();
 		final Class<?> clazz = point.getMember().getDeclaringClass();
 		final String name = Introspector.decapitalize(clazz.getSimpleName());
-
+		loader.setClassLoader(getClass().getClassLoader());
+		System.out.println(loader.getClassLoader());
 		System.out.println(name.concat(FXML_SUFFIX));
 		loader.setLocation(clazz.getResource(name.concat(FXML_SUFFIX)));
 		System.out.println("SHITTTTTTTTTTTTTTTT " + point.getType());
-		return loader.load();
+		try{
+			return loader.load();
+
+		}
+		catch(IOException e) {
+			System.out.println(e.getMessage());
+			System.out.println(e.getCause());
+		}
+		return null;
 	}
 }

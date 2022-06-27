@@ -29,7 +29,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import javafx.scene.control.ListView;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import org.unigrid.janus.model.cdi.Eager;
 
+@Eager
 @ApplicationScoped
 public class DebugService {
 	private static ListView output;

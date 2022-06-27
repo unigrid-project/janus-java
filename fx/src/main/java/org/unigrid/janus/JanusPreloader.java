@@ -16,6 +16,7 @@
 
 package org.unigrid.janus;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 //import java.util.logging.Level;
@@ -24,10 +25,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
 
 import org.unigrid.janus.controller.view.SplashScreenController;
+import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.view.SplashScreen;
 
+@Eager
 @ApplicationScoped
 public class JanusPreloader {
 
@@ -48,6 +51,12 @@ public class JanusPreloader {
 	public JanusPreloader() {
 	}
 
+	@PostConstruct
+	private void init() {
+		System.out.println("bajs");
+		System.out.println(splashScreen);
+		System.	out.println("kiss");
+	}
 	public void updateProgress(double value) {
 
 		progress.setProgress(value);

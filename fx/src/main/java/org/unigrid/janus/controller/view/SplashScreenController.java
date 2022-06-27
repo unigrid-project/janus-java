@@ -30,8 +30,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.JanusModel;
+import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.WindowService;
 
+@Eager
 @ApplicationScoped
 public class SplashScreenController implements Initializable, PropertyChangeListener {
 

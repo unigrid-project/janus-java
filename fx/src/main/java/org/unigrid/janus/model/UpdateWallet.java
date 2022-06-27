@@ -16,6 +16,9 @@
 
 package org.unigrid.janus.model;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.util.TimerTask;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,12 +26,37 @@ import org.update4j.Configuration;
 
 public class UpdateWallet extends TimerTask {
 	
+	public enum UpdateState {
+		UPDATE_READY,
+		UPDATE_NOT_READY
+	}
+	
+	public final String UPDATE_PROPERTY = "update";
+	private UpdateState oldValue = UpdateState.UPDATE_NOT_READY;
 	private Configuration config;
 	private SimpleBooleanProperty running;
+	private PropertyChangeSupport pcs;
+	
+	public UpdateWallet() {
+		if(this.pcs != null) {
+			return;
+		}
+		this.pcs = new PropertyChangeSupport(this);
+	}
+	
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		this.pcs.addPropertyChangeListener(listener);
+	}
+	
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		this.pcs.removePropertyChangeListener(listener);
+	}
 	
 	@Override
 	public void run() {
-		throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+		if(checkUpdate()) {
+			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
+		}
 	}
 		
 	private Boolean checkUpdate() {

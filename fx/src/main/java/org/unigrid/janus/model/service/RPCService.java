@@ -44,7 +44,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.Timer;
+import org.unigrid.janus.model.cdi.Eager;
 
+@Eager
 @ApplicationScoped
 public class RPCService {
 	private static final String PROPERTY_USERNAME_KEY = "janus.rpc.username";
@@ -92,7 +94,7 @@ public class RPCService {
 
 		try {
 			debug.print("before DataDirectory getConfig", RPCService.class.getSimpleName());
-
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 			Configuration config = DataDirectory.getConfig(true);
 			debug.print("called getConfig", RPCService.class.getSimpleName());
 			credentials = new User();

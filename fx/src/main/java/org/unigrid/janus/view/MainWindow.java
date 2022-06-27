@@ -33,8 +33,10 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
 import org.unigrid.janus.model.JanusModel;
+import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.event.CloseJanusEvent;
 
+@Eager
 @ApplicationScoped
 public class MainWindow implements Window {
 

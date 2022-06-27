@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller.component;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -39,6 +40,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.UpdateWallet;
 
 @Dependent
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
@@ -51,6 +53,9 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	private static RPCService rpc = new RPCService();
 
 	private Wallet wallet;
+	
+	//@Inject
+	//private UpdateWallet update;
 
 	private static DebugService debug = new DebugService();
 	private static WindowService window = WindowService.getInstance();
@@ -61,6 +66,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
+		//update.addPropertyChangeListener(this);
 		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setWindowBarController(this);
@@ -82,6 +88,9 @@ public class WindowBarController implements Decoratable, Initializable, Property
 				//debug.log(status);
 			}
 		}
+		/*if(event.getPropertyName().equals(update.UPDATE_PROPERTY)) {
+			showUpdateButton();
+		}*/
 	}
 
 	@FXML
@@ -128,5 +137,9 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	public void stopSpinner() {
 		rt.stop();
 		spinner.setVisible(false);
+	}
+	
+	public void showUpdateButton(){
+		
 	}
 }

@@ -33,8 +33,10 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.unigrid.janus.model.Preferences;
+import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BlockCount;
 
+@Eager
 @ApplicationScoped
 public class Daemon {
 	@Inject
