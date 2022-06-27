@@ -32,16 +32,25 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.update4j.Configuration;
 import org.update4j.service.Delegate;
+import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import javafx.stage.StageStyle;
 
 public class App extends Application implements Delegate {
 
 	private static Scene scene;
+	private static FXMLLoader loader;
 
 	@Override
 	public void start(Stage stage) throws IOException {
 
-		stage.setMinWidth(650);
-		stage.setMinHeight(500);
+		final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
+		root.setLevel(Level.ALL);
+		
+		stage.setMinWidth(600);
+		stage.setMinHeight(300);
 		
 		URL configUrl = new URL("http://docs.unigrid.org/wallet/config.xml");
 		Configuration config = null;
@@ -60,10 +69,13 @@ public class App extends Application implements Delegate {
 		}
 		
 		config.sync();
-		scene = new Scene(loadFXML("updateView"), 640, 480);
+		scene = new Scene(loadFXML("updateView"));
+		stage.initStyle(StageStyle.UNDECORATED);
+		stage.centerOnScreen();
+		stage.setResizable(false);
 		stage.setScene(scene);
 		stage.show();
-		UpdateView updateView = new UpdateView(config, stage);
+		UpdateView.getInstance().setConfig(config, stage);
 
 	}
 
@@ -73,6 +85,7 @@ public class App extends Application implements Delegate {
 
 	private static Parent loadFXML(String fxml) throws IOException {
 		FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+		loader = fxmlLoader;
 		return fxmlLoader.load();
 	}
 

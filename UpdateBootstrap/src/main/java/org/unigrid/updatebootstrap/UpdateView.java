@@ -26,21 +26,9 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -52,10 +40,13 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	private Label status;
 
 	@FXML
-	private Label output;
-
-	@FXML
 	private ProgressBar progress;
+	
+	@FXML
+	private Button quit;
+	
+	@FXML
+	private Button launch;
 
 	private DoubleProperty primaryPercent;
 	private DoubleProperty secondaryPercent;
@@ -65,17 +56,38 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	@InjectSource
 	private Stage primaryStage;
+	
+	private static UpdateView updateView = null;
+	
+	private UpdateView() {
+		
+	}
+	
+	public static UpdateView getInstance() {
+		if(updateView == null) {
+			updateView = new UpdateView();
+		}
+		return updateView;
+	}
+	
+	public Stage getStage() {
+		return primaryStage;
+	}
 
-	public UpdateView(Configuration config, Stage primaryStage) {
+	public void setConfig(Configuration config, Stage primaryStage) {
 		this.config = config;
 		this.primaryStage = primaryStage;
 
 		status = (Label) primaryStage.getScene().lookup("#status");
-		output = (Label) primaryStage.getScene().lookup("#output");
 		progress = (ProgressBar) primaryStage.getScene().lookup("#progress");
+		
+		quit = (Button) primaryStage.getScene().lookup("#quit");
+		launch = (Button) primaryStage.getScene().lookup("#launch");
 
 		primaryPercent = new SimpleDoubleProperty(this, "primaryPercent");
 		secondaryPercent = new SimpleDoubleProperty(this, "secondaryPercent");
+		
+		launch.setDisable(true);
 
 		running = new SimpleBooleanProperty(this, "running");
 
@@ -98,8 +110,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	void update() {
 		if (running.get()) {
 			abort = true;
-			System.out.println("the applicatoin is running");
-			output.setText("the application is running;");
+			System.out.println("the application is running");
 			return;
 		}
 		
@@ -111,6 +122,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Task<Boolean> checkUpdates = checkUpdates();
 		checkUpdates.setOnSucceeded(evt -> {
 			if (!checkUpdates.getValue()) {
+				progress.setProgress(1);
 				status.setText("No updates found");
 				running.set(false);
 				launch();
@@ -158,11 +170,11 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 	
 	private void launch(){
-		Thread run = new Thread(() -> {
-			config.launch(this);
-		});
-		run.start();
-		
+		launch.setDisable(false);
+	}
+	
+	public void launchApp() {
+		config.launch();
 	}
 
 	private void run(Runnable runnable) {
