@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.unigrid.janus</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.0.5-SNAPSHOT</version>
+		<version>1.0.6-SNAPSHOT</version>
 	</parent>
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
@@ -75,7 +75,7 @@
 							<goal>jpackage</goal>
 						</goals>
 						<configuration>
-							<appVersion>1.0.5</appVersion>
+							<appVersion>1.0.6</appVersion>
 							<vendor>org.unigrid</vendor>
 							<module>fx/org.unigrid.janus.Janus</module>
 							<modulePaths>
@@ -100,7 +100,7 @@
 							<goal>jpackage</goal>
 						</goals>
 						<configuration>
-                            <appVersion>1.0.5</appVersion>
+                            <appVersion>1.0.6</appVersion>
 							<appImage>target/dist/Unigrid</appImage>
 						</configuration>
 					</execution>
@@ -218,7 +218,7 @@
 									<linuxPackageName>unigrid</linuxPackageName>
 									<linuxAppCategory>Utilities</linuxAppCategory>
 									<linuxMenuGroup>Utilities</linuxMenuGroup>
-                                                                        <icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
+                                    <icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
 								</configuration>
 							</execution>
 						</executions>

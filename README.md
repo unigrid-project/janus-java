@@ -24,7 +24,7 @@ To build a working package, you first need to create an app-image that can hold 
 ```
 mvn clean package # will build a jlink distribution and an app-image
 ```
-Next, you should copy the unigrid daemon executables for your operating system into Windows: `desktop\target\dist\Unigrid\runtime\bin` OSX:`desktop/target/dist/Unigrid.app/Contents/app` Linux:`desktop/target/dist/janus/bin/`. This can be done by GitHub Actions as an intermediate step. However, doing it by hand also works just fine.
+Next, you should copy the unigrid daemon executables for your operating system into Windows: `desktop\target\dist\Unigrid\runtime\bin` OSX:`desktop/target/dist/Unigrid.app/Contents/app` Linux:`desktop/target/dist/Unigrid/bin/`. This can be done by GitHub Actions as an intermediate step. However, doing it by hand also works just fine.
 
 Finally, we create the actual installer image with everything;
 ```
@@ -33,6 +33,11 @@ mvn jpackage:jpackage@installer
 ```
 
 The resulting installer image is placed under `desktop/target/dist/`.
+
+Troubleshooting
+---------------
+If you are running into issues starting the wallet a good place to look is our [documentation](https://docs.unigrid.org/) page.
+
 
 Automated Testing
 -----------------

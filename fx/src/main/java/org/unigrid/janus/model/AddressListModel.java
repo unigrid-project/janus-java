@@ -20,6 +20,9 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.service.DebugService;
 
@@ -28,6 +31,8 @@ public class AddressListModel {
 	public static final String ADDRESS_LIST = "addressList";
 	private static PropertyChangeSupport pcs;
 	private static ObservableList<Address> addresses = FXCollections.observableArrayList();
+	@Getter @Setter
+	private Boolean selected;
 
 	public AddressListModel() {
 		if (this.pcs != null) {
@@ -53,9 +58,16 @@ public class AddressListModel {
 		addresses.clear();
 		int newCount = 0;
 		for (Address g : list.getResult()) {
-			//debug.log(String.format("address: %s", g.getAddress()));
-			addresses.add(g);
-			newCount++;
+			//System.out.println(String.format("address: %s", g.getAmount()));
+			if(selected){
+				if(g.getAmount() > 0){
+					addresses.add(g);
+					newCount++;
+				}
+			}else {
+				addresses.add(g);
+				newCount++;
+			}
 		}
 		this.pcs.firePropertyChange(this.ADDRESS_LIST, oldCount, newCount);
 	}

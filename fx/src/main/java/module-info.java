@@ -36,7 +36,7 @@ module fx {
 	requires jersey.client;
 	requires org.kordamp.ikonli.javafx;
 	requires org.eclipse.yasson;
-
+	requires com.fasterxml.jackson.databind;
 	requires jsch;
 	requires java.sql;
 	requires java.instrument;

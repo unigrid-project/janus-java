@@ -47,6 +47,7 @@ import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 
