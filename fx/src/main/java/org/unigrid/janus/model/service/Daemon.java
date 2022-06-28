@@ -45,7 +45,8 @@ public class Daemon {
 	private DebugService debug;
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
 	private static final String DEFAULT_PATH_TO_DAEMON_KEY = "path.to.daemon";
-	
+	private static File file = new File(System.getProperty("user.dir")+ "/bin/");
+	private static String[] dirNameOfDaemon = file.list() == null ? new String[]{""} : file.list();
 	@Getter private String location = "";
 	private Optional<Process> process = Optional.empty();
 
@@ -56,7 +57,8 @@ public class Daemon {
 		"/opt/janus/bin/",
 		"/opt/unigrid/bin/",
 		System.getProperty("user.dir") + "/runtime/bin/",
-		System.getProperty("APPDIR") + "/"
+		System.getProperty("APPDIR") + "/",
+		"unigrid/" + System.getProperty("user.dir") + "/bin/" + dirNameOfDaemon[0] + "/bin/"
 	};
 
 	private URL primary = null;

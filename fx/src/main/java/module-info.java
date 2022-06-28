@@ -47,7 +47,7 @@ module fx {
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
 	
 	opens org.unigrid.janus to weld.core.impl, org.update4j;
-	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics;
+	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics, weld.core.impl;
 	opens org.unigrid.janus.controller.view to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j, javafx.graphics;
 	opens org.unigrid.janus.view to weld.core.impl;
 	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls;

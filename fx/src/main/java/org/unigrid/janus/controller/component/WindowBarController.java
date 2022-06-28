@@ -41,6 +41,7 @@ import javafx.animation.RotateTransition;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
+import org.unigrid.janus.view.component.WindowBarButton;
 
 @Dependent
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
@@ -54,19 +55,21 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	private Wallet wallet;
 	
-	//@Inject
-	//private UpdateWallet update;
+	@Inject
+	private UpdateWallet update;
 
 	private static DebugService debug = new DebugService();
 	private static WindowService window = WindowService.getInstance();
 	@FXML
 	private FontIcon spinner;
 	private RotateTransition rt;
-
+	
+	@FXML
+	private WindowBarButton updateButton;
+	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		/* Empty on purpose */
-		//update.addPropertyChangeListener(this);
+		update.addPropertyChangeListener(this);
 		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setWindowBarController(this);
@@ -88,9 +91,9 @@ public class WindowBarController implements Decoratable, Initializable, Property
 				//debug.log(status);
 			}
 		}
-		/*if(event.getPropertyName().equals(update.UPDATE_PROPERTY)) {
+		if(event.getPropertyName().equals(update.getUPDATE_PROPERTY())) {
 			showUpdateButton();
-		}*/
+		}
 	}
 
 	@FXML
@@ -139,7 +142,12 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		spinner.setVisible(false);
 	}
 	
-	public void showUpdateButton(){
-		
+	public void showUpdateButton() {
+		updateButton.setVisible(true);
+	}
+	
+	@FXML
+	public void onUpdate(MouseEvent event) {
+		updateButton.setVisible(false);
 	}
 }

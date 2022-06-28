@@ -57,6 +57,7 @@ import javafx.scene.control.ButtonType;
 
 import org.unigrid.janus.controller.view.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
+import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
@@ -91,8 +92,11 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@Inject
 	private JanusModel janusModel;
-
+	
 	@Inject
+	private UpdateWallet updateWallet;
+
+	@Inject;
 	private SplashScreenController splashController;
 
 	@Inject
