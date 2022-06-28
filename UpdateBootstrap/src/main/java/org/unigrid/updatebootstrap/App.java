@@ -45,14 +45,14 @@ public class App extends Application implements Delegate {
 	@Override
 	public void start(Stage stage) throws IOException {
 
-		final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
-		root.setLevel(Level.ALL);
+		//root.setLevel(Level.ALL);
 		
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
 		
-		URL configUrl = new URL("http://docs.unigrid.org/wallet/config.xml");
+		URL configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config.xml");
 		Configuration config = null;
 		
 		
