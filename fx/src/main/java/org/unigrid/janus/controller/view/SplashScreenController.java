@@ -39,16 +39,11 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 	private WindowService window;
 
-	@FXML
-	private ProgressBar progBar;
-	@FXML
-	private FontIcon spinnerPreLoad;
-	@FXML
-	private Label lblText;
-	@FXML
-	private Label lblStatus;
-	@FXML
-	private Label verLbl;
+	@FXML private ProgressBar progBar;
+	@FXML private FontIcon spinnerPreLoad;
+	@FXML private Label lblText;
+	@FXML private Label lblStatus;
+	@FXML private Label verLbl;
 
 	//@Inject
 	//private SplashScreen splashScreen;
@@ -57,6 +52,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		System.out.println("rb = " + rb);
 		System.out.println("ADDRESS   :" + this);
 		window = window.getInstance();
 		window.setSplashScreenController(this);

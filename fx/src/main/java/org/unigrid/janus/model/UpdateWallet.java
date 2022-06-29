@@ -61,10 +61,10 @@ public class UpdateWallet extends TimerTask {
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
 	}
-	
+
 	@PostConstruct
 	private void init() {
-	
+		
 		if(this.pcs != null) {
 			return;
 		}

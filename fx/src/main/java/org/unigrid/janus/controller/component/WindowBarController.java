@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller.component;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -43,7 +44,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.view.component.WindowBarButton;
 
-@Dependent
+//@Dependent
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
 
 	private Decorator movableWindowDecorator;
@@ -69,10 +70,13 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		//TODO: Remove when FX integration is done
+		//update = CDI.current().select(UpdateWallet.class).get();
 		update.addPropertyChangeListener(this);
 		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setWindowBarController(this);
+		updateButton.setVisible(false);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -143,6 +147,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	}
 	
 	public void showUpdateButton() {
+		System.out.println("Update button visable");
 		updateButton.setVisible(true);
 	}
 	

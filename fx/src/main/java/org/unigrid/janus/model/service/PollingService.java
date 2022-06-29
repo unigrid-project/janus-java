@@ -3,6 +3,7 @@ package org.unigrid.janus.model.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.Timer;
+import org.unigrid.janus.model.UpdateWallet;
 
 @ApplicationScoped
 public class PollingService {
@@ -14,6 +15,7 @@ public class PollingService {
 		debug.print("poll", PollingService.class.getSimpleName());
 		pollingTimer = new Timer(true);
 		pollingTimer.scheduleAtFixedRate(new LongPollingTask(), 0, interval);
+		pollingTimer.scheduleAtFixedRate(new UpdateWallet(), 0, interval);
 	}
 
 	public void stopPolling() {

@@ -219,6 +219,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					}
 				a.delete();
 			}
+			destination.mkdirs();
 		}
 		try {
 			Runtime.getRuntime().exec("tar -xf " + archive + " -C " + destination);

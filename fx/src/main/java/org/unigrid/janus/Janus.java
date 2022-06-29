@@ -97,7 +97,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject
 	private UpdateWallet updateWallet;
 
-	@Inject;
+	@Inject
 	private SplashScreenController splashController;
 
 	@Inject
