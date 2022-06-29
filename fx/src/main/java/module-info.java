@@ -64,5 +64,5 @@ module fx {
 	exports org.unigrid.janus.model.rpc to weld.core.impl;
 	exports org.unigrid.janus.view.component to weld.core.impl;
 	exports org.unigrid.janus.view.decorator to weld.core.impl;
-	exports org.unigrid.janus.model to org.eclipse.yasson;
+	exports org.unigrid.janus.model to org.eclipse.yasson, com.fasterxml.jackson.databind;
 }

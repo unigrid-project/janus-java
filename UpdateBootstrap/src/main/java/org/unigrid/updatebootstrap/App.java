@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.update4j.Configuration;
 import org.update4j.service.Delegate;
+import org.update4j.OS;
 import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -52,7 +53,19 @@ public class App extends Application implements Delegate {
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
 		
-		URL configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config.xml");
+		URL configUrl = null;
+		OS os = OS.CURRENT;
+		if(os.equals(OS.LINUX)) {
+			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-linux.xml");
+
+		}
+		else if(os.equals(OS.WINDOWS)) {
+			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-windows.xml");
+		}
+		else if(os.equals(OS.MAC)) {
+			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-mac.xml");
+		}
+		//configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config.xml");
 		Configuration config = null;
 		
 		
