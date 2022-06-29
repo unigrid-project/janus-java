@@ -1,0 +1,34 @@
+/*
+ * Empty Stylesheet file.
+ */
+
+.mainFxmlClass {
+
+}
+
+.my-progress-bar > .track {
+	-fx-background-color: "#05233d", "#05233d";
+	-fx-background-radius:0;
+	-fx-background-insets: 0, 1;
+}
+
+.my-progress-bar > .bar { 
+	-fx-padding: 1px; 
+	-fx-accent: "#FD7304";
+	-fx-background-insets: 0; 
+	-fx-background-radius: 2;
+	-fx-padding: 0.75em;
+}
+
+.button {
+	-fx-background-color: #ccc3;
+	-fx-background-radius: 50;
+	-fx-text-fill: #cccc;
+	-fx-border-color: #e72;
+	-fx-border-width: 2;
+	-fx-border-radius: 50;
+}
+
+.button:hover {
+	-fx-background-color: #ccc5;
+}
