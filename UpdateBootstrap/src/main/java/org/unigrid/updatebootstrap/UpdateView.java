@@ -140,12 +140,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					@Override
 					protected Void call() throws Exception {
 						System.out.println("calling the zip");
-						File f = new File(System.getProperty("user.dir") + "/unigrid/zip");
-						System.out.println(f.getPath());
-						if(!f.exists()) {
-							f.mkdirs();
-						}
-						Path zip = Paths.get(f.getAbsolutePath());
+						
+						Path zip = Paths.get(System.getProperty("user.dir") + "/unigrid/temp");
 
 						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException() == null) {
 							System.out.println("Do the install");
