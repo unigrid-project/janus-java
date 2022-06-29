@@ -42,7 +42,7 @@ public class StageProducer {
 		FXMLLoader loader = new FXMLLoader();
 		System.out.println("bajs producer");
 		
-		loader.setControllerFactory(controller -> {
+		/*loader.setControllerFactory(controller -> {
 			final BeanManager manager = CDI.current().getBeanManager();
 			final Bean<?> bean = manager.getBeans(controller).iterator().next();
 			System.out.println("Bean context " + manager.getContext(bean.getScope()).get(bean));
@@ -54,8 +54,8 @@ public class StageProducer {
 			}
 			catch(Exception e) {
 				return null;
-			}*/
-		});
+			}
+		});*/
 
 		final String name = Introspector.decapitalize(clazz.getSimpleName());
 		loader.setClassLoader(getClass().getClassLoader());

@@ -71,7 +71,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		//TODO: Remove when FX integration is done
-		//update = CDI.current().select(UpdateWallet.class).get();
+		update = CDI.current().select(UpdateWallet.class).get();
 		update.addPropertyChangeListener(this);
 		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
