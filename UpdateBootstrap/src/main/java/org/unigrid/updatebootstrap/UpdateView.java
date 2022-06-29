@@ -140,11 +140,16 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					@Override
 					protected Void call() throws Exception {
 						System.out.println("calling the zip");
-						Path zip = Paths.get("/home/marcus/Documents/unigrid/wallet-update.zip");
+						File f = new File(System.getProperty("user.dir") + "/unigrid/zip");
+						System.out.println(f.getPath());
+						if(!f.exists()) {
+							f.mkdirs();
+						}
+						Path zip = Paths.get(f.getAbsolutePath());
 
 						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException() == null) {
 							System.out.println("Do the install");
-							Archive.read(zip).install();
+							Archive.read(zip).install(true);
 							System.out.println("Install done!!");
 							if(OS.CURRENT == OS.LINUX || OS.CURRENT == OS.MAC){
 								untarDaemonLinux();							
@@ -154,6 +159,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 							}
 							launch();
 						} else {
+							Throwable s = config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException();
+							System.out.println(s);
 							System.out.println("updatehandler = null");
 							launch();
 						}
