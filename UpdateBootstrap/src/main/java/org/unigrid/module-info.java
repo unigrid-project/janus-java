@@ -5,8 +5,8 @@ module org.unigrid.updatebootstrap {
 	requires org.update4j;
 	requires java.instrument;
 	requires java.sql;
-	requires org.slf4j;
-	requires ch.qos.logback.classic;
+	requires transitive java.xml;
+	requires jdk.zipfs;
 	
     opens org.unigrid.updatebootstrap to javafx.fxml, org.update4j;
     opens org.unigrid.updatebootstrap.controllers to javafx.fxml;

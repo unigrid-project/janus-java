@@ -33,9 +33,6 @@ import java.util.List;
 import org.update4j.Configuration;
 import org.update4j.service.Delegate;
 import org.update4j.OS;
-import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import javafx.stage.StageStyle;
 
 public class App extends Application implements Delegate {
