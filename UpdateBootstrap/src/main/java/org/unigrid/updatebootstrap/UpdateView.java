@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.PublicKey;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.zip.ZipEntry;
@@ -116,6 +117,11 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	void update() {
+		List<FileMetadata> files = config.getFiles();
+		
+		for(FileMetadata file : files) {
+			System.out.println(file.getUri());
+		}
 		if (running.get()) {
 			abort = true;
 			System.out.println("the application is running");
@@ -141,9 +147,9 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					protected Void call() throws Exception {
 						System.out.println("calling the zip");
 						
-						Path zip = Paths.get(System.getProperty("user.dir"),"temp");
+						Path zip = Paths.get(System.getProperty("user.home"),"temp");
 						
-						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this).publicKey()).getException() == null) {
+						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException() == null) {
 							System.out.println("Do the install");
 							Archive.read(zip).install(true);
 							System.out.println("Install done!!");
@@ -203,7 +209,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		}
 		System.out.println(untarName);
-		String startLoacation = System.getProperty("user.dir");
+		String startLoacation = System.getProperty("user.home");
 		File archive = new File(startLoacation + "/unigrid/lib/" + untarName);
 		File destination = new File(startLoacation + "/unigrid/bin/");
 
@@ -247,7 +253,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		}
 		System.out.println(untarName);
-		String startLoacation = System.getProperty("user.dir");
+		String startLoacation = System.getProperty("user.home");
 		File archive = new File(startLoacation + "/unigrid/lib/" + untarName);
 		File destination = new File(startLoacation + "/unigrid/bin/");
 

@@ -60,6 +60,8 @@
                     <verbosity>debug</verbosity>
                     <mainClass>org.unigrid.updatebootstrap.App</mainClass>
                     <mainModule>org.unigrid.updatebootstrap</mainModule>
+                    <addModules>jdk.crypto.ec</addModules>
+                    <addModules>java.compiler</addModules>
                     <templateDir>src/main/templates</templateDir>
                     <stripDebug>false</stripDebug>
                     <excludeModules>jdk.jfr</excludeModules>
@@ -109,8 +111,8 @@
                             <javaOptions>
                                 <option>--add-opens</option>
                                 <option>java.base/java.lang=ALL-UNNAMED</option>
-                                <option>--add-opens</option>
-                                <option>java.base/java.lang=weld.core.impl</option>
+                                <option>-Djavax.net.ssl.trustStore=../lib/runtime/lib/security/cacert</option>
+                                <option>-Djavax.net.ssl.trustStorePassword=changeit</option>
                                 <option>-DAPPDIR=$APPDIR</option>
                                 <option>-DAPPVER=${project.version}</option>
                             </javaOptions>

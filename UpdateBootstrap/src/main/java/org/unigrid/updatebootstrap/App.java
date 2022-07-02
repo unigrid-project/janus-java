@@ -13,9 +13,10 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.updatebootstrap;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,17 +24,26 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.List;
 import org.update4j.Configuration;
 import org.update4j.service.Delegate;
 import org.update4j.OS;
 import javafx.stage.StageStyle;
+//import ch.qos.logback.classic.Level;
+//import ch.qos.logback.classic.Logger;
+//import org.slf4j.LoggerFactory;
 
 public class App extends Application implements Delegate {
 
@@ -44,40 +54,35 @@ public class App extends Application implements Delegate {
 	public void start(Stage stage) throws IOException {
 
 		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-
 		//root.setLevel(Level.ALL);
-		
+
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
-		
+
 		URL configUrl = null;
 		OS os = OS.CURRENT;
-		if(os.equals(OS.LINUX)) {
+		if (os.equals(OS.LINUX)) {
 			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-linux.xml");
 
-		}
-		else if(os.equals(OS.WINDOWS)) {
+		} else if (os.equals(OS.WINDOWS)) {
 			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-windows.xml");
-		}
-		else if(os.equals(OS.MAC)) {
+		} else if (os.equals(OS.MAC)) {
 			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-mac.xml");
 		}
 		//configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config.xml");
 		Configuration config = null;
-		
-		
-		
-		try(Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+
+		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+			System.out.println("are we getting here??????");
 			config = Configuration.read(in);
-		}
-		catch(IOException e) {
+		} catch (IOException e) {
 			System.out.println(e.getMessage());
-			try(Reader in = Files.newBufferedReader(Paths.get("/home/marcus/Documents/unigrid/config/UpdateWalletConfig/config.xml"))) {
+			try ( Reader in = Files.newBufferedReader(Paths.get("/home/marcus/Documents/unigrid/config/UpdateWalletConfig/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
 		}
-		
+
 		config.sync();
 		scene = new Scene(loadFXML("updateView"));
 		stage.initStyle(StageStyle.UNDECORATED);
