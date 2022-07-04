@@ -99,7 +99,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		launch.setDisable(true);
 
 		running = new SimpleBooleanProperty(this, "running");
-
+		
 		status.setOpacity(0);
 		FadeTransition fade = new FadeTransition(Duration.seconds(1.5), status);
 		fade.setToValue(0);
@@ -147,8 +147,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					protected Void call() throws Exception {
 						System.out.println("calling the zip");
 						
-						Path zip = Paths.get(System.getProperty("user.home"),"temp");
-						
+						Path zip = Paths.get(System.getProperty("user.home"), "unigrid","temp");
+						System.out.println(zip);
 						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException() == null) {
 							System.out.println("Do the install");
 							Archive.read(zip).install(true);
@@ -232,6 +232,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		}
 		try {
 			Runtime.getRuntime().exec("tar -xf " + archive + " -C " + destination);
+			Runtime.getRuntime().exec("find " + destination + " -type f -name 'unigrid*' -exec cp {} " + destination + " \\;");
 
 		} catch (Exception e) {
 			System.err.println("it all whent to shit");
@@ -253,7 +254,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		}
 		System.out.println(untarName);
-		String startLoacation = System.getProperty("user.home");
+		String startLoacation = System.getProperty("user.home") + "/AppData/Roaming";
 		File archive = new File(startLoacation + "/unigrid/lib/" + untarName);
 		File destination = new File(startLoacation + "/unigrid/bin/");
 
@@ -295,7 +296,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					}
 					fos.close();
 				}
-
+				zipEntry = zis.getNextEntry();
 			}
 		} catch (Exception e) {
 			System.err.println("it all whent to shit");

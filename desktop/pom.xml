@@ -111,8 +111,6 @@
                             <javaOptions>
                                 <option>--add-opens</option>
                                 <option>java.base/java.lang=ALL-UNNAMED</option>
-                                <option>-Djavax.net.ssl.trustStore=../lib/runtime/lib/security/cacert</option>
-                                <option>-Djavax.net.ssl.trustStorePassword=changeit</option>
                                 <option>-DAPPDIR=$APPDIR</option>
                                 <option>-DAPPVER=${project.version}</option>
                             </javaOptions>
