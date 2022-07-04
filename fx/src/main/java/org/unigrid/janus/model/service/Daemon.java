@@ -58,7 +58,7 @@ public class Daemon {
 		"/opt/unigrid/bin/",
 		System.getProperty("user.dir") + "/runtime/bin/",
 		System.getProperty("APPDIR") + "/",
-		System.getProperty("user.home") + "/AppData/Roaming/unigrid/bin/"
+		System.getProperty("user.home") + "/AppData/Roaming/UNIGRID/bin/"
 	};
 
 	private URL primary = null;

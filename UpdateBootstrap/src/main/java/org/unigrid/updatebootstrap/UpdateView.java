@@ -99,7 +99,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		launch.setDisable(true);
 
 		running = new SimpleBooleanProperty(this, "running");
-		
+
 		status.setOpacity(0);
 		FadeTransition fade = new FadeTransition(Duration.seconds(1.5), status);
 		fade.setToValue(0);
@@ -118,8 +118,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	void update() {
 		List<FileMetadata> files = config.getFiles();
-		
-		for(FileMetadata file : files) {
+
+		for (FileMetadata file : files) {
 			System.out.println(file.getUri());
 		}
 		if (running.get()) {
@@ -146,17 +146,16 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					@Override
 					protected Void call() throws Exception {
 						System.out.println("calling the zip");
-						
-						Path zip = Paths.get(System.getProperty("user.home"), "unigrid","temp");
+
+						Path zip = Paths.get(System.getProperty("user.home"), "unigrid", "temp");
 						System.out.println(zip);
 						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException() == null) {
 							System.out.println("Do the install");
 							Archive.read(zip).install(true);
 							System.out.println("Install done!!");
-							if(OS.CURRENT == OS.LINUX || OS.CURRENT == OS.MAC){
-								untarDaemonLinux();							
-							}
-							else {
+							if (OS.CURRENT == OS.LINUX || OS.CURRENT == OS.MAC) {
+								untarDaemonLinux();
+							} else {
 								unzipDaemonWindows();
 							}
 							launch();
@@ -199,10 +198,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 		List<FileMetadata> files = config.getFiles();
 		String untarName = "";
-		for(FileMetadata file : files) {
-			System.out.println("checking for file name");
-			if(!file.isModulepath()){
-				System.out.println("filename found");
+		for (FileMetadata file : files) {
+			if (!file.isModulepath()) {
 				String s = file.getUri().toString();
 				String[] arr = s.split("/");
 				untarName = arr[arr.length - 1];
@@ -218,7 +215,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		} else {
 			File[] bin = destination.listFiles();
 			for (File a : bin) {
-				File[] unigrid = a.listFiles();
+				if (a.isDirectory()) {
+					File[] unigrid = a.listFiles();
 					for (File b : unigrid) {
 						File[] bintar = b.listFiles();
 						for (File file : bintar) {
@@ -226,6 +224,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 						}
 						b.delete();
 					}
+				}
+
 				a.delete();
 			}
 			destination.mkdirs();
@@ -239,15 +239,13 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			System.err.println(e.getMessage());
 		}
 	}
-	
-	private void unzipDaemonWindows() {
 
+	private void unzipDaemonWindows() {
+		String[] filesToMove = new String[3];
 		List<FileMetadata> files = config.getFiles();
 		String untarName = "";
-		for(FileMetadata file : files) {
-			System.out.println("checking for file name");
-			if(!file.isModulepath()){
-				System.out.println("filename found");
+		for (FileMetadata file : files) {
+			if (!file.isModulepath()) {
 				String s = file.getUri().toString();
 				String[] arr = s.split("/");
 				untarName = arr[arr.length - 1];
@@ -263,7 +261,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		} else {
 			File[] bin = destination.listFiles();
 			for (File a : bin) {
-				File[] unigrid = a.listFiles();
+				if (a.isDirectory()) {
+					File[] unigrid = a.listFiles();
 					for (File b : unigrid) {
 						File[] bintar = b.listFiles();
 						for (File file : bintar) {
@@ -271,6 +270,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 						}
 						b.delete();
 					}
+				}
+
 				a.delete();
 			}
 		}
@@ -281,13 +282,18 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			System.out.println(zis.getNextEntry());
 			ZipEntry zipEntry = zis.getNextEntry();
 			System.out.println(zipEntry.getSize());
+			int counter = 0;
 			while (zipEntry != null) {
 				File newFile = new File(destination, zipEntry.getName());
 				System.out.println("Zipentry is not null");
-				if (!newFile.isDirectory() && !newFile.mkdirs()) {
-
+				if (zipEntry.isDirectory()) {
+					if (!newFile.isDirectory() && !newFile.mkdirs()) {
+					}
 				} else {
 					File parent = newFile.getParentFile();
+
+					if (!parent.isDirectory() && !parent.mkdirs()) {
+					}
 
 					FileOutputStream fos = new FileOutputStream(newFile);
 					int len;
@@ -295,12 +301,23 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 						fos.write(buffer, 0, len);
 					}
 					fos.close();
+					filesToMove[counter] = zipEntry.getName();
 				}
 				zipEntry = zis.getNextEntry();
 			}
+			zis.closeEntry();
+			zis.close();
 		} catch (Exception e) {
 			System.err.println("it all whent to shit");
 			System.err.println(e.getMessage());
+		}
+		try {
+			for (String s : filesToMove) {
+				Runtime.getRuntime().exec("xcopy " + Paths.get(destination.getAbsolutePath() + "/" + s)
+					+ " " + destination.getAbsolutePath());
+			}
+		} catch (IOException ioe) {
+			System.out.println(ioe.getMessage());
 		}
 	}
 
