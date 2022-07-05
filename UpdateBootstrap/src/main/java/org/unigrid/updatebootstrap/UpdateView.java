@@ -4,14 +4,15 @@
  */
 package org.unigrid.updatebootstrap;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.PublicKey;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.zip.ZipEntry;
@@ -32,7 +33,6 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -231,13 +231,46 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			destination.mkdirs();
 		}
 		try {
-			Runtime.getRuntime().exec("tar -xf " + archive + " -C " + destination);
-			Runtime.getRuntime().exec("find " + destination + " -type f -name 'unigrid*' -exec cp {} " + destination + " \\;");
+			var pb = new ProcessBuilder("tar", "-xf", archive.toString(), "-C", destination.toString());
+			var process = pb.start();
+	
+			try (var reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream()))) {
 
+				String line;
+	
+				while ((line = reader.readLine()) != null) {
+					System.out.println(line);
+				}
+			}
 		} catch (Exception e) {
-			System.err.println("it all whent to shit");
 			System.err.println(e.getMessage());
 		}
+		try {
+			var pb = new ProcessBuilder();
+			if (OS.CURRENT == OS.MAC) {
+				pb.command("find", destination.toString(), "-perm", "+111", "-type", "f", "-name", "unigrid*");
+			} else {
+				pb.command("find", destination.toString(), "-type", "f", "-name", "unigrid*");
+			}
+
+			var process = pb.start();
+	
+			try (var reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream()))) {
+	
+				String line;
+	
+				while ((line = reader.readLine()) != null) {
+					System.out.println(line);
+					var cp = new ProcessBuilder("cp", line, destination.toString());
+					cp.start();
+				}
+			}
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+
 	}
 
 	private void unzipDaemonWindows() {
