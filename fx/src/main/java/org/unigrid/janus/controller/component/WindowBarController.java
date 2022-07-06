@@ -88,7 +88,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		t.install(updateButton, t);
 
 		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
-		pollingService.pollForUpdate(7200000);
+		//pollingService.pollForUpdate(7200000);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
