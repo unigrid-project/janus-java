@@ -18,7 +18,6 @@ package org.unigrid.janus.model;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -78,13 +77,13 @@ public class UpdateWallet extends TimerTask {
 		
 		try {
 			if (os.equals(OS.LINUX)) {
-				configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-linux.xml");
+				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-linux.xml");
 				System.out.println("getting linux config");
 			} else if (os.equals(OS.WINDOWS)) {
-				configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-windows.xml");
+				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
 				System.out.println("getting windows config");
 			} else if (os.equals(OS.MAC)) {
-				configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-mac.xml");
+				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
 				System.out.println("getting mac config");
 			}
 		}

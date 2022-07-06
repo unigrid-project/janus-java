@@ -47,17 +47,18 @@ public class Daemon {
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
 	private static final String DEFAULT_PATH_TO_DAEMON_KEY = "path.to.daemon";
 	private static File file = new File(System.getProperty("user.dir") + "/bin/");
-	private static String[] dirNameOfDaemon = file.list() == null ? new String[]{""} : file.list();
-	@Getter private String location = "";
+	private static String[] dirNameOfDaemon = file.list() == null ? new String[] { "" } : file.list();
+	@Getter
+	private String location = "";
 	private Optional<Process> process = Optional.empty();
 
-	private static final String[] LOCATIONS = new String[]{
-		getBaseDirectory(), "/bin/"
+	private static final String[] LOCATIONS = new String[] {
+			getBaseDirectory()
 	};
 
 	private URL primary = null;
 
-	private static final String[] EXEC = new String[]{"unigridd", "unigridd.exe"};
+	private static final String[] EXEC = new String[] { "unigridd", "unigridd.exe" };
 
 	@PostConstruct
 	@SneakyThrows
@@ -66,10 +67,10 @@ public class Daemon {
 			System.out.println("The path is set to default");
 			return;
 		}
-		//String loc = System.getProperty("APPDIR");
-		//String root = System.getProperty("ROOTDIR");
-		//debug.print("$APPDIR "+ loc, Daemon.class.getSimpleName());
-		//debug.print("$ROOTDIR "+ root, Daemon.class.getSimpleName());
+		// String loc = System.getProperty("APPDIR");
+		// String root = System.getProperty("ROOTDIR");
+		// debug.print("$APPDIR "+ loc, Daemon.class.getSimpleName());
+		// debug.print("$ROOTDIR "+ root, Daemon.class.getSimpleName());
 		for (int i = 0; i < LOCATIONS.length; i++) {
 			for (int j = 0; j < EXEC.length; j++) {
 				System.out.println(LOCATIONS[i] + EXEC[j]);
@@ -94,10 +95,10 @@ public class Daemon {
 
 	private void runDaemon() throws IOException {
 		debug.print("starting daemon", Daemon.class.getSimpleName());
-		//if (isDaemonRunning()) {
-		process = Optional.of(Runtime.getRuntime().exec(new String[]{location}));
+		// if (isDaemonRunning()) {
+		process = Optional.of(Runtime.getRuntime().exec(new String[] { location }));
 
-		//}
+		// }
 	}
 
 	private boolean isDaemonRunning() {
@@ -137,9 +138,8 @@ public class Daemon {
 				runDaemon();
 			} else if (!isHttp()) {
 				throw new ConfigurationException(String.format("Invalid protocol specified for RPC "
-					+ "daemon backend in property '%s'. This has to point to a valid "
-					+ "HTTP endpoint.", PROPERTY_LOCATION_KEY)
-				);
+						+ "daemon backend in property '%s'. This has to point to a valid "
+						+ "HTTP endpoint.", PROPERTY_LOCATION_KEY));
 			} else {
 				debug.print("findFile", Daemon.class.getSimpleName());
 				findFile();
@@ -147,10 +147,12 @@ public class Daemon {
 			}
 		} else {
 			/**
-			 * throw new ConfigurationException(String.format("No location to the daemon specified in " + " property
-			 * '%s'. This should point to either a local file, " + "or a remote HTTP location.",
+			 * throw new ConfigurationException(String.format("No location to the daemon
+			 * specified in " + " property
+			 * '%s'. This should point to either a local file, " + "or a remote HTTP
+			 * location.",
 			 * PROPERTY_LOCATION_KEY)
-			);*
+			 * );*
 			 */
 			findFile();
 			start();
@@ -184,7 +186,7 @@ public class Daemon {
 
 	@SneakyThrows
 	private String getDefaultPathToDaemon() {
-		//location = Preferences.get().get(DEFAULT_PATH_TO_DAEMON_KEY, location);
+		// location = Preferences.get().get(DEFAULT_PATH_TO_DAEMON_KEY, location);
 		location = "";
 		System.out.println("Get path from config " + location);
 		return location;
@@ -213,16 +215,17 @@ public class Daemon {
 		String blockRoot = "";
 		switch (OS.CURRENT) {
 			case LINUX:
-				blockRoot = System.getProperty("user.home").concat("/.unigrid/dependencies");
+				blockRoot = System.getProperty("user.home").concat("/.unigrid/dependencies/bin/");
 				break;
 			case WINDOWS:
-				blockRoot = System.getProperty("user.home").concat("/AppData/Roaming/unigrid/dependencies");
+				blockRoot = System.getProperty("user.home").concat("/AppData/Roaming/unigrid/dependencies/bin/");
 				break;
 			case MAC:
-				blockRoot = System.getProperty("user.home").concat("/Library/Application Support/unigrid/dependencies");
+				blockRoot = System.getProperty("user.home")
+						.concat("/Library/Application Support/unigrid/dependencies/bin/");
 				break;
 			default:
-				blockRoot = System.getProperty("user.home").concat("/unigrid/dependencies");
+				blockRoot = System.getProperty("user.home").concat("/unigrid/dependencies/bin/");
 				break;
 		}
 
