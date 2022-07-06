@@ -142,13 +142,15 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 				launch();
 			} else {
 				Task<Void> doUpdate = new Task<>() {
-
 					@Override
 					protected Void call() throws Exception {
 						System.out.println("calling the zip");
 
-						Path zip = Paths.get(System.getProperty("user.home"), "unigrid", "temp");
-						System.out.println(zip);
+						Path zip = Paths.get(getBaseDirectory(), "temp");
+						System.out.println("zip location: " + zip.toString());
+
+						System.out.println("depenendencies location: " + getBaseDirectory().toString());
+
 						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException() == null) {
 							System.out.println("Do the install");
 							Archive.read(zip).install(true);
@@ -206,9 +208,9 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		}
 		System.out.println(untarName);
-		String startLoacation = System.getProperty("user.home");
-		File archive = new File(startLoacation + "/unigrid/lib/" + untarName);
-		File destination = new File(startLoacation + "/unigrid/bin/");
+		String startLoacation = getBaseDirectory();
+		File archive = new File(startLoacation + "/lib/" + untarName);
+		File destination = new File(startLoacation + "/bin/");
 
 		if (!destination.exists()) {
 			destination.mkdirs();
@@ -232,12 +234,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		try {
 			var pb = new ProcessBuilder("tar", "-xf", archive.toString(), "-C", destination.toString());
 			var process = pb.start();
-	
-			try (var reader = new BufferedReader(
+
+			try ( var reader = new BufferedReader(
 				new InputStreamReader(process.getInputStream()))) {
 
 				String line;
-	
+
 				while ((line = reader.readLine()) != null) {
 					System.out.println(line);
 				}
@@ -255,12 +257,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 
 			var process = pb.start();
-	
-			try (var reader = new BufferedReader(
+
+			try ( var reader = new BufferedReader(
 				new InputStreamReader(process.getInputStream()))) {
-	
+
 				String line;
-	
+
 				while ((line = reader.readLine()) != null) {
 					System.out.println(line);
 					var cp = new ProcessBuilder("cp", line, destination.toString());
@@ -362,6 +364,30 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Thread runner = new Thread(runnable);
 		runner.setDaemon(true);
 		runner.start();
+	}
+
+	private String getBaseDirectory() {
+		String blockRoot = "";
+		switch (OS.CURRENT) {
+			case LINUX:
+				blockRoot = System.getProperty("user.home").concat("/.unigrid/dependencies");
+				break;
+			case WINDOWS:
+				blockRoot = System.getProperty("user.home").concat("/AppData/Roaming/unigrid/dependencies");
+				break;
+			case MAC:
+				blockRoot = System.getProperty("user.home").concat("/Library/Application Support/unigrid/dependencies");
+				break;
+			default:
+				blockRoot = System.getProperty("user.home").concat("/unigrid/dependencies");
+				break;
+		}
+
+		File depenendencies = new File(blockRoot);
+		if (!depenendencies.exists()) {
+			depenendencies.mkdirs();
+		}
+		return blockRoot;
 	}
 
 	@Override
