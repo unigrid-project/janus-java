@@ -9,6 +9,9 @@ import org.unigrid.janus.model.UpdateWallet;
 @ApplicationScoped
 public class PollingService {
 
+	@Inject
+	private UpdateWallet updateWallet;
+	
 	private static Timer pollingTimer;
 	private static Timer updateTimer;
 	@Inject
@@ -28,8 +31,9 @@ public class PollingService {
 	}
 
 	public void pollForUpdate(int interval) {
+		System.out.println("starting the update timer");
 		updateTimer = new Timer(true);
-		updateTimer.scheduleAtFixedRate(CDI.current().select(UpdateWallet.class).get(), 0, interval);
+		updateTimer.scheduleAtFixedRate(updateWallet, 0, interval);
 
 	}
 
