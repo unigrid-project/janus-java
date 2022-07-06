@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BlockCount;
+import org.update4j.OS;
 
 @Eager
 @ApplicationScoped
@@ -45,31 +46,23 @@ public class Daemon {
 	private DebugService debug;
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
 	private static final String DEFAULT_PATH_TO_DAEMON_KEY = "path.to.daemon";
-	private static File file = new File(System.getProperty("user.dir")+ "/bin/");
+	private static File file = new File(System.getProperty("user.dir") + "/bin/");
 	private static String[] dirNameOfDaemon = file.list() == null ? new String[]{""} : file.list();
 	@Getter private String location = "";
 	private Optional<Process> process = Optional.empty();
 
-	private static final String[] LOCATIONS = new String[] {
-		System.getProperty("user.dir") + "/", 
-		"/usr/bin/", 
-		"/opt/bin/",
-		"/opt/janus/bin/",
-		"/opt/unigrid/bin/",
-		System.getProperty("user.dir") + "/runtime/bin/",
-		System.getProperty("APPDIR") + "/",
-		System.getProperty("user.home") + "/AppData/Roaming/UNIGRID/bin/",
-		"/Users/home.dir/Library/Application Support/UNIGRID/bin/"
+	private static final String[] LOCATIONS = new String[]{
+		getBaseDirectory(), "/bin/"
 	};
 
 	private URL primary = null;
-	
-	private static final String[] EXEC = new String[] { "unigridd", "unigridd.exe" };
-	
+
+	private static final String[] EXEC = new String[]{"unigridd", "unigridd.exe"};
+
 	@PostConstruct
 	@SneakyThrows
 	private void init() {
-		if (!getDefaultPathToDaemon().equals("")){
+		if (!getDefaultPathToDaemon().equals("")) {
 			System.out.println("The path is set to default");
 			return;
 		}
@@ -93,7 +86,7 @@ public class Daemon {
 		if (primary != null && isLocalFile(primary.getFile())) {
 			location = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, primary.getFile());
 		} else {
-			location = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, "http://127.0.0.1:51993");			
+			location = Preferences.PROPS.getString(PROPERTY_LOCATION_KEY, "http://127.0.0.1:51993");
 		}
 		System.out.println("end of init");
 
@@ -102,8 +95,8 @@ public class Daemon {
 	private void runDaemon() throws IOException {
 		debug.print("starting daemon", Daemon.class.getSimpleName());
 		//if (isDaemonRunning()) {
-		process = Optional.of(Runtime.getRuntime().exec(new String[]{ location }));
-			
+		process = Optional.of(Runtime.getRuntime().exec(new String[]{location}));
+
 		//}
 	}
 
@@ -153,40 +146,44 @@ public class Daemon {
 				start();
 			}
 		} else {
-			/**throw new ConfigurationException(String.format("No location to the daemon specified in "
-				+ " property '%s'. This should point to either a local file, "
-				+ "or a remote HTTP location.", PROPERTY_LOCATION_KEY)
-			);**/
+			/**
+			 * throw new ConfigurationException(String.format("No location to the daemon specified in " + " property
+			 * '%s'. This should point to either a local file, " + "or a remote HTTP location.",
+			 * PROPERTY_LOCATION_KEY)
+			);*
+			 */
 			findFile();
 			start();
 		}
 	}
-	
+
 	@SneakyThrows
-	private void findFile(){
-		
+	private void findFile() {
+
 		Alert alert = new Alert(AlertType.INFORMATION);
 		alert.setTitle("Unigrid Janus");
 		alert.setHeaderText("Unigrid backend program not found!");
 		alert.setContentText("Set the path to unigridd");
 		alert.showAndWait();
-		
+
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Pick file unigridd");
-		
+
 		File temp = fileChooser.showOpenDialog(new Stage());
-		if (temp.getAbsoluteFile() == null){ return; }
+		if (temp.getAbsoluteFile() == null) {
+			return;
+		}
 		location = temp.getAbsolutePath();
 		addPathAsDefault(location);
 	}
-	
+
 	@SneakyThrows
-	private void addPathAsDefault(String path){
+	private void addPathAsDefault(String path) {
 		Preferences.get().put(DEFAULT_PATH_TO_DAEMON_KEY, path);
 	}
-	
+
 	@SneakyThrows
-	private String getDefaultPathToDaemon(){
+	private String getDefaultPathToDaemon() {
 		//location = Preferences.get().get(DEFAULT_PATH_TO_DAEMON_KEY, location);
 		location = "";
 		System.out.println("Get path from config " + location);
@@ -210,5 +207,29 @@ public class Daemon {
 		}
 
 		return "http://127.0.0.1:51993";
+	}
+
+	private static String getBaseDirectory() {
+		String blockRoot = "";
+		switch (OS.CURRENT) {
+			case LINUX:
+				blockRoot = System.getProperty("user.home").concat("/.unigrid/dependencies");
+				break;
+			case WINDOWS:
+				blockRoot = System.getProperty("user.home").concat("/AppData/Roaming/unigrid/dependencies");
+				break;
+			case MAC:
+				blockRoot = System.getProperty("user.home").concat("/Library/Application Support/unigrid/dependencies");
+				break;
+			default:
+				blockRoot = System.getProperty("user.home").concat("/unigrid/dependencies");
+				break;
+		}
+
+		File depenendencies = new File(blockRoot);
+		if (!depenendencies.exists()) {
+			depenendencies.mkdirs();
+		}
+		return blockRoot;
 	}
 }

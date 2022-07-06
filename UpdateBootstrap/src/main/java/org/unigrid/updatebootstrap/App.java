@@ -63,17 +63,23 @@ public class App extends Application implements Delegate {
 		}
 		//configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config.xml");
 		Configuration config = null;
-
+		try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"),"/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
+			//try ( Reader in = Files.newBufferedReader(Paths.get("/home/marcus/Documents/unigrid/config/UpdateWalletConfig/config.xml"))) {
+				System.out.println("reading local config xml");
+				config = Configuration.read(in);
+			}
+			/*
 		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			System.out.println("are we getting here??????");
 			config = Configuration.read(in);
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
-			try ( Reader in = Files.newBufferedReader(Paths.get("/home/marcus/Documents/unigrid/config/UpdateWalletConfig/config.xml"))) {
+			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"),"/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
+			//try ( Reader in = Files.newBufferedReader(Paths.get("/home/marcus/Documents/unigrid/config/UpdateWalletConfig/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
-		}
+		}*/
 
 		config.sync();
 		scene = new Scene(loadFXML("updateView"));

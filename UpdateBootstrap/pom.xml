@@ -4,11 +4,11 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>org.unigrid.janus</groupId>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.0.6-SNAPSHOT</version>
     </parent>
     <groupId>org.unigrid</groupId>
     <artifactId>UpdateBootstrap</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.6-SNAPSHOT</version>
     <packaging>jar</packaging>
     <properties>
         <mainClass>org.unigrid.updatebootstrap.App</mainClass>
