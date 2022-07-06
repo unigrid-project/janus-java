@@ -34,11 +34,10 @@ public class UpdateWalletConfig {
 		String configLocation = System.getProperty("user.dir");
 		String homeDir = System.getProperty("user.home");
 		String dir = configLocation;
-		
 		Configuration config = Configuration.builder()
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
 			//.basePath("../../desktop/target/dist/Unigrid/lib/app/mods/")
-			.basePath("${user.home}/unigrid/lib/")
+			.basePath("${user.home}/.unigrid/dependencies/lib/")
 			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.6-SNAPSHOT.jar")
 				//.uri("https://drive.google.com/uc?export=download&id=1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay").modulepath())
 				.uri("https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar").modulepath())
@@ -165,7 +164,7 @@ public class UpdateWalletConfig {
 		Configuration configWindows = Configuration.builder()
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
 			//.basePath("../../desktop/target/dist/Unigrid/lib/app/mods/")
-			.basePath("${user.home}/AppData/Roaming/unigrid/lib/")
+			.basePath("${user.home}/AppData/Roaming/unigrid/dependencies/lib/")
 			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.6-SNAPSHOT.jar")
 				//.uri("https://drive.google.com/uc?export=download&id=1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay").modulepath())
 				.uri("https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar").modulepath())
@@ -292,7 +291,7 @@ public class UpdateWalletConfig {
 		Configuration configMac = Configuration.builder()
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
 			//.basePath("../../desktop/target/dist/Unigrid/lib/app/mods/")
-			.basePath("${user.home}/unigrid/lib/")
+			.basePath("${user.home}/Library/Application Support/unigrid/dependencies/lib/")
 			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.6-SNAPSHOT.jar")
 				//.uri("https://drive.google.com/uc?export=download&id=1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay").modulepath())
 				.uri("https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar").modulepath())
