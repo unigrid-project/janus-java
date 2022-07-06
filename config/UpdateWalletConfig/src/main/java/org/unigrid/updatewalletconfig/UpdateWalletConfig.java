@@ -152,7 +152,7 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("org.jboss.weld","weld-spi","4.0.SP1")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/yasson-2.0.0-M1.jar")
 				.uri(mavenUrl("org.eclipse","yasson","2.0.0-M1")).modulepath())
-			.file(FileMetadata.readFrom("/home/marcus/Downloads/unigrid-2.0.2-x86_64-linux-gnu.tar.gz").uri(getDaemonUrl(OS.LINUX)))
+			.file(FileMetadata.readFrom(System.getProperty("user.home") + "/Downloads/unigrid-2.0.2-x86_64-linux-gnu.tar.gz").uri(getDaemonUrl(OS.LINUX)))
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
 			.build();
@@ -279,7 +279,7 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("org.jboss.weld","weld-spi","4.0.SP1")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/yasson-2.0.0-M1.jar")
 				.uri(mavenUrl("org.eclipse","yasson","2.0.0-M1")).modulepath())
-			.file(FileMetadata.readFrom("/home/marcus/Downloads/unigrid-2.0.2-win64.zip").uri(getDaemonUrl(OS.WINDOWS)))
+			.file(FileMetadata.readFrom(System.getProperty("user.home") + "/Downloads/unigrid-2.0.2-win64.zip").uri(getDaemonUrl(OS.WINDOWS)))
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
 			.build();
@@ -406,7 +406,7 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("org.jboss.weld","weld-spi","4.0.SP1")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/yasson-2.0.0-M1.jar")
 				.uri(mavenUrl("org.eclipse","yasson","2.0.0-M1")).modulepath())
-			.file(FileMetadata.readFrom("/home/marcus/Downloads/unigrid-2.0.2-osx64.tar.gz").uri(getDaemonUrl(OS.MAC)))
+			.file(FileMetadata.readFrom(System.getProperty("user.home") + "/Downloads/unigrid-2.0.2-osx64.tar.gz").uri(getDaemonUrl(OS.MAC)))
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
 			.build();
