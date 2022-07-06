@@ -20,3 +20,5 @@ fx/unigrid-cli
 /UpdateBootstrap/target/
 /updateBootstrapConfig/target/
 /config/UpdateWalletConfig/target/
+/config/config*
+
