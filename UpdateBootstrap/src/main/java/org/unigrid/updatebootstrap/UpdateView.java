@@ -4,15 +4,19 @@
  */
 package org.unigrid.updatebootstrap;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.zip.ZipEntry;
@@ -67,6 +71,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	private Stage primaryStage;
 
 	private static UpdateView updateView = null;
+	private static String startLoacation = getBaseDirectory();
 
 	private UpdateView() {
 
@@ -151,7 +156,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 						System.out.println("depenendencies location: " + getBaseDirectory().toString());
 
-						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException() == null) {
+						if (config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this))
+								.getException() == null) {
 							System.out.println("Do the install");
 							Archive.read(zip).install(true);
 							System.out.println("Install done!!");
@@ -162,7 +168,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 							}
 							launch();
 						} else {
-							Throwable s = config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this)).getException();
+							Throwable s = config.update(UpdateOptions.archive(zip).updateHandler(UpdateView.this))
+									.getException();
 							System.out.println(s);
 							System.out.println("updatehandler = null");
 							launch();
@@ -208,7 +215,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		}
 		System.out.println(untarName);
-		String startLoacation = getBaseDirectory();
+
 		File archive = new File(startLoacation + "/lib/" + untarName);
 		File destination = new File(startLoacation + "/bin/");
 
@@ -235,8 +242,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			var pb = new ProcessBuilder("tar", "-xf", archive.toString(), "-C", destination.toString());
 			var process = pb.start();
 
-			try ( var reader = new BufferedReader(
-				new InputStreamReader(process.getInputStream()))) {
+			try (var reader = new BufferedReader(
+					new InputStreamReader(process.getInputStream()))) {
 
 				String line;
 
@@ -258,8 +265,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 			var process = pb.start();
 
-			try ( var reader = new BufferedReader(
-				new InputStreamReader(process.getInputStream()))) {
+			try (var reader = new BufferedReader(
+					new InputStreamReader(process.getInputStream()))) {
 
 				String line;
 
@@ -287,73 +294,72 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		}
 		System.out.println(untarName);
-		String startLoacation = System.getProperty("user.home") + "/AppData/Roaming";
-		File archive = new File(startLoacation + "/unigrid/lib/" + untarName);
-		File destination = new File(startLoacation + "/unigrid/bin/");
 
-		if (!destination.exists()) {
-			destination.mkdirs();
-		} else {
-			File[] bin = destination.listFiles();
-			for (File a : bin) {
-				if (a.isDirectory()) {
-					File[] unigrid = a.listFiles();
-					for (File b : unigrid) {
-						File[] bintar = b.listFiles();
-						for (File file : bintar) {
-							file.delete();
-						}
-						b.delete();
-					}
-				}
-
-				a.delete();
-			}
-		}
+		Path source = Paths.get(startLoacation + "/lib/" + untarName);
+		Path target = Paths.get(startLoacation + "/bin/");
 		try {
-			byte[] buffer = new byte[1024];
-			ZipInputStream zis = new ZipInputStream(new FileInputStream(archive));
-			System.out.println(zis.available());
-			System.out.println(zis.getNextEntry());
+			unzipFolder(source, target);
+			System.out.println("Done");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void unzipFolder(Path source, Path target) throws IOException {
+		final Path endDir = Paths.get(startLoacation + "/bin");
+		try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
+
+			// list files in zip
 			ZipEntry zipEntry = zis.getNextEntry();
-			System.out.println(zipEntry.getSize());
-			int counter = 0;
+
 			while (zipEntry != null) {
-				File newFile = new File(destination, zipEntry.getName());
-				System.out.println("Zipentry is not null");
-				if (zipEntry.isDirectory()) {
-					if (!newFile.isDirectory() && !newFile.mkdirs()) {
-					}
-				} else {
-					File parent = newFile.getParentFile();
 
-					if (!parent.isDirectory() && !parent.mkdirs()) {
-					}
-
-					FileOutputStream fos = new FileOutputStream(newFile);
-					int len;
-					while ((len = zis.read(buffer)) > 0) {
-						fos.write(buffer, 0, len);
-					}
-					fos.close();
-					filesToMove[counter] = zipEntry.getName();
+				boolean isDirectory = false;
+				// detect directories
+				if (zipEntry.getName().endsWith(File.separator)) {
+					isDirectory = true;
 				}
+
+				Path newPath = zipSlipProtect(zipEntry, target);
+
+				if (isDirectory) {
+					Files.createDirectories(newPath);
+					System.out.println("isDirectory");
+				} else {
+					if (newPath.getParent() != null) {
+						if (Files.notExists(newPath.getParent())) {
+							Files.createDirectories(newPath.getParent());
+						}
+					}
+
+					Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
+					final Path moveName = Paths.get(endDir + "/" + new File(zipEntry.getName()).getName().toString());
+					System.out.println("moveName: " + moveName.toString());
+					// copy daemons to bin directory
+					Files.copy(newPath, moveName, StandardCopyOption.REPLACE_EXISTING);					
+				}
+
 				zipEntry = zis.getNextEntry();
+
 			}
 			zis.closeEntry();
-			zis.close();
-		} catch (Exception e) {
-			System.err.println("it all whent to shit");
-			System.err.println(e.getMessage());
+
 		}
-		try {
-			for (String s : filesToMove) {
-				Runtime.getRuntime().exec("xcopy " + Paths.get(destination.getAbsolutePath() + "/" + s)
-					+ " " + destination.getAbsolutePath());
-			}
-		} catch (IOException ioe) {
-			System.out.println(ioe.getMessage());
+
+	}
+
+	public static Path zipSlipProtect(ZipEntry zipEntry, Path targetDir)
+			throws IOException {
+
+		Path targetDirResolved = targetDir.resolve(zipEntry.getName());
+
+		Path normalizePath = targetDirResolved.normalize();
+		if (!normalizePath.startsWith(targetDir)) {
+			throw new IOException("Bad zip entry: " + zipEntry.getName());
 		}
+
+		return normalizePath;
 	}
 
 	public void launchApp() {
@@ -366,7 +372,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		runner.start();
 	}
 
-	private String getBaseDirectory() {
+	private static String getBaseDirectory() {
 		String blockRoot = "";
 		switch (OS.CURRENT) {
 			case LINUX:
@@ -403,7 +409,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	public void updateDownloadProgress(float frac) {
 		Platform.runLater(() -> {
 			primaryPercent.set(frac);
-			//progress.setProgress(frac);
+			// progress.setProgress(frac);
 		});
 	}
 
