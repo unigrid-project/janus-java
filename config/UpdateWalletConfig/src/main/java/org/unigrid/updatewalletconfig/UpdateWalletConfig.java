@@ -32,16 +32,17 @@ public class UpdateWalletConfig {
 	public static void main(String[] args) throws IOException {
 
 		String configLocation = System.getProperty("user.dir");
+		String homeDir = System.getProperty("user.home");
 		String dir = configLocation;
 		
 		Configuration config = Configuration.builder()
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
 			//.basePath("../../desktop/target/dist/Unigrid/lib/app/mods/")
 			.basePath("${user.home}/unigrid/lib/")
-			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.5-SNAPSHOT.jar")
+			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.6-SNAPSHOT.jar")
 				//.uri("https://drive.google.com/uc?export=download&id=1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay").modulepath())
-				.uri("https://github.com/Fim-84/test/releases/download/1.0.0/fx-1.0.5-SNAPSHOT.jar").modulepath())
-				//.path("../../fx/target/fx-1.0.5-SNAPSHOT.jar").modulepath())
+				.uri("https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar").modulepath())
+				//.path("../../fx/target/fx-1.0.6-SNAPSHOT.jar").modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/aopalliance-repackaged-3.0.3.jar")
 				.uri(mavenUrl("org.glassfish.hk2.external","aopalliance-repackaged","3.0.3")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/commons-beanutils-1.9.4.jar")
@@ -152,7 +153,7 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("org.jboss.weld","weld-spi","4.0.SP1")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/yasson-2.0.0-M1.jar")
 				.uri(mavenUrl("org.eclipse","yasson","2.0.0-M1")).modulepath())
-			.file(FileMetadata.readFrom(System.getProperty("user.home") + "/Downloads/unigrid-2.0.2-x86_64-linux-gnu.tar.gz").uri(getDaemonUrl(OS.LINUX)))
+			.file(FileMetadata.readFrom(homeDir + "/Downloads/unigrid-2.0.2-x86_64-linux-gnu.tar.gz").uri(getDaemonUrl(OS.LINUX)))
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
 			.build();
@@ -165,10 +166,10 @@ public class UpdateWalletConfig {
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
 			//.basePath("../../desktop/target/dist/Unigrid/lib/app/mods/")
 			.basePath("${user.home}/AppData/Roaming/unigrid/lib/")
-			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.5-SNAPSHOT.jar")
+			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.6-SNAPSHOT.jar")
 				//.uri("https://drive.google.com/uc?export=download&id=1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay").modulepath())
-				.uri("https://github.com/Fim-84/test/releases/download/1.0.0/fx-1.0.5-SNAPSHOT.jar").modulepath())
-				//.path("../../fx/target/fx-1.0.5-SNAPSHOT.jar").modulepath())
+				.uri("https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar").modulepath())
+				//.path("../../fx/target/fx-1.0.6-SNAPSHOT.jar").modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/aopalliance-repackaged-3.0.3.jar")
 				.uri(mavenUrl("org.glassfish.hk2.external","aopalliance-repackaged","3.0.3")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/commons-beanutils-1.9.4.jar")
@@ -279,7 +280,7 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("org.jboss.weld","weld-spi","4.0.SP1")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/yasson-2.0.0-M1.jar")
 				.uri(mavenUrl("org.eclipse","yasson","2.0.0-M1")).modulepath())
-			.file(FileMetadata.readFrom(System.getProperty("user.home") + "/Downloads/unigrid-2.0.2-win64.zip").uri(getDaemonUrl(OS.WINDOWS)))
+			.file(FileMetadata.readFrom(homeDir + "/Downloads/unigrid-2.0.2-win64.zip").uri(getDaemonUrl(OS.WINDOWS)))
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
 			.build();
@@ -292,10 +293,10 @@ public class UpdateWalletConfig {
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
 			//.basePath("../../desktop/target/dist/Unigrid/lib/app/mods/")
 			.basePath("${user.home}/unigrid/lib/")
-			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.5-SNAPSHOT.jar")
+			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.6-SNAPSHOT.jar")
 				//.uri("https://drive.google.com/uc?export=download&id=1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay").modulepath())
-				.uri("https://github.com/Fim-84/test/releases/download/1.0.0/fx-1.0.5-SNAPSHOT.jar").modulepath())
-				//.path("../../fx/target/fx-1.0.5-SNAPSHOT.jar").modulepath())
+				.uri("https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar").modulepath())
+				//.path("../../fx/target/fx-1.0.6-SNAPSHOT.jar").modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/aopalliance-repackaged-3.0.3.jar")
 				.uri(mavenUrl("org.glassfish.hk2.external","aopalliance-repackaged","3.0.3")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/commons-beanutils-1.9.4.jar")
@@ -406,7 +407,7 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("org.jboss.weld","weld-spi","4.0.SP1")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/yasson-2.0.0-M1.jar")
 				.uri(mavenUrl("org.eclipse","yasson","2.0.0-M1")).modulepath())
-			.file(FileMetadata.readFrom(System.getProperty("user.home") + "/Downloads/unigrid-2.0.2-osx64.tar.gz").uri(getDaemonUrl(OS.MAC)))
+			.file(FileMetadata.readFrom(homeDir + "/Downloads/unigrid-2.0.2-osx64.tar.gz").uri(getDaemonUrl(OS.MAC)))
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
 			.build();
