@@ -287,11 +287,11 @@ public class UpdateWalletConfig {
 		try (Writer out = Files.newBufferedWriter(Paths.get(dir + "/config-windows.xml"))){
 			configWindows.write(out);
 		}
-		
+
 		Configuration configMac = Configuration.builder()
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
 			//.basePath("../../desktop/target/dist/Unigrid/lib/app/mods/")
-			.basePath("${user.home}/Library/Application Support/unigrid/dependencies/lib/")
+			.basePath("${user.home}/Library/Application Support/UNIGRID/dependencies/lib/")
 			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.6-SNAPSHOT.jar")
 				//.uri("https://drive.google.com/uc?export=download&id=1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay").modulepath())
 				.uri("https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar").modulepath())

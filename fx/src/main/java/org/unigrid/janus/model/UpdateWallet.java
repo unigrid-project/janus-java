@@ -83,7 +83,7 @@ public class UpdateWallet extends TimerTask {
 				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
 				System.out.println("getting windows config");
 			} else if (os.equals(OS.MAC)) {
-				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
+				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-mac.xml");
 				System.out.println("getting mac config");
 			}
 		}
@@ -92,9 +92,7 @@ public class UpdateWallet extends TimerTask {
 			System.err.println(mle.getMessage());
 		}
 		Configuration config = null;
-		
-		
-		
+
 		try(Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			config = Configuration.read(in);
 			System.out.println("Reading the config file");

@@ -222,7 +222,7 @@ public class Daemon {
 				break;
 			case MAC:
 				blockRoot = System.getProperty("user.home")
-						.concat("/Library/Application Support/unigrid/dependencies/bin/");
+						.concat("/Library/Application Support/UNIGRID/dependencies/bin/");
 				break;
 			default:
 				blockRoot = System.getProperty("user.home").concat("/unigrid/dependencies/bin/");
