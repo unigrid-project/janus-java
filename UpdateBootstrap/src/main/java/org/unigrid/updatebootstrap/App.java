@@ -54,21 +54,16 @@ public class App extends Application implements Delegate {
 		URL configUrl = null;
 		OS os = OS.CURRENT;
 		if (os.equals(OS.LINUX)) {
-			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-linux.xml");
+			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-linux.xml");
 
 		} else if (os.equals(OS.WINDOWS)) {
 			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-windows.xml");
 		} else if (os.equals(OS.MAC)) {
-			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-mac.xml");
+			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
 		}
 		//configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config.xml");
 		Configuration config = null;
-		try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"),"/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
-			//try ( Reader in = Files.newBufferedReader(Paths.get("/home/marcus/Documents/unigrid/config/UpdateWalletConfig/config.xml"))) {
-				System.out.println("reading local config xml");
-				config = Configuration.read(in);
-			}
-			/*
+
 		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			System.out.println("are we getting here??????");
 			config = Configuration.read(in);
@@ -79,7 +74,7 @@ public class App extends Application implements Delegate {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
-		}*/
+		}
 
 		config.sync();
 		scene = new Scene(loadFXML("updateView"));
