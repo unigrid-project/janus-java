@@ -37,6 +37,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.cdi.Eager;
 import org.update4j.Configuration;
+import org.update4j.OS;
 
 @Eager
 @ApplicationScoped
@@ -64,6 +65,9 @@ public class UpdateWallet extends TimerTask {
 
 	@PostConstruct
 	private void init() {
+		System.out.println("Init walletUpdate");
+
+		OS os = OS.CURRENT;
 		
 		if(this.pcs != null) {
 			return;
@@ -73,7 +77,16 @@ public class UpdateWallet extends TimerTask {
 		URL configUrl = null;
 		
 		try {
-			configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config.xml");		
+			if (os.equals(OS.LINUX)) {
+				configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-linux.xml");
+				System.out.println("getting linux config");
+			} else if (os.equals(OS.WINDOWS)) {
+				configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-windows.xml");
+				System.out.println("getting windows config");
+			} else if (os.equals(OS.MAC)) {
+				configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config-mac.xml");
+				System.out.println("getting mac config");
+			}
 		}
 		catch(MalformedURLException mle) {
 			System.out.println("Unable to find url to config.xml");
@@ -85,6 +98,7 @@ public class UpdateWallet extends TimerTask {
 		
 		try(Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			config = Configuration.read(in);
+			System.out.println("Reading the config file");
 		}
 		catch(IOException e) {
 			System.out.println(e.getMessage());
@@ -106,7 +120,7 @@ public class UpdateWallet extends TimerTask {
 				Notifications
 					.create()
 					.title("Update Ready")
-					.text("New update ready")
+					.text("New update ready \nPleas close application to update!")
 					.position(Pos.TOP_RIGHT)
 					.showInformation();
 			}
@@ -114,7 +128,7 @@ public class UpdateWallet extends TimerTask {
 				Notifications
 					.create()
 					.title("Update Ready")
-					.text("New update ready")
+					.text("New update ready \nPleas close application to update!")
 					.showInformation();
 			}
 		}
@@ -123,6 +137,8 @@ public class UpdateWallet extends TimerTask {
 	private Boolean checkUpdate() {
 		boolean update = false;
 		try {
+			System.out.println("Checking for update");
+
 			update = config.requiresUpdate();
 			
 		}

@@ -35,6 +35,7 @@ import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.event.CloseJanusEvent;
+import org.unigrid.janus.model.service.PollingService;
 
 @Eager
 @ApplicationScoped
@@ -59,6 +60,7 @@ public class MainWindow implements Window {
 
 	@SneakyThrows
 	public void show() {
+		
 		try {
 			window.setStage(stage);
 			window.getSettingsController().setVersion(janusModel.getVersion());

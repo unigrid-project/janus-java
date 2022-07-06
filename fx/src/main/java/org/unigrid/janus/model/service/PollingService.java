@@ -1,13 +1,16 @@
 package org.unigrid.janus.model.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.util.Timer;
 import org.unigrid.janus.model.UpdateWallet;
 
 @ApplicationScoped
 public class PollingService {
+
 	private static Timer pollingTimer;
+	private static Timer updateTimer;
 	@Inject
 	private DebugService debug;
 
@@ -15,7 +18,6 @@ public class PollingService {
 		debug.print("poll", PollingService.class.getSimpleName());
 		pollingTimer = new Timer(true);
 		pollingTimer.scheduleAtFixedRate(new LongPollingTask(), 0, interval);
-		pollingTimer.scheduleAtFixedRate(new UpdateWallet(), 0, interval);
 	}
 
 	public void stopPolling() {
@@ -23,5 +25,19 @@ public class PollingService {
 			pollingTimer.cancel();
 			pollingTimer.purge();
 		}
+	}
+
+	public void pollForUpdate(int interval) {
+		updateTimer = new Timer(true);
+		updateTimer.scheduleAtFixedRate(CDI.current().select(UpdateWallet.class).get(), 0, interval);
+
+	}
+
+	public void stopPollingForUpdate() {
+		if (updateTimer != null) {
+			updateTimer.cancel();
+			updateTimer.purge();
+		}
+
 	}
 }

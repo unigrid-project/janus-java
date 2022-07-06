@@ -4,10 +4,12 @@
  */
 package org.unigrid.updatebootstrap;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -228,11 +230,32 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 				a.delete();
 			}
-			destination.mkdirs();
 		}
 		try {
-			Runtime.getRuntime().exec("tar -xf " + archive + " -C " + destination);
-			Runtime.getRuntime().exec("find " + destination + " -type f -name 'unigrid*' -exec cp {} " + destination + " \\;");
+			String s = "find " + destination.getAbsolutePath() + " -type f -name unigridd "
+				+ "-exec cp {} " + destination.getAbsolutePath() + " \\;";
+			System.out.println(s);
+			//Runtime.getRuntime().exec("tar -xf " + archive + " -C " + destination + " && find "
+			//	+ destination.getAbsolutePath().toString() + " -type f -name 'unigrid*' "
+			//	+ "-exec cp -t " + destination.getAbsolutePath().toString() + " {} +");
+
+			var processBuilder = new ProcessBuilder();
+
+			processBuilder.command("tar -xf " + archive + " -C " + destination + " && find "
+				+ destination.getAbsolutePath().toString() + " -type f -name 'unigrid*' "
+				+ "-exec cp -t " + destination.getAbsolutePath().toString() + " {} +");
+
+			var process = processBuilder.start();
+
+			try ( var reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream()))) {
+
+				String line;
+
+				while ((line = reader.readLine()) != null) {
+					System.out.println(line);
+				}
+			}
 
 		} catch (Exception e) {
 			System.err.println("it all whent to shit");

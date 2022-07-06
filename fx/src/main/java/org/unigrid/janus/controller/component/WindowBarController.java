@@ -25,6 +25,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
 import lombok.Getter;
 import org.unigrid.janus.view.decorator.Decoratable;
@@ -42,6 +43,7 @@ import javafx.animation.RotateTransition;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
+import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.view.component.WindowBarButton;
 
 //@Dependent
@@ -68,15 +70,24 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@FXML
 	private WindowBarButton updateButton;
 	
+	@Inject
+	private PollingService pollingService;
+	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		//TODO: Remove when FX integration is done
-		update = CDI.current().select(UpdateWallet.class).get();
+		pollingService = CDI.current().select(PollingService.class).get();
+		//update = CDI.current().select(UpdateWallet.class).get();
 		update.addPropertyChangeListener(this);
 		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setWindowBarController(this);
 		updateButton.setVisible(false);
+		Tooltip t = new Tooltip("A new update is ready. Pleas restart the wallet");
+		t.install(updateButton, t);
+
+		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
+		pollingService.pollForUpdate(7200000);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
