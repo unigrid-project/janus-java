@@ -24,7 +24,7 @@
         </dependency>-->
         <dependency>
             <groupId>org.unigrid</groupId>
-            <artifactId>UpdateBootstrap</artifactId>
+            <artifactId>bootstrap</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -58,8 +58,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <verbosity>debug</verbosity>
-                    <mainClass>org.unigrid.updatebootstrap.App</mainClass>
-                    <mainModule>org.unigrid.updatebootstrap</mainModule>
+                    <mainClass>org.unigrid.bootstrap.App</mainClass>
+                    <mainModule>org.unigrid.bootstrap</mainModule>
                     <addModules>jdk.crypto.ec</addModules>
                     <addModules>java.compiler</addModules>
                     <templateDir>src/main/templates</templateDir>
@@ -101,10 +101,7 @@
                         <configuration>
                             <appVersion>1.0.6</appVersion>
                             <vendor>org.unigrid</vendor>
-                            <module>org.unigrid.updatebootstrap/org.unigrid.updatebootstrap.App</module>
-                      <!--      <modulePaths>
-                                <modulePath>target/mp</modulePath>
-                            </modulePaths>-->
+                            <module>org.unigrid.bootstrap/org.unigrid.bootstrap.App</module>
                             <runtimeImage>target/jlink</runtimeImage>
                             <type>APP_IMAGE</type>
                             <winConsole>false</winConsole>
