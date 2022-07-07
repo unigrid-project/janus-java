@@ -415,7 +415,7 @@ public class UpdateWalletConfig {
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
 			.build();
-		
+
 		try (Writer out = Files.newBufferedWriter(Paths.get(dir + "/config-mac.xml"))){
 			configMac.write(out);
 		}
