@@ -30,7 +30,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
-import org.unigrid.janus.controller.view.SplashScreenController;
+import org.unigrid.janus.controller.SplashScreenController;
 
 @Dependent
 public class StageProducer {

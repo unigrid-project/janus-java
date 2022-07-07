@@ -24,7 +24,7 @@ import jakarta.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
 
-import org.unigrid.janus.controller.view.SplashScreenController;
+import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;

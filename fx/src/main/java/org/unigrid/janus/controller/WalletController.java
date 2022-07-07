@@ -13,7 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-package org.unigrid.janus.controller.view;
+package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import java.net.URL;
@@ -22,28 +22,40 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
-import javafx.util.Callback;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.geometry.Orientation;
+import javafx.scene.control.Label;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
-import javafx.scene.control.ScrollBar;
+import javafx.scene.layout.FlowPane;
+import javafx.collections.ObservableList;
+import javafx.util.Callback;
+import java.beans.PropertyChangeListener;
+import java.math.BigDecimal;
+import java.beans.PropertyChangeEvent;
+import java.util.function.UnaryOperator;
+import javafx.animation.PauseTransition;
+import javafx.beans.value.ObservableValue;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.TextFormatter.Change;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
+import javafx.util.Duration;
+import javafx.util.converter.DoubleStringConverter;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -52,56 +64,78 @@ import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.Wallet;
-import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.TransactionList;
-import org.unigrid.janus.model.TransactionList.LoadReport;
+import org.unigrid.janus.model.rpc.entity.ListTransactions;
+import org.unigrid.janus.model.rpc.entity.SendTransaction;
+import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 
 @ApplicationScoped
-public class TransactionsController implements Initializable, PropertyChangeListener {
+public class WalletController implements Initializable, PropertyChangeListener {
 
     private static DebugService debug = new DebugService();
     private static RPCService rpc = new RPCService();
-    private static TransactionList transList = new TransactionList();
 
     private Wallet wallet;
 
+    private TransactionList transList = new TransactionList();
     private static WindowService window = WindowService.getInstance();
 
-    // transactions table
+
+    /* Injected fx:id from FXML */
     @FXML
-    private TableView tblTransactions;
+    private Label lblBalance;
     @FXML
-    private TableColumn colTransDate;
+    private Label lblBalanceSend;
     @FXML
-    private TableColumn colTransType;
+    private FlowPane pnlBalance;
     @FXML
-    private TableColumn colTransAddress;
+    private VBox sendTransactionPnl;
     @FXML
-    private TableColumn colTransAmount;
+    private Text sendWarnMsg;
+    @FXML
+    private TextField ugdAddressTxt;
+    // wallet table
+    @FXML
+    private TableView tblWalletTrans;
+    @FXML
+    private TableColumn colWalletTransDate;
+    @FXML
+    private TableColumn colWalletTransType;
+    @FXML
+    private TableColumn colWalletTransAddress;
+    @FXML
+    private TableColumn colWalletTransAmount;
+    @FXML
+    private BorderPane pnlUnlock;
+    @FXML
+    private TextField amountToSend;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         /* Empty on purpose */
+        debug.log("Initializing wallet transactions");
         wallet = window.getWallet();
-        debug.log("Initializing transactions");
-        window.setTransactionsController(this);
-        transList.addPropertyChangeListener(this);
         wallet.addPropertyChangeListener(this);
-        setupTransactions();
+        transList.addPropertyChangeListener(this);
+        window.setWalletController(this);
+        setupWalletTransactions();
     }
 
-    public void onShown() {
-        try {
-            // TODO: anything to render after the app is shown (not transactions tab)
-            debug.log("Transactions shown called.");
-        } catch (Exception e) {
-            debug.log(String.format("ERROR: (transactions shown) %s", e.getMessage()));
-        }
+    @FXML
+    private void setupFormatter(MouseEvent event) {
+        // need a way to remove this
+        amountToSend.setTextFormatter(
+                new TextFormatter<Double>(new DoubleStringConverter(), 0.0, integerFilter));
+        amountToSend.setPromptText("UGD TO SEND");
     }
 
-    private void setupTransactions() {
+    private void setupLockScreen() {
+        pnlUnlock.setVisible(false);
+    }
+
+    private void setupWalletTransactions() {
         try {
-            colTransDate.setCellValueFactory(
+            colWalletTransDate.setCellValueFactory(
                     new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
                 public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
                     long time = t.getValue().getTime();
@@ -110,13 +144,14 @@ public class TransactionsController implements Initializable, PropertyChangeList
                     return new ReadOnlyStringWrapper(sdf.format(date));
                     // return new ReadOnlyStringWrapper("n/a");
                 }
-            });
-            colTransType.setCellValueFactory(
+            }
+            );
+            colWalletTransType.setCellValueFactory(
                     new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
                 public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
                     Transaction trans = t.getValue();
-                    Button btn = new Button();
                     int confrimations = trans.getConfirmations();
+                    Button btn = new Button();
                     btn.setTooltip(new Tooltip(trans.getCategory()));
                     btn.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
@@ -144,12 +179,12 @@ public class TransactionsController implements Initializable, PropertyChangeList
                         fontIcon = new FontIcon("fas-arrow-left");
                         fontIcon.setIconColor(setColor(48, 186, 69, confrimations));
                     }
-                    
                     btn.setGraphic(fontIcon);
+                    //debug.print(trans.getCategory(), WalletController.class.getSimpleName());
                     return new ReadOnlyObjectWrapper(btn);
                 }
             });
-            colTransAddress.setCellValueFactory(
+            colWalletTransAddress.setCellValueFactory(
                     new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
                 public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
                     Hyperlink link = new Hyperlink();
@@ -191,11 +226,10 @@ public class TransactionsController implements Initializable, PropertyChangeList
                     });
                     link.setGraphic(btn);
                     link.setAlignment(Pos.CENTER_RIGHT);
-                    // link.setContentDisplay(ContentDisplay.RIGHT);
                     return new ReadOnlyObjectWrapper(link);
                 }
             });
-            colTransAmount.setCellValueFactory(
+            colWalletTransAmount.setCellValueFactory(
                     new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
                 public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
                     Transaction trans = t.getValue();
@@ -207,7 +241,6 @@ public class TransactionsController implements Initializable, PropertyChangeList
                 }
             }
             );
-
         } catch (Exception e) {
             debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
         }
@@ -217,57 +250,139 @@ public class TransactionsController implements Initializable, PropertyChangeList
         return Color.rgb(r, g, b, Math.min(1.0f, Math.max(0.8f, 0.8f))); //confirmations * 0.1f)));
     }
 
-
-    public void loadTransactions(int page) {
-        debug.log("Loading transactions");
-        ListTransactions trans = rpc.call(new ListTransactions.Request(page * 100, 100),
-                ListTransactions.class);
-        transList.setTransactions(trans, 0);
+    public void propertyChange(PropertyChangeEvent event) {
+        if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
+            debug.log("Value: " + event.getNewValue().toString());
+            lblBalance.setText(((BigDecimal) event.getNewValue()).toPlainString());
+            lblBalanceSend.setText(((BigDecimal) event.getNewValue()).toPlainString());
+        }
+        if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
+            boolean locked = (boolean) event.getNewValue();
+            // can determine from this if a send transaction needs a passphrase
+        }
+        if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
+            tblWalletTrans.setItems(transList.getTransactions());
+        }
+        if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
+		ListTransactions trans = rpc.call(new ListTransactions.Request(0, 10),
+			ListTransactions.class);
+		transList.setTransactions(trans, 0);
+        }
     }
 
-    private ScrollBar getVerticalScrollbar(TableView<?> table) {
-        ScrollBar result = null;
-        for (Node n : table.lookupAll(".scroll-bar")) {
-            if (n instanceof ScrollBar) {
-                ScrollBar bar = (ScrollBar) n;
-                if (bar.getOrientation().equals(Orientation.VERTICAL)) {
-                    result = bar;
+    private UnaryOperator<Change> integerFilter = change -> {
+        String newText = change.getControlNewText();
+
+        if (newText.matches("\\d*|\\d+\\.\\d*")) {
+            return change;
+        }
+        return null;
+    };
+
+    @FXML
+    private void onSendTransactionClicked(MouseEvent event) {
+        if (amountToSend.getText().equals("") || amountToSend.getText() == null
+                || Double.parseDouble(amountToSend.getText()) == 0) {
+            onErrorMessage("Please enter an amount of Unigrid to send.");
+            return;
+        } else {
+            onErrorMessage("> 0");
+        }
+
+        //check if address is valid
+        if (ugdAddressTxt.getText().equals("") && ugdAddressTxt.getText() != null) {
+            onErrorMessage("Please enter a valid Unigrid address.");
+            return;
+        }
+        final ValidateAddress call = rpc.call(
+                new ValidateAddress.Request(ugdAddressTxt.getText()), ValidateAddress.class);
+        if (call.getError() != null) {
+            debug.log(String.format("ERROR: %s", call.getError()));
+            onErrorMessage("Please enter a valid Unigrid address.");
+        } else {
+            if (!call.getResult().getValid()) {
+                ugdAddressTxt.setText("");
+                onErrorMessage("Please enter a valid Unigrid address.");
+            } else {
+                wallet.setSendArgs(new Object[]{ugdAddressTxt.getText(),
+                    Double.parseDouble(amountToSend.getText())});
+                if (wallet.getLocked()) {
+                    onErrorMessage("Locked wallet");
+                    window.getMainWindowController().unlockForSending();
+                    return;
+                } else {
+                    //Object[] sendArgs = new Object[]{ugdAddressTxt.getText(),
+                    //Integer.parseInt(amountToSend.getText())};
+                    final SendTransaction send = rpc.call(
+                            new SendTransaction.Request(wallet.getSendArgs()), SendTransaction.class);
+                    if (send.getError() != null) {
+                        onErrorMessage(send.getError().getMessage());
+                    } else {
+                        onSuccessMessage("TRANSACTION SENT!");
+                        resetText();
+                    }
                 }
             }
         }
-        return result;
     }
 
-    private void scrolled(ObservableValue<? extends Number> observable,
-            Number oldValue,
-            Number newValue) {
-        double value = newValue.doubleValue();
-        ScrollBar bar = getVerticalScrollbar(tblTransactions);
-        if (value == bar.getMax()) {
-            debug.log("Adding new transactions.");
-            LoadReport report = transList.loadTransactions(40);
-            bar.setValue(value * report.getOldSize() / report.getNewSize());
+    public void sendTransactionAfterUnlock() {
+        final SendTransaction send = rpc.call(
+                new SendTransaction.Request(wallet.getSendArgs()), SendTransaction.class);
+        if (send.getError() != null) {
+            onErrorMessage(send.getError().getMessage());
+        } else {
+            onSuccessMessage("TRANSACTION SENT!");
+            debug.log(send.getResult());
+            resetText();
+            wallet.setSendArgs(null);
         }
     }
 
-    public void propertyChange(PropertyChangeEvent event) {
-        if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
-            debug.log("Transactions list changed");
-            tblTransactions.setItems(transList.getTransactions());
-            ScrollBar bar = getVerticalScrollbar(tblTransactions);
-            debug.log(String.format("Was scrollbar found: %b", (bar != null)));
-            if (bar != null) {
-                bar.valueProperty().addListener(this::scrolled);
-            }
-        }
-        // if balance changes, load the transactions.
-        if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
-            if (transList.getTransactions().size() == 0) {
-                loadTransactions(0);
-            }
-        }
-        if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
-            loadTransactions(0);
-        }
+    @FXML
+    private void onCloseSendClicked(MouseEvent event) {
+        sendTransactionPnl.setVisible(false);
+        resetText();
+    }
+
+    private void resetText() {
+        amountToSend.setText("");
+        amountToSend.setPromptText("UGD TO SEND");
+        ugdAddressTxt.setText("");
+        ugdAddressTxt.setPromptText("UGD ADDRESS");
+    }
+
+    @FXML
+    private void onOpenSendClicked(MouseEvent event) {
+        sendTransactionPnl.setVisible(true);
+    }
+
+    @FXML
+    private void onReceiveClicked(MouseEvent event) {
+        window.getMainWindowController().tabSelect(4);
+    }
+
+    private void onErrorMessage(String message) {
+        sendWarnMsg.setFill(Color.RED);
+        sendWarnMsg.setText(message);
+        sendWarnMsg.setVisible(true);
+        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        pause.setOnFinished(e -> {
+            sendWarnMsg.setVisible(false);
+            sendWarnMsg.setText("");
+        });
+        pause.play();
+    }
+
+    private void onSuccessMessage(String message) {
+        sendWarnMsg.setFill(Color.GREEN);
+        sendWarnMsg.setText(message);
+        sendWarnMsg.setVisible(true);
+        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        pause.setOnFinished(e -> {
+            sendWarnMsg.setVisible(false);
+            sendWarnMsg.setText("");
+        });
+        pause.play();
     }
 }

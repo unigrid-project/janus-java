@@ -22,7 +22,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import org.kordamp.ikonli.javafx.StackedFontIcon?>
 
-<Stage minHeight="400.0" minWidth="600.0" onShown="#onShown" title="Unigrid Janus Wallet" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.view.MainWindowController">
+<Stage minHeight="400.0" minWidth="600.0" onShown="#onShown" title="Unigrid Janus Wallet" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.MainWindowController">
    <scene>
       <Scene fill="#000024" stylesheets="@main.css">
          <root>

@@ -14,7 +14,7 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.controller.view;
+package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeSupport;
