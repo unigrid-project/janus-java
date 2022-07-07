@@ -39,26 +39,30 @@ module fx {
 	requires com.fasterxml.jackson.databind;
 	requires jsch;
 	requires java.sql;
+	requires java.instrument;
 	requires org.controlsfx.controls;
-	requires jdk.crypto.ec;
-
-	opens org.unigrid.janus to weld.core.impl;
-	opens org.unigrid.janus.controller.component to javafx.fxml;
-	opens org.unigrid.janus.controller.view to javafx.fxml, weld.core.impl;
+	requires static org.update4j;
+	
+	uses org.update4j.service.Launcher;
+	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
+	
+	opens org.unigrid.janus to weld.core.impl, org.update4j;
+	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics, weld.core.impl;
+	opens org.unigrid.janus.controller.view to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j, javafx.graphics;
 	opens org.unigrid.janus.view to weld.core.impl;
-	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml;
-	opens org.unigrid.janus.model to weld.core.impl, javafx.base, com.fasterxml.jackson.databind;
+	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls;
+	opens org.unigrid.janus.model to weld.core.impl, javafx.base;
 	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson;
-	opens org.unigrid.janus.model.service to weld.core.impl;
+	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2;
 
 	exports org.unigrid.janus;
-	exports org.unigrid.janus.controller.component to weld.core.impl;
-	exports org.unigrid.janus.controller.view to weld.core.impl;
+	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics;
+	exports org.unigrid.janus.controller.view to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics;
 	exports org.unigrid.janus.model.event to weld.core.impl;
 	exports org.unigrid.janus.model.producer to weld.core.impl;
 	exports org.unigrid.janus.model.setup to weld.core.impl;
 	exports org.unigrid.janus.model.rpc to weld.core.impl;
 	exports org.unigrid.janus.view.component to weld.core.impl;
 	exports org.unigrid.janus.view.decorator to weld.core.impl;
-	exports org.unigrid.janus.model to org.eclipse.yasson;
+	exports org.unigrid.janus.model to org.eclipse.yasson, com.fasterxml.jackson.databind;
 }

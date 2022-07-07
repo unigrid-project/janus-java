@@ -17,12 +17,15 @@
 package org.unigrid.janus.controller.component;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
 import lombok.Getter;
 import org.unigrid.janus.view.decorator.Decoratable;
@@ -39,8 +42,11 @@ import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.UpdateWallet;
+import org.unigrid.janus.model.service.PollingService;
+import org.unigrid.janus.view.component.WindowBarButton;
 
-@Dependent
+//@Dependent
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
 
 	private Decorator movableWindowDecorator;
@@ -51,19 +57,38 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	private static RPCService rpc = new RPCService();
 
 	private Wallet wallet;
+	
+	@Inject
+	private UpdateWallet update;
 
 	private static DebugService debug = new DebugService();
 	private static WindowService window = WindowService.getInstance();
 	@FXML
 	private FontIcon spinner;
 	private RotateTransition rt;
-
+	
+	@FXML
+	private WindowBarButton updateButton;
+	
+	@Inject
+	private PollingService pollingService;
+	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		/* Empty on purpose */
+		//TODO: Remove when FX integration is done
+		System.out.println("Initilizing window bar");
+		update = CDI.current().select(UpdateWallet.class).get();
+		pollingService = CDI.current().select(PollingService.class).get();
+		update.addPropertyChangeListener(this);
 		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setWindowBarController(this);
+		updateButton.setVisible(false);
+		Tooltip t = new Tooltip("A new update is ready. Pleas restart the wallet");
+		t.install(updateButton, t);
+
+		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
+		//pollingService.pollForUpdate(7200000);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -81,6 +106,9 @@ public class WindowBarController implements Decoratable, Initializable, Property
 					(boolean) wallet.getProcessingStatus());
 				//debug.log(status);
 			}
+		}
+		if(event.getPropertyName().equals(update.getUPDATE_PROPERTY())) {
+			showUpdateButton();
 		}
 	}
 
@@ -128,5 +156,15 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	public void stopSpinner() {
 		rt.stop();
 		spinner.setVisible(false);
+	}
+	
+	public void showUpdateButton() {
+		System.out.println("Update button visable");
+		updateButton.setVisible(true);
+	}
+	
+	@FXML
+	public void onUpdate(MouseEvent event) {
+		updateButton.setVisible(false);
 	}
 }

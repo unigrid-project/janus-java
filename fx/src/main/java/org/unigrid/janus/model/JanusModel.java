@@ -21,7 +21,9 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import lombok.Getter;
 import lombok.Setter;
+import org.unigrid.janus.model.cdi.Eager;
 
+@Eager
 @ApplicationScoped
 public class JanusModel {
 

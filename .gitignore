@@ -8,6 +8,7 @@
 
 /target/
 /fx/target/
+fx/templates/
 /fx/runtime/
 /desktop/target/
 
@@ -16,3 +17,8 @@ fx/unigrid-cli.exe
 fx/unigridd.exe
 fx/unigridd
 fx/unigrid-cli
+/UpdateBootstrap/target/
+/updateBootstrapConfig/target/
+/config/UpdateWalletConfig/target/
+/config/UpdateWalletConfig/config*
+

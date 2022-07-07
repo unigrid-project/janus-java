@@ -30,23 +30,20 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.JanusModel;
+import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.WindowService;
 
+@Eager
 @ApplicationScoped
 public class SplashScreenController implements Initializable, PropertyChangeListener {
 
 	private WindowService window;
 
-	@FXML
-	private ProgressBar progBar;
-	@FXML
-	private FontIcon spinnerPreLoad;
-	@FXML
-	private Label lblText;
-	@FXML
-	private Label lblStatus;
-	@FXML
-	private Label verLbl;
+	@FXML private ProgressBar progBar;
+	@FXML private FontIcon spinnerPreLoad;
+	@FXML private Label lblText;
+	@FXML private Label lblStatus;
+	@FXML private Label verLbl;
 
 	//@Inject
 	//private SplashScreen splashScreen;
@@ -55,6 +52,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		System.out.println("rb = " + rb);
 		System.out.println("ADDRESS   :" + this);
 		window = window.getInstance();
 		window.setSplashScreenController(this);

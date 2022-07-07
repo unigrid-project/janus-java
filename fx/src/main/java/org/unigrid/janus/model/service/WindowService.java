@@ -40,8 +40,10 @@ import org.unigrid.janus.controller.view.SettingsController;
 import org.unigrid.janus.controller.view.SplashScreenController;
 import org.unigrid.janus.controller.view.WarningController;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 
+@Eager
 @ApplicationScoped
 @RequiredArgsConstructor
 public class WindowService {
