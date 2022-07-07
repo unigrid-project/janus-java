@@ -13,7 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-package org.unigrid.updatebootstrap;
+package org.unigrid.bootstrap;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

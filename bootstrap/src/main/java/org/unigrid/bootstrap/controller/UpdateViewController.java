@@ -15,7 +15,7 @@
  */
 
 
-package org.unigrid.updatebootstrap.controllers;
+package org.unigrid.bootstrap.controller;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -23,7 +23,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import org.unigrid.updatebootstrap.UpdateView;
+import org.unigrid.bootstrap.UpdateView;
 
 public class UpdateViewController implements Initializable {
 
