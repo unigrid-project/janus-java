@@ -164,7 +164,7 @@ public class UpdateWalletConfig {
 		Configuration configWindows = Configuration.builder()
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
 			//.basePath("../../desktop/target/dist/Unigrid/lib/app/mods/")
-			.basePath("${user.home}/AppData/Roaming/unigrid/dependencies/lib/")
+			.basePath("${user.home}/AppData/Roaming/UNIGRID/dependencies/lib/")
 			.file(FileMetadata.readFrom("../../fx/target/fx-1.0.6-SNAPSHOT.jar")
 				//.uri("https://drive.google.com/uc?export=download&id=1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay").modulepath())
 				.uri("https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar").modulepath())

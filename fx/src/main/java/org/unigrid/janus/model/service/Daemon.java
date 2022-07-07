@@ -218,14 +218,14 @@ public class Daemon {
 				blockRoot = System.getProperty("user.home").concat("/.unigrid/dependencies/bin/");
 				break;
 			case WINDOWS:
-				blockRoot = System.getProperty("user.home").concat("/AppData/Roaming/unigrid/dependencies/bin/");
+				blockRoot = System.getProperty("user.home").concat("/AppData/Roaming/UNIGRID/dependencies/bin/");
 				break;
 			case MAC:
 				blockRoot = System.getProperty("user.home")
 						.concat("/Library/Application Support/UNIGRID/dependencies/bin/");
 				break;
 			default:
-				blockRoot = System.getProperty("user.home").concat("/unigrid/dependencies/bin/");
+				blockRoot = System.getProperty("user.home").concat("/UNIGRID/dependencies/bin/");
 				break;
 		}
 

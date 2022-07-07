@@ -379,13 +379,13 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 				blockRoot = System.getProperty("user.home").concat("/.unigrid/dependencies");
 				break;
 			case WINDOWS:
-				blockRoot = System.getProperty("user.home").concat("/AppData/Roaming/unigrid/dependencies");
+				blockRoot = System.getProperty("user.home").concat("/AppData/Roaming/UNIGRID/dependencies");
 				break;
 			case MAC:
 				blockRoot = System.getProperty("user.home").concat("/Library/Application Support/UNIGRID/dependencies");
 				break;
 			default:
-				blockRoot = System.getProperty("user.home").concat("/unigrid/dependencies");
+				blockRoot = System.getProperty("user.home").concat("/UNIGRID/dependencies");
 				break;
 		}
 
