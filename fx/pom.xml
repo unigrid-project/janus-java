@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.unigrid.janus</groupId>
     <artifactId>fx</artifactId>
     <packaging>jar</packaging>
     <name>Unigrid Janus FX Frontend</name>
-
     <parent>
         <groupId>org.unigrid.janus</groupId>
         <artifactId>parent</artifactId>
@@ -112,17 +111,22 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>3.0.4</version>
+            <version>3.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
-            <artifactId>jersey-cdi2-se</artifactId>
-            <version>3.0.4</version>
+            <artifactId>jersey-hk2</artifactId>
+            <version>3.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-binding</artifactId>
-            <version>3.0.4</version>
+            <version>3.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld.se</groupId>
+            <artifactId>weld-se-core</artifactId>
+            <version>4.0.3.Final</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse/yasson-->
         <dependency>
@@ -145,11 +149,11 @@
             <artifactId>controlsfx</artifactId>
             <version>11.1.1</version>
         </dependency>
-	<dependency>
-		<groupId>com.fasterxml.jackson.core</groupId>
-		<artifactId>jackson-databind</artifactId>
-		<version>2.13.3</version>
-	</dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.13.3</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -157,7 +161,27 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-           <!--<plugin>
+            <!-- Uncomment tentackle to build moduls jars for fx to make a new config.xml for update. 
+                 Comment to speed up the build process for testing -->
+            <plugin>
+                <groupId>org.tentackle</groupId>
+                <artifactId>tentackle-jlink-maven-plugin</artifactId>
+                <version>11.7.3.0</version>
+                <configuration>
+                    <mainClass>${mainClass}</mainClass>
+                    <stripDebug>true</stripDebug>
+                    <excludeModules>jdk.jfr</excludeModules>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jpackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--<plugin>
                     <groupId>org.tentackle</groupId>
                     <artifactId>tentackle-jlink-maven-plugin</artifactId>
             </plugin>-->

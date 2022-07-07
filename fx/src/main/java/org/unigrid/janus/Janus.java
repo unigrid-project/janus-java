@@ -18,17 +18,11 @@ package org.unigrid.janus;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.se.SeContainer;
-import jakarta.enterprise.inject.se.SeContainerInitializer;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -40,13 +34,11 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 
@@ -54,18 +46,18 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import org.unigrid.janus.model.cdi.Eager;
 
 import org.unigrid.janus.controller.view.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
+import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
-import org.update4j.LaunchContext;
-import org.update4j.inject.InjectTarget;
-import org.update4j.service.Launcher;
 
+@Eager
 @ApplicationScoped
 public class Janus extends BaseApplication implements PropertyChangeListener {
 
@@ -89,6 +81,9 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@Inject
 	private JanusModel janusModel;
+	
+	@Inject
+	private UpdateWallet updateWallet;
 
 	@Inject
 	private SplashScreenController splashController;
@@ -176,9 +171,10 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		});
 
 	}
-	
+
 	public void startFromBootstrap(Stage stage) throws Exception {
-		
+		System.out.println(CDI.current());
+
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
 		startSplashScreen();
@@ -242,9 +238,13 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		//System.out.println("version: " + filteredVer);
 		janusModel.setAppState(JanusModel.AppState.STARTING);
 
+		System.out.println(preloader);
 		preloader.initText();
+		System.out.println("a");
 		preloader.setVersion(filteredVer);
+		System.out.println("b");
 		preloader.show();
+		System.out.println("c");
 		startUp();
 	}
 

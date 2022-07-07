@@ -1,202 +1,102 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  	
-  <modelVersion>4.0.0</modelVersion>
-  	
-  <groupId>org.unigrid.janus</groupId>
-  	
-  <artifactId>parent</artifactId>
-  	
-  <version>1.0.5-SNAPSHOT</version>
-  	
-  <packaging>pom</packaging>
-  	
-  <name>Unigrid Janus Parent</name>
-  	
-  <organization>
-    		
-    <name>The Unigrid Foundation</name>
-    		
-    <url>https://www.unigrid.org</url>
-    	
-  </organization>
-  	
-  <modules>
-    		
-    <module>desktop</module>
-    		
-    <module>fx</module>
-    	  
-    <module>UpdateBootstrap</module>
-  </modules>
-  	
-  <dependencyManagement>
-    		
-    <dependencies>
-      			
-      <dependency>
-        				
-        <groupId>org.projectlombok</groupId>
-        				
-        <artifactId>lombok</artifactId>
-        				
-        <version>1.18.24</version>
-        			
-      </dependency>
-      		
-    </dependencies>
-    	
-  </dependencyManagement>
-  	
-  <build>
-    		
-    <pluginManagement>
-      			
-      <plugins>
-        				
-        <plugin>
-          					
-          <groupId>org.apache.maven.plugins</groupId>
-          					
-          <artifactId>maven-compiler-plugin</artifactId>
-          					
-          <version>3.10.1</version>
-          					
-          <configuration>
-            						
-            <compilerArgument>-Xlint:unchecked</compilerArgument>
-            						
-            <compilerArgument>-Xlint:deprecation</compilerArgument>
-            						
-            <release>17</release>
-            						
-            <debug>true</debug>
-            						
-            <annotationProcessorPaths>
-              							
-              <path>
-                								
-                <groupId>org.projectlombok</groupId>
-                								
-                <artifactId>lombok</artifactId>
-                								
-                <version>1.18.24</version>
-                							
-              </path>
-              						
-            </annotationProcessorPaths>
-            					
-          </configuration>
-          				
-        </plugin>
-        				
-        <plugin>
-          					
-          <!-- 3.2.0+ of the resources plugin is supposed to retain file permissions -->
-          					
-          <groupId>org.apache.maven.plugins</groupId>
-          					
-          <artifactId>maven-resources-plugin</artifactId>
-          					
-          <version>3.2.0</version>
-          				
-        </plugin>
-        				
-        <plugin>
-          					
-          <groupId>org.apache.maven.plugins</groupId>
-          					
-          <artifactId>maven-checkstyle-plugin</artifactId>
-          					
-          <version>3.1.2</version>
-          					
-          <configuration>
-            						
-            <configLocation>checkstyle.xml</configLocation>
-            						
-            <excludes>**/module-info.java</excludes>
-            					
-          </configuration>
-          					
-          <executions>
-            						
-            <execution>
-              							
-              <goals>
-                								
-                <goal>check</goal>
-                							
-              </goals>
-              						
-            </execution>
-            					
-          </executions>
-          					
-          <dependencies>
-            						
-            <dependency>
-              							
-              <groupId>com.puppycrawl.tools</groupId>
-              							
-              <artifactId>checkstyle</artifactId>
-              							
-              <version>8.41</version>
-              						
-            </dependency>
-            					
-          </dependencies>
-          				
-        </plugin>
-        				
-        <plugin>
-          					
-          <groupId>pl.gdela</groupId>
-          					
-          <artifactId>socomo-maven</artifactId>
-          					
-          <version>2.3.1</version>
-          					
-          <executions>
-            						
-            <execution>
-              							
-              <goals>
-                								
-                <goal>analyze</goal>
-                							
-              </goals>
-              						
-            </execution>
-            					
-          </executions>
-          				
-        </plugin>
-        			
-      </plugins>
-      		
-    </pluginManagement>
-    		
-    <resources>
-      			
-      <resource>
-        				
-        <directory>src/main/resources-filtered</directory>
-        				
-        <filtering>true</filtering>
-        			
-      </resource>
-      			
-      <resource>
-        				
-        <directory>src/main/resources</directory>
-        				
-        <filtering>false</filtering>
-        			
-      </resource>
-      		
-    </resources>
-    		
-	
-  </build>
-  
+        <modelVersion>4.0.0</modelVersion>
+	<groupId>org.unigrid.janus</groupId>
+	<artifactId>parent</artifactId>  	
+	<version>1.0.6-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Unigrid Janus Parent</name>
+	<organization>
+		<name>The Unigrid Foundation</name>
+		<url>https://www.unigrid.org</url>
+	</organization>
+	<modules>
+		<module>desktop</module>
+		<module>fx</module>
+		<module>bootstrap</module>
+	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>	
+				<groupId>org.projectlombok</groupId>	
+				<artifactId>lombok</artifactId>
+				<version>1.18.24</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<pluginManagement>	
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.10.1</version>
+					<configuration>
+						<compilerArgument>-Xlint:unchecked</compilerArgument>
+						<compilerArgument>-Xlint:deprecation</compilerArgument>
+						<release>17</release>
+						<debug>true</debug>
+						<annotationProcessorPaths>
+							<path>	
+								<groupId>org.projectlombok</groupId>		
+								<artifactId>lombok</artifactId>
+								<version>1.18.24</version>
+							</path>
+						</annotationProcessorPaths>
+					</configuration>
+				</plugin>
+				<plugin>	
+					<!-- 3.2.0+ of the resources plugin is supposed to retain file permissions -->	
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>	
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>3.1.2</version>
+					<configuration>
+						<configLocation>checkstyle.xml</configLocation>
+						<excludes>**/module-info.java</excludes>
+					</configuration>
+					<executions>
+						<execution>		
+							<goals>			
+								<goal>check</goal>	
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>	
+							<groupId>com.puppycrawl.tools</groupId>	
+							<artifactId>checkstyle</artifactId>
+							<version>8.41</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>	
+					<groupId>pl.gdela</groupId>	
+					<artifactId>socomo-maven</artifactId>
+					<version>2.3.1</version>
+					<executions>
+						<execution>		
+							<goals>			
+								<goal>analyze</goal>	
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<resources>
+			<resource>		
+				<directory>src/main/resources-filtered</directory>	
+				<filtering>true</filtering>
+			</resource>
+			<resource>	
+				<directory>src/main/resources</directory>	
+				<filtering>false</filtering>
+			</resource>
+		</resources>
+	</build>
 </project>

@@ -207,20 +207,20 @@ public class WalletController implements Initializable, PropertyChangeListener {
                     btn.setOnAction((ActionEvent event) -> {
                         final Clipboard cb = Clipboard.getSystemClipboard();
                         final ClipboardContent content = new ClipboardContent();
-                        content.putString(trans.getAddress());
+                        content.putString(trans.getTxid());
                         cb.setContent(content);
                         if (SystemUtils.IS_OS_MAC_OSX) {
                             Notifications
                                     .create()
-                                    .title("Address copied to clipboard")
-                                    .text(trans.getAddress())
+                                    .title("Transaction copied to clipboard")
+                                    .text(trans.getTxid())
                                     .position(Pos.TOP_RIGHT)
                                     .showInformation();
                         } else {
                             Notifications
                                     .create()
-                                    .title("Address copied to clipboard")
-                                    .text(trans.getAddress())
+                                    .title("Transaction copied to clipboard")
+                                    .text(trans.getTxid())
                                     .showInformation();
                         }
                     });

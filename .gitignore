@@ -6,13 +6,15 @@
 
 /src/main/resources/daemon/
 
-/target/
-/fx/target/
-/fx/runtime/
-/desktop/target/
+target/
+/fx/templates/
+/fx/runtime/ # What is this?
 
 fx/debug.log
 fx/unigrid-cli.exe
 fx/unigridd.exe
 fx/unigridd
 fx/unigrid-cli
+
+/config/UpdateWalletConfig/target/
+/config/UpdateWalletConfig/config*
