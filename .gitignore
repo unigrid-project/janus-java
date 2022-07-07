@@ -17,7 +17,7 @@ fx/unigrid-cli.exe
 fx/unigridd.exe
 fx/unigridd
 fx/unigrid-cli
-/UpdateBootstrap/target/
+/UpdateBootstrap/target/*
 /updateBootstrapConfig/target/
 /config/UpdateWalletConfig/target/
 /config/UpdateWalletConfig/config*
