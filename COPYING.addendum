@@ -1,9 +1,9 @@
                GNU AFFERO GENERAL PUBLIC LICENSE ADDENDUM
                              20 June 2021
 
- Copyright (C) 2020-2022 The Unigrid Foundation <http://www.unigrid.org/>
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
+ Copyright (C) 2020-2022 The Unigrid Foundation, UGD Software AB
+<http://www.unigrid.org/>. Everyone is permitted to copy and distribute
+verbatim copies of this license document, but changing it is not allowed.
 
   This addendum to the GNU Affero General Public License incorporates
 the terms and conditions of that license, supplemented by the additional
@@ -21,8 +21,8 @@ GNU Affero General Public License for this software.
 distributed by this software.
 
   As used herein, "Unigrid website" refers to any links to web resources
-associated with the Unigrid Foundation. Examples include
-[http://www.unigrid.org] and [https://unigrid.org].
+associated with the Unigrid Foundation and UGD Software AB. Examples
+include [http://www.unigrid.org] and [https://unigrid.org].
 
   As used herein, "user interface" refers to the final interactive and
 graphical representation presented to the end user.
@@ -37,22 +37,22 @@ final user interface.
 this addendum complements the additional terms with the following conditions;
 
    a) The frontend code and user interface must clearly and visibly attribute
-   The Unigrid Foundation.
+   The Unigrid Foundation and UGD Software AB.
 
-   b) Any mention of The Unigrid Foundation or links to any Unigrid website
-   may not be removed from the frontend code itself.
+   b) Any mention of The Unigrid Foundation, UGD Software AB or links to any
+   Unigrid website may not be removed from the frontend code itself.
 
-   c) You may not use stylesheet rules or any other non-direct means to
-   purposely hide references to The Unigrid Foundation or any Unigrid
-   website.
+   c) You may not use stylesheet rules or any other non-direct or direct
+   means to purposely hide references to the website of The Unigrid
+   Foundation or UGD Software AB.
 
    d) The conditions described in 1a, 1b and 1c of this document can be
    exempted if a written permission is received from an official
-   representative of The Unigrid Foundation.
+   representative of The Unigrid Foundation or UGD Software AB.
 
    e) Anybody contributing code or other work in the form of pull requests,
    git commits or any other means to the official Janus repository
    [https://github.com/unigrid-project/janus-java] agrees to grant The Unigrid
-   Foundation shared copyright for that contributed work and to accept the
-   license terms of this software as outlined by the original GNU Affero
-   General Public License and this addendum.
+   Foundation and UGD Software AB shared copyright for that contributed work
+   and to accept the license terms of this software as outlined by the
+   original GNU Affero General Public License and this addendum.
