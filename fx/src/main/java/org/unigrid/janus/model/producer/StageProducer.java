@@ -47,7 +47,7 @@ public class StageProducer {
 		}); */
 
 		final String name = Introspector.decapitalize(clazz.getSimpleName());
-		loader.setClassLoader(getClass().getClassLoader());
+		loader.setClassLoader(clazz.getClassLoader());
 
 		System.out.println(loader.getClassLoader());
 		System.out.println(name.concat(FXML_SUFFIX));
