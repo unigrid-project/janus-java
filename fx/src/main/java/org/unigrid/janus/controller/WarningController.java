@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021-2022 The Unigrid Foundation
+	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -14,7 +14,7 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.controller.view;
+package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeSupport;
@@ -29,7 +29,7 @@ import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 
 @ApplicationScoped
-public class WarningController implements Initializable{
+public class WarningController implements Initializable {
 	public static final String HIDE_WARNING = "hidewarning";
 	public static final String STATUS_PROPERTY = "walletstatus";
 	private static DebugService debug = new DebugService();
@@ -39,8 +39,7 @@ public class WarningController implements Initializable{
 	private static WindowService window = WindowService.getInstance();
 	private static PropertyChangeSupport pcs;
 
-	/**
-	public WarningController() {
+	/* public WarningController() {
 		wallet = window.getWallet();
 		if (this.pcs != null) {
 			return;
@@ -54,8 +53,8 @@ public class WarningController implements Initializable{
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
-	}
-**/
+	} */
+
 	public void onRestartClicked(MouseEvent event) {
 		debug.log("onRestartClicked");
 		// will be implemented once CDI is working

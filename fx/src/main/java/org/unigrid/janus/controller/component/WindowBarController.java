@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -16,7 +16,6 @@
 
 package org.unigrid.janus.controller.component;
 
-import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.net.URL;
@@ -46,37 +45,30 @@ import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.view.component.WindowBarButton;
 
-//@Dependent
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
-
 	private Decorator movableWindowDecorator;
 
 	@Getter
 	private Stage stage;
 
 	private static RPCService rpc = new RPCService();
-
+	private RotateTransition rt;
 	private Wallet wallet;
-	
-	@Inject
-	private UpdateWallet update;
 
 	private static DebugService debug = new DebugService();
 	private static WindowService window = WindowService.getInstance();
-	@FXML
-	private FontIcon spinner;
-	private RotateTransition rt;
-	
-	@FXML
-	private WindowBarButton updateButton;
-	
-	@Inject
-	private PollingService pollingService;
-	
+
+	@FXML private FontIcon spinner;
+	@FXML private WindowBarButton updateButton;
+
+	@Inject private PollingService pollingService;
+	@Inject private UpdateWallet update;
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		//TODO: Remove when FX integration is done
 		System.out.println("Initilizing window bar");
+
 		update = CDI.current().select(UpdateWallet.class).get();
 		pollingService = CDI.current().select(PollingService.class).get();
 		update.addPropertyChangeListener(this);
@@ -84,6 +76,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		wallet.addPropertyChangeListener(this);
 		window.setWindowBarController(this);
 		updateButton.setVisible(false);
+
 		Tooltip t = new Tooltip("A new update is ready. Pleas restart the wallet");
 		t.install(updateButton, t);
 
@@ -100,6 +93,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 				supply.setText(sValue);
 			}
 		}*/
+
 		if (event.getPropertyName().equals(wallet.PROCESSING_PROPERTY)) {
 			if (wallet.getProcessingStatus()) {
 				String status = String.format("processing status %s",
@@ -107,7 +101,8 @@ public class WindowBarController implements Decoratable, Initializable, Property
 				//debug.log(status);
 			}
 		}
-		if(event.getPropertyName().equals(update.getUPDATE_PROPERTY())) {
+
+		if (event.getPropertyName().equals(update.getUPDATE_PROPERTY())) {
 			showUpdateButton();
 		}
 	}
@@ -157,12 +152,12 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		rt.stop();
 		spinner.setVisible(false);
 	}
-	
+
 	public void showUpdateButton() {
 		System.out.println("Update button visable");
 		updateButton.setVisible(true);
 	}
-	
+
 	@FXML
 	public void onUpdate(MouseEvent event) {
 		updateButton.setVisible(false);

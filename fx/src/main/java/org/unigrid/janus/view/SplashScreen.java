@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -117,35 +117,24 @@ public class SplashScreen implements Window {
 	}
 
 	public void initText() {
-		System.out.println("1");
 		text = (Label) stageSplash.getScene().lookup("#lblText");
 		status = (Label) stageSplash.getScene().lookup("#lblStatus");
-		
+
 		InputStream in = getClass().getResourceAsStream("fonts/PressStart2P-vaV7.ttf");
-		
 		Font font = Font.loadFont(in, 10);
-		System.out.println("2");
+
 		text.setFont(font);
-		System.out.println("3");
-
 		text.setAlignment(Pos.CENTER);
-		System.out.println("4");
 		text.setText("Starting unigrid backend");
-		System.out.println("5");
-
 		status.setFont(font);
-		System.out.println("6");
 		status.setText("...");
-		System.out.println("7");
 
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.7), evt -> status.setVisible(false)),
-			new KeyFrame(Duration.seconds(0.2), evt -> status.setVisible(true)));
+			new KeyFrame(Duration.seconds(0.2), evt -> status.setVisible(true))
+		);
+
 		timeline.setCycleCount(Animation.INDEFINITE);
-		System.out.println("8");
-
 		timeline.play();
-				System.out.println("9");
-
 	}
 
 	public void setText(String s) {

@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021 The Unigrid Foundation
+	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -14,7 +14,7 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.controller.view;
+package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 

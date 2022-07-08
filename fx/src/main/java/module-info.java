@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021-2022 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -48,7 +48,7 @@ module fx {
 	
 	opens org.unigrid.janus to weld.core.impl, org.update4j;
 	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics, weld.core.impl;
-	opens org.unigrid.janus.controller.view to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j, javafx.graphics;
+	opens org.unigrid.janus.controller to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j, javafx.graphics;
 	opens org.unigrid.janus.view to weld.core.impl;
 	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls;
 	opens org.unigrid.janus.model to weld.core.impl, javafx.base;
@@ -57,7 +57,7 @@ module fx {
 
 	exports org.unigrid.janus;
 	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics;
-	exports org.unigrid.janus.controller.view to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics;
+	exports org.unigrid.janus.controller to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics;
 	exports org.unigrid.janus.model.event to weld.core.impl;
 	exports org.unigrid.janus.model.producer to weld.core.impl;
 	exports org.unigrid.janus.model.setup to weld.core.impl;

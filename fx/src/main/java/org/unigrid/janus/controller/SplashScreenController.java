@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -14,11 +14,9 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.controller.view;
+package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -29,15 +27,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.WindowService;
 
 @Eager
 @ApplicationScoped
 public class SplashScreenController implements Initializable, PropertyChangeListener {
-
 	private WindowService window;
+	private float ind = 0.6f;
 
 	@FXML private ProgressBar progBar;
 	@FXML private FontIcon spinnerPreLoad;
@@ -48,8 +45,6 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	//@Inject
 	//private SplashScreen splashScreen;
 
-	private float ind = (float) 0.6;
-
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		System.out.println("rb = " + rb);
@@ -59,20 +54,20 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 		Platform.runLater(() -> {
 			progBar.setVisible(false);
-			//Font font = Font.loadFont("fonts/PressStart2P-vaV7.ttf", 10);
-			//lblText.setFont(font);
-			//lblStatus.setFont(font);
+			// Font font = Font.loadFont("fonts/PressStart2P-vaV7.ttf", 10);
+			// lblText.setFont(font);
+			// lblStatus.setFont(font);
 		});
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent pce) {
-		//
+		/* Empty on purpose */
 	}
 
 	public void updateProgress(float prog) {
-		//System.out.println("address: " + this);
-		//System.out.println("progress: " + prog);
+		// System.out.println("address: " + this);
+		// System.out.println("progress: " + prog);
 		progBar.setProgress(prog);
 	}
 
@@ -82,10 +77,9 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	public void setText(String s) {
-		System.out.println("ADDRESS              :" + this);
 		lblText.setText(s);
 	}
-	
+
 	public void hideProgBar() {
 		progBar.setVisible(false);
 	}

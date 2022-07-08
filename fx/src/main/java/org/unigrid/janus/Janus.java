@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -13,6 +13,7 @@
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus;
 
 import jakarta.annotation.PostConstruct;
@@ -25,7 +26,6 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
-
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -36,19 +36,17 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
-
-import javafx.scene.control.ListView;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.cdi.Eager;
-
-import org.unigrid.janus.controller.view.SplashScreenController;
+import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
@@ -60,36 +58,16 @@ import org.unigrid.janus.model.rpc.entity.Info;
 @Eager
 @ApplicationScoped
 public class Janus extends BaseApplication implements PropertyChangeListener {
-
-	@Inject
-	private Daemon daemon;
-
-	@Inject
-	private RPCService rpc;
-
-	@Inject
-	private DebugService debug;
-
-	@Inject
-	private WindowService window;
-
-	@Inject
-	private MainWindow mainWindow;
-
-	@Inject
-	private JanusPreloader preloader;
-
-	@Inject
-	private JanusModel janusModel;
-	
-	@Inject
-	private UpdateWallet updateWallet;
-
-	@Inject
-	private SplashScreenController splashController;
-
-	@Inject
-	private Wallet wallet;
+	@Inject private Daemon daemon;
+	@Inject private RPCService rpc;
+	@Inject private DebugService debug;
+	@Inject private WindowService window;
+	@Inject private MainWindow mainWindow;
+	@Inject private JanusPreloader preloader;
+	@Inject private JanusModel janusModel;
+	@Inject private UpdateWallet updateWallet;
+	@Inject private SplashScreenController splashController;
+	@Inject private Wallet wallet;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
@@ -147,13 +125,12 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		startSplashScreen();
 		window.setHostServices(hostServices);
 
-		ready.addListener(
-			new ChangeListener<Boolean>() {
+		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
-			public void changed(ObservableValue<? extends Boolean> ov, Boolean t,
-				Boolean t1) {
+			public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
 				if (t1) {
 					ready.setValue(Boolean.FALSE);
+
 					Platform.runLater(new Runnable() {
 						public void run() {
 							debug.print("run poll", Janus.class.getSimpleName());
@@ -179,13 +156,12 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		System.out.println("start from bootstrap");
 		startSplashScreen();
 
-		ready.addListener(
-			new ChangeListener<Boolean>() {
+		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
-			public void changed(ObservableValue<? extends Boolean> ov, Boolean t,
-				Boolean t1) {
+			public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
 				if (t1) {
 					ready.setValue(Boolean.FALSE);
+
 					Platform.runLater(new Runnable() {
 						public void run() {
 							debug.print("run poll", Janus.class.getSimpleName());
@@ -207,7 +183,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private void startMainWindow() {
 		try {
 			mainWindow.show();
-
 			mainWindow.bindDebugListViewWidth(0.98);
 			debug.setListView((ListView) window.lookup("lstDebug"));
 
@@ -226,11 +201,13 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		debug.print("opening splash screen...", Janus.class.getSimpleName());
 		System.out.println("start splashscreen");
 		Properties myProperties = new Properties();
+
 		try {
 			myProperties.load(getClass().getResourceAsStream("application.properties"));
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
+
 		String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
 		String filteredVer = fullVer.replace("-SNAPSHOT", "");
 		janusModel.setVersion(filteredVer);
@@ -259,27 +236,33 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 					try {
 						walletInfo = rpc.call(new GetWalletInfo.Request(),
 							GetWalletInfo.class);
+
 						boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
 							GetBootstrappingInfo.class);
+
 						walletStatus = boostrapInfo.getResult().getWalletstatus();
-						// System.out.println("walletStatus: " + walletStatus);
 						progress = boostrapInfo.getResult().getProgress();
-						// System.out.println("progress: " + progress);
 						status = boostrapInfo.getResult().getStatus();
-						// System.out.println("status: " + status);
 						Thread.sleep(1000);
 					} catch (Exception e) {
-						debug.print("RPC call error: " + e.getMessage().toString(), Janus.class.getSimpleName());
-						// debug.print("RPC call error: " + e., Janus.class.getSimpleName());
+						debug.print("RPC call error: " + e.getMessage().toString(),
+							Janus.class.getSimpleName()
+						);
 
 						for (var x : e.getSuppressed()) {
-							debug.print("RPC call error: " + x.getCause().getMessage(), Janus.class.getSimpleName());
+							debug.print("RPC call error: " + x.getCause().getMessage(),
+								Janus.class.getSimpleName()
+							);
 						}
 
-						debug.print("RPC call error: " + e.getCause().getMessage(), Janus.class.getSimpleName());
+						debug.print("RPC call error: " + e.getCause().getMessage(),
+							Janus.class.getSimpleName()
+						);
 
 						for (var x : e.getStackTrace()) {
-							debug.print("RPC call error: " + x.toString(), Janus.class.getSimpleName());
+							debug.print("RPC call error: " + x.toString(),
+								Janus.class.getSimpleName()
+							);
 						}
 					}
 
@@ -288,37 +271,52 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							() -> {
 								float f = Float.parseFloat(progress);
 								window.getSplashScreenController().showProgressBar();
-								window.getSplashScreenController().setText("Downloading blockchain");
-								window.getSplashScreenController().updateProgress((float) (f / 100));
+
+								window.getSplashScreenController()
+									.setText("Downloading blockchain");
+
+								window.getSplashScreenController()
+									.updateProgress((float) (f / 100));
 							});
 					}
+
 					if (status.equals("unarchiving")) {
 						Platform.runLater(
 							() -> {
 								float f = Float.parseFloat(progress);
 								window.getSplashScreenController().showProgressBar();
-								window.getSplashScreenController().setText("Unarchiving blockchain");
-								window.getSplashScreenController().updateProgress((float) (f / 100));
+
+								window.getSplashScreenController()
+									.setText("Unarchiving blockchain");
+
+								window.getSplashScreenController()
+									.updateProgress((float) (f / 100));
 							});
 					}
+
 					if (status.equals("complete")) {
 						Platform.runLater(
 							() -> {
 								window.getSplashScreenController().hideProgBar();
 								window.getSplashScreenController().showSpinner();
-								window.getSplashScreenController().setText("Starting unigrid backend");
+
+								window.getSplashScreenController()
+									.setText("Starting unigrid backend");
 							});
 					}
 				} while (walletInfo.hasError());
-				debug.print("startup completed should load main screen..." + walletStatus, Janus.class.getSimpleName());
+
+				debug.print("startup completed should load main screen..." + walletStatus,
+					Janus.class.getSimpleName()
+				);
+
 				window.getSplashScreenController().hideProgBar();
 				ready.setValue(Boolean.TRUE);
-
 				return null;
 			}
 		};
-		new Thread(task).start();
 
+		new Thread(task).start();
 	}
 
 	public void restartDaemon() {
@@ -330,6 +328,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		} catch (InterruptedException ex) {
 			System.out.println("error on sleep");
 		}
+
 		ready.setValue(Boolean.FALSE);
 		startSplashScreen();
 		mainWindow.hide();

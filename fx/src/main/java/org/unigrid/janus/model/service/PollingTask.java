@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -20,8 +20,6 @@ import org.unigrid.janus.model.Wallet;
 import java.util.TimerTask;
 import javafx.application.Platform;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetConnectionCount;
 import org.unigrid.janus.model.rpc.entity.GetUnlockState;
@@ -32,7 +30,7 @@ public class PollingTask extends TimerTask {
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
-	//private static Jsonb jsonb = JsonbBuilder.create();
+	// private static Jsonb jsonb = JsonbBuilder.create();
 
 	public PollingTask() {
 		debug.log("Polling task created!");
@@ -40,16 +38,23 @@ public class PollingTask extends TimerTask {
 
 	public void run() {
 		Platform.runLater(() -> {
-			//wallet.setProcessingStatus();
-			//final Info info = rpc.call(new Info.Request(), Info.class);
+			// wallet.setProcessingStatus();
+			// final Info info = rpc.call(new Info.Request(), Info.class);
 			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+
 			try {
 				final GetWalletInfo walletInfo = rpc.call(new GetWalletInfo.Request(), GetWalletInfo.class);
 				final GetBlockCount blockCount = rpc.call(new GetBlockCount.Request(), GetBlockCount.class);
+
 				final GetConnectionCount connCount = rpc.call(new GetConnectionCount.Request(),
 					GetConnectionCount.class);
+
 				final StakingStatus staking = rpc.call(new StakingStatus.Request(), StakingStatus.class);
-				final GetUnlockState unlockState = rpc.call(new GetUnlockState.Request(), GetUnlockState.class);
+
+				final GetUnlockState unlockState = rpc.call(new GetUnlockState.Request(),
+					GetUnlockState.class
+				);
+
 				wallet.setBalance(walletInfo.getResult().getTotalbalance());
 				wallet.setBlocks(Integer.parseInt(blockCount.getResult().toString()));
 				wallet.setConnections(Integer.parseInt(connCount.getResult().toString()));
@@ -59,7 +64,10 @@ public class PollingTask extends TimerTask {
 				wallet.setTransactionCount(walletInfo.getResult().getTxcount());
 				wallet.setStatus("done");
 			} catch (Exception e) {
-				debug.print("Daemon offline: ".concat(e.getMessage()), PollingTask.class.getSimpleName());	
+				debug.print("Daemon offline: ".concat(e.getMessage()),
+					PollingTask.class.getSimpleName()
+				);
+
 				wallet.setOffline(Boolean.TRUE);
 				rpc.stopPolling();
 			}

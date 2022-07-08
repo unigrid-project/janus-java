@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -37,7 +37,6 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import lombok.SneakyThrows;
 import javafx.scene.control.ButtonType;
 import java.io.InputStream;
 import java.io.BufferedReader;
@@ -55,16 +54,15 @@ public class RPCService {
 	private static final String PROPERTY_PASSWORD = Preferences.PROPS.getString(PROPERTY_PASSWORD_KEY);
 
 	private static Timer pollingTimer;
-
-	private User credentials;
-	@Inject
-	private Daemon daemon;
-	@Inject
-	private DebugService debug;
 	private static WebTarget target;
+	private User credentials;
+
+	@Inject private Daemon daemon;
+	@Inject private DebugService debug;
 
 	private String getRPCProperty(Configuration config, String key, String value, String dataDirConfig,
 			boolean randomizeOnMissingProperty) throws ConfigurationException {
+
 		if (StringUtils.isNotBlank(value)) {
 			return value;
 		}
@@ -87,6 +85,7 @@ public class RPCService {
 	@PostConstruct
 	private void init() {
 		debug.print("RPC init called", RPCService.class.getSimpleName());
+
 		if (target != null) {
 			debug.print("target is not null", RPCService.class.getSimpleName());
 			return;
@@ -107,13 +106,14 @@ public class RPCService {
 
 			target = ClientBuilder.newBuilder()
 					.register(new JsonConfiguration())
-					.register(HttpAuthenticationFeature.basic(credentials.getName(), 
+					.register(HttpAuthenticationFeature.basic(credentials.getName(),
 					credentials.getPassword()))
 					.build().target(daemon.getRPCAdress());
 
 		} catch (ConfigurationException | org.apache.commons.configuration2.ex.ConfigurationException ex) {
 			debug.print("Bajs det gick åt helvete!!!!!!!!!!!!!!!!", RPCService.class.getSimpleName());
 		}
+
 		debug.print("after DataDirectory getConfig", RPCService.class.getSimpleName());
 	}
 
@@ -131,23 +131,24 @@ public class RPCService {
 	}
 
 	public <R, T> T call(R request, Class<T> clazz) {
-		//debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
-		//debug.print("RPC target ".concat(target.request().post(Entity.json(request)).readEntity(clazz).toString()), RPCService.class.getSimpleName());
+		// debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
 		return target.request().post(Entity.json(request)).readEntity(clazz);
 	}
 
 	public <R> String callToJson(R request) {
 		Response r = target.request().post(Entity.json(request));
 		String result = "{}";
+
 		if (r.hasEntity()) {
 			InputStream instream = (InputStream) r.getEntity();
 			Jsonb jsonb = JsonbBuilder.create();
 			String sRequest = jsonb.toJson(request);
-			result = String.format("RPC call: %s\n"
-					+ "Response: %s",
-					sRequest,
-					convertStreamToString(instream));
+
+			result = String.format("RPC call: %s\nResponse: %s", sRequest,
+				convertStreamToString(instream)
+			);
 		}
+
 		return result;
 	}
 
@@ -158,19 +159,17 @@ public class RPCService {
 
 	public <R> String alert(R request) {
 		String result = callToJson(request);
-		Alert a = new Alert(AlertType.INFORMATION,
-				result,
-				ButtonType.OK);
+		Alert a = new Alert(AlertType.INFORMATION, result, ButtonType.OK);
+
 		a.showAndWait();
 		return result;
 	}
 
 	private static String convertStreamToString(InputStream is) {
-
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		StringBuilder sb = new StringBuilder();
-
 		String line = null;
+
 		try {
 			while ((line = reader.readLine()) != null) {
 				sb.append(line + "\n");
@@ -184,6 +183,7 @@ public class RPCService {
 				e.printStackTrace();
 			}
 		}
+
 		return sb.toString();
 	}
 }

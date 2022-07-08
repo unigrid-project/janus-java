@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021 The Unigrid Foundation
+	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -21,8 +21,6 @@ import jakarta.inject.Inject;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,13 +28,11 @@ import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
-import org.unigrid.janus.model.rpc.entity.WalletInfo;
 import org.unigrid.janus.model.service.DebugService;
 
 @Eager
 @ApplicationScoped
 public class Wallet {
-
 	public static final String BALANCE_PROPERTY = "balance";
 	public static final String TOTALBALANCE_PROPERTY = "totalbalance";
 	public static final String MONEYSUPPLY_PROPERTY = "moneysupply";
@@ -63,29 +59,36 @@ public class Wallet {
 	private static Boolean isStaking;
 	private static Boolean processingStatus = false;
 	private static String status;
+
 	@Getter @Setter
 	private static int unlockState = 0;
+
 	@Getter
 	private static long stakingStartTime = 100000000L;
 	private static Boolean encrypted;
 	private static Boolean offline = false;
+
 	@Getter @Setter
 	private Object[] sendArgs;
+
 	@Inject
 	private static DebugService debug = new DebugService();
 	private static PropertyChangeSupport pcs;
+
 	@Getter @Setter
 	private LockState lockState = LockState.LOCKED;
+
 	@AllArgsConstructor
-	public static enum LockState {
+	public enum LockState {
 		UNLOCKED("unlocked"),
 		LOCKED("locked"),
 		UNLOCKED_FOR_STAKING("unlocked-for-staking");
-		
-		@Getter private String currentState;
+
+		@Getter
+		private String currentState;
 
 		public static LockState from(String s) {
-			return switch(s) {
+			return switch (s) {
 				case "locked" -> LockState.LOCKED;
 				case "unlocked" -> LockState.UNLOCKED;
 				default -> LockState.UNLOCKED_FOR_STAKING;

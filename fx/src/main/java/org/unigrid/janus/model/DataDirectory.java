@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -28,12 +28,8 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.SystemUtils;
-import org.unigrid.janus.model.service.DebugService;
-
-import jakarta.inject.Inject;
 
 public class DataDirectory {
-
 	private static final String APPLICATION_NAME = "UNIGRID";
 	public static final String CONFIG_FILE = "unigrid.conf";
 	public static final String GRIDNODE_FILE = "masternode.conf";
@@ -71,25 +67,25 @@ public class DataDirectory {
 		FileBasedConfigurationBuilder<FileBasedConfiguration> builder
 			= new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
 				.configure(parameters.properties().setFile(getConfigFile()));
-		
-		//System.out.println("found folder = " + builder.getFileHandler().locate());
-		//System.out.println(builder.getFileHandler().getPath());
+
+		// System.out.println("found folder = " + builder.getFileHandler().locate());
+		// System.out.println(builder.getFileHandler().getPath());
 		System.out.println("Path: ".concat(builder.getFileHandler().getPath()));
+
 		try {
 			do {
 				System.out.println("init loop DataDirectory!!!");
-				try{
-				Thread.sleep(250);
-				} 
-				catch (InterruptedException e) { 
+
+				try {
+					Thread.sleep(250);
+				} catch (InterruptedException e) {
 					System.out.println("Somthing whent wrong with the thread");
 				}
 			} while (blocking && !builder.getFileHandler().locate());
 		} catch (Exception e) {
 			System.out.println("dowhile");
 		}
-		
-		
+
 		return builder.getConfiguration();
 	}
 
@@ -97,9 +93,11 @@ public class DataDirectory {
 		Configuration config = getConfig(true);
 		Iterator<String> keys = config.getKeys();
 		String result = "";
+
 		while (keys.hasNext()) {
 			result = String.format("%s\n%s", result, keys.next());
 		}
+
 		return result;
 	}
 
@@ -110,11 +108,11 @@ public class DataDirectory {
 	public static File getGridnodeFile() {
 		return Paths.get(get(), GRIDNODE_FILE).toFile();
 	}
-	
+
 	public static File getBackendLog() {
 		return Paths.get(get(), "debug.log").toFile();
 	}
-	
+
 	public static File getWalletLog() {
 		return Paths.get(get(), "wallet.log").toFile();
 	}

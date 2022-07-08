@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021 The Unigrid Foundation
+	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -27,16 +27,18 @@ import org.unigrid.janus.model.rpc.entity.ListTransactions;
 
 public class TransactionList {
 	public static final String TRANSACTION_LIST = "transactionlist";
+
 	private static PropertyChangeSupport pcs;
 	private static ObservableList<Transaction> transactions = FXCollections.observableArrayList();
 	private static RPCService rpc = new RPCService();
 	private static DebugService debug = new DebugService();
 
 	public TransactionList() {
-		if (this.pcs != null) {
+		if (pcs != null) {
 			return;
 		}
-		this.pcs = new PropertyChangeSupport(this);
+
+		pcs = new PropertyChangeSupport(this);
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -54,12 +56,12 @@ public class TransactionList {
 	public ObservableList<Transaction> getLatestTransactions(int count) {
 		System.out.println(this.transactions.size());
 		count = count > transactions.size() ? transactions.size() : count;
+
 		return (ObservableList<Transaction>) FXCollections.observableArrayList(transactions.subList(0, count));
 	}
 
 	public int loadNewTransactions() {
-		ListTransactions trans = rpc.call(new ListTransactions.Request(0, 10),
-			ListTransactions.class);
+		ListTransactions trans = rpc.call(new ListTransactions.Request(0, 10), ListTransactions.class);
 		int iNewCount = 0;
 		// TODO: merge new trans to beginning of list
 		return iNewCount;
@@ -68,11 +70,14 @@ public class TransactionList {
 	// return index of first duplicate, or -1 if not found.
 	public int isDuplicate(Transaction trans, boolean beginning) {
 		int result = -1;
+
 		if (trans.getTxid() == null) {
 			return -1;
 		}
+
 		try {
 			int index = 0;
+
 			for (Transaction t : this.transactions) {
 				if (t.getTxid() != null && trans.getTxid() != null) {
 					if (t.getTxid().equals(trans.getTxid())) {
@@ -80,17 +85,20 @@ public class TransactionList {
 						break;
 					}
 				}
+
 				index++;
 			}
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (TransactionList isDuplicate) %s", e.getMessage()));
 		}
+
 		debug.print("is duplicate transaction index: " + result, TransactionList.class.getSimpleName());
 		return result;
 	}
 
 	public Transaction getMultiPart(Transaction trans, boolean beginning) {
 		Transaction result = null;
+
 		for (Transaction t : this.transactions) {
 			if (t.getCategory().equals("multipart")
 				&& t.getTxid().equals(trans.getTxid())) {
@@ -98,6 +106,7 @@ public class TransactionList {
 				break;
 			}
 		}
+
 		return result;
 	}
 
@@ -106,18 +115,19 @@ public class TransactionList {
 	 *
 	 * @param index If this is not a part of another transaction, insert at index.
 	 * @param trans The new transaction to add (maybe)
-	 * @return True if added as new, false if added to multipart or not added.
-	 * This is used to determine if transaction count
-	 * changed.
+	 * @return True if added as new, false if added to multipart or not added. This is used to determine if transaction
+	 * count changed.
 	 */
 	public boolean addTransaction(int index, Transaction trans) {
 		boolean result = false;
 		try {
 			//boolean beginning = (index == 0);
 			int idx = -1; //isDuplicate(trans, beginning);
+
 			if (idx != -1) {
 				// TODO: check for multipart and add, or create multipart if needed.
 				Transaction t = transactions.get(idx);
+
 				if (t.getCategory().equals("multipart")) {
 					// add part to found transaction if not already there
 					// this isn't adding to transactions count, so return false.
@@ -145,19 +155,21 @@ public class TransactionList {
 		// new transactions since the last load
 		debug.log(String.format("Transaction count before load: %d", transactions.size()));
 		int offset = transactions.size() - 10;
+
 		if (offset < 0) {
 			offset = 0;
 		}
+
 		int load = (int) Math.round(count * 1.5);
-		debug.log(String.format("Offset: %d and count: %d", offset, load));
-		ListTransactions trans = rpc.call(
-			new ListTransactions.Request(offset, load),
-			ListTransactions.class);
+		debug.log(String.format("Offset: %d and count: %d",  offset,  load));
+		ListTransactions trans = rpc.call(new ListTransactions.Request(offset, load), ListTransactions.class);
+
 		// TODO: merge new trans to end of list
 		for (Transaction t : trans.getResult()) {
 			// transactions.add(result.oldSize, t);
 			this.addTransaction(result.getOldSize(), t);
 		}
+
 		this.processMultipart();
 		result.setNewSize(transactions.size());
 		debug.log(String.format("New size: %d", result.getNewSize()));
@@ -168,15 +180,16 @@ public class TransactionList {
 		int oldCount = 0;
 		transactions.clear();
 		int newCount = 0;
+
 		for (Transaction t : transList.getResult()) {
 			// add to the beginning to sort in reverse date order
 			// transactions.add(0, t);
 			this.addTransaction(0, t);
 			newCount++;
 		}
-		this.processMultipart();
 
-		this.pcs.firePropertyChange(this.TRANSACTION_LIST, oldCount, newCount);
+		processMultipart();
+		pcs.firePropertyChange(this.TRANSACTION_LIST, oldCount, newCount);
 	}
 
 	public void processMultipart() {
@@ -186,6 +199,7 @@ public class TransactionList {
 				double sendAmount = 0;
 				double receiveAmount = 0;
 				double fee = 0;
+
 				for (Transaction trans : t.getParts()) {
 					if (trans.getCategory().equals("send")) {
 						sendAmount += trans.getAmount();
@@ -197,6 +211,7 @@ public class TransactionList {
 						address = trans.getAddress();
 					}
 				}
+
 				if (t.getParts().size() == 2) {
 					t.setAddress(address);
 					t.setCategory("fee");
@@ -204,6 +219,7 @@ public class TransactionList {
 					t.setFee(fee);
 				} else {
 					double total = sendAmount + receiveAmount + fee;
+
 					if (total > 0) {
 						t.setAddress(address);
 						t.setCategory("receive");
@@ -213,9 +229,10 @@ public class TransactionList {
 						t.setCategory("send");
 						t.setAmount(total - fee);
 						t.setFee(fee);
+
 						for (Transaction trans : t.getParts()) {
-							if (trans.getCategory().equals("send") &&
-								!trans.getAddress().equals(address)) {
+							if (trans.getCategory().equals("send")
+								&& !trans.getAddress().equals(address)) {
 								t.setAddress(trans.getAddress());
 							}
 						}

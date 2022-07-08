@@ -14,24 +14,15 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.view;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import org.junit.jupiter.api.Test;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-public class LockWallet extends BaseResult<LockWallet.Result> {
-	private static final String METHOD = "walletlock";
-
-	public static class Request extends BaseRequest {
-		public Request() {
-			super(METHOD);
-		}
-	}
-
-	@Data
-	public static class Result {
-
+public class ViewArchitectureTest {
+	@Test
+	public void shouldNotDependOnControllers() {
+		noClasses().that().resideInAPackage("org.unigrid.janus.view")
+			.should().dependOnClassesThat().resideInAPackage("org.unigrid.janus.controller");
 	}
 }

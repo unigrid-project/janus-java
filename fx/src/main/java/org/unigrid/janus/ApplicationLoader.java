@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021-2022 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -30,7 +30,7 @@ public class ApplicationLoader extends Application {
 	@Override
 	public void init() throws Exception {
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
-		//final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
+		// final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
 
 		application = container.select(Janus.class).get();
 	}
@@ -39,5 +39,4 @@ public class ApplicationLoader extends Application {
 	public void start(Stage stage) throws Exception {
 		application.start(stage, getParameters(), getHostServices());
 	}
-	
 }

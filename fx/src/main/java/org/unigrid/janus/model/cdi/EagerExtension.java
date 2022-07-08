@@ -1,6 +1,6 @@
 /*
-    Unigrid Hedgehog 
-    Copyright © 2021-2022 The Unigrid Foundation
+    The Janus Wallet
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the The Unigrid Foundation and
@@ -29,7 +29,7 @@ import java.util.List;
 public class EagerExtension implements Extension {
 	private final List<Bean<?>> eagerBeansList = new ArrayList<>();
 
-	public <T> void collect(@Observes ProcessBean< T> event) {
+	public <T> void collect(@Observes ProcessBean<T> event) {
 		if (event.getAnnotated().isAnnotationPresent(Eager.class)
 			&& event.getAnnotated().isAnnotationPresent(ApplicationScoped.class)) {
 
