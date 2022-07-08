@@ -43,7 +43,7 @@ import org.update4j.OS;
 @Eager
 @ApplicationScoped
 public class UpdateWallet extends TimerTask {
-	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/%s";
+	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
 
 	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
 		{OS.LINUX, "config-linux.xml"}, {OS.WINDOWS, "config-windows.xml"}, {OS.MAC, "config-mac.xml"}
