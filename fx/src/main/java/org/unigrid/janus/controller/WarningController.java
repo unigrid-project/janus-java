@@ -29,7 +29,7 @@ import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 
 @ApplicationScoped
-public class WarningController implements Initializable{
+public class WarningController implements Initializable {
 	public static final String HIDE_WARNING = "hidewarning";
 	public static final String STATUS_PROPERTY = "walletstatus";
 	private static DebugService debug = new DebugService();
@@ -39,8 +39,7 @@ public class WarningController implements Initializable{
 	private static WindowService window = WindowService.getInstance();
 	private static PropertyChangeSupport pcs;
 
-	/**
-	public WarningController() {
+	/* public WarningController() {
 		wallet = window.getWallet();
 		if (this.pcs != null) {
 			return;
@@ -54,8 +53,8 @@ public class WarningController implements Initializable{
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
-	}
-**/
+	} */
+
 	public void onRestartClicked(MouseEvent event) {
 		debug.log("onRestartClicked");
 		// will be implemented once CDI is working

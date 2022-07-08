@@ -27,29 +27,22 @@ import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ListCell;
 import lombok.SneakyThrows;
-import org.unigrid.janus.model.service.WindowService;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
-
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.event.CloseJanusEvent;
-import org.unigrid.janus.model.service.PollingService;
+import org.unigrid.janus.model.service.WindowService;
 
 @Eager
 @ApplicationScoped
 public class MainWindow implements Window {
-
-	@Inject
-	private Stage stage;
-	@Inject
-	private JanusModel janusModel;
-
 	private WindowService window = WindowService.getInstance();
 
-	@Inject
-	private Event<CloseJanusEvent> closeJanusEvent;
+	@Inject private Stage stage;
+	@Inject private JanusModel janusModel;
+	@Inject private Event<CloseJanusEvent> closeJanusEvent;
 
 	@PostConstruct
 	private void init() {
@@ -60,15 +53,12 @@ public class MainWindow implements Window {
 
 	@SneakyThrows
 	public void show() {
-		
 		try {
 			window.setStage(stage);
 			window.getSettingsController().setVersion(janusModel.getVersion());
 			stage.show();
 		} catch (Exception e) {
-			Alert a = new Alert(AlertType.ERROR,
-				e.getMessage(),
-				ButtonType.OK);
+			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
 			a.showAndWait();
 		}
 	}

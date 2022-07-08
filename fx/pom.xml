@@ -169,12 +169,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
-			<!-- Uncomment tentackle to build moduls jars for fx to make a new config.xml for update. 
+			<!-- Uncomment tentackle to build module jars for fx to make a new config.xml for update.
 			Comment to speed up the build process for testing -->
 			<plugin>
 				<groupId>org.tentackle</groupId>
 				<artifactId>tentackle-jlink-maven-plugin</artifactId>
-				<version>11.7.3.0</version>
 				<configuration>
 					<mainClass>${mainClass}</mainClass>
 					<stripDebug>true</stripDebug>
@@ -189,67 +188,17 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--<plugin>
-				<groupId>org.tentackle</groupId>
-				<artifactId>tentackle-jlink-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>com.github.akman</groupId>
-				<artifactId>jpackage-maven-plugin</artifactId>
-				<version>0.1.3</version>
-				<configuration>
-					<runtimeimage>target/jlink</runtimeimage>
-					<type>IMAGE</type>
-					<dest>target/jpackage</dest>
-					<name>Janus</name>
-				</configuration>
-			</plugin>-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.2</version>
-				<configuration>
-					<configLocation>checkstyle.xml</configLocation>
-					<excludes>**/module-info.java</excludes>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>com.puppycrawl.tools</groupId>
-						<artifactId>checkstyle</artifactId>
-						<version>8.41</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>pl.gdela</groupId>
 				<artifactId>socomo-maven</artifactId>
-				<version>2.3.1</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm</artifactId>
-						<version>9.1</version>
-					</dependency>
-				</dependencies>
-				<executions>
-					<execution>
-						<goals>
-							<goal>analyze</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
 			</plugin>
 		</plugins>
 	</build>

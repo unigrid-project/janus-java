@@ -13,6 +13,7 @@
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,7 +29,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -39,8 +39,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
@@ -52,16 +50,14 @@ import org.unigrid.janus.model.Documentation;
 
 @ApplicationScoped
 public class DocumentationController implements Initializable, PropertyChangeListener {
-
 	private static DebugService debug = new DebugService();
 	private static Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 	private static DocList documentationList = new DocList();
 
-	@FXML
-	private TableView tblDocs;
-	@FXML
-	private TableColumn colDescription;
+	@FXML private TableView tblDocs;
+	@FXML private TableColumn colDescription;
+
 	private String url = "https://docs.unigrid.org/docs/data/index.json";
 
 	@Override
@@ -83,6 +79,7 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 	public void pullNewDocumentaion() throws JsonProcessingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
+
 		try {
 			mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -106,34 +103,35 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 	private void setupDocList() {
 		try {
-			colDescription.setCellValueFactory(
-					new Callback<TableColumn.CellDataFeatures<Documentation, Hyperlink>, ObservableValue<Hyperlink>>() {
-						public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Documentation, Hyperlink> t) {
-							Documentation doc = t.getValue();
-							String text = doc.getTitle();
+			colDescription.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Documentation,
+				Hyperlink>, ObservableValue<Hyperlink>>() {
 
-							Hyperlink link = new Hyperlink();
-							link.setText(text);
-							link.setOnAction(new EventHandler<ActionEvent>() {
-								@Override
-								public void handle(ActionEvent e) {
-									if (e.getTarget().equals(link)) {
-										window.browseURL(doc.getLink());
-									}
-								}
-							});
-							Button btn = new Button();
-							FontIcon fontIcon = new FontIcon("far-newspaper");
-							fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-							btn.setGraphic(fontIcon);
-							link.setGraphic(btn);
-							link.setAlignment(Pos.CENTER_RIGHT);
-							return new ReadOnlyObjectWrapper(link);
+				public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Documentation,
+					Hyperlink> t) {
+
+					Documentation doc = t.getValue();
+					String text = doc.getTitle();
+					Hyperlink link = new Hyperlink();
+					link.setText(text);
+
+					link.setOnAction(e -> {
+						if (e.getTarget().equals(link)) {
+							window.browseURL(doc.getLink());
 						}
 					});
+
+					Button btn = new Button();
+					FontIcon fontIcon = new FontIcon("far-newspaper");
+					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+					btn.setGraphic(fontIcon);
+					link.setGraphic(btn);
+					link.setAlignment(Pos.CENTER_RIGHT);
+
+					return new ReadOnlyObjectWrapper(link);
+				}
+			});
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup node table) %s", e.getMessage()));
 		}
 	}
-
 }

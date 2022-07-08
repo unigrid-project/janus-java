@@ -28,5 +28,5 @@ public class Preferences {
 
 	public static java.util.prefs.Preferences get() {
 		return java.util.prefs.Preferences.userRoot().node(ROOT_NODE);
-		}
+	}
 }

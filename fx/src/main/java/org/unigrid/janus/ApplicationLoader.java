@@ -30,7 +30,7 @@ public class ApplicationLoader extends Application {
 	@Override
 	public void init() throws Exception {
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
-		//final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
+		// final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
 
 		application = container.select(Janus.class).get();
 	}
@@ -39,5 +39,4 @@ public class ApplicationLoader extends Application {
 	public void start(Stage stage) throws Exception {
 		application.start(stage, getParameters(), getHostServices());
 	}
-	
 }

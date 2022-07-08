@@ -23,8 +23,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -91,55 +89,59 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	private void setupAddressList() {
 		try {
-			colAddress.setCellValueFactory(
-					new Callback<TableColumn.CellDataFeatures<Address, Hyperlink>, ObservableValue<Hyperlink>>() {
-						public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address, Hyperlink> t) {
-							Address address = t.getValue();
-							String text = address.getAddress();
+			colAddress.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Address, Hyperlink>,
+				ObservableValue<Hyperlink>>() {
 
-							Hyperlink link = new Hyperlink();
-							link.setText(text);
-							link.setOnAction(new EventHandler<ActionEvent>() {
-								@Override
-								public void handle(ActionEvent e) {
-									if (e.getTarget().equals(link)) {
-										window.browseURL("https://explorer"
-												+ ".unigrid.org/address/"
-												+ address.getAddress());
-									}
-								}
-							});
-							Button btn = new Button();
-							FontIcon fontIcon = new FontIcon("fas-clipboard");
-							fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-							btn.setGraphic(fontIcon);
-							btn.setOnAction((ActionEvent event) -> {
-								final Clipboard cb = Clipboard.getSystemClipboard();
-								final ClipboardContent content = new ClipboardContent();
-								content.putString(address.getAddress());
-								cb.setContent(content);
-								if (SystemUtils.IS_OS_MAC_OSX) {
-									Notifications
-											.create()
-											.title("Address copied to clipboard")
-											.text(address.getAddress())
-											.position(Pos.TOP_RIGHT)
-											.showInformation();
-								} else {
-									Notifications
-											.create()
-											.title("Address copied to clipboard")
-											.text(address.getAddress())
-											.showInformation();
-								}
-							});
-							link.setGraphic(btn);
-							link.setAlignment(Pos.CENTER_RIGHT);
-							return new ReadOnlyObjectWrapper(link);
+				public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address, Hyperlink> t) {
+
+					Address address = t.getValue();
+					String text = address.getAddress();
+
+					Hyperlink link = new Hyperlink();
+					link.setText(text);
+
+					link.setOnAction(e -> {
+						if (e.getTarget().equals(link)) {
+							// TODO: Not a proper setter!
+							window.browseURL("https://explorer.unigrid.org/address/"
+								+ address.getAddress()
+							);
 						}
 					});
-			colAddressBalance.setCellValueFactory(
-					new PropertyValueFactory<Address, String>("amount"));
+
+					Button btn = new Button();
+					FontIcon fontIcon = new FontIcon("fas-clipboard");
+					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+					btn.setGraphic(fontIcon);
+
+					btn.setOnAction(e -> {
+						final Clipboard cb = Clipboard.getSystemClipboard();
+						final ClipboardContent content = new ClipboardContent();
+						content.putString(address.getAddress());
+						cb.setContent(content);
+						if (SystemUtils.IS_OS_MAC_OSX) {
+							Notifications
+								.create()
+								.title("Address copied to clipboard")
+								.text(address.getAddress())
+								.position(Pos.TOP_RIGHT)
+								.showInformation();
+						} else {
+							Notifications
+								.create()
+								.title("Address copied to clipboard")
+								.text(address.getAddress())
+								.showInformation();
+						}
+					});
+
+					link.setGraphic(btn);
+					link.setAlignment(Pos.CENTER_RIGHT);
+					return new ReadOnlyObjectWrapper(link);
+				}
+			});
+
+			colAddressBalance.setCellValueFactory(new PropertyValueFactory<Address, String>("amount"));
 
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup address table) %s", e.getMessage()));
@@ -150,6 +152,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		TableColumn<Address, Void> colBtn = new TableColumn("Copy");
 		colBtn.setStyle("-fx-alignment: CENTER;");
 		Callback<TableColumn<Address, Void>, TableCell<Address, Void>> cellFactory;
+
 		cellFactory = (final TableColumn<Address, Void> param) -> {
 			final TableCell<Address, Void> cell = new TableCell<Address, Void>() {
 				private final Button btn = new Button();
@@ -158,16 +161,17 @@ public class AddressController implements Initializable, PropertyChangeListener 
 					FontIcon fontIcon = new FontIcon("fas-clipboard");
 					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
 					btn.setGraphic(fontIcon);
-					btn.setOnAction((ActionEvent event) -> {
+
+					btn.setOnAction(e -> {
 						Address data = getTableView().getItems().get(getIndex());
-						copyToClipboard(data.getAddress().toString());
-						// debug.log("selectedData: " + data.getAddress().toString());
+						copyToClipboard(data.getAddress());
 					});
 				}
 
 				@Override
 				public void updateItem(Void item, boolean empty) {
 					super.updateItem(item, empty);
+
 					if (empty) {
 						setGraphic(null);
 					} else {
@@ -184,12 +188,13 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(addresses.ADDRESS_LIST)) {
-			// debug.log("ADDRESS_LIST change");
 			tblAddresses.setItems(addresses.getAddresses());
 		}
+
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
 			loadAddresses();
 		}
+
 		if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
 			loadAddresses();
 		}
@@ -234,10 +239,10 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		content.putString(address);
 		clipboard.setContent(content);
 		Notifications
-				.create()
-				.title("Address copied to clipboard")
-				.text(address)
-				.showInformation();
+			.create()
+			.title("Address copied to clipboard")
+			.text(address)
+			.showInformation();
 	}
 
 	@FXML

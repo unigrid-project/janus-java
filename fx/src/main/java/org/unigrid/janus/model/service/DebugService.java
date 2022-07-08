@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model.service;
 
@@ -22,13 +22,11 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import org.unigrid.janus.model.DataDirectory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import javafx.scene.control.ListView;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
 
 @Eager
@@ -39,6 +37,7 @@ public class DebugService {
 
 	public void setListView(ListView lv) {
 		output = lv;
+
 		if (lv != null && items != null) {
 			output.setItems(items);
 		}
@@ -51,25 +50,27 @@ public class DebugService {
 			if (items == null) {
 				items = FXCollections.observableArrayList();
 			}
+
 			items.add(msg);
 		}
 	}
 
 	public void print(String msg, String className) {
-        String path = DataDirectory.get().concat("/wallet.log");
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(path, true))) {
-            bw.write(getCurrentDate().concat(": ").concat(className).concat("- ").concat(msg));
-            System.out.println(msg);
-            bw.newLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+		String path = DataDirectory.get().concat("/wallet.log");
 
-    public String getCurrentDate() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd.HH.mm");
-        Date date = new Date();
-        String dateS = dateFormat.format(date);
-        return dateS;
-    }
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(path, true))) {
+			bw.write(getCurrentDate().concat(": ").concat(className).concat("- ").concat(msg));
+			System.out.println(msg);
+			bw.newLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String getCurrentDate() {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd.HH.mm");
+		Date date = new Date();
+		String dateS = dateFormat.format(date);
+		return dateS;
+	}
 }

@@ -16,7 +16,7 @@
 
 package org.unigrid.janus;
 
-import javafx.application.Application;
+import javafx.application.Application.Parameters;
 import javafx.application.HostServices;
 import javafx.stage.Stage;
 import org.unigrid.janus.model.Preferences;
@@ -25,14 +25,12 @@ abstract class BaseApplication {
 	public static void main(String[] args) {
 		/* Effectively changes the default values of these properties as used in JavaFX, we do this to speed up
 		   refreshes and custom resizing of undecorated windows. */
-
 		Preferences.changePropertyDefault(Boolean.class, "prism.vsync", false);
 		Preferences.changePropertyDefault(String.class, "prism.order", "sw");
 
 		ApplicationLoader.launch(ApplicationLoader.class, args);
 
 	}
-	
-	public abstract void start(Stage primaryStage, Application.Parameters parameters,
-		HostServices hostServices) throws Exception;
+
+	public abstract void start(Stage primaryStage, Parameters parameters, HostServices hostServices) throws Exception;
 }

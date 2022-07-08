@@ -21,7 +21,6 @@ import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import jakarta.enterprise.inject.spi.CDI;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.cdi.EagerExtension;
@@ -29,38 +28,36 @@ import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
 import org.update4j.service.Launcher;
 
-
 public class JanusLauncher implements Launcher {
-	
 	@InjectTarget
-	private Stage primaryStage;
-	
+	private Stage primaryStage; // TODO: This doesnt seem to be used at all ?
+
 	@Override @SneakyThrows
 	public void run(LaunchContext lc) {
 		System.out.println("before cotainer init");
-		//ApplicationLoader.launch(ApplicationLoader.class);
-		final SeContainer container = SeContainerInitializer.newInstance().addExtensions(EagerExtension.class)
-			.initialize();
+		// ApplicationLoader.launch(ApplicationLoader.class);
+
+		final SeContainer container = SeContainerInitializer.newInstance()
+			.addExtensions(EagerExtension.class).initialize();
+
 		System.out.println(CDI.current());
-		
+
 		Platform.runLater(() -> {
 			Janus janus = container.select(Janus.class).get();
-			
 			System.out.println(lc.getClassLoader());
-
 			Stage stage = new Stage();
-			
-			System.out.println("Is application scope: " + container.getBeanManager().isScope(ApplicationScoped.class));
+
+			System.out.println("Is application scope: "
+				+ container.getBeanManager().isScope(ApplicationScoped.class)
+			);
+
 			System.out.println("launcher start");
-		
+
 			try {
 				janus.startFromBootstrap(stage);
-			}
-			catch(Exception e) {
+			} catch (Exception e) {
 				System.exit(1);
 			}
 		});
-		
 	}
-	
 }

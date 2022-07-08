@@ -59,16 +59,17 @@ public class AddressListModel {
 		int newCount = 0;
 		for (Address g : list.getResult()) {
 			//System.out.println(String.format("address: %s", g.getAmount()));
-			if(selected){
-				if(g.getAmount() > 0){
+			if (selected) {
+				if (g.getAmount() > 0) {
 					addresses.add(g);
 					newCount++;
 				}
-			}else {
+			} else {
 				addresses.add(g);
 				newCount++;
 			}
 		}
+
 		this.pcs.firePropertyChange(this.ADDRESS_LIST, oldCount, newCount);
 	}
 }
