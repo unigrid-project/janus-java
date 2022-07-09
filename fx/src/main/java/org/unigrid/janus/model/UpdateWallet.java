@@ -30,6 +30,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TimerTask;
+
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Pos;
 import lombok.Getter;
@@ -37,16 +39,20 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.cdi.Eager;
+import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.PollingService;
 import org.update4j.Configuration;
 import org.update4j.OS;
 
 @Eager
 @ApplicationScoped
 public class UpdateWallet extends TimerTask {
+	private static DebugService debug = new DebugService();
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
-
+	private static PollingService polling = new PollingService();
+	private OS os = OS.CURRENT;
 	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
-		{OS.LINUX, "config-linux.xml"}, {OS.WINDOWS, "config-windows.xml"}, {OS.MAC, "config-mac.xml"}
+			{ OS.LINUX, "config-linux.xml" }, { OS.WINDOWS, "config-windows.xml" }, { OS.MAC, "config-mac.xml" }
 	});
 
 	public enum UpdateState {
@@ -58,9 +64,19 @@ public class UpdateWallet extends TimerTask {
 	private static final String UPDATE_PROPERTY = "update";
 
 	private UpdateState oldValue = UpdateState.UPDATE_NOT_READY;
-	private Configuration config;
+	private Configuration updateConfig = null;
 	private SimpleBooleanProperty running;
-	private PropertyChangeSupport pcs;
+	private static PropertyChangeSupport pcs;
+
+	public UpdateWallet() {
+		System.out.println("Init walletUpdate");
+		if (this.pcs != null) {
+			// TODO: Should this really be a fallthrough ? It looks dangerous.
+			return;
+		}
+
+		this.pcs = new PropertyChangeSupport(this);
+	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.addPropertyChangeListener(listener);
@@ -70,19 +86,34 @@ public class UpdateWallet extends TimerTask {
 		this.pcs.removePropertyChangeListener(listener);
 	}
 
-	@PostConstruct
-	private void init() {
-		System.out.println("Init walletUpdate");
-		OS os = OS.CURRENT;
+	@Override
+	public void run() {
+		if(pcs == null)
+			pcs = new PropertyChangeSupport(this);
+		if (checkUpdate()) {
+			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
-		if (pcs != null) {
-			// TODO: Should this really be a fallthrough ? It looks dangerous.
-			return;
+			if (SystemUtils.IS_OS_MAC_OSX) {
+				Notifications.create().title("Update Ready")
+						.text("New update ready \nPleas close application to update!")
+						.position(Pos.TOP_RIGHT).showInformation();
+			} else {
+				Notifications.create().title("Update Ready")
+						.text("New update ready \nPleas close application to update!").showInformation();
+			}
+		} else {
+			
+			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
+			debug.print("user.dir: " + System.getProperty("user.dir"), UpdateWallet.class.getSimpleName());
 		}
+
+	}
+
+	private Boolean checkUpdate() {
+		boolean update = false;
 
 		URL configUrl = null;
 		Configuration updateConfig = null;
-		pcs = new PropertyChangeSupport(this);
 
 		try {
 			configUrl = new URL(String.format(BASE_URL, OS_CONFIG.get(os)));
@@ -96,42 +127,12 @@ public class UpdateWallet extends TimerTask {
 			System.out.println("Reading the config file");
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
-
-			// TODO: Hardcoded to marcus home directory! Needs to be fixed.
-			final String directory = "/home/marcus/Documents/unigrid/config/UpdateWalletConfig/config.xml";
-
-			try (Reader in = Files.newBufferedReader(Paths.get(directory))) {
-				System.out.println("reading local config xml");
-				updateConfig = Configuration.read(in);
-			} catch (IOException ioe) {
-				/* Just rethrow as a runtime exception for now - if we get here, we are in trouble anyway */
-				throw new IllegalStateException(ioe);
-			}
 		}
-	}
-
-	@Override
-	public void run() {
-		if (checkUpdate()) {
-			pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
-
-			if (SystemUtils.IS_OS_MAC_OSX) {
-				Notifications.create().title("Update Ready")
-					.text("New update ready \nPleas close application to update!")
-					.position(Pos.TOP_RIGHT).showInformation();
-			} else {
-				Notifications.create().title("Update Ready")
-					.text("New update ready \nPleas close application to update!").showInformation();
-			}
-		}
-	}
-
-	private Boolean checkUpdate() {
-		boolean update = false;
-
 		try {
 			System.out.println("Checking for update");
-			update = config.requiresUpdate();
+			if(updateConfig == null)
+				debug.print("null config", UpdateWallet.class.getSimpleName());
+			update = updateConfig.requiresUpdate();
 		} catch (IOException e) {
 			update = false;
 		}
@@ -139,7 +140,7 @@ public class UpdateWallet extends TimerTask {
 		return update;
 	}
 
-	private void doUpdate() {
-		running.set(true);
+	private void restartWallet() {
+		// TODO: move code from WindowBarController here
 	}
 }
