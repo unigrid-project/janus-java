@@ -36,9 +36,13 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
+import javafx.application.Platform;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
@@ -77,11 +81,11 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		window.setWindowBarController(this);
 		updateButton.setVisible(false);
 
-		Tooltip t = new Tooltip("A new update is ready. Pleas restart the wallet");
+		Tooltip t = new Tooltip("A new update is ready. Please restart the wallet");
 		t.install(updateButton, t);
 
 		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
-		//pollingService.pollForUpdate(7200000);
+		pollingService.pollForUpdate(10000);	
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -161,5 +165,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@FXML
 	public void onUpdate(MouseEvent event) {
 		updateButton.setVisible(false);
+		// TODO: move this code into UpdateWallet.java
+		// linux the Unigrid app is not executable
 	}
 }
