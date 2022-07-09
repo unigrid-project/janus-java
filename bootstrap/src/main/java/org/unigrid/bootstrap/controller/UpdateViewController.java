@@ -14,7 +14,6 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-
 package org.unigrid.bootstrap.controller;
 
 import java.net.URL;
@@ -26,21 +25,19 @@ import javafx.fxml.Initializable;
 import org.unigrid.bootstrap.UpdateView;
 
 public class UpdateViewController implements Initializable {
-
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		// TODO
 	}
-	
+
 	@FXML
 	void onLaunch(ActionEvent event) {
 		UpdateView.getInstance().launchApp();
 		UpdateView.getInstance().getStage().hide();
 	}
-	
+
 	@FXML
 	void onQuit(ActionEvent event) {
 		Platform.exit();
 	}
-	
 }
