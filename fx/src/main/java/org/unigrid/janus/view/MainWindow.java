@@ -38,6 +38,9 @@ import org.unigrid.janus.model.service.WindowService;
 @Eager
 @ApplicationScoped
 public class MainWindow implements Window {
+	public static final int MIN_WIDTH = 800;
+	public static final int MIN_HEIGHT = 500;
+
 	private WindowService window = WindowService.getInstance();
 
 	@Inject private Stage stage;
@@ -49,6 +52,7 @@ public class MainWindow implements Window {
 		stage.centerOnScreen();
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.setResizable(true);
+		stage.setUserData(new StageProperties());
 	}
 
 	@SneakyThrows
