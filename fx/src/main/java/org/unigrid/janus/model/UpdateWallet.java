@@ -16,7 +16,6 @@
 
 package org.unigrid.janus.model;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -26,12 +25,9 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TimerTask;
 
-import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Pos;
 import lombok.Getter;
@@ -40,7 +36,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.PollingService;
+//import org.unigrid.janus.model.service.PollingService;
 import org.update4j.Configuration;
 import org.update4j.OS;
 
@@ -49,10 +45,10 @@ import org.update4j.OS;
 public class UpdateWallet extends TimerTask {
 	private static DebugService debug = new DebugService();
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
-	private static PollingService polling = new PollingService();
+	//private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
-	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
-			{ OS.LINUX, "config-linux.xml" }, { OS.WINDOWS, "config-windows.xml" }, { OS.MAC, "config-mac.xml" }
+	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][]{
+		{OS.LINUX, "config-linux.xml"}, {OS.WINDOWS, "config-windows.xml"}, {OS.MAC, "config-mac.xml"}
 	});
 
 	public enum UpdateState {
@@ -88,23 +84,23 @@ public class UpdateWallet extends TimerTask {
 
 	@Override
 	public void run() {
-		if(pcs == null)
+		if (pcs == null) {
 			pcs = new PropertyChangeSupport(this);
+		}
 		if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
 			if (SystemUtils.IS_OS_MAC_OSX) {
 				Notifications.create().title("Update Ready")
-						.text("New update ready \nPleas close application to update!")
-						.position(Pos.TOP_RIGHT).showInformation();
+					.text("New update ready \nPleas close application to update!")
+					.position(Pos.TOP_RIGHT).showInformation();
 			} else {
 				Notifications.create().title("Update Ready")
-						.text("New update ready \nPleas close application to update!").showInformation();
+					.text("New update ready \nPleas close application to update!").showInformation();
 			}
 		} else {
-			
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
-			debug.print("user.dir: " + System.getProperty("user.dir"), UpdateWallet.class.getSimpleName());
+			//debug.print("user.dir: " + System.getProperty("user.dir"), UpdateWallet.class.getSimpleName());
 		}
 
 	}
@@ -130,8 +126,9 @@ public class UpdateWallet extends TimerTask {
 		}
 		try {
 			System.out.println("Checking for update");
-			if(updateConfig == null)
+			if (updateConfig == null) {
 				debug.print("null config", UpdateWallet.class.getSimpleName());
+			}
 			update = updateConfig.requiresUpdate();
 		} catch (IOException e) {
 			update = false;
