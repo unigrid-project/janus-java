@@ -19,6 +19,8 @@ package org.unigrid.janus.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -29,8 +31,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.service.WindowService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.enterprise.inject.spi.CDI;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
@@ -57,6 +61,7 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 	@FXML private TableView tblDocs;
 	@FXML private TableColumn colDescription;
+	@Inject private PollingService pollingService;
 
 	private String url = "https://docs.unigrid.org/docs/data/index.json";
 
@@ -66,6 +71,7 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 		window.setDocsController(this);
 		wallet.addPropertyChangeListener(this);
 		documentationList.addPropertyChangeListener(this);
+		pollingService = CDI.current().select(PollingService.class).get();
 		setupDocList();
 
 		try {
@@ -75,6 +81,8 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 		} catch (IOException ex) {
 			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		// polls every six hours
+		pollingService.poll(21600000);
 	}
 
 	public void pullNewDocumentaion() throws JsonProcessingException, IOException {
