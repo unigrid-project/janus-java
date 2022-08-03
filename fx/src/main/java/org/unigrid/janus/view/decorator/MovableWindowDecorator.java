@@ -19,27 +19,36 @@ package org.unigrid.janus.view.decorator;
 import java.awt.Point;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import org.unigrid.janus.view.StageProperties;
 
 public class MovableWindowDecorator implements Decorator {
 	private final Point clickedPoint = new Point(0, 0);
 
 	@Override
 	public void decorate(Decoratable decoratable, Node node) {
-		node.setOnMousePressed(e -> {
-			clickedPoint.setLocation(
-				decoratable.getStage().getX() - e.getScreenX(),
-				decoratable.getStage().getY() - e.getScreenY()
-			);
-			decoratable.getStage().getScene().setCursor(Cursor.MOVE);
-		});
+		final StageProperties stageProperties = StageProperties.get(decoratable.getStage().getUserData());
 
-		node.setOnMouseReleased(e -> {
-			decoratable.getStage().getScene().setCursor(Cursor.DEFAULT);
-		});
+		if (stageProperties.getDecoratorState() !=  StageProperties.DecoratorState.RESIZING) {
+			StageProperties.get(decoratable.getStage().getUserData())
+				.setDecoratorState(StageProperties.DecoratorState.MOVING);
+			node.setOnMousePressed(e -> {
+				clickedPoint.setLocation(
+					decoratable.getStage().getX() - e.getScreenX(),
+					decoratable.getStage().getY() - e.getScreenY()
+				);
+				decoratable.getStage().getScene().setCursor(Cursor.MOVE);
+			});
 
-		node.setOnMouseDragged(e -> {
-			decoratable.getStage().setX(e.getScreenX() + clickedPoint.getX());
-			decoratable.getStage().setY(e.getScreenY() + clickedPoint.getY());
-		});
+			node.setOnMouseReleased(e -> {
+				decoratable.getStage().getScene().setCursor(Cursor.DEFAULT);
+				StageProperties.get(decoratable.getStage().getUserData())
+					.setDecoratorState(StageProperties.DecoratorState.IDLE);
+			});
+
+			node.setOnMouseDragged(e -> {
+				decoratable.getStage().setX(e.getScreenX() + clickedPoint.getX());
+				decoratable.getStage().setY(e.getScreenY() + clickedPoint.getY());
+			});
+		}
 	}
 }
