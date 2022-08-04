@@ -38,8 +38,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.Gridnode;
 import org.unigrid.janus.model.GridnodeListModel;
 import org.unigrid.janus.model.Wallet;
@@ -55,6 +60,8 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	private static RPCService rpc = new RPCService();
 	private static WindowService window = WindowService.getInstance();
 	private static GridnodeListModel nodes = new GridnodeListModel();
+	private final Clipboard clipboard = Clipboard.getSystemClipboard();
+	private final ClipboardContent content = new ClipboardContent();
 
 	private Wallet wallet;
 
@@ -67,7 +74,11 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML
 	private VBox vpsConect;
 	@FXML
+	private VBox genereateKeyPnl;
+	@FXML
 	private TableView tblGridnodes;
+	@FXML
+	private TableView tblGridnodeKeys;
 	@FXML
 	private TableColumn colNodeStatus;
 	@FXML
@@ -76,6 +87,12 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	private TableColumn colNodeAddress;
 	@FXML
 	private TableColumn colNodeStart;
+	@FXML
+	private TableColumn colNodeKey;
+	@FXML
+	private HBox newGridnodeDisplay;
+	@FXML
+	private Text gridnodeDisplay;
 
 	private String serverResponse;
 
@@ -129,6 +146,50 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		nodes.setGridnodes(result);
 		window.getWindowBarController().stopSpinner();
 		//debug.log(String.format("gridnode result: %s", nodes.getGridnodes()));
+	}
+
+	@FXML
+	private void onGenerateKeyClicked(MouseEvent event) {
+		genereateKeyPnl.setVisible(true);
+	}
+
+	@FXML
+	private void onGenerateNewKeyClicked(MouseEvent e) {
+		GridnodeEntity newGridnode = rpc.call(
+			new GridnodeEntity.Request(new Object[]{"genkey"}),
+			GridnodeEntity.class
+		);
+		gridnodeDisplay.setText(newGridnode.getResult().toString());
+		newGridnodeDisplay.setVisible(true);
+		copyToClipboard(gridnodeDisplay.getText());
+	}
+
+	@FXML
+	private void onCloseGridnodeClicked(MouseEvent event) {
+		genereateKeyPnl.setVisible(false);
+		newGridnodeDisplay.setVisible(false);
+		gridnodeDisplay.setText("");
+	}
+
+	@FXML
+	private void onClearGridnodeClicked(MouseEvent event) {
+		newGridnodeDisplay.setVisible(false);
+		gridnodeDisplay.setText("");
+	}
+
+	@FXML
+	private void onCopyToClipboardClicked(MouseEvent event) {
+		copyToClipboard(gridnodeDisplay.getText());
+	}
+
+	private void copyToClipboard(String gridnode) {
+		content.putString(gridnode);
+		clipboard.setContent(content);
+		Notifications
+			.create()
+			.title("Gridnode copied to clipboard")
+			.text(gridnode)
+			.showInformation();
 	}
 
 	@FXML
