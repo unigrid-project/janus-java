@@ -16,7 +16,7 @@
 <?import org.unigrid.janus.view.component.PTableColumn?>
 <?import org.unigrid.janus.view.component.WindowBarButton?>
 
-<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="364.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.AddressController">
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="364.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.AddressController">
    <children>
       <VBox maxWidth="1.7976931348623157E308" prefHeight="364.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -87,11 +87,23 @@
                   <Insets bottom="10.0" />
                </VBox.margin>
             </FlowPane>
-            <CheckBox fx:id="chkAddress" mnemonicParsing="false" onMouseClicked="#onChecboxChange" text="Hide zero balances" textFill="#2e7090">
-               <padding>
-                  <Insets left="20.0" />
-               </padding>
-            </CheckBox>
+            <FlowPane>
+               <children>
+                  <CheckBox fx:id="chkAddress" mnemonicParsing="false" onMouseClicked="#onChecboxChange" text="Hide zero balances" textFill="#2e7090">
+                     <padding>
+                        <Insets left="20.0" />
+                     </padding>
+                  </CheckBox>
+                  <CheckBox fx:id="chkAmountSort" mnemonicParsing="false" onMouseClicked="#onSortChange" selected="true" text="Descending" textFill="#2e7090">
+                     <padding>
+                        <Insets left="20.0" />
+                     </padding>
+                  </CheckBox>
+               </children>
+               <VBox.margin>
+                  <Insets bottom="5.0" />
+               </VBox.margin>
+            </FlowPane>
             <StackPane VBox.vgrow="ALWAYS">
                <children>
                   <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" StackPane.alignment="CENTER">
@@ -99,7 +111,7 @@
                         <TableView fx:id="tblAddresses" VBox.vgrow="ALWAYS">
                            <columns>
                               <PTableColumn fx:id="colAddress" editable="false" percentageWidth="0.48" prefWidth="130.0" sortType="DESCENDING" sortable="false" text="Address" />
-                              <PTableColumn fx:id="colAddressBalance" editable="false" percentageWidth="0.39" prefWidth="85.0" sortable="false" text="Balance" />
+                              <PTableColumn fx:id="colAddressBalance" editable="false" percentageWidth="0.39" prefWidth="85.0" sortType="DESCENDING" sortable="false" text="Balance" />
                            </columns>
                            <VBox.margin>
                               <Insets />
