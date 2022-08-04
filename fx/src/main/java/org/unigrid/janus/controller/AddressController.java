@@ -75,6 +75,8 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	private Text addressDisplay;
 	@FXML
 	private CheckBox chkAddress;
+	@FXML
+	private CheckBox chkAmountSort;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -84,6 +86,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		addresses.addPropertyChangeListener(this);
 		setupAddressList();
 		addresses.setSelected(chkAddress.isSelected());
+		addresses.setSorted(chkAmountSort.isSelected());
 		// addButtonToTable();
 	}
 
@@ -248,6 +251,14 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	@FXML
 	private void onChecboxChange(MouseEvent event) {
 		addresses.setSelected(chkAddress.isSelected());
+		addresses.setSorted(chkAmountSort.isSelected());
+		loadAddresses();
+	}
+
+	@FXML
+	private void onSortChange(MouseEvent event) {
+		addresses.setSelected(chkAddress.isSelected());
+		addresses.setSorted(chkAmountSort.isSelected());
 		loadAddresses();
 	}
 }
