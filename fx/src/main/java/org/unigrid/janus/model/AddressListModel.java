@@ -32,7 +32,10 @@ public class AddressListModel {
 	private static DebugService debug = new DebugService();
 	public static final String ADDRESS_LIST = "addressList";
 	private static PropertyChangeSupport pcs;
-	private static ObservableList<Address> addresses = FXCollections.observableArrayList();
+
+	@Getter
+	private ObservableList<Address> addresses = FXCollections.observableArrayList();
+
 	@Getter @Setter
 	private Boolean selected;
 	@Getter @Setter
@@ -51,10 +54,6 @@ public class AddressListModel {
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		this.pcs.removePropertyChangeListener(listener);
-	}
-
-	public ObservableList<Address> getAddresses() {
-		return this.addresses;
 	}
 
 	public void setAddresses(ListAddressBalances list) {
