@@ -21,9 +21,18 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ResourceBundle;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
@@ -37,12 +46,17 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
+
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.service.DebugService;
@@ -85,12 +99,28 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML private Label txtPassWarningOne;
 	@FXML private Label txtPassWarningTwo;
 	@FXML private Label txtErrorMessage;
+	@FXML private TextArea debugLog;
+
+	private FileAlterationMonitor monitor = new FileAlterationMonitor(2000);
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setSettingsController(this);
+		Platform.runLater(() -> {
+			debugLog.textProperty().addListener(new ChangeListener() {
+				public void changed(ObservableValue ov, Object oldValue, Object newValue) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException ex) {
+						// don't care
+					}
+					debugLog.setScrollTop(Double.MAX_VALUE);    //top
+					//debugLog.setScrollTop(Double.MIN_VALUE);   //down
+				}
+			});
+		});
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -121,6 +151,11 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		pnlSetPassphrase.setVisible(false);
 		pnlSetExport.setVisible(false);
 		pnlSetDebug.setVisible(false);
+		if(janusModel.getDebugActive()) {
+			// stop monitor
+			stopMonitor();
+			janusModel.setDebugActive(false);
+		}
 		switch (tab) {
 			case TAB_SETTINGS_GENERAL:
 				pnlSetGeneral.setVisible(true);
@@ -140,6 +175,14 @@ public class SettingsController implements Initializable, PropertyChangeListener
 				break;
 			case TAB_SETTINGS_DEBUG:
 				pnlSetDebug.setVisible(true);
+				// start monitor
+				try {
+					startMonitor();
+					janusModel.setDebugActive(true);
+				} catch (Exception e) {
+					//dont care
+				}
+
 				break;
 			default:
 				pnlSetDebug.setVisible(true);
@@ -337,5 +380,72 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	public void setVersion(String version) {
 		verLbl.setText("version: ".concat(version));
+	}
+
+	private void readDebug() throws IOException, Exception {
+		File debug = DataDirectory.getBackendLog();
+
+		FileAlterationObserver observer = new FileAlterationObserver(debug.getParent());
+		observer.addListener(new FileAlterationListenerAdaptor() {
+			@Override
+			public void onFileChange(File file) {
+				super.onFileChange(file);
+				if (file.equals(debug)) {
+					System.out.println("DEBUG UPDATED: " + file);
+					try {
+						updateDebug();
+					} catch (IOException ex) {
+						Logger.getLogger(SettingsController.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+				//System.out.println("File updated: " + file);
+			}
+
+			@Override
+			public void onStart(FileAlterationObserver observer) {
+				System.out.println("observer start: " + observer);
+			}
+
+			@Override
+			public void onStop(FileAlterationObserver observer) {
+				System.out.println("observer stop: " + observer);
+			}
+		});
+
+		monitor.addObserver(observer);
+		try {
+			monitor.start();
+			updateDebug();
+		} catch (Exception e) {
+			System.out.println("error: " + e.getMessage());
+		}
+
+	}
+
+	private void updateDebug() throws FileNotFoundException, IOException {
+		File debug = DataDirectory.getBackendLog();
+		StringBuffer sbuffer = new StringBuffer();
+		FileReader fileReader = new FileReader(debug);
+		BufferedReader br = new BufferedReader(fileReader);
+
+		String line;
+		while ((line = br.readLine()) != null) {
+			sbuffer.append(line + "\n");
+
+		}
+
+		debugLog.setText(sbuffer.toString());
+	}
+
+	public void startMonitor() throws Exception {
+		readDebug();
+	}
+
+	public void stopMonitor() {
+		try {
+			monitor.stop();
+		} catch (Exception e) {
+			System.out.println("error: " + e.getMessage());
+		}
 	}
 }

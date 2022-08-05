@@ -45,6 +45,8 @@ public class JanusModel {
 
 	@Getter @Setter
 	private Boolean hasRun;
+	@Getter @Setter
+	private Boolean debugActive = false;
 
 	public JanusModel() {
 		if (this.pcs != null) {

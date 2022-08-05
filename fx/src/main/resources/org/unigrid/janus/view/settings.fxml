@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.image.Image?>
@@ -16,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
+<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
    <children>
       <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
@@ -255,7 +256,9 @@
                   </VBox>
                   <VBox fx:id="pnlSetDebug" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <ListView fx:id="lstDebug" VBox.vgrow="ALWAYS" />
+                        <ListView fx:id="lstDebug" prefHeight="200.0" VBox.vgrow="ALWAYS" />
+                        <TextArea fx:id="debugLog" prefHeight="200.0" prefWidth="200.0" />
+                        <TextArea fx:id="debugLog1" prefHeight="200.0" prefWidth="200.0" />
                      </children>
                   </VBox>
                </children>
