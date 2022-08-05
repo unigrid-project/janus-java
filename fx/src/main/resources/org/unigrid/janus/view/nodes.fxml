@@ -54,7 +54,7 @@
                         <Insets left="10.0" top="10.0" />
                      </FlowPane.margin>
                   </Button>
-                  <Button mnemonicParsing="false" onMouseClicked="#onGenerateKeyClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Generate Key">
+                  <Button mnemonicParsing="false" onMouseClicked="#onGenerateKeyClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Setup">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -129,7 +129,7 @@
          <children>
             <FlowPane alignment="CENTER" columnHalignment="CENTER">
                <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" text="Generate Key" textAlignment="CENTER" textFill="#ff8b2d">
+                  <Label alignment="CENTER" contentDisplay="CENTER" text="Gridnode Setup" textAlignment="CENTER" textFill="#ff8b2d">
                      <font>
                         <Font size="24.0" />
                      </font>
@@ -212,7 +212,7 @@
                      <children>
                         <TableView fx:id="tblGridnodeKeys" VBox.vgrow="ALWAYS">
                            <columns>
-                              <PTableColumn fx:id="colNodeTxhash" editable="false" percentageWidth="0.97" prefWidth="130.0" sortType="DESCENDING" sortable="false" text="Gridnode keys" />
+                              <PTableColumn fx:id="colNodeTxhash" editable="false" percentageWidth="0.97" prefWidth="130.0" sortType="DESCENDING" sortable="false" text="Gridnode Outputs" />
                            </columns>
                            <VBox.margin>
                               <Insets />
