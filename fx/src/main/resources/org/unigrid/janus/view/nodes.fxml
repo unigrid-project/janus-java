@@ -212,7 +212,7 @@
                      <children>
                         <TableView fx:id="tblGridnodeKeys" VBox.vgrow="ALWAYS">
                            <columns>
-                              <PTableColumn fx:id="colNodeKey" editable="false" percentageWidth="0.97" prefWidth="130.0" sortType="DESCENDING" sortable="false" text="Gridnode keys" />
+                              <PTableColumn fx:id="colNodeTxhash" editable="false" percentageWidth="0.97" prefWidth="130.0" sortType="DESCENDING" sortable="false" text="Gridnode keys" />
                            </columns>
                            <VBox.margin>
                               <Insets />
