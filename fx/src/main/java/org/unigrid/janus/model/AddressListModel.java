@@ -32,7 +32,10 @@ public class AddressListModel {
 	private static DebugService debug = new DebugService();
 	public static final String ADDRESS_LIST = "addressList";
 	private static PropertyChangeSupport pcs;
-	private static ObservableList<Address> addresses = FXCollections.observableArrayList();
+
+	@Getter
+	private ObservableList<Address> addresses = FXCollections.observableArrayList();
+
 	@Getter @Setter
 	private Boolean selected;
 	@Getter @Setter
@@ -53,10 +56,6 @@ public class AddressListModel {
 		this.pcs.removePropertyChangeListener(listener);
 	}
 
-	public ObservableList<Address> getAddresses() {
-		return this.addresses;
-	}
-
 	public void setAddresses(ListAddressBalances list) {
 		int oldCount = 0;
 		addresses.clear();
@@ -75,9 +74,9 @@ public class AddressListModel {
 			}
 		}
 
-		if(sorted) {
+		if (sorted) {
 			addresses.sort(Comparator.comparingDouble(Address::getAmount)
-			.reversed());
+				.reversed());
 			//System.out.println(String.format("addresses: %s", addresses.size()));
 		} else {
 			addresses.sort(Comparator.comparingDouble(Address::getAmount));
