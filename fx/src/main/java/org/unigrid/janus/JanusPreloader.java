@@ -20,6 +20,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
+
+import java.io.IOException;
+
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.Daemon;
@@ -42,8 +45,14 @@ public class JanusPreloader {
 		progress.setProgress(value);
 	}
 
-	public void initText() {
+	public void initText() throws Exception {
 		splashScreen.initText();
+		/*try {
+			splashScreen.readDebug();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 	}
 
 	public void setText(String s) {
