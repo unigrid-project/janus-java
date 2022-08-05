@@ -140,7 +140,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 				public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Gridnode, Hyperlink> t) {
 
 					Gridnode gridnode = t.getValue();
-					String text = gridnode.getTxhash();
+					String text = gridnode.getTxhash() + " " + gridnode.getOutputidx();
 
 					Hyperlink link = new Hyperlink();
 					link.setText(text);
