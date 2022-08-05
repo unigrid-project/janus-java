@@ -68,6 +68,11 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 			// lblStatus.setFont(font);
 			debugTxt.textProperty().addListener(new ChangeListener() {
 				public void changed(ObservableValue ov, Object oldValue, Object newValue) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException ex) {
+						// don't care
+					}
 					debugTxt.setScrollTop(Double.MAX_VALUE);    //top
 					//vpsOutput.setScrollTop(Double.MIN_VALUE);   //down
 				}
