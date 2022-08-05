@@ -75,9 +75,8 @@ public class AddressListModel {
 			}
 		}
 
-		if(sorted) {
-			addresses.sort(Comparator.comparingDouble(Address::getAmount)
-			.reversed());
+		if (sorted) {
+			addresses.sort(Comparator.comparingDouble(Address::getAmount).reversed());
 			//System.out.println(String.format("addresses: %s", addresses.size()));
 		} else {
 			addresses.sort(Comparator.comparingDouble(Address::getAmount));

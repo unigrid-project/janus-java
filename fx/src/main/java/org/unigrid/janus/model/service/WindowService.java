@@ -42,6 +42,7 @@ import org.unigrid.janus.controller.WarningController;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
+import org.unigrid.janus.view.SplashScreen;
 
 @Eager
 @ApplicationScoped
@@ -62,6 +63,8 @@ public class WindowService {
 	private static DocumentationController docsController;
 	private static WarningController warnController;
 	private static SplashScreenController splashController;
+	private static SplashScreen splashScreen;
+
 	@NonNull private Wallet wallet;
 
 	private static WindowService serviceInstance = null;
@@ -206,6 +209,14 @@ public class WindowService {
 
 	public SplashScreenController getSplashScreenController() {
 		return this.splashController;
+	}
+
+	public void setSplashScreen(SplashScreen screen) {
+		this.splashScreen = screen;
+	}
+
+	public SplashScreen getSplashScreen() {
+		return this.splashScreen;
 	}
 
 	public void notifyIfError(BaseResult result) {

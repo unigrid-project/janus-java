@@ -42,7 +42,8 @@ module fx {
 	requires java.instrument;
 	requires org.controlsfx.controls;
 	requires static org.update4j;
-	
+	requires org.apache.commons.io;
+
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
 	
