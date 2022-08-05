@@ -21,7 +21,17 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -37,7 +47,12 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lombok.Data;
 import lombok.SneakyThrows;
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+
+import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.event.CloseJanusEvent;
 import org.unigrid.janus.model.service.WindowService;
@@ -58,6 +73,7 @@ public class SplashScreen implements Window {
 	private Label text;
 	private Label status;
 	private Label lbl;
+	private FileAlterationMonitor monitor = new FileAlterationMonitor(2000);
 
 	public SplashScreen() {
 
@@ -74,11 +90,12 @@ public class SplashScreen implements Window {
 	@SneakyThrows
 	public void show() {
 		try {
-			System.out.println("show init");
+			//System.out.println("show init");
 			window.setStage(stageSplash);
-			System.out.println("show middle");
+			window.setSplashScreen(this);
+			//System.out.println("show middle");
 			stageSplash.show();
-			System.out.println("show show");
+			//System.out.println("show show");
 			startSpinner();
 		} catch (Exception e) {
 			Alert a = new Alert(Alert.AlertType.ERROR,
@@ -90,6 +107,7 @@ public class SplashScreen implements Window {
 
 	@Override
 	public void hide() {
+		stopMonitor();
 		stageSplash.close();
 	}
 
@@ -145,4 +163,72 @@ public class SplashScreen implements Window {
 		lbl = (Label) stageSplash.getScene().lookup("#verLbl");
 		lbl.setText("version: ".concat(version));
 	}
+
+	private void readDebug() throws IOException, Exception {
+		File debug = DataDirectory.getBackendLog();
+
+		FileAlterationObserver observer = new FileAlterationObserver(debug.getParent());
+		observer.addListener(new FileAlterationListenerAdaptor() {
+			@Override
+			public void onFileChange(File file) {
+				super.onFileChange(file);
+				if (file.equals(debug)) {
+					System.out.println("DEBUG UPDATED: " + file);
+					try {
+						updateDebug();
+					} catch (IOException ex) {
+						Logger.getLogger(SplashScreen.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+				//System.out.println("File updated: " + file);
+			}
+
+			@Override
+			public void onStart(FileAlterationObserver observer) {
+				//System.out.println("observer start: " + observer);
+			}
+
+			@Override
+			public void onStop(FileAlterationObserver observer) {
+				//System.out.println("observer stop: " + observer);
+			}
+		});
+
+		monitor.addObserver(observer);
+		try {
+			monitor.start();
+			updateDebug();
+		} catch (Exception e) {
+			System.out.println("error: " + e.getMessage());
+		}
+
+	}
+
+	private void updateDebug() throws FileNotFoundException, IOException {
+		File debug = DataDirectory.getBackendLog();
+		StringBuffer sbuffer = new StringBuffer();
+		FileReader fileReader = new FileReader(debug);
+		BufferedReader br = new BufferedReader(fileReader);
+
+		String line;
+		while ((line = br.readLine()) != null) {
+			sbuffer.append(line + "\n");
+
+		}
+
+		window.getSplashScreenController().setDebugText(sbuffer.toString());
+	}
+
+	public void startMonitor() throws Exception {
+		readDebug();
+	}
+
+	public void stopMonitor() {
+		try {
+			monitor.stop();
+		} catch (Exception e) {
+			System.out.println("error: " + e.getMessage());
+		}
+	}
+
 }
