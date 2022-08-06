@@ -68,6 +68,7 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.EncryptWallet;
 import org.unigrid.janus.model.rpc.entity.ImportWallet;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
+import org.unigrid.janus.view.component.ObservableStringBuffer;
 
 @ApplicationScoped
 public class SettingsController implements Initializable, PropertyChangeListener {
@@ -82,6 +83,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private static final int TAB_SETTINGS_EXPORT = 4;
 	private static final int TAB_SETTINGS_DEBUG = 5;
 	private static JanusModel janusModel = new JanusModel();
+	//private static ObservableStringBuffer buffer = new ObservableStringBuffer();
 
 	@FXML private Label verLbl;
 	// settings navigation
@@ -383,7 +385,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	}
 
 	private void readDebug() throws IOException, Exception {
-		File debug = DataDirectory.getBackendLog();
+		File debug = DataDirectory.getWalletLog();
 
 		FileAlterationObserver observer = new FileAlterationObserver(debug.getParent());
 		observer.addListener(new FileAlterationListenerAdaptor() {
@@ -403,12 +405,12 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 			@Override
 			public void onStart(FileAlterationObserver observer) {
-				System.out.println("observer start: " + observer);
+				//System.out.println("observer start: " + observer);
 			}
 
 			@Override
 			public void onStop(FileAlterationObserver observer) {
-				System.out.println("observer stop: " + observer);
+				//System.out.println("observer stop: " + observer);
 			}
 		});
 
@@ -427,14 +429,14 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		StringBuffer sbuffer = new StringBuffer();
 		FileReader fileReader = new FileReader(debug);
 		BufferedReader br = new BufferedReader(fileReader);
-
+		ObservableStringBuffer buffer = new ObservableStringBuffer();
 		String line;
 		while ((line = br.readLine()) != null) {
-			sbuffer.append(line + "\n");
-
+			buffer.append(line + "\n");
 		}
-
-		debugLog.setText(sbuffer.toString());
+		debugLog.textProperty().bind(buffer);
+		//debugLog.setText(sbuffer.toString());
+		debugLog.setScrollTop(Double.MAX_VALUE);
 	}
 
 	public void startMonitor() throws Exception {
