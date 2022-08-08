@@ -17,16 +17,26 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.SplashModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.WindowService;
 
@@ -36,19 +46,18 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	private WindowService window;
 	private float ind = 0.6f;
 
+	private SplashModel splashModel = new SplashModel();
 	@FXML private ProgressBar progBar;
 	@FXML private FontIcon spinnerPreLoad;
 	@FXML private Label lblText;
 	@FXML private Label lblStatus;
 	@FXML private Label verLbl;
-
-	//@Inject
-	//private SplashScreen splashScreen;
+	@FXML private TextArea debugTxt;
+	@FXML private GridPane splashGrid;
+	@FXML private Tooltip bugTooltip;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		System.out.println("rb = " + rb);
-		System.out.println("ADDRESS   :" + this);
 		window = window.getInstance();
 		window.setSplashScreenController(this);
 
@@ -57,6 +66,17 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 			// Font font = Font.loadFont("fonts/PressStart2P-vaV7.ttf", 10);
 			// lblText.setFont(font);
 			// lblStatus.setFont(font);
+			debugTxt.textProperty().addListener(new ChangeListener() {
+				public void changed(ObservableValue ov, Object oldValue, Object newValue) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException ex) {
+						// don't care
+					}
+					debugTxt.setScrollTop(Double.MAX_VALUE);    //top
+					//vpsOutput.setScrollTop(Double.MIN_VALUE);   //down
+				}
+			});
 		});
 	}
 
@@ -86,5 +106,36 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 	public void showSpinner() {
 		spinnerPreLoad.setVisible(true);
+	}
+
+	public void setDebugText(String value) {
+		debugTxt.setText(value);
+		debugTxt.appendText("");
+	}
+
+	@FXML
+	public void onShowDebug(MouseEvent event) throws Exception {
+		//System.out.println(window.getStage().getHeight());
+		//System.out.println(splashGrid.getCellBounds(0, 6));
+
+		try {
+			if (!splashModel.getDebug()) {
+				window.getSplashScreen().startMonitor();
+				debugTxt.setVisible(true);
+				splashModel.setDebug(true);
+				debugTxt.setScrollTop(Double.MAX_VALUE);
+				window.getStage().setHeight(400);
+				bugTooltip.setText("Hide debug log");
+			} else {
+				window.getSplashScreen().stopMonitor();
+				debugTxt.setVisible(false);
+				splashModel.setDebug(false);
+				window.getStage().setHeight(220);
+				bugTooltip.setText("Show debug log");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -17,21 +17,13 @@
 package org.unigrid.janus.model;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 public class Gridnode {
-	@Getter @Setter
 	private String alias;
-	@Getter @Setter
 	private String address;
-	@Getter @Setter
 	private String privateKey;
-	@Getter @Setter
-	private int outputIndex;
-	@Getter @Setter
-	private String txHash;
-	@Getter @Setter
+	private int outputidx;
+	private String txhash;
 	private String status;
 }

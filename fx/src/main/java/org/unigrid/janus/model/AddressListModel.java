@@ -18,6 +18,8 @@ package org.unigrid.janus.model;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Comparator;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
@@ -30,9 +32,14 @@ public class AddressListModel {
 	private static DebugService debug = new DebugService();
 	public static final String ADDRESS_LIST = "addressList";
 	private static PropertyChangeSupport pcs;
-	private static ObservableList<Address> addresses = FXCollections.observableArrayList();
+
+	@Getter
+	private ObservableList<Address> addresses = FXCollections.observableArrayList();
+
 	@Getter @Setter
 	private Boolean selected;
+	@Getter @Setter
+	private Boolean sorted;
 
 	public AddressListModel() {
 		if (this.pcs != null) {
@@ -49,13 +56,10 @@ public class AddressListModel {
 		this.pcs.removePropertyChangeListener(listener);
 	}
 
-	public ObservableList<Address> getAddresses() {
-		return this.addresses;
-	}
-
 	public void setAddresses(ListAddressBalances list) {
 		int oldCount = 0;
 		addresses.clear();
+
 		int newCount = 0;
 		for (Address g : list.getResult()) {
 			//System.out.println(String.format("address: %s", g.getAmount()));
@@ -68,6 +72,14 @@ public class AddressListModel {
 				addresses.add(g);
 				newCount++;
 			}
+		}
+
+		if (sorted) {
+			addresses.sort(Comparator.comparingDouble(Address::getAmount).reversed());
+			//System.out.println(String.format("addresses: %s", addresses.size()));
+		} else {
+			addresses.sort(Comparator.comparingDouble(Address::getAmount));
+			//System.out.println(String.format("addresses: %s", addresses.size()));
 		}
 
 		this.pcs.firePropertyChange(this.ADDRESS_LIST, oldCount, newCount);

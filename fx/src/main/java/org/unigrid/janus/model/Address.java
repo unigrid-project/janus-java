@@ -17,13 +17,9 @@
 package org.unigrid.janus.model;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 public class Address {
-	@Getter @Setter
 	private String address;
-	@Getter @Setter
 	private double amount;
 }

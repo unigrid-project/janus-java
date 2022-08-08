@@ -81,7 +81,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		t.install(updateButton, t);
 
 		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
-		pollingService.pollForUpdate(10000);
+		//pollingService.pollForUpdate(7200000);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -162,7 +162,5 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	public void onUpdate(MouseEvent event) {
 		updateButton.setVisible(false);
 		update.doUpdate();
-		// TODO: move this code into UpdateWallet.java
-		// linux the Unigrid app is not executable
 	}
 }

@@ -29,17 +29,30 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
+import javafx.util.Callback;
+import org.apache.commons.lang3.SystemUtils;
+import org.controlsfx.control.Notifications;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.Gridnode;
 import org.unigrid.janus.model.GridnodeListModel;
 import org.unigrid.janus.model.Wallet;
@@ -55,6 +68,8 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	private static RPCService rpc = new RPCService();
 	private static WindowService window = WindowService.getInstance();
 	private static GridnodeListModel nodes = new GridnodeListModel();
+	private final Clipboard clipboard = Clipboard.getSystemClipboard();
+	private final ClipboardContent content = new ClipboardContent();
 
 	private Wallet wallet;
 
@@ -67,7 +82,11 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML
 	private VBox vpsConect;
 	@FXML
+	private VBox genereateKeyPnl;
+	@FXML
 	private TableView tblGridnodes;
+	@FXML
+	private TableView tblGridnodeKeys;
 	@FXML
 	private TableColumn colNodeStatus;
 	@FXML
@@ -76,6 +95,12 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	private TableColumn colNodeAddress;
 	@FXML
 	private TableColumn colNodeStart;
+	@FXML
+	private TableColumn colNodeTxhash;
+	@FXML
+	private HBox newGridnodeDisplay;
+	@FXML
+	private Text gridnodeDisplay;
 
 	private String serverResponse;
 
@@ -83,7 +108,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	public void initialize(URL url, ResourceBundle rb) {
 		wallet = window.getWallet();
 		setupNodeList();
-		nodes.addPropertyChangeListener(this);
 		wallet.addPropertyChangeListener(this);
 		window.setNodeController(this);
 		Platform.runLater(() -> {
@@ -110,7 +134,57 @@ public class NodesController implements Initializable, PropertyChangeListener {
 				new PropertyValueFactory<Gridnode, String>("alias"));
 			colNodeAddress.setCellValueFactory(
 				new PropertyValueFactory<Gridnode, String>("address"));
+			colNodeTxhash.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Gridnode, Hyperlink>,
+				ObservableValue<Hyperlink>>() {
 
+				public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Gridnode, Hyperlink> t) {
+
+					Gridnode gridnode = t.getValue();
+					String text = gridnode.getTxhash() + " " + gridnode.getOutputidx();
+
+					Hyperlink link = new Hyperlink();
+					link.setText(text);
+
+					link.setOnAction(e -> {
+						if (e.getTarget().equals(link)) {
+							// TODO: Not a proper setter!
+							window.browseURL("https://explorer.unigrid.org/tx/"
+								+ gridnode.getTxhash()
+							);
+						}
+					});
+
+					Button btn = new Button();
+					FontIcon fontIcon = new FontIcon("fas-clipboard");
+					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+					btn.setGraphic(fontIcon);
+
+					btn.setOnAction(e -> {
+						final Clipboard cb = Clipboard.getSystemClipboard();
+						final ClipboardContent content = new ClipboardContent();
+						content.putString(gridnode.getTxhash());
+						cb.setContent(content);
+						if (SystemUtils.IS_OS_MAC_OSX) {
+							Notifications
+								.create()
+								.title("Key copied to clipboard")
+								.text(gridnode.getTxhash())
+								.position(Pos.TOP_RIGHT)
+								.showInformation();
+						} else {
+							Notifications
+								.create()
+								.title("Key copied to clipboard")
+								.text(gridnode.getTxhash())
+								.showInformation();
+						}
+					});
+
+					link.setGraphic(btn);
+					link.setAlignment(Pos.CENTER_RIGHT);
+					return new ReadOnlyObjectWrapper(link);
+				}
+			});
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup node table) %s", e.getMessage()));
 		}
@@ -129,6 +203,64 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		nodes.setGridnodes(result);
 		window.getWindowBarController().stopSpinner();
 		//debug.log(String.format("gridnode result: %s", nodes.getGridnodes()));
+	}
+
+	@FXML
+	private void onGenerateKeyClicked(MouseEvent event) {
+		genereateKeyPnl.setVisible(true);
+		loadGridnodes();
+	}
+
+	@FXML
+	private void onGenerateNewKeyClicked(MouseEvent e) {
+		GridnodeEntity newGridnode = rpc.call(
+			new GridnodeEntity.Request(new Object[]{"genkey"}),
+			GridnodeEntity.class
+		);
+		gridnodeDisplay.setText(newGridnode.getResult().toString());
+		newGridnodeDisplay.setVisible(true);
+		copyToClipboard(gridnodeDisplay.getText());
+		loadGridnodes();
+	}
+
+	public void loadGridnodes() {
+		try {
+			GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"outputs"}),
+				GridnodeList.class);
+			nodes.setGridnodes(result);
+			tblGridnodeKeys.setItems(nodes.getGridnodes());
+		} catch (Exception e) {
+			debug.print("loadGridnodes " + e.getMessage(),
+				NodesController.class.getSimpleName());
+		}
+	}
+
+	@FXML
+	private void onCloseGridnodeClicked(MouseEvent event) {
+		genereateKeyPnl.setVisible(false);
+		newGridnodeDisplay.setVisible(false);
+		gridnodeDisplay.setText("");
+	}
+
+	@FXML
+	private void onClearGridnodeClicked(MouseEvent event) {
+		newGridnodeDisplay.setVisible(false);
+		gridnodeDisplay.setText("");
+	}
+
+	@FXML
+	private void onCopyToClipboardClicked(MouseEvent event) {
+		copyToClipboard(gridnodeDisplay.getText());
+	}
+
+	private void copyToClipboard(String gridnode) {
+		content.putString(gridnode);
+		clipboard.setContent(content);
+		Notifications
+			.create()
+			.title("Gridnode copied to clipboard")
+			.text(gridnode)
+			.showInformation();
 	}
 
 	@FXML

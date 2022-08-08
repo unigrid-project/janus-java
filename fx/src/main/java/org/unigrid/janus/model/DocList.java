@@ -21,16 +21,15 @@ import java.beans.PropertyChangeSupport;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import lombok.Data;
 import org.unigrid.janus.model.service.DebugService;
 
-@Data
 public class DocList {
 	public static final String DOCUMENTATION_LIST = "docList";
 
 	private static DebugService debug = new DebugService();
-	private static PropertyChangeSupport pcs;
 	private static ObservableList<Documentation> doclist = FXCollections.observableArrayList();
+
+	private PropertyChangeSupport pcs;
 
 	public DocList() {
 		if (pcs != null) {
@@ -40,7 +39,7 @@ public class DocList {
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		addPropertyChangeListener(listener);
+		pcs.addPropertyChangeListener(listener);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {

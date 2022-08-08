@@ -12,24 +12,14 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-module org.unigrid.bootstrap {
-	requires javafx.controls;
-	requires javafx.fxml;
-	requires java.base;
-	requires org.update4j;
-	requires java.instrument;
-	requires java.sql;
-	requires jdk.security.auth;
-	requires transitive java.xml;
-	requires jdk.zipfs;
-	requires java.compiler;
-	requires jdk.crypto.ec;
+package org.unigrid.janus.model;
 
-	opens org.unigrid.bootstrap to javafx.fxml, org.update4j;
-	opens org.unigrid.bootstrap.controller to javafx.fxml;
+import lombok.Getter;
+import lombok.Setter;
 
-	exports org.unigrid.bootstrap to org.update4j, javafx.graphics;
-	exports org.unigrid.bootstrap.controller;
+public class SplashModel {
+	@Getter @Setter
+	private Boolean debug = false;
 }

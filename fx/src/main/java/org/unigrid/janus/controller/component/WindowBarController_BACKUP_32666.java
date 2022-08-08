@@ -77,7 +77,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		window.setWindowBarController(this);
 		updateButton.setVisible(false);
 
-		Tooltip t = new Tooltip("A new update is ready. Pleas restart the wallet");
+		Tooltip t = new Tooltip("A new update is ready. Please restart the wallet");
 		t.install(updateButton, t);
 
 		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
@@ -161,8 +161,11 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@FXML
 	public void onUpdate(MouseEvent event) {
 		updateButton.setVisible(false);
+<<<<<<< HEAD
 		update.doUpdate();
+=======
 		// TODO: move this code into UpdateWallet.java
 		// linux the Unigrid app is not executable
+>>>>>>> f14271e6721d03e29726633f5466209ef2dd56b4
 	}
 }
