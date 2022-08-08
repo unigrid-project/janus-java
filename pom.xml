@@ -72,9 +72,10 @@
 						<excludes>**/module-info.java</excludes>
 					</configuration>
 					<executions>
-						<execution>		
-							<goals>			
-								<goal>check</goal>	
+						<execution>
+                                                        <phase>compile</phase>
+							<goals>
+								<goal>check</goal>
 							</goals>
 						</execution>
 					</executions>
