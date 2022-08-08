@@ -139,7 +139,26 @@ public class UpdateWallet extends TimerTask {
 		return update;
 	}
 
-	private void doUpdate() {
-		running.set(true);
+	public void doUpdate() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String linuxExec = "./opt/unigrid/bin/unigrid";
+				String macExec = "open -a unigrid";
+				String windowsExec = "c:/programFiles/unigrid/bin/unigrid.exe";
+				try {
+					if (OS.CURRENT == OS.LINUX) {
+						Runtime.getRuntime().exec(linuxExec);
+					} else if (OS.CURRENT == OS.MAC) {
+						Runtime.getRuntime().exec(macExec);
+					} else if (OS.CURRENT == OS.WINDOWS) {
+						Runtime.getRuntime().exec(windowsExec);
+					}
+				} catch (Exception e) {
+					System.out.println("shit");
+				}
+			}
+		});
+		System.exit(0);
 	}
 }

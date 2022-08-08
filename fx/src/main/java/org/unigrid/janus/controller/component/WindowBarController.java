@@ -161,5 +161,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@FXML
 	public void onUpdate(MouseEvent event) {
 		updateButton.setVisible(false);
+		update.doUpdate();
 	}
 }
