@@ -87,6 +87,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	@FXML private TableColumn colWalletTransType;
 	@FXML private TableColumn colWalletTransAddress;
 	@FXML private TableColumn colWalletTransAmount;
+	@FXML private TableColumn colWalletTransCopy;
 	@FXML private BorderPane pnlUnlock;
 	@FXML private TextField amountToSend;
 
@@ -180,6 +181,47 @@ public class WalletController implements Initializable, PropertyChangeListener {
 								+ trans.getAddress());
 						}
 					});
+
+					Button btn = new Button();
+					FontIcon fontIcon = new FontIcon("fas-clipboard");
+					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+					btn.setGraphic(fontIcon);
+
+					btn.setOnAction(e -> {
+						final Clipboard cb = Clipboard.getSystemClipboard();
+						final ClipboardContent content = new ClipboardContent();
+
+						content.putString(trans.getTxid());
+						cb.setContent(content);
+
+						if (SystemUtils.IS_OS_MAC_OSX) {
+							Notifications
+								.create()
+								.title("Transaction copied to clipboard")
+								.text(trans.getTxid())
+								.position(Pos.TOP_RIGHT)
+								.showInformation();
+						} else {
+							Notifications
+								.create()
+								.title("Transaction copied to clipboard")
+								.text(trans.getTxid())
+								.showInformation();
+						}
+					});
+
+					link.setGraphic(btn);
+					link.setAlignment(Pos.CENTER_RIGHT);
+					return new ReadOnlyObjectWrapper(link);
+				}
+			});
+
+			colWalletTransCopy.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>,
+				ObservableValue<Hyperlink>>() {
+
+				public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
+					Hyperlink link = new Hyperlink();
+					Transaction trans = t.getValue();
 
 					Button btn = new Button();
 					FontIcon fontIcon = new FontIcon("fas-clipboard");

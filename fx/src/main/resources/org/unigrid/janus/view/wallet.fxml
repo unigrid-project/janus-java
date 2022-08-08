@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Text?>
 <?import org.unigrid.janus.view.component.PTableColumn?>
 
-<AnchorPane prefHeight="300.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.WalletController">
+<AnchorPane prefHeight="300.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.WalletController">
    <children>
       <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -78,6 +78,7 @@
                <children>
                   <TableView fx:id="tblWalletTrans" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
                      <columns>
+                        <PTableColumn fx:id="colWalletTransType1" percentageWidth="0.17" prefWidth="75.0" style="-fx-padding: 0px 0px 0px 10px; -fx-alignment: CENTER;" />
                         <PTableColumn fx:id="colWalletTransAddress" percentageWidth="0.41" prefWidth="170.0" text="Address" />
                         <PTableColumn fx:id="colWalletTransAmount" percentageWidth="0.15" prefWidth="75.0" text="Amount" />
                         <PTableColumn fx:id="colWalletTransDate" minWidth="100.0" percentageWidth="0.24" prefWidth="130.0" sortType="DESCENDING" text="Date" />
