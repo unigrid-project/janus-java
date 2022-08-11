@@ -12,24 +12,28 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-module org.unigrid.bootstrap {
-	requires javafx.controls;
-	requires javafx.fxml;
-	requires java.base;
-	requires org.update4j;
-	requires java.instrument;
-	requires java.sql;
-	requires jdk.security.auth;
-	requires transitive java.xml;
-	requires jdk.zipfs;
-	requires java.compiler;
-	requires jdk.crypto.ec;
+package org.unigrid.janus.model.entity;
 
-	opens org.unigrid.bootstrap to javafx.fxml, org.update4j;
-	opens org.unigrid.bootstrap.controller to javafx.fxml;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import jakarta.json.bind.annotation.JsonbProperty;
+import java.util.List;
 
-	exports org.unigrid.bootstrap to org.update4j, javafx.graphics;
-	exports org.unigrid.bootstrap.controller;
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class GithubJson {
+	@JsonbProperty("tag_name")
+	private String tagName;
+	private List<Asset> assets;
+	
+	@Data
+	public static class Asset {
+		@JsonbProperty("browser_download_url")
+		private String browserDownloadUrl;
+		@JsonProperty("name")
+		private String name;
+	}
 }

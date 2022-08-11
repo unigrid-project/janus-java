@@ -181,7 +181,7 @@
                               <Insets top="8.0" />
                            </VBox.margin>
                            <children>
-                              <Button fx:id="btnUpdatePassphrase" disable="true" mnemonicParsing="false" onMouseClicked="#onLock" text="Update">
+                              <Button fx:id="btnUpdatePassphrase" disable="true" mnemonicParsing="false" onMouseClicked="#onLock" text="Encrypt">
                                  <HBox.margin>
                                     <Insets right="8.0" />
                                  </HBox.margin>

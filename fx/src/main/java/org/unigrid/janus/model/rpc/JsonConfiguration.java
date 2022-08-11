@@ -26,6 +26,7 @@ public class JsonConfiguration implements ContextResolver<Jsonb> {
 	private JsonbConfig getJsonbConfig() {
 		return new JsonbConfig().withPropertyNamingStrategy(
 			PropertyNamingStrategy.LOWER_CASE_WITH_DASHES
+			//PropertyNamingStrategy.LOWER_CASE_WITH_UNDERSCORES
 		);
 	}
 

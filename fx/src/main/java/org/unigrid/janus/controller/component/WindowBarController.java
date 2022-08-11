@@ -39,6 +39,7 @@ import java.beans.PropertyChangeEvent;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
+import javafx.application.Platform;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
@@ -81,7 +82,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		t.install(updateButton, t);
 
 		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
-		//pollingService.pollForUpdate(7200000);
+		pollingService.pollForUpdate(10000);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -155,11 +156,19 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	public void showUpdateButton() {
 		System.out.println("Update button visable");
-		updateButton.setVisible(true);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				updateButton.setVisible(true);
+			}
+		});
 	}
 
 	@FXML
 	public void onUpdate(MouseEvent event) {
 		updateButton.setVisible(false);
+		update.doUpdate();
+		// TODO: move this code into UpdateWallet.java
+		// linux the Unigrid app is not executable
 	}
 }

@@ -27,7 +27,7 @@ public class PollingService {
 	private static Timer updateTimer;
 
 	@Inject private DebugService debug;
-	@Inject private UpdateWallet updateWallet;
+	//@Inject private UpdateWallet updateWallet;
 
 	public void poll(int interval) {
 		debug.print("poll", PollingService.class.getSimpleName());
@@ -44,8 +44,8 @@ public class PollingService {
 
 	public void pollForUpdate(int interval) {
 		System.out.println("starting the update timer");
-		updateTimer = new Timer(true);
-		updateTimer.scheduleAtFixedRate(updateWallet, 0, interval);
+		updateTimer = new Timer(false);
+		updateTimer.scheduleAtFixedRate(new UpdateWallet(), 0, interval);
 
 	}
 

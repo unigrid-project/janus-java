@@ -18,6 +18,7 @@ package org.unigrid.janus.view.decorator;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Objects;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.scene.Cursor;
@@ -25,6 +26,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Window;
 import org.unigrid.janus.model.Direction;
+import org.unigrid.janus.view.MainWindow;
+import org.unigrid.janus.view.StageProperties;
 
 public class ResizableWindowDecorator implements Decorator {
 	private Optional<Direction> dragDirection = Optional.empty();
@@ -42,22 +45,30 @@ public class ResizableWindowDecorator implements Decorator {
 	private void refreshCoordinates(double screenX, double screenY) {
 		if (dragDirection.get() == Direction.NORTH || dragDirection.get() == Direction.NORTHEAST
 			|| dragDirection.get() == Direction.NORTHWEST) {
-			y1 = origin.getMinY() - (clickedPoint.getY() - screenY);
+			if (origin.getMaxY() - screenY > MainWindow.MIN_HEIGHT) {
+				y1 = origin.getMinY() - (clickedPoint.getY() - screenY);
+			}
 		}
 
 		if (dragDirection.get() == Direction.NORTHEAST || dragDirection.get() == Direction.EAST
 			|| dragDirection.get() == Direction.SOUTHEAST) {
-			x2 = origin.getMaxX() - (clickedPoint.getX() - screenX);
+			if (screenX - origin.getMinX() > MainWindow.MIN_WIDTH) {
+				x2 = origin.getMaxX() - (clickedPoint.getX() - screenX);
+			}
 		}
 
 		if (dragDirection.get() == Direction.SOUTHEAST || dragDirection.get() == Direction.SOUTH
 			|| dragDirection.get() == Direction.SOUTHWEST) {
-			y2 = origin.getMaxY() - (clickedPoint.getY() - screenY);
+			if (screenY - origin.getMinY() > MainWindow.MIN_HEIGHT) {
+				y2 = origin.getMaxY() - (clickedPoint.getY() - screenY);
+			}
 		}
 
 		if (dragDirection.get() == Direction.SOUTHWEST || dragDirection.get() == Direction.WEST
 			|| dragDirection.get() == Direction.NORTHWEST) {
-			x1 = origin.getMinX() - (clickedPoint.getX() - screenX);
+			if (origin.getMaxX() - screenX > MainWindow.MIN_WIDTH) {
+				x1 = origin.getMinX() - (clickedPoint.getX() - screenX);
+			}
 		}
 	}
 
@@ -73,13 +84,13 @@ public class ResizableWindowDecorator implements Decorator {
 		}
 
 		if (current.getWidth() != window.getWidth()) {
-			if (current.getWidth() >= 600) {
+			if (current.getWidth() >= MainWindow.MIN_WIDTH) {
 				window.setWidth(current.getWidth());
 			}
 		}
 
 		if (current.getHeight() != window.getHeight()) {
-			if (current.getHeight() >= 400) {
+			if (current.getHeight() >= MainWindow.MIN_HEIGHT) {
 				window.setHeight(current.getHeight());
 			}
 		}
@@ -91,6 +102,8 @@ public class ResizableWindowDecorator implements Decorator {
 		decoratable.getStage().getScene().getWindow().setForceIntegerRenderScale(true);
 
 		node.setOnMousePressed(e -> {
+			StageProperties.get(decoratable.getStage().getUserData())
+				.setDecoratorState(StageProperties.DecoratorState.RESIZING);
 			origin.setRect(
 				decoratable.getStage().getX(), decoratable.getStage().getY(),
 				decoratable.getStage().getWidth(), decoratable.getStage().getHeight()
@@ -107,6 +120,8 @@ public class ResizableWindowDecorator implements Decorator {
 
 		node.setOnMouseReleased(e -> {
 			dragDirection = Optional.empty();
+			StageProperties.get(decoratable.getStage().getUserData())
+				.setDecoratorState(StageProperties.DecoratorState.IDLE);
 		});
 
 		node.setOnMouseExited(e -> {
@@ -114,6 +129,8 @@ public class ResizableWindowDecorator implements Decorator {
 		});
 
 		node.setOnMouseDragged(e -> {
+			StageProperties.get(decoratable.getStage().getUserData())
+				.setDecoratorState(StageProperties.DecoratorState.RESIZING);
 			if (dragDirection.isPresent() && !stillResizing) {
 				stillResizing = true;
 				refreshCoordinates(e.getScreenX(), e.getScreenY());
@@ -128,16 +145,20 @@ public class ResizableWindowDecorator implements Decorator {
 
 	public void resize(Decoratable decoratable, Direction direction) {
 		final Scene scene = decoratable.getStage().getScene();
+		final StageProperties stageProperties = (StageProperties) decoratable.getStage().getUserData();
 
-		switch (direction) {
-			case NORTH -> scene.setCursor(Cursor.N_RESIZE);
-			case NORTHWEST -> scene.setCursor(Cursor.NW_RESIZE);
-			case NORTHEAST -> scene.setCursor(Cursor.NE_RESIZE);
-			case WEST -> scene.setCursor(Cursor.W_RESIZE);
-			case EAST -> scene.setCursor(Cursor.E_RESIZE);
-			case SOUTHWEST -> scene.setCursor(Cursor.SW_RESIZE);
-			case SOUTH -> scene.setCursor(Cursor.S_RESIZE);
-			case SOUTHEAST -> scene.setCursor(Cursor.SE_RESIZE);
+		if (Objects.nonNull(stageProperties)
+			&& stageProperties.getDecoratorState() == StageProperties.DecoratorState.IDLE) {
+			switch (direction) {
+				case NORTH -> scene.setCursor(Cursor.N_RESIZE);
+				case NORTHWEST -> scene.setCursor(Cursor.NW_RESIZE);
+				case NORTHEAST -> scene.setCursor(Cursor.NE_RESIZE);
+				case WEST -> scene.setCursor(Cursor.W_RESIZE);
+				case EAST -> scene.setCursor(Cursor.E_RESIZE);
+				case SOUTHWEST -> scene.setCursor(Cursor.SW_RESIZE);
+				case SOUTH -> scene.setCursor(Cursor.S_RESIZE);
+				case SOUTHEAST -> scene.setCursor(Cursor.SE_RESIZE);
+			}
 		}
 
 		dragDirection = Optional.of(direction);

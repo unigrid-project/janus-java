@@ -73,9 +73,9 @@
 					</configuration>
 					<executions>
 						<execution>
-                                                        <phase>compile</phase>
+                                                        <phase>process-sources</phase>
 							<goals>
-								<goal>check</goal>
+								<goal>check</goal>	
 							</goals>
 						</execution>
 					</executions>
@@ -99,7 +99,7 @@
 						</dependency>
 					</dependencies>
 					<executions>
-						<execution>		
+						<execution>
 							<goals>			
 								<goal>analyze</goal>	
 							</goals>

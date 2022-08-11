@@ -120,7 +120,7 @@ public class RPCService {
 	public void pollForInfo(int interval) {
 		debug.print("pollForInfo", RPCService.class.getSimpleName());
 		pollingTimer = new Timer(true);
-		pollingTimer.scheduleAtFixedRate(new PollingTask(), 0, interval);
+		pollingTimer.schedule(new PollingTask(), 0, interval);
 	}
 
 	public void stopPolling() {
