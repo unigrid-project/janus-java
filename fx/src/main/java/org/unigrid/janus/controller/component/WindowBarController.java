@@ -39,6 +39,7 @@ import java.beans.PropertyChangeEvent;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
+import javafx.application.Platform;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
@@ -155,7 +156,12 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	public void showUpdateButton() {
 		System.out.println("Update button visable");
-		updateButton.setVisible(true);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				updateButton.setVisible(true);
+			}
+		});
 	}
 
 	@FXML

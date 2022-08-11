@@ -72,8 +72,9 @@
 						<excludes>**/module-info.java</excludes>
 					</configuration>
 					<executions>
-						<execution>		
-							<goals>			
+						<execution>
+                                                        <phase>process-sources</phase>
+							<goals>
 								<goal>check</goal>	
 							</goals>
 						</execution>
@@ -98,7 +99,7 @@
 						</dependency>
 					</dependencies>
 					<executions>
-						<execution>		
+						<execution>
 							<goals>			
 								<goal>analyze</goal>	
 							</goals>

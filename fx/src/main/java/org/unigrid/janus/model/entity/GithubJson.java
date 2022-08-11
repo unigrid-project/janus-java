@@ -12,26 +12,28 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model.rpc;
+package org.unigrid.janus.model.entity;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import jakarta.json.bind.JsonbConfig;
-import jakarta.json.bind.config.PropertyNamingStrategy;
-import jakarta.ws.rs.ext.ContextResolver;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import jakarta.json.bind.annotation.JsonbProperty;
+import java.util.List;
 
-public class JsonConfiguration implements ContextResolver<Jsonb> {
-	private JsonbConfig getJsonbConfig() {
-		return new JsonbConfig().withPropertyNamingStrategy(
-			PropertyNamingStrategy.LOWER_CASE_WITH_DASHES
-			//PropertyNamingStrategy.LOWER_CASE_WITH_UNDERSCORES
-		);
-	}
-
-	@Override
-	public Jsonb getContext(Class<?> type) {
-		return JsonbBuilder.newBuilder().withConfig(getJsonbConfig()).build();
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class GithubJson {
+	@JsonbProperty("tag_name")
+	private String tagName;
+	private List<Asset> assets;
+	
+	@Data
+	public static class Asset {
+		@JsonbProperty("browser_download_url")
+		private String browserDownloadUrl;
+		@JsonProperty("name")
+		private String name;
 	}
 }
