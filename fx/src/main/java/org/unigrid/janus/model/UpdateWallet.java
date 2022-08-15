@@ -17,6 +17,7 @@
 package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.client.Client;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -40,28 +41,27 @@ import org.unigrid.janus.model.service.DebugService;
 import org.update4j.Configuration;
 import org.update4j.OS;
 
-import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
-import java.io.BufferedInputStream;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Objects;
 import java.util.Properties;
 import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
 import org.unigrid.janus.Janus;
 import org.unigrid.janus.model.entity.GithubJson;
-import org.unigrid.janus.model.entity.GithubJson.Asset;
+import org.unigrid.janus.model.entity.MyMessageProviderReader;
 
 @Eager
 @ApplicationScoped
 public class UpdateWallet extends TimerTask {
 
-	final private String LINUX_PATH = System.getProperty("user.home").concat("/.unigrid/dependencies/temp/");
-	final private String MAC_PATH = System.getProperty("user.home")
+	private final String linuxPath = System.getProperty("user.home").concat("/.unigrid/dependencies/temp/");
+	private final String macPath = System.getProperty("user.home")
 		.concat("/Library/Application Support/UNIGRID/dependencies/temp/");
-	final private String WINDOWS_PATH = System.getProperty("user.home")
+	private final String windowsPath = System.getProperty("user.home")
 		.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
 
 	private static DebugService debug = new DebugService();
@@ -86,7 +86,7 @@ public class UpdateWallet extends TimerTask {
 	private Configuration updateConfig = null;
 	private SimpleBooleanProperty running;
 	private static PropertyChangeSupport pcs;
-	private WebTarget target;
+	private Client client;
 	private GithubJson githubJson;
 
 	public UpdateWallet() {
@@ -101,9 +101,20 @@ public class UpdateWallet extends TimerTask {
 		this.pcs = new PropertyChangeSupport(this);
 	}
 
-	private void initWebTarget() {
-		target = ClientBuilder.newBuilder()
-			.build().target("https://api.github.com/repos/unigrid-project/janus-java/releases/latest");
+	private GithubJson initWebTarget() {
+		try {
+			client = ClientBuilder.newBuilder()
+				.register(MyMessageProviderReader.class)
+				.build();
+			Response response = client.target("https://github.com/unigrid-project/janus-java/releases.atom")
+				.request(MediaType.APPLICATION_ATOM_XML_TYPE).get();
+			GithubJson githubJson = response.readEntity(GithubJson.class);
+			return githubJson;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.out.println(e.getCause().toString());
+			return null;
+		}
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -131,7 +142,8 @@ public class UpdateWallet extends TimerTask {
 							.position(Pos.TOP_RIGHT).showInformation();
 					} else {
 						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas close application to update!").showInformation();
+							.text("New update ready \nPleas close application to update!")
+							.showInformation();
 					}
 				}
 			});
@@ -177,18 +189,7 @@ public class UpdateWallet extends TimerTask {
 
 	private Boolean checkUpdateBootstrap() {
 		String delimiter = ".";
-		githubJson = target.request().get()
-			.readEntity(GithubJson.class);
 
-		String githubTag = githubJson.getTagName();
-
-		System.out.println("Github tag for this version: " + githubTag);
-		for (Asset a : githubJson.getAssets()) {
-			System.out.println(a.getBrowserDownloadUrl());
-		}
-
-		String[] s = githubTag.substring(1).split(delimiter);
-		System.out.println(githubTag.substring(1));
 		Properties myProperties = new Properties();
 
 		try {
@@ -203,7 +204,6 @@ public class UpdateWallet extends TimerTask {
 
 		System.out.println(filteredVer);
 		String[] existingVersion = filteredVer.split(delimiter);
-		System.out.println(s.length);
 		System.out.println(existingVersion.length);
 		/*TODO: find out way the split dose not work as inteded. Its wierd!!!
 		if (!s[0].equals(existingVersion[0]) || !s[1].equals(existingVersion[1])) {
@@ -213,29 +213,26 @@ public class UpdateWallet extends TimerTask {
 			b = false;
 			bootstrapUpdate = false;
 		}*/
-		if (githubTag.substring(1).equals(filteredVer)) {
+		if (getLatestVersion().equals(filteredVer)) {
 			bootstrapUpdate = false;
 		} else {
 			if (OS.CURRENT == OS.LINUX
-				&& !checkTempFolder(githubJson.getAssets().get(3).getName(), LINUX_PATH)) {
+				&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
 				System.out.println("downloading linux installer");
-				downloadFile(githubJson.getAssets().get(3)
-					.getBrowserDownloadUrl(),
-					LINUX_PATH,
-					githubJson.getAssets().get(3).getName());
+				downloadFile(getDownloadURL(getLatestVersion(), getDEBFileName(getLatestVersion())),
+					linuxPath,
+					getDEBFileName(getLatestVersion()));
 				System.out.println("Did it start??");
 			} else if (OS.CURRENT == OS.MAC
-				&& !checkTempFolder(githubJson.getAssets().get(0).getName(), MAC_PATH)) {
-				downloadFile(githubJson.getAssets().get(0)
-					.getBrowserDownloadUrl(),
-					MAC_PATH,
-					githubJson.getAssets().get(0).getName());
+				&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
+				downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
+					macPath,
+					getDMGFileName(getLatestVersion()));
 			} else if (OS.CURRENT == OS.WINDOWS
-				&& !checkTempFolder(githubJson.getAssets().get(1).getName(), WINDOWS_PATH)) {
-				downloadFile(githubJson.getAssets().get(1)
-					.getBrowserDownloadUrl(),
-					WINDOWS_PATH,
-					githubJson.getAssets().get(1).getName());
+				&& !checkTempFolder(getMSIFileName(getLatestVersion()), windowsPath)) {
+				downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
+					windowsPath,
+					getMSIFileName(getLatestVersion()));
 			}
 			bootstrapUpdate = true;
 		}
@@ -263,29 +260,21 @@ public class UpdateWallet extends TimerTask {
 			@Override
 			public void run() {
 				if (checkUpdateBootstrap()) {
-					String linuxInstallExec = "pkexcec dpkg -i " + LINUX_PATH
-						+ githubJson.getAssets().get(3).getName();
-					String macInstallExec = "open " + MAC_PATH + githubJson.getAssets()
-						.get(0).getName();
-					String windowsInstallExec ="msiexec /i" + WINDOWS_PATH + githubJson.getAssets()
-						.get(1).getName();
+					String linuxInstallExec = String.format("pkexcec dpkg -i %s%s", linuxPath,
+						 getDEBFileName(getLatestVersion()));
+					String macInstallExec = "open " + macPath + getDMGFileName(getLatestVersion());
+					String windowsInstallExec = String.format("msiexec /i %s%s", windowsPath,
+						 getMSIFileName(getLatestVersion()));
 					System.out.println(linuxInstallExec);
 					try {
 						if (OS.CURRENT == OS.LINUX) {
 							System.out.println("downloading linux installer");
-							downloadFile(githubJson.getAssets().get(3)
-								.getBrowserDownloadUrl(),
-								LINUX_PATH,
-								githubJson.getAssets().get(3).getName());
 							Runtime.getRuntime().exec(linuxInstallExec);
 							System.out.println("Did it start??");
 						} else if (OS.CURRENT == OS.MAC) {
-							downloadFile(githubJson.getAssets().get(0)
-								.getBrowserDownloadUrl(),
-								LINUX_PATH,
-								githubJson.getAssets().get(0).getName());
 							Runtime.getRuntime().exec(macInstallExec);
 						} else if (OS.CURRENT == OS.WINDOWS) {
+							Runtime.getRuntime().exec(windowsInstallExec);
 						}
 					} catch (Exception e) {
 						System.out.println(e.getMessage());
@@ -319,5 +308,38 @@ public class UpdateWallet extends TimerTask {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
+	}
+
+	private String getDEBFileName(String version) {
+		return String.format("unigrid_%s_amd64.deb", version);
+	}
+
+	private String getDMGFileName(String version) {
+		return String.format("Unigrid-%s.dmg", version);
+	}
+
+	private String getMSIFileName(String version) {
+		return String.format("Unigrid-%s.msi", version);
+	}
+
+	private String getRPMFileName(String version) {
+		return String.format("unigrid-%s.x86_64.rpm", version);
+	}
+
+	private String getLatestVersion() {
+		githubJson = initWebTarget();
+		if (githubJson == null) {
+			System.out.println("githubjson is null");
+			return "";
+		}
+		String githubEntry = githubJson.getEntries().get(0).getId();
+		githubEntry = githubEntry.split("/")[2].substring(1);
+		System.out.println("Github tag for this version: " + githubEntry);
+		return githubEntry;
+	}
+
+	private String getDownloadURL(String version, String fileName) {
+		return String.format("https://github.com/unigrid-project/janus-java/releases/download/v%s/%s",
+			version, fileName);
 	}
 }

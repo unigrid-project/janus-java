@@ -16,24 +16,30 @@
 
 package org.unigrid.janus.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
+//@EqualsAndHashCode(callSuper = false)
+@XmlRootElement(name="feed")
 public class GithubJson {
-	@JsonbProperty("tag_name")
-	private String tagName;
-	private List<Asset> assets;
-	
-	@Data
-	public static class Asset {
-		@JsonbProperty("browser_download_url")
-		private String browserDownloadUrl;
-		@JsonProperty("name")
-		private String name;
+ 
+	@XmlElement(name = "id")
+	private String tag;
+
+	@XmlElementWrapper
+	@XmlElement(name = "entry")
+	List<Entry> entries;
+
+	public static class Entry {
+		@Getter @Setter
+		//@XmlElement(name="id")
+		private String id;
 	}
 }
