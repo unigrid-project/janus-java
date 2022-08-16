@@ -253,26 +253,38 @@ public class UpdateWallet extends TimerTask {
 	}
 
 	public void doUpdate() {
+		Object obj = new Object();
 		System.out.println(bootstrapUpdate);
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				if (checkUpdateBootstrap()) {
-					String linuxInstallExec = String.format("pkexcec dpkg -i %s%s", linuxPath,
-						 getDEBFileName(getLatestVersion()));
+					Process process;
+					String linuxInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
+						getDEBFileName(getLatestVersion()));
 					String macInstallExec = "open " + macPath + getDMGFileName(getLatestVersion());
 					String windowsInstallExec = String.format("msiexec /i %s%s", windowsPath,
-						 getMSIFileName(getLatestVersion()));
+						getMSIFileName(getLatestVersion()));
 					System.out.println(linuxInstallExec);
 					try {
 						if (OS.CURRENT == OS.LINUX) {
 							System.out.println("downloading linux installer");
-							Runtime.getRuntime().exec(linuxInstallExec);
+							try {
+								Process p = Runtime.getRuntime().exec(linuxInstallExec);
+								p.waitFor();
+								//process = new ProcessBuilder(linuxInstallExec).start();
+								//process.waitFor();	
+							} catch (Exception e) {
+								System.out.println(e.getMessage());
+							}
+							//Runtime.getRuntime().exec(linuxInstallExec);
 							System.out.println("Did it start??");
 						} else if (OS.CURRENT == OS.MAC) {
-							Runtime.getRuntime().exec(macInstallExec);
+							Process p = Runtime.getRuntime().exec(macInstallExec);
+							p.waitFor();
 						} else if (OS.CURRENT == OS.WINDOWS) {
-							Runtime.getRuntime().exec(windowsInstallExec);
+							Process p = Runtime.getRuntime().exec(windowsInstallExec);
+							p.waitFor();
 						}
 					} catch (Exception e) {
 						System.out.println(e.getMessage());
@@ -282,6 +294,10 @@ public class UpdateWallet extends TimerTask {
 				String macExec = "open -a unigrid";
 				String windowsExec = "c:/programFiles/unigrid/bin/unigrid.exe";
 				try {
+					synchronized (obj) {						
+						obj.notifyAll();
+					}
+					System.out.println("!!!!We got passed the notyfiy");
 					if (OS.CURRENT == OS.LINUX) {
 						System.out.println("run the app agien on linux");
 						Runtime.getRuntime().exec(linuxExec);
@@ -297,6 +313,15 @@ public class UpdateWallet extends TimerTask {
 			}
 		});
 		t.start();
+		synchronized (obj) {
+			try {
+				System.out.println("We are waiting!!!!!!!");
+				obj.wait();
+				System.out.println("we are done waiting!!!!!!");
+			} catch (InterruptedException e) {
+				System.out.println(e.getMessage());
+			}
+		}
 		System.exit(0);
 	}
 

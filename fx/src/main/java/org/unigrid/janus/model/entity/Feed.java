@@ -28,7 +28,7 @@ import java.util.List;
 @XmlRootElement(namespace = "http://www.w3.org/2005/Atom")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Feed {
-	
+
 	@XmlElement
 	private String id;
 
