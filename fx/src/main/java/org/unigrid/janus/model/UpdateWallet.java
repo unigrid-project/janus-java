@@ -273,7 +273,7 @@ public class UpdateWallet extends TimerTask {
 								Process p = Runtime.getRuntime().exec(linuxInstallExec);
 								p.waitFor();
 								//process = new ProcessBuilder(linuxInstallExec).start();
-								//process.waitFor();	
+								//process.waitFor();
 							} catch (Exception e) {
 								System.out.println(e.getMessage());
 							}
@@ -294,7 +294,7 @@ public class UpdateWallet extends TimerTask {
 				String macExec = "open -a unigrid";
 				String windowsExec = "c:/programFiles/unigrid/bin/unigrid.exe";
 				try {
-					synchronized (obj) {						
+					synchronized (obj) {
 						obj.notifyAll();
 					}
 					System.out.println("!!!!We got passed the notyfiy");
