@@ -16,30 +16,31 @@
 
 package org.unigrid.janus.model.entity;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 //@EqualsAndHashCode(callSuper = false)
-@XmlRootElement(name="feed")
-public class GithubJson {
- 
-	@XmlElement(name = "id")
-	private String tag;
+@XmlRootElement(namespace = "http://www.w3.org/2005/Atom")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Feed {
+	
+	@XmlElement
+	private String id;
 
-	@XmlElementWrapper
-	@XmlElement(name = "entry")
-	List<Entry> entries;
+	//@XmlElementWrapper
+	@XmlElement
+	private List<Entry> entry;
 
+	@Data
+	@XmlAccessorType(XmlAccessType.FIELD)
 	public static class Entry {
-		@Getter @Setter
-		//@XmlElement(name="id")
+
+		@XmlElement
 		private String id;
 	}
 }

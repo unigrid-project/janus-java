@@ -42,7 +42,6 @@ import org.update4j.Configuration;
 import org.update4j.OS;
 
 import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.File;
@@ -51,8 +50,7 @@ import java.util.Properties;
 import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
 import org.unigrid.janus.Janus;
-import org.unigrid.janus.model.entity.GithubJson;
-import org.unigrid.janus.model.entity.MyMessageProviderReader;
+import org.unigrid.janus.model.entity.Feed;
 
 @Eager
 @ApplicationScoped
@@ -87,7 +85,7 @@ public class UpdateWallet extends TimerTask {
 	private SimpleBooleanProperty running;
 	private static PropertyChangeSupport pcs;
 	private Client client;
-	private GithubJson githubJson;
+	private Feed githubJson;
 
 	public UpdateWallet() {
 		System.out.println("Init walletUpdate");
@@ -101,15 +99,15 @@ public class UpdateWallet extends TimerTask {
 		this.pcs = new PropertyChangeSupport(this);
 	}
 
-	private GithubJson initWebTarget() {
+	private Feed initWebTarget() {
 		try {
 			client = ClientBuilder.newBuilder()
-				.register(MyMessageProviderReader.class)
 				.build();
 			Response response = client.target("https://github.com/unigrid-project/janus-java/releases.atom")
-				.request(MediaType.APPLICATION_ATOM_XML_TYPE).get();
-			GithubJson githubJson = response.readEntity(GithubJson.class);
-			return githubJson;
+				.request(MediaType.APPLICATION_XML_TYPE).get();
+			//System.out.println(response.readEntity(String.class));
+			Feed feed = response.readEntity(Feed.class);
+			return feed;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.out.println(e.getCause().toString());
@@ -168,7 +166,7 @@ public class UpdateWallet extends TimerTask {
 			System.err.println(mle.getMessage());
 		}
 
-		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+		try (Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			updateConfig = Configuration.read(in);
 			System.out.println("Reading the config file");
 		} catch (IOException e) {
@@ -332,7 +330,7 @@ public class UpdateWallet extends TimerTask {
 			System.out.println("githubjson is null");
 			return "";
 		}
-		String githubEntry = githubJson.getEntries().get(0).getId();
+		String githubEntry = githubJson.getEntry().get(0).getId();
 		githubEntry = githubEntry.split("/")[2].substring(1);
 		System.out.println("Github tag for this version: " + githubEntry);
 		return githubEntry;
