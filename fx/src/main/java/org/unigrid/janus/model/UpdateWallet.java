@@ -58,7 +58,7 @@ public class UpdateWallet extends TimerTask {
 
 	private final String linuxPath = System.getProperty("user.home").concat("/.unigrid/dependencies/temp/");
 	private final String macPath = System.getProperty("user.home")
-		.concat("/Library/Application Support/UNIGRID/dependencies/temp/");
+		.concat("/Library/Application\\ Support/UNIGRID/dependencies/temp/");
 	private final String windowsPath = System.getProperty("user.home")
 		.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
 
@@ -257,10 +257,10 @@ public class UpdateWallet extends TimerTask {
 					Process process;
 					String linuxInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
 						getDEBFileName(getLatestVersion()));
-					String macInstallExec = "open " + macPath + getDMGFileName(getLatestVersion());
 					String windowsInstallExec = String.format("msiexec /i %s%s",
 						windowsPath.replace("/", "\\"), getMSIFileName(getLatestVersion()));
 					System.out.println(linuxInstallExec);
+					String macInstallExec = macPath + getDMGFileName(getLatestVersion());
 					try {
 						if (OS.CURRENT == OS.LINUX) {
 							System.out.println("downloading linux installer");
@@ -275,8 +275,14 @@ public class UpdateWallet extends TimerTask {
 							//Runtime.getRuntime().exec(linuxInstallExec);
 							System.out.println("Did it start??");
 						} else if (OS.CURRENT == OS.MAC) {
-							Process p = Runtime.getRuntime().exec(macInstallExec);
-							p.waitFor();
+							try {
+								Process p = Runtime.getRuntime().exec(new String[]{"open", macInstallExec});
+								int exitCode = p.waitFor();
+								System.out.println("exitCode " + exitCode);
+							} catch (Exception e) {
+								//TODO: handle exception
+								System.out.println("cant open dmg: " + e.getMessage());
+							}
 						} else if (OS.CURRENT == OS.WINDOWS) {
 							try {
 								System.out.println(windowsInstallExec);
@@ -303,7 +309,8 @@ public class UpdateWallet extends TimerTask {
 						Runtime.getRuntime().exec(linuxExec);
 						System.out.println("Did it start??");
 					} else if (OS.CURRENT == OS.MAC) {
-						Runtime.getRuntime().exec(macExec);
+						//Runtime.getRuntime().exec(macExec);
+						// user has to manually install on OSX so we cannot do this
 					} else if (OS.CURRENT == OS.WINDOWS) {
 						Runtime.getRuntime().exec(windowsExec);
 					}
