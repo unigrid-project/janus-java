@@ -205,8 +205,8 @@ public class UpdateWallet extends TimerTask {
 		System.out.println(existingVersion.length);
 		String[] latestVersion = getLatestVersion().split(delimiter);
 		
-		if (latestVersion[0].equals(existingVersion[0]) || latestVersion[1].equals(existingVersion[1])) {
-//if (getLatestVersion().equals(filteredVer)) {
+		//if (latestVersion[0].equals(existingVersion[0]) || latestVersion[1].equals(existingVersion[1])) {
+		if (getLatestVersion().equals(filteredVer)) {
 			bootstrapUpdate = false;
 		} else {
 			if (OS.CURRENT == OS.LINUX
