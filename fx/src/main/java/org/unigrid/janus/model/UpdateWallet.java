@@ -203,15 +203,10 @@ public class UpdateWallet extends TimerTask {
 		System.out.println(filteredVer);
 		String[] existingVersion = filteredVer.split(delimiter);
 		System.out.println(existingVersion.length);
-		/*TODO: find out way the split dose not work as inteded. Its wierd!!!
-		if (!s[0].equals(existingVersion[0]) || !s[1].equals(existingVersion[1])) {
-			b = true;
-			bootstrapUpdate = true;
-		} else {
-			b = false;
-			bootstrapUpdate = false;
-		}*/
-		if (getLatestVersion().equals(filteredVer)) {
+		String[] latestVersion = getLatestVersion().split(delimiter);
+		
+		if (latestVersion[0].equals(existingVersion[0]) || latestVersion[1].equals(existingVersion[1])) {
+//if (getLatestVersion().equals(filteredVer)) {
 			bootstrapUpdate = false;
 		} else {
 			if (OS.CURRENT == OS.LINUX
@@ -327,7 +322,7 @@ public class UpdateWallet extends TimerTask {
 				System.out.println(e.getMessage());
 			}
 		}
-		//System.exit(0);
+		System.exit(0);
 	}
 
 	private void downloadFile(String url, String path, String fileName) {
