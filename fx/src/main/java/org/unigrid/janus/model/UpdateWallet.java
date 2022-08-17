@@ -263,8 +263,8 @@ public class UpdateWallet extends TimerTask {
 					String linuxInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
 						getDEBFileName(getLatestVersion()));
 					String macInstallExec = "open " + macPath + getDMGFileName(getLatestVersion());
-					String windowsInstallExec = String.format("msiexec /i %s%s", windowsPath,
-						getMSIFileName(getLatestVersion()));
+					String windowsInstallExec = String.format("msiexec /i %s%s",
+						windowsPath.replace("/", "\\"), getMSIFileName(getLatestVersion()));
 					System.out.println(linuxInstallExec);
 					try {
 						if (OS.CURRENT == OS.LINUX) {
@@ -283,8 +283,13 @@ public class UpdateWallet extends TimerTask {
 							Process p = Runtime.getRuntime().exec(macInstallExec);
 							p.waitFor();
 						} else if (OS.CURRENT == OS.WINDOWS) {
-							Process p = Runtime.getRuntime().exec(windowsInstallExec);
-							p.waitFor();
+							try {
+								System.out.println(windowsInstallExec);
+								Process p = Runtime.getRuntime().exec(windowsInstallExec);
+								p.waitFor();
+							} catch (Exception e) {
+								System.out.println(e.getMessage());
+							}
 						}
 					} catch (Exception e) {
 						System.out.println(e.getMessage());
@@ -292,7 +297,7 @@ public class UpdateWallet extends TimerTask {
 				}
 				String linuxExec = "/opt/unigrid/bin/Unigrid";
 				String macExec = "open -a unigrid";
-				String windowsExec = "c:/programFiles/unigrid/bin/unigrid.exe";
+				String windowsExec = "\"C:\\Program Files\\Unigrid\\Unigrid.exe\"";
 				try {
 					synchronized (obj) {
 						obj.notifyAll();
@@ -322,7 +327,7 @@ public class UpdateWallet extends TimerTask {
 				System.out.println(e.getMessage());
 			}
 		}
-		System.exit(0);
+		//System.exit(0);
 	}
 
 	private void downloadFile(String url, String path, String fileName) {
