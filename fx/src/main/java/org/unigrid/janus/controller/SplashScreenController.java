@@ -125,7 +125,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 			// Open debug.log file
 			window.getHostServices().showDocument(debugLog.getAbsolutePath());
 			// disable showing log on load as it runs very slow with large debugs
-			/* 
+			/*
 			if (!splashModel.getDebug()) {
 				window.getSplashScreen().startMonitor();
 				debugTxt.setVisible(true);
@@ -140,7 +140,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 				window.getStage().setHeight(220);
 				bugTooltip.setText("Show debug log");
 			}
-			*/
+			 */
 		} catch (Exception e) {
 			debug.print(e.getMessage(), SplashScreenController.class.getSimpleName());
 		}
