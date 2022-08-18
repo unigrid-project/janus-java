@@ -31,6 +31,7 @@ module fx {
 	requires jakarta.json.bind;
 	requires jakarta.json;
 	requires jakarta.ws.rs;
+	requires jakarta.xml.bind;
 	requires com.sun.jna.platform;
 	requires com.sun.jna;
 	requires jersey.client;
