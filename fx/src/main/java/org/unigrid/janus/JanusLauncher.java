@@ -39,7 +39,6 @@ public class JanusLauncher implements Launcher {
 
 		final SeContainer container = SeContainerInitializer.newInstance()
 			.addExtensions(EagerExtension.class).initialize();
-
 		System.out.println(CDI.current());
 
 		Platform.runLater(() -> {

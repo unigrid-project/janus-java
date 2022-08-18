@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.updatebootstrap.controllers.UpdateViewController">
+    <stylesheets>
+        <URL value="@/styles/updateview.css" />
+    </stylesheets>
+   <children>
+      <StackPane prefHeight="246.0" prefWidth="600.0">
+         <children>
+            <ProgressBar fx:id="progress" prefHeight="20.0" prefWidth="458.0" progress="0.0" />
+            <Label fx:id="status" text="Label" />
+         </children>
+      </StackPane>
+      <Label fx:id="output" layoutX="282.0" layoutY="278.0" text="Label" />
+   </children>
+</AnchorPane>

@@ -17,6 +17,7 @@
 package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.client.Client;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -40,9 +41,27 @@ import org.unigrid.janus.model.service.DebugService;
 import org.update4j.Configuration;
 import org.update4j.OS;
 
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import java.io.File;
+import java.util.Objects;
+import java.util.Properties;
+import javafx.application.Platform;
+import org.apache.commons.io.FileUtils;
+import org.unigrid.janus.Janus;
+import org.unigrid.janus.model.entity.Feed;
+
 @Eager
 @ApplicationScoped
 public class UpdateWallet extends TimerTask {
+
+	private final String linuxPath = System.getProperty("user.home").concat("/.unigrid/dependencies/temp/");
+	private final String macPath = System.getProperty("user.home")
+		.concat("/Library/Application\\ Support/UNIGRID/dependencies/temp/");
+	private final String windowsPath = System.getProperty("user.home")
+		.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
+
 	private static DebugService debug = new DebugService();
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
 	//private static PollingService polling = new PollingService();
@@ -56,6 +75,8 @@ public class UpdateWallet extends TimerTask {
 		UPDATE_NOT_READY
 	}
 
+	private boolean bootstrapUpdate = false;
+
 	@Getter
 	private static final String UPDATE_PROPERTY = "update";
 
@@ -63,15 +84,35 @@ public class UpdateWallet extends TimerTask {
 	private Configuration updateConfig = null;
 	private SimpleBooleanProperty running;
 	private static PropertyChangeSupport pcs;
+	private Client client;
+	private Feed githubJson;
 
 	public UpdateWallet() {
 		System.out.println("Init walletUpdate");
+
+		initWebTarget();
 		if (this.pcs != null) {
 			// TODO: Should this really be a fallthrough ? It looks dangerous.
 			return;
 		}
 
 		this.pcs = new PropertyChangeSupport(this);
+	}
+
+	private Feed initWebTarget() {
+		try {
+			client = ClientBuilder.newBuilder()
+				.build();
+			Response response = client.target("https://github.com/unigrid-project/janus-java/releases.atom")
+				.request(MediaType.APPLICATION_XML_TYPE).get();
+			//System.out.println(response.readEntity(String.class));
+			Feed feed = response.readEntity(Feed.class);
+			return feed;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.out.println(e.getCause().toString());
+			return null;
+		}
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -87,17 +128,24 @@ public class UpdateWallet extends TimerTask {
 		if (pcs == null) {
 			pcs = new PropertyChangeSupport(this);
 		}
-		if (checkUpdate()) {
+		if (checkUpdate() || checkUpdateBootstrap()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
-			if (SystemUtils.IS_OS_MAC_OSX) {
-				Notifications.create().title("Update Ready")
-					.text("New update ready \nPleas close application to update!")
-					.position(Pos.TOP_RIGHT).showInformation();
-			} else {
-				Notifications.create().title("Update Ready")
-					.text("New update ready \nPleas close application to update!").showInformation();
-			}
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						Notifications.create().title("Update Ready")
+							.text("New update ready \nPleas close application to update!")
+							.position(Pos.TOP_RIGHT).showInformation();
+					} else {
+						Notifications.create().title("Update Ready")
+							.text("New update ready \nPleas close application to update!")
+							.showInformation();
+					}
+				}
+			});
+
 		} else {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 			//debug.print("user.dir: " + System.getProperty("user.dir"), UpdateWallet.class.getSimpleName());
@@ -137,7 +185,191 @@ public class UpdateWallet extends TimerTask {
 		return update;
 	}
 
+	private Boolean checkUpdateBootstrap() {
+		String delimiter = ".";
+
+		Properties myProperties = new Properties();
+
+		try {
+			myProperties.load(Janus.class.getResourceAsStream("application.properties"));
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			System.out.println(e.getCause().toString());
+		}
+
+		String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
+		String filteredVer = fullVer.replace("-SNAPSHOT", "");
+
+		System.out.println(filteredVer);
+		String[] existingVersion = filteredVer.split(delimiter);
+		System.out.println(existingVersion.length);
+		String[] latestVersion = getLatestVersion().split(delimiter);
+		
+		//if (latestVersion[0].equals(existingVersion[0]) || latestVersion[1].equals(existingVersion[1])) {
+		if (getLatestVersion().equals(filteredVer)) {
+			bootstrapUpdate = false;
+		} else {
+			if (OS.CURRENT == OS.LINUX
+				&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
+				System.out.println("downloading linux installer");
+				downloadFile(getDownloadURL(getLatestVersion(), getDEBFileName(getLatestVersion())),
+					linuxPath,
+					getDEBFileName(getLatestVersion()));
+				System.out.println("Did it start??");
+			} else if (OS.CURRENT == OS.MAC
+				&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
+				downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
+					macPath,
+					getDMGFileName(getLatestVersion()));
+			} else if (OS.CURRENT == OS.WINDOWS
+				&& !checkTempFolder(getMSIFileName(getLatestVersion()), windowsPath)) {
+				downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
+					windowsPath,
+					getMSIFileName(getLatestVersion()));
+			}
+			bootstrapUpdate = true;
+		}
+		System.out.println("are we upadting the bootstrap: " + bootstrapUpdate);
+		return bootstrapUpdate;
+	}
+
+	private boolean checkTempFolder(String fileName, String path) {
+		boolean b = false;
+		try {
+			b = new File(path + fileName).exists();
+		} catch (Exception e) {
+			b = false;
+		}
+		return b;
+	}
+
 	private void restartWallet() {
 		// TODO: move code from WindowBarController here
+	}
+
+	public void doUpdate() {
+		Object obj = new Object();
+		System.out.println(bootstrapUpdate);
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (checkUpdateBootstrap()) {
+					Process process;
+					String linuxInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
+						getDEBFileName(getLatestVersion()));
+					String windowsInstallExec = String.format("msiexec /i %s%s",
+						windowsPath.replace("/", "\\"), getMSIFileName(getLatestVersion()));
+					System.out.println(linuxInstallExec);
+					String macInstallExec = macPath + getDMGFileName(getLatestVersion());
+					try {
+						if (OS.CURRENT == OS.LINUX) {
+							System.out.println("downloading linux installer");
+							try {
+								Process p = Runtime.getRuntime().exec(linuxInstallExec);
+								p.waitFor();
+								//process = new ProcessBuilder(linuxInstallExec).start();
+								//process.waitFor();
+							} catch (Exception e) {
+								System.out.println(e.getMessage());
+							}
+							//Runtime.getRuntime().exec(linuxInstallExec);
+							System.out.println("Did it start??");
+						} else if (OS.CURRENT == OS.MAC) {
+							try {
+								Process p = Runtime.getRuntime().exec(new String[]{"open", macInstallExec});
+								int exitCode = p.waitFor();
+								System.out.println("exitCode " + exitCode);
+							} catch (Exception e) {
+								//TODO: handle exception
+								System.out.println("cant open dmg: " + e.getMessage());
+							}
+						} else if (OS.CURRENT == OS.WINDOWS) {
+							try {
+								System.out.println(windowsInstallExec);
+								Process p = Runtime.getRuntime().exec(windowsInstallExec);
+								p.waitFor();
+							} catch (Exception e) {
+								System.out.println(e.getMessage());
+							}
+						}
+					} catch (Exception e) {
+						System.out.println(e.getMessage());
+					}
+				}
+				String linuxExec = "/opt/unigrid/bin/Unigrid";
+				String macExec = "open -a unigrid";
+				String windowsExec = "\"C:\\Program Files\\Unigrid\\Unigrid.exe\"";
+				try {
+					synchronized (obj) {
+						obj.notifyAll();
+					}
+					System.out.println("!!!!We got passed the notyfiy");
+					if (OS.CURRENT == OS.LINUX) {
+						System.out.println("run the app agien on linux");
+						Runtime.getRuntime().exec(linuxExec);
+						System.out.println("Did it start??");
+					} else if (OS.CURRENT == OS.MAC) {
+						//Runtime.getRuntime().exec(macExec);
+						// user has to manually install on OSX so we cannot do this
+					} else if (OS.CURRENT == OS.WINDOWS) {
+						Runtime.getRuntime().exec(windowsExec);
+					}
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
+			}
+		});
+		t.start();
+		synchronized (obj) {
+			try {
+				System.out.println("We are waiting!!!!!!!");
+				obj.wait();
+				System.out.println("we are done waiting!!!!!!");
+			} catch (InterruptedException e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		System.exit(0);
+	}
+
+	private void downloadFile(String url, String path, String fileName) {
+		try {
+			FileUtils.copyURLToFile(new URL(url), new File(path + fileName));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	private String getDEBFileName(String version) {
+		return String.format("unigrid_%s_amd64.deb", version);
+	}
+
+	private String getDMGFileName(String version) {
+		return String.format("Unigrid-%s.dmg", version);
+	}
+
+	private String getMSIFileName(String version) {
+		return String.format("Unigrid-%s.msi", version);
+	}
+
+	private String getRPMFileName(String version) {
+		return String.format("unigrid-%s.x86_64.rpm", version);
+	}
+
+	private String getLatestVersion() {
+		githubJson = initWebTarget();
+		if (githubJson == null) {
+			System.out.println("githubjson is null");
+			return "";
+		}
+		String githubEntry = githubJson.getEntry().get(0).getId();
+		githubEntry = githubEntry.split("/")[2].substring(1);
+		System.out.println("Github tag for this version: " + githubEntry);
+		return githubEntry;
+	}
+
+	private String getDownloadURL(String version, String fileName) {
+		return String.format("https://github.com/unigrid-project/janus-java/releases/download/v%s/%s",
+			version, fileName);
 	}
 }
