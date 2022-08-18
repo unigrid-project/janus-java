@@ -44,10 +44,11 @@ import org.update4j.OS;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.io.BufferedReader;
 import java.io.File;
-import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Properties;
 import javafx.application.Platform;
@@ -131,7 +132,7 @@ public class UpdateWallet extends TimerTask {
 		if (pcs == null) {
 			pcs = new PropertyChangeSupport(this);
 		}
-		if (checkUpdate() || checkUpdateBootstrap()) {
+		if (checkUpdateBootstrap()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
 			Platform.runLater(new Runnable() {
@@ -139,16 +140,35 @@ public class UpdateWallet extends TimerTask {
 				public void run() {
 					if (SystemUtils.IS_OS_MAC_OSX) {
 						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas close application to update!")
+							.text("New launcher update ready \n"
+								+ "Pleas press the update button!")
 							.position(Pos.TOP_RIGHT).showInformation();
 					} else {
 						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas close application to update!")
+							.text("New launcher update ready \n"
+								+ "Pleas press the update button!")
 							.showInformation();
 					}
 				}
 			});
 
+		} else if (checkUpdate()) {
+			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
+
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						Notifications.create().title("Update Ready")
+							.text("New update ready \nPleas press the update button!")
+							.position(Pos.TOP_RIGHT).showInformation();
+					} else {
+						Notifications.create().title("Update Ready")
+							.text("New update ready \nPleas press the update button!")
+							.showInformation();
+					}
+				}
+			});
 		} else {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 			//debug.print("user.dir: " + System.getProperty("user.dir"), UpdateWallet.class.getSimpleName());
@@ -203,24 +223,26 @@ public class UpdateWallet extends TimerTask {
 		String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
 		String filteredVer = fullVer.replace("-SNAPSHOT", "");
 
-		System.out.println(filteredVer);
-		String[] existingVersion = filteredVer.split(delimiter);
-		System.out.println(existingVersion.length);
-		String[] latestVersion = getLatestVersion().split(delimiter);
-		
-		//if (latestVersion[0].equals(existingVersion[0]) || latestVersion[1].equals(existingVersion[1])) {
-		if (getLatestVersion().equals(filteredVer)) {
+		if (getVersionNumber(filteredVer, 0) < getVersionNumber(getLatestVersion(), 0)
+			|| getVersionNumber(filteredVer, 2) < getVersionNumber(getLatestVersion(), 0)) {
 			bootstrapUpdate = false;
+			System.out.println("The latest version of the bootstrap is the same as the one we have");
 		} else {
-			if (OS.CURRENT == OS.LINUX
-				&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
+			if (OS.CURRENT == OS.LINUX) {
 				Path path = Paths.get(linuxPath);
-				FileSystem fs = path.getFileSystem();
-				fs
 				System.out.println("downloading linux installer");
-				downloadFile(getDownloadURL(getLatestVersion(), getDEBFileName(getLatestVersion())),
-					linuxPath,
-					getDEBFileName(getLatestVersion()));
+				if (getLinuxIDLike().equals("debian")
+					&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
+					downloadFile(getDownloadURL(getLatestVersion(),
+						getDEBFileName(getLatestVersion())),
+						linuxPath,
+						getDEBFileName(getLatestVersion()));
+				} else {
+					downloadFile(getDownloadURL(getLatestVersion(),
+						getRPMFileName(getLatestVersion())),
+						linuxPath,
+						getRPMFileName(getLatestVersion()));
+				}
 				System.out.println("Did it start??");
 			} else if (OS.CURRENT == OS.MAC
 				&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
@@ -259,6 +281,7 @@ public class UpdateWallet extends TimerTask {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
+				boolean isBootstrapUpdate = false;
 				if (checkUpdateBootstrap()) {
 					Process process;
 					String linuxInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
@@ -279,9 +302,11 @@ public class UpdateWallet extends TimerTask {
 							System.out.println("Did it start??");
 						} else if (OS.CURRENT == OS.MAC) {
 							try {
-								Process p = Runtime.getRuntime().exec(new String[]{"open", macInstallExec});
+								Process p = Runtime.getRuntime()
+									.exec(new String[]{"open", macInstallExec});
 								int exitCode = p.waitFor();
 								System.out.println("exitCode " + exitCode);
+								isBootstrapUpdate = true;
 							} catch (Exception e) {
 								//TODO: handle exception
 								System.out.println("cant open dmg: " + e.getMessage());
@@ -311,9 +336,8 @@ public class UpdateWallet extends TimerTask {
 						System.out.println("run the app agien on linux");
 						Runtime.getRuntime().exec(linuxExec);
 						System.out.println("Did it start??");
-					} else if (OS.CURRENT == OS.MAC) {
-						//Runtime.getRuntime().exec(macExec);
-						// user has to manually install on OSX so we cannot do this
+					} else if (OS.CURRENT == OS.MAC && !isBootstrapUpdate) {
+						Runtime.getRuntime().exec(macExec);
 					} else if (OS.CURRENT == OS.WINDOWS) {
 						Runtime.getRuntime().exec(windowsExec);
 					}
@@ -374,5 +398,29 @@ public class UpdateWallet extends TimerTask {
 	private String getDownloadURL(String version, String fileName) {
 		return String.format("https://github.com/unigrid-project/janus-java/releases/download/v%s/%s",
 			version, fileName);
+	}
+
+	private String getLinuxIDLike() {
+		String s = "";
+		Map<String, String> osDetails = new HashMap<String, String>();
+		try {
+			Process process = Runtime.getRuntime().exec("cat /etc/os-release");
+			BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			while ((s = br.readLine()) != null) {
+				String[] args = s.split("=");
+				osDetails.put(args[0], args[1]);
+				System.out.println(s);
+			}
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+		return osDetails.get("ID_LIKE");
+	}
+
+	private int getVersionNumber(String version, int index) {
+		char[] c = version.toCharArray();
+
+		String majorVersion = String.valueOf(c[index]);
+		return Integer.parseInt(majorVersion);
 	}
 }
