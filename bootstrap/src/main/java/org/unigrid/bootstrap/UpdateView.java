@@ -146,7 +146,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					@Override
 					protected Void call() throws Exception {
 						System.out.println("calling the zip");
-						Path zip = Paths.get(getBaseDirectory(), "temp");
+						Path zip = Paths.get(getBaseDirectory(), "zip");
 
 						System.out.println("zip location: " + zip.toString());
 						System.out.println("depenendencies location: " + getBaseDirectory());
