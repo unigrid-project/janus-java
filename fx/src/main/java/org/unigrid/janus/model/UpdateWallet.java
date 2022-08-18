@@ -45,6 +45,9 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.File;
+import java.nio.file.FileSystem;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Properties;
 import javafx.application.Platform;
@@ -216,6 +219,9 @@ public class UpdateWallet extends TimerTask {
 		} else {
 			if (OS.CURRENT == OS.LINUX
 				&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
+				Path path = Paths.get(linuxPath);
+				FileSystem fs = path.getFileSystem();
+				fs
 				System.out.println("downloading linux installer");
 				downloadFile(getDownloadURL(getLatestVersion(), getDEBFileName(getLatestVersion())),
 					linuxPath,
@@ -272,12 +278,9 @@ public class UpdateWallet extends TimerTask {
 							try {
 								Process p = Runtime.getRuntime().exec(linuxInstallExec);
 								p.waitFor();
-								//process = new ProcessBuilder(linuxInstallExec).start();
-								//process.waitFor();
 							} catch (Exception e) {
 								System.out.println(e.getMessage());
 							}
-							//Runtime.getRuntime().exec(linuxInstallExec);
 							System.out.println("Did it start??");
 						} else if (OS.CURRENT == OS.MAC) {
 							Process p = Runtime.getRuntime().exec(macInstallExec);
