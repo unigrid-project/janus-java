@@ -46,9 +46,9 @@ public class UpdateWalletConfig {
 		String homeDir = System.getProperty("user.home");
 		String dir = configLocation;
 		String fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar";
-		String linuxDaemon = "unigrid-2.0.2-x86_64-linux-gnu.tar.gz";
-		String windowsDaemon = "unigrid-2.0.2-win64.zip";
-		String osxDaemon = "unigrid-2.0.2-osx64.tar.gz";
+		String linuxDaemon = "unigrid-2.9.2-x86_64-linux-gnu.tar.gz";
+		String windowsDaemon = "unigrid-2.9.2-win64.zip";
+		String osxDaemon = "unigrid-2.9.2-osx64.tar.gz";
 
 		Configuration config = Configuration.builder()
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
@@ -168,6 +168,10 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("org.jboss.weld","weld-spi","4.0.SP1")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/yasson-2.0.0-M1.jar")
 				.uri(mavenUrl("org.eclipse","yasson","2.0.0-M1")).modulepath())
+			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-path-2.4.0.jar")
+				.uri(mavenUrl("com.jayway.jsonpath","json-path","2.4.0")).modulepath())
+			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jersey-media-jaxb-3.0.6.jar")
+				.uri(mavenUrl("org.glassfish.jersey.media","jersey-media-jaxb","3.0.6")).modulepath())
 			.file(FileMetadata.readFrom(homeDir + "/Downloads/" + linuxDaemon).uri(getDaemonUrl(OS.LINUX)))
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
@@ -295,6 +299,10 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("org.jboss.weld","weld-spi","4.0.SP1")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/yasson-2.0.0-M1.jar")
 				.uri(mavenUrl("org.eclipse","yasson","2.0.0-M1")).modulepath())
+			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-path-2.4.0.jar")
+				.uri(mavenUrl("com.jayway.jsonpath","json-path","2.4.0")).modulepath())
+			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-path-2.4.0.jar")
+				.uri(mavenUrl("org.glassfish.jersey.media","jersey-media-jaxb","3.0.5")).modulepath())
 			.file(FileMetadata.readFrom(homeDir + "/Downloads/" + windowsDaemon).uri(getDaemonUrl(OS.WINDOWS)))
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
@@ -422,6 +430,10 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("org.jboss.weld","weld-spi","4.0.SP1")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/yasson-2.0.0-M1.jar")
 				.uri(mavenUrl("org.eclipse","yasson","2.0.0-M1")).modulepath())
+			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-path-2.4.0.jar")
+				.uri(mavenUrl("com.jayway.jsonpath","json-path","2.4.0")).modulepath())
+			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-path-2.4.0.jar")
+				.uri(mavenUrl("org.glassfish.jersey.media","jersey-media-jaxb","3.0.5")).modulepath())
 			.file(FileMetadata.readFrom(homeDir + "/Downloads/" + osxDaemon).uri(getDaemonUrl(OS.MAC)))
 			.property("maven.central", MAVEN_BASE)
 			.property("default.launcher.main.class", "org.unigrid.janus.Janus")
