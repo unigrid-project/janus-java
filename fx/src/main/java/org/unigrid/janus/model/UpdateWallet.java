@@ -44,6 +44,8 @@ import org.update4j.OS;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.util.Objects;
 import java.util.Properties;
@@ -58,16 +60,18 @@ public class UpdateWallet extends TimerTask {
 
 	private final String linuxPath = System.getProperty("user.home").concat("/.unigrid/dependencies/temp/");
 	private final String macPath = System.getProperty("user.home")
-		.concat("/Library/Application\\ Support/UNIGRID/dependencies/temp/");
+			.concat("/Library/Application\\ Support/UNIGRID/dependencies/temp/");
 	private final String windowsPath = System.getProperty("user.home")
-		.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
+			.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
 
 	private static DebugService debug = new DebugService();
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
-	//private static PollingService polling = new PollingService();
+	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
-	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][]{
-		{OS.LINUX, "config-linux.xml"}, {OS.WINDOWS, "config-windows.xml"}, {OS.MAC, "config-mac.xml"}
+	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
+		{OS.LINUX, "config-linux.xml"},
+		{OS.WINDOWS, "config-windows.xml"},
+		{OS.MAC, "config-mac.xml"}
 	});
 
 	public enum UpdateState {
@@ -102,10 +106,10 @@ public class UpdateWallet extends TimerTask {
 	private Feed initWebTarget() {
 		try {
 			client = ClientBuilder.newBuilder()
-				.build();
+					.build();
 			Response response = client.target("https://github.com/unigrid-project/janus-java/releases.atom")
-				.request(MediaType.APPLICATION_XML_TYPE).get();
-			//System.out.println(response.readEntity(String.class));
+					.request(MediaType.APPLICATION_XML_TYPE).get();
+			// System.out.println(response.readEntity(String.class));
 			Feed feed = response.readEntity(Feed.class);
 			return feed;
 		} catch (Exception e) {
@@ -136,19 +140,22 @@ public class UpdateWallet extends TimerTask {
 				public void run() {
 					if (SystemUtils.IS_OS_MAC_OSX) {
 						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas close application to update!")
-							.position(Pos.TOP_RIGHT).showInformation();
+								.text("New update ready \nPleas"
+									+ " close application to update!")
+								.position(Pos.TOP_RIGHT).showInformation();
 					} else {
 						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas close application to update!")
-							.showInformation();
+								.text("New update ready \nPleas"
+									+ " close application to update!")
+								.showInformation();
 					}
 				}
 			});
 
 		} else {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
-			//debug.print("user.dir: " + System.getProperty("user.dir"), UpdateWallet.class.getSimpleName());
+			// debug.print("user.dir: " + System.getProperty("user.dir"),
+			// UpdateWallet.class.getSimpleName());
 		}
 
 	}
@@ -204,28 +211,29 @@ public class UpdateWallet extends TimerTask {
 		String[] existingVersion = filteredVer.split(delimiter);
 		System.out.println(existingVersion.length);
 		String[] latestVersion = getLatestVersion().split(delimiter);
-		
-		//if (latestVersion[0].equals(existingVersion[0]) || latestVersion[1].equals(existingVersion[1])) {
+
+		// if (latestVersion[0].equals(existingVersion[0]) ||
+		// latestVersion[1].equals(existingVersion[1])) {
 		if (getLatestVersion().equals(filteredVer)) {
 			bootstrapUpdate = false;
 		} else {
 			if (OS.CURRENT == OS.LINUX
-				&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
+					&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
 				System.out.println("downloading linux installer");
 				downloadFile(getDownloadURL(getLatestVersion(), getDEBFileName(getLatestVersion())),
-					linuxPath,
-					getDEBFileName(getLatestVersion()));
+						linuxPath,
+						getDEBFileName(getLatestVersion()));
 				System.out.println("Did it start??");
 			} else if (OS.CURRENT == OS.MAC
-				&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
+					&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
 				downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
-					macPath,
-					getDMGFileName(getLatestVersion()));
+						macPath,
+						getDMGFileName(getLatestVersion()));
 			} else if (OS.CURRENT == OS.WINDOWS
-				&& !checkTempFolder(getMSIFileName(getLatestVersion()), windowsPath)) {
+					&& !checkTempFolder(getMSIFileName(getLatestVersion()), windowsPath)) {
 				downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
-					windowsPath,
-					getMSIFileName(getLatestVersion()));
+						windowsPath,
+						getMSIFileName(getLatestVersion()));
 			}
 			bootstrapUpdate = true;
 		}
@@ -256,31 +264,58 @@ public class UpdateWallet extends TimerTask {
 				if (checkUpdateBootstrap()) {
 					Process process;
 					String linuxInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
-						getDEBFileName(getLatestVersion()));
+							getDEBFileName(getLatestVersion()));
 					String windowsInstallExec = String.format("msiexec /i %s%s",
-						windowsPath.replace("/", "\\"), getMSIFileName(getLatestVersion()));
+							windowsPath.replace("/", "\\"), getMSIFileName(getLatestVersion()));
 					System.out.println(linuxInstallExec);
 					String macInstallExec = macPath + getDMGFileName(getLatestVersion());
 					try {
 						if (OS.CURRENT == OS.LINUX) {
+							Process t = Runtime.getRuntime().exec("cat /etc/os-release");
+							t.waitFor();
+							BufferedReader stdInput = new BufferedReader(
+									new InputStreamReader(t.getInputStream()));
+
+							BufferedReader stdError = new BufferedReader(
+									new InputStreamReader(t.getErrorStream()));
+
+							// Read the output from the command
+							System.out.println("Here is the standard output of the command:\n");
+							String s = null;
+							while ((s = stdInput.readLine()) != null) {
+								// System.out.println(s);
+								if (getFirstKeywordMatch(s, "ID_LIKE") != null) {
+									System.out.println(getFirstKeywordMatch(s,
+										"ID_LIKE"));
+								}
+							}
+
+							// Read any errors from the attempted command
+							System.out.println("Here is the standard error of the"
+								+ " command (if any):\n");
+							while ((s = stdError.readLine()) != null) {
+								System.out.println(s);
+							}
 							System.out.println("downloading linux installer");
 							try {
 								Process p = Runtime.getRuntime().exec(linuxInstallExec);
 								p.waitFor();
-								//process = new ProcessBuilder(linuxInstallExec).start();
-								//process.waitFor();
+
+								// process = new ProcessBuilder(linuxInstallExec).start();
+								// process.waitFor();
 							} catch (Exception e) {
 								System.out.println(e.getMessage());
 							}
-							//Runtime.getRuntime().exec(linuxInstallExec);
+							// Runtime.getRuntime().exec(linuxInstallExec);
 							System.out.println("Did it start??");
 						} else if (OS.CURRENT == OS.MAC) {
 							try {
-								Process p = Runtime.getRuntime().exec(new String[]{"open", macInstallExec});
+								Process p = Runtime.getRuntime().exec(new String[] {"open",
+									macInstallExec});
 								int exitCode = p.waitFor();
 								System.out.println("exitCode " + exitCode);
 							} catch (Exception e) {
-								//TODO: handle exception
+								// TODO: handle exception
 								System.out.println("cant open dmg: " + e.getMessage());
 							}
 						} else if (OS.CURRENT == OS.WINDOWS) {
@@ -308,9 +343,6 @@ public class UpdateWallet extends TimerTask {
 						System.out.println("run the app agien on linux");
 						Runtime.getRuntime().exec(linuxExec);
 						System.out.println("Did it start??");
-					} else if (OS.CURRENT == OS.MAC) {
-						//Runtime.getRuntime().exec(macExec);
-						// user has to manually install on OSX so we cannot do this
 					} else if (OS.CURRENT == OS.WINDOWS) {
 						Runtime.getRuntime().exec(windowsExec);
 					}
@@ -330,6 +362,18 @@ public class UpdateWallet extends TimerTask {
 			}
 		}
 		System.exit(0);
+	}
+
+	private static String getFirstKeywordMatch(String s, String keyword) {
+		String[] parts = s.split("=");
+
+		for (String part : parts) {
+			if (part.contains(keyword)) {
+				return s.split("=")[1];
+			}
+		}
+
+		return null;
 	}
 
 	private void downloadFile(String url, String path, String fileName) {
@@ -370,6 +414,6 @@ public class UpdateWallet extends TimerTask {
 
 	private String getDownloadURL(String version, String fileName) {
 		return String.format("https://github.com/unigrid-project/janus-java/releases/download/v%s/%s",
-			version, fileName);
+				version, fileName);
 	}
 }
