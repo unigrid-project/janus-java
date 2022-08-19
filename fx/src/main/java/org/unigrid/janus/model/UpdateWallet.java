@@ -314,7 +314,6 @@ public class UpdateWallet extends TimerTask {
 									System.out.println(e.getMessage());
 								}
 							}
-							
 							System.out.println("Did it start??");
 						} else if (OS.CURRENT == OS.MAC) {
 							try {

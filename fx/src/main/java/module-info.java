@@ -53,9 +53,10 @@ module fx {
 	opens org.unigrid.janus.controller to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j, javafx.graphics;
 	opens org.unigrid.janus.view to weld.core.impl;
 	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls;
-	opens org.unigrid.janus.model to weld.core.impl, javafx.base , jakarta.xml.bind;
+	opens org.unigrid.janus.model to weld.core.impl, javafx.base , jakarta.xml.bind, jakarta.ws.rs;
 	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson;
 	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2;
+	opens org.unigrid.janus.model.entity to jakarta.xml.bind;
 
 	exports org.unigrid.janus;
 	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics;
