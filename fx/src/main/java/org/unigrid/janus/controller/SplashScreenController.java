@@ -20,7 +20,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
@@ -36,14 +36,17 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.SplashModel;
 import org.unigrid.janus.model.cdi.Eager;
+import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.WindowService;
 
 @Eager
 @ApplicationScoped
 public class SplashScreenController implements Initializable, PropertyChangeListener {
 	private WindowService window;
+	private static DebugService debug = new DebugService();
 	private float ind = 0.6f;
 
 	private SplashModel splashModel = new SplashModel();
@@ -117,8 +120,12 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	public void onShowDebug(MouseEvent event) throws Exception {
 		//System.out.println(window.getStage().getHeight());
 		//System.out.println(splashGrid.getCellBounds(0, 6));
-
+		File debugLog = DataDirectory.getDebugLog();
 		try {
+			// Open debug.log file
+			window.getHostServices().showDocument(debugLog.getAbsolutePath());
+			// disable showing log on load as it runs very slow with large debugs
+			/*
 			if (!splashModel.getDebug()) {
 				window.getSplashScreen().startMonitor();
 				debugTxt.setVisible(true);
@@ -133,9 +140,9 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 				window.getStage().setHeight(220);
 				bugTooltip.setText("Show debug log");
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			 */
+		} catch (Exception e) {
+			debug.print(e.getMessage(), SplashScreenController.class.getSimpleName());
 		}
 	}
 }

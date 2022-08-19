@@ -62,16 +62,18 @@ public class UpdateWallet extends TimerTask {
 
 	private final String linuxPath = System.getProperty("user.home").concat("/.unigrid/dependencies/temp/");
 	private final String macPath = System.getProperty("user.home")
-		.concat("/Library/Application\\ Support/UNIGRID/dependencies/temp/");
+			.concat("/Library/Application\\ Support/UNIGRID/dependencies/temp/");
 	private final String windowsPath = System.getProperty("user.home")
-		.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
+			.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
 
 	private static DebugService debug = new DebugService();
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
-	//private static PollingService polling = new PollingService();
+	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
-	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][]{
-		{OS.LINUX, "config-linux.xml"}, {OS.WINDOWS, "config-windows.xml"}, {OS.MAC, "config-mac.xml"}
+	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
+		{OS.LINUX, "config-linux.xml"},
+		{OS.WINDOWS, "config-windows.xml"},
+		{OS.MAC, "config-mac.xml"}
 	});
 
 	public enum UpdateState {
@@ -141,12 +143,12 @@ public class UpdateWallet extends TimerTask {
 					if (SystemUtils.IS_OS_MAC_OSX) {
 						Notifications.create().title("Update Ready")
 							.text("New launcher update ready \n"
-								+ "Pleas press the update button!")
+								+ "Please press the update button!")
 							.position(Pos.TOP_RIGHT).showInformation();
 					} else {
 						Notifications.create().title("Update Ready")
 							.text("New launcher update ready \n"
-								+ "Pleas press the update button!")
+								+ "Please press the update button!")
 							.showInformation();
 					}
 				}
@@ -171,7 +173,8 @@ public class UpdateWallet extends TimerTask {
 			});
 		} else {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
-			//debug.print("user.dir: " + System.getProperty("user.dir"), UpdateWallet.class.getSimpleName());
+			// debug.print("user.dir: " + System.getProperty("user.dir"),
+			// UpdateWallet.class.getSimpleName());
 		}
 
 	}
@@ -210,7 +213,6 @@ public class UpdateWallet extends TimerTask {
 
 	private Boolean checkUpdateBootstrap() {
 		String delimiter = ".";
-
 		Properties myProperties = new Properties();
 
 		try {
@@ -276,7 +278,7 @@ public class UpdateWallet extends TimerTask {
 	}
 
 	public void doUpdate() {
-		Object obj = new Object();
+		final Object obj = new Object();
 		System.out.println(bootstrapUpdate);
 		Thread t = new Thread(new Runnable() {
 			@Override
@@ -284,21 +286,35 @@ public class UpdateWallet extends TimerTask {
 				boolean isBootstrapUpdate = false;
 				if (checkUpdateBootstrap()) {
 					Process process;
-					String linuxInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
+					//TODO: Add RPM install line
+					String linuxDebInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
 						getDEBFileName(getLatestVersion()));
+					String linuxRpmInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
+						getRPMFileName(getLatestVersion()));
 					String windowsInstallExec = String.format("msiexec /i %s%s",
 						windowsPath.replace("/", "\\"), getMSIFileName(getLatestVersion()));
-					System.out.println(linuxInstallExec);
+					System.out.println(linuxDebInstallExec);
 					String macInstallExec = macPath + getDMGFileName(getLatestVersion());
 					try {
 						if (OS.CURRENT == OS.LINUX) {
-							System.out.println("downloading linux installer");
-							try {
-								Process p = Runtime.getRuntime().exec(linuxInstallExec);
-								p.waitFor();
-							} catch (Exception e) {
-								System.out.println(e.getMessage());
+							if (getLinuxIDLike().equals("debian")) {
+								try {
+									Process p = Runtime.getRuntime()
+										.exec(linuxDebInstallExec);
+									p.waitFor();
+								} catch (Exception e) {
+									System.out.println(e.getMessage());
+								}
+							} else {
+								try {
+									Process p = Runtime.getRuntime()
+										.exec(linuxRpmInstallExec);
+									p.waitFor();
+								} catch (Exception e) {
+									System.out.println(e.getMessage());
+								}
 							}
+							
 							System.out.println("Did it start??");
 						} else if (OS.CURRENT == OS.MAC) {
 							try {
@@ -357,6 +373,18 @@ public class UpdateWallet extends TimerTask {
 			}
 		}
 		System.exit(0);
+	}
+
+	private static String getFirstKeywordMatch(String s, String keyword) {
+		String[] parts = s.split("=");
+
+		for (String part : parts) {
+			if (part.contains(keyword)) {
+				return s.split("=")[1];
+			}
+		}
+
+		return null;
 	}
 
 	private void downloadFile(String url, String path, String fileName) {
