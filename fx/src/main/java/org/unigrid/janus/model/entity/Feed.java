@@ -12,26 +12,35 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model.rpc;
+package org.unigrid.janus.model.entity;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import jakarta.json.bind.JsonbConfig;
-import jakarta.json.bind.config.PropertyNamingStrategy;
-import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import lombok.Data;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
-public class JsonConfiguration implements ContextResolver<Jsonb> {
-	private JsonbConfig getJsonbConfig() {
-		return new JsonbConfig().withPropertyNamingStrategy(
-			PropertyNamingStrategy.LOWER_CASE_WITH_DASHES
-			//PropertyNamingStrategy.LOWER_CASE_WITH_UNDERSCORES
-		);
-	}
+@Data
+//@EqualsAndHashCode(callSuper = false)
+@XmlRootElement(namespace = "http://www.w3.org/2005/Atom")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Feed {
 
-	@Override
-	public Jsonb getContext(Class<?> type) {
-		return JsonbBuilder.newBuilder().withConfig(getJsonbConfig()).build();
+	@XmlElement
+	private String id;
+
+	//@XmlElementWrapper
+	@XmlElement
+	private List<Entry> entry;
+
+	@Data
+	@XmlAccessorType(XmlAccessType.FIELD)
+	public static class Entry {
+
+		@XmlElement
+		private String id;
 	}
 }
