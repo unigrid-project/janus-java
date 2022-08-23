@@ -31,7 +31,7 @@
             </FlowPane>
             <FlowPane nodeOrientation="LEFT_TO_RIGHT" prefHeight="50.0" prefWidth="450.0" VBox.vgrow="ALWAYS">
                <children>
-                  <Button mnemonicParsing="false" onMouseClicked="#onGenerateAddressClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Generate">
+                  <Button fx:id="btnGenerateAddress" mnemonicParsing="false" onMouseClicked="#onGenerateAddressClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Generate">
                      <font>
                         <Font size="14.0" />
                      </font>

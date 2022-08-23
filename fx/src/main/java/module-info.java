@@ -21,7 +21,6 @@ module fx {
 	requires javafx.fxml;
 	requires org.apache.commons.lang3;
 	requires org.apache.commons.configuration2;
-	requires java.annotation;
 	requires java.desktop;
 	requires java.prefs;
 	requires java.naming;
@@ -43,6 +42,12 @@ module fx {
 	requires org.controlsfx.controls;
 	requires static org.update4j;
 	requires org.apache.commons.io;
+	requires org.kordamp.ikonli.fontawesome5;
+	requires weld.environment.common;
+	requires jersey.common;
+	requires org.slf4j;
+	requires ch.qos.logback.core;
+	requires ch.qos.logback.classic;
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
