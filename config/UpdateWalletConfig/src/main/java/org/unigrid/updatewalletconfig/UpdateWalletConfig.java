@@ -46,9 +46,9 @@ public class UpdateWalletConfig {
 		String homeDir = System.getProperty("user.home");
 		String dir = configLocation;
 		String fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar";
-		String linuxDaemon = "unigrid-2.0.2-x86_64-linux-gnu.tar.gz";
-		String windowsDaemon = "unigrid-2.0.2-win64.zip";
-		String osxDaemon = "unigrid-2.0.2-osx64.tar.gz";
+		String linuxDaemon = "unigrid-2.9.2-x86_64-linux-gnu.tar.gz";
+		String windowsDaemon = "unigrid-2.9.2-win64.zip";
+		String osxDaemon = "unigrid-2.9.2-osx64.tar.gz";
 
 		Configuration config = Configuration.builder()
 			//.baseUri("https://drive.google.com/file/d/1IhV5soH9Kvt7zZjlBkWAikLyyv1DY6Ay/view?usp=sharing")
@@ -132,6 +132,8 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("com.sun.xml.bind","jaxb-core","3.0.0")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-impl-3.0.0.jar")
 				.uri(mavenUrl("com.sun.xml.bind","jaxb-impl","3.0.0")).modulepath())
+			/*.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-runtime-3.0.0.jar")
+				.uri(mavenUrl("org.glassfish.jaxb","jaxb-runtime","3.0.0")).modulepath())*/
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jboss-classfilewriter-1.2.5.Final.jar")
 				.uri(mavenUrl("org.jboss.classfilewriter","jboss-classfilewriter","1.2.5.Final")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jboss-logging-3.4.3.Final.jar")
@@ -155,7 +157,7 @@ public class UpdateWalletConfig {
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jsch-0.1.55.jar")
 				.uri(mavenUrl("com.jcraft","jsch","0.1.55")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-path-2.4.0.jar")
-				.uri(mavenUrl("com.jayway,jsonpath","json-path","2.4.0")).modulepath())
+				.uri(mavenUrl("com.jayway.jsonpath","json-path","2.4.0")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-smart-2.3.jar")
 				.uri(mavenUrl("net.minidev","json-smart","2.3")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/lombok-1.18.24.jar")
@@ -189,6 +191,7 @@ public class UpdateWalletConfig {
 		
 		try (Writer out = Files.newBufferedWriter(Paths.get(dir + "/config-linux.xml"))){
 			config.write(out);
+			System.out.println(dir);
 		}
 		
 		Configuration configWindows = Configuration.builder()
@@ -203,8 +206,6 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("net.minidev","accessors-smart","1.2")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/aopalliance-repackaged-3.0.3.jar")
 				.uri(mavenUrl("org.glassfish.hk2.external","aopalliance-repackaged","3.0.3")).modulepath())
-			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/asm-5.0.4.jar")
-				.uri(mavenUrl("org.ow2.asm","asm","5.0.4")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/commons-beanutils-1.9.4.jar")
 				.uri(mavenUrl("commons-beanutils","commons-beanutils","1.9.4")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/commons-collections-3.2.2.jar")
@@ -273,6 +274,8 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("com.sun.xml.bind","jaxb-core","3.0.0")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-impl-3.0.0.jar")
 				.uri(mavenUrl("com.sun.xml.bind","jaxb-impl","3.0.0")).modulepath())
+			/*.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-runtime-3.0.0.jar")
+				.uri(mavenUrl("org.glassfish.jaxb","jaxb-runtime","3.0.0")).modulepath())*/
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jboss-classfilewriter-1.2.5.Final.jar")
 				.uri(mavenUrl("org.jboss.classfilewriter","jboss-classfilewriter","1.2.5.Final")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jboss-logging-3.4.3.Final.jar")
@@ -296,7 +299,7 @@ public class UpdateWalletConfig {
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jsch-0.1.55.jar")
 				.uri(mavenUrl("com.jcraft","jsch","0.1.55")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-path-2.4.0.jar")
-				.uri(mavenUrl("com.jayway,jsonpath","json-path","2.4.0")).modulepath())
+				.uri(mavenUrl("com.jayway.jsonpath","json-path","2.4.0")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-smart-2.3.jar")
 				.uri(mavenUrl("net.minidev","json-smart","2.3")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/lombok-1.18.24.jar")
@@ -344,8 +347,6 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("net.minidev","accessors-smart","1.2")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/aopalliance-repackaged-3.0.3.jar")
 				.uri(mavenUrl("org.glassfish.hk2.external","aopalliance-repackaged","3.0.3")).modulepath())
-			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/asm-5.0.4.jar")
-				.uri(mavenUrl("org.ow2.asm","asm","5.0.4")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/commons-beanutils-1.9.4.jar")
 				.uri(mavenUrl("commons-beanutils","commons-beanutils","1.9.4")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/commons-collections-3.2.2.jar")
@@ -414,6 +415,8 @@ public class UpdateWalletConfig {
 				.uri(mavenUrl("com.sun.xml.bind","jaxb-core","3.0.0")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-impl-3.0.0.jar")
 				.uri(mavenUrl("com.sun.xml.bind","jaxb-impl","3.0.0")).modulepath())
+			/*.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-runtime-3.0.0.jar")
+				.uri(mavenUrl("org.glassfish.jaxb","jaxb-runtime","3.0.0")).modulepath())*/
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jboss-classfilewriter-1.2.5.Final.jar")
 				.uri(mavenUrl("org.jboss.classfilewriter","jboss-classfilewriter","1.2.5.Final")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jboss-logging-3.4.3.Final.jar")
@@ -437,7 +440,7 @@ public class UpdateWalletConfig {
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jsch-0.1.55.jar")
 				.uri(mavenUrl("com.jcraft","jsch","0.1.55")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-path-2.4.0.jar")
-				.uri(mavenUrl("com.jayway,jsonpath","json-path","2.4.0")).modulepath())
+				.uri(mavenUrl("com.jayway.jsonpath","json-path","2.4.0")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/json-smart-2.3.jar")
 				.uri(mavenUrl("net.minidev","json-smart","2.3")).modulepath())
 			.file(FileMetadata.readFrom("../../fx/target/jlink/cp/lombok-1.18.24.jar")
