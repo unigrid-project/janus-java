@@ -28,8 +28,8 @@ import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Logger;
+//import org.slf4j.LoggerFactory;
+//import ch.qos.logback.classic.Logger;
 import org.testfx.api.FxRobot;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit5.ApplicationAdapter;
@@ -41,14 +41,12 @@ public class FXApplicationTest extends FxRobot implements ApplicationFixture {
 	public static void launch(Class<? extends Application> appClass, String... appArgs) throws Exception {
 		FxToolkit.registerPrimaryStage();
 		FxToolkit.setupApplication(appClass, appArgs);
-		headless();
 	}
 
 	@BeforeAll
 	public static void internalBeforeAll() {
-		Logger log = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		log.setLevel(ch.qos.logback.classic.Level.WARN);
-		headless();
+		//Logger log = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		//log.setLevel(ch.qos.logback.classic.Level.WARN);
 	}
 
 	@BeforeEach
@@ -106,6 +104,7 @@ public class FXApplicationTest extends FxRobot implements ApplicationFixture {
 	 * prism.text = t2k<br>
 	 */
 	public static void headless(Map<String, String> map) {
+		headless();
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			System.setProperty(entry.getKey(), entry.getValue());
 

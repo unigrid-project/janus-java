@@ -23,7 +23,6 @@ import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-//import org.junit.jupiter.api.BeforeAll;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.control.TableViewMatchers.hasTableCell;
 import static org.testfx.matcher.control.TextMatchers.hasText;
@@ -52,11 +51,6 @@ public class AddressControllerTest extends FXApplicationTest {
 
 	@Inject
 	private RPCService rpc;
-
-	/*@BeforeAll
-	public static void configuration() {
-		removeHeadless(); // default headless
-	}*/
 
 	@Test
 	public void testGenerateAddress() {
