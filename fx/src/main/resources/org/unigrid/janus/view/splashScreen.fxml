@@ -75,7 +75,7 @@
                               <Insets bottom="10.0" left="10.0" right="10.0" />
                            </GridPane.margin>
                         </TextArea>
-                        <Button mnemonicParsing="false" onMouseClicked="#onShowDebug" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="5" GridPane.valignment="CENTER">
+                        <Button mnemonicParsing="false" onMouseClicked="#onShowDebug" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;" visible="false" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="5" GridPane.valignment="CENTER">
                            <graphic>
                               <FontIcon fx:id="coinsBtn" iconColor="WHITE" iconLiteral="fas-bug" iconSize="15" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
                            </graphic>
