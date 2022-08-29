@@ -45,6 +45,7 @@ module fx {
 	requires static org.update4j;
 	requires org.apache.commons.io;
 	requires jersey.media.jaxb;
+	requires java.xml;
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
