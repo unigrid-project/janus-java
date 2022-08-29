@@ -124,11 +124,6 @@
             <version>3.0.5</version>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-jaxb</artifactId>
-            <version>3.0.5</version>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se-core</artifactId>
             <version>4.0.3.Final</version>
@@ -176,7 +171,7 @@
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-jaxb</artifactId>
-            <version>3.0.6</version>
+            <version>3.0.5</version>
         </dependency>
         <!-- NEED TO ADD TO UpdateWalletConfig -->
     </dependencies>
