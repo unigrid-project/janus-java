@@ -226,7 +226,8 @@ public class UpdateWallet extends TimerTask {
 		String filteredVer = fullVer.replace("-SNAPSHOT", "");
 
 		if (getVersionNumber(filteredVer, 0) < getVersionNumber(getLatestVersion(), 0)
-			|| getVersionNumber(filteredVer, 2) < getVersionNumber(getLatestVersion(), 0)) {
+			|| getVersionNumber(filteredVer, 2) < getVersionNumber(getLatestVersion(), 0)
+			|| getLatestVersion().equals("")) {
 			bootstrapUpdate = false;
 			System.out.println("The latest version of the bootstrap is the same as the one we have");
 		} else {
@@ -417,6 +418,9 @@ public class UpdateWallet extends TimerTask {
 			return "";
 		}
 		String githubEntry = githubJson.getEntry().get(0).getId();
+		if (githubEntry.equals("")) {
+			return "";
+		}
 		githubEntry = githubEntry.split("/")[2].substring(1);
 		System.out.println("Github tag for this version: " + githubEntry);
 		return githubEntry;
