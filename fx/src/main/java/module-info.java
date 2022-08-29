@@ -43,6 +43,8 @@ module fx {
 	requires org.controlsfx.controls;
 	requires static org.update4j;
 	requires org.apache.commons.io;
+	requires jersey.media.jaxb;
+	requires java.xml;
 	requires org.kordamp.ikonli.fontawesome5;
 	requires weld.environment.common;
 	requires jersey.common;
@@ -54,17 +56,23 @@ module fx {
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
 	
 	opens org.unigrid.janus to weld.core.impl, org.update4j;
-	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics, weld.core.impl;
-	opens org.unigrid.janus.controller to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j, javafx.graphics;
+	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics,
+		weld.core.impl;
+	opens org.unigrid.janus.controller to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j,
+		javafx.graphics;
 	opens org.unigrid.janus.view to weld.core.impl;
 	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls;
-	opens org.unigrid.janus.model to weld.core.impl, javafx.base;
+	opens org.unigrid.janus.model to weld.core.impl, javafx.base , jakarta.xml.bind, jakarta.ws.rs, com.fasterxml.jackson.databind,
+		jersey.media.jaxb;
 	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson;
 	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2;
+	opens org.unigrid.janus.model.entity to jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
 
 	exports org.unigrid.janus;
-	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics;
-	exports org.unigrid.janus.controller to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics;
+	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml, javafx.base,
+		javafx.controls, org.update4j, javafx.graphics;
+	exports org.unigrid.janus.controller to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls,
+		org.update4j, javafx.graphics;
 	exports org.unigrid.janus.model.event to weld.core.impl;
 	exports org.unigrid.janus.model.producer to weld.core.impl;
 	exports org.unigrid.janus.model.setup to weld.core.impl;
