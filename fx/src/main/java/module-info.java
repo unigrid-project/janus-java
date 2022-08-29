@@ -46,9 +46,9 @@ module fx {
 	requires org.kordamp.ikonli.fontawesome5;
 	requires weld.environment.common;
 	requires jersey.common;
-	//requires org.slf4j;
-	//requires ch.qos.logback.core;
-	//requires ch.qos.logback.classic;
+	requires org.slf4j;
+	requires ch.qos.logback.core;
+	requires ch.qos.logback.classic;
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;

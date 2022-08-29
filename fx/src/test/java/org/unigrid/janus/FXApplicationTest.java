@@ -28,8 +28,8 @@ import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
-//import org.slf4j.LoggerFactory;
-//import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.Logger;
 import org.testfx.api.FxRobot;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit5.ApplicationAdapter;
@@ -45,8 +45,8 @@ public class FXApplicationTest extends FxRobot implements ApplicationFixture {
 
 	@BeforeAll
 	public static void internalBeforeAll() {
-		//Logger log = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		//log.setLevel(ch.qos.logback.classic.Level.WARN);
+		Logger log = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		log.setLevel(ch.qos.logback.classic.Level.WARN);
 	}
 
 	@BeforeEach
