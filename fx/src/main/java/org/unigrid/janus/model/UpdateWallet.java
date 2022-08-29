@@ -134,7 +134,9 @@ public class UpdateWallet extends TimerTask {
 		if (pcs == null) {
 			pcs = new PropertyChangeSupport(this);
 		}
+
 		/*if (checkUpdateBootstrap()) {
+
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
 			Platform.runLater(new Runnable() {
@@ -154,8 +156,11 @@ public class UpdateWallet extends TimerTask {
 				}
 			});
 
+
 		} else */
 		if (checkUpdate()) {
+
+		} else if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
 			Platform.runLater(new Runnable() {
