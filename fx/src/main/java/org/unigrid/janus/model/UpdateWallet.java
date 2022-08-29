@@ -134,7 +134,9 @@ public class UpdateWallet extends TimerTask {
 		if (pcs == null) {
 			pcs = new PropertyChangeSupport(this);
 		}
-		if (checkUpdateBootstrap()) {
+
+		/*if (checkUpdateBootstrap()) {
+
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
 			Platform.runLater(new Runnable() {
@@ -153,6 +155,10 @@ public class UpdateWallet extends TimerTask {
 					}
 				}
 			});
+
+
+		} else */
+		if (checkUpdate()) {
 
 		} else if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
@@ -171,12 +177,7 @@ public class UpdateWallet extends TimerTask {
 					}
 				}
 			});
-		} else {
-			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
-			// debug.print("user.dir: " + System.getProperty("user.dir"),
-			// UpdateWallet.class.getSimpleName());
 		}
-
 	}
 
 	private Boolean checkUpdate() {
@@ -207,7 +208,7 @@ public class UpdateWallet extends TimerTask {
 		} catch (IOException e) {
 			update = false;
 		}
-
+		System.out.println("Is thier an update ready = " + update);
 		return update;
 	}
 
@@ -226,7 +227,8 @@ public class UpdateWallet extends TimerTask {
 		String filteredVer = fullVer.replace("-SNAPSHOT", "");
 
 		if (getVersionNumber(filteredVer, 0) < getVersionNumber(getLatestVersion(), 0)
-			|| getVersionNumber(filteredVer, 2) < getVersionNumber(getLatestVersion(), 0)) {
+			|| getVersionNumber(filteredVer, 2) < getVersionNumber(getLatestVersion(), 0)
+			|| getLatestVersion().equals("")) {
 			bootstrapUpdate = false;
 			System.out.println("The latest version of the bootstrap is the same as the one we have");
 		} else {
@@ -284,7 +286,7 @@ public class UpdateWallet extends TimerTask {
 			@Override
 			public void run() {
 				boolean isBootstrapUpdate = false;
-				if (checkUpdateBootstrap()) {
+				if (false) { //(checkUpdateBootstrap()) {
 					Process process;
 					//TODO: Add RPM install line
 					String linuxDebInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
@@ -417,6 +419,9 @@ public class UpdateWallet extends TimerTask {
 			return "";
 		}
 		String githubEntry = githubJson.getEntry().get(0).getId();
+		if (githubEntry.equals("") || githubEntry == null) {
+			return "";
+		}
 		githubEntry = githubEntry.split("/")[2].substring(1);
 		System.out.println("Github tag for this version: " + githubEntry);
 		return githubEntry;
