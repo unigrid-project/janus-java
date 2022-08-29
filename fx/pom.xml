@@ -263,6 +263,7 @@
                 <configuration>
                     <argLine>
                         -javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar
+                        -Dcoverage-classes=loaded
                         --add-opens fx/org.unigrid.janus.controller=ALL-UNNAMED
                         --add-opens fx/org.unigrid.janus.controller.component=ALL-UNNAMED
                         --add-opens fx/org.unigrid.janus.model=ALL-UNNAMED
