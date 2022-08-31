@@ -71,9 +71,9 @@ public class UpdateWallet extends TimerTask {
 	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
 	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
-		{OS.LINUX, "config-linux.xml"},
-		{OS.WINDOWS, "config-windows.xml"},
-		{OS.MAC, "config-mac.xml"}
+		{OS.LINUX, ConfigUrl.getLinuxUrl()},
+		{OS.WINDOWS, ConfigUrl.getWindowsUrl()},
+		{OS.MAC, ConfigUrl.getMacUrl()}
 	});
 
 	public enum UpdateState {
@@ -182,7 +182,8 @@ public class UpdateWallet extends TimerTask {
 		Configuration updateConfig = null;
 
 		try {
-			configUrl = new URL(String.format(BASE_URL, OS_CONFIG.get(os)));
+			configUrl = new URL(OS_CONFIG.get(os).toString());
+			System.out.println(configUrl);
 		} catch (MalformedURLException mle) {
 			System.out.println("Unable to find url to config.xml");
 			System.err.println(mle.getMessage());
