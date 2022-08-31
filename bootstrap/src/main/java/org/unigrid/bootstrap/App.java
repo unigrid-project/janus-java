@@ -13,6 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.bootstrap;
 
 import javafx.application.Application;
@@ -37,17 +38,21 @@ import javafx.stage.StageStyle;
 //import ch.qos.logback.classic.Logger;
 //import org.slf4j.LoggerFactory;
 
+
 public class App extends Application implements Delegate {
 
 	private static Scene scene;
 	private static FXMLLoader loader;
 
 	@Override
-	public void start(Stage stage) throws IOException {
-
+	public void start(Stage stage) throws IOException, Exception {
+		headless();
 		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		//root.setLevel(Level.ALL);
-
+		HeadlessApplication head = new HeadlessApplication();
+		Application test = head.assignMonoclePlatform();
+		test.start(stage);
+		System.out.println("TEST: " + test.toString());
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
 
@@ -104,6 +109,14 @@ public class App extends Application implements Delegate {
 	@Override
 	public void main(List<String> list) throws Throwable {
 		launch();
+	}
+
+	public static void headless() {
+		System.setProperty("java.awt.headless", "true");
+		System.setProperty("testfx.robot", "glass");
+		System.setProperty("testfx.headless", "true");
+		System.setProperty("prism.order", "sw");
+		System.setProperty("prism.text", "t2k");
 	}
 
 }

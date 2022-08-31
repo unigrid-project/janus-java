@@ -18,27 +18,45 @@
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
-			<version>17-ea+7</version>
+			<version>17-ea+18</version>
+			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-graphics</artifactId>
-			<version>17-ea+7</version>
+			<version>17-ea+18</version>
+			<classifier>linux-monocle</classifier>
+			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-fxml</artifactId>
-			<version>17-ea+7</version>
+			<version>17-ea+18</version>
+			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-media</artifactId>
-			<version>17-ea+7</version>
+			<version>17-ea+18</version>
+			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.update4j</groupId>
 			<artifactId>update4j</artifactId>
 			<version>1.5.9</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.testfx</groupId>
+			<artifactId>testfx-junit5</artifactId>
+			<version>4.0.16-alpha</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.testfx</groupId>
+			<artifactId>testfx-core</artifactId>
+			<version>4.0.16-alpha</version>
+			<type>jar</type>
 		</dependency>
 	</dependencies>
 	<build>
@@ -54,6 +72,16 @@
 				<configuration>
 					<mainClass>org.unigrid.bootstrap.App</mainClass>
 					<commandlineArgs>--ADD-OPENS=org.update4j</commandlineArgs>
+					<options>			
+						<option>--add-opens</option>
+						<option>javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</option>
+						<option>--add-exports</option>
+						<option>javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</option>
+						<option>--add-exports</option>
+						<option>javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</option>
+						<option>--add-exports</option>
+						<option>javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED</option>
+					</options>
 				</configuration>
 				<executions>
 					<execution>

@@ -37,6 +37,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -199,6 +200,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	private void launch() {
 		launch.setDisable(false);
+		launch.fireEvent(new ActionEvent());
 	}
 
 	private void untarDaemonLinux() {
