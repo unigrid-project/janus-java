@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-        <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.unigrid.janus</groupId>
-	<artifactId>parent</artifactId>  	
+	<artifactId>parent</artifactId>
 	<version>1.0.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Unigrid Janus Parent</name>
@@ -17,8 +17,8 @@
 	</modules>
 	<dependencyManagement>
 		<dependencies>
-			<dependency>	
-				<groupId>org.projectlombok</groupId>	
+			<dependency>
+				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
 				<version>1.18.24</version>
 			</dependency>
@@ -37,7 +37,7 @@
 		</dependencies>
 	</dependencyManagement>
 	<build>
-		<pluginManagement>	
+		<pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -49,33 +49,34 @@
 						<release>17</release>
 						<debug>true</debug>
 						<annotationProcessorPaths>
-							<path>	
-								<groupId>org.projectlombok</groupId>		
+							<path>
+								<groupId>org.projectlombok</groupId>
 								<artifactId>lombok</artifactId>
 								<version>1.18.24</version>
 							</path>
 						</annotationProcessorPaths>
 					</configuration>
 				</plugin>
-				<plugin>	
-					<!-- 3.2.0+ of the resources plugin is supposed to retain file permissions -->	
+				<plugin>
+					<!-- 3.2.0+ of the resources plugin is supposed to retain file permissions -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>3.2.0</version>
 				</plugin>
-				<plugin>	
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
 					<version>3.1.2</version>
 					<configuration>
 						<configLocation>checkstyle.xml</configLocation>
+						<includeTestSourceDirectory>true</includeTestSourceDirectory>
 						<excludes>**/module-info.java</excludes>
 					</configuration>
 					<executions>
 						<execution>
-                                                        <phase>process-sources</phase>
+							<phase>process-sources</phase>
 							<goals>
-								<goal>check</goal>	
+								<goal>check</goal>
 							</goals>
 						</execution>
 					</executions>
@@ -88,7 +89,7 @@
 					</dependencies>
 				</plugin>
 				<plugin>	
-					<groupId>pl.gdela</groupId>	
+					<groupId>pl.gdela</groupId>
 					<artifactId>socomo-maven</artifactId>
 					<version>2.3.1</version>
 					<dependencies>
@@ -100,8 +101,8 @@
 					</dependencies>
 					<executions>
 						<execution>
-							<goals>			
-								<goal>analyze</goal>	
+							<goals>
+								<goal>analyze</goal>
 							</goals>
 						</execution>
 					</executions>
@@ -109,7 +110,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.1</version>
+					<version>2.22.2</version>
 					<dependencies>
 						<dependency>
 							<groupId>org.ow2.asm</groupId>
@@ -121,12 +122,12 @@
 			</plugins>
 		</pluginManagement>
 		<resources>
-			<resource>		
-				<directory>src/main/resources-filtered</directory>	
+			<resource>
+				<directory>src/main/resources-filtered</directory>
 				<filtering>true</filtering>
 			</resource>
-			<resource>	
-				<directory>src/main/resources</directory>	
+			<resource>
+				<directory>src/main/resources</directory>
 				<filtering>false</filtering>
 			</resource>
 		</resources>

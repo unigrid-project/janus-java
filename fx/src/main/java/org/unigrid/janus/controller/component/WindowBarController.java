@@ -65,6 +65,9 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@Inject private PollingService pollingService;
 	@Inject private UpdateWallet update;
 
+	private int testTimeInterval = 10000;
+	private int liveTimeInterval = 21600000;
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		//TODO: Remove when FX integration is done
@@ -82,7 +85,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		t.install(updateButton, t);
 
 		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
-		pollingService.pollForUpdate(10000);
+		pollingService.pollForUpdate(liveTimeInterval);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
