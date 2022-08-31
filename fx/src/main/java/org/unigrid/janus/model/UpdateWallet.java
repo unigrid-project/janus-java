@@ -62,18 +62,25 @@ public class UpdateWallet extends TimerTask {
 
 	private final String linuxPath = System.getProperty("user.home").concat("/.unigrid/dependencies/temp/");
 	private final String macPath = System.getProperty("user.home")
-			.concat("/Library/Application\\ Support/UNIGRID/dependencies/temp/");
+		.concat("/Library/Application\\ Support/UNIGRID/dependencies/temp/");
 	private final String windowsPath = System.getProperty("user.home")
-			.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
+		.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
 
 	private static DebugService debug = new DebugService();
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
 	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
+<<<<<<< HEAD
 	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
 		{OS.LINUX, ConfigUrl.getLinuxUrl()},
 		{OS.WINDOWS, ConfigUrl.getWindowsUrl()},
 		{OS.MAC, ConfigUrl.getMacUrl()}
+=======
+	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][]{
+		{OS.LINUX, "config-linux.xml"},
+		{OS.WINDOWS, "config-windows.xml"},
+		{OS.MAC, "config-mac.xml"}
+>>>>>>> master
 	});
 
 	public enum UpdateState {
@@ -134,7 +141,13 @@ public class UpdateWallet extends TimerTask {
 		if (pcs == null) {
 			pcs = new PropertyChangeSupport(this);
 		}
+<<<<<<< HEAD
 		/*if (checkUpdateBootstrap()) {
+=======
+
+		/*if (checkUpdateBootstrap()) {
+
+>>>>>>> master
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
 			Platform.runLater(new Runnable() {
@@ -153,7 +166,10 @@ public class UpdateWallet extends TimerTask {
 					}
 				}
 			});
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 		} else */
 		if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
