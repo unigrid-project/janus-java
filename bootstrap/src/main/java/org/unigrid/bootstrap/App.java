@@ -28,7 +28,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.update4j.Configuration;
 import org.update4j.service.Delegate;
 import org.update4j.OS;
@@ -41,6 +43,7 @@ public class App extends Application implements Delegate {
 
 	private static Scene scene;
 	private static FXMLLoader loader;
+	private static Map<String, String> inputArgs = new HashMap<String, String>();
 
 	@Override
 	public void start(Stage stage) throws IOException {
@@ -53,15 +56,19 @@ public class App extends Application implements Delegate {
 
 		URL configUrl = null;
 		OS os = OS.CURRENT;
-		if (os.equals(OS.LINUX)) {
-			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-linux.xml");
-
-		} else if (os.equals(OS.WINDOWS)) {
-			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
-		} else if (os.equals(OS.MAC)) {
-			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-mac.xml");
+		if (!inputArgs.containsKey("URL")) {
+			if (os.equals(OS.LINUX)) {
+				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-linux.xml");
+			} else if (os.equals(OS.WINDOWS)) {
+				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
+			} else if (os.equals(OS.MAC)) {
+				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-mac.xml");
+			}
+		} else {
+			configUrl = new URL(inputArgs.get("URL"));
 		}
-		//configUrl = new URL("https://raw.githubusercontent.com/Fim-84/test/main/config.xml");
+		System.out.println(configUrl);
+
 		Configuration config = null;
 
 		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
@@ -70,7 +77,6 @@ public class App extends Application implements Delegate {
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"),"/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
-			//try ( Reader in = Files.newBufferedReader(Paths.get("/home/marcus/Documents/unigrid/config/UpdateWalletConfig/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
@@ -83,7 +89,7 @@ public class App extends Application implements Delegate {
 		stage.setResizable(false);
 		stage.setScene(scene);
 		stage.show();
-		UpdateView.getInstance().setConfig(config, stage);
+		UpdateView.getInstance().setConfig(config, stage, inputArgs);
 
 	}
 
@@ -98,6 +104,15 @@ public class App extends Application implements Delegate {
 	}
 
 	public static void main(String[] args) {
+		if (args != null) {
+			for (String arg : args) {
+				if (arg.contains("=")) {
+					String key = arg.split("=")[0];
+					String value = arg.split("=")[1];
+					inputArgs.put(key, value);
+				}
+			}	
+		}
 		launch();
 	}
 
