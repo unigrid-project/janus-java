@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>parent</artifactId>
 		<groupId>org.unigrid.janus</groupId>
-		<version>1.0.6-SNAPSHOT</version>
+		<version>1.0.5-SNAPSHOT</version>
 	</parent>
 	<groupId>org.unigrid</groupId>
 	<artifactId>bootstrap</artifactId>
@@ -54,7 +54,7 @@
 				<configuration>
 					<mainClass>org.unigrid.bootstrap.App</mainClass>
 					<commandlineArgs>--ADD-OPENS=org.update4j</commandlineArgs>
-                                        <commandlineArgs>URL=https://raw.githubusercontent.com/Fim-84/test/main/config-linux-test.xml</commandlineArgs>
+                    <commandlineArgs>URL=https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-linux-test.xml</commandlineArgs>
 				</configuration>
 				<executions>
 					<execution>

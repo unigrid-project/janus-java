@@ -63,7 +63,7 @@ public class UpdateWalletConfig {
 			if ((i%2) == 0) {
 				fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar";
 			} else {
-				fxJarUrl = "https://github.com/Fim-84/test/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar";
+				fxJarUrl = "https://github.com/unigrid-project/unigrid-update-testing/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar";
 			}
 
 			if (filePath[i].contains("linux")) {
