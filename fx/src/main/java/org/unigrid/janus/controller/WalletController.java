@@ -35,6 +35,7 @@ import java.math.BigDecimal;
 import java.beans.PropertyChangeEvent;
 import java.util.function.UnaryOperator;
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -46,6 +47,8 @@ import javafx.scene.control.TextFormatter.Change;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -275,6 +278,10 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	@FXML
 	private void onSendTransactionClicked(MouseEvent event) {
+		submit();
+	}
+
+	private void submit() {
 		if (amountToSend.getText().equals("") || amountToSend.getText() == null
 			|| Double.parseDouble(amountToSend.getText()) == 0) {
 
@@ -346,6 +353,10 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	@FXML
 	private void onCloseSendClicked(MouseEvent event) {
+		close();
+	}
+
+	private void close() {
 		sendTransactionPnl.setVisible(false);
 		resetText();
 	}
@@ -358,8 +369,18 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	}
 
 	@FXML
+	private void onKeyPressed(KeyEvent ke) {
+		if (ke.getCode() == KeyCode.ENTER) {
+			submit();
+		} else if (ke.getCode() == KeyCode.ESCAPE) {
+			close();
+		}
+	}
+
+	@FXML
 	private void onOpenSendClicked(MouseEvent event) {
 		sendTransactionPnl.setVisible(true);
+		Platform.runLater(() -> amountToSend.requestFocus());
 	}
 
 	@FXML
