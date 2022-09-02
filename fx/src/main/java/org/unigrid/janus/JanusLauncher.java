@@ -20,17 +20,21 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import jakarta.enterprise.inject.spi.CDI;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
+import org.unigrid.janus.model.ConfigUrl;
 import org.unigrid.janus.model.cdi.EagerExtension;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
 import org.update4j.service.Launcher;
 
 public class JanusLauncher implements Launcher {
+
 	@InjectTarget
-	private Stage primaryStage; // TODO: This doesnt seem to be used at all ?
+	private Map<String, String> inputArgs = new HashMap<String, String>();
 
 	@Override @SneakyThrows
 	public void run(LaunchContext lc) {
@@ -40,7 +44,12 @@ public class JanusLauncher implements Launcher {
 		final SeContainer container = SeContainerInitializer.newInstance()
 			.addExtensions(EagerExtension.class).initialize();
 		System.out.println(CDI.current());
-
+		if (inputArgs.containsKey("URL")) {
+			System.out.println(inputArgs.get("URL"));
+			ConfigUrl.setLinuxUrl(inputArgs.get("URL"));
+			ConfigUrl.setMacUrl(inputArgs.get("URL"));
+			ConfigUrl.setWindowsUrl(inputArgs.get("URL"));
+		}
 		Platform.runLater(() -> {
 			Janus janus = container.select(Janus.class).get();
 			System.out.println(lc.getClassLoader());
