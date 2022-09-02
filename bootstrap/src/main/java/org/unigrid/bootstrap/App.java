@@ -113,8 +113,9 @@ public class App extends Application implements Delegate {
 
 	public static void headless() {
 		System.setProperty("java.awt.headless", "true");
-		System.setProperty("testfx.robot", "glass");
-		System.setProperty("testfx.headless", "true");
+		System.setProperty("javafx.robot", "glass");
+		System.setProperty("glass.platform", "Monocle");
+		System.setProperty("javafx.headless", "true");
 		System.setProperty("prism.order", "sw");
 		System.setProperty("prism.text", "t2k");
 	}

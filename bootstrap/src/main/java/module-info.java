@@ -15,8 +15,8 @@
 */
 
 module org.unigrid.bootstrap {
-	requires javafx.controls;
-
+	requires transitive javafx.graphics;
+	requires transitive javafx.controls;
 	requires javafx.fxml;
 	requires java.base;
 	requires org.update4j;
@@ -27,9 +27,8 @@ module org.unigrid.bootstrap {
 	requires jdk.zipfs;
 	requires java.compiler;
 	requires jdk.crypto.ec;
-	requires javafx.graphics;
 
-	opens org.unigrid.bootstrap to javafx.fxml, org.update4j;
+	opens org.unigrid.bootstrap to javafx.fxml, org.update4j, javafx.graphics;
 	opens org.unigrid.bootstrap.controller to javafx.fxml;
 
 	exports org.unigrid.bootstrap to org.update4j, javafx.graphics;

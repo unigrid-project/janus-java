@@ -18,26 +18,26 @@
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
-			<version>17-ea+18</version>
+			<version>17.0.2</version>
 			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-graphics</artifactId>
-			<version>17-ea+18</version>
+			<version>17.0.2</version>
 			<classifier>linux-monocle</classifier>
 			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-fxml</artifactId>
-			<version>17-ea+18</version>
+			<version>17.0.2</version>
 			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-media</artifactId>
-			<version>17-ea+18</version>
+			<version>17.0.2</version>
 			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
@@ -45,7 +45,6 @@
 			<artifactId>update4j</artifactId>
 			<version>1.5.9</version>
 		</dependency>
-		
 		<dependency>
 			<groupId>org.testfx</groupId>
 			<artifactId>testfx-junit5</artifactId>
@@ -74,13 +73,13 @@
 					<commandlineArgs>--ADD-OPENS=org.update4j</commandlineArgs>
 					<options>			
 						<option>--add-opens</option>
+						<option>javafx.graphics/com.sun.javafx.text=ALL-UNNAMED</option>
+						<option>--add-opens</option>
+						<option>javafx.graphics/com.sun.javafx.monocle=ALL-UNNAMED</option>
+						<option>--add-exports</option>
 						<option>javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</option>
-						<option>--add-exports</option>
-						<option>javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</option>
-						<option>--add-exports</option>
+						<option>--add-opens</option>
 						<option>javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</option>
-						<option>--add-exports</option>
-						<option>javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED</option>
 					</options>
 				</configuration>
 				<executions>
