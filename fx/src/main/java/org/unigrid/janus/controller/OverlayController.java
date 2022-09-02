@@ -31,6 +31,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import javafx.application.Platform;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
@@ -71,6 +74,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		pnlUnlock.setVisible(true);
 		wallet.setUnlockState(2);
 		submitBtn.setText("UNLOCK");
+		Platform.runLater(() -> passphraseInput.requestFocus());
 
 		unlockCopy.setText("Unlock your wallet by entering your passphrase and "
 			+ "pressing the UNLOCK button."
@@ -81,6 +85,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		wallet.setUnlockState(1);
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("STAKE");
+		Platform.runLater(() -> passphraseInput.requestFocus());
 
 		unlockCopy.setText("Enable staking in your wallet by entering your passphrase and "
 			+ "pressing the STAKE button."
@@ -92,6 +97,8 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		wallet.setUnlockState(4);
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("UNLOCK");
+		Platform.runLater(() -> passphraseInput.requestFocus());
+
 		unlockCopy.setText("Please enter your passphrase in order to perform this task. "
 			+ "The wallet will automatically lock itself after 30 seconds.");
 	}
@@ -101,6 +108,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		wallet.setUnlockState(3);
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("SEND");
+		Platform.runLater(() -> passphraseInput.requestFocus());
 
 		unlockCopy.setText("Please enter your passphrase to send Unigrid tokens. "
 			+ "If your wallet was staking you will need to enable again after the transaction completes."
@@ -112,6 +120,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		wallet.setUnlockState(4);
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("START");
+		Platform.runLater(() -> passphraseInput.requestFocus());
 
 		unlockCopy.setText("Please enter your passphrase to enable your gridnodes. "
 			+ "If your wallet was staking you will need to enable again after the task completes."
@@ -123,10 +132,20 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		wallet.setUnlockState(5);
 		pnlUnlock.setVisible(true);
 		submitBtn.setText("EXPORT");
+		Platform.runLater(() -> passphraseInput.requestFocus());
 
 		unlockCopy.setText("Please enter your passphrase to export your private keys. "
 			+ "If your wallet was staking you will need to enable again after the task completes."
 		);
+	}
+
+	@FXML
+	private void setKeyListern(KeyEvent ke) {
+		if (ke.getCode() == KeyCode.ENTER) {
+			submit();
+		} else if (ke.getCode() == KeyCode.ESCAPE) {
+			closeUnlockOverlay();
+		}
 	}
 
 	@FXML
@@ -136,6 +155,10 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 
 	@FXML
 	private void onSubmitPassphrasePressed(MouseEvent event) {
+		submit();
+	}
+
+	private void submit() {
 		submitBtn.setDisable(true);
 		Object[] sendArgs;
 		long stakingStartTime = wallet.getStakingStartTime();
