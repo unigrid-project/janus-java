@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.control.TableViewMatchers.hasTableCell;
-import static org.testfx.matcher.control.TextMatchers.hasText;
+//import static org.testfx.matcher.control.TextMatchers.hasText;
 import org.unigrid.janus.FXApplicationTest;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.cdi.Eager;
@@ -52,6 +52,7 @@ public class AddressControllerTest extends FXApplicationTest {
 	@Inject
 	private RPCService rpc;
 
+/*
 	@Test
 	public void testGenerateAddress() {
 		new ResponseMockUp();
@@ -64,6 +65,7 @@ public class AddressControllerTest extends FXApplicationTest {
 		clickOn("#btnGenerateAddress");
 		verifyThat("#addressDisplay", hasText("A7HitmzXEMPL3P7McZABtm9BuS3t9eZaf4"));
 	}
+*/
 
 	@Test
 	public void testHideZeroBalances() {
