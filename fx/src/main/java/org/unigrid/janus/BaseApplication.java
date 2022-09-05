@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus;
 
@@ -20,8 +20,10 @@ import javafx.application.Application.Parameters;
 import javafx.application.HostServices;
 import javafx.stage.Stage;
 import org.unigrid.janus.model.Preferences;
+import org.update4j.inject.Injectable;
 
 abstract class BaseApplication {
+
 	public static void main(String[] args) {
 		/* Effectively changes the default values of these properties as used in JavaFX, we do this to speed up
 		   refreshes and custom resizing of undecorated windows. */
@@ -32,5 +34,6 @@ abstract class BaseApplication {
 
 	}
 
-	public abstract void start(Stage primaryStage, Parameters parameters, HostServices hostServices) throws Exception;
+	public abstract void start(Stage primaryStage, Parameters parameters, HostServices hostServices, Injectable inject)
+		throws Exception;
 }

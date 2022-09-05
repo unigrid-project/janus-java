@@ -53,8 +53,10 @@ module fx {
 	requires ch.qos.logback.classic;
 
 	uses org.update4j.service.Launcher;
+	uses org.update4j.inject.Injectable;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
-	
+	provides org.update4j.inject.Injectable with org.unigrid.janus.JanusLauncher;
+
 	opens org.unigrid.janus to weld.core.impl, org.update4j;
 	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics,
 		weld.core.impl;
@@ -69,6 +71,7 @@ module fx {
 	opens org.unigrid.janus.model.entity to jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
 
 	exports org.unigrid.janus;
+	exports org.unigrid.model.entity to jakarta.xml.bind;
 	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml, javafx.base,
 		javafx.controls, org.update4j, javafx.graphics;
 	exports org.unigrid.janus.controller to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls,

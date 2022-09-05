@@ -21,11 +21,13 @@ import jakarta.enterprise.inject.se.SeContainerInitializer;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.stage.Stage;
+import org.update4j.inject.Injectable;
 
 public class ApplicationLoader extends Application {
 
 	private BaseApplication application;
 	private HostServices hostServices = getHostServices();
+	private Injectable inject;
 
 	@Override
 	public void init() throws Exception {
@@ -37,6 +39,6 @@ public class ApplicationLoader extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		application.start(stage, getParameters(), getHostServices());
+		application.start(stage, getParameters(), getHostServices(), inject);
 	}
 }

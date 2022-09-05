@@ -54,6 +54,7 @@ import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.update4j.inject.Injectable;
 
 @Eager
 @ApplicationScoped
@@ -120,7 +121,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	}
 
 	@Override
-	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
+	public void start(Stage stage, Application.Parameters parameters,
+		HostServices hostServices, Injectable inject) throws Exception {
 		debug.print("start", Janus.class.getSimpleName());
 		startSplashScreen();
 		window.setHostServices(hostServices);
