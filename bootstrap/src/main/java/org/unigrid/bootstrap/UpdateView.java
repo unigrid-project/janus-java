@@ -26,7 +26,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -55,6 +57,7 @@ import org.update4j.service.UpdateHandler;
 import org.update4j.OS;
 
 public class UpdateView implements UpdateHandler, Injectable, Initializable {
+
 	private Configuration config;
 	private DoubleProperty primaryPercent;
 	private DoubleProperty secondaryPercent;
@@ -62,13 +65,19 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	private BooleanProperty running;
 	private boolean abort;
 
-	@FXML private Label status;
-	@FXML private ProgressBar progress;
-	@FXML private Button quit;
-	@FXML private Button launch;
+	@FXML
+	private Label status;
+	@FXML
+	private ProgressBar progress;
+	@FXML
+	private Button quit;
+	@FXML
+	private Button launch;
 
 	@InjectSource
 	private Stage primaryStage;
+
+	private Injectable inject;
 
 	private static UpdateView updateView = null;
 	private static String startLoacation = getBaseDirectory();
@@ -84,10 +93,15 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		return primaryStage;
 	}
 
-	public void setConfig(Configuration config, Stage primaryStage) {
+	public void setConfig(Configuration config, Stage primaryStage, Map<String, String> input) {
 		this.config = config;
 		this.primaryStage = primaryStage;
+		inject = new Injectable() {
+			@InjectSource
+			Map<String, String> inputArgs = input;
+		};
 
+		System.out.println(input.get("URL"));
 		status = (Label) primaryStage.getScene().lookup("#status");
 		progress = (ProgressBar) primaryStage.getScene().lookup("#progress");
 
@@ -246,7 +260,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 			final Process process = pb.start();
 
-			try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+			try ( var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line;
 
 				while ((line = reader.readLine()) != null) {
@@ -273,7 +287,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 			final Process process = pb.start();
 
-			try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+			try ( var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line;
 
 				while ((line = reader.readLine()) != null) {
@@ -315,7 +329,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	public static void unzipFolder(Path source, Path target) throws IOException {
 		final Path endDir = Paths.get(startLoacation + "/bin");
 
-		try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
+		try ( ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
 			ZipEntry zipEntry = zis.getNextEntry();
 
 			while (zipEntry != null) {
@@ -368,7 +382,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	public void launchApp() {
-		config.launch();
+		config.launch(inject);
 	}
 
 	private void run(Runnable runnable) {
@@ -380,11 +394,15 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	private static String getBaseDirectory() {
 		final String blockRoot = System.getProperty("user.home").concat(
 			switch (OS.CURRENT) {
-				case LINUX -> "/.unigrid/dependencies";
-				case WINDOWS -> "/AppData/Roaming/UNIGRID/dependencies";
-				case MAC -> "/Library/Application Support/UNIGRID/dependencies";
-				default -> "/UNIGRID/dependencies";
-			}
+			case LINUX ->
+				"/.unigrid/dependencies";
+			case WINDOWS ->
+				"/AppData/Roaming/UNIGRID/dependencies";
+			case MAC ->
+				"/Library/Application Support/UNIGRID/dependencies";
+			default ->
+				"/UNIGRID/dependencies";
+		}
 		);
 
 		File depenendencies = new File(blockRoot);

@@ -69,6 +69,7 @@ module fx {
 	opens org.unigrid.janus.model.entity to jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
 
 	exports org.unigrid.janus;
+	
 	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml, javafx.base,
 		javafx.controls, org.update4j, javafx.graphics;
 	exports org.unigrid.janus.controller to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls,

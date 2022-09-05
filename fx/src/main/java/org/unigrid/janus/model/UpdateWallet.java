@@ -70,10 +70,11 @@ public class UpdateWallet extends TimerTask {
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
 	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
-	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][]{
-		{OS.LINUX, "config-linux.xml"},
-		{OS.WINDOWS, "config-windows.xml"},
-		{OS.MAC, "config-mac.xml"}
+
+	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
+		{OS.LINUX, ConfigUrl.getLinuxUrl()},
+		{OS.WINDOWS, ConfigUrl.getWindowsUrl()},
+		{OS.MAC, ConfigUrl.getMacUrl()}
 	});
 
 	public enum UpdateState {
@@ -135,7 +136,7 @@ public class UpdateWallet extends TimerTask {
 			pcs = new PropertyChangeSupport(this);
 		}
 
-		/*if (checkUpdateBootstrap()) {
+		if (checkUpdateBootstrap()) {
 
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
@@ -155,8 +156,7 @@ public class UpdateWallet extends TimerTask {
 					}
 				}
 			});
-		} else */
-		if (checkUpdate()) {
+		} else if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
 			Platform.runLater(new Runnable() {
@@ -183,7 +183,8 @@ public class UpdateWallet extends TimerTask {
 		Configuration updateConfig = null;
 
 		try {
-			configUrl = new URL(String.format(BASE_URL, OS_CONFIG.get(os)));
+			configUrl = new URL(OS_CONFIG.get(os).toString());
+			System.out.println(configUrl);
 		} catch (MalformedURLException mle) {
 			System.out.println("Unable to find url to config.xml");
 			System.err.println(mle.getMessage());
@@ -226,6 +227,7 @@ public class UpdateWallet extends TimerTask {
 			|| getVersionNumber(filteredVer, 2) < getVersionNumber(getLatestVersion(), 0)
 			|| getLatestVersion().equals("")) {
 			bootstrapUpdate = false;
+			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());
 			System.out.println("The latest version of the bootstrap is the same as the one we have");
 		} else {
 			if (OS.CURRENT == OS.LINUX) {
