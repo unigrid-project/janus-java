@@ -54,7 +54,6 @@
 				<configuration>
 					<mainClass>org.unigrid.bootstrap.App</mainClass>
 					<commandlineArgs>--ADD-OPENS=org.update4j</commandlineArgs>
-                                        <commandlineArgs>URL=https://raw.githubusercontent.com/Fim-84/test/main/config-linux-test.xml</commandlineArgs>
 				</configuration>
 				<executions>
 					<execution>
