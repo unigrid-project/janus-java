@@ -15,6 +15,7 @@
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<javafx.monocle>true</javafx.monocle>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -28,23 +29,28 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>17-ea+7</version>
+			<artifactId>javafx-base</artifactId>
+			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-graphics</artifactId>
-			<version>17-ea+7</version>
+			<artifactId>javafx-controls</artifactId>
+			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-fxml</artifactId>
-			<version>17-ea+7</version>
+			<classifier>linux-monocle</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-media</artifactId>
-			<version>17-ea+7</version>
+			<classifier>linux-monocle</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -191,7 +197,7 @@
 			<version>4.0.16-alpha</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>org.testfx</groupId>
 			<artifactId>openjfx-monocle</artifactId>
 			<version>jdk-12.0.1+2</version>
@@ -202,7 +208,7 @@
 			<artifactId>openjfx-monocle</artifactId>
 			<version>1.8.0_20</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
@@ -219,13 +225,6 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.0-alpha7</version>
 		</dependency>
-	
-   <dependency>
-     <groupId>org.testfx</groupId>
-     <artifactId>openjfx-monocle</artifactId>
-     <version>jdk-12.0.1+2</version>
-   </dependency>
- 
  </dependencies>
 	<build>
 		<plugins>
