@@ -136,7 +136,7 @@ public class UpdateWallet extends TimerTask {
 			pcs = new PropertyChangeSupport(this);
 		}
 
-		/*if (checkUpdateBootstrap()) {
+		if (checkUpdateBootstrap()) {
 
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
@@ -156,8 +156,7 @@ public class UpdateWallet extends TimerTask {
 					}
 				}
 			});
-		} else */
-		if (checkUpdate()) {
+		} else if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
 			Platform.runLater(new Runnable() {
@@ -228,6 +227,7 @@ public class UpdateWallet extends TimerTask {
 			|| getVersionNumber(filteredVer, 2) < getVersionNumber(getLatestVersion(), 0)
 			|| getLatestVersion().equals("")) {
 			bootstrapUpdate = false;
+			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());
 			System.out.println("The latest version of the bootstrap is the same as the one we have");
 		} else {
 			if (OS.CURRENT == OS.LINUX) {
