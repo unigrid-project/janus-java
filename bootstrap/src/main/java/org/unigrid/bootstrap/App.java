@@ -54,10 +54,10 @@ public class App extends Application implements Delegate {
 		URL configUrl = null;
 		OS os = OS.CURRENT;
 		if (os.equals(OS.LINUX)) {
-			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-linux.xml");
+			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-linux-test.xml");
 
 		} else if (os.equals(OS.WINDOWS)) {
-			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
+			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-windows-test.xml");
 		} else if (os.equals(OS.MAC)) {
 			configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-mac.xml");
 		}
