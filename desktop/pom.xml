@@ -104,7 +104,7 @@
 							<module>org.unigrid.bootstrap/org.unigrid.bootstrap.App</module>
 							<runtimeImage>target/jlink</runtimeImage>
 							<type>APP_IMAGE</type>
-							<winConsole>true</winConsole>
+							<winConsole>false</winConsole>
 							<javaOptions>
 								<option>--add-opens</option>
 								<option>java.base/java.lang=ALL-UNNAMED</option>
