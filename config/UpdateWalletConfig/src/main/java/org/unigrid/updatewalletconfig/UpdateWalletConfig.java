@@ -58,6 +58,7 @@ public class UpdateWalletConfig {
 		};
 		String daemonPath = "";
 		String url = "";
+		String basePath = "";
 
 		for (int i = 0; i < filePath.length; i++) {
 			if ((i%2) == 0) {
@@ -69,16 +70,19 @@ public class UpdateWalletConfig {
 			if (filePath[i].contains("linux")) {
 				daemonPath = homeDir + "/Downloads/" + linuxDaemon;
 				url = getDaemonUrl(OS.LINUX);
+				basePath = "${user.home}/.unigrid/dependencies/lib/";
 			} else if (filePath[i].contains("mac")) {
 				daemonPath = homeDir + "/Downloads/" + osxDaemon;
 				url = getDaemonUrl(OS.MAC);
+				basePath = "${user.home}/Library/Application Support/UNIGRID/dependencies/lib/";
 			} else if (filePath[i].contains("windows")) {
 				daemonPath = homeDir + "/Downloads/" + windowsDaemon;
 				url = getDaemonUrl(OS.WINDOWS);
+				basePath = "${user.home}/AppData/Roaming/UNIGRID/dependencies/lib/";
 			}
 
 			Configuration config = Configuration.builder()
-				.basePath("${user.home}/.unigrid/dependencies/lib/")
+				.basePath(basePath)
 				.file(FileMetadata.readFrom("../../fx/target/fx-1.0.7-SNAPSHOT.jar")
 					.uri(fxJarUrl).modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/aopalliance-repackaged-3.0.3.jar")
