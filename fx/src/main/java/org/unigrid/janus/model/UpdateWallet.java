@@ -136,7 +136,7 @@ public class UpdateWallet extends TimerTask {
 			pcs = new PropertyChangeSupport(this);
 		}
 
-		/*if (checkUpdateBootstrap()) {
+		if (checkUpdateBootstrap()) {
 
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
@@ -156,8 +156,7 @@ public class UpdateWallet extends TimerTask {
 					}
 				}
 			});
-		} else */
-		if (checkUpdate()) {
+		} else if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
 			Platform.runLater(new Runnable() {
@@ -191,7 +190,7 @@ public class UpdateWallet extends TimerTask {
 			System.err.println(mle.getMessage());
 		}
 
-		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+		try (Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			updateConfig = Configuration.read(in);
 			System.out.println("Reading the config file");
 		} catch (IOException e) {

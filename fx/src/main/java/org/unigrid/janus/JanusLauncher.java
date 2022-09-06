@@ -27,6 +27,7 @@ import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.ConfigUrl;
 import org.unigrid.janus.model.cdi.EagerExtension;
+import org.unigrid.janus.model.entity.InitSentry;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
 import org.update4j.service.Launcher;
@@ -40,7 +41,8 @@ public class JanusLauncher implements Launcher {
 	public void run(LaunchContext lc) {
 		System.out.println("before cotainer init");
 		// ApplicationLoader.launch(ApplicationLoader.class);
-
+		String s = inputArgs.get("test") != null ? inputArgs.get("test") : "";
+		new InitSentry().init(s);
 		final SeContainer container = SeContainerInitializer.newInstance()
 			.addExtensions(EagerExtension.class).initialize();
 		System.out.println(CDI.current());

@@ -35,6 +35,7 @@ import org.update4j.Configuration;
 import org.update4j.service.Delegate;
 import org.update4j.OS;
 import javafx.stage.StageStyle;
+import io.sentry.Sentry;
 //import ch.qos.logback.classic.Level;
 //import ch.qos.logback.classic.Logger;
 //import org.slf4j.LoggerFactory;
@@ -48,6 +49,22 @@ public class App extends Application implements Delegate {
 	@Override
 	public void start(Stage stage) throws IOException {
 
+		Sentry.init(options -> {
+			 options.setDsn("https://18a30d2bf41643ce9efe84a451ecef1a@o266736.ingest.sentry.io/6632466");
+			// Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+			// We recommend adjusting this value in production.
+			options.setServerName("unigrid");
+			options.setTag("os", OS.CURRENT.getShortName());
+			if (inputArgs.get("test") == null) {
+				options.setEnvironment("production");
+			} else {
+				options.setEnvironment(inputArgs.get("test"));
+			}
+			options.setTracesSampleRate(1.0);
+			// When first trying Sentry it's good to see what the SDK is doing:
+			options.setDebug(false);
+		});
+	
 		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		//root.setLevel(Level.ALL);
 
@@ -76,6 +93,7 @@ public class App extends Application implements Delegate {
 			config = Configuration.read(in);
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
+			Sentry.captureException(e);
 			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"),"/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
@@ -106,6 +124,7 @@ public class App extends Application implements Delegate {
 	public static void main(String[] args) {
 		if (args != null) {
 			for (String arg : args) {
+				System.out.println(arg);
 				if (arg.contains("=")) {
 					String key = arg.split("=")[0];
 					String value = arg.split("=")[1];

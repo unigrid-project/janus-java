@@ -40,6 +40,11 @@
 			<artifactId>update4j</artifactId>
 			<version>1.5.9</version>
 		</dependency>
+                <dependency>
+                    <groupId>io.sentry</groupId>
+                    <artifactId>sentry</artifactId>
+                    <version>6.4.0</version>
+                </dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -53,9 +58,9 @@
 				<version>0.0.4</version>
 				<configuration>
 					<mainClass>org.unigrid.bootstrap.App</mainClass>
-					<commandlineArgs>--ADD-OPENS=org.update4j</commandlineArgs>
                                         <commandlineArgs>URL=https://raw.githubusercontent.com/Fim-84/test/main/config-linux-test.xml</commandlineArgs>
-				</configuration>
+                                        <commandlineArgs>test=true</commandlineArgs>
+                                </configuration>
 				<executions>
 					<execution>
 						<!-- Default configuration for running -->

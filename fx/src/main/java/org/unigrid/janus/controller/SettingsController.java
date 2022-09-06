@@ -17,7 +17,6 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

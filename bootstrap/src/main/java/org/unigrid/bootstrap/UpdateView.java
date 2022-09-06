@@ -16,6 +16,7 @@
 
 package org.unigrid.bootstrap;
 
+import io.sentry.Sentry;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -177,12 +178,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 							} else {
 								unzipDaemonWindows();
 							}
-
+							
 							launch();
 						} else {
 							Throwable s = config.update(UpdateOptions.archive(zip)
 								.updateHandler(UpdateView.this)).getException();
-
+							Sentry.captureException(s);
 							System.out.println(s);
 							System.out.println("updatehandler = null");
 							launch();
