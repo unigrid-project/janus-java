@@ -32,8 +32,8 @@ public class UpdateViewController implements Initializable {
 
 	@FXML
 	void onLaunch(ActionEvent event) {
-		UpdateView.getInstance().launchApp();
 		UpdateView.getInstance().getStage().hide();
+		UpdateView.getInstance().launchApp();
 	}
 
 	@FXML

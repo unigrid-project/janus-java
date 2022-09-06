@@ -59,15 +59,16 @@
 				<configuration>
 					<mainClass>org.unigrid.bootstrap.App</mainClass>
 					<commandlineArgs>--ADD-OPENS=org.update4j</commandlineArgs>
-					<options>			
-						<option>--add-opens</option>
-						<option>javafx.graphics/com.sun.javafx.text=ALL-UNNAMED</option>
-						<option>--add-opens</option>
-						<option>javafx.graphics/com.sun.javafx.monocle=ALL-UNNAMED</option>
+					<commandlineArgs>URL=https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-linux-test.xml</commandlineArgs>
+					<options>		
 						<option>--add-exports</option>
-						<option>javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</option>
+						<option>javafx.graphics/com.sun.glass.ui=org.unigrid.bootstrap</option>
 						<option>--add-opens</option>
-						<option>javafx.graphics/com.sun.glass.ui=ALL-UNNAMED</option>
+						<option>javafx.graphics/com.sun.glass.ui=org.unigrid.bootstrap</option>
+						<option>--add-opens</option>
+						<option>javafx.graphics/com.sun.glass.ui.monocle=org.unigrid.bootstrap</option>
+						<option>--add-exports</option>
+						<option>javafx.graphics/com.sun.glass.ui.monocle=org.unigrid.bootstrap</option>
 					</options>
 				</configuration>
 				<executions>

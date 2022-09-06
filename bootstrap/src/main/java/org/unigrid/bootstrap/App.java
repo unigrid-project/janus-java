@@ -13,7 +13,6 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.bootstrap;
 
 import javafx.application.Application;
@@ -40,7 +39,6 @@ import javafx.stage.StageStyle;
 //import ch.qos.logback.classic.Logger;
 //import org.slf4j.LoggerFactory;
 
-
 public class App extends Application implements Delegate {
 
 	private static Scene scene;
@@ -49,13 +47,14 @@ public class App extends Application implements Delegate {
 
 	@Override
 	public void start(Stage stage) throws IOException, Exception {
-		headless();
+		//headless();
 		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		//root.setLevel(Level.ALL);
-		HeadlessApplication head = new HeadlessApplication();
-		Application test = head.assignMonoclePlatform();
-		test.start(stage);
-		System.out.println("TEST: " + test.toString());
+		//HeadlessApplication head = new HeadlessApplication();
+		//head.assignHeadlessPlatform();
+		//Application test = head.assignMonoclePlatform();
+		//test.start(stage);
+		//ystem.out.println("TEST: " + test.toString());
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
 
@@ -81,7 +80,7 @@ public class App extends Application implements Delegate {
 			config = Configuration.read(in);
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
-			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"),"/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
+			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"), "/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
@@ -116,9 +115,10 @@ public class App extends Application implements Delegate {
 					String value = arg.split("=")[1];
 					inputArgs.put(key, value);
 				}
-			}	
+			}
 		}
-		launch();
+		//launch();
+		headless();
 	}
 
 	@Override
@@ -127,12 +127,20 @@ public class App extends Application implements Delegate {
 	}
 
 	public static void headless() {
+		System.setProperty("glass.platform", "Monocle");
+		System.setProperty("monocle.platform", "Headless");
+		System.setProperty("javafx.headless", "true");
+		System.setProperty("prism.order", "sw");
+		System.setProperty("prism.text", "t2k");
+		System.setProperty("headless.geometry", "150x250-16");
+		launch();
+		/*
 		System.setProperty("java.awt.headless", "true");
 		System.setProperty("javafx.robot", "glass");
 		System.setProperty("glass.platform", "Monocle");
 		System.setProperty("javafx.headless", "true");
 		System.setProperty("prism.order", "sw");
-		System.setProperty("prism.text", "t2k");
+		System.setProperty("prism.text", "t2k");*/
 	}
 
 }
