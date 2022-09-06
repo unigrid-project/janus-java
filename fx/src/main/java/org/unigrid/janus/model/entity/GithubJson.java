@@ -28,7 +28,7 @@ public class GithubJson {
 	@JsonbProperty("tag_name")
 	private String tagName;
 	private List<Asset> assets;
-	
+
 	@Data
 	public static class Asset {
 		@JsonbProperty("browser_download_url")
