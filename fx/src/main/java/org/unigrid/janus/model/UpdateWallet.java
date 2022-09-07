@@ -13,7 +13,6 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,6 +31,7 @@ import java.util.TimerTask;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Pos;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
@@ -46,19 +46,25 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
 import org.unigrid.janus.Janus;
 import org.unigrid.janus.model.entity.Feed;
+import org.update4j.FileMetadata;
 
 @Eager
 @ApplicationScoped
 public class UpdateWallet extends TimerTask {
+
+	@Getter @Setter
+	private Boolean daemonMatches = true;
 
 	private final String linuxPath = System.getProperty("user.home").concat("/.unigrid/dependencies/temp/");
 	private final String macPath = System.getProperty("user.home")
@@ -71,7 +77,7 @@ public class UpdateWallet extends TimerTask {
 	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
 
-	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
+	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][]{
 		{OS.LINUX, ConfigUrl.getLinuxUrl()},
 		{OS.WINDOWS, ConfigUrl.getWindowsUrl()},
 		{OS.MAC, ConfigUrl.getMacUrl()}
@@ -190,8 +196,9 @@ public class UpdateWallet extends TimerTask {
 			System.err.println(mle.getMessage());
 		}
 
-		try (Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			updateConfig = Configuration.read(in);
+
 			System.out.println("Reading the config file");
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
@@ -205,7 +212,12 @@ public class UpdateWallet extends TimerTask {
 		} catch (IOException e) {
 			update = false;
 		}
-		System.out.println("Is thier an update ready = " + update);
+		System.out.println("Is their an update ready = " + update);
+		// check daemon version
+		if (updateConfig != null) {
+			checkDaemonVersion(updateConfig);
+		}
+
 		return update;
 	}
 
@@ -263,6 +275,43 @@ public class UpdateWallet extends TimerTask {
 		return bootstrapUpdate;
 	}
 
+	private void checkDaemonVersion(Configuration config) {
+		List<FileMetadata> files = config.getFiles();
+		String untarName = "";
+
+		for (FileMetadata file : files) {
+			if (!file.isModulepath()) {
+				String s = file.getUri().toString();
+				String[] arr = s.split("/");
+				untarName = arr[arr.length - 1];
+			}
+		}
+		File file = new File(getBaseDirectory().concat("/lib/").concat(untarName));
+		setDaemonMatches(file.exists());
+		debug.print("daemon zip name: " + untarName, UpdateWallet.class.getSimpleName());
+		debug.print("does file exist? " + getDaemonMatches(), UpdateWallet.class.getSimpleName());
+
+	}
+
+	private static String getBaseDirectory() {
+		final String blockRoot = System.getProperty("user.home").concat(
+			switch (OS.CURRENT) {
+			case LINUX ->
+				"/.unigrid/dependencies";
+			case WINDOWS ->
+				"/AppData/Roaming/UNIGRID/dependencies";
+			case MAC ->
+				"/Library/Application Support/UNIGRID/dependencies";
+			default ->
+				"/UNIGRID/dependencies";
+		}
+		);
+
+		File depenendencies = new File(blockRoot);
+
+		return blockRoot;
+	}
+
 	private boolean checkTempFolder(String fileName, String path) {
 		boolean b = false;
 		try {
@@ -284,7 +333,7 @@ public class UpdateWallet extends TimerTask {
 			@Override
 			public void run() {
 				boolean isBootstrapUpdate = false;
-				if (false) { //(checkUpdateBootstrap()) {
+				if (checkUpdateBootstrap()) {
 					Process process;
 					//TODO: Add RPM install line
 					String linuxDebInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
@@ -346,9 +395,9 @@ public class UpdateWallet extends TimerTask {
 					synchronized (obj) {
 						obj.notifyAll();
 					}
-					System.out.println("!!!!We got passed the notyfiy");
+					System.out.println("!!!!We got passed the notify");
 					if (OS.CURRENT == OS.LINUX) {
-						System.out.println("run the app agien on linux");
+						System.out.println("run the app again on linux");
 						Runtime.getRuntime().exec(linuxExec);
 						System.out.println("Did it start??");
 					} else if (OS.CURRENT == OS.MAC && !isBootstrapUpdate) {

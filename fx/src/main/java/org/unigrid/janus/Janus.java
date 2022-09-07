@@ -68,6 +68,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private UpdateWallet updateWallet;
 	@Inject private SplashScreenController splashController;
 	@Inject private Wallet wallet;
+	@Inject private UpdateWallet update;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
@@ -116,7 +117,10 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@SneakyThrows
 	private void destroy() {
 		// TODO: should this change to spalshScreenInsted
-		daemon.stop();
+		// don't stop the daemon if there is no new version
+		if(!update.getDaemonMatches()) {
+			daemon.stop();
+		}
 	}
 
 	@Override
