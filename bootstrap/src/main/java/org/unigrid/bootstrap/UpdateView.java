@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,6 +129,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		});
 
 		System.out.println("before update");
+		removeOldJars(config);
 		update();
 	}
 
@@ -443,5 +445,27 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+	}
+
+	private void removeOldJars(Configuration config) {
+		File baseDir = new File(getBaseDirectory().concat("/lib"));
+		List<FileMetadata> onlineFiles = config.getFiles();
+		List<String> fileNames = new ArrayList<String>();
+		for (FileMetadata onlineFile: onlineFiles) {
+			fileNames.add(getFileName(onlineFile.getPath().toString()));
+		}
+		for (File file : baseDir.listFiles()) {
+			System.out.println(file.getName());
+			if (!fileNames.contains(file.getName())) {
+				file.delete();
+			}
+		}
+	}
+	
+	private String getFileName(String file) {
+		String fileName = "";
+		String[] strings = file.split("/");
+		fileName = strings[strings.length - 1];
+		return fileName;
 	}
 }

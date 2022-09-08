@@ -13,6 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.bootstrap;
 
 import javafx.application.Application;
@@ -38,10 +39,8 @@ import javafx.stage.StageStyle;
 import io.sentry.Sentry;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.security.MessageDigest;
 import java.util.Enumeration;
 import java.util.UUID;
-import javax.crypto.KeyGenerator;
 //import ch.qos.logback.classic.Level;
 //import ch.qos.logback.classic.Logger;
 //import org.slf4j.LoggerFactory;
@@ -83,12 +82,12 @@ public class App extends Application implements Delegate {
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			Sentry.captureException(e);
-			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"),"/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
+			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"), "/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
 		}
-		
+
 		if (inputArgs.get("test") == null) {
 			String server = "";
 			final String version = config.getProperties("fx.version").get(0).getValue();
@@ -135,7 +134,7 @@ public class App extends Application implements Delegate {
 					String value = arg.split("=")[1];
 					inputArgs.put(key, value);
 				}
-			}	
+			}
 		}
 		launch();
 	}
@@ -168,14 +167,13 @@ public class App extends Application implements Delegate {
 		}
 		return s;
 	}
-	
+
 	private byte[] joinBytes(byte[] byteArray1, byte[] byteArray2) {
-        final int finalLength = byteArray1.length + byteArray2.length;
-        final byte[] result = new byte[finalLength];
+		final int finalLength = byteArray1.length + byteArray2.length;
+		final byte[] result = new byte[finalLength];
 
-        System.arraycopy(byteArray1, 0, result, 0, byteArray1.length);
-        System.arraycopy(byteArray2, 0, result, byteArray1.length, byteArray2.length);
-        return result;
-    }
-
+		System.arraycopy(byteArray1, 0, result, 0, byteArray1.length);
+		System.arraycopy(byteArray2, 0, result, byteArray1.length, byteArray2.length);
+		return result;
+	}
 }
