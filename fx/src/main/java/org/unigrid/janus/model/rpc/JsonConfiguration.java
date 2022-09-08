@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -26,6 +26,7 @@ public class JsonConfiguration implements ContextResolver<Jsonb> {
 	private JsonbConfig getJsonbConfig() {
 		return new JsonbConfig().withPropertyNamingStrategy(
 			PropertyNamingStrategy.LOWER_CASE_WITH_DASHES
+			//PropertyNamingStrategy.LOWER_CASE_WITH_UNDERSCORES
 		);
 	}
 

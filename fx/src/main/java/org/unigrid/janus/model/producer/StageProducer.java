@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -20,23 +20,47 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import java.beans.Introspector;
+import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
-import lombok.SneakyThrows;
 
 @Dependent
 public class StageProducer {
 	private static final String FXML_SUFFIX = ".fxml";
 
-	@Produces @SneakyThrows
+	@Produces
 	public Stage produce(final InjectionPoint point) {
-		final FXMLLoader loader = new FXMLLoader();
 		final Class<?> clazz = point.getMember().getDeclaringClass();
-		final String name = Introspector.decapitalize(clazz.getSimpleName());
+		FXMLLoader loader = new FXMLLoader();
 
+		/* loader.setControllerFactory(controller -> {
+			final BeanManager manager = CDI.current().getBeanManager();
+			final Bean<?> bean = manager.getBeans(controller).iterator().next();
+			System.out.println("Bean context " + manager.getContext(bean.getScope()).get(bean));
+			return manager.getContext(bean.getScope()).get(bean);
+
+			/*try {
+				return controller.getDeclaredConstructor().newInstance();
+			} catch(Exception e) {
+				return null;
+			}
+		}); */
+
+		final String name = Introspector.decapitalize(clazz.getSimpleName());
+		loader.setClassLoader(clazz.getClassLoader());
+
+		System.out.println(loader.getClassLoader());
 		System.out.println(name.concat(FXML_SUFFIX));
 		loader.setLocation(clazz.getResource(name.concat(FXML_SUFFIX)));
-		System.out.println("SHITTTTTTTTTTTTTTTT " + point.getType());
-		return loader.load();
+
+		try {
+			return loader.load();
+		} catch (IOException e) {
+			//TODO: Throw illegal state
+			System.out.println(e.getMessage());
+			System.out.println(e.getCause());
+		}
+
+		return null;
 	}
 }

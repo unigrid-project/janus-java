@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021 The Unigrid Foundation
+	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -17,21 +17,13 @@
 package org.unigrid.janus.model;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 public class Gridnode {
-	@Getter @Setter
 	private String alias;
-	@Getter @Setter
 	private String address;
-	@Getter @Setter
 	private String privateKey;
-	@Getter @Setter
-	private int outputIndex;
-	@Getter @Setter
-	private String txHash;
-	@Getter @Setter
+	private int outputidx;
+	private String txhash;
 	private String status;
 }

@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2022 The Unigrid Foundation
+	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -18,8 +18,13 @@ package org.unigrid.janus.model;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Comparator;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.service.DebugService;
 
@@ -27,7 +32,14 @@ public class AddressListModel {
 	private static DebugService debug = new DebugService();
 	public static final String ADDRESS_LIST = "addressList";
 	private static PropertyChangeSupport pcs;
-	private static ObservableList<Address> addresses = FXCollections.observableArrayList();
+
+	@Getter
+	private ObservableList<Address> addresses = FXCollections.observableArrayList();
+
+	@Getter @Setter
+	private Boolean selected;
+	@Getter @Setter
+	private Boolean sorted;
 
 	public AddressListModel() {
 		if (this.pcs != null) {
@@ -44,19 +56,32 @@ public class AddressListModel {
 		this.pcs.removePropertyChangeListener(listener);
 	}
 
-	public ObservableList<Address> getAddresses() {
-		return this.addresses;
-	}
-
 	public void setAddresses(ListAddressBalances list) {
 		int oldCount = 0;
 		addresses.clear();
+
 		int newCount = 0;
 		for (Address g : list.getResult()) {
-			//debug.log(String.format("address: %s", g.getAddress()));
-			addresses.add(g);
-			newCount++;
+			//System.out.println(String.format("address: %s", g.getAmount()));
+			if (selected) {
+				if (g.getAmount() > 0) {
+					addresses.add(g);
+					newCount++;
+				}
+			} else {
+				addresses.add(g);
+				newCount++;
+			}
 		}
+
+		if (sorted) {
+			addresses.sort(Comparator.comparingDouble(Address::getAmount).reversed());
+			//System.out.println(String.format("addresses: %s", addresses.size()));
+		} else {
+			addresses.sort(Comparator.comparingDouble(Address::getAmount));
+			//System.out.println(String.format("addresses: %s", addresses.size()));
+		}
+
 		this.pcs.firePropertyChange(this.ADDRESS_LIST, oldCount, newCount);
 	}
 }

@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021 The Unigrid Foundation
+    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -29,18 +29,22 @@ import javafx.scene.control.ButtonType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.controller.component.WindowBarController;
-import org.unigrid.janus.controller.view.AddressController;
-import org.unigrid.janus.controller.view.MainWindowController;
-import org.unigrid.janus.controller.view.NodesController;
-import org.unigrid.janus.controller.view.WalletController;
-import org.unigrid.janus.controller.view.TransactionsController;
-import org.unigrid.janus.controller.view.OverlayController;
-import org.unigrid.janus.controller.view.SettingsController;
-import org.unigrid.janus.controller.view.SplashScreenController;
-import org.unigrid.janus.controller.view.WarningController;
+import org.unigrid.janus.controller.AddressController;
+import org.unigrid.janus.controller.DocumentationController;
+import org.unigrid.janus.controller.MainWindowController;
+import org.unigrid.janus.controller.NodesController;
+import org.unigrid.janus.controller.WalletController;
+import org.unigrid.janus.controller.TransactionsController;
+import org.unigrid.janus.controller.OverlayController;
+import org.unigrid.janus.controller.SettingsController;
+import org.unigrid.janus.controller.SplashScreenController;
+import org.unigrid.janus.controller.WarningController;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
+import org.unigrid.janus.view.SplashScreen;
 
+@Eager
 @ApplicationScoped
 @RequiredArgsConstructor
 public class WindowService {
@@ -56,8 +60,11 @@ public class WindowService {
 	private static TransactionsController transController;
 	private static SettingsController settingsController;
 	private static AddressController addrController;
+	private static DocumentationController docsController;
 	private static WarningController warnController;
 	private static SplashScreenController splashController;
+	private static SplashScreen splashScreen;
+
 	@NonNull private Wallet wallet;
 
 	private static WindowService serviceInstance = null;
@@ -180,6 +187,14 @@ public class WindowService {
 		this.addrController = controller;
 	}
 
+	public DocumentationController getDocsController() {
+		return this.docsController;
+	}
+
+	public void setDocsController(DocumentationController controller) {
+		this.docsController = controller;
+	}
+
 	public SettingsController getSettingsController() {
 		return this.settingsController;
 	}
@@ -194,6 +209,14 @@ public class WindowService {
 
 	public SplashScreenController getSplashScreenController() {
 		return this.splashController;
+	}
+
+	public void setSplashScreen(SplashScreen screen) {
+		this.splashScreen = screen;
+	}
+
+	public SplashScreen getSplashScreen() {
+		return this.splashScreen;
 	}
 
 	public void notifyIfError(BaseResult result) {
