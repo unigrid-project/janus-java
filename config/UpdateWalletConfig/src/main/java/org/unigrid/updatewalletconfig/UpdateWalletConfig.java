@@ -48,6 +48,7 @@ public class UpdateWalletConfig {
 		String linuxDaemon = "unigrid-2.9.2-x86_64-linux-gnu.tar.gz";
 		String windowsDaemon = "unigrid-2.9.2-win64.zip";
 		String osxDaemon = "unigrid-2.9.2-osx64.tar.gz";
+		String fxVersion = "1.0.6";
 		String[] filePath = new String[]{
 			"/config-linux.xml",
 			"/config-linux-test.xml",
@@ -207,6 +208,7 @@ public class UpdateWalletConfig {
 					.uri(mavenUrl("org.eclipse", "yasson", "2.0.0-M1")).modulepath())
 				.file(FileMetadata.readFrom(daemonPath).uri(url))
 				.property("maven.central", MAVEN_BASE)
+				.property("fx.version", fxVersion)
 				.property("default.launcher.main.class", "org.unigrid.janus.Janus")
 				.build();
 

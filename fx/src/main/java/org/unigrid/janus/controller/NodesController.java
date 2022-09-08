@@ -128,6 +128,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	private void setupNodeList() {
 		try {
+			tblGridnodes.setItems(nodes.getGridnodes());
 			colNodeStatus.setCellValueFactory(
 				new PropertyValueFactory<Gridnode, String>("status"));
 			colNodeAlias.setCellValueFactory(
@@ -201,6 +202,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		window.getWindowBarController().startSpinner();
 		GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
 		nodes.setGridnodes(result);
+		nodes.getGridnodes();
 		window.getWindowBarController().stopSpinner();
 		//debug.log(String.format("gridnode result: %s", nodes.getGridnodes()));
 	}

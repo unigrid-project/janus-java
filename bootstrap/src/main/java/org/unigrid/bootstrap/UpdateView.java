@@ -16,6 +16,7 @@
 
 package org.unigrid.bootstrap;
 
+import io.sentry.Sentry;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +116,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		running = new SimpleBooleanProperty(this, "running");
 
 		status.setOpacity(0);
-		FadeTransition fade = new FadeTransition(Duration.seconds(1.5), status);
+		FadeTransition fade = new FadeTransition(Duration.seconds(5), status);
 		fade.setToValue(0);
 
 		running.addListener((obs, ov, nv) -> {
@@ -127,6 +129,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		});
 
 		System.out.println("before update");
+		removeOldJars(config);
 		update();
 	}
 
@@ -177,14 +180,15 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 							} else {
 								unzipDaemonWindows();
 							}
-
+							
 							launch();
 						} else {
 							Throwable s = config.update(UpdateOptions.archive(zip)
 								.updateHandler(UpdateView.this)).getException();
-
+							Sentry.captureException(s);
 							System.out.println(s);
 							System.out.println("updatehandler = null");
+							status.setText("No updates found");
 							launch();
 						}
 
@@ -442,5 +446,27 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+	}
+
+	private void removeOldJars(Configuration config) {
+		File baseDir = new File(getBaseDirectory().concat("/lib"));
+		List<FileMetadata> onlineFiles = config.getFiles();
+		List<String> fileNames = new ArrayList<String>();
+		for (FileMetadata onlineFile: onlineFiles) {
+			fileNames.add(getFileName(onlineFile.getPath().toString()));
+		}
+		for (File file : baseDir.listFiles()) {
+			System.out.println(file.getName());
+			if (!fileNames.contains(file.getName())) {
+				file.delete();
+			}
+		}
+	}
+	
+	private String getFileName(String file) {
+		String fileName = "";
+		String[] strings = file.split("/");
+		fileName = strings[strings.length - 1];
+		return fileName;
 	}
 }
