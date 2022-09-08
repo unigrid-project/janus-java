@@ -116,7 +116,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		running = new SimpleBooleanProperty(this, "running");
 
 		status.setOpacity(0);
-		FadeTransition fade = new FadeTransition(Duration.seconds(1.5), status);
+		FadeTransition fade = new FadeTransition(Duration.seconds(5), status);
 		fade.setToValue(0);
 
 		running.addListener((obs, ov, nv) -> {
@@ -188,6 +188,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 							Sentry.captureException(s);
 							System.out.println(s);
 							System.out.println("updatehandler = null");
+							status.setText("No updates found");
 							launch();
 						}
 
