@@ -453,10 +453,10 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		List<FileMetadata> onlineFiles = config.getFiles();
 		List<String> fileNames = new ArrayList<String>();
 		for (FileMetadata onlineFile: onlineFiles) {
-			fileNames.add(getFileName(onlineFile.getPath().toString()));
+			fileNames.add(new File(onlineFile.getPath().getFileName().toString()).getName());
+			
 		}
 		for (File file : baseDir.listFiles()) {
-			System.out.println(file.getName());
 			if (!fileNames.contains(file.getName())) {
 				file.delete();
 			}
@@ -467,6 +467,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		String fileName = "";
 		String[] strings = file.split("/");
 		fileName = strings[strings.length - 1];
+		System.out.println(fileName);
 		return fileName;
 	}
 }
