@@ -44,7 +44,7 @@ public class UpdateWalletConfig {
 		String configLocation = System.getProperty("user.dir");
 		String homeDir = System.getProperty("user.home");
 		String dir = configLocation;
-		String fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar";
+		String fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.7/fx-1.0.7-SNAPSHOT.jar";
 		String linuxDaemon = "unigrid-2.9.2-x86_64-linux-gnu.tar.gz";
 		String windowsDaemon = "unigrid-2.9.2-win64.zip";
 		String osxDaemon = "unigrid-2.9.2-osx64.tar.gz";
@@ -59,28 +59,32 @@ public class UpdateWalletConfig {
 		};
 		String daemonPath = "";
 		String url = "";
+		String basePath = "";
 
 		for (int i = 0; i < filePath.length; i++) {
 			if ((i%2) == 0) {
-				fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar";
+				fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.7/fx-1.0.7-SNAPSHOT.jar";
 			} else {
-				fxJarUrl = "https://github.com/Fim-84/test/releases/download/v1.0.6/fx-1.0.6-SNAPSHOT.jar";
+				fxJarUrl = "https://github.com/unigrid-project/unigrid-update-testing/releases/download/v1.0.7/fx-1.0.7-SNAPSHOT.jar";
 			}
 
 			if (filePath[i].contains("linux")) {
 				daemonPath = homeDir + "/Downloads/" + linuxDaemon;
 				url = getDaemonUrl(OS.LINUX);
+				basePath = "${user.home}/.unigrid/dependencies/lib/";
 			} else if (filePath[i].contains("mac")) {
 				daemonPath = homeDir + "/Downloads/" + osxDaemon;
 				url = getDaemonUrl(OS.MAC);
+				basePath = "${user.home}/Library/Application Support/UNIGRID/dependencies/lib/";
 			} else if (filePath[i].contains("windows")) {
 				daemonPath = homeDir + "/Downloads/" + windowsDaemon;
 				url = getDaemonUrl(OS.WINDOWS);
+				basePath = "${user.home}/AppData/Roaming/UNIGRID/dependencies/lib/";
 			}
 
 			Configuration config = Configuration.builder()
-				.basePath("${user.home}/.unigrid/dependencies/lib/")
-				.file(FileMetadata.readFrom("../../fx/target/fx-1.0.6-SNAPSHOT.jar")
+				.basePath(basePath)
+				.file(FileMetadata.readFrom("../../fx/target/fx-1.0.7-SNAPSHOT.jar")
 					.uri(fxJarUrl).modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/aopalliance-repackaged-3.0.3.jar")
 					.uri(mavenUrl("org.glassfish.hk2.external", "aopalliance-repackaged", "3.0.3")).modulepath())
@@ -120,10 +124,6 @@ public class UpdateWalletConfig {
 					.uri("https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.13.3/jackson-core-2.13.3.jar").modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jackson-databind-2.13.3.jar")
 					.uri("https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.13.3/jackson-databind-2.13.3.jar").modulepath())
-				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jakarta.activation-2.0.0.jar")
-					.uri("https://repo1.maven.org/maven2/com/sun/activation/jakarta.activation/2.0.0/jakarta.activation-2.0.0.jar").modulepath())
-				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jakarta.activation-api-2.1.0.jar")
-					.uri("https://repo1.maven.org/maven2/jakarta/activation/jakarta.activation-api/2.1.0/jakarta.activation-api-2.1.0.jar").modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jakarta.annotation-api-2.0.0.jar")
 					.uri("https://repo1.maven.org/maven2/jakarta/annotation/jakarta.annotation-api/2.0.0/jakarta.annotation-api-2.0.0.jar").modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jakarta.el-api-4.0.0.jar")
@@ -142,16 +142,22 @@ public class UpdateWalletConfig {
 					.uri("https://repo1.maven.org/maven2/jakarta/json/jakarta.json-api/2.0.2/jakarta.json-api-2.0.2.jar").modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jakarta.ws.rs-api-3.0.0.jar")
 					.uri("https://repo1.maven.org/maven2/jakarta/ws/rs/jakarta.ws.rs-api/3.0.0/jakarta.ws.rs-api-3.0.0.jar").modulepath())
-				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jakarta.xml.bind-api-3.0.0.jar")
-					.uri("https://repo1.maven.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/3.0.0/jakarta.xml.bind-api-3.0.0.jar").modulepath())
+				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jakarta.xml.bind-api-3.0.1.jar")
+					.uri("https://repo1.maven.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/3.0.1/jakarta.xml.bind-api-3.0.1.jar").modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/javassist-3.28.0-GA.jar")
 					.uri(mavenUrl("org.javassist", "javassist", "3.28.0-GA")).modulepath())
-				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-core-3.0.0.jar")
-					.uri(mavenUrl("com.sun.xml.bind", "jaxb-core", "3.0.0")).modulepath())
-				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-impl-3.0.0.jar")
-					.uri(mavenUrl("com.sun.xml.bind", "jaxb-impl", "3.0.0")).modulepath())
-				/*.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-runtime-3.0.0.jar")
-				.uri(mavenUrl("org.glassfish.jaxb","jaxb-runtime","3.0.0")).modulepath())*/
+				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-core-3.0.2.jar")
+					.uri(mavenUrl("org.glassfish.jaxb", "jaxb-core", "3.0.2")).modulepath())
+				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/istack-commons-runtime-4.0.1.jar")
+					.uri(mavenUrl("com.sun.istack", "istack-commons-runtime", "4.0.1")).modulepath())
+				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/txw2-3.0.2.jar")
+					.uri(mavenUrl("org.glassfish.jaxb", "txw2", "3.0.2")).modulepath())
+				/*.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-impl-4.0.0.jar")
+					.uri(mavenUrl("com.sun.xml.bind", "jaxb-impl", "4.0.0")).modulepath())*/
+				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jaxb-runtime-3.0.2.jar")
+					.uri(mavenUrl("org.glassfish.jaxb","jaxb-runtime","3.0.2")).modulepath())
+				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jakarta.activation-2.0.1.jar")
+					.uri("https://repo1.maven.org/maven2/com/sun/activation/jakarta.activation/2.0.1/jakarta.activation-2.0.1.jar").modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jboss-classfilewriter-1.2.5.Final.jar")
 					.uri(mavenUrl("org.jboss.classfilewriter", "jboss-classfilewriter", "1.2.5.Final")).modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/jboss-logging-3.4.3.Final.jar")
@@ -186,8 +192,6 @@ public class UpdateWalletConfig {
 					.uri(mavenUrl("org.eclipse.parsson", "parsson", "1.0.0")).modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/slf4j-api-2.0.0-alpha7.jar")
 					.uri(mavenUrl("org.slf4j", "slf4j-api", "2.0.0-alpha7")).modulepath())
-				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/stax-ex-2.1.0.jar")
-					.uri(mavenUrl("org.jvnet.staxex", "stax-ex", "2.1.0")).modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/weld-api-4.0.SP1.jar")
 					.uri(mavenUrl("org.jboss.weld", "weld-api", "4.0.SP1")).modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/weld-core-impl-4.0.3.Final.jar")
