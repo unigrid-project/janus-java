@@ -70,7 +70,7 @@
 					</variables>
 				</configuration>
 			</plugin>
-			<!--<plugin>
+			<plugin>
 			    <groupId>com.coderplus.maven.plugins</groupId>
 			    <artifactId>copy-rename-maven-plugin</artifactId>
 			    <version>1.0.1</version>
@@ -86,7 +86,7 @@
 				    </configuration>
 				</execution>
 			    </executions>
-			</plugin>-->
+			</plugin>
 			<plugin>
 				<groupId>org.panteleyev</groupId>
 				<artifactId>jpackage-maven-plugin</artifactId>
@@ -102,6 +102,9 @@
 							<appVersion>1.0.6</appVersion>
 							<vendor>org.unigrid</vendor>
 							<module>org.unigrid.bootstrap/org.unigrid.bootstrap.App</module>
+                                                        <modulePaths>
+                                                            <modulePath>target/mp</modulePath>
+                                                        </modulePaths>
 							<runtimeImage>target/jlink</runtimeImage>
 							<type>APP_IMAGE</type>
 							<winConsole>false</winConsole>
