@@ -48,7 +48,7 @@ public class UpdateWalletConfig {
 		String linuxDaemon = "unigrid-2.9.2-x86_64-linux-gnu.tar.gz";
 		String windowsDaemon = "unigrid-2.9.2-win64.zip";
 		String osxDaemon = "unigrid-2.9.2-osx64.tar.gz";
-		String fxVersion = "1.0.6";
+		String fxVersion = "1.0.8";
 		String[] filePath = new String[]{
 			"/config-linux.xml",
 			"/config-linux-test.xml",
