@@ -36,6 +36,7 @@ public class GridnodeListModel {
 		int newCount = 0;
 		for (Gridnode g : list.getResult()) {
 			gridnodes.add(g);
+			//TODO: is this used for something
 			newCount++;
 		}
 	}

@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.unigrid.janus</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.0.6-SNAPSHOT</version>
+		<version>1.0.7-SNAPSHOT</version>
 	</parent>
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
@@ -213,6 +213,11 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.0-alpha7</version>
 		</dependency>
+                <dependency>
+                    <groupId>io.sentry</groupId>
+                    <artifactId>sentry</artifactId>
+                    <version>6.4.0</version>
+                </dependency>
 	</dependencies>
 	<build>
 		<plugins>

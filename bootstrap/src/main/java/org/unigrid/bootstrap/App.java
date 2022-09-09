@@ -13,6 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.bootstrap;
 
 import javafx.application.Application;
@@ -35,6 +36,11 @@ import org.update4j.Configuration;
 import org.update4j.service.Delegate;
 import org.update4j.OS;
 import javafx.stage.StageStyle;
+import io.sentry.Sentry;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
+import java.util.UUID;
 //import ch.qos.logback.classic.Level;
 //import ch.qos.logback.classic.Logger;
 //import org.slf4j.LoggerFactory;
@@ -50,7 +56,6 @@ public class App extends Application implements Delegate {
 
 		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		//root.setLevel(Level.ALL);
-
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
 
@@ -76,10 +81,27 @@ public class App extends Application implements Delegate {
 			config = Configuration.read(in);
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
-			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"),"/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
+			Sentry.captureException(e);
+			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"), "/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
+		}
+
+		if (inputArgs.get("test") == null) {
+			String server = "";
+			final String version = config.getProperties("fx.version").get(0).getValue();
+			Sentry.init(options -> {
+				options.setDsn("https://18a30d2bf41643ce9efe84a451ecef1a@o266736.ingest.sentry.io/6632466");
+				// Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+				// We recommend adjusting this value in production.
+				options.setServerName(cryptCompName());
+				options.setTag("os", OS.CURRENT.getShortName());
+				options.setRelease(version);
+				options.setEnvironment("production");
+				options.setTracesSampleRate(0.1);
+				options.setDebug(false);
+			});
 		}
 
 		config.sync();
@@ -106,12 +128,13 @@ public class App extends Application implements Delegate {
 	public static void main(String[] args) {
 		if (args != null) {
 			for (String arg : args) {
+				System.out.println(arg);
 				if (arg.contains("=")) {
 					String key = arg.split("=")[0];
 					String value = arg.split("=")[1];
 					inputArgs.put(key, value);
 				}
-			}	
+			}
 		}
 		launch();
 	}
@@ -121,4 +144,36 @@ public class App extends Application implements Delegate {
 		launch();
 	}
 
+	private String cryptCompName() {
+		String s = "";
+		try {
+			InetAddress localHost = InetAddress.getLocalHost();
+			Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+			while (nis.hasMoreElements()) {
+				NetworkInterface ni = nis.nextElement();
+				System.out.println(ni.getName());
+				if (ni != null) {
+					byte[] name = ni.getHardwareAddress();
+					byte[] salt = "31".getBytes();
+					byte[] result = joinBytes(name, salt);
+					UUID uuid = UUID.nameUUIDFromBytes(result);
+					s = uuid.toString();
+					break;
+				}
+			}
+			System.out.println(s);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return s;
+	}
+
+	private byte[] joinBytes(byte[] byteArray1, byte[] byteArray2) {
+		final int finalLength = byteArray1.length + byteArray2.length;
+		final byte[] result = new byte[finalLength];
+
+		System.arraycopy(byteArray1, 0, result, 0, byteArray1.length);
+		System.arraycopy(byteArray2, 0, result, byteArray1.length, byteArray2.length);
+		return result;
+	}
 }

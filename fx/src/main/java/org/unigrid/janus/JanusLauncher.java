@@ -40,6 +40,10 @@ public class JanusLauncher implements Launcher {
 	public void run(LaunchContext lc) {
 		System.out.println("before cotainer init");
 		// ApplicationLoader.launch(ApplicationLoader.class);
+		for (Map.Entry<String, String> entry : inputArgs.entrySet()) {
+			System.out.println(entry.getKey());
+			System.out.println(entry.getValue());
+		}
 
 		final SeContainer container = SeContainerInitializer.newInstance()
 			.addExtensions(EagerExtension.class).initialize();
