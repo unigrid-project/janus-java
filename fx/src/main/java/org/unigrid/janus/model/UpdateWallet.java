@@ -136,6 +136,9 @@ public class UpdateWallet extends TimerTask {
 			pcs = new PropertyChangeSupport(this);
 		}
 
+		String title = "Unigrid";
+		String launcherMessage = "New launcher update ready \nPlease press the update button!";
+		String fxMessage = "New update ready \nPlease press the update button!";
 		if (checkUpdateBootstrap()) {
 
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
@@ -144,14 +147,12 @@ public class UpdateWallet extends TimerTask {
 				@Override
 				public void run() {
 					if (SystemUtils.IS_OS_MAC_OSX) {
-						Notifications.create().title("Update Ready")
-							.text("New launcher update ready \n"
-								+ "Please press the update button!")
+						Notifications.create().title(title)
+							.text(launcherMessage)
 							.position(Pos.TOP_RIGHT).showInformation();
 					} else {
-						Notifications.create().title("Update Ready")
-							.text("New launcher update ready \n"
-								+ "Please press the update button!")
+						Notifications.create().title(title)
+							.text(launcherMessage)
 							.showInformation();
 					}
 				}
@@ -163,12 +164,12 @@ public class UpdateWallet extends TimerTask {
 				@Override
 				public void run() {
 					if (SystemUtils.IS_OS_MAC_OSX) {
-						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas press the update button!")
+						Notifications.create().title(title)
+							.text(fxMessage)
 							.position(Pos.TOP_RIGHT).showInformation();
 					} else {
-						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas press the update button!")
+						Notifications.create().title(title)
+							.text(fxMessage)
 							.showInformation();
 					}
 				}
