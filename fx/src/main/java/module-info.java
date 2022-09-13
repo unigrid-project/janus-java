@@ -47,12 +47,15 @@ module fx {
 	requires java.xml;
 	requires org.kordamp.ikonli.fontawesome5;
 	requires weld.environment.common;
+	requires weld.se.core;
+	requires weld.core.impl;
 	requires jersey.common;
 	requires org.slf4j;
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
 	requires FXTrayIcon;
 	requires javafx.swing;
+	requires j8fu;
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;

@@ -185,6 +185,11 @@
 			<version>2.0.0</version>
 		</dependency>
 		<dependency>
+			<groupId>com.evolvedbinary.j8fu</groupId>
+			<artifactId>j8fu</artifactId>
+			<version>1.23.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.testfx</groupId>
 			<artifactId>testfx-core</artifactId>
 			<version>4.0.16-alpha</version>
@@ -206,6 +211,12 @@
 			<groupId>org.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
 			<version>1.49</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.jqwik</groupId>
+			<artifactId>jqwik</artifactId>
+			<version>1.6.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
