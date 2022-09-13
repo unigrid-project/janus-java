@@ -346,7 +346,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 				getClass().getResource("/org/unigrid/janus/view/images/unigrid-round.png"));
 			tray.show();
 
-			tray.setTooltip("Unigrid");	
+			tray.setTooltip("Unigrid");
 		}
 	}
 }
