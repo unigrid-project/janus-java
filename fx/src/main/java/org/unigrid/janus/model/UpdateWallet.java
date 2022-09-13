@@ -143,37 +143,41 @@ public class UpdateWallet extends TimerTask {
 
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					if (SystemUtils.IS_OS_MAC_OSX) {
-						Notifications.create().title(title)
-							.text(launcherMessage)
-							.position(Pos.TOP_RIGHT).showInformation();
-					} else {
-						Notifications.create().title(title)
-							.text(launcherMessage)
-							.showInformation();
+			if (Preferences.get().getBoolean("notifications", true)) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						if (SystemUtils.IS_OS_MAC_OSX) {
+							Notifications.create().title(title)
+								.text(launcherMessage)
+								.position(Pos.TOP_RIGHT).showInformation();
+						} else {
+							Notifications.create().title(title)
+								.text(launcherMessage)
+								.showInformation();
+						}
 					}
-				}
-			});
+				});
+			}
 		} else if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					if (SystemUtils.IS_OS_MAC_OSX) {
-						Notifications.create().title(title)
-							.text(fxMessage)
-							.position(Pos.TOP_RIGHT).showInformation();
-					} else {
-						Notifications.create().title(title)
-							.text(fxMessage)
-							.showInformation();
+			if (Preferences.get().getBoolean("notifications", true)) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						if (SystemUtils.IS_OS_MAC_OSX) {
+							Notifications.create().title(title)
+								.text(fxMessage)
+								.position(Pos.TOP_RIGHT).showInformation();
+						} else {
+							Notifications.create().title(title)
+								.text(fxMessage)
+								.showInformation();
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 

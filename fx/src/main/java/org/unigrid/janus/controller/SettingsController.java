@@ -35,6 +35,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.VBox;
@@ -45,6 +46,7 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
+import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
@@ -85,12 +87,14 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML private Label txtPassWarningOne;
 	@FXML private Label txtPassWarningTwo;
 	@FXML private Label txtErrorMessage;
+	@FXML private CheckBox chkNotifications;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setSettingsController(this);
+		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -333,6 +337,11 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		final BackupWallet result = rpc.call(new BackupWallet.Request(file.getAbsolutePath()), BackupWallet.class);
 		window.notifyIfError(result);
 		debug.log(String.format("Backup wallet result: %s", rpc.resultToJson(result)));
+	}
+
+	@FXML
+	private void onNotificationsShown(MouseEvent event) {
+		Preferences.get().put("notifications", String.valueOf(chkNotifications.isSelected()));
 	}
 
 	public void setVersion(String version) {

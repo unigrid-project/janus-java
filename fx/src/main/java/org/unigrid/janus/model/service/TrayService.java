@@ -46,7 +46,7 @@ public class TrayService {
 	}
 
 	//TODO: Implement the blend of the images
-	public void updateNewEventImage() throws NotImplementedException{
+	public void updateNewEventImage() throws NotImplementedException {
 		Image image = manipulateImage(getClass()
 			.getResourceAsStream("/org/unigrid/janus/view/images/unigrid-round_77x77.png"));
 		if (image != null) {
