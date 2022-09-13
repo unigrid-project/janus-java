@@ -216,7 +216,9 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	private void launch() {
-		launch.setDisable(false);
+		launchApp();
+		getStage().hide();
+		//launch.setDisable(false);
 	}
 
 	private void untarDaemonLinux() {

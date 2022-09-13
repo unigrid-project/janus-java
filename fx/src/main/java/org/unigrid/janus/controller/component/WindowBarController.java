@@ -81,7 +81,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		window.setWindowBarController(this);
 		updateButton.setVisible(false);
 
-		Tooltip t = new Tooltip("A new update is ready. Pleas restart the wallet");
+		Tooltip t = new Tooltip("A new update is ready. Please restart the wallet");
 		t.install(updateButton, t);
 
 		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
