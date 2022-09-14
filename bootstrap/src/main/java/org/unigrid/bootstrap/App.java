@@ -41,6 +41,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.UUID;
+import javafx.application.HostServices;
 //import ch.qos.logback.classic.Level;
 //import ch.qos.logback.classic.Logger;
 //import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ public class App extends Application implements Delegate {
 	private static Scene scene;
 	private static FXMLLoader loader;
 	private static Map<String, String> inputArgs = new HashMap<String, String>();
+	private HostServices hostServices = getHostServices();
 
 	@Override
 	public void start(Stage stage) throws IOException {
@@ -111,7 +113,7 @@ public class App extends Application implements Delegate {
 		stage.setResizable(false);
 		stage.setScene(scene);
 		stage.show();
-		UpdateView.getInstance().setConfig(config, stage, inputArgs);
+		UpdateView.getInstance().setConfig(config, stage, inputArgs, hostServices);
 
 	}
 
