@@ -37,7 +37,7 @@ public class JanusLauncher implements Launcher {
 
 	@InjectTarget
 	private Map<String, String> inputArgs = new HashMap<String, String>();
-	
+
 	@InjectTarget
 	private HostServices hostService;
 
@@ -71,7 +71,7 @@ public class JanusLauncher implements Launcher {
 			System.out.println("launcher start");
 
 			try {
-				janus.startFromBootstrap(stage);
+				janus.startFromBootstrap(stage, hostService);
 			} catch (Exception e) {
 				System.exit(1);
 			}

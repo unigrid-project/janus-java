@@ -36,11 +36,11 @@
 			<artifactId>javafx-graphics</artifactId>
 			<version>17-ea+7</version>
 		</dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-swing</artifactId>
-                    <version>17-ea+7</version>
-                </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-swing</artifactId>
+      <version>17-ea+7</version>
+    </dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-fxml</artifactId>
@@ -218,11 +218,11 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.0-alpha7</version>
 		</dependency>
-                <dependency>
-                    <groupId>com.dustinredmond.fxtrayicon</groupId>
-                    <artifactId>FXTrayIcon</artifactId>
-                    <version>3.3.0</version>
-                </dependency>
+    <dependency>
+      <groupId>com.dustinredmond.fxtrayicon</groupId>
+      <artifactId>FXTrayIcon</artifactId>
+      <version>3.3.0</version>
+    </dependency>
 	</dependencies>
 	<build>
 		<plugins>
