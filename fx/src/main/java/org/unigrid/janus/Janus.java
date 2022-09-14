@@ -125,8 +125,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
 		debug.print("start", Janus.class.getSimpleName());
 		setUpTrayIcon(stage);
-		startSplashScreen();
 		window.setHostServices(hostServices);
+		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
@@ -152,11 +152,12 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	}
 
-	public void startFromBootstrap(Stage stage) throws Exception {
+	public void startFromBootstrap(Stage stage, HostServices hostServices) throws Exception {
 		System.out.println(CDI.current());
 		setUpTrayIcon(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
+		window.setHostServices(hostServices);
 		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {

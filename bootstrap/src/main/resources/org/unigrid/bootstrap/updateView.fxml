@@ -20,7 +20,7 @@
       </ImageView>
       <ProgressBar fx:id="progress" layoutX="50.0" layoutY="178.0" maxHeight="4.0" prefHeight="4.0" prefWidth="500.0" progress="0.4" styleClass="my-progress-bar" stylesheets="@updateview.css" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" />
       <Label fx:id="status" layoutX="84.0" layoutY="210.0" prefHeight="16.0" prefWidth="432.0" text="Label" textFill="WHITE" />
-      <Button fx:id="quit" layoutX="189.0" layoutY="250.0" mnemonicParsing="false" onAction="#onQuit" prefHeight="24.0" prefWidth="70.0" stylesheets="@updateview.css" text="Quit" />
-      <Button fx:id="launch" layoutX="332.0" layoutY="250.0" mnemonicParsing="false" onAction="#onLaunch" prefWidth="70.0" stylesheets="@updateview.css" text="Launch" />
+      <Button fx:id="quit" layoutX="189.0" layoutY="250.0" mnemonicParsing="false" onAction="#onQuit" prefHeight="24.0" prefWidth="70.0" stylesheets="@updateview.css" text="Quit" visible="false" />
+      <Button fx:id="launch" layoutX="332.0" layoutY="250.0" mnemonicParsing="false" onAction="#onLaunch" prefWidth="70.0" stylesheets="@updateview.css" text="Launch" visible="false" />
    </children>
 </AnchorPane>
