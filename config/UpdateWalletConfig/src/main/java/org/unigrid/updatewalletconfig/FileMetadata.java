@@ -31,16 +31,16 @@ public class FileMetadata {
 
 	@Setter
 	@XmlAttribute
-	private String checkSum;
+	private String checksum;
 
 	@Setter
 	@XmlAttribute
 	private boolean modulePath;
 
-	public FileMetadata(String uri, long size, String checkSum) {
+	public FileMetadata(String uri, long size, String checksum) {
 		this.uri = uri;
 		this.size = size;
-		this.checkSum = checkSum;
+		this.checksum = checksum;
 		this.modulePath = true;
 	}
 

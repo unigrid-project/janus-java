@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.unigrid.janus</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.0.6-SNAPSHOT</version>
+		<version>1.0.8-SNAPSHOT</version>
 	</parent>
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
@@ -70,7 +70,7 @@
 					</variables>
 				</configuration>
 			</plugin>
-			<!--<plugin>
+			<plugin>
 			    <groupId>com.coderplus.maven.plugins</groupId>
 			    <artifactId>copy-rename-maven-plugin</artifactId>
 			    <version>1.0.1</version>
@@ -86,7 +86,7 @@
 				    </configuration>
 				</execution>
 			    </executions>
-			</plugin>-->
+			</plugin>
 			<plugin>
 				<groupId>org.panteleyev</groupId>
 				<artifactId>jpackage-maven-plugin</artifactId>
@@ -99,12 +99,15 @@
 							<goal>jpackage</goal>
 						</goals>
 						<configuration>
-							<appVersion>1.0.6</appVersion>
+							<appVersion>1.0.8</appVersion>
 							<vendor>org.unigrid</vendor>
 							<module>org.unigrid.bootstrap/org.unigrid.bootstrap.App</module>
+                                                        <modulePaths>
+                                                            <modulePath>target/mp</modulePath>
+                                                        </modulePaths>
 							<runtimeImage>target/jlink</runtimeImage>
 							<type>APP_IMAGE</type>
-							<winConsole>true</winConsole>
+							<winConsole>false</winConsole>
 							<javaOptions>
 								<option>--add-opens</option>
 								<option>java.base/java.lang=ALL-UNNAMED</option>
@@ -119,7 +122,7 @@
 							<goal>jpackage</goal>
 						</goals>
 						<configuration>
-							<appVersion>1.0.6</appVersion>
+							<appVersion>1.0.8</appVersion>
 							<appImage>target/dist/Unigrid</appImage>
 						</configuration>
 					</execution>

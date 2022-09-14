@@ -12,32 +12,21 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
- */
+*/
 
-package org.unigrid.janus.model;
+package org.unigrid.janus;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
+import lombok.AccessLevel;
 import lombok.Getter;
-import org.unigrid.janus.model.rpc.entity.GridnodeList;
-import org.unigrid.janus.model.service.DebugService;
+import lombok.NoArgsConstructor;
 
-public class GridnodeListModel {
-	private static DebugService debug = new DebugService();
-	public static final String GRIDNODE_LIST = "gridnodeList";
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class ArchiTectureTest {
+	@Getter(AccessLevel.PROTECTED)
+	private final String packageName = this.getClass().getPackageName();
 
-	@Getter
-	private ObservableList<Gridnode> gridnodes = FXCollections.observableArrayList();
-
-	public void setGridnodes(GridnodeList list) {
-		int oldCount = 0;
-		gridnodes.clear();
-
-		int newCount = 0;
-		for (Gridnode g : list.getResult()) {
-			gridnodes.add(g);
-			//TODO: is this used for something
-			newCount++;
-		}
-	}
+	@Getter(AccessLevel.PROTECTED)
+	private final JavaClasses classes = new ClassFileImporter().importPackages(packageName);
 }

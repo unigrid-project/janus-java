@@ -164,11 +164,11 @@ public class UpdateWallet extends TimerTask {
 				public void run() {
 					if (SystemUtils.IS_OS_MAC_OSX) {
 						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas press the update button!")
+							.text("New update ready \nPlease press the update button!")
 							.position(Pos.TOP_RIGHT).showInformation();
 					} else {
 						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas press the update button!")
+							.text("New update ready \nPlease press the update button!")
 							.showInformation();
 					}
 				}

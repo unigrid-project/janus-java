@@ -22,6 +22,7 @@ import jakarta.enterprise.inject.se.SeContainerInitializer;
 import jakarta.enterprise.inject.spi.CDI;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
@@ -35,11 +36,17 @@ public class JanusLauncher implements Launcher {
 
 	@InjectTarget
 	private Map<String, String> inputArgs = new HashMap<String, String>();
+	@InjectTarget
+	private HostServices hostService;
 
 	@Override @SneakyThrows
 	public void run(LaunchContext lc) {
 		System.out.println("before cotainer init");
 		// ApplicationLoader.launch(ApplicationLoader.class);
+		for (Map.Entry<String, String> entry : inputArgs.entrySet()) {
+			System.out.println(entry.getKey());
+			System.out.println(entry.getValue());
+		}
 
 		final SeContainer container = SeContainerInitializer.newInstance()
 			.addExtensions(EagerExtension.class).initialize();
@@ -62,7 +69,7 @@ public class JanusLauncher implements Launcher {
 			System.out.println("launcher start");
 
 			try {
-				janus.startFromBootstrap(stage);
+				janus.startFromBootstrap(stage, hostService);
 			} catch (Exception e) {
 				System.exit(1);
 			}

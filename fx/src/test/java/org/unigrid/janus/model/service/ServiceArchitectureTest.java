@@ -12,32 +12,18 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
- */
+*/
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.model.service;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import lombok.Getter;
-import org.unigrid.janus.model.rpc.entity.GridnodeList;
-import org.unigrid.janus.model.service.DebugService;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.unigrid.janus.ArchiTectureTest;
 
-public class GridnodeListModel {
-	private static DebugService debug = new DebugService();
-	public static final String GRIDNODE_LIST = "gridnodeList";
-
-	@Getter
-	private ObservableList<Gridnode> gridnodes = FXCollections.observableArrayList();
-
-	public void setGridnodes(GridnodeList list) {
-		int oldCount = 0;
-		gridnodes.clear();
-
-		int newCount = 0;
-		for (Gridnode g : list.getResult()) {
-			gridnodes.add(g);
-			//TODO: is this used for something
-			newCount++;
-		}
+public class ServiceArchitectureTest extends ArchiTectureTest {
+	@Test @Disabled // TODO: Fix and enable
+	public void shouldNotDependOnJavaFx() {
+		noClasses().should().accessClassesThat().resideInAPackage("javafx..").check(getClasses());
 	}
 }
