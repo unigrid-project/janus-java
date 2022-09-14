@@ -136,43 +136,48 @@ public class UpdateWallet extends TimerTask {
 			pcs = new PropertyChangeSupport(this);
 		}
 
+		String title = "Unigrid";
+		String launcherMessage = "New launcher update ready \nPlease press the update button!";
+		String fxMessage = "New update ready \nPlease press the update button!";
 		if (checkUpdateBootstrap()) {
 
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					if (SystemUtils.IS_OS_MAC_OSX) {
-						Notifications.create().title("Update Ready")
-							.text("New launcher update ready \n"
-								+ "Please press the update button!")
-							.position(Pos.TOP_RIGHT).showInformation();
-					} else {
-						Notifications.create().title("Update Ready")
-							.text("New launcher update ready \n"
-								+ "Please press the update button!")
-							.showInformation();
+			if (Preferences.get().getBoolean("notifications", true)) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						if (SystemUtils.IS_OS_MAC_OSX) {
+							Notifications.create().title(title)
+								.text(launcherMessage)
+								.position(Pos.TOP_RIGHT).showInformation();
+						} else {
+							Notifications.create().title(title)
+								.text(launcherMessage)
+								.showInformation();
+						}
 					}
-				}
-			});
+				});
+			}
 		} else if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					if (SystemUtils.IS_OS_MAC_OSX) {
-						Notifications.create().title("Update Ready")
-							.text("New update ready \nPlease press the update button!")
-							.position(Pos.TOP_RIGHT).showInformation();
-					} else {
-						Notifications.create().title("Update Ready")
-							.text("New update ready \nPlease press the update button!")
-							.showInformation();
+			if (Preferences.get().getBoolean("notifications", true)) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						if (SystemUtils.IS_OS_MAC_OSX) {
+							Notifications.create().title(title)
+								.text(fxMessage)
+								.position(Pos.TOP_RIGHT).showInformation();
+						} else {
+							Notifications.create().title(title)
+								.text(fxMessage)
+								.showInformation();
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 

@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.unigrid.janus.ArchiTectureTest;
 
 public class ModelArchitectureTest extends ArchiTectureTest {
-	@Test @Disabled // TODO: Fix and enable
+	@Test @Disabled// TODO: Fix and enable
 	public void shouldNotDependOnServices() {
 		noClasses().that().resideInAPackage("org.unigrid.janus.model")
 			.should().dependOnClassesThat().resideInAPackage("org.unigrid.janus.model.service")
