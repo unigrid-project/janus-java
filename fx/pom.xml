@@ -168,12 +168,6 @@
 			<version>3.0.5</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.weld.se</groupId>
-			<artifactId>weld-se-shaded</artifactId>
-			<version>4.0.3.Final</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.jboss.weld</groupId>
 			<artifactId>weld-junit5</artifactId>
 			<version>4.0.0.Final</version>
@@ -260,10 +254,10 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-			</plugin>
+			</plugin>-->
 			<plugin>
 				<groupId>pl.gdela</groupId>
 				<artifactId>socomo-maven</artifactId>
@@ -290,6 +284,7 @@
 						--add-exports fx/org.unigrid.janus.model.service.external=jersey.client
 						--add-exports fx/org.unigrid.janus.model.external=jersey.common
 						--add-exports fx/org.unigrid.janus.model.external=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.jqwik=ALL-UNNAMED
 						--add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
 						--add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
 						--add-exports javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED

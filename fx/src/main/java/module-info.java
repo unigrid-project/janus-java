@@ -49,6 +49,7 @@ module fx {
 	requires weld.environment.common;
 	requires weld.se.core;
 	requires weld.core.impl;
+	requires weld.api;
 	requires jersey.common;
 	requires org.slf4j;
 	requires ch.qos.logback.core;
