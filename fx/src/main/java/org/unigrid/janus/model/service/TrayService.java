@@ -26,7 +26,6 @@ import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.NotImplementedException;
 
 @ApplicationScoped
 public class TrayService {
@@ -46,13 +45,14 @@ public class TrayService {
 	}
 
 	//TODO: Implement the blend of the images
-	public void updateNewEventImage() throws NotImplementedException {
+	public void updateNewEventImage() {
+		if (!SystemTray.isSupported()) {
+			return;
+		}
 		Image image = manipulateImage(getClass()
 			.getResourceAsStream("/org/unigrid/janus/view/images/unigrid-round_77x77.png"));
 		if (image != null) {
 			tray.setGraphic(image);
-		} else {
-			System.exit(1);
 		}
 	}
 
@@ -74,28 +74,6 @@ public class TrayService {
 				top
 			);
 			return blend.snapshot(new SnapshotParameters(), null);
-			/*System.out.println(path);
-			System.out.println(getClass()
-				.getResource("/org/unigrid/janus/view/images/red-dot.png").toString());
-			BufferedImage base = ImageIO.read(path);
-			//BufferedImage img2 = ImageIO.read(new File(getClass()
-			//	.getResource("/org/unigrid/janus/view/images/red-dot.png").toString()));
-			BufferedImage img2 = ImageIO.read(getClass()
-				.getResourceAsStream("/org/unigrid/janus/view/images/red-dot.png"));
-			int offset = 2;
-			int width = base.getWidth() + img2.getWidth() + offset;
-			int heigth = Math.max(base.getHeight(), img2.getHeight()) + offset;
-			BufferedImage newImage = new BufferedImage(width, heigth, BufferedImage.TYPE_INT_ARGB);
-			Graphics2D g2 = newImage.createGraphics();
-			Color oldColor = g2.getColor();
-			g2.setPaint(Color.BLACK);
-			g2.fillRect(0, 0, width, heigth);
-			g2.setColor(oldColor);
-			g2.drawI
-			g2.drawImage(base, null, 0, 0);
-			g2.drawImage(img2, null, base.getWidth() + offset, 0);
-			g2.dispose();
-			return newImage;*/
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
