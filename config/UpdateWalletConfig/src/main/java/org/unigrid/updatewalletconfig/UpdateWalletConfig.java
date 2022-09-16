@@ -66,6 +66,13 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 	@Override
 	public void afterProjectsRead(MavenSession mavenSession
 	) {
+		OS[] os = new OS[]{OS.LINUX, OS.LINUX, OS.MAC, OS.MAC, OS.WINDOWS, OS.WINDOWS};
+		for (int i = 0; i < os.length; i++) {
+			generateUpdateConfigFile(mavenSession, os[i], i % 2 == 0);
+		}
+	}
+
+	public void generateUpdateConfigFile(MavenSession mavenSession, OS os, boolean isForTesting) {
 		String version = mavenSession.getCurrentProject().getVersion();
 		basedir = mavenSession.getRepositorySession().getLocalRepository().getBasedir();
 		if (fxVersion.isEmpty()) {
@@ -75,16 +82,17 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 		List<FileMetadata> files = getDependencies(getFxDependencyString(mavenSession));
 		List<FileMetadata> bootstrapFiles = getDependencies("org.unigrid:bootstrap:" + version);
-		List<FileMetadata> external = getExternalDependencies();
+		List<FileMetadata> external = getExternalDependencies(isForTesting);
 		files.removeAll(bootstrapFiles);
 		files.addAll(0, external);
-		configuration.setBasePath(new BasePath(getBasePathUrl(OS.CURRENT)));
+		configuration.setBasePath(new BasePath(getBasePathUrl(os)));
 		configuration.setFiles(files);
 		ConfMarshaller marshaller = new ConfMarshaller();
-		marshaller.mashal(configuration, getFileUrl(OS.CURRENT));
+		marshaller.mashal(configuration, getFileUrl(os, isForTesting));
+		logger.info("Config File created: " + getFileUrl(os, isForTesting));
 	}
 
-	private RepositorySystem newRepositorySystem() {
+	public RepositorySystem newRepositorySystem() {
 		DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
 		locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
 		locator.addService(TransporterFactory.class, FileTransporterFactory.class);
@@ -143,14 +151,16 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		return files;
 	}
 
-	public List<FileMetadata> getExternalDependencies() {
+	public List<FileMetadata> getExternalDependencies(boolean isForTesting) {
+		String testing = isForTesting ? "-testing" : "";
 		List<FileMetadata> list = new ArrayList();
 		try {
-			list.add(getFileByUrl("https://github.com/unigrid-project/unigrid-update/releases/download/v"
-				+ fxVersion + "/fx-" + fxVersion + "-SNAPSHOT.jar"));
+			list.add(getFileByUrl("https://github.com/unigrid-project/unigrid-update"
+				+ testing + "/releases/download/v" + fxVersion + "/fx-" + fxVersion + "-SNAPSHOT.jar"));
 			list.add(getFileByUrl(getDaemonUrl(OS.CURRENT)));
 		} catch (IOException ex) {
-			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName()).log(Level.SEVERE, null, ex);
+			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
+				.log(Level.SEVERE, null, ex);
 		}
 		return list;
 	}
@@ -168,7 +178,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					checksum
 				);
 			} catch (IOException ex) {
-				java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName()).log(Level.SEVERE, null, ex);
+				java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
+					.log(Level.SEVERE, null, ex);
 			}
 		} else {
 			logger.info("    !!!- Url to file doesn't exist: " + localUrl);
@@ -211,8 +222,9 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		};
 	}
 
-	public static String getFileUrl(OS os) {
-		return System.getProperty("user.home") + "/Downloads/config-" + os.getShortName() + ".xml";
+	public static String getFileUrl(OS os, boolean isForTesting) {
+		String testing = isForTesting ? "-test" : "";
+		return System.getProperty("user.home") + "/Downloads/config-" + os.getShortName() + testing + ".xml";
 	}
 
 	public static String getDaemonUrl(OS os) {
@@ -230,7 +242,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		List<String> githubUrls = jsonPath.read(jsonSearch);
 
 		if (os.equals(OS.LINUX)) {
-			/*List<Map<String, Object>> data = jsonPath.read("$['assets'][*][?('linux' in @['browser_download_url'])]");
+			/*List<Map<String, Object>> data = jsonPath
+				.read("$['assets'][*][?('linux' in @['browser_download_url'])]");
 			s = data.get(0).toString();
 			String arg = "linux-gnu.tar.gz";
 			for (int i = 0; i < githubUrls.size(); i++) {
