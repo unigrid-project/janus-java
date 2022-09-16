@@ -101,7 +101,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		return locator.getService(RepositorySystem.class);
 	}
 
-	private List<FileMetadata> getDependencies(String currentArtifact) {
+	public List<FileMetadata> getDependencies(String currentArtifact) {
 
 		List<FileMetadata> files = new ArrayList();
 		DefaultRepositorySystemSession defSession = MavenRepositorySystemUtils.newSession();
@@ -125,7 +125,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		return files;
 	}
 
-	private List<FileMetadata> getListByRecursion(
+	public List<FileMetadata> getListByRecursion(
 		List<DependencyNode> nodes,
 		List<FileMetadata> files
 	) {
@@ -143,7 +143,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		return files;
 	}
 
-	private List<FileMetadata> getExternalDependencies() {
+	public List<FileMetadata> getExternalDependencies() {
 		List<FileMetadata> list = new ArrayList();
 		try {
 			list.add(getFileByUrl("https://github.com/unigrid-project/unigrid-update/releases/download/v"
@@ -155,7 +155,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		return list;
 	}
 
-	private FileMetadata getFileMetadata(String gId, String aId, String version, String classifier) {
+	public FileMetadata getFileMetadata(String gId, String aId, String version, String classifier) {
 		String localUrl = getLocalUrl(gId, aId, version, classifier);
 		File file = new File(localUrl);
 		FileMetadata tempFile = null;
@@ -184,7 +184,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			.toString();
 	}
 
-	private FileMetadata getFileByUrl(String url) throws MalformedURLException, IOException {
+	public FileMetadata getFileByUrl(String url) throws MalformedURLException, IOException {
 		URL tempUrl = new URL(url);
 		FileMetadata tempFile = new FileMetadata(
 			tempUrl.toString(),
@@ -194,7 +194,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		return tempFile;
 	}
 
-	private static String getBasePathUrl(OS os) {
+	public static String getBasePathUrl(OS os) {
 		return switch (os) {
 			case LINUX -> {
 				yield "${user.home}/.unigrid/dependencies/lib/";
@@ -211,11 +211,11 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		};
 	}
 
-	private static String getFileUrl(OS os) {
+	public static String getFileUrl(OS os) {
 		return System.getProperty("user.home") + "/Downloads/config-" + os.getShortName() + ".xml";
 	}
 
-	private static String getDaemonUrl(OS os) {
+	public static String getDaemonUrl(OS os) {
 		String s = "";
 
 		String jsonSearch = "$['assets'][*]['browser_download_url']";
@@ -250,7 +250,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		return s;
 	}
 
-	private static String getLocalUrl(String groupId, String artifactId, String version, String classifier) {
+	public static String getLocalUrl(String groupId, String artifactId, String version, String classifier) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(System.getProperty("user.home").concat("/.m2/repository/"));
 		builder.append(groupId.replace('.', '/')).append("/");
