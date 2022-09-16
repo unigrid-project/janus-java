@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.jqwik;
 
+import org.unigrid.janus.jqwik.fx.BaseFxTest;
 import com.evolvedbinary.j8fu.function.TriConsumer;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
@@ -25,8 +26,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import net.jqwik.api.lifecycle.AroundContainerHook;
 import net.jqwik.api.lifecycle.AroundPropertyHook;
@@ -37,17 +40,28 @@ import net.jqwik.api.lifecycle.PropertyLifecycleContext;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
+import org.testfx.api.FxRobot;
 
 public class WeldHook implements AroundContainerHook, AroundPropertyHook {
 	private List<Class<?>> findWeldClasses(Object instance, Class<?> clazz) {
-		final List<Class<?>> beans = new ArrayList<>();
+		final Set<Class<?>> beans = new HashSet<>();
 		final WeldSetup weldSetup = clazz.getAnnotation(WeldSetup.class);
 
 		if (Objects.nonNull(weldSetup)) {
 			beans.addAll(List.of(weldSetup.value()));
 		}
 
-		return beans;
+		Class<?> superClass = clazz;
+
+		do {
+			if (BaseFxTest.class.equals(superClass)) {
+				beans.add(FxRobot.class);
+			}
+
+			superClass = superClass.getSuperclass();
+		} while (Objects.nonNull(superClass));
+
+		return new ArrayList<>(beans);
 	}
 
 	private WeldContainer createOrGetWeld(String name, PropertyLifecycleContext context) {
@@ -122,7 +136,7 @@ public class WeldHook implements AroundContainerHook, AroundPropertyHook {
 	private Object inject(PropertyLifecycleContext context, Type type, Field field, String containerSuffix) {
 		final String name = context.containerClass().getSimpleName() + containerSuffix;
 		final WeldContainer instance = createOrGetWeld(name, context);
-		NamedCDIProvider.getNameReference().set(name);
+		NamedCDIProvider.NAME_REFERENCE.set(name);
 
 		try {
 			final Object obj = instance.select(type).get();

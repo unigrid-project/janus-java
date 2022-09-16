@@ -14,14 +14,16 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.service;
+package org.unigrid.janus.jqwik.fx;
 
-import mockit.Mock;
-import mockit.MockUp;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import net.jqwik.api.lifecycle.AddLifecycleHook;
+import net.jqwik.api.lifecycle.PropagationMode;
+import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 
-public class DaemonMockUp extends MockUp<Daemon> {
-	@Mock
-	public String getRPCAdress() {
-		return "http://localhost:1337";
-	}
+@AddLifecycleHook(value = FxHook.class, propagateTo = PropagationMode.ALL_DESCENDANTS)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class BaseFxTest extends BaseMockedWeldTest {
+	/* Empty on purpose */
 }

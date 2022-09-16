@@ -155,23 +155,13 @@
 			<version>2.13.3</version>
 		</dependency>
 		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.tngtech.archunit</groupId>
-			<artifactId>archunit-junit5</artifactId>
+			<artifactId>archunit</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-jaxb</artifactId>
 			<version>3.0.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.weld</groupId>
-			<artifactId>weld-junit5</artifactId>
-			<version>4.0.0.Final</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
@@ -186,12 +176,6 @@
 		<dependency>
 			<groupId>org.testfx</groupId>
 			<artifactId>testfx-core</artifactId>
-			<version>4.0.16-alpha</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testfx</groupId>
-			<artifactId>testfx-junit5</artifactId>
 			<version>4.0.16-alpha</version>
 			<scope>test</scope>
 		</dependency>
@@ -291,6 +275,7 @@
 						--add-exports fx/org.unigrid.janus.model.external=jersey.common
 						--add-exports fx/org.unigrid.janus.model.external=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.jqwik=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.jqwik.fx=ALL-UNNAMED
 						--add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
 						--add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
 						--add-exports javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED
