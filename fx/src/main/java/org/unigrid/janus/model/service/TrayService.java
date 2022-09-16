@@ -26,6 +26,7 @@ import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import org.update4j.OS;
 
 @ApplicationScoped
 public class TrayService {
@@ -33,8 +34,8 @@ public class TrayService {
 	private FXTrayIcon tray = null;
 
 	public void initTrayService(Stage stage) {
-		System.out.println("Is systemTray supported");
-		if (SystemTray.isSupported()) {
+		System.out.println("Is systemTray supported " + SystemTray.isSupported());
+		if (SystemTray.isSupported() && OS.CURRENT == OS.WINDOWS) {
 			System.out.println("Init tray icon");
 			tray = new FXTrayIcon(stage,
 				getClass().getResource("/org/unigrid/janus/view/images/unigrid-round_77x77.png"));
