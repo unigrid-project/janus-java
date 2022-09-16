@@ -47,16 +47,21 @@ module fx {
 	requires java.xml;
 	requires org.kordamp.ikonli.fontawesome5;
 	requires weld.environment.common;
+	requires weld.se.core;
+	requires weld.core.impl;
+	requires weld.api;
 	requires jersey.common;
 	requires org.slf4j;
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
-	//requires sentry;
+	requires FXTrayIcon;
+	requires javafx.swing;
+	requires j8fu;
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
 	
-	opens org.unigrid.janus to weld.core.impl, org.update4j;
+	opens org.unigrid.janus to weld.core.impl, org.update4j, javafx.swing;
 	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics,
 		weld.core.impl;
 	opens org.unigrid.janus.controller to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j,
@@ -66,7 +71,7 @@ module fx {
 	opens org.unigrid.janus.model to weld.core.impl, javafx.base , jakarta.xml.bind, jakarta.ws.rs, com.fasterxml.jackson.databind,
 		jersey.media.jaxb;
 	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson;
-	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2;
+	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2, javafx.swing;
 	opens org.unigrid.janus.model.entity to jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
 
 	exports org.unigrid.janus;

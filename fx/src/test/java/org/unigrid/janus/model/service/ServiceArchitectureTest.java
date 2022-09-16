@@ -17,12 +17,12 @@
 package org.unigrid.janus.model.service;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import net.jqwik.api.Disabled;
+import net.jqwik.api.Example;
 import org.unigrid.janus.ArchiTectureTest;
 
 public class ServiceArchitectureTest extends ArchiTectureTest {
-	@Test @Disabled // TODO: Fix and enable
+	@Example @Disabled // TODO: Fix and enable
 	public void shouldNotDependOnJavaFx() {
 		noClasses().should().accessClassesThat().resideInAPackage("javafx..").check(getClasses());
 	}

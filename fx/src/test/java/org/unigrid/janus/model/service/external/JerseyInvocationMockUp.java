@@ -24,7 +24,6 @@ import mockit.MockUp;
 import org.glassfish.jersey.client.JerseyInvocation;
 
 public class JerseyInvocationMockUp extends MockUp<JerseyInvocation> {
-
 	@Mock
 	public Response invoke() throws ProcessingException, WebApplicationException {
 		return Response.ok().entity("").build();

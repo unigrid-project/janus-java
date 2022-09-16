@@ -17,12 +17,12 @@
 package org.unigrid.janus.model.rpc.entity;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import net.jqwik.api.Disabled;
+import net.jqwik.api.Example;
 import org.unigrid.janus.ArchiTectureTest;
 
 public class RpcEntityArchitectureTest extends ArchiTectureTest {
-	@Test @Disabled // TODO: Fix and enable
+	@Example @Disabled // TODO: Fix and enable
 	public void shouldOnlyDependOnModel() {
 		noClasses().should().dependOnClassesThat()
 			.resideOutsideOfPackages("org.unigrid.janus.model", "org.unigrid.janus.model.entity")
