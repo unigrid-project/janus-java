@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model.service;
 
+import jakarta.inject.Inject;
 import org.unigrid.janus.model.Wallet;
 import java.util.TimerTask;
 import javafx.application.Platform;
@@ -26,7 +27,7 @@ import org.unigrid.janus.model.rpc.entity.GetUnlockState;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 
 public class PollingTask extends TimerTask {
-
+	@Inject
 	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
@@ -64,10 +65,7 @@ public class PollingTask extends TimerTask {
 				wallet.setTransactionCount(walletInfo.getResult().getTxcount());
 				wallet.setStatus("done");
 			} catch (Exception e) {
-				debug.print("Daemon offline: ".concat(e.getMessage()),
-					PollingTask.class.getSimpleName()
-				);
-
+				System.out.println("SHITPICKLE: " + e.getMessage());
 				wallet.setOffline(Boolean.TRUE);
 				rpc.stopPolling();
 			}
