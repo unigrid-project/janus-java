@@ -13,10 +13,10 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -69,14 +69,19 @@ import org.unigrid.janus.model.TransactionList;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.SendTransaction;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
+import org.unigrid.janus.model.service.PollingService;
 
 @ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {
-	private static final DebugService DEBUG = new DebugService();
+
+	private static DebugService debug = new DebugService();
 	private static final RPCService RPC = new RPCService();
 	private Wallet wallet;
 	private TransactionList transList = new TransactionList();
 	private static final WindowService WINDOW = WindowService.getInstance();
+	private static PollingService polling = new PollingService();
+	private int syncIntervalShort = 30000;
+	private int syncIntervalLong = 3600000;
 
 	@FXML private Label lblBalance;
 	@FXML private Label lblBalanceSend;
@@ -96,12 +101,46 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
-		DEBUG.log("Initializing wallet transactions");
+		debug.log("Initializing wallet transactions");
+
 		wallet = WINDOW.getWallet();
 		wallet.addPropertyChangeListener(this);
 		transList.addPropertyChangeListener(this);
 		WINDOW.setWalletController(this);
 		setupWalletTransactions();
+	}
+
+	public void compareBlockHeights() {
+		//if (wallet.getCheckExplorer()) {
+			int explorerHeight = Integer.parseInt(wallet.getExplorerHeight());
+			System.out.println("EXPLORER HEIGHT: " + explorerHeight);
+			if (wallet.getBlocks() < (explorerHeight - 100)) {
+				// STOP LONG POLL IF RUNNING
+				if (polling.getLongSyncTimerRunning()) {
+					polling.stopLongSyncPoll();
+				}
+				System.out.println("BLOCK HEIGHT IS LOWER");
+				//wallet.setCheckExplorer(Boolean.TRUE);
+				if(!polling.getSyncTimerRunning()) {
+					polling.pollForSync(syncIntervalShort);
+				}
+				// FIRE SYNCING EVENT
+				wallet.setSyncStatus(Wallet.SyncStatus.from("syncing"));
+			} else {
+				//wallet.setCheckExplorer(Boolean.FALSE);
+				if(polling.getSyncTimerRunning()) {
+					polling.stopSyncPoll();
+				}
+				// FIRE STOP SYNCING EVENT
+				wallet.setSyncStatus(Wallet.SyncStatus.from("synced"));
+				// START LONG SYNC POLL
+				if (!polling.getLongSyncTimerRunning()) {
+					polling.longPollForSync(syncIntervalLong);
+				}
+				System.out.println("BLOCK HEIGHT IS OK: " + wallet.getBlocks());
+				System.out.println("EXPLORER HEIGHT: " + explorerHeight);
+			}
+		//}
 	}
 
 	@FXML
@@ -117,8 +156,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	private void setupWalletTransactions() {
 		try {
-			colWalletTransDate.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>,
-				ObservableValue<String>>() {
+			colWalletTransDate.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
 
 				public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
 					long time = t.getValue().getTime();
@@ -129,8 +167,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				}
 			});
 
-			colWalletTransType.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
+			colWalletTransType.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
 
 				public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
 					Transaction trans = t.getValue();
@@ -168,8 +205,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				}
 			});
 
-			colWalletTransAddress.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
+			colWalletTransAddress.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
 
 				public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
 					Hyperlink link = new Hyperlink();
@@ -218,8 +254,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				}
 			});
 
-			colWalletTransAmount.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>,
-				ObservableValue<String>>() {
+			colWalletTransAmount.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
 
 				public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
 					Transaction trans = t.getValue();
@@ -233,7 +268,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				}
 			});
 		} catch (Exception e) {
-			DEBUG.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
+			debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
 		}
 	}
 
@@ -243,9 +278,15 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
-			DEBUG.log("Value: " + event.getNewValue().toString());
+			debug.log("Value: " + event.getNewValue().toString());
 			lblBalance.setText(((BigDecimal) event.getNewValue()).toPlainString());
 			lblBalanceSend.setText(((BigDecimal) event.getNewValue()).toPlainString());
+		}
+
+		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
+			if(!polling.getSyncTimerRunning() || !polling.getLongSyncTimerRunning()) {
+				this.compareBlockHeights();
+			}
 		}
 
 		if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
@@ -301,7 +342,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		);
 
 		if (call.getError() != null) {
-			DEBUG.log(String.format("ERROR: %s", call.getError()));
+			debug.log(String.format("ERROR: %s", call.getError()));
 			onErrorMessage("Please enter a valid Unigrid address.");
 		} else {
 			if (!call.getResult().getValid()) {
@@ -345,7 +386,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			onErrorMessage(send.getError().getMessage());
 		} else {
 			onSuccessMessage("TRANSACTION SENT!");
-			DEBUG.log(send.getResult());
+			debug.log(send.getResult());
 			resetText();
 			wallet.setSendArgs(null);
 		}
