@@ -76,7 +76,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				}
 			}
 
-			if (fxProject != null) {
+			if (fxProject != null && fxProject.getDependencies().size() != 0) {
 				logger.info("Fx Project: " + fxProject.getGroupId() + ":" + fxProject.getArtifactId()
 					+ ":" + fxProject.getVersion());
 				if (fxVersion.isEmpty()) {
@@ -88,7 +88,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					generateUpdateConfigFile(fxProject, os[i], i % 2 == 0);
 				}
 			} else {
-				logger.info("Fx Project not found!");
+				logger.info("Fx Project not found or no local dependencies found! Need to build once");
 			}
 		}
 	}
@@ -179,7 +179,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					localJar.length(),
 					ConfFileUtil.getChecksumString(localJar.toPath())));
 			} else {
-				logger.info("local jar not found! Try build Parent or fx again to create the jar file");
+				logger.info("local jar not found! Parent or fx need to build once to create jar file");
 			}
 			list.add(getFileByUrl(getDaemonUrl(OS.CURRENT)));
 			// list.add(getFileByUrl(getHedgehogUrl(OS.CURRENT)));
@@ -261,14 +261,10 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		try {
 			jsonPath = JsonPath
 				.parse(new URL("https://api.github.com/repos/unigrid-project/daemon/releases/latest"));
+			List<String> githubUrls = jsonPath.read(jsonSearch);
 
-		} catch (IOException e) {
-
-		}
-		List<String> githubUrls = jsonPath.read(jsonSearch);
-
-		if (os.equals(OS.LINUX)) {
-			/*List<Map<String, Object>> data = jsonPath
+			if (os.equals(OS.LINUX)) {
+				/*List<Map<String, Object>> data = jsonPath
 				.read("$['assets'][*][?('linux' in @['browser_download_url'])]");
 			s = data.get(0).toString();
 			String arg = "linux-gnu.tar.gz";
@@ -277,16 +273,20 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					s = githubUrls.get(i);
 				}
 			}*/
-			s = githubUrls.get(2);
-			System.out.println(s);
-		} else if (os.equals(OS.MAC)) {
-			s = githubUrls.get(0);
-			System.out.println(s);
-		} else if (os.equals(OS.WINDOWS)) {
-			s = githubUrls.get(1);
-			System.out.println(s);
+				s = githubUrls.get(2);
+				System.out.println(s);
+			} else if (os.equals(OS.MAC)) {
+				s = githubUrls.get(0);
+				System.out.println(s);
+			} else if (os.equals(OS.WINDOWS)) {
+				s = githubUrls.get(1);
+				System.out.println(s);
+			}
+			return s;
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return s;
+		return "";
 	}
 
 	public static String getHedgehogUrl(OS os) {
@@ -297,23 +297,24 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		try {
 			jsonPath = JsonPath
 				.parse(new URL("https://api.github.com/repos/unigrid-project/hedgehog/releases/latest"));
+			List<String> githubUrls = jsonPath.read(jsonSearch);
+
+			if (os.equals(OS.LINUX)) {
+				s = githubUrls.get(2);
+				System.out.println(s);
+			} else if (os.equals(OS.MAC)) {
+				s = githubUrls.get(0);
+				System.out.println(s);
+			} else if (os.equals(OS.WINDOWS)) {
+				s = githubUrls.get(1);
+				System.out.println(s);
+			}
+			return s;
 
 		} catch (IOException e) {
-
+			e.printStackTrace();
 		}
-		List<String> githubUrls = jsonPath.read(jsonSearch);
-
-		if (os.equals(OS.LINUX)) {
-			s = githubUrls.get(2);
-			System.out.println(s);
-		} else if (os.equals(OS.MAC)) {
-			s = githubUrls.get(0);
-			System.out.println(s);
-		} else if (os.equals(OS.WINDOWS)) {
-			s = githubUrls.get(1);
-			System.out.println(s);
-		}
-		return s;
+		return "";
 	}
 
 	public static String getLocalUrl(String groupId, String artifactId, String version, String classifier) {
