@@ -112,34 +112,34 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	public void compareBlockHeights() {
 		//if (wallet.getCheckExplorer()) {
-			int explorerHeight = Integer.parseInt(wallet.getExplorerHeight());
-			System.out.println("EXPLORER HEIGHT: " + explorerHeight);
-			if (wallet.getBlocks() < (explorerHeight - 100)) {
-				// STOP LONG POLL IF RUNNING
-				if (polling.getLongSyncTimerRunning()) {
-					polling.stopLongSyncPoll();
-				}
-				System.out.println("BLOCK HEIGHT IS LOWER");
-				//wallet.setCheckExplorer(Boolean.TRUE);
-				if(!polling.getSyncTimerRunning()) {
-					polling.pollForSync(syncIntervalShort);
-				}
-				// FIRE SYNCING EVENT
-				wallet.setSyncStatus(Wallet.SyncStatus.from("syncing"));
-			} else {
-				//wallet.setCheckExplorer(Boolean.FALSE);
-				if(polling.getSyncTimerRunning()) {
-					polling.stopSyncPoll();
-				}
-				// FIRE STOP SYNCING EVENT
-				wallet.setSyncStatus(Wallet.SyncStatus.from("synced"));
-				// START LONG SYNC POLL
-				if (!polling.getLongSyncTimerRunning()) {
-					polling.longPollForSync(syncIntervalLong);
-				}
-				System.out.println("BLOCK HEIGHT IS OK: " + wallet.getBlocks());
-				System.out.println("EXPLORER HEIGHT: " + explorerHeight);
+		int explorerHeight = Integer.parseInt(wallet.getExplorerHeight());
+		System.out.println("EXPLORER HEIGHT: " + explorerHeight);
+		if (wallet.getBlocks() < (explorerHeight - 100)) {
+			// STOP LONG POLL IF RUNNING
+			if (polling.getLongSyncTimerRunning()) {
+				polling.stopLongSyncPoll();
 			}
+			System.out.println("BLOCK HEIGHT IS LOWER");
+			//wallet.setCheckExplorer(Boolean.TRUE);
+			if (!polling.getSyncTimerRunning()) {
+				polling.pollForSync(syncIntervalShort);
+			}
+			// FIRE SYNCING EVENT
+			wallet.setSyncStatus(Wallet.SyncStatus.from("syncing"));
+		} else {
+			//wallet.setCheckExplorer(Boolean.FALSE);
+			if (polling.getSyncTimerRunning()) {
+				polling.stopSyncPoll();
+			}
+			// FIRE STOP SYNCING EVENT
+			wallet.setSyncStatus(Wallet.SyncStatus.from("synced"));
+			// START LONG SYNC POLL
+			if (!polling.getLongSyncTimerRunning()) {
+				polling.longPollForSync(syncIntervalLong);
+			}
+			System.out.println("BLOCK HEIGHT IS OK: " + wallet.getBlocks());
+			System.out.println("EXPLORER HEIGHT: " + explorerHeight);
+		}
 		//}
 	}
 
@@ -284,7 +284,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		}
 
 		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
-			if(!polling.getSyncTimerRunning() || !polling.getLongSyncTimerRunning()) {
+			if (!polling.getSyncTimerRunning() || !polling.getLongSyncTimerRunning()) {
 				this.compareBlockHeights();
 			}
 		}
