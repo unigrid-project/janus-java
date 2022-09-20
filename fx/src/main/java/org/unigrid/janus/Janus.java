@@ -340,15 +340,4 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		mainWindow.hide();
 		janusModel.addPropertyChangeListener(this);
 	}
-
-	public void setUpTrayIcon(Stage stage) {
-		System.out.println("Is systemTray supported");
-		if (SystemTray.isSupported()) {
-			System.out.println("Init tray icon");
-			FXTrayIcon tray = new FXTrayIcon(stage,
-				getClass().getResource("/org/unigrid/janus/view/images/unigrid-round.png"));
-			tray.show();
-			tray.setTooltip("Unigrid");
-		}
-	}
 }

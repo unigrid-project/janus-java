@@ -210,6 +210,7 @@ public class UpdateWallet extends TimerTask {
 			}
 			update = updateConfig.requiresUpdate();
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
 			update = false;
 		}
 		System.out.println("Is thier an update ready = " + update);

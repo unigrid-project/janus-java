@@ -282,6 +282,7 @@
                         --add-exports fx/org.unigrid.janus.model.service=ALL-UNNAMED
                         --add-exports fx/org.unigrid.janus.model.service.external=jersey.client
                         --add-exports fx/org.unigrid.janus.model.external=jersey.common
+                        --add-exports fx/org.unigrid.janus.model.external=org.update4j
                         --add-exports fx/org.unigrid.janus.model.external=ALL-UNNAMED
                         --add-exports fx/org.unigrid.janus.jqwik=ALL-UNNAMED
                         --add-exports fx/org.unigrid.janus.jqwik.fx=ALL-UNNAMED
