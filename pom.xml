@@ -11,7 +11,6 @@
 		<url>https://www.unigrid.org</url>
 	</organization>
 	<modules>
-		<module>config</module>
 		<module>desktop</module>
 		<module>fx</module>
 		<module>bootstrap</module>
