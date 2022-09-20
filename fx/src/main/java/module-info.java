@@ -41,7 +41,7 @@ module fx {
 	requires java.sql;
 	requires java.instrument;
 	requires org.controlsfx.controls;
-	requires static org.update4j;
+	requires org.update4j;
 	requires org.apache.commons.io;
 	requires jersey.media.jaxb;
 	requires java.xml;

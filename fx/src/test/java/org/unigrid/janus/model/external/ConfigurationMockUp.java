@@ -14,21 +14,16 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.model.external;
 
-import lombok.Getter;
-import lombok.Setter;
+import mockit.MockUp;
+import mockit.Mock;
+import org.update4j.Configuration;
 
-public class ConfigUrl {
-	@Getter @Setter
-	private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/config-linux.xml";
+public class ConfigurationMockUp extends MockUp<Configuration> {
 
-	@Getter @Setter
-	private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/config-mac.xml";
-
-	@Getter @Setter
-	private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/config-windows.xml";
+	@Mock
+	public boolean requiresUpdate() {
+		return true;
+	}
 }

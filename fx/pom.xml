@@ -265,6 +265,7 @@
                     <argLine>
                         -javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar
                         -Dcoverage-classes=loaded
+                        --add-modules org.update4j
                         --add-opens fx/org.unigrid.janus.controller=ALL-UNNAMED
                         --add-opens fx/org.unigrid.janus.controller.component=ALL-UNNAMED
                         --add-opens fx/org.unigrid.janus.model=ALL-UNNAMED
@@ -272,6 +273,14 @@
                         --add-opens fx/org.unigrid.janus.model.service=ALL-UNNAMED
                         --add-opens fx/org.unigrid.janus.view=ALL-UNNAMED
                         --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
+                        --add-opens fx/org.unigrid.janus.model.entity=jersey.media.jaxb
+                        --add-opens fx/org.unigrid.janus.model=jersey.media.jaxb
+                        --add-opens fx/org.unigrid.janus.model=jakarta.ws.rs
+                        --add-opens fx/org.unigrid.janus.model.entity=jakarta.ws.rs
+                        --add-opens fx/org.unigrid.janus.model.entity=jakarta.xml.bind
+                        --add-opens fx/org.unigrid.janus.model=jakarta.xml.bind
+                        --add-opens fx/org.unigrid.janus.model=jersey-client
+                        --add-opens fx/org.unigrid.janus.model.entity=jersey-client
                         --add-exports fx/org.unigrid.janus.cdi=ALL-UNNAMED
                         --add-exports fx/org.unigrid.janus.controller.component=ALL-UNNAMED
                         --add-exports fx/org.unigrid.janus.model=ALL-UNNAMED
@@ -279,10 +288,12 @@
                         --add-exports fx/org.unigrid.janus.model.service=ALL-UNNAMED
                         --add-exports fx/org.unigrid.janus.model.service.external=jersey.client
                         --add-exports fx/org.unigrid.janus.model.external=jersey.common
+                        --add-exports fx/org.unigrid.janus.model.external=org.update4j
                         --add-exports fx/org.unigrid.janus.model.external=ALL-UNNAMED
                         --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
                         --add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
                         --add-exports javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED
+                        --add-reads org.update4j=fx
                     </argLine>
                     <systemPropertyVariables>
                         <glass.platform>Monocle</glass.platform>
