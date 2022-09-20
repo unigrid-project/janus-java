@@ -16,11 +16,13 @@
 
 package org.unigrid.janus;
 
+import com.dustinredmond.fxtrayicon.FXTrayIcon;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
+import java.awt.SystemTray;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -337,5 +339,16 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		startSplashScreen();
 		mainWindow.hide();
 		janusModel.addPropertyChangeListener(this);
+	}
+
+	public void setUpTrayIcon(Stage stage) {
+		System.out.println("Is systemTray supported");
+		if (SystemTray.isSupported()) {
+			System.out.println("Init tray icon");
+			FXTrayIcon tray = new FXTrayIcon(stage,
+				getClass().getResource("/org/unigrid/janus/view/images/unigrid-round.png"));
+			tray.show();
+			tray.setTooltip("Unigrid");
+		}
 	}
 }

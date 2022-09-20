@@ -266,6 +266,14 @@
 						--add-opens fx/org.unigrid.janus.model.service=ALL-UNNAMED
 						--add-opens fx/org.unigrid.janus.view=ALL-UNNAMED
 						--add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
+            --add-opens fx/org.unigrid.janus.model.entity=jersey.media.jaxb
+            --add-opens fx/org.unigrid.janus.model=jersey.media.jaxb
+            --add-opens fx/org.unigrid.janus.model=jakarta.ws.rs
+            --add-opens fx/org.unigrid.janus.model.entity=jakarta.ws.rs
+            --add-opens fx/org.unigrid.janus.model.entity=jakarta.xml.bind
+            --add-opens fx/org.unigrid.janus.model=jakarta.xml.bind
+            --add-opens fx/org.unigrid.janus.model=jersey-client
+            --add-opens fx/org.unigrid.janus.model.entity=jersey-client
 						--add-exports fx/org.unigrid.janus.cdi=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.controller.component=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.model=ALL-UNNAMED

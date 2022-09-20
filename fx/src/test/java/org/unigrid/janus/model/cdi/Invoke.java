@@ -12,21 +12,31 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.model.cdi;
 
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import net.jqwik.api.Disabled;
-import net.jqwik.api.Example;
-import org.unigrid.janus.ArchiTectureTest;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import mockit.Invocation;
 
-public class ModelArchitectureTest extends ArchiTectureTest {
+public class Invoke {
 
-	@Example @Disabled // TODO: Fix and enable
-	public void shouldNotDependOnServices() {
-		noClasses().that().resideInAPackage("org.unigrid.janus.model")
-			.should().dependOnClassesThat().resideInAPackage("org.unigrid.janus.model.service")
-			.check(getClasses());
+	public static <T, R> R invoke(String name, Invocation invocation, Object... args) {
+		try {
+			final List<Class> paramterTypes = new ArrayList<>();
+			for (Object arg : args) {
+				paramterTypes.add(arg.getClass());
+			}
+			final T invocationInstance = invocation.getInvokedInstance();
+			final Method method = invocation.getInvokedInstance().getClass()
+				.getDeclaredMethod(name, paramterTypes.toArray(new Class[0]));
+			method.setAccessible(true);
+			return (R) method.invoke(invocationInstance, args);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return null;
+		}
 	}
 }

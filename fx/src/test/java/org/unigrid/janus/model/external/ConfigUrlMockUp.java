@@ -12,21 +12,23 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.model.external;
 
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import net.jqwik.api.Disabled;
-import net.jqwik.api.Example;
-import org.unigrid.janus.ArchiTectureTest;
+import mockit.MockUp;
+import mockit.Mock;
+import org.unigrid.janus.model.UpdateURL;
 
-public class ModelArchitectureTest extends ArchiTectureTest {
+public class ConfigUrlMockUp extends MockUp<UpdateURL> {
 
-	@Example @Disabled // TODO: Fix and enable
-	public void shouldNotDependOnServices() {
-		noClasses().that().resideInAPackage("org.unigrid.janus.model")
-			.should().dependOnClassesThat().resideInAPackage("org.unigrid.janus.model.service")
-			.check(getClasses());
+	@Mock
+	public String getLinuxUrl() {
+		return ConfigUrlMockUp.class.getResource("get_update4j_config.xml").toString();
+	}
+
+	@Mock
+	public String getBootstrapUrl() {
+		return ConfigUrlMockUp.class.getResource("get_bootstrap_version_from_github.xml").toString();
 	}
 }

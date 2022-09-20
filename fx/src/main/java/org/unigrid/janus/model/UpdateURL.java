@@ -12,21 +12,26 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model;
 
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import net.jqwik.api.Disabled;
-import net.jqwik.api.Example;
-import org.unigrid.janus.ArchiTectureTest;
+import lombok.Getter;
+import lombok.Setter;
 
-public class ModelArchitectureTest extends ArchiTectureTest {
+public class UpdateURL {
+	@Getter @Setter
+	private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
+		+ "unigrid-update/main/config-linux.xml";
 
-	@Example @Disabled // TODO: Fix and enable
-	public void shouldNotDependOnServices() {
-		noClasses().that().resideInAPackage("org.unigrid.janus.model")
-			.should().dependOnClassesThat().resideInAPackage("org.unigrid.janus.model.service")
-			.check(getClasses());
-	}
+	@Getter @Setter
+	private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
+		+ "unigrid-update/main/config-mac.xml";
+
+	@Getter @Setter
+	private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
+		+ "unigrid-update/main/config-windows.xml";
+
+	@Getter @Setter
+	private static String bootstrapUrl = "https://github.com/unigrid-project/janus-java/releases.atom";
 }
