@@ -17,16 +17,16 @@
 package org.unigrid.janus.controller;
 
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
-import org.jboss.weld.junit5.WeldInitiator;
-import org.jboss.weld.junit5.WeldJunit5Extension;
-import org.jboss.weld.junit5.WeldSetup;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import javafx.stage.Stage;
+import net.jqwik.api.Example;
 import static org.testfx.api.FxAssert.verifyThat;
+import org.testfx.api.FxRobot;
 import static org.testfx.matcher.control.TableViewMatchers.hasTableCell;
-//import static org.testfx.matcher.control.TextMatchers.hasText;
-import org.unigrid.janus.FXApplicationTest;
+import org.unigrid.janus.jqwik.fx.BaseFxTest;
+import org.unigrid.janus.jqwik.WeldSetup;
+import org.unigrid.janus.jqwik.fx.FxResource;
+import org.unigrid.janus.jqwik.fx.FxStart;
+import org.unigrid.janus.jqwik.fx.FxStop;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.external.ResponseMockUp;
@@ -37,48 +37,50 @@ import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
 import org.unigrid.janus.model.service.external.WebTargetMockUp;
+import org.unigrid.janus.view.MainWindow;
 
-@Slf4j
-@ExtendWith(WeldJunit5Extension.class)
-public class AddressControllerTest extends FXApplicationTest {
-
-	@WeldSetup
-	private static WeldInitiator weld = WeldInitiator.of(WeldInitiator.createWeld()
-		.beanClasses(AddressController.class, DebugService.class,
-			UpdateWallet.class, PollingService.class, RPCService.class, Daemon.class
-		)
-	);
+@FxResource(clazz = MainWindow.class, name = "mainWindow.fxml")
+@WeldSetup({ AddressController.class, Daemon.class, DebugService.class, PollingService.class,
+	RPCService.class, UpdateWallet.class
+})
+public class AddressControllerTest extends BaseFxTest {
+	@Inject
+	private FxRobot robot;
 
 	@Inject
 	private RPCService rpc;
 
-/*
-	@Test
-	public void testGenerateAddress() {
-		new ResponseMockUp();
-		new JerseyInvocationMockUp();
-		new WebTargetMockUp();
-		new DaemonMockUp();
-		Eager.instantiate(rpc);
-
-		clickOn("#btnAddress");
-		clickOn("#btnGenerateAddress");
-		verifyThat("#addressDisplay", hasText("A7HitmzXEMPL3P7McZABtm9BuS3t9eZaf4"));
+	@FxStart // TODO: Remove this method
+	public void startWithStage(Stage stage) {
+		System.out.println("I take a stage!");
+		System.out.println("I'm starting a test run and I am only here for demo purposes!");
 	}
-*/
 
-	@Test
-	public void testHideZeroBalances() {
+	@FxStart // TODO: Remove this method
+	public void start() {
+		System.out.println("I do not take a stage...");
+		System.out.println("I'm starting a test run and I am only here for demo purposes!");
+	}
+
+	@FxStop // TODO: Remove this method
+	public void stop() {
+		System.out.println("I'm stopping a test run and I am only here for demo purposes!");
+	}
+
+	@Example
+	public void shouldHideZeroBalances() {
 		new ResponseMockUp();
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
 		new DaemonMockUp();
+
 		Eager.instantiate(rpc);
 
-		clickOn("#btnAddress");
-		clickOn("#chkAddress");
+		robot.clickOn("#btnAddress");
+		robot.clickOn("#chkAddress");
 		verifyThat("#tblAddresses", hasTableCell(2000.0));
-		clickOn("#chkAddress");
+
+		robot.clickOn("#chkAddress");
 		verifyThat("#tblAddresses", hasTableCell(0.0));
 		verifyThat("#tblAddresses", hasTableCell(2000.0));
 	}

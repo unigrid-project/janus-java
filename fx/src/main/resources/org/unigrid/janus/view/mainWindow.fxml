@@ -265,7 +265,7 @@
                                     </Button>
                                     <Button mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;">
                                        <graphic>
-                                          <FontIcon fx:id="satelliteIcn" iconColor="WHITE" iconLiteral="fas-satellite-dish" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
+                                          <FontIcon fx:id="satelliteIcn" iconColor="RED" iconLiteral="fas-satellite-dish" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
                                        </graphic>
                                        <tooltip>
                                           <Tooltip fx:id="connectionTltp" text="Connections: 0" />
@@ -279,7 +279,7 @@
                                     </Button>
                                     <Button mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;">
                                        <graphic>
-                                          <FontIcon fx:id="satelliteIcn1" iconColor="#68c5ff" iconLiteral="fas-cubes" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
+                                          <FontIcon fx:id="blocksIcn" iconColor="#68c5ff" iconLiteral="fas-cubes" iconSize="20" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
                                        </graphic>
                                        <tooltip>
                                           <Tooltip fx:id="blocksTltp" text="Blocks: 0" />

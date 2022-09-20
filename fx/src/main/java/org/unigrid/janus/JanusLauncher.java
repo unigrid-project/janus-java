@@ -27,6 +27,8 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.UpdateURL;
+import org.apache.commons.lang3.SystemUtils;
+import org.unigrid.janus.model.ConfigUrl;
 import org.unigrid.janus.model.cdi.EagerExtension;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
@@ -36,6 +38,7 @@ public class JanusLauncher implements Launcher {
 
 	@InjectTarget
 	private Map<String, String> inputArgs = new HashMap<String, String>();
+
 	@InjectTarget
 	private HostServices hostService;
 

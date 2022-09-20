@@ -33,6 +33,19 @@ public class TransactionList {
 	private static RPCService rpc = new RPCService();
 	private static DebugService debug = new DebugService();
 
+	@Data
+	public static class LoadReport {
+		private int oldSize;
+		private int newCount;
+		private int newSize;
+
+		public LoadReport(int size) {
+			this.oldSize = size;
+			this.newCount = 0;
+			this.newSize = size;
+		}
+	}
+
 	public TransactionList() {
 		if (pcs != null) {
 			return;
@@ -241,18 +254,4 @@ public class TransactionList {
 			}
 		}
 	}
-
-	@Data
-	public class LoadReport {
-		private int oldSize;
-		private int newCount;
-		private int newSize;
-
-		public LoadReport(int size) {
-			this.oldSize = size;
-			this.newCount = 0;
-			this.newSize = size;
-		}
-	}
-
 }

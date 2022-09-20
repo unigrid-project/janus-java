@@ -19,16 +19,13 @@ package org.unigrid.janus.model.external;
 import jakarta.json.bind.JsonbBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
 import mockit.Mock;
 import mockit.MockUp;
 import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.unigrid.janus.model.rpc.entity.GetNewAddress;
 import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 
-@Data
 public class ResponseMockUp extends MockUp<OutboundJaxrsResponse> {
-
 	@Mock
 	public <T> T readEntity(Class<T> clazz) {
 		switch (clazz.getSimpleName()) {

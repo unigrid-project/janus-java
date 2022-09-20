@@ -18,3 +18,5 @@ fx/unigrid-cli
 
 /config/UpdateWalletConfig/target/
 /config/UpdateWalletConfig/config*
+
+.jqwik-database

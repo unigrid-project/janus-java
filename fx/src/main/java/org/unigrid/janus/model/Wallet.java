@@ -18,6 +18,10 @@ package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
@@ -40,6 +44,7 @@ public class Wallet {
 	public static final String CONNECTIONS_PROPERTY = "connections";
 	public static final String LOCKED_PROPERTY = "locked";
 	public static final String LOCKED_STATE_PROPERTY = "null";
+	public static final String SYNC_STATE = "synced";
 	public static final String STAKING_PROPERTY = "staking";
 	public static final String PROCESSING_PROPERTY = "processing";
 	public static final String ENCRYPTED_STATUS = "encrypted";
@@ -51,6 +56,7 @@ public class Wallet {
 	private static double moneysupply;
 	private static double blacklisted;
 	private static int blocks;
+	private Client client;
 	private static int connections;
 	private static int version;
 	private static int walletVersion;
@@ -62,6 +68,8 @@ public class Wallet {
 
 	@Getter @Setter
 	private static int unlockState = 0;
+	@Getter @Setter
+	private Boolean checkExplorer = true;
 
 	@Getter
 	private static long stakingStartTime = 100000000L;
@@ -75,7 +83,7 @@ public class Wallet {
 	private static DebugService debug = new DebugService();
 	private static PropertyChangeSupport pcs;
 
-	@Getter @Setter
+	@Getter
 	private LockState lockState = LockState.LOCKED;
 
 	@AllArgsConstructor
@@ -92,6 +100,26 @@ public class Wallet {
 				case "locked" -> LockState.LOCKED;
 				case "unlocked" -> LockState.UNLOCKED;
 				default -> LockState.UNLOCKED_FOR_STAKING;
+			};
+		}
+	}
+
+	@Getter
+	private SyncStatus syncStatus = SyncStatus.SYNCED;
+
+	@AllArgsConstructor
+	public enum SyncStatus {
+		SYNCED("synced"),
+		SYNCING("syncing");
+
+		@Getter
+		private String currentSyncStatus;
+
+		public static SyncStatus from(String s) {
+			return switch (s) {
+				case "synced" -> SyncStatus.SYNCED;
+				case "syncing" -> SyncStatus.SYNCING;
+				default -> SyncStatus.SYNCED;
 			};
 		}
 	}
@@ -162,12 +190,14 @@ public class Wallet {
 	}
 
 	public int getBlocks() {
+		
 		return this.blocks;
 	}
 
 	public void setBlocks(int newValue) {
 		int oldValue = this.blocks;
 		this.blocks = newValue;
+		System.out.println("setting blocks: " + this.blocks);
 		this.pcs.firePropertyChange(this.BLOCKS_PROPERTY, oldValue, newValue);
 	}
 
@@ -298,6 +328,12 @@ public class Wallet {
 		this.pcs.firePropertyChange(this.LOCKED_STATE_PROPERTY, oldValue, state);
 	}
 
+	public void setSyncStatus(SyncStatus state) {
+		SyncStatus oldValue = this.syncStatus;
+		this.syncStatus = state;
+		this.pcs.firePropertyChange(this.SYNC_STATE, oldValue, state);
+	}
+
 	public Boolean getProcessingStatus() {
 		return this.processingStatus;
 	}
@@ -306,6 +342,26 @@ public class Wallet {
 		Boolean oldValue = this.processingStatus;
 		this.processingStatus ^= true;
 		this.pcs.firePropertyChange(this.PROCESSING_PROPERTY, oldValue, this.getProcessingStatus());
+	}
+
+	public int getExplorerHeight() {
+		try {
+			client = ClientBuilder.newBuilder()
+				.build();
+			Response response = client.target("https://explorer.unigrid.org/api/getblockcount")
+				.request(MediaType.TEXT_XML).get();
+			//System.out.println(response.readEntity(String.class));
+			String block = response.readEntity(String.class);
+			if (block.equalsIgnoreCase("This method is restricted.")) {
+				return 0;
+			} else {
+				return Integer.parseInt(block);
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.out.println(e.getCause().toString());
+			return 0;
+		}
 	}
 
 }
