@@ -59,4 +59,8 @@ public class Configuration {
 	public void setFxVersionToProperty(String fxVersion) {
 		properties.add(new Property("fx.version", fxVersion));
 	}
+
+	public List<Property> getConfProperties() {
+		return properties;
+	}
 }

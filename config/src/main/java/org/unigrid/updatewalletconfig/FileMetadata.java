@@ -37,11 +37,24 @@ public class FileMetadata {
 	@XmlAttribute
 	private boolean modulePath;
 
+	@Setter
+	@XmlAttribute
+	private boolean ignoreBootConflict;
+
 	public FileMetadata(String uri, long size, String checksum) {
+		this(uri, size, checksum, true, false);
+	}
+
+	public FileMetadata(String uri, long size, String checksum, boolean modulePath) {
+		this(uri, size, checksum, modulePath, false);
+	}
+
+	public FileMetadata(String uri, long size, String checksum, boolean modulePath, boolean ignoreBootConflict) {
 		this.uri = uri;
 		this.size = size;
 		this.checksum = checksum;
-		this.modulePath = true;
+		this.modulePath = modulePath;
+		this.ignoreBootConflict = ignoreBootConflict;
 	}
 
 	public String getStringUri() {

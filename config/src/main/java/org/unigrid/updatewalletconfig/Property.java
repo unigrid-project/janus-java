@@ -33,4 +33,12 @@ public class Property {
 		this.key = key;
 		this.value = value;
 	}
+
+	public String getPropertyKey() {
+		return key;
+	}
+
+	public String getPropertyValue() {
+		return value;
+	}
 }

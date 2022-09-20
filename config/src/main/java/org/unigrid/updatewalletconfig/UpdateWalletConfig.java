@@ -175,14 +175,21 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		String isTesting = testing ? "-testing" : "";
 		List<FileMetadata> list = new ArrayList();
 		try {
+			String version = "";
+			for (Property property : configuration.getConfProperties()) {
+				if (property.getPropertyKey().equals("fx.version")) {
+					version = "${fx.version}";
+				}
+			}
 			String updateUrl = "https://github.com/unigrid-project/unigrid-update"
-				+ isTesting + "/releases/download/v" + fxVersion + "/fx-" + fxVersion + "-SNAPSHOT.jar";
+				+ isTesting + "/releases/download/v" + fxVersion + "/fx-" + version + "-SNAPSHOT.jar";
 			File localJar = new File(baseDir.getAbsolutePath() + "/target/fx-" + fxVersion
 				+ "-SNAPSHOT.jar");
 			if (localJar.exists() != false) {
 				list.add(new FileMetadata(updateUrl,
 					localJar.length(),
-					ConfFileUtil.getChecksumString(localJar.toPath())));
+					ConfFileUtil.getChecksumString(localJar.toPath())
+				));
 			} else {
 				throw new MavenExecutionException("Local jar not found!"
 					+ " Try mvn clean install or mvn clean package", new IllegalStateException());
@@ -202,12 +209,23 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		FileMetadata tempFile = null;
 		if (file.exists()) {
 			try {
+				String filePath = file.getAbsolutePath().replace(basedir.getPath(), "${maven.central}");
 				String checksum = ConfFileUtil.getChecksumString(file.toPath());
-				tempFile = new FileMetadata(
-					file.getAbsolutePath().replace(basedir.getPath(), "${maven.central}"),
-					file.length(),
-					checksum
-				);
+				if (filePath.contains("${maven.central}/jakarta/inject/jakarta.inject-api")) {
+					tempFile = new FileMetadata(
+						filePath,
+						file.length(),
+						checksum,
+						true,
+						true
+					);
+				} else {
+					tempFile = new FileMetadata(
+						filePath,
+						file.length(),
+						checksum
+					);
+				}
 			} catch (IOException ex) {
 				java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
 					.log(Level.SEVERE, null, ex);
@@ -229,7 +247,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			return new FileMetadata(
 				tempUrl.toString(),
 				ConfFileUtil.getFileSize(tempUrl),
-				ConfFileUtil.getChecksumStringyByInputStream(tempUrl.openStream())
+				ConfFileUtil.getChecksumStringyByInputStream(tempUrl.openStream()),
+				false
 			);
 		} catch (IOException ex) {
 			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName()).log(Level.SEVERE, null, ex);
@@ -256,7 +275,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	public static String getFileUrl(OS os, boolean testing) {
 		String isTesting = testing ? "-test" : "";
-		return System.getProperty("user.home") + "/Downloads/config-" + os.getShortName() + isTesting + ".xml";
+		return System.getProperty("user.dir").concat("/config/target/") + "config-"
+			+ os.getShortName() + isTesting + ".xml";
 	}
 
 	public static String getDaemonUrl(OS os) {
