@@ -112,7 +112,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	public void compareBlockHeights() {
 		//if (wallet.getCheckExplorer()) {
-		int explorerHeight = Integer.parseInt(wallet.getExplorerHeight());
+		int explorerHeight = wallet.getExplorerHeight();
 		System.out.println("EXPLORER HEIGHT: " + explorerHeight);
 		if (wallet.getBlocks() < (explorerHeight - 100)) {
 			// STOP LONG POLL IF RUNNING
