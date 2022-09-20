@@ -344,7 +344,7 @@ public class Wallet {
 		this.pcs.firePropertyChange(this.PROCESSING_PROPERTY, oldValue, this.getProcessingStatus());
 	}
 
-	public String getExplorerHeight() {
+	public int getExplorerHeight() {
 		try {
 			client = ClientBuilder.newBuilder()
 				.build();
@@ -353,14 +353,14 @@ public class Wallet {
 			//System.out.println(response.readEntity(String.class));
 			String block = response.readEntity(String.class);
 			if (block.equalsIgnoreCase("This method is restricted.")) {
-				return "100000";
+				return 0;
 			} else {
-				return block;
+				return Integer.parseInt(block);
 			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.out.println(e.getCause().toString());
-			return "100000";
+			return 0;
 		}
 	}
 
