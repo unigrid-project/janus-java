@@ -14,14 +14,24 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.service;
+package org.unigrid.janus.model;
 
-import mockit.Mock;
-import mockit.MockUp;
+import lombok.Getter;
+import lombok.Setter;
 
-public class DaemonMockUp extends MockUp<Daemon> {
-	@Mock
-	public String getRPCAdress() {
-		return "http://localhost:1337";
-	}
+public class UpdateURL {
+	@Getter @Setter
+	private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
+		+ "unigrid-update/main/config-linux.xml";
+
+	@Getter @Setter
+	private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
+		+ "unigrid-update/main/config-mac.xml";
+
+	@Getter @Setter
+	private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
+		+ "unigrid-update/main/config-windows.xml";
+
+	@Getter @Setter
+	private static String bootstrapUrl = "https://github.com/unigrid-project/janus-java/releases.atom";
 }

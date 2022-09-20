@@ -60,6 +60,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	// @FXML private Label lblConnection;
 	@FXML private AnchorPane pnlMain;
 	@FXML private AnchorPane pnlSplash;
+	@FXML private FontIcon blocksIcn;
 	@FXML private ToggleButton btnWallet;
 	@FXML private ToggleButton btnTransactions;
 	@FXML private ToggleButton btnNodes;
@@ -218,7 +219,13 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		//debug.log(event.getPropertyName());
 
 		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
-			String blocks = String.format("Blocks: %d", (int) event.getNewValue());
+			String blocks;
+			if (wallet.getSyncStatus() == Wallet.SyncStatus.SYNCING) {
+				blocks = String.format("Syncing / Blocks: %d", (int) event.getNewValue());
+			} else {
+				blocks = String.format("Blocks: %d", (int) event.getNewValue());
+			}
+
 			blocksTltp.setText(blocks);
 		}
 
@@ -266,6 +273,22 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 				ft.setCycleCount(40);
 				ft.setAutoReverse(true);
 				ft.play();
+			}
+		}
+
+		if (event.getPropertyName().equals(wallet.SYNC_STATE)) {
+			Wallet.SyncStatus syncStatus = (Wallet.SyncStatus) event.getNewValue();
+			System.out.println("sync state: " + syncStatus);
+			if (syncStatus.equals(Wallet.SyncStatus.SYNCING)) {
+				blocksIcn.iconColorProperty().setValue(Color.RED);
+				FadeTransition ft = new FadeTransition(Duration.millis(500), blocksIcn);
+				ft.setFromValue(1.0);
+				ft.setToValue(0.3);
+				ft.setCycleCount(40);
+				ft.setAutoReverse(true);
+				ft.play();
+			} else {
+				blocksIcn.iconColorProperty().setValue(Color.web("#68c5ff"));
 			}
 		}
 

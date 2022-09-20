@@ -14,14 +14,16 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.service;
+package org.unigrid.janus.model.external;
 
-import mockit.Mock;
 import mockit.MockUp;
+import mockit.Mock;
+import org.update4j.Configuration;
 
-public class DaemonMockUp extends MockUp<Daemon> {
+public class ConfigurationMockUp extends MockUp<Configuration> {
+
 	@Mock
-	public String getRPCAdress() {
-		return "http://localhost:1337";
+	public boolean requiresUpdate() {
+		return true;
 	}
 }

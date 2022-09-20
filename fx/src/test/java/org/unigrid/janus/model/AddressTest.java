@@ -17,28 +17,20 @@
 package org.unigrid.janus.model;
 
 import jakarta.inject.Inject;
-import org.jboss.weld.junit5.WeldInitiator;
-import org.jboss.weld.junit5.WeldJunit5Extension;
-import org.jboss.weld.junit5.WeldSetup;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import net.jqwik.api.Example;
+import org.unigrid.janus.jqwik.BaseMockedWeldTest;
+import org.unigrid.janus.jqwik.WeldSetup;
 
-@ExtendWith(WeldJunit5Extension.class)
-class AddressTest {
-
-	@WeldSetup
-	private WeldInitiator weld = WeldInitiator
-		.of(Address.class);
-
+@WeldSetup(Address.class)
+public class AddressTest extends BaseMockedWeldTest {
 	@Inject
 	private Address address;
 
-	@Test
-	public void testAddressProperties() {
+	@Example
+	public boolean testAddressProperties() {
 		final String addr = "HAjsFi8JShq9Hfx5xYseGMoy8Mzbbo3Reu";
 
 		address.setAddress(addr);
-		Assertions.assertEquals(address.getAddress(), addr);
+		return addr.endsWith(address.getAddress());
 	}
 }

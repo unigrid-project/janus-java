@@ -17,20 +17,27 @@
 package org.unigrid.janus.model.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import java.util.Timer;
+import lombok.Getter;
+import lombok.Setter;
 import org.unigrid.janus.model.UpdateWallet;
 
 @ApplicationScoped
 public class PollingService {
-	private static Timer pollingTimer;
-	private static Timer updateTimer;
+	private Timer pollingTimer;
+	private Timer updateTimer;
+	private Timer syncTimer;
+	private Timer longSyncTimer;
+	@Getter @Setter
+	private Boolean syncTimerRunning = false;
+	@Getter @Setter
+	private Boolean longSyncTimerRunning = false;
 
-	@Inject private DebugService debug;
+	private DebugService debug = new DebugService();
 	//@Inject private UpdateWallet updateWallet;
 
 	public void poll(int interval) {
-		debug.print("poll", PollingService.class.getSimpleName());
+		debug.print("poll started", PollingService.class.getSimpleName());
 		pollingTimer = new Timer(true);
 		pollingTimer.scheduleAtFixedRate(new LongPollingTask(), 0, interval);
 	}
@@ -43,7 +50,7 @@ public class PollingService {
 	}
 
 	public void pollForUpdate(int interval) {
-		System.out.println("starting the update timer");
+		debug.print("starting the update timer", PollingService.class.getSimpleName());
 		updateTimer = new Timer(false);
 		updateTimer.scheduleAtFixedRate(new UpdateWallet(), 0, interval);
 
@@ -55,4 +62,35 @@ public class PollingService {
 			updateTimer.purge();
 		}
 	}
+
+	public void pollForSync(int interval) {
+		debug.print("starting sync poll", PollingService.class.getSimpleName());
+		syncTimer = new Timer(true);
+		syncTimer.scheduleAtFixedRate(new SyncPollingTask(), 0, interval);
+		setSyncTimerRunning(true);
+	}
+
+	public void stopSyncPoll() {
+		if (syncTimer != null) {
+			syncTimer.cancel();
+			syncTimer.purge();
+			setSyncTimerRunning(false);
+		}
+	}
+
+	public void longPollForSync(int interval) {
+		debug.print("starting long sync poll", PollingService.class.getSimpleName());
+		longSyncTimer = new Timer(true);
+		longSyncTimer.scheduleAtFixedRate(new SyncPollingTask(), 0, interval);
+		setLongSyncTimerRunning(true);
+	}
+
+	public void stopLongSyncPoll() {
+		if (longSyncTimer != null) {
+			longSyncTimer.cancel();
+			longSyncTimer.purge();
+			setLongSyncTimerRunning(false);
+		}
+	}
+
 }
