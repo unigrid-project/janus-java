@@ -457,6 +457,9 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		File baseDir = new File(getBaseDirectory().concat("/lib"));
 		List<FileMetadata> onlineFiles = config.getFiles();
 		List<String> fileNames = new ArrayList<String>();
+		if (fileNames.size() == 0) {
+			return;
+		}
 		for (FileMetadata onlineFile: onlineFiles) {
 			fileNames.add(new File(onlineFile.getPath().toString()).getName());
 		}
