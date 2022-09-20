@@ -26,19 +26,16 @@ import mockit.MockUp;
 import net.jqwik.api.Property;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.constraints.IntRange;
-import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 import org.unigrid.janus.jqwik.WeldSetup;
 import static org.awaitility.Awaitility.await;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
 import org.unigrid.janus.jqwik.fx.FxResource;
-import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.view.MainWindow;
 
 @FxResource(clazz = MainWindow.class, name = "mainWindow.fxml")
-@WeldSetup({PollingService.class, DebugService.class, Daemon.class, RPCService.class, UpdateWallet.class})
+@WeldSetup({PollingService.class, DebugService.class})
 public class SyncPollingTest  extends BaseFxTest {
-	@Inject
-	private RPCService rpc;
+
 	@Inject
 	private PollingService pollingService;
 
@@ -46,18 +43,15 @@ public class SyncPollingTest  extends BaseFxTest {
 	public void shouldPollWithTheRightInterval(@ForAll @IntRange(min = 1, max = 4) int interval) {
 		final AtomicInteger calls = new AtomicInteger();
 
-		rpc.pollForInfo(3000);
-		pollingService.pollForSync(3000);
-		Thread.sleep(10000);
-		/*new MockUp<SyncPollingTask>() {
+		new MockUp<SyncPollingTask>() {
 			@Mock
 			public void run() {
 				calls.incrementAndGet();
 			}
-		};*/
+		};
 
-		//pollingService.pollForSync(interval * 100);
-		//await().atLeast(interval * 100, MILLISECONDS).atMost(1, SECONDS).until(() -> calls.get() == 2);
-		//pollingService.stopSyncPoll();
+		pollingService.pollForSync(interval * 100);
+		await().atLeast(interval * 100, MILLISECONDS).atMost(1, SECONDS).until(() -> calls.get() == 2);
+		pollingService.stopSyncPoll();
 	}
 }
