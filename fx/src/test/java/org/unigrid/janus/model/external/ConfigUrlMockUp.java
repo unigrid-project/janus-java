@@ -14,14 +14,21 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.service;
+package org.unigrid.janus.model.external;
 
-import mockit.Mock;
 import mockit.MockUp;
+import mockit.Mock;
+import org.unigrid.janus.model.UpdateURL;
 
-public class DaemonMockUp extends MockUp<Daemon> {
+public class ConfigUrlMockUp extends MockUp<UpdateURL> {
+
+	
+	public String getLinuxUrl() {
+		return ConfigUrlMockUp.class.getResource("get_update4j_config.xml").toString();
+	}
+
 	@Mock
-	public String getRPCAdress() {
-		return "http://localhost:1337";
+	public String getBootstrapUrl() {
+		return ConfigUrlMockUp.class.getResource("get_bootstrap_version_from_github.xml").toString();
 	}
 }

@@ -14,14 +14,28 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.service;
+package org.unigrid.janus.jqwik;
 
-import mockit.Mock;
-import mockit.MockUp;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.CDIProvider;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+import org.jboss.weld.environment.se.WeldContainer;
 
-public class DaemonMockUp extends MockUp<Daemon> {
-	@Mock
-	public String getRPCAdress() {
-		return "http://localhost:1337";
+public class NamedCDIProvider implements CDIProvider {
+	public static final AtomicReference<String> NAME_REFERENCE = new AtomicReference<>();
+
+	@Override
+	public CDI<Object> getCDI() {
+		if (Objects.isNull(NAME_REFERENCE.get())) {
+			throw new IllegalStateException("No namespace set for requested CDI instance");
+		}
+
+		return WeldContainer.instance(NAME_REFERENCE.get());
+	}
+
+	@Override
+	public int getPriority() {
+		return DEFAULT_CDI_PROVIDER_PRIORITY + 10; /* Bump ourselves up so we get precedence. */
 	}
 }

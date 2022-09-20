@@ -67,6 +67,10 @@ public class DebugService {
 		}
 	}
 
+	public void trace(String msg) {
+			System.out.println(msg);		
+	}
+
 	public String getCurrentDate() {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd.HH.mm");
 		Date date = new Date();

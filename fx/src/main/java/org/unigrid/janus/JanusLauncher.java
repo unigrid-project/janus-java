@@ -22,10 +22,12 @@ import jakarta.enterprise.inject.se.SeContainerInitializer;
 import jakarta.enterprise.inject.spi.CDI;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
-import org.unigrid.janus.model.ConfigUrl;
+import org.unigrid.janus.model.UpdateURL;
+import org.apache.commons.lang3.SystemUtils;
 import org.unigrid.janus.model.cdi.EagerExtension;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
@@ -35,6 +37,9 @@ public class JanusLauncher implements Launcher {
 
 	@InjectTarget
 	private Map<String, String> inputArgs = new HashMap<String, String>();
+
+	@InjectTarget
+	private HostServices hostService;
 
 	@Override @SneakyThrows
 	public void run(LaunchContext lc) {
@@ -50,9 +55,9 @@ public class JanusLauncher implements Launcher {
 		System.out.println(CDI.current());
 		if (inputArgs.containsKey("URL")) {
 			System.out.println(inputArgs.get("URL"));
-			ConfigUrl.setLinuxUrl(inputArgs.get("URL"));
-			ConfigUrl.setMacUrl(inputArgs.get("URL"));
-			ConfigUrl.setWindowsUrl(inputArgs.get("URL"));
+			UpdateURL.setLinuxUrl(inputArgs.get("URL"));
+			UpdateURL.setMacUrl(inputArgs.get("URL"));
+			UpdateURL.setWindowsUrl(inputArgs.get("URL"));
 		}
 		Platform.runLater(() -> {
 			Janus janus = container.select(Janus.class).get();
@@ -66,7 +71,7 @@ public class JanusLauncher implements Launcher {
 			System.out.println("launcher start");
 
 			try {
-				janus.startFromBootstrap(stage);
+				janus.startFromBootstrap(stage, hostService);
 			} catch (Exception e) {
 				System.exit(1);
 			}

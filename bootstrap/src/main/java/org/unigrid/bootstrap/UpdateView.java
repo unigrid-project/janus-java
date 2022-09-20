@@ -35,6 +35,7 @@ import java.util.ResourceBundle;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javafx.animation.FadeTransition;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -94,12 +95,14 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		return primaryStage;
 	}
 
-	public void setConfig(Configuration config, Stage primaryStage, Map<String, String> input) {
+	public void setConfig(Configuration config, Stage primaryStage, Map<String, String> input, HostServices hostServices) {
 		this.config = config;
 		this.primaryStage = primaryStage;
 		inject = new Injectable() {
 			@InjectSource
 			Map<String, String> inputArgs = input;
+			@InjectSource
+			HostServices hostService = hostServices;
 		};
 
 		System.out.println(input.get("URL"));
@@ -216,7 +219,9 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	private void launch() {
-		launch.setDisable(false);
+		getStage().hide();
+		launchApp();
+		//launch.setDisable(false);
 	}
 
 	private void untarDaemonLinux() {
@@ -452,9 +457,11 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		File baseDir = new File(getBaseDirectory().concat("/lib"));
 		List<FileMetadata> onlineFiles = config.getFiles();
 		List<String> fileNames = new ArrayList<String>();
+		if (fileNames.size() == 0) {
+			return;
+		}
 		for (FileMetadata onlineFile: onlineFiles) {
 			fileNames.add(new File(onlineFile.getPath().getFileName().toString()).getName());
-			
 		}
 		for (File file : baseDir.listFiles()) {
 			if (!fileNames.contains(file.getName())) {

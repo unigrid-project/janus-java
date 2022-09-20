@@ -14,14 +14,29 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.service;
+package org.unigrid.janus.model.cdi;
 
-import mockit.Mock;
-import mockit.MockUp;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import mockit.Invocation;
 
-public class DaemonMockUp extends MockUp<Daemon> {
-	@Mock
-	public String getRPCAdress() {
-		return "http://localhost:1337";
+public class Invoke {
+
+	public static <T, R> R invoke(String name, Invocation invocation, Object... args) {
+		try {
+			final List<Class> paramterTypes = new ArrayList<>();
+			for (Object arg : args) {
+				paramterTypes.add(arg.getClass());
+			}
+			final T invocationInstance = invocation.getInvokedInstance();
+			final Method method = invocation.getInvokedInstance().getClass()
+				.getDeclaredMethod(name, paramterTypes.toArray(new Class[0]));
+			method.setAccessible(true);
+			return (R) method.invoke(invocationInstance, args);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return null;
+		}
 	}
 }

@@ -14,14 +14,18 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.service;
+package org.unigrid.janus.jqwik;
 
-import mockit.Mock;
-import mockit.MockUp;
+import mockit.integration.TestRunnerDecorator;
+import net.jqwik.api.lifecycle.AroundPropertyHook;
+import net.jqwik.api.lifecycle.PropertyExecutionResult;
+import net.jqwik.api.lifecycle.PropertyExecutor;
+import net.jqwik.api.lifecycle.PropertyLifecycleContext;
 
-public class DaemonMockUp extends MockUp<Daemon> {
-	@Mock
-	public String getRPCAdress() {
-		return "http://localhost:1337";
+public class MockitHook extends TestRunnerDecorator implements AroundPropertyHook {
+	@Override
+	public PropertyExecutionResult aroundProperty(PropertyLifecycleContext context, PropertyExecutor property) {
+		handleMockFieldsForWholeTestClass(context.testInstance());
+		return property.execute();
 	}
 }

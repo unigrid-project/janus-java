@@ -16,11 +16,13 @@
 
 package org.unigrid.janus;
 
+import com.dustinredmond.fxtrayicon.FXTrayIcon;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
+import java.awt.SystemTray;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -54,6 +56,7 @@ import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.service.TrayService;
 
 @Eager
 @ApplicationScoped
@@ -68,6 +71,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private UpdateWallet updateWallet;
 	@Inject private SplashScreenController splashController;
 	@Inject private Wallet wallet;
+	@Inject private TrayService tray;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
@@ -122,8 +126,9 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Override
 	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
 		debug.print("start", Janus.class.getSimpleName());
-		startSplashScreen();
+		tray.initTrayService(stage);
 		window.setHostServices(hostServices);
+		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
@@ -149,11 +154,12 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	}
 
-	public void startFromBootstrap(Stage stage) throws Exception {
+	public void startFromBootstrap(Stage stage, HostServices hostServices) throws Exception {
 		System.out.println(CDI.current());
-
+		tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
+		window.setHostServices(hostServices);
 		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {

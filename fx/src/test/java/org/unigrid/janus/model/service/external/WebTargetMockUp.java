@@ -26,12 +26,9 @@ import org.glassfish.jersey.client.JerseyInvocation;
 import org.glassfish.jersey.client.JerseyWebTarget;
 
 public class WebTargetMockUp extends MockUp<JerseyWebTarget> {
-
 	public static class SneakyBuilder extends JerseyInvocation.Builder {
-
 		public SneakyBuilder() {
-			super(
-				URI.create("http://localhost:4242"),
+			super(URI.create("http://localhost:4242"),
 				(ClientConfig) ClientBuilder.newClient().getConfiguration()
 			);
 		}

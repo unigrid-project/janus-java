@@ -4,7 +4,7 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>org.unigrid.janus</groupId>
-        <version>1.0.7-SNAPSHOT</version>
+        <version>1.0.8-SNAPSHOT</version>
     </parent>
     <groupId>org.unigrid</groupId>
     <artifactId>bootstrap</artifactId>

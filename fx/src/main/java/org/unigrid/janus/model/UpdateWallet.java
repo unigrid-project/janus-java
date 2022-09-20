@@ -68,13 +68,14 @@ public class UpdateWallet extends TimerTask {
 
 	private static DebugService debug = new DebugService();
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
+	private static final String BOOTSTRAP_URL = UpdateURL.getBootstrapUrl();
 	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
 
 	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
-		{OS.LINUX, ConfigUrl.getLinuxUrl()},
-		{OS.WINDOWS, ConfigUrl.getWindowsUrl()},
-		{OS.MAC, ConfigUrl.getMacUrl()}
+		{OS.LINUX, UpdateURL.getLinuxUrl()},
+		{OS.WINDOWS, UpdateURL.getWindowsUrl()},
+		{OS.MAC, UpdateURL.getMacUrl()}
 	});
 
 	public enum UpdateState {
@@ -106,18 +107,18 @@ public class UpdateWallet extends TimerTask {
 		this.pcs = new PropertyChangeSupport(this);
 	}
 
-	private Feed initWebTarget() {
+	public Feed initWebTarget() {
 		try {
+			System.out.println(BOOTSTRAP_URL);
 			client = ClientBuilder.newBuilder()
 				.build();
-			Response response = client.target("https://github.com/unigrid-project/janus-java/releases.atom")
+			Response response = client.target(BOOTSTRAP_URL)
 				.request(MediaType.APPLICATION_XML_TYPE).get();
 			//System.out.println(response.readEntity(String.class));
 			Feed feed = response.readEntity(Feed.class);
 			return feed;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			System.out.println(e.getCause().toString());
 			return null;
 		}
 	}
@@ -136,43 +137,48 @@ public class UpdateWallet extends TimerTask {
 			pcs = new PropertyChangeSupport(this);
 		}
 
+		String title = "Unigrid";
+		String launcherMessage = "New launcher update ready \nPlease press the update button!";
+		String fxMessage = "New update ready \nPlease press the update button!";
 		if (checkUpdateBootstrap()) {
 
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					if (SystemUtils.IS_OS_MAC_OSX) {
-						Notifications.create().title("Update Ready")
-							.text("New launcher update ready \n"
-								+ "Please press the update button!")
-							.position(Pos.TOP_RIGHT).showInformation();
-					} else {
-						Notifications.create().title("Update Ready")
-							.text("New launcher update ready \n"
-								+ "Please press the update button!")
-							.showInformation();
+			if (Preferences.get().getBoolean("notifications", true)) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						if (SystemUtils.IS_OS_MAC_OSX) {
+							Notifications.create().title(title)
+								.text(launcherMessage)
+								.position(Pos.TOP_RIGHT).showInformation();
+						} else {
+							Notifications.create().title(title)
+								.text(launcherMessage)
+								.showInformation();
+						}
 					}
-				}
-			});
+				});
+			}
 		} else if (checkUpdate()) {
 			this.pcs.firePropertyChange(this.UPDATE_PROPERTY, oldValue, UpdateState.UPDATE_READY);
 
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					if (SystemUtils.IS_OS_MAC_OSX) {
-						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas press the update button!")
-							.position(Pos.TOP_RIGHT).showInformation();
-					} else {
-						Notifications.create().title("Update Ready")
-							.text("New update ready \nPleas press the update button!")
-							.showInformation();
+			if (Preferences.get().getBoolean("notifications", true)) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						if (SystemUtils.IS_OS_MAC_OSX) {
+							Notifications.create().title(title)
+								.text(fxMessage)
+								.position(Pos.TOP_RIGHT).showInformation();
+						} else {
+							Notifications.create().title(title)
+								.text(fxMessage)
+								.showInformation();
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 
@@ -200,9 +206,11 @@ public class UpdateWallet extends TimerTask {
 			System.out.println("Checking for update");
 			if (updateConfig == null) {
 				debug.print("null config", UpdateWallet.class.getSimpleName());
+				return false;
 			}
 			update = updateConfig.requiresUpdate();
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
 			update = false;
 		}
 		System.out.println("Is thier an update ready = " + update);

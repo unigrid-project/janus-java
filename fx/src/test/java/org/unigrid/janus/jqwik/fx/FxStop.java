@@ -14,21 +14,15 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.jqwik.fx;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class ConfigUrl {
-	@Getter @Setter
-	private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/config-linux.xml";
-
-	@Getter @Setter
-	private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/config-mac.xml";
-
-	@Getter @Setter
-	private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/config-windows.xml";
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface FxStop {
+	/* Empty on purpose */
 }
