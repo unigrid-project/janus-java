@@ -45,43 +45,47 @@
             <artifactId>sentry</artifactId>
             <version>6.4.0</version>
         </dependency>
-	<dependency>
-		<groupId>org.projectlombok</groupId>
-		<artifactId>lombok</artifactId>
-	</dependency>
-	<dependency>
-		<groupId>org.jmockit</groupId>
-		<artifactId>jmockit</artifactId>
-		<version>1.49</version>
-		<scope>test</scope>
-	</dependency>
-	<dependency>
-		<groupId>net.jqwik</groupId>
-		<artifactId>jqwik</artifactId>
-		<version>1.6.5</version>
-		<scope>test</scope>
-	</dependency>
-	<dependency>
-		<groupId>com.evolvedbinary.j8fu</groupId>
-		<artifactId>j8fu</artifactId>
-		<version>1.23.0</version>
-	</dependency>
-	<dependency>
-		<groupId>org.jboss.weld.se</groupId>
-		<artifactId>weld-se-core</artifactId>
-		<version>4.0.3.Final</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.commons</groupId>
-		<artifactId>commons-lang3</artifactId>
-		<version>3.8.1</version>
-	</dependency>
-	<dependency>
-		<groupId>org.awaitility</groupId>
-		<artifactId>awaitility</artifactId>
-		<version>4.2.0</version>
-		<scope>test</scope>
-	</dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>1.49</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.jqwik</groupId>
+            <artifactId>jqwik</artifactId>
+            <version>1.6.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.evolvedbinary.j8fu</groupId>
+            <artifactId>j8fu</artifactId>
+            <version>1.23.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld.se</groupId>
+            <artifactId>weld-se-core</artifactId>
+            <version>4.0.3.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>4.2.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -103,18 +107,19 @@
                     </execution>
                 </executions>
             </plugin>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-surefire-plugin</artifactId>
-		<configuration>
-			<argLine>
-				-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar
-				-Dcoverage-classes=loaded
-				--add-opens org.unigrid.bootstrap/org.unigrid.bootstrap=ALL-UNNAMED
-				--add-exports org.unigrid.bootstrap/org.unigrid.bootstrap.jqwik=ALL-UNNAMED
-			</argLine>
-		</configuration>
-	    </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>
+                        -javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar
+                        -Dcoverage-classes=loaded
+                        --add-opens org.unigrid.bootstrap/org.unigrid.bootstrap=ALL-UNNAMED
+                        --add-exports org.unigrid.bootstrap/org.unigrid.bootstrap.jqwik=ALL-UNNAMED
+                    </argLine>
+                 
+                </configuration>
+            </plugin>
             <!--<plugin>
                 <groupId>org.tentackle</groupId>
                 <artifactId>tentackle-jlink-maven-plugin</artifactId>

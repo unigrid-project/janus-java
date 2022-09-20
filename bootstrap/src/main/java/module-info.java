@@ -15,7 +15,6 @@
 */
 
 module org.unigrid.bootstrap {
-	requires static lombok;
 	requires javafx.controls;
 	requires javafx.fxml;
 	requires java.base;
@@ -28,8 +27,6 @@ module org.unigrid.bootstrap {
 	requires java.compiler;
 	requires jdk.crypto.ec;
 	requires sentry;
-	requires weld.environment.common;
-	requires jakarta.inject;
 
 	opens org.unigrid.bootstrap to javafx.fxml, org.update4j;
 	opens org.unigrid.bootstrap.controller to javafx.fxml;
