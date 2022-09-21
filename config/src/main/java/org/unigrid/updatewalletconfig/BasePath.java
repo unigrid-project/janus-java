@@ -17,11 +17,14 @@
 package org.unigrid.updatewalletconfig;
 
 import jakarta.xml.bind.annotation.XmlAttribute;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
 
+@Data()
 public class BasePath {
 
-	@Setter
+	@Getter(AccessLevel.PROTECTED)
 	@XmlAttribute
 	private String path;
 

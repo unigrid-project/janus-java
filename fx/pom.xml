@@ -15,6 +15,11 @@
     <properties>
         <mainClass>org.unigrid.janus.Janus</mainClass>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <config.opens>
+            fx/org.unigrid.janus.model.entity=jakarta.xml.bind/jakarta.xml.bind-api
+        </config.opens>
+        <config.exports>
+        </config.exports>
     </properties>
     <dependencies>
         <dependency>

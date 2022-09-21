@@ -20,20 +20,22 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Data()
-public class Property {
+@RequiredArgsConstructor
+public class Package {
+
+	@Getter(AccessLevel.PROTECTED)
+	@XmlAttribute(name = "package")
+	private String groupId;
 
 	@Getter(AccessLevel.PROTECTED)
 	@XmlAttribute
-	private String key;
+	private String target;
 
-	@Getter(AccessLevel.PROTECTED)
-	@XmlAttribute
-	private String value;
-
-	public Property(String key, String value) {
-		this.key = key;
-		this.value = value;
+	public Package(String groupId, String target) {
+		this.groupId = groupId;
+		this.target = target;
 	}
 }

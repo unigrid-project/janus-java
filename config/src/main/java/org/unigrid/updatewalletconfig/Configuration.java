@@ -25,26 +25,29 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
 
+@Data()
 @XmlRootElement(name = "configuration")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Configuration {
 
-	@Setter
+	@Getter(AccessLevel.PROTECTED)
 	@XmlAttribute
 	private String timestamp;
 
-	@Setter
+	@Getter(AccessLevel.PROTECTED)
 	@XmlElement(name = "base")
 	private BasePath basePath;
 
-	@Setter
+	@Getter(AccessLevel.PROTECTED)
 	@XmlElementWrapper(name = "properties")
 	@XmlElement(name = "property")
 	private List<Property> properties = new ArrayList();
 
-	@Setter
+	@Getter(AccessLevel.PROTECTED)
 	@XmlElementWrapper(name = "files")
 	@XmlElement(name = "file")
 	private List<FileMetadata> files;
@@ -54,13 +57,5 @@ public class Configuration {
 		basePath = new BasePath();
 		properties.add(new Property("maven.central", "https://repo1.maven.org/maven2"));
 		properties.add(new Property("default.launcher.main.class", "org.unigrid.janus.Janus"));
-	}
-
-	public void setFxVersionToProperty(String fxVersion) {
-		properties.add(new Property("fx.version", fxVersion));
-	}
-
-	public List<Property> getConfProperties() {
-		return properties;
 	}
 }

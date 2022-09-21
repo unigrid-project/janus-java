@@ -48,7 +48,6 @@ import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.internal.impl.SimpleLocalRepositoryManagerFactory;
 import org.eclipse.aether.repository.NoLocalRepositoryManagerException;
 import org.eclipse.aether.graph.DependencyNode;
-import java.util.StringJoiner;
 import org.apache.maven.MavenExecutionException;
 import org.apache.maven.project.MavenProject;
 
@@ -66,8 +65,12 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	@Override
 	public void afterSessionEnd(MavenSession mavenSession) throws MavenExecutionException {
+		if (!mavenSession.getResult().getExceptions().isEmpty()) {
+			return;
+		}
 		basedir = mavenSession.getRepositorySession().getLocalRepository().getBasedir();
 		MavenProject fxProject = null;
+
 		if (mavenSession.getGoals().contains("validate") || mavenSession.getGoals().contains("package")
 			|| mavenSession.getGoals().contains("install")) {
 			logger.info("Goal: " + mavenSession.getGoals());
@@ -82,7 +85,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					+ ":" + fxProject.getVersion());
 				if (fxVersion.isEmpty()) {
 					fxVersion = fxProject.getVersion().replace("-SNAPSHOT", "");
-					configuration.setFxVersionToProperty(fxVersion);
+					configuration.getProperties().add(new Property("fx.version", fxVersion));
 				}
 
 				OS[] os = new OS[]{OS.LINUX, OS.LINUX, OS.MAC, OS.MAC, OS.WINDOWS, OS.WINDOWS};
@@ -100,15 +103,49 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		String version = fx.getVersion();
 		List<FileMetadata> files = getDependencies(getFxDependencyString(fx));
 		List<FileMetadata> bootstrapFiles = getDependencies("org.unigrid:bootstrap:" + version);
-		List<FileMetadata> external = getExternalDependencies(os, fx.getBasedir(), testing);
+		List<FileMetadata> externalFiles = getExternalDependencies(os, fx.getBasedir(), testing);
 		files.removeAll(bootstrapFiles);
-		files.addAll(0, external);
+		files.addAll(0, externalFiles);
+
+		final String[] opens = fx.getProperties().getProperty("config.opens").split("\n");
+		final String[] exports = fx.getProperties().getProperty("config.exports").split("\n");
+		for (FileMetadata file : files) {
+			/*logger.info("getUri: " + file.getUri());
+			logger.info("getArtifactId: " + file.getArtifactId());
+			logger.info("getGroupId: " + file.getGroupId());*/
+			List<Package> opensPackages = getOpensExports(file, opens);
+			if (!opensPackages.isEmpty()) {
+				file.setOpensPackages(getOpensExports(file, opens));
+			}
+			List<Package> exportsPackages = getOpensExports(file, exports);
+			if (!exportsPackages.isEmpty()) {
+				file.setExportsPackages(getOpensExports(file, exports));
+			}
+		}
+
 		configuration.setBasePath(new BasePath(getBasePathUrl(os)));
 		configuration.setFiles(files);
 
 		ConfMarshaller marshaller = new ConfMarshaller();
 		marshaller.mashal(configuration, getFileUrl(os, testing));
 		logger.info("Config File created: " + getFileUrl(os, testing));
+	}
+
+	public List<Package> getOpensExports(FileMetadata file, String[] opensExportsList) {
+		List<Package> packages = new ArrayList<Package>();
+		for (String element : opensExportsList) {
+			String[] elementSplitStrings = element.trim().split("=");
+			String target = elementSplitStrings[0];
+			String dependency[] = elementSplitStrings[1].split("/");
+			String groupId = dependency[0];
+			String artifactId = dependency[1];
+
+			if (file.getGroupId().equals(groupId) && file.getArtifactId().equals(artifactId)) {
+				logger.info("groupId: " + groupId + ",artifactId: " + artifactId);
+				packages.add(new Package(groupId, target));
+			}
+		}
+		return packages;
 	}
 
 	public RepositorySystem newRepositorySystem() {
@@ -128,10 +165,10 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 	}
 
 	public List<FileMetadata> getDependencies(String currentArtifact) {
-
 		List<FileMetadata> files = new ArrayList();
 		DefaultRepositorySystemSession defSession = MavenRepositorySystemUtils.newSession();
 		LocalRepository localRepo = new LocalRepository(basedir);
+
 		try {
 			defSession.setLocalRepositoryManager(new SimpleLocalRepositoryManagerFactory()
 				.newInstance(defSession, localRepo));
@@ -176,9 +213,11 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		List<FileMetadata> list = new ArrayList();
 		try {
 			String version = "";
-			for (Property property : configuration.getConfProperties()) {
-				if (property.getPropertyKey().equals("fx.version")) {
+			for (Property property : configuration.getProperties()) {
+				if (property.getKey().equals("fx.version")) {
 					version = "${fx.version}";
+				} else {
+					version = fxVersion;
 				}
 			}
 			String updateUrl = "https://github.com/unigrid-project/unigrid-update"
@@ -186,10 +225,9 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			File localJar = new File(baseDir.getAbsolutePath() + "/target/fx-" + fxVersion
 				+ "-SNAPSHOT.jar");
 			if (localJar.exists() != false) {
-				list.add(new FileMetadata(updateUrl,
-					localJar.length(),
-					ConfFileUtil.getChecksumString(localJar.toPath())
-				));
+				FileMetadata tempFile = new FileMetadata(updateUrl, localJar.length(),
+					ConfFileUtil.getChecksumString(localJar.toPath()));
+				list.add(tempFile);
 			} else {
 				throw new MavenExecutionException("Local jar not found!"
 					+ " Try mvn clean install or mvn clean package", new IllegalStateException());
@@ -203,28 +241,23 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		return list;
 	}
 
-	public FileMetadata getFileMetadata(String gId, String aId, String version, String classifier) {
-		String localUrl = getLocalUrl(gId, aId, version, classifier);
+	public FileMetadata getFileMetadata(String groupId, String artifactId, String version, String classifier) {
+		String localUrl = getLocalUrl(groupId, artifactId, version, classifier);
 		File file = new File(localUrl);
 		FileMetadata tempFile = null;
 		if (file.exists()) {
 			try {
 				String filePath = file.getAbsolutePath().replace(basedir.getPath(), "${maven.central}");
 				String checksum = ConfFileUtil.getChecksumString(file.toPath());
+				tempFile = new FileMetadata(
+					filePath,
+					file.length(),
+					checksum,
+					groupId,
+					artifactId
+				);
 				if (filePath.contains("${maven.central}/jakarta/inject/jakarta.inject-api")) {
-					tempFile = new FileMetadata(
-						filePath,
-						file.length(),
-						checksum,
-						true,
-						true
-					);
-				} else {
-					tempFile = new FileMetadata(
-						filePath,
-						file.length(),
-						checksum
-					);
+					tempFile.setIgnoreBootConflict(true);
 				}
 			} catch (IOException ex) {
 				java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
@@ -237,19 +270,19 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 	}
 
 	public String getFxDependencyString(MavenProject fxProject) {
-		return new StringJoiner(":").add(fxProject.getGroupId()).add(fxProject.getArtifactId())
-			.add(fxProject.getVersion()).toString();
+		return String.join(":", fxProject.getGroupId(), fxProject.getArtifactId(), fxProject.getVersion());
 	}
 
 	public FileMetadata getFileByUrl(String url) {
 		try {
 			URL tempUrl = new URL(url);
-			return new FileMetadata(
+			FileMetadata tempFile = new FileMetadata(
 				tempUrl.toString(),
 				ConfFileUtil.getFileSize(tempUrl),
-				ConfFileUtil.getChecksumStringyByInputStream(tempUrl.openStream()),
-				false
+				ConfFileUtil.getChecksumStringyByInputStream(tempUrl.openStream())
 			);
+			tempFile.setModulePath(false);
+			return tempFile;
 		} catch (IOException ex) {
 			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName()).log(Level.SEVERE, null, ex);
 		}
