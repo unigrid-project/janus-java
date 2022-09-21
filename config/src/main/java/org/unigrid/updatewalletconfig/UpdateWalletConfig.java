@@ -114,11 +114,11 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			logger.info("getArtifactId: " + file.getArtifactId());
 			logger.info("getGroupId: " + file.getGroupId());*/
 			List<Package> opensPackages = getOpensExports(file, opens);
-			if (!opensPackages.isEmpty()) {
+			if (opensPackages != null && !opensPackages.isEmpty()) {
 				file.setOpensPackages(getOpensExports(file, opens));
 			}
 			List<Package> exportsPackages = getOpensExports(file, exports);
-			if (!exportsPackages.isEmpty()) {
+			if (exportsPackages != null && !exportsPackages.isEmpty()) {
 				file.setExportsPackages(getOpensExports(file, exports));
 			}
 		}
@@ -132,17 +132,20 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 	}
 
 	public List<Package> getOpensExports(FileMetadata file, String[] opensExportsList) {
-		List<Package> packages = new ArrayList<Package>();
+		List<Package> packages = null;
 		for (String element : opensExportsList) {
-			String[] elementSplitStrings = element.trim().split("=");
-			String target = elementSplitStrings[0];
-			String dependency[] = elementSplitStrings[1].split("/");
-			String groupId = dependency[0];
-			String artifactId = dependency[1];
+			element.trim();
+			if (!element.isEmpty()) {
+				String[] elementSplitStrings = element.split("=");
+				String target = elementSplitStrings[0];
+				String dependency[] = elementSplitStrings[1].split("/");
+				String groupId = dependency[0];
+				String artifactId = dependency[1];
 
-			if (file.getGroupId().equals(groupId) && file.getArtifactId().equals(artifactId)) {
-				logger.info("groupId: " + groupId + ",artifactId: " + artifactId);
-				packages.add(new Package(groupId, target));
+				if (file.getGroupId().equals(groupId) && file.getArtifactId().equals(artifactId)) {
+					packages = new ArrayList<Package>();
+					packages.add(new Package(groupId, target));
+				}
 			}
 		}
 		return packages;
