@@ -27,6 +27,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.UpdateURL;
+import org.apache.commons.lang3.SystemUtils;
 import org.unigrid.janus.model.cdi.EagerExtension;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;

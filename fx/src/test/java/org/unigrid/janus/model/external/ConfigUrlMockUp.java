@@ -22,7 +22,7 @@ import org.unigrid.janus.model.UpdateURL;
 
 public class ConfigUrlMockUp extends MockUp<UpdateURL> {
 
-	@Mock
+	
 	public String getLinuxUrl() {
 		return ConfigUrlMockUp.class.getResource("get_update4j_config.xml").toString();
 	}

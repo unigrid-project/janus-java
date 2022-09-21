@@ -48,6 +48,7 @@ public class UpdateWalletTest {
 		new MockUp<UpdateWallet>() {
 			@Mock
 			public void run(Invocation invocation) {
+				System.out.println(invocation);
 				if (Invoke.invoke("checkUpdate", invocation)) {
 					testUpdateTrue = true;
 					System.out.println("Testing testing");
@@ -99,7 +100,7 @@ public class UpdateWalletTest {
 				} catch (Exception e) {
 					System.out.println(e.getMessage());
 					return null;
-				}	
+				}
 			}
 
 		};
