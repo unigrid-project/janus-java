@@ -27,6 +27,7 @@ module org.unigrid.bootstrap {
 	requires java.compiler;
 	requires jdk.crypto.ec;
 	requires sentry;
+	requires javafx.swing;
 
 	opens org.unigrid.bootstrap to javafx.fxml, org.update4j;
 	opens org.unigrid.bootstrap.controller to javafx.fxml;
