@@ -461,13 +461,20 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			return;
 		}
 		for (FileMetadata onlineFile: onlineFiles) {
-			fileNames.add(new File(onlineFile.getPath().toString()).getName());
+			fileNames.add(new File(onlineFile.getPath().getFileName().toString()).getName());
 		}
 		for (File file : baseDir.listFiles()) {
-			System.out.println(file.getName());
 			if (!fileNames.contains(file.getName())) {
 				file.delete();
 			}
 		}
+	}
+	
+	private String getFileName(String file) {
+		String fileName = "";
+		String[] strings = file.split("/");
+		fileName = strings[strings.length - 1];
+		System.out.println(fileName);
+		return fileName;
 	}
 }
