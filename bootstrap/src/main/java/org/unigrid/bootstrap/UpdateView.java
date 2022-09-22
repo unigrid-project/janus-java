@@ -522,6 +522,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		if (fileNames.size() == 0) {
 			return;
 		}
+
 		for (FileMetadata onlineFile : onlineFiles) {
 			fileNames.add(new File(onlineFile.getPath().getFileName().toString()).getName());
 		}
