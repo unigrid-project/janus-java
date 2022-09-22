@@ -13,7 +13,6 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.bootstrap;
 
 import io.sentry.Sentry;
@@ -30,7 +29,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javafx.animation.FadeTransition;
@@ -75,7 +77,6 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	@FXML
 	private Button launch;
 
-	@InjectSource
 	private Stage primaryStage;
 
 	private Injectable inject;
@@ -153,13 +154,16 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		running.set(true);
 		status.setText("Checking for updates...");
 		Task<Boolean> checkUpdates = checkUpdates();
+		final Object launchTrigger = new Object();
 
 		checkUpdates.setOnSucceeded(evt -> {
 			if (!checkUpdates.getValue()) {
+				if(!daemonDirExists()) {
+					extractDaemon();
+				}
 				progress.setProgress(1);
 				status.setText("No updates found");
 				running.set(false);
-				launch();
 			} else {
 				Task<Void> doUpdate = new Task<>() {
 					@Override
@@ -170,28 +174,28 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 						System.out.println("zip location: " + zip.toString());
 						System.out.println("depenendencies location: " + getBaseDirectory());
 
-						if (config.update(UpdateOptions.archive(zip)
-							.updateHandler(UpdateView.this)).getException() == null) {
+						Throwable s = config.update(UpdateOptions.archive(zip)
+							.updateHandler(UpdateView.this)).getException();
 
+						if (Objects.isNull(s)) {
 							System.out.println("Do the install");
 							Archive.read(zip).install(true);
 							System.out.println("Install done!!");
-
-							if (OS.CURRENT == OS.LINUX || OS.CURRENT == OS.MAC) {
-								untarDaemonLinux();
-							} else {
-								unzipDaemonWindows();
+							if(!daemonDirExists()) {
+								extractDaemon();
 							}
-							
-							launch();
+							synchronized (launchTrigger) {
+								launchTrigger.notifyAll();
+							}
 						} else {
-							Throwable s = config.update(UpdateOptions.archive(zip)
-								.updateHandler(UpdateView.this)).getException();
 							Sentry.captureException(s);
 							System.out.println(s);
 							System.out.println("updatehandler = null");
 							status.setText("No updates found");
-							launch();
+
+							synchronized (launchTrigger) {
+								launchTrigger.notifyAll();
+							}
 						}
 
 						return null;
@@ -200,7 +204,17 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 				};
 
 				run(doUpdate);
+
+				synchronized (launchTrigger) {
+					try {
+						launchTrigger.wait();
+					} catch (InterruptedException ex) {
+						/* Empty on purpose */
+					}
+				}
 			}
+
+			launch();
 		});
 
 		run(checkUpdates);
@@ -217,10 +231,59 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		};
 	}
 
+	private void extractDaemon() {
+		final Object obj = new Object();
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (OS.CURRENT == OS.LINUX
+					|| OS.CURRENT == OS.MAC) {
+					untarDaemonLinux();
+				} else {
+					unzipDaemonWindows();
+				}
+				synchronized (obj) {
+					obj.notifyAll();
+				}
+			}
+		});
+		t.start();
+		synchronized (obj) {
+			try {
+				System.out.println("we are waiting");
+				obj.wait();
+				System.out.println("we are done waiting!!!!!!");
+			} catch (InterruptedException ex) {
+				/* Empty on purpose */
+			}
+		}
+	}
+
 	private void launch() {
-		getStage().hide();
+		Stage stage = getStage();
+		stage.hide();
 		launchApp();
 		//launch.setDisable(false);
+	}
+
+	private boolean daemonDirExists() {
+		List<FileMetadata> files = config.getFiles();
+		String onlineFileName = "";
+		System.out.println("is this working!!!!");
+		for (FileMetadata file : files) {
+			if (!file.isModulepath()) {
+				String s = file.getUri().toString();
+				String[] arr = s.split("/");
+				onlineFileName = arr[arr.length - 1];
+			}
+		}
+		String[] arr = onlineFileName.split("-");
+		if (arr.length < 1) {
+			return false;
+		}
+		File dir = new File(startLoacation + "/bin/unigrid-" + arr[1]);
+		System.out.println("daemon lib exits = " + dir.exists());
+		return dir.exists();
 	}
 
 	private void untarDaemonLinux() {
@@ -273,6 +336,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					System.out.println(line);
 				}
 			}
+			process.waitFor();
 
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
@@ -290,9 +354,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					"-name", "unigrid*"
 				);
 			}
-
 			final Process process = pb.start();
-
 			try ( var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line;
 
@@ -302,6 +364,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					cp.start();
 				}
 			}
+			process.waitFor();
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
@@ -459,7 +522,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		if (fileNames.size() == 0) {
 			return;
 		}
-		for (FileMetadata onlineFile: onlineFiles) {
+
+		for (FileMetadata onlineFile : onlineFiles) {
 			fileNames.add(new File(onlineFile.getPath().getFileName().toString()).getName());
 		}
 		for (File file : baseDir.listFiles()) {
@@ -468,7 +532,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		}
 	}
-	
+
 	private String getFileName(String file) {
 		String fileName = "";
 		String[] strings = file.split("/");
