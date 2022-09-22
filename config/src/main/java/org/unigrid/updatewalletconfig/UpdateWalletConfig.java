@@ -58,6 +58,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	private File basedir = null;
 
+	private static String localRepo = "";
+
 	private String fxVersion = "";
 
 	@Requirement
@@ -69,6 +71,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			return;
 		}
 		basedir = mavenSession.getRepositorySession().getLocalRepository().getBasedir();
+		localRepo = mavenSession.getSettings().getLocalRepository();
 		MavenProject fxProject = null;
 
 		if (mavenSession.getGoals().contains("validate") || mavenSession.getGoals().contains("package")
@@ -315,7 +318,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 	public static String getFileUrl(OS os, boolean testing) {
 		String isTesting = testing ? "-test" : "";
 		return System.getProperty("user.dir").concat("/config/target/") + "config-"
-			+ os.getShortName() + isTesting + ".xml";
+			+ os.name().toLowerCase() + isTesting + ".xml";
 	}
 
 	public static String getDaemonUrl(OS os) {
@@ -382,7 +385,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	public static String getLocalUrl(String groupId, String artifactId, String version, String classifier) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(System.getProperty("user.home").concat("/.m2/repository/"));
+		builder.append(localRepo).append("/");
 		builder.append(groupId.replace('.', '/')).append("/");
 		builder.append(artifactId).append("/");
 		builder.append(version).append('/');
