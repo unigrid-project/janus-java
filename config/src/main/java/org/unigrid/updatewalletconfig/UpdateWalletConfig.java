@@ -262,6 +262,9 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				if (filePath.contains("${maven.central}/jakarta/inject/jakarta.inject-api")) {
 					tempFile.setIgnoreBootConflict(true);
 				}
+				if (filePath.contains("${maven.central}/org/openjfx/javafx-swing")) {
+					tempFile.setIgnoreBootConflict(true);
+				}
 			} catch (IOException ex) {
 				java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
 					.log(Level.SEVERE, null, ex);

@@ -43,7 +43,7 @@ public class FileMetadata {
 	private String checksum;
 
 	@Getter(AccessLevel.PROTECTED)
-	@XmlAttribute
+	@XmlAttribute(name = "modulepath")
 	private boolean modulePath;
 
 	@Getter(AccessLevel.PROTECTED)
