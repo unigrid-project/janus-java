@@ -7,6 +7,7 @@
 /src/main/resources/daemon/
 
 target/
+
 /fx/templates/
 /fx/runtime/ # What is this?
 
@@ -15,8 +16,5 @@ fx/unigrid-cli.exe
 fx/unigridd.exe
 fx/unigridd
 fx/unigrid-cli
-
-/config/UpdateWalletConfig/target/
-/config/UpdateWalletConfig/config*
 
 .jqwik-database

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration timestamp="2022-09-14T16:51:43.592Z">
+    <base path="${user.dir}/target/update-dependencies/temp/lib/"/>
+    <properties>
+        <property key="maven.central" value="https://repo1.maven.org/maven2"/>
+        <property key="default.launcher.main.class" value="org.unigrid.janus.Janus"/>
+        <property key="fx.version" value="1.0.8"/>
+    </properties>
+    <files>
+        <file uri="${maven.central}/org/slf4j/slf4j-api/2.0.0-alpha7/slf4j-api-2.0.0-alpha7.jar" size="60713" checksum="a26d4533" modulepath="true"/>
+    </files>
+</configuration>

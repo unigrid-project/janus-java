@@ -460,7 +460,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		runner.start();
 	}
 
-	private static String getBaseDirectory() {
+	public static String getBaseDirectory() {
 		final String blockRoot = System.getProperty("user.home").concat(
 			switch (OS.CURRENT) {
 			case LINUX ->
@@ -515,7 +515,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 	}
 
-	private void removeOldJars(Configuration config) {
+	public void removeOldJars(Configuration config) {
 		File baseDir = new File(getBaseDirectory().concat("/lib"));
 		List<FileMetadata> onlineFiles = config.getFiles();
 		List<String> fileNames = new ArrayList<String>();

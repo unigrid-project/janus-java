@@ -15,6 +15,11 @@
     <properties>
         <mainClass>org.unigrid.janus.Janus</mainClass>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <config.opens>
+            fx/org.unigrid.janus.model.entity=jakarta.xml.bind/jakarta.xml.bind-api
+        </config.opens>
+        <config.exports>
+        </config.exports>
     </properties>
     <dependencies>
         <dependency>
@@ -284,6 +289,8 @@
                         --add-exports fx/org.unigrid.janus.model.external=jersey.common
                         --add-exports fx/org.unigrid.janus.model.external=org.update4j
                         --add-exports fx/org.unigrid.janus.model.external=ALL-UNNAMED
+                        --add-exports fx/org.unigrid.janus.jqwik=ALL-UNNAMED
+                        --add-exports fx/org.unigrid.janus.jqwik.fx=ALL-UNNAMED
                         --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
                         --add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
                         --add-exports javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED
@@ -297,6 +304,13 @@
                 </configuration>
             </plugin>
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>org.unigrid.janus</groupId>
+                <artifactId>updateconfig</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </extension>
+        </extensions>
     </build>
     <reporting>
         <plugins>
