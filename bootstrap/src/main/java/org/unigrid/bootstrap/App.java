@@ -84,7 +84,7 @@ public class App extends Application implements Delegate {
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			Sentry.captureException(e);
-			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"), "/work/janus-java/config/UpdateWalletConfig/config.xml"))) {
+			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"), "/work/janus-java/config/target/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
