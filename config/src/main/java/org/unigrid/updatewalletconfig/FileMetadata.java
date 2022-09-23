@@ -46,9 +46,9 @@ public class FileMetadata {
 	@XmlAttribute(name = "modulepath")
 	private boolean modulePath;
 
-	@Getter(AccessLevel.PROTECTED)
-	@XmlAttribute
-	private boolean ignoreBootConflict;
+	//@Getter(AccessLevel.PROTECTED)
+	//@XmlAttribute
+	//private boolean ignoreBootConflict;
 
 	@Getter(AccessLevel.PROTECTED)
 	@XmlElementWrapper(name = "addOpens")
