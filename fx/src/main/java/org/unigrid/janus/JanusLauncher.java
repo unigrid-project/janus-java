@@ -59,6 +59,11 @@ public class JanusLauncher implements Launcher {
 			UpdateURL.setMacUrl(inputArgs.get("URL"));
 			UpdateURL.setWindowsUrl(inputArgs.get("URL"));
 		}
+
+		if(inputArgs.containsKey("BootstrapURL")){
+			UpdateURL.setBootstrapUrl(inputArgs.get("BootstrapURL"));
+		}
+
 		Platform.runLater(() -> {
 			Janus janus = container.select(Janus.class).get();
 			System.out.println(lc.getClassLoader());
