@@ -36,11 +36,11 @@
             <artifactId>javafx-graphics</artifactId>
             <version>17-ea+7</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
             <version>17-ea+7</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>

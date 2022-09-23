@@ -14,6 +14,7 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
+/*
 package org.unigrid.janus.model.service;
 
 import com.dustinredmond.fxtrayicon.FXTrayIcon;
@@ -82,3 +83,4 @@ public class TrayService {
 		}
 	}
 }
+*/

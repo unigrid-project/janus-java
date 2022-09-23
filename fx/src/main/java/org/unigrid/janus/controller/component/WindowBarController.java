@@ -44,7 +44,7 @@ import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
-import org.unigrid.janus.model.service.TrayService;
+//import org.unigrid.janus.model.service.TrayService;
 import org.unigrid.janus.view.component.WindowBarButton;
 
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
@@ -65,7 +65,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	@Inject private PollingService pollingService;
 	@Inject private UpdateWallet update;
-	@Inject private TrayService tray;
+	//@Inject private TrayService tray;
 
 	private int testTimeInterval = 10000;
 	private int liveTimeInterval = 21600000;
