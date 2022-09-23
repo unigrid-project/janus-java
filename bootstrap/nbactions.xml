@@ -11,16 +11,6 @@
 		</goals>
 	</action>
 	<action>
-		<actionName>debug</actionName>
-		<goals>
-			<goal>clean</goal>
-			<goal>javafx:run@ide-debug</goal>
-		</goals>
-		<properties>
-			<jpda.listen>true</jpda.listen>
-		</properties>
-	</action>
-	<action>
 		<actionName>profile</actionName>
 		<goals>
 			<goal>clean</goal>
@@ -32,9 +22,9 @@
 		<displayName>jlink</displayName>
 		<goals>
 			<goal>clean</goal>
-			<!-- compile not needed with javafx-maven-plugin v0.0.5 -->
 			<goal>compile</goal>
 			<goal>javafx:jlink</goal>
 		</goals>
 	</action>
+	
 </actions>
