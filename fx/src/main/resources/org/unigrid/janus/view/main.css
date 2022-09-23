@@ -199,5 +199,25 @@
 	-fx-padding: 0.75em;
 }
 
+.check-box .box {
+        -fx-background-color: #ccc3;
+	-fx-background-radius: 50;
+        -fx-border-color:#e72;
+        -fx-border-radius:3px; 
+
+}
+
+.check-box:selected .mark {
+        -fx-background-color: #e72;
+
+}
+
+.check-box:selected .box {
+        -fx-background-color: #ccc3;
+	-fx-background-radius: 50;
+        -fx-border-color:#e72;
+        -fx-border-radius:3px;
+}
+
 
 
