@@ -62,7 +62,7 @@ public class UpdateWalletTest {
 		return testUpdateTrue;
 	}
 
-	@Example
+	/*@Example
 	public boolean checkBootstrapUpdateIsTrue() {
 		testUpdateTrue = false;
 		new ConfigUrlMockUp();
@@ -107,6 +107,6 @@ public class UpdateWalletTest {
 		UpdateWallet updateWallet = new UpdateWallet();
 		updateWallet.run();
 		return testUpdateTrue;
-	}
+	}*/
 
 }
