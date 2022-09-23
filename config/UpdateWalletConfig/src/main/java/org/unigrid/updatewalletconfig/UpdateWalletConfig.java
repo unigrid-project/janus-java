@@ -45,9 +45,9 @@ public class UpdateWalletConfig {
 		String homeDir = System.getProperty("user.home");
 		String dir = configLocation;
 		String fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.1.0/fx-1.1.0-SNAPSHOT.jar";
-		String linuxDaemon = "unigrid-2.9.2-x86_64-linux-gnu.tar.gz";
-		String windowsDaemon = "unigrid-2.9.2-win64.zip";
-		String osxDaemon = "unigrid-2.9.2-osx64.tar.gz";
+		String linuxDaemon = "unigrid-2.9.3-x86_64-linux-gnu.tar.gz";
+		String windowsDaemon = "unigrid-2.9.3-win64.zip";
+		String osxDaemon = "unigrid-2.9.3-osx64.tar.gz";
 		String fxVersion = "1.1.0";
 		String[] filePath = new String[]{
 			"/config-linux.xml",
