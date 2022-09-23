@@ -231,8 +231,8 @@ public class UpdateWallet extends TimerTask {
 		String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
 		String filteredVer = fullVer.replace("-SNAPSHOT", "");
 
-		if (getVersionNumber(filteredVer, 0) < getVersionNumber(getLatestVersion(), 0)
-			|| getVersionNumber(filteredVer, 2) < getVersionNumber(getLatestVersion(), 0)
+		if ((getVersionNumber(filteredVer, 0) == getVersionNumber(getLatestVersion(), 0))
+			&& (getVersionNumber(filteredVer, 2) == getVersionNumber(getLatestVersion(), 2))
 			|| getLatestVersion().equals("")) {
 			bootstrapUpdate = false;
 			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());

@@ -61,7 +61,7 @@ public class UpdateWalletTest {
 
 		return testUpdateTrue;
 	}
-
+/*
 	@Example
 	public boolean checkBootstrapUpdateIsTrue() {
 		testUpdateTrue = false;
@@ -108,5 +108,5 @@ public class UpdateWalletTest {
 		updateWallet.run();
 		return testUpdateTrue;
 	}
-
+*/
 }
