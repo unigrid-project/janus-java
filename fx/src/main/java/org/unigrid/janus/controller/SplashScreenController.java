@@ -78,7 +78,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 						// don't care
 					}
 					debugTxt.setScrollTop(Double.MAX_VALUE);    //top
-					//vpsOutput.setScrollTop(Double.MIN_VALUE);   //down
+					// vpsOutput.setScrollTop(Double.MIN_VALUE);  //down
 				}
 			});
 		});
@@ -90,8 +90,6 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	public void updateProgress(float prog) {
-		// System.out.println("address: " + this);
-		// System.out.println("progress: " + prog);
 		progBar.setProgress(prog);
 	}
 

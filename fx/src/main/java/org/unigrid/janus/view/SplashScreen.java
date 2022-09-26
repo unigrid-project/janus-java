@@ -61,12 +61,8 @@ import org.unigrid.janus.model.service.WindowService;
 @Data
 @ApplicationScoped
 public class SplashScreen implements Window {
-
-	@Inject
-	private Stage stageSplash;
-
-	@Inject
-	private WindowService window;
+	@Inject private Stage stageSplash;
+	@Inject private WindowService window;
 
 	private FontIcon spinnerPreLoad;
 	private RotateTransition rt;
@@ -90,17 +86,11 @@ public class SplashScreen implements Window {
 	@SneakyThrows
 	public void show() {
 		try {
-			//System.out.println("show init");
 			window.setStage(stageSplash);
-			window.setSplashScreen(this);
-			//System.out.println("show middle");
 			stageSplash.show();
-			//System.out.println("show show");
 			startSpinner();
 		} catch (Exception e) {
-			Alert a = new Alert(Alert.AlertType.ERROR,
-				e.getMessage(),
-				ButtonType.OK);
+			Alert a = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
 			a.showAndWait();
 		}
 	}

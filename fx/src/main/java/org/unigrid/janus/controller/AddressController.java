@@ -59,8 +59,8 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
-	private static AddressListModel addresses = new AddressListModel();
-	private static WindowService window = WindowService.getInstance();
+	private final AddressListModel addresses = new AddressListModel();
+	private final WindowService window = WindowService.getInstance();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
@@ -74,7 +74,6 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		window.setAddressController(this);
 		wallet.addPropertyChangeListener(this);
 		addresses.addPropertyChangeListener(this);
 

@@ -27,10 +27,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.controller.component.WindowBarController;
-import org.unigrid.janus.controller.AddressController;
 import org.unigrid.janus.controller.DocumentationController;
 import org.unigrid.janus.controller.MainWindowController;
 import org.unigrid.janus.controller.NodesController;
@@ -40,7 +38,6 @@ import org.unigrid.janus.controller.OverlayController;
 import org.unigrid.janus.controller.SettingsController;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.controller.WarningController;
-import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 import org.unigrid.janus.view.SplashScreen;
@@ -59,11 +56,9 @@ public class WindowService {
 	private static NodesController noController;
 	private static TransactionsController transController;
 	private static SettingsController settingsController;
-	private static AddressController addrController;
 	private static DocumentationController docsController;
 	private static WarningController warnController;
 	private static SplashScreenController splashController;
-	private static SplashScreen splashScreen;
 
 	private static WindowService serviceInstance = null;
 
@@ -161,14 +156,6 @@ public class WindowService {
 		this.transController = controller;
 	}
 
-	public AddressController getAddressController() {
-		return this.addrController;
-	}
-
-	public void setAddressController(AddressController controller) {
-		this.addrController = controller;
-	}
-
 	public DocumentationController getDocsController() {
 		return this.docsController;
 	}
@@ -191,14 +178,6 @@ public class WindowService {
 
 	public SplashScreenController getSplashScreenController() {
 		return this.splashController;
-	}
-
-	public void setSplashScreen(SplashScreen screen) {
-		this.splashScreen = screen;
-	}
-
-	public SplashScreen getSplashScreen() {
-		return this.splashScreen;
 	}
 
 	public void notifyIfError(BaseResult result) {
