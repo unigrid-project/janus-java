@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.jqwik.fx;
 
+import jakarta.enterprise.inject.spi.CDI;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,7 +34,9 @@ import net.jqwik.api.lifecycle.AroundPropertyHook;
 import net.jqwik.api.lifecycle.PropertyExecutionResult;
 import net.jqwik.api.lifecycle.PropertyExecutor;
 import net.jqwik.api.lifecycle.PropertyLifecycleContext;
+import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.testfx.api.FxToolkit;
+import org.unigrid.janus.model.cdi.CDIUtil;
 
 public class FxHook implements AroundContainerHook, AroundPropertyHook {
 	private static final int HIGH_PRIORITY = 1024;
@@ -90,6 +93,16 @@ public class FxHook implements AroundContainerHook, AroundPropertyHook {
 					FXMLLoader loader = new FXMLLoader();
 					loader.setClassLoader(resource.clazz().getClassLoader());
 					loader.setLocation(resource.clazz().getResource(resource.name()));
+
+					loader.setControllerFactory(c -> {
+						final Object o = CDI.current().select(c).get();
+
+						if (o instanceof TargetInstanceProxy) {
+							return CDIUtil.unproxy(o);
+						}
+
+						return o;
+					});
 
 					FxToolkit.toolkitContext().setRegisteredStage(loader.load());
 					FxToolkit.showStage();

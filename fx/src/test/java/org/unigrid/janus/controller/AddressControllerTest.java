@@ -23,26 +23,18 @@ import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.api.FxRobot;
 import static org.testfx.matcher.control.TableViewMatchers.hasTableCell;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
-import org.unigrid.janus.jqwik.WeldSetup;
 import org.unigrid.janus.jqwik.fx.FxResource;
 import org.unigrid.janus.jqwik.fx.FxStart;
 import org.unigrid.janus.jqwik.fx.FxStop;
-import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.external.ResponseMockUp;
-import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.DaemonMockUp;
-import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
 import org.unigrid.janus.model.service.external.WebTargetMockUp;
 import org.unigrid.janus.view.MainWindow;
 
 @FxResource(clazz = MainWindow.class, name = "mainWindow.fxml")
-@WeldSetup({ AddressController.class, Daemon.class, DebugService.class, PollingService.class,
-	RPCService.class, UpdateWallet.class
-})
 public class AddressControllerTest extends BaseFxTest {
 	@Inject
 	private FxRobot robot;
