@@ -44,8 +44,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
 @ApplicationScoped
 public class MainWindowController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
 
-	private static RPCService rpc = new RPCService();
 	private Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 	private static WarningController warning = new WarningController();

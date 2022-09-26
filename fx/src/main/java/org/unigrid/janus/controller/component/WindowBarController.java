@@ -54,7 +54,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@Getter
 	private Stage stage;
 
-	private static RPCService rpc = new RPCService();
 	private RotateTransition rt;
 	private Wallet wallet;
 
@@ -65,8 +64,9 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	@Inject private DebugService debug;
 	@Inject private PollingService pollingService;
+	@Inject private RPCService rpc;
 	@Inject private UpdateWallet update;
-	//@Inject private TrayService tray;
+	// @Inject private TrayService tray;
 
 	private int testTimeInterval = 10000;
 	private int liveTimeInterval = 21600000;

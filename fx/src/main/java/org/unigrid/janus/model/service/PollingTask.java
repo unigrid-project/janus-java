@@ -28,13 +28,14 @@ import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 
 public class PollingTask extends TimerTask {
 	private DebugService debug;
+	private RPCService rpc;
 
-	private static RPCService rpc = new RPCService();
 	private static Wallet wallet = new Wallet();
 	// private static Jsonb jsonb = JsonbBuilder.create();
 
 	public PollingTask() {
 		debug = CDI.current().select(DebugService.class).get();
+		rpc = CDI.current().select(RPCService.class).get();
 		debug.log("Polling task created!");
 	}
 

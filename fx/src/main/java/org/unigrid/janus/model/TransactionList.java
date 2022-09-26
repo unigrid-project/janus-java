@@ -30,10 +30,10 @@ public class TransactionList {
 	public static final String TRANSACTION_LIST = "transactionlist";
 
 	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
 
 	private static PropertyChangeSupport pcs;
 	private static ObservableList<Transaction> transactions = FXCollections.observableArrayList();
-	private static RPCService rpc = new RPCService();
 
 	@Data
 	public static class LoadReport {

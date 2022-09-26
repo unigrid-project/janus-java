@@ -35,8 +35,8 @@ public class WarningController implements Initializable {
 	public static final String STATUS_PROPERTY = "walletstatus";
 
 	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
 
-	private static RPCService rpc = new RPCService();
 	private static Wallet wallet;
 	private static JanusModel janusModel = new JanusModel();
 	private static WindowService window = WindowService.getInstance();

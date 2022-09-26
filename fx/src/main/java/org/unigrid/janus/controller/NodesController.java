@@ -66,8 +66,8 @@ import org.unigrid.janus.model.service.WindowService;
 @ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
 
-	private static RPCService rpc = new RPCService();
 	private static WindowService window = WindowService.getInstance();
 	private static GridnodeListModel nodes = new GridnodeListModel();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();

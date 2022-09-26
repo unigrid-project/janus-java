@@ -56,8 +56,8 @@ import org.unigrid.janus.model.service.WindowService;
 @ApplicationScoped
 public class AddressController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
 
-	private static RPCService rpc = new RPCService();
 	private static Wallet wallet;
 	private static AddressListModel addresses = new AddressListModel();
 	private static WindowService window = WindowService.getInstance();

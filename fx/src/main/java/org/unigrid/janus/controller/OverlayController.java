@@ -45,8 +45,8 @@ import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 @ApplicationScoped
 public class OverlayController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
 
-	private static RPCService rpc = new RPCService();
 	private static Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 

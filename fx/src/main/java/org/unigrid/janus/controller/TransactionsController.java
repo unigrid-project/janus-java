@@ -59,8 +59,8 @@ import org.unigrid.janus.model.TransactionList.LoadReport;
 @ApplicationScoped
 public class TransactionsController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
 
-	private static RPCService rpc = new RPCService();
 	private static TransactionList transList = new TransactionList();
 	private Wallet wallet;
 	private static WindowService window = WindowService.getInstance();

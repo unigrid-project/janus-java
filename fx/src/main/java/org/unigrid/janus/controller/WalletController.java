@@ -76,8 +76,8 @@ import org.unigrid.janus.model.service.PollingService;
 public class WalletController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private PollingService polling;
+	@Inject private RPCService rpc;
 
-	private static final RPCService RPC = new RPCService();
 	private Wallet wallet;
 	private TransactionList transList = new TransactionList();
 	private static final WindowService WINDOW = WindowService.getInstance();
@@ -305,7 +305,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		}
 
 		if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
-			final ListTransactions trans = RPC.call(new ListTransactions.Request(0, 10),
+			final ListTransactions trans = rpc.call(new ListTransactions.Request(0, 10),
 				ListTransactions.class
 			);
 
@@ -343,7 +343,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			return;
 		}
 
-		final ValidateAddress call = RPC.call(new ValidateAddress.Request(ugdAddressTxt.getText()),
+		final ValidateAddress call = rpc.call(new ValidateAddress.Request(ugdAddressTxt.getText()),
 			ValidateAddress.class
 		);
 
@@ -367,7 +367,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 					//Object[] sendArgs = new Object[]{ugdAddressTxt.getText(),
 					//Integer.parseInt(amountToSend.getText())};
 
-					final SendTransaction send = RPC.call(new SendTransaction.Request(
+					final SendTransaction send = rpc.call(new SendTransaction.Request(
 						wallet.getSendArgs()),
 						SendTransaction.class
 					);
@@ -384,7 +384,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	}
 
 	public void sendTransactionAfterUnlock() {
-		final SendTransaction send = RPC.call(new SendTransaction.Request(wallet.getSendArgs()),
+		final SendTransaction send = rpc.call(new SendTransaction.Request(wallet.getSendArgs()),
 			SendTransaction.class
 		);
 
