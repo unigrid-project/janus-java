@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller.component;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.net.URL;
@@ -45,6 +46,7 @@ import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
+import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.view.component.WindowBarButton;
 
 @Dependent
@@ -79,7 +81,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		pollingService = CDI.current().select(PollingService.class).get();
 		update.addPropertyChangeListener(this);
 		wallet.addPropertyChangeListener(this);
-		window.setWindowBarController(this);
 		updateButton.setVisible(false);
 
 		Tooltip t = new Tooltip("A new update is ready. Please restart the wallet");
@@ -143,21 +144,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		stage.setIconified(!stage.isIconified());
 	}
 
-	public void startSpinner() {
-		spinner.setVisible(true);
-		rt = new RotateTransition(Duration.millis(50000), spinner);
-		rt.setByAngle(20000);
-		rt.setCycleCount(Animation.INDEFINITE);
-		rt.setAutoReverse(true);
-		rt.setInterpolator(Interpolator.LINEAR);
-		rt.play();
-	}
-
-	public void stopSpinner() {
-		rt.stop();
-		spinner.setVisible(false);
-	}
-
 	public void showUpdateButton() {
 		System.out.println("Update button visable");
 		//tray.updateNewEventImage();
@@ -175,5 +161,28 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		update.doUpdate();
 		// TODO: move this code into UpdateWallet.java
 		// linux the Unigrid app is not executable
+	}
+
+	private void startSpinner() {
+		spinner.setVisible(true);
+		rt = new RotateTransition(Duration.millis(50000), spinner);
+		rt.setByAngle(20000);
+		rt.setCycleCount(Animation.INDEFINITE);
+		rt.setAutoReverse(true);
+		rt.setInterpolator(Interpolator.LINEAR);
+		rt.play();
+	}
+
+	private void stopSpinner() {
+		rt.stop();
+		spinner.setVisible(false);
+	}
+
+	public void eventState(@Observes State state) {
+		if (state.isWorking()) {
+			startSpinner();
+		} else {
+			stopSpinner();
+		}
 	}
 }

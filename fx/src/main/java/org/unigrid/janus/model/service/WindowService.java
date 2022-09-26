@@ -46,7 +46,6 @@ public class WindowService {
 	@Inject private DebugService debug;
 
 	private static Stage stage;
-	private static WindowBarController wbController;
 	private static MainWindowController mwController;
 	private static WalletController wController;
 	private static OverlayController olController;
@@ -102,14 +101,6 @@ public class WindowService {
 				"ERROR: (browse url) %s",
 				ex.getMessage()));
 		}
-	}
-
-	public WindowBarController getWindowBarController() {
-		return this.wbController;
-	}
-
-	public void setWindowBarController(WindowBarController controller) {
-		this.wbController = controller;
 	}
 
 	public OverlayController getOverlayController() {

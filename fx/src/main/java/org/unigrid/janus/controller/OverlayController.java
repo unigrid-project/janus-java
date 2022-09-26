@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -41,12 +42,15 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
+import org.unigrid.janus.model.signal.State;
 
 @ApplicationScoped
 public class OverlayController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
+
+	@Inject private Event<State> stateEvent;
 
 	private static WindowService window = WindowService.getInstance();
 
@@ -156,7 +160,8 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		submitBtn.setDisable(true);
 		Object[] sendArgs;
 		long stakingStartTime = wallet.getStakingStartTime();
-		window.getWindowBarController().startSpinner();
+
+		stateEvent.fire(State.builder().working(true).build());
 
 		// TODO: What exactly do these numbers mean ? Please change this to an enum and explain it.
 		switch (wallet.getUnlockState()) {
@@ -188,7 +193,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		if (passphraseInput.getText().equals("")) {
 			errorTxt.setText("Please enter a passphrase");
 			submitBtn.setDisable(false);
-			window.getWindowBarController().stopSpinner();
+			stateEvent.fire(State.builder().working(false).build());
 		} else {
 			try {
 				final UnlockWallet call = rpc.call(new UnlockWallet.Request(sendArgs), UnlockWallet.class);
@@ -213,6 +218,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 					debug.print("Successfuly unlocked wallet", OverlayController.class.getSimpleName());
 					passphraseInput.setText("");
 
+					//TODO: Get rid of these numbers and use an enum instead!
 					if (wallet.getUnlockState() == 3) {
 						// send transaction
 						window.getWalletController().sendTransactionAfterUnlock();
@@ -232,7 +238,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 				debug.print(e.getMessage(), OverlayController.class.getSimpleName());
 			}
 
-			window.getWindowBarController().stopSpinner();
+			stateEvent.fire(State.builder().working(false).build());
 		}
 	}
 

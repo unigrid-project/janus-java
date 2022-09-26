@@ -21,6 +21,7 @@ import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -62,6 +63,7 @@ import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.signal.State;
 
 @ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
@@ -69,39 +71,27 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
+	@Inject private Event<State> stateEvent;
+
 	private static WindowService window = WindowService.getInstance();
 	private static GridnodeListModel nodes = new GridnodeListModel();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
-	@FXML
-	private TextField vpsPassword;
-	@FXML
-	private TextField vpsAddress;
-	@FXML
-	private TextArea vpsOutput;
-	@FXML
-	private VBox vpsConect;
-	@FXML
-	private VBox genereateKeyPnl;
-	@FXML
-	private TableView tblGridnodes;
-	@FXML
-	private TableView tblGridnodeKeys;
-	@FXML
-	private TableColumn colNodeStatus;
-	@FXML
-	private TableColumn colNodeAlias;
-	@FXML
-	private TableColumn colNodeAddress;
-	@FXML
-	private TableColumn colNodeStart;
-	@FXML
-	private TableColumn colNodeTxhash;
-	@FXML
-	private HBox newGridnodeDisplay;
-	@FXML
-	private Text gridnodeDisplay;
+	@FXML private TextField vpsPassword;
+	@FXML private TextField vpsAddress;
+	@FXML private TextArea vpsOutput;
+	@FXML private VBox vpsConect;
+	@FXML private VBox genereateKeyPnl;
+	@FXML private TableView tblGridnodes;
+	@FXML private TableView tblGridnodeKeys;
+	@FXML private TableColumn colNodeStatus;
+	@FXML private TableColumn colNodeAlias;
+	@FXML private TableColumn colNodeAddress;
+	@FXML private TableColumn colNodeStart;
+	@FXML private TableColumn colNodeTxhash;
+	@FXML private HBox newGridnodeDisplay;
+	@FXML private Text gridnodeDisplay;
 
 	private String serverResponse;
 
@@ -199,12 +189,12 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	private void getNodeList() {
 		debug.log("Loading gridnode list");
-		window.getWindowBarController().startSpinner();
+
+		stateEvent.fire(State.builder().working(true).build());
 		GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
 		nodes.setGridnodes(result);
-		nodes.getGridnodes();
-		window.getWindowBarController().stopSpinner();
-		//debug.log(String.format("gridnode result: %s", nodes.getGridnodes()));
+		nodes.getGridnodes(); //TODO: Why this call?
+		stateEvent.fire(State.builder().working(false).build());
 	}
 
 	@FXML
@@ -219,6 +209,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 			new GridnodeEntity.Request(new Object[]{"genkey"}),
 			GridnodeEntity.class
 		);
+
 		gridnodeDisplay.setText(newGridnode.getResult().toString());
 		newGridnodeDisplay.setVisible(true);
 		copyToClipboard(gridnodeDisplay.getText());
