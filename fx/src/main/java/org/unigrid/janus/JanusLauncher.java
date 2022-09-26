@@ -20,7 +20,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import jakarta.enterprise.inject.spi.CDI;
-import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.application.HostServices;
@@ -39,14 +38,12 @@ public class JanusLauncher implements Launcher {
 	@InjectTarget
 	private Map<String, String> inputArgs = new HashMap<String, String>();
 
-	@InjectTarget
+	@InjectTarget(required = false)
+	// TODO enable once bootstraps are updated
 	private HostServices hostService;
 
-	@InjectTarget
+	@InjectTarget(required = false)
 	private String bootstrapVer;
-
-	@Inject
-	private BootstrapModel updateWallet;
 
 	@Override @SneakyThrows
 	public void run(LaunchContext lc) {
@@ -66,11 +63,11 @@ public class JanusLauncher implements Launcher {
 			UpdateURL.setMacUrl(inputArgs.get("URL"));
 			UpdateURL.setWindowsUrl(inputArgs.get("URL"));
 		}
-		System.out.println("bootstrapVer pre");
+
 		System.out.println("bootstrapVer in fx: " + bootstrapVer);
-		if(bootstrapVer != null || !bootstrapVer.equals("")) {
-			updateWallet.setBootstrapVer(bootstrapVer);
-			System.out.println("bootstrapVer in fx: " + bootstrapVer);
+
+		if(bootstrapVer != null && !bootstrapVer.equals("")) {
+			BootstrapModel.getInstance().setBootstrapVer(bootstrapVer);
 		}
 
 		if(inputArgs.containsKey("BootstrapURL")){
@@ -78,6 +75,7 @@ public class JanusLauncher implements Launcher {
 		}
 
 		Platform.runLater(() -> {
+			System.out.println("run later");
 			Janus janus = container.select(Janus.class).get();
 			System.out.println(lc.getClassLoader());
 			Stage stage = new Stage();

@@ -13,7 +13,6 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -73,7 +72,7 @@ public class UpdateWallet extends TimerTask {
 	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
 
-	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
+	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][]{
 		{OS.LINUX, UpdateURL.getLinuxUrl()},
 		{OS.WINDOWS, UpdateURL.getWindowsUrl()},
 		{OS.MAC, UpdateURL.getMacUrl()}
@@ -198,7 +197,7 @@ public class UpdateWallet extends TimerTask {
 			System.err.println(mle.getMessage());
 		}
 
-		try (Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			updateConfig = Configuration.read(in);
 			System.out.println("Reading the config file");
 		} catch (IOException e) {
@@ -230,11 +229,16 @@ public class UpdateWallet extends TimerTask {
 			System.out.println(e.getCause().toString());
 		}
 
-		String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
-		String filteredVer = fullVer.replace("-SNAPSHOT", "");
+		//String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
+		//String filteredVer = fullVer.replace("-SNAPSHOT", "");
+		String filteredVer = BootstrapModel.getInstance().getBootstrapVer();
+		System.out.println("getBootstrapVer in UpdateWallet Check: " + BootstrapModel.getInstance().getBootstrapVer());
 
 		if ((getVersionNumber(filteredVer, 0) == getVersionNumber(getLatestVersion(), 0))
-			&& (getVersionNumber(filteredVer, 2) == getVersionNumber(getLatestVersion(), 2))
+			&& (getVersionNumber(filteredVer, 2)
+			== getVersionNumber(getLatestVersion(), 2))
+			&& (getVersionNumber(filteredVer, 4)
+			== getVersionNumber(getLatestVersion(), 4))
 			|| getLatestVersion().equals("")) {
 			bootstrapUpdate = false;
 			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());
@@ -405,6 +409,7 @@ public class UpdateWallet extends TimerTask {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
+		System.out.println("DOWNLOADED: " + url);
 	}
 
 	private String getDEBFileName(String version) {
