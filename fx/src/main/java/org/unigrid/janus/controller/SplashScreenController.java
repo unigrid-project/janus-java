@@ -63,7 +63,6 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		window = window.getInstance();
-		window.setSplashScreenController(this);
 
 		Platform.runLater(() -> {
 			progBar.setVisible(false);

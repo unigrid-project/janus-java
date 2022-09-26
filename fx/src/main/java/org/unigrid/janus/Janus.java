@@ -68,7 +68,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private MainWindow mainWindow;
 	@Inject private JanusPreloader preloader;
 	@Inject private JanusModel janusModel;
-	@Inject private SplashScreenController splashController;
+	@Inject private SplashScreenController splashController; // TODO: Just here to instantiate the splash screen ?
 	@Inject private Wallet wallet;
 	// @Inject private TrayService tray;
 
@@ -273,42 +273,37 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 						}
 					}
 
+					//TODO: Remove - model layer should not directly call these
 					if (status.equals("downloading")) {
 						Platform.runLater(
 							() -> {
 								float f = Float.parseFloat(progress);
-								window.getSplashScreenController().showProgressBar();
 
-								window.getSplashScreenController()
-									.setText("Downloading blockchain");
-
-								window.getSplashScreenController()
-									.updateProgress((float) (f / 100));
+								splashController.showProgressBar();
+								splashController.setText("Downloading blockchain");
+								splashController.updateProgress((float) (f / 100));
 							});
 					}
 
+					//TODO: Remove - model layer should not directly call these
 					if (status.equals("unarchiving")) {
 						Platform.runLater(
 							() -> {
 								float f = Float.parseFloat(progress);
-								window.getSplashScreenController().showProgressBar();
 
-								window.getSplashScreenController()
-									.setText("Unarchiving blockchain");
-
-								window.getSplashScreenController()
-									.updateProgress((float) (f / 100));
+								splashController.showProgressBar();
+								splashController.setText("Unarchiving blockchain");
+								splashController.updateProgress((float) (f / 100));
 							});
 					}
 
+					//TODO: Remove - model layer should not directly call these
 					if (status.equals("complete")) {
 						Platform.runLater(
 							() -> {
-								window.getSplashScreenController().hideProgBar();
-								window.getSplashScreenController().showSpinner();
-
-								window.getSplashScreenController()
-									.setText("Starting unigrid backend");
+								splashController.hideProgBar();
+								splashController.showSpinner();
+								splashController.setText("Starting unigrid backend");
 							});
 					}
 				} while (walletInfo.hasError());
@@ -317,7 +312,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 					Janus.class.getSimpleName()
 				);
 
-				window.getSplashScreenController().hideProgBar();
+				//TODO: Remove - model layer should not directly call this
+				splashController.hideProgBar();
 				ready.setValue(Boolean.TRUE);
 				return null;
 			}

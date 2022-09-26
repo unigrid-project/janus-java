@@ -52,6 +52,7 @@ import org.apache.commons.io.monitor.FileAlterationMonitor;
 
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.event.CloseJanusEvent;
@@ -61,6 +62,7 @@ import org.unigrid.janus.model.service.WindowService;
 @Data
 @ApplicationScoped
 public class SplashScreen implements Window {
+	@Inject private SplashScreenController splashScreenController; // TODO: Big no no. Controller should not see the view.
 	@Inject private Stage stageSplash;
 	@Inject private WindowService window;
 
@@ -206,7 +208,7 @@ public class SplashScreen implements Window {
 
 		}
 
-		window.getSplashScreenController().setDebugText(sbuffer.toString());
+		splashScreenController.setDebugText(sbuffer.toString()); // TODO: Big no no. Controller should not see the view.
 	}
 
 	public void startMonitor() throws Exception {

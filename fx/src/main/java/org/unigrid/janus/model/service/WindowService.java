@@ -20,8 +20,6 @@ import java.awt.Desktop;
 import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import javafx.application.HostServices;
-
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -40,7 +38,6 @@ import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.controller.WarningController;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
-import org.unigrid.janus.view.SplashScreen;
 
 @Eager
 @ApplicationScoped
@@ -58,7 +55,6 @@ public class WindowService {
 	private static SettingsController settingsController;
 	private static DocumentationController docsController;
 	private static WarningController warnController;
-	private static SplashScreenController splashController;
 
 	private static WindowService serviceInstance = null;
 
@@ -170,14 +166,6 @@ public class WindowService {
 
 	public void setSettingsController(SettingsController controller) {
 		this.settingsController = controller;
-	}
-
-	public void setSplashScreenController(SplashScreenController controller) {
-		this.splashController = controller;
-	}
-
-	public SplashScreenController getSplashScreenController() {
-		return this.splashController;
 	}
 
 	public void notifyIfError(BaseResult result) {
