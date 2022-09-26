@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeSupport;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -32,7 +33,9 @@ import org.unigrid.janus.model.service.WindowService;
 public class WarningController implements Initializable {
 	public static final String HIDE_WARNING = "hidewarning";
 	public static final String STATUS_PROPERTY = "walletstatus";
-	private static DebugService debug = new DebugService();
+
+	@Inject private DebugService debug;
+
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet;
 	private static JanusModel janusModel = new JanusModel();

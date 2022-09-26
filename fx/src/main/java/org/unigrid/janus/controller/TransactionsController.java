@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -57,8 +58,8 @@ import org.unigrid.janus.model.TransactionList.LoadReport;
 
 @ApplicationScoped
 public class TransactionsController implements Initializable, PropertyChangeListener {
+	@Inject private DebugService debug;
 
-	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static TransactionList transList = new TransactionList();
 	private Wallet wallet;

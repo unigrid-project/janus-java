@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -44,8 +45,8 @@ import org.unigrid.janus.model.service.WindowService;
 @ApplicationScoped
 public class SplashScreenController implements Initializable, PropertyChangeListener {
 	private WindowService window;
-	private static DebugService debug = new DebugService();
-	private float ind = 0.6f;
+
+	@Inject private DebugService debug;
 
 	private SplashModel splashModel = new SplashModel();
 	@FXML private ProgressBar progBar;

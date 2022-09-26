@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -42,11 +43,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 @ApplicationScoped
 public class MainWindowController implements Initializable, PropertyChangeListener {
-	private static DebugService debug = new DebugService();
+	@Inject private DebugService debug;
+
 	private static RPCService rpc = new RPCService();
-
 	private Wallet wallet;
-
 	private static WindowService window = WindowService.getInstance();
 	private static WarningController warning = new WarningController();
 	private static final int TAB_WALLET = 1;

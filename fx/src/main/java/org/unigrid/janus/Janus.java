@@ -50,7 +50,6 @@ import org.unigrid.janus.view.MainWindow;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
-import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
@@ -68,10 +67,9 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private MainWindow mainWindow;
 	@Inject private JanusPreloader preloader;
 	@Inject private JanusModel janusModel;
-	@Inject private UpdateWallet updateWallet;
 	@Inject private SplashScreenController splashController;
 	@Inject private Wallet wallet;
-	//@Inject private TrayService tray;
+	// @Inject private TrayService tray;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;

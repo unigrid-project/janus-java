@@ -17,7 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -59,7 +59,8 @@ import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 
 @ApplicationScoped
 public class SettingsController implements Initializable, PropertyChangeListener {
-	private static DebugService debug = new DebugService();
+	@Inject private DebugService debug;
+
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet;
 	private static WindowService window = WindowService.getInstance();

@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
@@ -23,8 +24,9 @@ import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.service.DebugService;
 
 public class GridnodeListModel {
-	private static DebugService debug = new DebugService();
 	public static final String GRIDNODE_LIST = "gridnodeList";
+
+	@Inject private DebugService debug;
 
 	@Getter
 	private ObservableList<Gridnode> gridnodes = FXCollections.observableArrayList();

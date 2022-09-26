@@ -19,6 +19,7 @@ package org.unigrid.janus.model.service;
 import java.awt.Desktop;
 import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import javafx.application.HostServices;
 
 import javafx.stage.Stage;
@@ -48,8 +49,8 @@ import org.unigrid.janus.view.SplashScreen;
 @ApplicationScoped
 @RequiredArgsConstructor
 public class WindowService {
+	@Inject private DebugService debug;
 
-	private static DebugService debug = new DebugService();
 	private static Stage stage;
 	private static HostServices hostServices;
 	private static WindowBarController wbController;

@@ -58,12 +58,12 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	private RotateTransition rt;
 	private Wallet wallet;
 
-	private static DebugService debug = new DebugService();
 	private static WindowService window = WindowService.getInstance();
 
 	@FXML private FontIcon spinner;
 	@FXML private WindowBarButton updateButton;
 
+	@Inject private DebugService debug;
 	@Inject private PollingService pollingService;
 	@Inject private UpdateWallet update;
 	//@Inject private TrayService tray;
@@ -76,7 +76,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		//TODO: Remove when FX integration is done
 		System.out.println("Initilizing window bar");
 
-		update = CDI.current().select(UpdateWallet.class).get();
 		pollingService = CDI.current().select(PollingService.class).get();
 		update.addPropertyChangeListener(this);
 		wallet = window.getWallet();

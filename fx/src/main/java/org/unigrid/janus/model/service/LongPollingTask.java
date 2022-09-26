@@ -16,17 +16,22 @@
 
 package org.unigrid.janus.model.service;
 
+import jakarta.enterprise.inject.spi.CDI;
 import java.util.TimerTask;
 import javafx.application.Platform;
 import org.unigrid.janus.model.Wallet;
 
 public class LongPollingTask extends TimerTask {
-	private static DebugService debug = new DebugService();
-	private static PollingService polling = new PollingService();
+	private DebugService debug;
+	private PollingService polling;
+
 	private static Wallet wallet = new Wallet();
 	private static WindowService window = new WindowService();
 
 	public LongPollingTask() {
+		debug = CDI.current().select(DebugService.class).get();
+		polling = CDI.current().select(PollingService.class).get();
+
 		debug.log("Long polling task created!");
 	}
 

@@ -17,6 +17,7 @@
 package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.ws.rs.client.Client;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -35,9 +36,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
-import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.DebugService;
-//import org.unigrid.janus.model.service.PollingService;
 import org.update4j.Configuration;
 import org.update4j.OS;
 
@@ -56,7 +55,6 @@ import org.apache.commons.io.FileUtils;
 import org.unigrid.janus.Janus;
 import org.unigrid.janus.model.entity.Feed;
 
-@Eager
 @ApplicationScoped
 public class UpdateWallet extends TimerTask {
 
@@ -66,10 +64,10 @@ public class UpdateWallet extends TimerTask {
 	private final String windowsPath = System.getProperty("user.home")
 		.concat("/AppData/Roaming/UNIGRID/dependencies/temp/");
 
-	private static DebugService debug = new DebugService();
+	private DebugService debug;
+
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
 	private static final String BOOTSTRAP_URL = UpdateURL.getBootstrapUrl();
-	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
 
 	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
@@ -96,6 +94,7 @@ public class UpdateWallet extends TimerTask {
 	private Feed githubJson;
 
 	public UpdateWallet() {
+		debug = CDI.current().select(DebugService.class).get();
 		System.out.println("Init walletUpdate");
 
 		initWebTarget();

@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -54,8 +55,8 @@ import org.unigrid.janus.model.service.WindowService;
 
 @ApplicationScoped
 public class AddressController implements Initializable, PropertyChangeListener {
+	@Inject private DebugService debug;
 
-	private static DebugService debug = new DebugService();
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet;
 	private static AddressListModel addresses = new AddressListModel();
@@ -63,20 +64,13 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
-	@FXML
-	private TableView tblAddresses;
-	@FXML
-	private TableColumn colAddress;
-	@FXML
-	private TableColumn colAddressBalance;
-	@FXML
-	private HBox newAddressDisplay;
-	@FXML
-	private Text addressDisplay;
-	@FXML
-	private CheckBox chkAddress;
-	@FXML
-	private CheckBox chkAmountSort;
+	@FXML private TableView tblAddresses;
+	@FXML private TableColumn colAddress;
+	@FXML private TableColumn colAddressBalance;
+	@FXML private HBox newAddressDisplay;
+	@FXML private Text addressDisplay;
+	@FXML private CheckBox chkAddress;
+	@FXML private CheckBox chkAmountSort;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {

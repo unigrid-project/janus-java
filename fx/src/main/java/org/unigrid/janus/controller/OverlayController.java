@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import jakarta.json.bind.Jsonb;
@@ -43,23 +44,18 @@ import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 
 @ApplicationScoped
 public class OverlayController implements Initializable, PropertyChangeListener {
-	private static DebugService debug = new DebugService();
+	@Inject private DebugService debug;
+
 	private static RPCService rpc = new RPCService();
 	private static Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 
-	@FXML
-	private GridPane pnlUnlock;
-	@FXML
-	private PasswordField passphraseInput;
-	@FXML
-	private Text errorTxt;
-	@FXML
-	private ImageView spinnerIcon;
-	@FXML
-	private Button submitBtn;
-	@FXML
-	private Text unlockCopy;
+	@FXML private GridPane pnlUnlock;
+	@FXML private PasswordField passphraseInput;
+	@FXML private Text errorTxt;
+	@FXML private ImageView spinnerIcon;
+	@FXML private Button submitBtn;
+	@FXML private Text unlockCopy;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {

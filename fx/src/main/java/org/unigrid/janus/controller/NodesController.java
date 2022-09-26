@@ -21,6 +21,7 @@ import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.InputStream;
@@ -64,7 +65,8 @@ import org.unigrid.janus.model.service.WindowService;
 
 @ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
-	private static DebugService debug = new DebugService();
+	@Inject private DebugService debug;
+
 	private static RPCService rpc = new RPCService();
 	private static WindowService window = WindowService.getInstance();
 	private static GridnodeListModel nodes = new GridnodeListModel();

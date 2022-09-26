@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.inject.Inject;
 import lombok.Data;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
@@ -28,10 +29,11 @@ import org.unigrid.janus.model.rpc.entity.ListTransactions;
 public class TransactionList {
 	public static final String TRANSACTION_LIST = "transactionlist";
 
+	@Inject private DebugService debug;
+
 	private static PropertyChangeSupport pcs;
 	private static ObservableList<Transaction> transactions = FXCollections.observableArrayList();
 	private static RPCService rpc = new RPCService();
-	private static DebugService debug = new DebugService();
 
 	@Data
 	public static class LoadReport {

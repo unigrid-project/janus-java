@@ -54,14 +54,15 @@ import org.unigrid.janus.model.Documentation;
 
 @ApplicationScoped
 public class DocumentationController implements Initializable, PropertyChangeListener {
-	private static DebugService debug = new DebugService();
+	@Inject private DebugService debug;
+	@Inject private PollingService pollingService;
+
 	private static Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 	private static DocList documentationList = new DocList();
 
 	@FXML private TableView tblDocs;
 	@FXML private TableColumn colDescription;
-	@Inject private PollingService pollingService;
 
 	private String url = "https://docs.unigrid.org/docs/data/index.json";
 

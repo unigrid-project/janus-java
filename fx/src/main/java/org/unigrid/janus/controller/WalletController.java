@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -73,13 +74,13 @@ import org.unigrid.janus.model.service.PollingService;
 
 @ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {
+	@Inject private DebugService debug;
+	@Inject private PollingService polling;
 
-	private static DebugService debug = new DebugService();
 	private static final RPCService RPC = new RPCService();
 	private Wallet wallet;
 	private TransactionList transList = new TransactionList();
 	private static final WindowService WINDOW = WindowService.getInstance();
-	private static PollingService polling = new PollingService();
 	private int syncIntervalShort = 30000;
 	private int syncIntervalLong = 3600000;
 

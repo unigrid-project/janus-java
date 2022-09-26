@@ -51,6 +51,7 @@ public class Wallet {
 	public static final String IS_OFFLINE = "offline";
 	public static final String STATUS_PROPERTY = "walletstatus";
 	public static final String TRANSACTION_COUNT = "transactioncount";
+
 	private static BigDecimal balance = new BigDecimal(0);
 	private static double totalbalance;
 	private static double moneysupply;
@@ -65,6 +66,7 @@ public class Wallet {
 	private static Boolean isStaking;
 	private static Boolean processingStatus = false;
 	private static String status;
+	private static PropertyChangeSupport pcs;
 
 	@Getter @Setter
 	private static int unlockState = 0;
@@ -79,9 +81,7 @@ public class Wallet {
 	@Getter @Setter
 	private Object[] sendArgs;
 
-	@Inject
-	private static DebugService debug = new DebugService();
-	private static PropertyChangeSupport pcs;
+	@Inject private DebugService debug;
 
 	@Getter
 	private LockState lockState = LockState.LOCKED;
