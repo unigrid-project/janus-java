@@ -54,6 +54,8 @@ import org.unigrid.janus.model.Documentation;
 
 @ApplicationScoped
 public class DocumentationController implements Initializable, PropertyChangeListener {
+	private static final String DOCUMENTATION_URL = "https://docs.unigrid.org/docs/data/index.json";
+	private static final int SIX_HOURS_IN_MS = 60 * 60 * 6 * 1000;
 	@Inject private DebugService debug;
 	@Inject private PollingService pollingService;
 
@@ -63,8 +65,6 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 	@FXML private TableView tblDocs;
 	@FXML private TableColumn colDescription;
-
-	private String url = "https://docs.unigrid.org/docs/data/index.json";
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -82,8 +82,8 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 		} catch (IOException ex) {
 			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		// polls every six hours
-		pollingService.poll(21600000);
+
+		pollingService.poll(SIX_HOURS_IN_MS);
 	}
 
 	public void pullNewDocumentaion() throws JsonProcessingException, IOException {
@@ -92,11 +92,12 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 		try {
 			mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			//List<DocList> docList = Arrays.asList(mapper.readValue(new URL(url), DocList[].class));
-			List<Documentation> docList = Arrays.asList(mapper.readValue(new URL(url), Documentation[].class));
+
+			List<Documentation> docList = Arrays.asList(mapper.readValue(new URL(DOCUMENTATION_URL),
+				Documentation[].class)
+			);
+
 			documentationList.setDoclist(docList);
-			//System.out.println("\nJSON array to List of objects");
-			//docList.stream().forEach(x -> System.out.println(x));
 
 		} catch (MalformedURLException ex) {
 			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
