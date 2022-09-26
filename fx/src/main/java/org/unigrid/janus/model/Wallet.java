@@ -197,7 +197,7 @@ public class Wallet {
 	public void setBlocks(int newValue) {
 		int oldValue = this.blocks;
 		this.blocks = newValue;
-		System.out.println("setting blocks: " + this.blocks);
+		//System.out.println("setting blocks: " + this.blocks);
 		this.pcs.firePropertyChange(this.BLOCKS_PROPERTY, oldValue, newValue);
 	}
 

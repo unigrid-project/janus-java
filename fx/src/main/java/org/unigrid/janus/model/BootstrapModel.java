@@ -16,10 +16,28 @@
 
 package org.unigrid.janus.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.enterprise.context.ApplicationScoped;
+import org.unigrid.janus.model.cdi.Eager;
 
+@Eager
+@ApplicationScoped
 public class BootstrapModel {
-	@Getter @Setter
-	private String bootstrapVer = "";
+
+	private static BootstrapModel bootstrapModel = null;
+	private String bootstrapVer = "0.0.0";
+
+	public static BootstrapModel getInstance() {
+		if (bootstrapModel == null) {
+			bootstrapModel = new BootstrapModel();
+		}
+		return bootstrapModel;
+	}
+
+	public String getBootstrapVer() {
+		return this.bootstrapVer;
+	}
+
+	public void setBootstrapVer(String ver) {
+		this.bootstrapVer = ver;
+	}
 }

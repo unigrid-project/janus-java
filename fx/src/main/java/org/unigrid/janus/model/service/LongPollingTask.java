@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model.service;
 
+import jakarta.inject.Inject;
 import java.util.TimerTask;
 import javafx.application.Platform;
 import org.unigrid.janus.model.Wallet;
