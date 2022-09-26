@@ -17,6 +17,7 @@
 package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -94,10 +95,11 @@ public class UpdateWallet extends TimerTask {
 	private static PropertyChangeSupport pcs;
 	private Client client;
 	private Feed githubJson;
+	private BootstrapModel bootstrapModel = new BootstrapModel();
 
 	public UpdateWallet() {
 		System.out.println("Init walletUpdate");
-
+		bootstrapModel.getBootstrapVer();
 		initWebTarget();
 		if (this.pcs != null) {
 			// TODO: Should this really be a fallthrough ? It looks dangerous.
@@ -240,6 +242,7 @@ public class UpdateWallet extends TimerTask {
 		} else {
 			if (OS.CURRENT == OS.LINUX) {
 				Path path = Paths.get(linuxPath);
+				removeOldInstall(linuxPath);
 				System.out.println("downloading linux installer");
 				if (getLinuxIDLike().equals("debian")
 					&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
@@ -256,12 +259,14 @@ public class UpdateWallet extends TimerTask {
 				System.out.println("Did it start??");
 			} else if (OS.CURRENT == OS.MAC
 				&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
-				downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
+					removeOldInstall(macPath);
+					downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
 					macPath,
 					getDMGFileName(getLatestVersion()));
 			} else if (OS.CURRENT == OS.WINDOWS
 				&& !checkTempFolder(getMSIFileName(getLatestVersion()), windowsPath)) {
-				downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
+					removeOldInstall(windowsPath);
+					downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
 					windowsPath,
 					getMSIFileName(getLatestVersion()));
 			}
@@ -292,7 +297,7 @@ public class UpdateWallet extends TimerTask {
 			@Override
 			public void run() {
 				boolean isBootstrapUpdate = false;
-				if (false) { //(checkUpdateBootstrap()) {
+				if (checkUpdateBootstrap()) {
 					Process process;
 					//TODO: Add RPM install line
 					String linuxDebInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
@@ -347,7 +352,7 @@ public class UpdateWallet extends TimerTask {
 						System.out.println(e.getMessage());
 					}
 				}
-				String linuxExec = "/opt/unigrid/bin/Unigrid";
+				String linuxExec = "./opt/unigrid/bin/Unigrid";
 				String macExec = "open -a unigrid";
 				String windowsExec = "\"C:\\Program Files\\Unigrid\\Unigrid.exe\"";
 				try {
@@ -460,5 +465,15 @@ public class UpdateWallet extends TimerTask {
 
 		String majorVersion = String.valueOf(c[index]);
 		return Integer.parseInt(majorVersion);
+	}
+
+	private void removeOldInstall(String path) {
+		File file = new File(path);
+		if(!file.exists()) {
+			return;
+		}
+		for(File f: file.listFiles()) {
+			f.delete();
+		}
 	}
 }

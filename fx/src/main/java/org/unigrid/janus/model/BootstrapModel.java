@@ -21,5 +21,5 @@ import lombok.Setter;
 
 public class BootstrapModel {
 	@Getter @Setter
-	private String bootstrapVer = "";
+	private static String bootstrapVer = "";
 }
