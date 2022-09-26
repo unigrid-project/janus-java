@@ -194,10 +194,12 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 		} catch (Exception e) {
 			System.out.print("error: " + e.getMessage());
-			System.out.print("error: " + e.getCause().toString());
-			Alert a = new Alert(AlertType.ERROR,
-				e.getMessage(),
-				ButtonType.OK);
+
+			if (Objects.nonNull(e.getCause())) {
+				System.err.print("error: " + e.getCause().toString());
+			}
+
+			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
 			a.showAndWait();
 		}
 	}

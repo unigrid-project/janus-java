@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.controller.component;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.net.URL;
@@ -44,9 +45,9 @@ import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
-//import org.unigrid.janus.model.service.TrayService;
 import org.unigrid.janus.view.component.WindowBarButton;
 
+@Dependent
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
 	private Decorator movableWindowDecorator;
 
