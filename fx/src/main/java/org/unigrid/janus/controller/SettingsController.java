@@ -24,6 +24,7 @@ import java.net.URL;
 import java.io.File;
 import java.util.ResourceBundle;
 import java.util.Optional;
+import javafx.application.HostServices;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
@@ -60,6 +61,7 @@ import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 @ApplicationScoped
 public class SettingsController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
+	@Inject private HostServices hostServices;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
@@ -182,7 +184,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private void onOpenConf(MouseEvent event) {
 		File conf = DataDirectory.getConfigFile();
 		try {
-			window.getHostServices().showDocument(conf.getAbsolutePath());
+			hostServices.showDocument(conf.getAbsolutePath());
 		} catch (Exception e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
@@ -192,7 +194,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private void onOpenGridnode(MouseEvent event) {
 		File gridnode = DataDirectory.getGridnodeFile();
 		try {
-			window.getHostServices().showDocument(gridnode.getAbsolutePath());
+			hostServices.showDocument(gridnode.getAbsolutePath());
 		} catch (Exception e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
@@ -201,7 +203,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML
 	private void onOpenUnigrid(MouseEvent event) {
 		String gridnode = DataDirectory.get();
-		window.getHostServices().showDocument(gridnode);
+		hostServices.showDocument(gridnode);
 	}
 
 	@FXML

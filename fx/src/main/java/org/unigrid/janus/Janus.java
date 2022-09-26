@@ -51,6 +51,7 @@ import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
@@ -125,7 +126,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
 		debug.print("start", Janus.class.getSimpleName());
 		//tray.initTrayService(stage);
-		window.setHostServices(hostServices);
+		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {
@@ -157,7 +158,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		//tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
-		window.setHostServices(hostServices);
+		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {

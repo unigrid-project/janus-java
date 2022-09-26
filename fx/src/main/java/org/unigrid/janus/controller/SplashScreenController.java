@@ -23,6 +23,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -47,6 +48,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	private WindowService window;
 
 	@Inject private DebugService debug;
+	@Inject private HostServices hostServices;
 
 	private SplashModel splashModel = new SplashModel();
 	@FXML private ProgressBar progBar;
@@ -117,31 +119,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 	@FXML
 	public void onShowDebug(MouseEvent event) throws Exception {
-		//System.out.println(window.getStage().getHeight());
-		//System.out.println(splashGrid.getCellBounds(0, 6));
 		File debugLog = DataDirectory.getDebugLog();
-		try {
-			// Open debug.log file
-			window.getHostServices().showDocument(debugLog.getAbsolutePath());
-			// disable showing log on load as it runs very slow with large debugs
-			/*
-			if (!splashModel.getDebug()) {
-				window.getSplashScreen().startMonitor();
-				debugTxt.setVisible(true);
-				splashModel.setDebug(true);
-				debugTxt.setScrollTop(Double.MAX_VALUE);
-				window.getStage().setHeight(400);
-				bugTooltip.setText("Hide debug log");
-			} else {
-				window.getSplashScreen().stopMonitor();
-				debugTxt.setVisible(false);
-				splashModel.setDebug(false);
-				window.getStage().setHeight(220);
-				bugTooltip.setText("Show debug log");
-			}
-			 */
-		} catch (Exception e) {
-			debug.print(e.getMessage(), SplashScreenController.class.getSimpleName());
-		}
+		hostServices.showDocument(debugLog.getAbsolutePath());
 	}
 }

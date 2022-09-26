@@ -52,7 +52,6 @@ public class WindowService {
 	@Inject private DebugService debug;
 
 	private static Stage stage;
-	private static HostServices hostServices;
 	private static WindowBarController wbController;
 	private static MainWindowController mwController;
 	private static WalletController wController;
@@ -81,14 +80,6 @@ public class WindowService {
 
 	public void setStage(Stage value) {
 		this.stage = value;
-	}
-
-	public HostServices getHostServices() {
-		return this.hostServices;
-	}
-
-	public void setHostServices(HostServices host) {
-		this.hostServices = host;
 	}
 
 	public Node lookup(String id) {
