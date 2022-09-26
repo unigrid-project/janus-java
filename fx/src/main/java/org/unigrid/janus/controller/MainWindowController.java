@@ -45,8 +45,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
 public class MainWindowController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
 
-	private Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 	private static WarningController warning = new WarningController();
 	private static final int TAB_WALLET = 1;
@@ -86,7 +86,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
 		hideOverlay();
 		hideWarning();
 		wallet.addPropertyChangeListener(this);

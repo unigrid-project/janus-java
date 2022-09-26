@@ -60,9 +60,9 @@ import org.unigrid.janus.model.TransactionList.LoadReport;
 public class TransactionsController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
 
 	private static TransactionList transList = new TransactionList();
-	private Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 
 	@FXML private TableView tblTransactions;
@@ -73,8 +73,6 @@ public class TransactionsController implements Initializable, PropertyChangeList
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		/* Empty on purpose */
-		wallet = window.getWallet();
 		debug.log("Initializing transactions");
 		window.setTransactionsController(this);
 		transList.addPropertyChangeListener(this);

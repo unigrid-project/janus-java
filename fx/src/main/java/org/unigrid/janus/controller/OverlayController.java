@@ -46,8 +46,8 @@ import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 public class OverlayController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
 
-	private static Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 
 	@FXML private GridPane pnlUnlock;
@@ -59,8 +59,6 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
-
 		window.setOverlayController(this);
 		wallet.addPropertyChangeListener(this);
 		// TODO: pnlUnlock.setVisible(false);

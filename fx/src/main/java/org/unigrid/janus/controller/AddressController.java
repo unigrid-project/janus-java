@@ -57,8 +57,8 @@ import org.unigrid.janus.model.service.WindowService;
 public class AddressController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
 
-	private static Wallet wallet;
 	private static AddressListModel addresses = new AddressListModel();
 	private static WindowService window = WindowService.getInstance();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
@@ -74,11 +74,12 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
 		window.setAddressController(this);
 		wallet.addPropertyChangeListener(this);
 		addresses.addPropertyChangeListener(this);
+
 		setupAddressList();
+
 		addresses.setSelected(chkAddress.isSelected());
 		addresses.setSorted(chkAmountSort.isSelected());
 		// addButtonToTable();

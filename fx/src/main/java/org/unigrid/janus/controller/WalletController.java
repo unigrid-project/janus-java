@@ -77,8 +77,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private PollingService polling;
 	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
 
-	private Wallet wallet;
 	private TransactionList transList = new TransactionList();
 	private static final WindowService WINDOW = WindowService.getInstance();
 	private int syncIntervalShort = 30000;
@@ -103,8 +103,6 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	public void initialize(URL url, ResourceBundle rb) {
 		/* Empty on purpose */
 		debug.log("Initializing wallet transactions");
-
-		wallet = WINDOW.getWallet();
 		wallet.addPropertyChangeListener(this);
 		transList.addPropertyChangeListener(this);
 		WINDOW.setWalletController(this);

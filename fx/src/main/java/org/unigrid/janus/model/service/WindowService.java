@@ -66,13 +66,7 @@ public class WindowService {
 	private static SplashScreenController splashController;
 	private static SplashScreen splashScreen;
 
-	@NonNull private Wallet wallet;
-
 	private static WindowService serviceInstance = null;
-
-	public WindowService() {
-		wallet = new Wallet();
-	}
 
 	public static WindowService getInstance() {
 		if (serviceInstance == null) {
@@ -103,10 +97,6 @@ public class WindowService {
 		} else {
 			return null;
 		}
-	}
-
-	public Wallet getWallet() {
-		return wallet;
 	}
 
 	public void browseURL(String url) {

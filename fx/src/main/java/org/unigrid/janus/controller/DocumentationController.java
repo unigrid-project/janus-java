@@ -56,10 +56,11 @@ import org.unigrid.janus.model.Documentation;
 public class DocumentationController implements Initializable, PropertyChangeListener {
 	private static final String DOCUMENTATION_URL = "https://docs.unigrid.org/docs/data/index.json";
 	private static final int SIX_HOURS_IN_MS = 60 * 60 * 6 * 1000;
+
 	@Inject private DebugService debug;
 	@Inject private PollingService pollingService;
+	@Inject private Wallet wallet;
 
-	private static Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 	private static DocList documentationList = new DocList();
 
@@ -68,7 +69,6 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
 		window.setDocsController(this);
 		wallet.addPropertyChangeListener(this);
 		documentationList.addPropertyChangeListener(this);

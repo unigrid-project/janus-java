@@ -17,21 +17,20 @@
 package org.unigrid.janus.model.service;
 
 import jakarta.enterprise.inject.spi.CDI;
-import jakarta.inject.Inject;
 import java.util.TimerTask;
 import javafx.application.Platform;
+import org.unigrid.janus.controller.WalletController;
 import org.unigrid.janus.model.Wallet;
 
 public class SyncPollingTask extends TimerTask {
 	private DebugService debug;
 	private PollingService polling;
-
-	private static Wallet wallet = new Wallet();
-	private static WindowService window = new WindowService();
+	private Wallet wallet;
 
 	public SyncPollingTask() {
 		debug = CDI.current().select(DebugService.class).get();
 		polling = CDI.current().select(PollingService.class).get();
+		wallet = CDI.current().select(Wallet.class).get();
 
 		debug.log("Sync polling task created!");
 	}
@@ -39,7 +38,7 @@ public class SyncPollingTask extends TimerTask {
 	public void run() {
 		Platform.runLater(() -> {
 			try {
-				window.getWalletController().compareBlockHeights();
+				CDI.current().select(WalletController.class).get().compareBlockHeights();
 			} catch (Exception e) {
 				debug.print("error calling explorer: ".concat(e.getMessage()),
 					LongPollingTask.class.getSimpleName()

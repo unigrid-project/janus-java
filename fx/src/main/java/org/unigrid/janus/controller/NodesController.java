@@ -67,13 +67,12 @@ import org.unigrid.janus.model.service.WindowService;
 public class NodesController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
 
 	private static WindowService window = WindowService.getInstance();
 	private static GridnodeListModel nodes = new GridnodeListModel();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
-
-	private Wallet wallet;
 
 	@FXML
 	private TextField vpsPassword;
@@ -108,7 +107,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
 		setupNodeList();
 		wallet.addPropertyChangeListener(this);
 		window.setNodeController(this);

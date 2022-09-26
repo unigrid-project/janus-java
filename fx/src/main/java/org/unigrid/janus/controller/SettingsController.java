@@ -61,8 +61,8 @@ import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 public class SettingsController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
 
-	private static Wallet wallet;
 	private static WindowService window = WindowService.getInstance();
 
 	private static final int TAB_SETTINGS_GENERAL = 1;
@@ -92,7 +92,6 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setSettingsController(this);
 		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));

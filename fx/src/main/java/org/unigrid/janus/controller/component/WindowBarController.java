@@ -55,7 +55,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	private Stage stage;
 
 	private RotateTransition rt;
-	private Wallet wallet;
 
 	private static WindowService window = WindowService.getInstance();
 
@@ -66,6 +65,8 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@Inject private PollingService pollingService;
 	@Inject private RPCService rpc;
 	@Inject private UpdateWallet update;
+	@Inject private Wallet wallet;
+
 	// @Inject private TrayService tray;
 
 	private int testTimeInterval = 10000;
@@ -73,12 +74,10 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		//TODO: Remove when FX integration is done
 		System.out.println("Initilizing window bar");
 
 		pollingService = CDI.current().select(PollingService.class).get();
 		update.addPropertyChangeListener(this);
-		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
 		window.setWindowBarController(this);
 		updateButton.setVisible(false);
