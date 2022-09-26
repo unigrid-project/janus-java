@@ -16,23 +16,13 @@
 
 package org.unigrid.janus.model;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.unigrid.janus.model.external.ConfigUrlMockUp;
 import net.jqwik.api.Example;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Invocation;
 import org.unigrid.janus.model.cdi.Invoke;
-import org.unigrid.janus.model.entity.Feed;
 import org.unigrid.janus.model.external.ConfigurationMockUp;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 public class UpdateWalletTest {
 
