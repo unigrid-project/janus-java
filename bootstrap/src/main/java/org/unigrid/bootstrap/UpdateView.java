@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,6 +82,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	private Injectable inject;
 
+	private String bootstrapVersion = "";
 	private static UpdateView updateView = null;
 	private static String startLoacation = getBaseDirectory();
 
@@ -98,11 +100,24 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	public void setConfig(Configuration config, Stage primaryStage, Map<String, String> input, HostServices hostServices) {
 		this.config = config;
 		this.primaryStage = primaryStage;
+		Properties myProperties = new Properties();
+
+		try {
+			myProperties.load(App.class.getResourceAsStream("application.properties"));
+			bootstrapVersion = Objects.requireNonNull((String) myProperties.get("proj.ver")).replace("-SNAPSHOT", "");
+			System.out.println("bootstrap version: " + bootstrapVersion);
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			System.out.println(e.getCause().toString());
+		}
+
 		inject = new Injectable() {
 			@InjectSource
 			Map<String, String> inputArgs = input;
 			@InjectSource
 			HostServices hostService = hostServices;
+			@InjectSource
+			String bootstrapVer = bootstrapVersion;
 		};
 
 		System.out.println(input.get("URL"));

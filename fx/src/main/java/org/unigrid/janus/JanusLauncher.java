@@ -20,6 +20,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.application.HostServices;
@@ -27,7 +28,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.UpdateURL;
-import org.apache.commons.lang3.SystemUtils;
+import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.cdi.EagerExtension;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
@@ -40,6 +41,12 @@ public class JanusLauncher implements Launcher {
 
 	@InjectTarget
 	private HostServices hostService;
+
+	@InjectTarget
+	private String bootstrapVer;
+
+	@Inject
+	private BootstrapModel updateWallet;
 
 	@Override @SneakyThrows
 	public void run(LaunchContext lc) {
@@ -58,6 +65,12 @@ public class JanusLauncher implements Launcher {
 			UpdateURL.setLinuxUrl(inputArgs.get("URL"));
 			UpdateURL.setMacUrl(inputArgs.get("URL"));
 			UpdateURL.setWindowsUrl(inputArgs.get("URL"));
+		}
+		System.out.println("bootstrapVer pre");
+		System.out.println("bootstrapVer in fx: " + bootstrapVer);
+		if(bootstrapVer != null || !bootstrapVer.equals("")) {
+			updateWallet.setBootstrapVer(bootstrapVer);
+			System.out.println("bootstrapVer in fx: " + bootstrapVer);
 		}
 
 		if(inputArgs.containsKey("BootstrapURL")){

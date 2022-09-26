@@ -40,6 +40,8 @@ import io.sentry.Sentry;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.UUID;
 import javafx.application.HostServices;
 //import ch.qos.logback.classic.Level;
@@ -113,6 +115,7 @@ public class App extends Application implements Delegate {
 		stage.setResizable(false);
 		stage.setScene(scene);
 		stage.show();
+
 		UpdateView.getInstance().setConfig(config, stage, inputArgs, hostServices);
 
 	}

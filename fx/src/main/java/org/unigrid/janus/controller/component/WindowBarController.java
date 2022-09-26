@@ -172,6 +172,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	@FXML
 	public void onUpdate(MouseEvent event) {
+		System.out.println("onUpdate clicked???");
 		updateButton.setVisible(false);
 		update.doUpdate();
 		// TODO: move this code into UpdateWallet.java

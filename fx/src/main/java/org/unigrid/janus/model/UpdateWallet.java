@@ -354,9 +354,9 @@ public class UpdateWallet extends TimerTask {
 					synchronized (obj) {
 						obj.notifyAll();
 					}
-					System.out.println("!!!!We got passed the notyfiy");
+					System.out.println("!!!!We got passed the notify");
 					if (OS.CURRENT == OS.LINUX) {
-						System.out.println("run the app agien on linux");
+						System.out.println("run the app again on linux");
 						Runtime.getRuntime().exec(linuxExec);
 						System.out.println("Did it start??");
 					} else if (OS.CURRENT == OS.MAC && !isBootstrapUpdate) {
