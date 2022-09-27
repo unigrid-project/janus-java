@@ -355,10 +355,13 @@ public class UpdateWallet extends TimerTask {
 							try {
 								System.out.println(windowsInstallExec);
 								Process p = Runtime.getRuntime().exec(windowsInstallExec);
-								exitCode = p.exitValue();
+								// WINDOWS NEEDS TO CLOSE HERE OTHERWISE IT WILL IMMEDIATELY
+								// OPEN THE APP WHILE TRYING TO INSTALL
+								System.exit(0);
+								/*exitCode = p.exitValue();
 								if (exitCode == 0) {
 									System.exit(0);
-								}
+								}*/
 							} catch (Exception e) {
 								System.out.println(e.getMessage());
 							}
