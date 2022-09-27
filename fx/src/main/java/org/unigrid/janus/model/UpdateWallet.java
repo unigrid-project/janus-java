@@ -83,8 +83,6 @@ public class UpdateWallet extends TimerTask {
 		UPDATE_NOT_READY
 	}
 
-	private boolean bootstrapUpdate = false;
-
 	@Getter
 	private static final String UPDATE_PROPERTY = "update";
 
@@ -139,7 +137,7 @@ public class UpdateWallet extends TimerTask {
 		}
 
 		String title = "Unigrid";
-		String launcherMessage = "New launcher update ready \nPlease press the update button!";
+		String launcherMessage = "A new Unigrid launcher update is ready \nPlease press the update button!";
 		String fxMessage = "New update ready \nPlease press the update button!";
 		if (checkUpdateBootstrap()) {
 
@@ -240,7 +238,7 @@ public class UpdateWallet extends TimerTask {
 			&& (getVersionNumber(filteredVer, 4)
 			== getVersionNumber(getLatestVersion(), 4))
 			|| getLatestVersion().equals("")) {
-			bootstrapUpdate = false;
+			bootstrapModel.setBootstrapUpdate(false);
 			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());
 			System.out.println("The latest version of the bootstrap is the same as the one we have");
 		} else {
@@ -274,10 +272,10 @@ public class UpdateWallet extends TimerTask {
 					windowsPath,
 					getMSIFileName(getLatestVersion()));
 			}
-			bootstrapUpdate = true;
+			bootstrapModel.setBootstrapUpdate(true);
 		}
-		System.out.println("are we upadting the bootstrap: " + bootstrapUpdate);
-		return bootstrapUpdate;
+		System.out.println("are we upadting the bootstrap: " + bootstrapModel.getBootstrapUpdate());
+		return bootstrapModel.getBootstrapUpdate();
 	}
 
 	private boolean checkTempFolder(String fileName, String path) {
@@ -296,12 +294,11 @@ public class UpdateWallet extends TimerTask {
 
 	public void doUpdate() {
 		final Object obj = new Object();
-		System.out.println(bootstrapUpdate);
+		System.out.println(bootstrapModel.getBootstrapUpdate());
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				boolean isBootstrapUpdate = false;
-				if (checkUpdateBootstrap()) {
+				if (bootstrapModel.getBootstrapUpdate()) {
 					Process process;
 					//TODO: Add RPM install line
 					String linuxDebInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
@@ -338,7 +335,7 @@ public class UpdateWallet extends TimerTask {
 									.exec(new String[]{"open", macInstallExec});
 								int exitCode = p.waitFor();
 								System.out.println("exitCode " + exitCode);
-								isBootstrapUpdate = true;
+								bootstrapModel.setBootstrapUpdate(true);
 							} catch (Exception e) {
 								//TODO: handle exception
 								System.out.println("cant open dmg: " + e.getMessage());
@@ -368,7 +365,7 @@ public class UpdateWallet extends TimerTask {
 						System.out.println("run the app again on linux");
 						Runtime.getRuntime().exec(linuxExec);
 						System.out.println("Did it start??");
-					} else if (OS.CURRENT == OS.MAC && !isBootstrapUpdate) {
+					} else if (OS.CURRENT == OS.MAC && !bootstrapModel.getBootstrapUpdate()) {
 						Runtime.getRuntime().exec(macExec);
 					} else if (OS.CURRENT == OS.WINDOWS) {
 						Runtime.getRuntime().exec(windowsExec);

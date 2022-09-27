@@ -26,6 +26,8 @@ public class BootstrapModel {
 	private static BootstrapModel bootstrapModel = null;
 	private String bootstrapVer = "0.0.0";
 
+	private boolean bootstrapUpdate = false;
+
 	public static BootstrapModel getInstance() {
 		if (bootstrapModel == null) {
 			bootstrapModel = new BootstrapModel();
@@ -39,5 +41,13 @@ public class BootstrapModel {
 
 	public void setBootstrapVer(String ver) {
 		this.bootstrapVer = ver;
+	}
+
+	public void setBootstrapUpdate(boolean update) {
+		this.bootstrapUpdate = update;
+	}
+
+	public boolean getBootstrapUpdate() {
+		return this.bootstrapUpdate;
 	}
 }
