@@ -344,9 +344,9 @@ public class UpdateWallet extends TimerTask {
 							try {
 								System.out.println(windowsInstallExec);
 								Process p = Runtime.getRuntime().exec(windowsInstallExec);
-								p.waitFor();
+								//p.waitFor();
 								// WINDOWS CAN'T UPDATE WHILE THE APP IS RUNNING
-								// SO EXIT HERE ONCE THE INSTALLER IS OPENED
+								// SO EXIT HERE ONCE THE INSTALLER HAS OPENED
 								System.exit(0);
 							} catch (Exception e) {
 								System.out.println(e.getMessage());
