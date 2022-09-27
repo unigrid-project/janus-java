@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -25,6 +26,8 @@ import java.io.File;
 import java.util.ResourceBundle;
 import java.util.Optional;
 import javafx.application.HostServices;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
@@ -37,9 +40,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Control;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.VBox;
@@ -61,10 +62,12 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.EncryptWallet;
 import org.unigrid.janus.model.rpc.entity.ImportWallet;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
+import org.unigrid.janus.model.signal.DebugMessage;
 
 @ApplicationScoped
 public class SettingsController implements Initializable, PropertyChangeListener, Showable {
 	private Stage stage;
+	private ObservableList<String> debugItems = FXCollections.observableArrayList();
 
 	@Inject private DebugService debug;
 	@Inject private HostServices hostServices;
@@ -100,29 +103,12 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML private Label txtErrorMessage;
 	@FXML private CheckBox chkNotifications;
 
-	private void setupDebugListViewWidth(double multiplier) {
-		lstDebug.setCellFactory(param -> new ListCell<String>() {
-			{
-				prefWidthProperty().bind(lstDebug.widthProperty().multiply(multiplier));
-				setMaxWidth(Control.USE_PREF_SIZE);
-				setWrapText(true);
-			}
-
-			@Override
-			protected void updateItem(String item, boolean empty) {
-				super.updateItem(item, empty);
-
-				if (item != null && !empty) {
-					setText(item);
-				} else {
-					setText(null);
-				}
-			}
-		});
-	}
-
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		lstDebug.setItems(debugItems);
+		lstDebug.setPrefWidth(500);
+		lstDebug.setPrefHeight(500); //TODO: Put these constants in a model perhaps?
+
 		wallet.addPropertyChangeListener(this);
 		window.setSettingsController(this);
 		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));
@@ -382,12 +368,14 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@Override
 	public void onShow(Stage stage) {
 		this.stage = stage;
-		setupDebugListViewWidth(0.98);
-		lstDebug.setPrefWidth(500);
 	}
 
 	@Override
 	public void onHide(Stage stage) {
 		/* Empty on purpose */
+	}
+
+	public void eventDebugMessage(@Observes DebugMessage debugMessage) {
+		debugItems.add(debugMessage.getMessage());
 	}
 }
