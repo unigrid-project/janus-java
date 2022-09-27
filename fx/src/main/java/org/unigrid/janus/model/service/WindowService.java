@@ -31,7 +31,6 @@ import org.unigrid.janus.controller.WalletController;
 import org.unigrid.janus.controller.TransactionsController;
 import org.unigrid.janus.controller.OverlayController;
 import org.unigrid.janus.controller.SettingsController;
-import org.unigrid.janus.controller.WarningController;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 
@@ -48,7 +47,6 @@ public class WindowService {
 	private static TransactionsController transController;
 	private static SettingsController settingsController;
 	private static DocumentationController docsController;
-	private static WarningController warnController;
 
 	private static WindowService serviceInstance = null;
 
@@ -145,13 +143,5 @@ public class WindowService {
 				ButtonType.OK);
 			a.showAndWait();
 		}
-	}
-
-	public void setWarnController(WarningController controller) {
-		this.warnController = controller;
-	}
-
-	public WarningController getWarningController() {
-		return this.warnController;
 	}
 }
