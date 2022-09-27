@@ -37,7 +37,10 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Border;
@@ -45,6 +48,7 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
+import javafx.stage.Stage;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Preferences;
@@ -59,7 +63,9 @@ import org.unigrid.janus.model.rpc.entity.ImportWallet;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 
 @ApplicationScoped
-public class SettingsController implements Initializable, PropertyChangeListener {
+public class SettingsController implements Initializable, PropertyChangeListener, Showable {
+	private Stage stage;
+
 	@Inject private DebugService debug;
 	@Inject private HostServices hostServices;
 	@Inject private RPCService rpc;
@@ -73,6 +79,8 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private static final int TAB_SETTINGS_EXPORT = 4;
 	private static final int TAB_SETTINGS_DEBUG = 5;
 	private static JanusModel janusModel = new JanusModel();
+
+	@FXML private ListView lstDebug;
 
 	@FXML private Label verLbl;
 	// settings navigation
@@ -91,6 +99,27 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML private Label txtPassWarningTwo;
 	@FXML private Label txtErrorMessage;
 	@FXML private CheckBox chkNotifications;
+
+	private void setupDebugListViewWidth(double multiplier) {
+		lstDebug.setCellFactory(param -> new ListCell<String>() {
+			{
+				prefWidthProperty().bind(lstDebug.widthProperty().multiply(multiplier));
+				setMaxWidth(Control.USE_PREF_SIZE);
+				setWrapText(true);
+			}
+
+			@Override
+			protected void updateItem(String item, boolean empty) {
+				super.updateItem(item, empty);
+
+				if (item != null && !empty) {
+					setText(item);
+				} else {
+					setText(null);
+				}
+			}
+		});
+	}
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -239,7 +268,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 							EncryptWallet.class
 						);
 
-						//TODO
+						//TODO: Fix this section
 						//THIS IS ONLY NEEDED FOR THE INITIAL ENCRYPTION
 						//SHOW LOAD SCREEN WHILE DAEMON STOPS
 						//PAUSE CALLS TO THE DAEMON
@@ -297,7 +326,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		fileChooser.setTitle("Import");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Wallet file", "*.txt"));
 		fileChooser.setInitialFileName("wallet.txt");
-		File file = fileChooser.showOpenDialog(window.getStage());
+		File file = fileChooser.showOpenDialog(stage);
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
 		rpc.call(new ImportWallet.Request(file.getAbsolutePath()), ImportWallet.class);
 	}
@@ -318,7 +347,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		fileChooser.setTitle("Export");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
 		fileChooser.setInitialFileName("wallet.txt");
-		File file = fileChooser.showSaveDialog(window.getStage());
+		File file = fileChooser.showSaveDialog(stage);
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
 		// debug.log(rpc.callToJson(new DumpWallet.Request(file.getAbsolutePath())));
 		final DumpWallet result = rpc.call(new DumpWallet.Request(file.getAbsolutePath()), DumpWallet.class);
@@ -333,7 +362,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		fileChooser.setTitle("Backup");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.dat"));
 		fileChooser.setInitialFileName("wallet.dat");
-		File file = fileChooser.showSaveDialog(window.getStage());
+		File file = fileChooser.showSaveDialog(stage);
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
 		// debug.log(rpc.callToJson(new BackupWallet.Request(file.getAbsolutePath())));
 		final BackupWallet result = rpc.call(new BackupWallet.Request(file.getAbsolutePath()), BackupWallet.class);
@@ -348,5 +377,17 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	public void setVersion(String version) {
 		verLbl.setText("version: ".concat(version));
+	}
+
+	@Override
+	public void onShow(Stage stage) {
+		this.stage = stage;
+		setupDebugListViewWidth(0.98);
+		lstDebug.setPrefWidth(500);
+	}
+
+	@Override
+	public void onHide(Stage stage) {
+		/* Empty on purpose */
 	}
 }

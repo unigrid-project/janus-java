@@ -20,8 +20,6 @@ import java.awt.Desktop;
 import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import javafx.stage.Stage;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -43,7 +41,6 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 public class WindowService {
 	@Inject private DebugService debug;
 
-	private static Stage stage;
 	private static MainWindowController mwController;
 	private static WalletController wController;
 	private static OverlayController olController;
@@ -60,22 +57,6 @@ public class WindowService {
 			serviceInstance = new WindowService();
 		}
 		return serviceInstance;
-	}
-
-	public Stage getStage() {
-		return this.stage;
-	}
-
-	public void setStage(Stage value) {
-		this.stage = value;
-	}
-
-	public Node lookup(String id) {
-		if (stage != null) {
-			return stage.getScene().lookup("#" + id);
-		} else {
-			return null;
-		}
 	}
 
 	public void browseURL(String url) {

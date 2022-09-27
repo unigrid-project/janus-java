@@ -88,7 +88,6 @@ public class SplashScreen implements Window {
 	@SneakyThrows
 	public void show() {
 		try {
-			window.setStage(stageSplash);
 			stageSplash.show();
 			startSpinner();
 		} catch (Exception e) {
@@ -158,8 +157,8 @@ public class SplashScreen implements Window {
 
 	private void readDebug() throws IOException, Exception {
 		File debug = DataDirectory.getBackendLog();
-
 		FileAlterationObserver observer = new FileAlterationObserver(debug.getParent());
+
 		observer.addListener(new FileAlterationListenerAdaptor() {
 			@Override
 			public void onFileChange(File file) {

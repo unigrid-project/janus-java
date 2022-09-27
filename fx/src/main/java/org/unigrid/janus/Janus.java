@@ -38,7 +38,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -188,8 +187,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private void startMainWindow() {
 		try {
 			mainWindow.show();
-			mainWindow.bindDebugListViewWidth(0.98);
-			debug.setListView((ListView) window.lookup("lstDebug"));
 
 		} catch (Exception e) {
 			System.out.print("error: " + e.getMessage());
