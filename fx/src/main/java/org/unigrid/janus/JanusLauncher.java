@@ -45,6 +45,9 @@ public class JanusLauncher implements Launcher {
 	@InjectTarget(required = false)
 	private String bootstrapVer;
 
+	@InjectTarget(required = false)
+	private String downloadUrl;
+
 	@Override @SneakyThrows
 	public void run(LaunchContext lc) {
 		System.out.println("before cotainer init");
@@ -68,6 +71,14 @@ public class JanusLauncher implements Launcher {
 
 		if(bootstrapVer != null && !bootstrapVer.equals("")) {
 			BootstrapModel.getInstance().setBootstrapVer(bootstrapVer);
+		}
+
+		if (inputArgs.containsKey("downloadUrl")) {
+			BootstrapModel.getInstance().setDownloadUrl(inputArgs.get("downloadUrl"));
+		}
+
+		if (inputArgs.containsKey("testing")) {
+			BootstrapModel.getInstance().setDownloadUrl(inputArgs.get("testing"));
 		}
 
 		if(inputArgs.containsKey("BootstrapURL")){

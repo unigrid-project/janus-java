@@ -25,6 +25,8 @@ public class BootstrapModel {
 
 	private static BootstrapModel bootstrapModel = null;
 	private String bootstrapVer = "0.0.0";
+	private String downloadUrl = "https://github.com/unigrid-project/janus-java/releases/download/";
+	private Boolean testing = false;
 
 	public static BootstrapModel getInstance() {
 		if (bootstrapModel == null) {
@@ -39,5 +41,21 @@ public class BootstrapModel {
 
 	public void setBootstrapVer(String ver) {
 		this.bootstrapVer = ver;
+	}
+
+	public String getDownloadUrl() {
+		return this.downloadUrl;
+	}
+
+	public void setDownloadUrl(String url) {
+		this.downloadUrl = url;
+	}
+
+	public Boolean getTesting() {
+		return this.testing;
+	}
+
+	public void setTesting(Boolean test) {
+		this.testing = test;
 	}
 }
