@@ -17,7 +17,6 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -34,7 +33,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.SplashModel;

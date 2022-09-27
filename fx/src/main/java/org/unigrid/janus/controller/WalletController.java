@@ -13,10 +13,10 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -163,7 +163,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	private void setupWalletTransactions() {
 		try {
-			colWalletTransDate.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
+			colWalletTransDate.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>,
+				ObservableValue<String>>() {
 
 				public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
 					long time = t.getValue().getTime();
@@ -174,7 +175,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				}
 			});
 
-			colWalletTransType.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
+			colWalletTransType.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>,
+				ObservableValue<Hyperlink>>() {
 
 				public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
 					Transaction trans = t.getValue();
@@ -206,13 +208,15 @@ public class WalletController implements Initializable, PropertyChangeListener {
 						fontIcon = new FontIcon("fas-arrow-left");
 						fontIcon.setIconColor(setColor(48, 186, 69, confrimations));
 					}
+
 					btn.setGraphic(fontIcon);
 					//debug.print(trans.getCategory(), WalletController.class.getSimpleName());
 					return new ReadOnlyObjectWrapper(btn);
 				}
 			});
 
-			colWalletTransAddress.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>, ObservableValue<Hyperlink>>() {
+			colWalletTransAddress.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>,
+				ObservableValue<Hyperlink>>() {
 
 				public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
 					Hyperlink link = new Hyperlink();
@@ -261,7 +265,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				}
 			});
 
-			colWalletTransAmount.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>, ObservableValue<String>>() {
+			colWalletTransAmount.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>,
+				ObservableValue<String>>() {
 
 				public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
 					Transaction trans = t.getValue();
