@@ -23,6 +23,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.io.File;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Optional;
 import javafx.application.HostServices;
@@ -108,6 +109,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		lstDebug.setItems(debugItems);
 		lstDebug.setPrefWidth(500);
 		lstDebug.setPrefHeight(500); //TODO: Put these constants in a model perhaps?
+		lstDebug.scrollTo(debugItems.size());
 
 		wallet.addPropertyChangeListener(this);
 		window.setSettingsController(this);
@@ -377,5 +379,9 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	public void eventDebugMessage(@Observes DebugMessage debugMessage) {
 		debugItems.add(debugMessage.getMessage());
+
+		if (Objects.nonNull(lstDebug)) {
+			lstDebug.scrollTo(debugItems.size());
+		}
 	}
 }
