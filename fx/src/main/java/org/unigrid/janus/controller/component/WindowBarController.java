@@ -34,10 +34,12 @@ import org.unigrid.janus.view.decorator.Decorator;
 import org.unigrid.janus.view.decorator.MovableWindowDecorator;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
@@ -48,17 +50,15 @@ import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.view.component.WindowBarButton;
+import org.unigrid.janus.controller.Showable;
 
 @Dependent
-public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
+public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener, Showable {
+	private static final Set<WindowBarController> CONTROLLERS = Collections.synchronizedSet(new HashSet<>());
+
 	private Decorator movableWindowDecorator;
-
-	@Getter
-	private Stage stage;
-
 	private RotateTransition rt;
-
-	private static WindowService window = WindowService.getInstance();
+	@Getter private Stage stage;
 
 	@FXML private FontIcon spinner;
 	@FXML private WindowBarButton updateButton;
@@ -76,8 +76,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		System.out.println("Initilizing window bar");
-
 		pollingService = CDI.current().select(PollingService.class).get();
 		update.addPropertyChangeListener(this);
 		wallet.addPropertyChangeListener(this);
@@ -85,29 +83,10 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 		Tooltip t = new Tooltip("A new update is ready. Please restart the wallet");
 		t.install(updateButton, t);
-
-		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
 		pollingService.pollForUpdate(liveTimeInterval);
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		/*if (event.getPropertyName().equals(wallet.MONEYSUPPLY_PROPERTY)) {
-			String sValue = String.format("%.8f", (double) event.getNewValue());
-			debug.log(String.format("Money supply: %s", sValue));
-			Label supply = (Label) window.lookup("txtSupply");
-			if (supply != null) {
-				supply.setText(sValue);
-			}
-		}*/
-
-		if (event.getPropertyName().equals(wallet.PROCESSING_PROPERTY)) {
-			if (wallet.getProcessingStatus()) {
-				String status = String.format("processing status %s",
-					(boolean) wallet.getProcessingStatus());
-				//debug.log(status);
-			}
-		}
-
 		if (event.getPropertyName().equals(update.getUPDATE_PROPERTY())) {
 			showUpdateButton();
 		}
@@ -178,11 +157,24 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		spinner.setVisible(false);
 	}
 
+	/* Because of the dependant scope, we have to save the controllers locally and loop through them */
 	public void eventState(@Observes State state) {
-		if (state.isWorking()) {
-			startSpinner();
-		} else {
-			stopSpinner();
+		for (WindowBarController c : CONTROLLERS) {
+			if (state.isWorking()) {
+				c.startSpinner();
+			} else {
+				c.stopSpinner();
+			}
 		}
+	}
+
+	@Override
+	public void onShow(Stage stage) {
+		CONTROLLERS.add(this);
+	}
+
+	@Override
+	public void onHide(Stage stage) {
+		CONTROLLERS.remove(this);
 	}
 }

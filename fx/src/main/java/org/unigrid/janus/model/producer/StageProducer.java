@@ -26,6 +26,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.unigrid.janus.model.cdi.CDIUtil;
+import org.unigrid.janus.controller.Showable;
 
 @Dependent
 public class StageProducer {
@@ -51,7 +52,22 @@ public class StageProducer {
 		loader.setLocation(clazz.getResource(name.concat(FXML_SUFFIX)));
 
 		try {
-			return loader.load();
+			final Stage stage = loader.load();
+
+			if (loader.getController() instanceof Showable) {
+				final Showable showable = loader.getController();
+
+				stage.setOnShown(e -> {
+					showable.onShow(stage);
+				});
+
+				stage.setOnHidden(e -> {
+					showable.onHide(stage);
+				});
+			}
+
+			return stage;
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println(e.getCause());
