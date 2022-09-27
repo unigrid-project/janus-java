@@ -34,4 +34,5 @@ public class UpdateURL {
 
 	@Getter @Setter
 	private static String bootstrapUrl = "https://github.com/unigrid-project/janus-java/releases.atom";
+
 }

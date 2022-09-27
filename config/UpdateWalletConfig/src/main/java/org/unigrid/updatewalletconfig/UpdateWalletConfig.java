@@ -44,11 +44,11 @@ public class UpdateWalletConfig {
 		String configLocation = System.getProperty("user.dir");
 		String homeDir = System.getProperty("user.home");
 		String dir = configLocation;
-		String fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.1.0/fx-1.1.0-SNAPSHOT.jar";
+		String fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.9/fx-1.0.9-SNAPSHOT.jar";
 		String linuxDaemon = "unigrid-2.9.3-x86_64-linux-gnu.tar.gz";
 		String windowsDaemon = "unigrid-2.9.3-win64.zip";
 		String osxDaemon = "unigrid-2.9.3-osx64.tar.gz";
-		String fxVersion = "1.1.0";
+		String fxVersion = "1.0.9";
 		String[] filePath = new String[]{
 			"/config-linux.xml",
 			"/config-linux-test.xml",
@@ -63,9 +63,9 @@ public class UpdateWalletConfig {
 
 		for (int i = 0; i < filePath.length; i++) {
 			if ((i%2) == 0) {
-				fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.1.0/fx-1.1.0-SNAPSHOT.jar";
+				fxJarUrl = "https://github.com/unigrid-project/unigrid-update/releases/download/v1.0.9/fx-1.0.9-SNAPSHOT.jar";
 			} else {
-				fxJarUrl = "https://github.com/unigrid-project/unigrid-update-testing/releases/download/v1.1.0/fx-1.1.0-SNAPSHOT.jar";
+				fxJarUrl = "https://github.com/unigrid-project/unigrid-update-testing/releases/download/v1.0.9/fx-1.0.9-SNAPSHOT.jar";
 			}
 
 			if (filePath[i].contains("linux")) {
@@ -84,7 +84,7 @@ public class UpdateWalletConfig {
 
 			Configuration config = Configuration.builder()
 				.basePath(basePath)
-				.file(FileMetadata.readFrom("../../fx/target/fx-1.1.0-SNAPSHOT.jar")
+				.file(FileMetadata.readFrom("../../fx/target/fx-1.0.9-SNAPSHOT.jar")
 					.uri(fxJarUrl).modulepath())
 				.file(FileMetadata.readFrom("../../fx/target/jlink/cp/aopalliance-repackaged-3.0.3.jar")
 					.uri(mavenUrl("org.glassfish.hk2.external", "aopalliance-repackaged", "3.0.3")).modulepath())
