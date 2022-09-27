@@ -16,7 +16,6 @@
 package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -51,7 +50,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Objects;
+//import java.util.Objects;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,6 +76,7 @@ public class UpdateWallet extends TimerTask {
 	private static DebugService debug = new DebugService();
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
 	private static final String BOOTSTRAP_URL = UpdateURL.getBootstrapUrl();
+	private String DOWNLOAD_URL = BootstrapModel.getInstance().getDownloadUrl();
 	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
 	private int exitCode = 0;
@@ -356,6 +356,9 @@ public class UpdateWallet extends TimerTask {
 								System.out.println(windowsInstallExec);
 								Process p = Runtime.getRuntime().exec(windowsInstallExec);
 								exitCode = p.exitValue();
+								if (exitCode == 0) {
+									System.exit(0);
+								}
 							} catch (Exception e) {
 								System.out.println(e.getMessage());
 							}
@@ -452,9 +455,9 @@ public class UpdateWallet extends TimerTask {
 
 	private void downloadFile(String url, String path, String fileName) {
 		try {
-			FileUtils.copyURLToFile(new URL(url), new File(path + fileName));
+			FileUtils.copyURLToFile(new URL(url), new File(path + fileName),5000, 5000);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			System.out.println("FILE FAILED TO DOWNLOAD" + e.getMessage());
 		}
 		System.out.println("DOWNLOADED: " + url);
 	}
@@ -491,7 +494,7 @@ public class UpdateWallet extends TimerTask {
 	}
 
 	private String getDownloadURL(String version, String fileName) {
-		return String.format("https://github.com/unigrid-project/janus-java/releases/download/v%s/%s",
+		return String.format(DOWNLOAD_URL.concat("v%s/%s"),
 			version, fileName);
 	}
 
