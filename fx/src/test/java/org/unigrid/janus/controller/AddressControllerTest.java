@@ -18,6 +18,8 @@ package org.unigrid.janus.controller;
 
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
+import net.jqwik.api.lifecycle.BeforeContainer;
+import net.jqwik.api.Disabled;
 import net.jqwik.api.Example;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.api.FxRobot;
@@ -59,13 +61,16 @@ public class AddressControllerTest extends BaseFxTest {
 		System.out.println("I'm stopping a test run and I am only here for demo purposes!");
 	}
 
-	@Example
-	public void shouldHideZeroBalances() {
+	@BeforeContainer
+	private static void before() {
 		new ResponseMockUp();
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
 		new DaemonMockUp();
+	}
 
+	@Example @Disabled
+	public void shouldHideZeroBalances() {
 		Eager.instantiate(rpc);
 
 		robot.clickOn("#btnAddress");

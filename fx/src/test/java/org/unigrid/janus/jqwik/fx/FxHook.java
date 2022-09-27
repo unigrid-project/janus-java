@@ -37,6 +37,7 @@ import net.jqwik.api.lifecycle.PropertyLifecycleContext;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.testfx.api.FxToolkit;
 import org.unigrid.janus.model.cdi.CDIUtil;
+import org.unigrid.janus.model.producer.HostServicesProducer;
 
 public class FxHook implements AroundContainerHook, AroundPropertyHook {
 	private static final int HIGH_PRIORITY = 1024;
@@ -51,6 +52,11 @@ public class FxHook implements AroundContainerHook, AroundPropertyHook {
 					consumer.accept(m);
 				}
 			}
+		}
+
+		@Override
+		public void init() throws Exception {
+			HostServicesProducer.setHostServices(getHostServices());
 		}
 
 		@Override
@@ -87,6 +93,7 @@ public class FxHook implements AroundContainerHook, AroundPropertyHook {
 	private Application setupFx(Object instance, FxResource resource) {
 		try {
 			FxToolkit.registerPrimaryStage();
+			final Application application = FxToolkit.setupApplication(() -> new ApplicationAdapter(instance));
 
 			Platform.runLater(() -> {
 				try {
@@ -111,7 +118,7 @@ public class FxHook implements AroundContainerHook, AroundPropertyHook {
 				}
 			});
 
-			return FxToolkit.setupApplication(() -> new ApplicationAdapter(instance));
+			return application;
 
 		} catch (TimeoutException ex) {
 			System.err.print(ex);
