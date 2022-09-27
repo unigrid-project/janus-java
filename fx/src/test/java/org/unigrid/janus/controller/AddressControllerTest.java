@@ -72,6 +72,7 @@ public class AddressControllerTest extends BaseFxTest {
 	@Example @Disabled
 	public void shouldHideZeroBalances() {
 		Eager.instantiate(rpc);
+		waitForScene();
 
 		robot.clickOn("#btnAddress");
 		robot.clickOn("#chkAddress");

@@ -16,14 +16,19 @@
 
 package org.unigrid.janus.jqwik.fx;
 
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.jqwik.api.lifecycle.AddLifecycleHook;
 import net.jqwik.api.lifecycle.PropagationMode;
+import static org.awaitility.Awaitility.await;
+import org.testfx.api.FxToolkit;
 import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 
 @AddLifecycleHook(value = FxHook.class, propagateTo = PropagationMode.ALL_DESCENDANTS)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BaseFxTest extends BaseMockedWeldTest {
-	/* Empty on purpose */
+	protected void waitForScene() {
+		await().until(() -> Objects.nonNull(FxToolkit.toolkitContext().getRegisteredStage().getScene()));
+	}
 }
