@@ -80,7 +80,7 @@ module fx {
 		javafx.controls, org.update4j, javafx.graphics;
 	exports org.unigrid.janus.controller to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls,
 		org.update4j, javafx.graphics;
-	exports org.unigrid.janus.model.event to weld.core.impl;
+	exports org.unigrid.janus.model.signal to weld.core.impl;
 	exports org.unigrid.janus.model.producer to weld.core.impl;
 	exports org.unigrid.janus.model.setup to weld.core.impl;
 	exports org.unigrid.janus.model.rpc to weld.core.impl;

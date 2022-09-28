@@ -205,29 +205,33 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	}
 
 	@FXML
-	private void onOpenConf(MouseEvent event) {
+	private void onOpenConf(MouseEvent event) throws NullPointerException {
 		File conf = DataDirectory.getConfigFile();
 		try {
 			hostServices.showDocument(conf.getAbsolutePath());
-		} catch (Exception e) {
+		} catch (NullPointerException e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
 	}
 
 	@FXML
-	private void onOpenGridnode(MouseEvent event) {
+	private void onOpenGridnode(MouseEvent event) throws NullPointerException {
 		File gridnode = DataDirectory.getGridnodeFile();
 		try {
 			hostServices.showDocument(gridnode.getAbsolutePath());
-		} catch (Exception e) {
+		} catch (NullPointerException e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
 	}
 
 	@FXML
-	private void onOpenUnigrid(MouseEvent event) {
+	private void onOpenUnigrid(MouseEvent event) throws NullPointerException {
 		String gridnode = DataDirectory.get();
-		hostServices.showDocument(gridnode);
+		try {
+			hostServices.showDocument(gridnode);
+		} catch (NullPointerException e) {
+			System.out.println("Null Host services " + e.getMessage());
+		}
 	}
 
 	@FXML

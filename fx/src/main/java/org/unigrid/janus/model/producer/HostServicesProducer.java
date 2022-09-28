@@ -28,9 +28,9 @@ public class HostServicesProducer {
 
 	@Produces
 	public HostServices produce() {
-		if (Objects.isNull(hostServices)) {
-			throw new IllegalStateException("Host services must be set and defined at this point.");
-		}
+		/*if (Objects.isNull(hostServices)) {
+			return (HostServices) new Object();
+		}*/
 
 		return hostServices;
 	}
