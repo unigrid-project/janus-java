@@ -23,10 +23,6 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.scene.control.Control;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ListCell;
-//import lombok.SneakyThrows;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -55,10 +51,8 @@ public class MainWindow implements Window {
 		stage.setUserData(new StageProperties());
 	}
 
-	//@SneakyThrows
 	public void show() {
 		try {
-			window.setStage(stage);
 			window.getSettingsController().setVersion(janusModel.getVersion());
 			stage.show();
 		} catch (Exception e) {
@@ -69,28 +63,6 @@ public class MainWindow implements Window {
 
 	public void hide() {
 		stage.hide();
-	}
-
-	public void bindDebugListViewWidth(double multiplier) {
-		ListView list = (ListView) window.lookup("lstDebug");
-		list.setCellFactory(param -> new ListCell<String>() {
-			{
-				prefWidthProperty().bind(list.widthProperty().multiply(multiplier));
-				setMaxWidth(Control.USE_PREF_SIZE);
-				setWrapText(true);
-			}
-
-			@Override
-			protected void updateItem(String item, boolean empty) {
-				super.updateItem(item, empty);
-
-				if (item != null && !empty) {
-					setText(item);
-				} else {
-					setText(null);
-				}
-			}
-		});
 	}
 
 	private void onClose(@Observes Event<CloseJanusEvent> event) {

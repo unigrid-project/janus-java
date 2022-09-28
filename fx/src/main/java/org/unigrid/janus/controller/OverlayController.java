@@ -17,6 +17,9 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import jakarta.json.bind.Jsonb;
@@ -29,9 +32,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
 import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import org.unigrid.janus.model.service.DebugService;
@@ -40,103 +42,41 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
+import org.unigrid.janus.model.signal.State;
+import org.unigrid.janus.model.signal.UnlockRequest;
+import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
-public class OverlayController implements Initializable, PropertyChangeListener {
-	private static DebugService debug = new DebugService();
-	private static RPCService rpc = new RPCService();
-	private static Wallet wallet;
+public class OverlayController implements Initializable {
+	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
+
+	@Inject private Event<State> stateEvent;
+
 	private static WindowService window = WindowService.getInstance();
 
-	@FXML
-	private GridPane pnlUnlock;
-	@FXML
-	private PasswordField passphraseInput;
-	@FXML
-	private Text errorTxt;
-	@FXML
-	private ImageView spinnerIcon;
-	@FXML
-	private Button submitBtn;
-	@FXML
-	private Text unlockCopy;
+	@FXML private GridPane pnlUnlock;
+	@FXML private PasswordField passphraseInput;
+	@FXML private Text errorTxt;
+	@FXML private ImageView spinnerIcon;
+	@FXML private Button submitBtn;
+	@FXML private Text unlockCopy;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
-
 		window.setOverlayController(this);
-		wallet.addPropertyChangeListener(this);
-		// TODO: pnlUnlock.setVisible(false);
 	}
 
-	public void startLockOverlay() {
+	private void eventUnlockRequest(@Observes UnlockRequest unlockRequest) {
+		debug.log("Unlock request fired");
+
+		submitBtn.setText(unlockRequest.getType().getAction());
+		wallet.setUnlockState(unlockRequest.getType().getState());
+		unlockCopy.setText(unlockRequest.getType().getDescription());
 		pnlUnlock.setVisible(true);
-		wallet.setUnlockState(2);
-		submitBtn.setText("UNLOCK");
+
 		Platform.runLater(() -> passphraseInput.requestFocus());
-
-		unlockCopy.setText("Unlock your wallet by entering your passphrase and "
-			+ "pressing the UNLOCK button."
-		);
-	}
-
-	public void startStakingOverlay() {
-		wallet.setUnlockState(1);
-		pnlUnlock.setVisible(true);
-		submitBtn.setText("STAKE");
-		Platform.runLater(() -> passphraseInput.requestFocus());
-
-		unlockCopy.setText("Enable staking in your wallet by entering your passphrase and "
-			+ "pressing the STAKE button."
-		);
-	}
-
-	public void startUnlockForTimeOverlay() {
-		debug.log("UNLOCK FOR TIME");
-		wallet.setUnlockState(4);
-		pnlUnlock.setVisible(true);
-		submitBtn.setText("UNLOCK");
-		Platform.runLater(() -> passphraseInput.requestFocus());
-
-		unlockCopy.setText("Please enter your passphrase in order to perform this task. "
-			+ "The wallet will automatically lock itself after 30 seconds.");
-	}
-
-	public void startUnlockForSendingOverlay() {
-		debug.log("UNLOCK FOR SENDING");
-		wallet.setUnlockState(3);
-		pnlUnlock.setVisible(true);
-		submitBtn.setText("SEND");
-		Platform.runLater(() -> passphraseInput.requestFocus());
-
-		unlockCopy.setText("Please enter your passphrase to send Unigrid tokens. "
-			+ "If your wallet was staking you will need to enable again after the transaction completes."
-		);
-	}
-
-	public void startUnlockForGridnodeOverlay() {
-		debug.log("UNLOCK FOR GRIDNODE");
-		wallet.setUnlockState(4);
-		pnlUnlock.setVisible(true);
-		submitBtn.setText("START");
-		Platform.runLater(() -> passphraseInput.requestFocus());
-
-		unlockCopy.setText("Please enter your passphrase to enable your gridnodes. "
-			+ "If your wallet was staking you will need to enable again after the task completes."
-		);
-	}
-
-	public void startUnlockForDump() {
-		debug.log("UNLOCK FOR DUMP");
-		wallet.setUnlockState(5);
-		pnlUnlock.setVisible(true);
-		submitBtn.setText("EXPORT");
-		Platform.runLater(() -> passphraseInput.requestFocus());
-
-		unlockCopy.setText("Please enter your passphrase to export your private keys. "
-			+ "If your wallet was staking you will need to enable again after the task completes."
-		);
 	}
 
 	@FXML
@@ -144,13 +84,13 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		if (ke.getCode() == KeyCode.ENTER) {
 			submit();
 		} else if (ke.getCode() == KeyCode.ESCAPE) {
-			closeUnlockOverlay();
+			hide();
 		}
 	}
 
 	@FXML
 	private void onCancelLockPressed(MouseEvent event) {
-		closeUnlockOverlay();
+		hide();
 	}
 
 	@FXML
@@ -162,30 +102,21 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		submitBtn.setDisable(true);
 		Object[] sendArgs;
 		long stakingStartTime = wallet.getStakingStartTime();
-		window.getWindowBarController().startSpinner();
+		stateEvent.fire(State.builder().working(true).build());
 
 		// TODO: What exactly do these numbers mean ? Please change this to an enum and explain it.
 		switch (wallet.getUnlockState()) {
 			case 1:
-				sendArgs = new Object[] {
-					passphraseInput.getText(), stakingStartTime, true
-				};
-
+				sendArgs = new Object[] { passphraseInput.getText(), stakingStartTime, true };
 				break;
 			case 2:
-				sendArgs = new Object[] {
-					passphraseInput.getText(), 0
-				};
-
+				sendArgs = new Object[] { passphraseInput.getText(), 0 };
 				break;
 			case 3:
 			case 4:
 			case 5:
 				// unlock for 30 seconds only
-				sendArgs = new Object[] {
-					passphraseInput.getText(), 30
-				};
-
+				sendArgs = new Object[] { passphraseInput.getText(), 30 };
 				break;
 			default:
 				throw new AssertionError();
@@ -194,7 +125,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		if (passphraseInput.getText().equals("")) {
 			errorTxt.setText("Please enter a passphrase");
 			submitBtn.setDisable(false);
-			window.getWindowBarController().stopSpinner();
+			stateEvent.fire(State.builder().working(false).build());
 		} else {
 			try {
 				final UnlockWallet call = rpc.call(new UnlockWallet.Request(sendArgs), UnlockWallet.class);
@@ -219,6 +150,7 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 					debug.print("Successfuly unlocked wallet", OverlayController.class.getSimpleName());
 					passphraseInput.setText("");
 
+					//TODO: Get rid of these numbers and use an enum instead!
 					if (wallet.getUnlockState() == 3) {
 						// send transaction
 						window.getWalletController().sendTransactionAfterUnlock();
@@ -232,17 +164,17 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 						wallet.setLocked(Boolean.FALSE);
 					}
 
-					closeUnlockOverlay();
+					hide();
 				}
 			} catch (Exception e) {
 				debug.print(e.getMessage(), OverlayController.class.getSimpleName());
 			}
 
-			window.getWindowBarController().stopSpinner();
+			stateEvent.fire(State.builder().working(false).build());
 		}
 	}
 
-	private void closeUnlockOverlay() {
+	private void hide() {
 		wallet.setUnlockState(0);
 		unlockCopy.setText("");
 		spinnerIcon.setVisible(false);
@@ -250,10 +182,9 @@ public class OverlayController implements Initializable, PropertyChangeListener 
 		passphraseInput.setText("");
 		pnlUnlock.setVisible(false);
 		submitBtn.setDisable(false);
-		window.getMainWindowController().hideOverlay();
-	}
 
-	public void propertyChange(PropertyChangeEvent event) {
-		/* Empty on purpose */
+		FxUtils.executeParentById("pnlOverlay", pnlUnlock, (node) -> {
+			node.setVisible(false);
+		});
 	}
 }

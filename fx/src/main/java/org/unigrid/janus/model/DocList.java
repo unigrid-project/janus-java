@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
@@ -26,9 +27,9 @@ import org.unigrid.janus.model.service.DebugService;
 public class DocList {
 	public static final String DOCUMENTATION_LIST = "docList";
 
-	private static DebugService debug = new DebugService();
-	private static ObservableList<Documentation> doclist = FXCollections.observableArrayList();
+	@Inject private DebugService debug;
 
+	private static ObservableList<Documentation> doclist = FXCollections.observableArrayList();
 	private PropertyChangeSupport pcs;
 
 	public DocList() {

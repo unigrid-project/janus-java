@@ -17,54 +17,34 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import java.beans.PropertyChangeSupport;
-import java.net.URL;
-import java.util.ResourceBundle;
-import javafx.fxml.Initializable;
+import jakarta.inject.Inject;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.input.MouseEvent;
 import org.unigrid.janus.model.JanusModel;
-import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
-public class WarningController implements Initializable {
+public class WarningController {
 	public static final String HIDE_WARNING = "hidewarning";
 	public static final String STATUS_PROPERTY = "walletstatus";
-	private static DebugService debug = new DebugService();
-	private static RPCService rpc = new RPCService();
-	private static Wallet wallet;
+
+	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
+
 	private static JanusModel janusModel = new JanusModel();
-	private static WindowService window = WindowService.getInstance();
-	private static PropertyChangeSupport pcs;
-
-	/* public WarningController() {
-		wallet = window.getWallet();
-		if (this.pcs != null) {
-			return;
-		}
-		this.pcs = new PropertyChangeSupport(this);
-	}
-
-	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		this.pcs.addPropertyChangeListener(listener);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		this.pcs.removePropertyChangeListener(listener);
-	} */
 
 	public void onRestartClicked(MouseEvent event) {
 		debug.log("onRestartClicked");
-		// will be implemented once CDI is working
-		//warningEvent.fire(this);
+		// TODO: Will be implemented once CDI is working
+		// warningEvent.fire(this);
 		janusModel.setAppState(JanusModel.AppState.RESTARTING);
-		window.getMainWindowController().hideWarning();
-	}
+		//window.getMainWindowController().hideWarning();
 
-	@Override
-	public void initialize(URL url, ResourceBundle rb) {
-		window.setWarnController(this);
+		FxUtils.executeParentById("pnlWarning", (Node) event.getSource(), (node) -> {
+			node.setVisible(false);
+		});
 	}
 }

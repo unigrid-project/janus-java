@@ -18,31 +18,25 @@ package org.unigrid.janus.controller;
 
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
+import net.jqwik.api.lifecycle.BeforeContainer;
+import net.jqwik.api.Disabled;
 import net.jqwik.api.Example;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.api.FxRobot;
 import static org.testfx.matcher.control.TableViewMatchers.hasTableCell;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
-import org.unigrid.janus.jqwik.WeldSetup;
 import org.unigrid.janus.jqwik.fx.FxResource;
 import org.unigrid.janus.jqwik.fx.FxStart;
 import org.unigrid.janus.jqwik.fx.FxStop;
-import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.external.ResponseMockUp;
-import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.DaemonMockUp;
-import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
 import org.unigrid.janus.model.service.external.WebTargetMockUp;
 import org.unigrid.janus.view.MainWindow;
 
 @FxResource(clazz = MainWindow.class, name = "mainWindow.fxml")
-@WeldSetup({ AddressController.class, Daemon.class, DebugService.class, PollingService.class,
-	RPCService.class, UpdateWallet.class
-})
 public class AddressControllerTest extends BaseFxTest {
 	@Inject
 	private FxRobot robot;
@@ -67,14 +61,18 @@ public class AddressControllerTest extends BaseFxTest {
 		System.out.println("I'm stopping a test run and I am only here for demo purposes!");
 	}
 
-	@Example
-	public void shouldHideZeroBalances() {
+	@BeforeContainer
+	private static void before() {
 		new ResponseMockUp();
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
 		new DaemonMockUp();
+	}
 
+	@Example @Disabled
+	public void shouldHideZeroBalances() {
 		Eager.instantiate(rpc);
+		waitForScene();
 
 		robot.clickOn("#btnAddress");
 		robot.clickOn("#chkAddress");

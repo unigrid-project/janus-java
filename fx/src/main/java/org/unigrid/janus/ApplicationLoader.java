@@ -19,16 +19,16 @@ package org.unigrid.janus;
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import javafx.application.Application;
-import javafx.application.HostServices;
 import javafx.stage.Stage;
+import org.unigrid.janus.model.producer.HostServicesProducer;
 
 public class ApplicationLoader extends Application {
-
 	private BaseApplication application;
-	private HostServices hostServices = getHostServices();
 
 	@Override
 	public void init() throws Exception {
+		HostServicesProducer.setHostServices(getHostServices());
+
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
 		// final Instance<BaseApplication> applicationInstance = container.select(BaseApplication.class);
 

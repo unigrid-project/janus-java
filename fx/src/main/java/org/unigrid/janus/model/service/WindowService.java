@@ -19,93 +19,40 @@ package org.unigrid.janus.model.service;
 import java.awt.Desktop;
 import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
-import javafx.application.HostServices;
-
-import javafx.stage.Stage;
-import javafx.scene.Node;
+import jakarta.inject.Inject;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.unigrid.janus.controller.component.WindowBarController;
-import org.unigrid.janus.controller.AddressController;
 import org.unigrid.janus.controller.DocumentationController;
-import org.unigrid.janus.controller.MainWindowController;
 import org.unigrid.janus.controller.NodesController;
 import org.unigrid.janus.controller.WalletController;
 import org.unigrid.janus.controller.TransactionsController;
 import org.unigrid.janus.controller.OverlayController;
 import org.unigrid.janus.controller.SettingsController;
-import org.unigrid.janus.controller.SplashScreenController;
-import org.unigrid.janus.controller.WarningController;
-import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
-import org.unigrid.janus.view.SplashScreen;
 
 @Eager
 @ApplicationScoped
 @RequiredArgsConstructor
 public class WindowService {
+	@Inject private DebugService debug;
 
-	private static DebugService debug = new DebugService();
-	private static Stage stage;
-	private static HostServices hostServices;
-	private static WindowBarController wbController;
-	private static MainWindowController mwController;
 	private static WalletController wController;
 	private static OverlayController olController;
 	private static NodesController noController;
 	private static TransactionsController transController;
 	private static SettingsController settingsController;
-	private static AddressController addrController;
 	private static DocumentationController docsController;
-	private static WarningController warnController;
-	private static SplashScreenController splashController;
-	private static SplashScreen splashScreen;
-
-	@NonNull private Wallet wallet;
 
 	private static WindowService serviceInstance = null;
-
-	public WindowService() {
-		wallet = new Wallet();
-	}
 
 	public static WindowService getInstance() {
 		if (serviceInstance == null) {
 			serviceInstance = new WindowService();
 		}
 		return serviceInstance;
-	}
-
-	public Stage getStage() {
-		return this.stage;
-	}
-
-	public void setStage(Stage value) {
-		this.stage = value;
-	}
-
-	public HostServices getHostServices() {
-		return this.hostServices;
-	}
-
-	public void setHostServices(HostServices host) {
-		this.hostServices = host;
-	}
-
-	public Node lookup(String id) {
-		if (stage != null) {
-			return stage.getScene().lookup("#" + id);
-		} else {
-			return null;
-		}
-	}
-
-	public Wallet getWallet() {
-		return wallet;
 	}
 
 	public void browseURL(String url) {
@@ -131,28 +78,12 @@ public class WindowService {
 		}
 	}
 
-	public WindowBarController getWindowBarController() {
-		return this.wbController;
-	}
-
-	public void setWindowBarController(WindowBarController controller) {
-		this.wbController = controller;
-	}
-
 	public OverlayController getOverlayController() {
 		return this.olController;
 	}
 
 	public void setOverlayController(OverlayController controller) {
 		this.olController = controller;
-	}
-
-	public MainWindowController getMainWindowController() {
-		return this.mwController;
-	}
-
-	public void setMainWIndowController(MainWindowController controller) {
-		this.mwController = controller;
 	}
 
 	public WalletController getWalletController() {
@@ -179,14 +110,6 @@ public class WindowService {
 		this.transController = controller;
 	}
 
-	public AddressController getAddressController() {
-		return this.addrController;
-	}
-
-	public void setAddressController(AddressController controller) {
-		this.addrController = controller;
-	}
-
 	public DocumentationController getDocsController() {
 		return this.docsController;
 	}
@@ -203,22 +126,6 @@ public class WindowService {
 		this.settingsController = controller;
 	}
 
-	public void setSplashScreenController(SplashScreenController controller) {
-		this.splashController = controller;
-	}
-
-	public SplashScreenController getSplashScreenController() {
-		return this.splashController;
-	}
-
-	public void setSplashScreen(SplashScreen screen) {
-		this.splashScreen = screen;
-	}
-
-	public SplashScreen getSplashScreen() {
-		return this.splashScreen;
-	}
-
 	public void notifyIfError(BaseResult result) {
 		if (result.hasError()) {
 			Alert a = new Alert(AlertType.ERROR,
@@ -226,13 +133,5 @@ public class WindowService {
 				ButtonType.OK);
 			a.showAndWait();
 		}
-	}
-
-	public void setWarnController(WarningController controller) {
-		this.warnController = controller;
-	}
-
-	public WarningController getWarningController() {
-		return this.warnController;
 	}
 }

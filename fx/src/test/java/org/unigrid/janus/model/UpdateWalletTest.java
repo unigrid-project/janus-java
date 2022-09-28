@@ -16,18 +16,21 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.inject.Inject;
 import org.unigrid.janus.model.external.ConfigUrlMockUp;
 import net.jqwik.api.Example;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Invocation;
+import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 import org.unigrid.janus.model.cdi.Invoke;
 import org.unigrid.janus.model.external.ConfigurationMockUp;
 
-public class UpdateWalletTest {
-
+public class UpdateWalletTest extends BaseMockedWeldTest {
 	private boolean testUpdateTrue;
 	private String result;
+
+	@Inject private UpdateWallet updateWallet;
 
 	@Example
 	public boolean checkUpdateIsTrue() {
@@ -45,10 +48,8 @@ public class UpdateWalletTest {
 				}
 			}
 		};
-		UpdateWallet updateWallet = new UpdateWallet();
 
 		updateWallet.run();
-
 		return testUpdateTrue;
 	}
 

@@ -34,7 +34,6 @@ import org.update4j.inject.InjectTarget;
 import org.update4j.service.Launcher;
 
 public class JanusLauncher implements Launcher {
-
 	@InjectTarget
 	private Map<String, String> inputArgs = new HashMap<String, String>();
 

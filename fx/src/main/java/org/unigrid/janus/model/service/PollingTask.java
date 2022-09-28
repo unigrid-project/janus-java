@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.model.service;
 
-import jakarta.inject.Inject;
+import jakarta.enterprise.inject.spi.CDI;
 import org.unigrid.janus.model.Wallet;
 import java.util.TimerTask;
 import javafx.application.Platform;
@@ -27,20 +27,20 @@ import org.unigrid.janus.model.rpc.entity.GetUnlockState;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 
 public class PollingTask extends TimerTask {
-	@Inject
-	private static DebugService debug = new DebugService();
-	private static RPCService rpc = new RPCService();
-	private static Wallet wallet = new Wallet();
-	// private static Jsonb jsonb = JsonbBuilder.create();
+	private DebugService debug;
+	private RPCService rpc;
+	private Wallet wallet;
 
 	public PollingTask() {
+		debug = CDI.current().select(DebugService.class).get();
+		rpc = CDI.current().select(RPCService.class).get();
+		wallet = CDI.current().select(Wallet.class).get();
+
 		debug.log("Polling task created!");
 	}
 
 	public void run() {
 		Platform.runLater(() -> {
-			// wallet.setProcessingStatus();
-			// final Info info = rpc.call(new Info.Request(), Info.class);
 			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 
 			try {

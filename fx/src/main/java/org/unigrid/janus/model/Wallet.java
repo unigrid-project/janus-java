@@ -51,40 +51,35 @@ public class Wallet {
 	public static final String IS_OFFLINE = "offline";
 	public static final String STATUS_PROPERTY = "walletstatus";
 	public static final String TRANSACTION_COUNT = "transactioncount";
-	private static BigDecimal balance = new BigDecimal(0);
-	private static double totalbalance;
-	private static double moneysupply;
-	private static double blacklisted;
-	private static int blocks;
+
+	private BigDecimal balance = new BigDecimal(0);
+	private double totalbalance;
+	private double moneysupply;
+	private double blacklisted;
+	private int blocks;
 	private Client client;
-	private static int connections;
-	private static int version;
-	private static int walletVersion;
-	private static long transactionCount;
-	private static Boolean locked = true;
-	private static Boolean isStaking;
-	private static Boolean processingStatus = false;
-	private static String status;
+	private int connections;
+	private int version;
+	private int walletVersion;
+	private long transactionCount;
+	private Boolean locked = true;
+	private Boolean isStaking;
+	private Boolean processingStatus = false;
+	private String status;
+	private PropertyChangeSupport pcs;
 
-	@Getter @Setter
-	private static int unlockState = 0;
-	@Getter @Setter
-	private Boolean checkExplorer = true;
+	@Getter private LockState lockState = LockState.LOCKED;
+	@Getter @Setter private int unlockState = 0; // TODO: Don't use integers to describe states - use an enum
+	@Getter @Setter private Boolean checkExplorer = true;
+	@Getter private long stakingStartTime = 100000000L;
 
-	@Getter
-	private static long stakingStartTime = 100000000L;
-	private static Boolean encrypted;
-	private static Boolean offline = false;
+	private boolean encrypted;
+	private static boolean offline = false;
 
 	@Getter @Setter
 	private Object[] sendArgs;
 
-	@Inject
-	private static DebugService debug = new DebugService();
-	private static PropertyChangeSupport pcs;
-
-	@Getter
-	private LockState lockState = LockState.LOCKED;
+	@Inject private DebugService debug;
 
 	@AllArgsConstructor
 	public enum LockState {

@@ -14,9 +14,21 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.view;
+package org.unigrid.janus.model.signal;
 
-public interface Window {
-	void show();
-	void hide();
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+
+@Data @Builder
+public class Navigate {
+	@AllArgsConstructor
+	public static enum Location {
+		WALLET_TAB(1), ADDRESS_TAB(4);
+
+		@Getter private final int index;
+	}
+
+	private Location location;
 }

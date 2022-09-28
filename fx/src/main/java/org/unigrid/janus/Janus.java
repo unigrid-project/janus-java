@@ -49,7 +49,6 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
-import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
@@ -129,7 +128,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
 		debug.print("start", Janus.class.getSimpleName());
 		//tray.initTrayService(stage);
-		window.setHostServices(hostServices);
+		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {
@@ -161,7 +160,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		//tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
-		window.setHostServices(hostServices);
+		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {
@@ -191,8 +190,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private void startMainWindow() {
 		try {
 			mainWindow.show();
-			mainWindow.bindDebugListViewWidth(0.98);
-			debug.setListView((ListView) window.lookup("lstDebug"));
 
 		} catch (Exception e) {
 			System.out.print("error: " + e.getMessage());
@@ -276,42 +273,39 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 						}
 					}
 
+					//TODO: Remove - model layer should not directly call these
 					if (status.equals("downloading")) {
 						Platform.runLater(
 							() -> {
 								float f = Float.parseFloat(progress);
 								window.getSplashScreenController().showProgressBar();
 
-								window.getSplashScreenController()
-									.setText("Downloading blockchain");
-
-								window.getSplashScreenController()
-									.updateProgress((float) (f / 100));
+								splashController.showProgressBar();
+								splashController.setText("Downloading blockchain");
+								splashController.updateProgress((float) (f / 100));
 							});
 					}
 
+					//TODO: Remove - model layer should not directly call these
 					if (status.equals("unarchiving")) {
 						Platform.runLater(
 							() -> {
 								float f = Float.parseFloat(progress);
 								window.getSplashScreenController().showProgressBar();
 
-								window.getSplashScreenController()
-									.setText("Unarchiving blockchain");
-
-								window.getSplashScreenController()
-									.updateProgress((float) (f / 100));
+								splashController.showProgressBar();
+								splashController.setText("Unarchiving blockchain");
+								splashController.updateProgress((float) (f / 100));
 							});
 					}
 
+					//TODO: Remove - model layer should not directly call these
 					if (status.equals("complete")) {
 						Platform.runLater(
 							() -> {
-								window.getSplashScreenController().hideProgBar();
-								window.getSplashScreenController().showSpinner();
-
-								window.getSplashScreenController()
-									.setText("Starting unigrid backend");
+								splashController.hideProgBar();
+								splashController.showSpinner();
+								splashController.setText("Starting unigrid backend");
 							});
 					}
 				} while (walletInfo.hasError());
@@ -320,7 +314,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 					Janus.class.getSimpleName()
 				);
 
-				window.getSplashScreenController().hideProgBar();
+				//TODO: Remove - model layer should not directly call this
+				splashController.hideProgBar();
 				ready.setValue(Boolean.TRUE);
 				return null;
 			}

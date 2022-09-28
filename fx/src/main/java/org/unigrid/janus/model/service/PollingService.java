@@ -16,11 +16,16 @@
 
 package org.unigrid.janus.model.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.Timer;
+import java.util.TimerTask;
 import lombok.Getter;
 import lombok.Setter;
+import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.unigrid.janus.model.UpdateWallet;
+import org.unigrid.janus.model.cdi.CDIUtil;
 
 @ApplicationScoped
 public class PollingService {
@@ -28,17 +33,25 @@ public class PollingService {
 	private Timer updateTimer;
 	private Timer syncTimer;
 	private Timer longSyncTimer;
-	@Getter @Setter
-	private Boolean syncTimerRunning = false;
-	@Getter @Setter
-	private Boolean longSyncTimerRunning = false;
 
-	private DebugService debug = new DebugService();
-	//@Inject private UpdateWallet updateWallet;
+	@Getter @Setter private Boolean syncTimerRunning = false;
+	@Getter @Setter private Boolean longSyncTimerRunning = false;
+
+	@Inject private DebugService debug;
+	@Inject private UpdateWallet updateWallet;
+
+	// TODO: These methods are all doing the same thing - generalize and put into a common class!
+
+	@PostConstruct
+	private void init() {
+		longSyncTimer = new Timer(true);
+		pollingTimer = new Timer(true);
+		syncTimer = new Timer(true);
+		updateTimer = new Timer(false);
+	}
 
 	public void poll(int interval) {
 		debug.print("poll started", PollingService.class.getSimpleName());
-		pollingTimer = new Timer(true);
 		pollingTimer.scheduleAtFixedRate(new LongPollingTask(), 0, interval);
 	}
 
@@ -51,9 +64,10 @@ public class PollingService {
 
 	public void pollForUpdate(int interval) {
 		debug.print("starting the update timer", PollingService.class.getSimpleName());
-		updateTimer = new Timer(false);
-		updateTimer.scheduleAtFixedRate(new UpdateWallet(), 0, interval);
 
+		// TODO: Apparently, Java timers don't like proxy objects - can we clean this up ?
+		
+		updateTimer.scheduleAtFixedRate(CDIUtil.unproxy(updateWallet), 0, interval);
 	}
 
 	public void stopPollingForUpdate() {
@@ -65,7 +79,6 @@ public class PollingService {
 
 	public void pollForSync(int interval) {
 		debug.print("starting sync poll", PollingService.class.getSimpleName());
-		syncTimer = new Timer(true);
 		syncTimer.scheduleAtFixedRate(new SyncPollingTask(), 0, interval);
 		setSyncTimerRunning(true);
 	}
@@ -80,7 +93,6 @@ public class PollingService {
 
 	public void longPollForSync(int interval) {
 		debug.print("starting long sync poll", PollingService.class.getSimpleName());
-		longSyncTimer = new Timer(true);
 		longSyncTimer.scheduleAtFixedRate(new SyncPollingTask(), 0, interval);
 		setLongSyncTimerRunning(true);
 	}
