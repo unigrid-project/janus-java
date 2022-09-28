@@ -38,7 +38,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -49,9 +48,11 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
+import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
@@ -278,8 +279,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 						Platform.runLater(
 							() -> {
 								float f = Float.parseFloat(progress);
-								window.getSplashScreenController().showProgressBar();
-
 								splashController.showProgressBar();
 								splashController.setText("Downloading blockchain");
 								splashController.updateProgress((float) (f / 100));
@@ -291,8 +290,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 						Platform.runLater(
 							() -> {
 								float f = Float.parseFloat(progress);
-								window.getSplashScreenController().showProgressBar();
-
 								splashController.showProgressBar();
 								splashController.setText("Unarchiving blockchain");
 								splashController.updateProgress((float) (f / 100));
