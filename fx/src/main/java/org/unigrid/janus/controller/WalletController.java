@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -71,6 +72,7 @@ import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.SendTransaction;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 import org.unigrid.janus.model.service.PollingService;
+import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {
@@ -78,6 +80,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	@Inject private PollingService polling;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
+
+	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
 	private TransactionList transList = new TransactionList();
 	private static final WindowService WINDOW = WindowService.getInstance();
@@ -359,11 +363,13 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 				if (wallet.getLocked()) {
 					onErrorMessage("Locked wallet");
-					WINDOW.getMainWindowController().unlockForSending();
-					return;
+
+					unlockRequestEvent.fire(
+						UnlockRequest.builder().type(UnlockRequest.Type.ORDINARY).build()
+					);
 				} else {
-					//Object[] sendArgs = new Object[]{ugdAddressTxt.getText(),
-					//Integer.parseInt(amountToSend.getText())};
+					// Object[] sendArgs = new Object[]{ugdAddressTxt.getText(),
+					// Integer.parseInt(amountToSend.getText())};
 
 					final SendTransaction send = rpc.call(new SendTransaction.Request(
 						wallet.getSendArgs()),
@@ -430,7 +436,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	@FXML
 	private void onReceiveClicked(MouseEvent event) {
-		WINDOW.getMainWindowController().tabSelect(4);
+		//WINDOW.getMainWindowController().tabSelect(4);
 	}
 
 	private void onErrorMessage(String message) {

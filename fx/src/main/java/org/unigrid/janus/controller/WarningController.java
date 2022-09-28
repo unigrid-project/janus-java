@@ -18,13 +18,13 @@ package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.beans.PropertyChangeSupport;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.input.MouseEvent;
 import org.unigrid.janus.model.JanusModel;
-import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
 public class WarningController {
@@ -34,16 +34,17 @@ public class WarningController {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
 
-	private static Wallet wallet;
 	private static JanusModel janusModel = new JanusModel();
-	private static WindowService window = WindowService.getInstance();
-	private static PropertyChangeSupport pcs;
 
 	public void onRestartClicked(MouseEvent event) {
 		debug.log("onRestartClicked");
 		// TODO: Will be implemented once CDI is working
-		//warningEvent.fire(this);
+		// warningEvent.fire(this);
 		janusModel.setAppState(JanusModel.AppState.RESTARTING);
-		window.getMainWindowController().hideWarning();
+		//window.getMainWindowController().hideWarning();
+
+		FxUtils.executeParentById("pnlWarning", (Node) event.getSource(), (node) -> {
+			node.setVisible(false);
+		});
 	}
 }

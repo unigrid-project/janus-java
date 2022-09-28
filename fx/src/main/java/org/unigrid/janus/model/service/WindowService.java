@@ -25,7 +25,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.controller.DocumentationController;
-import org.unigrid.janus.controller.MainWindowController;
 import org.unigrid.janus.controller.NodesController;
 import org.unigrid.janus.controller.WalletController;
 import org.unigrid.janus.controller.TransactionsController;
@@ -40,7 +39,6 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 public class WindowService {
 	@Inject private DebugService debug;
 
-	private static MainWindowController mwController;
 	private static WalletController wController;
 	private static OverlayController olController;
 	private static NodesController noController;
@@ -86,14 +84,6 @@ public class WindowService {
 
 	public void setOverlayController(OverlayController controller) {
 		this.olController = controller;
-	}
-
-	public MainWindowController getMainWindowController() {
-		return this.mwController;
-	}
-
-	public void setMainWIndowController(MainWindowController controller) {
-		this.mwController = controller;
 	}
 
 	public WalletController getWalletController() {

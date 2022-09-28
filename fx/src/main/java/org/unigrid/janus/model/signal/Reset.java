@@ -14,9 +14,11 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-package org.unigrid.janus.view;
+package org.unigrid.janus.model.signal;
 
-public interface Window {
-	void show();
-	void hide();
+import lombok.Data;
+
+@Data
+public class Reset {
+	/* Empty on purpose */
 }

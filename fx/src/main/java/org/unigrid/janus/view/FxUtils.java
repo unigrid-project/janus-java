@@ -16,7 +16,25 @@
 
 package org.unigrid.janus.view;
 
-public interface Window {
-	void show();
-	void hide();
+import java.util.Objects;
+import java.util.function.Consumer;
+import javafx.scene.Node;
+
+public class FxUtils {
+	public static void executeParentById(String id, Node node, Consumer<Node> consumer) {
+		Node parent = node;
+
+		do {
+			if (id.equals(parent.getId())) {
+				consumer.accept(parent);
+				return;
+			}
+
+			parent = parent.getParent();
+		} while (Objects.nonNull(parent));
+
+		throw new IllegalStateException(String.format(
+			"Unable to locate component '%s' for action", parent.getId())
+		);
+	}
 }

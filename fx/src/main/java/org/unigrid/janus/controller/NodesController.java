@@ -64,6 +64,7 @@ import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.signal.State;
+import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
@@ -72,6 +73,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@Inject private Wallet wallet;
 
 	@Inject private Event<State> stateEvent;
+	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
 	private static WindowService window = WindowService.getInstance();
 	private static GridnodeListModel nodes = new GridnodeListModel();
@@ -265,7 +267,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML
 	private void onStartAllNodesPressed(MouseEvent e) {
 		if (wallet.getLocked()) {
-			window.getMainWindowController().unlockForGridnode();
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_GRIDNODE).build());
 		} else {
 			startMissingNodes();
 		}
@@ -274,7 +276,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	public void startMissingNodes() {
 		rpc.callToJson(new GridnodeEntity.Request(new Object[]{"start-missing", "0"}));
 		getNodeList();
-		debug.log("ATTEMPTING TO START NODES");
+		debug.log("Attempting to start nodes");
 	}
 
 	@FXML
@@ -283,6 +285,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		Session session = null;
 		Channel channel = null;
 		ChannelShell shell = null;
+
 		try {
 			session = new JSch().getSession("root", vpsAddress.getText(), port);
 			session.setPassword(vpsPassword.getText());
@@ -360,6 +363,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		if (event.getPropertyName().equals(nodes.GRIDNODE_LIST)) {
 			tblGridnodes.setItems(nodes.getGridnodes());
 		}
+
 		// after wallet is done loading, load the gridnodes.
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
 			debug.log("loading gridnode list");

@@ -23,9 +23,6 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.scene.control.Control;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -54,7 +51,6 @@ public class MainWindow implements Window {
 		stage.setUserData(new StageProperties());
 	}
 
-	//@SneakyThrows
 	public void show() {
 		try {
 			window.getSettingsController().setVersion(janusModel.getVersion());

@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
@@ -64,6 +65,8 @@ import org.unigrid.janus.model.rpc.entity.EncryptWallet;
 import org.unigrid.janus.model.rpc.entity.ImportWallet;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 import org.unigrid.janus.model.signal.DebugMessage;
+import org.unigrid.janus.model.signal.Reset;
+import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
 public class SettingsController implements Initializable, PropertyChangeListener, Showable {
@@ -74,6 +77,9 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@Inject private HostServices hostServices;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
+
+	@Inject private Event<Reset> resetEvent;
+	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
 	private static WindowService window = WindowService.getInstance();
 
@@ -270,7 +276,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 							BorderStrokeStyle.SOLID,
 							new CornerRadii(3),
 							new BorderWidths(1))));
-					window.getMainWindowController().tabSelect(1);
+					resetEvent.fire(new Reset());
 					janusModel.setAppState(JanusModel.AppState.RESTARTING);
 					//wallet.setLocked(true);
 				}
@@ -322,9 +328,9 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML
 	private void onDumpWallet(MouseEvent event) {
 		debug.log("Dump wallet clicked!");
-		// check for encrypted wallet
+
 		if (wallet.getLocked()) {
-			window.getMainWindowController().unlockForDump();
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_GRIDNODE).build());
 		} else {
 			dumpKeys();
 		}
