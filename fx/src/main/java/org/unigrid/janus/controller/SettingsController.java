@@ -17,13 +17,19 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.io.File;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Optional;
+import javafx.application.HostServices;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
@@ -37,6 +43,7 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Border;
@@ -44,6 +51,7 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
+import javafx.stage.Stage;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Preferences;
@@ -56,12 +64,24 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.EncryptWallet;
 import org.unigrid.janus.model.rpc.entity.ImportWallet;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
+import org.unigrid.janus.model.signal.DebugMessage;
+import org.unigrid.janus.model.signal.Navigate;
+import static org.unigrid.janus.model.signal.Navigate.Location.*;
+import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
-public class SettingsController implements Initializable, PropertyChangeListener {
-	private static DebugService debug = new DebugService();
-	private static RPCService rpc = new RPCService();
-	private static Wallet wallet;
+public class SettingsController implements Initializable, PropertyChangeListener, Showable {
+	private Stage stage;
+	private ObservableList<String> debugItems = FXCollections.observableArrayList();
+
+	@Inject private DebugService debug;
+	@Inject private HostServices hostServices;
+	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
+
+	@Inject private Event<Navigate> navigateEvent;
+	@Inject private Event<UnlockRequest> unlockRequestEvent;
+
 	private static WindowService window = WindowService.getInstance();
 
 	private static final int TAB_SETTINGS_GENERAL = 1;
@@ -70,6 +90,8 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private static final int TAB_SETTINGS_EXPORT = 4;
 	private static final int TAB_SETTINGS_DEBUG = 5;
 	private static JanusModel janusModel = new JanusModel();
+
+	@FXML private ListView lstDebug;
 
 	@FXML private Label verLbl;
 	// settings navigation
@@ -91,7 +113,11 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
+		lstDebug.setItems(debugItems);
+		lstDebug.setPrefWidth(500);
+		lstDebug.setPrefHeight(500); //TODO: Put these constants in a model perhaps?
+		lstDebug.scrollTo(debugItems.size());
+
 		wallet.addPropertyChangeListener(this);
 		window.setSettingsController(this);
 		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));
@@ -182,7 +208,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private void onOpenConf(MouseEvent event) {
 		File conf = DataDirectory.getConfigFile();
 		try {
-			window.getHostServices().showDocument(conf.getAbsolutePath());
+			hostServices.showDocument(conf.getAbsolutePath());
 		} catch (Exception e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
@@ -192,7 +218,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private void onOpenGridnode(MouseEvent event) {
 		File gridnode = DataDirectory.getGridnodeFile();
 		try {
-			window.getHostServices().showDocument(gridnode.getAbsolutePath());
+			hostServices.showDocument(gridnode.getAbsolutePath());
 		} catch (Exception e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
@@ -201,7 +227,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML
 	private void onOpenUnigrid(MouseEvent event) {
 		String gridnode = DataDirectory.get();
-		window.getHostServices().showDocument(gridnode);
+		hostServices.showDocument(gridnode);
 	}
 
 	@FXML
@@ -237,7 +263,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 							EncryptWallet.class
 						);
 
-						//TODO
+						//TODO: Fix this section
 						//THIS IS ONLY NEEDED FOR THE INITIAL ENCRYPTION
 						//SHOW LOAD SCREEN WHILE DAEMON STOPS
 						//PAUSE CALLS TO THE DAEMON
@@ -246,12 +272,14 @@ public class SettingsController implements Initializable, PropertyChangeListener
 					}
 					taPassphrase.setText("");
 					taRepeatPassphrase.setText("");
-					taRepeatPassphrase.setBorder(new Border(
-						new BorderStroke(Color.TRANSPARENT,
-							BorderStrokeStyle.SOLID,
-							new CornerRadii(3),
-							new BorderWidths(1))));
-					window.getMainWindowController().tabSelect(1);
+
+					taRepeatPassphrase.setBorder(new Border(new BorderStroke(Color.TRANSPARENT,
+						BorderStrokeStyle.SOLID,
+						new CornerRadii(3),
+						new BorderWidths(1)
+					)));
+
+					navigateEvent.fire(Navigate.builder().location(WALLET_TAB).build());
 					janusModel.setAppState(JanusModel.AppState.RESTARTING);
 					//wallet.setLocked(true);
 				}
@@ -295,7 +323,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		fileChooser.setTitle("Import");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Wallet file", "*.txt"));
 		fileChooser.setInitialFileName("wallet.txt");
-		File file = fileChooser.showOpenDialog(window.getStage());
+		File file = fileChooser.showOpenDialog(stage);
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
 		rpc.call(new ImportWallet.Request(file.getAbsolutePath()), ImportWallet.class);
 	}
@@ -303,9 +331,9 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML
 	private void onDumpWallet(MouseEvent event) {
 		debug.log("Dump wallet clicked!");
-		// check for encrypted wallet
+
 		if (wallet.getLocked()) {
-			window.getMainWindowController().unlockForDump();
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_GRIDNODE).build());
 		} else {
 			dumpKeys();
 		}
@@ -316,7 +344,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		fileChooser.setTitle("Export");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
 		fileChooser.setInitialFileName("wallet.txt");
-		File file = fileChooser.showSaveDialog(window.getStage());
+		File file = fileChooser.showSaveDialog(stage);
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
 		// debug.log(rpc.callToJson(new DumpWallet.Request(file.getAbsolutePath())));
 		final DumpWallet result = rpc.call(new DumpWallet.Request(file.getAbsolutePath()), DumpWallet.class);
@@ -331,7 +359,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		fileChooser.setTitle("Backup");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.dat"));
 		fileChooser.setInitialFileName("wallet.dat");
-		File file = fileChooser.showSaveDialog(window.getStage());
+		File file = fileChooser.showSaveDialog(stage);
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
 		// debug.log(rpc.callToJson(new BackupWallet.Request(file.getAbsolutePath())));
 		final BackupWallet result = rpc.call(new BackupWallet.Request(file.getAbsolutePath()), BackupWallet.class);
@@ -346,5 +374,23 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	public void setVersion(String version) {
 		verLbl.setText("version: ".concat(version));
+	}
+
+	@Override
+	public void onShow(Stage stage) {
+		this.stage = stage;
+	}
+
+	@Override
+	public void onHide(Stage stage) {
+		/* Empty on purpose */
+	}
+
+	public void eventDebugMessage(@Observes DebugMessage debugMessage) {
+		debugItems.add(debugMessage.getMessage());
+
+		if (Objects.nonNull(lstDebug)) {
+			lstDebug.scrollTo(debugItems.size());
+		}
 	}
 }

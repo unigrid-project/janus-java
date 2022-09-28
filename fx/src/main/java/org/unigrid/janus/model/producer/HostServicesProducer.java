@@ -12,11 +12,26 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.view;
+package org.unigrid.janus.model.producer;
 
-public interface Window {
-	void show();
-	void hide();
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import java.util.Objects;
+import javafx.application.HostServices;
+import lombok.Setter;
+
+@ApplicationScoped
+public class HostServicesProducer {
+	@Setter private static HostServices hostServices;
+
+	@Produces
+	public HostServices produce() {
+		if (Objects.isNull(hostServices)) {
+			throw new IllegalStateException("Host services must be set and defined at this point.");
+		}
+
+		return hostServices;
+	}
 }

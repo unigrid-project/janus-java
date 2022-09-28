@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Comparator;
@@ -29,17 +30,14 @@ import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.service.DebugService;
 
 public class AddressListModel {
-	private static DebugService debug = new DebugService();
+	@Inject private DebugService debug;
+
 	public static final String ADDRESS_LIST = "addressList";
 	private static PropertyChangeSupport pcs;
 
-	@Getter
-	private ObservableList<Address> addresses = FXCollections.observableArrayList();
-
-	@Getter @Setter
-	private Boolean selected;
-	@Getter @Setter
-	private Boolean sorted;
+	@Getter private ObservableList<Address> addresses = FXCollections.observableArrayList();
+	@Getter @Setter private Boolean selected;
+	@Getter @Setter private Boolean sorted;
 
 	public AddressListModel() {
 		if (this.pcs != null) {

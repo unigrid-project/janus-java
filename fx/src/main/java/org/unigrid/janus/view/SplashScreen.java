@@ -52,6 +52,7 @@ import org.apache.commons.io.monitor.FileAlterationMonitor;
 
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.event.CloseJanusEvent;
@@ -61,12 +62,9 @@ import org.unigrid.janus.model.service.WindowService;
 @Data
 @ApplicationScoped
 public class SplashScreen implements Window {
-
-	@Inject
-	private Stage stageSplash;
-
-	@Inject
-	private WindowService window;
+	@Inject private SplashScreenController splashScreenController; // TODO: Big no no. Controller should not see the view.
+	@Inject private Stage stageSplash;
+	@Inject private WindowService window;
 
 	private FontIcon spinnerPreLoad;
 	private RotateTransition rt;
@@ -90,17 +88,10 @@ public class SplashScreen implements Window {
 	@SneakyThrows
 	public void show() {
 		try {
-			//System.out.println("show init");
-			window.setStage(stageSplash);
-			window.setSplashScreen(this);
-			//System.out.println("show middle");
 			stageSplash.show();
-			//System.out.println("show show");
 			startSpinner();
 		} catch (Exception e) {
-			Alert a = new Alert(Alert.AlertType.ERROR,
-				e.getMessage(),
-				ButtonType.OK);
+			Alert a = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
 			a.showAndWait();
 		}
 	}
@@ -166,8 +157,8 @@ public class SplashScreen implements Window {
 
 	private void readDebug() throws IOException, Exception {
 		File debug = DataDirectory.getBackendLog();
-
 		FileAlterationObserver observer = new FileAlterationObserver(debug.getParent());
+
 		observer.addListener(new FileAlterationListenerAdaptor() {
 			@Override
 			public void onFileChange(File file) {
@@ -216,7 +207,7 @@ public class SplashScreen implements Window {
 
 		}
 
-		window.getSplashScreenController().setDebugText(sbuffer.toString());
+		splashScreenController.setDebugText(sbuffer.toString()); // TODO: Big no no. Controller should not see the view.
 	}
 
 	public void startMonitor() throws Exception {

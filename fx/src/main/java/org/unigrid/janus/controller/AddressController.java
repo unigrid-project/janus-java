@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -54,37 +55,30 @@ import org.unigrid.janus.model.service.WindowService;
 
 @ApplicationScoped
 public class AddressController implements Initializable, PropertyChangeListener {
+	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
 
-	private static DebugService debug = new DebugService();
-	private static RPCService rpc = new RPCService();
-	private static Wallet wallet;
-	private static AddressListModel addresses = new AddressListModel();
-	private static WindowService window = WindowService.getInstance();
+	private final AddressListModel addresses = new AddressListModel();
+	private final WindowService window = WindowService.getInstance();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
-	@FXML
-	private TableView tblAddresses;
-	@FXML
-	private TableColumn colAddress;
-	@FXML
-	private TableColumn colAddressBalance;
-	@FXML
-	private HBox newAddressDisplay;
-	@FXML
-	private Text addressDisplay;
-	@FXML
-	private CheckBox chkAddress;
-	@FXML
-	private CheckBox chkAmountSort;
+	@FXML private TableView tblAddresses;
+	@FXML private TableColumn colAddress;
+	@FXML private TableColumn colAddressBalance;
+	@FXML private HBox newAddressDisplay;
+	@FXML private Text addressDisplay;
+	@FXML private CheckBox chkAddress;
+	@FXML private CheckBox chkAmountSort;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
-		window.setAddressController(this);
 		wallet.addPropertyChangeListener(this);
 		addresses.addPropertyChangeListener(this);
+
 		setupAddressList();
+
 		addresses.setSelected(chkAddress.isSelected());
 		addresses.setSorted(chkAmountSort.isSelected());
 		// addButtonToTable();

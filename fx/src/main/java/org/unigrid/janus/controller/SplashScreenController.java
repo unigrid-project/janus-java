@@ -17,11 +17,13 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -44,8 +46,9 @@ import org.unigrid.janus.model.service.WindowService;
 @ApplicationScoped
 public class SplashScreenController implements Initializable, PropertyChangeListener {
 	private WindowService window;
-	private static DebugService debug = new DebugService();
-	private float ind = 0.6f;
+
+	@Inject private DebugService debug;
+	@Inject private HostServices hostServices;
 
 	private SplashModel splashModel = new SplashModel();
 	@FXML private ProgressBar progBar;
@@ -60,7 +63,6 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		window = window.getInstance();
-		window.setSplashScreenController(this);
 
 		Platform.runLater(() -> {
 			progBar.setVisible(false);
@@ -75,7 +77,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 						// don't care
 					}
 					debugTxt.setScrollTop(Double.MAX_VALUE);    //top
-					//vpsOutput.setScrollTop(Double.MIN_VALUE);   //down
+					// vpsOutput.setScrollTop(Double.MIN_VALUE);  //down
 				}
 			});
 		});
@@ -87,8 +89,6 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	public void updateProgress(float prog) {
-		// System.out.println("address: " + this);
-		// System.out.println("progress: " + prog);
 		progBar.setProgress(prog);
 	}
 
@@ -116,31 +116,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 	@FXML
 	public void onShowDebug(MouseEvent event) throws Exception {
-		//System.out.println(window.getStage().getHeight());
-		//System.out.println(splashGrid.getCellBounds(0, 6));
 		File debugLog = DataDirectory.getDebugLog();
-		try {
-			// Open debug.log file
-			window.getHostServices().showDocument(debugLog.getAbsolutePath());
-			// disable showing log on load as it runs very slow with large debugs
-			/*
-			if (!splashModel.getDebug()) {
-				window.getSplashScreen().startMonitor();
-				debugTxt.setVisible(true);
-				splashModel.setDebug(true);
-				debugTxt.setScrollTop(Double.MAX_VALUE);
-				window.getStage().setHeight(400);
-				bugTooltip.setText("Hide debug log");
-			} else {
-				window.getSplashScreen().stopMonitor();
-				debugTxt.setVisible(false);
-				splashModel.setDebug(false);
-				window.getStage().setHeight(220);
-				bugTooltip.setText("Show debug log");
-			}
-			 */
-		} catch (Exception e) {
-			debug.print(e.getMessage(), SplashScreenController.class.getSimpleName());
-		}
+		hostServices.showDocument(debugLog.getAbsolutePath());
 	}
 }

@@ -71,7 +71,7 @@ public class WeldHook implements AroundContainerHook, AroundPropertyHook {
 			final List<Class<?>> weldClasses = findWeldClasses(context.testInstance(), context.containerClass());
 
 			instance = new Weld(name)
-				.disableDiscovery().beanClasses(weldClasses.toArray(new Class<?>[0]))
+				.beanClasses(weldClasses.toArray(new Class<?>[0]))
 				.initialize();
 		}
 
