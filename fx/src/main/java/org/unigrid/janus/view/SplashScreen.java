@@ -55,7 +55,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
-import org.unigrid.janus.model.event.CloseJanusEvent;
+import org.unigrid.janus.model.signal.CloseJanus;
 import org.unigrid.janus.model.service.WindowService;
 
 @Eager
@@ -121,7 +121,7 @@ public class SplashScreen implements Window {
 		//spinnerPreLoad.setVisible(false);
 	}
 
-	private void onClose(@Observes Event<CloseJanusEvent> event) {
+	private void onClose(@Observes Event<CloseJanus> closeJanus) {
 		this.stageSplash.close();
 	}
 
