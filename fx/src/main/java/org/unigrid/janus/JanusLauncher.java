@@ -38,7 +38,7 @@ public class JanusLauncher implements Launcher {
 	private Map<String, String> inputArgs = new HashMap<String, String>();
 
 	@InjectTarget(required = false)
-	// TODO enable once bootstraps are updated
+	// TODO: enable once bootstraps are updated
 	private HostServices hostService;
 
 	@InjectTarget(required = false)
@@ -69,15 +69,15 @@ public class JanusLauncher implements Launcher {
 		System.out.println("bootstrapVer in fx: " + bootstrapVer);
 
 		if(bootstrapVer != null && !bootstrapVer.equals("")) {
-			BootstrapModel.getInstance().setBootstrapVer(bootstrapVer);
+			BootstrapModel.setBootstrapVer(bootstrapVer);
 		}
 
 		if (inputArgs.containsKey("downloadUrl")) {
-			BootstrapModel.getInstance().setDownloadUrl(inputArgs.get("downloadUrl"));
+			BootstrapModel.setDownloadUrl(inputArgs.get("downloadUrl"));
 		}
 
 		if (inputArgs.containsKey("testing")) {
-			BootstrapModel.getInstance().setDownloadUrl(inputArgs.get("testing"));
+			BootstrapModel.setDownloadUrl(inputArgs.get("testing"));
 		}
 
 		if(inputArgs.containsKey("BootstrapURL")){

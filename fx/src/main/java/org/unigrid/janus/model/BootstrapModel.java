@@ -16,56 +16,14 @@
 
 package org.unigrid.janus.model;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import lombok.Getter;
+import lombok.Setter;
 import org.unigrid.janus.model.cdi.Eager;
 
 @Eager
-@ApplicationScoped
 public class BootstrapModel {
-
-	private static BootstrapModel bootstrapModel = null;
-	private String bootstrapVer = "0.0.0";
-	private String downloadUrl = "https://github.com/unigrid-project/janus-java/releases/download/";
-	private Boolean testing = false;
-
-	private boolean bootstrapUpdate = false;
-
-	public static BootstrapModel getInstance() {
-		if (bootstrapModel == null) {
-			bootstrapModel = new BootstrapModel();
-		}
-		return bootstrapModel;
-	}
-
-	public String getBootstrapVer() {
-		return this.bootstrapVer;
-	}
-
-	public void setBootstrapVer(String ver) {
-		this.bootstrapVer = ver;
-	}
-
-	public void setBootstrapUpdate(boolean update) {
-		this.bootstrapUpdate = update;
-	}
-
-	public boolean getBootstrapUpdate() {
-		return this.bootstrapUpdate;
-	}
-
-	public String getDownloadUrl() {
-		return this.downloadUrl;
-	}
-
-	public void setDownloadUrl(String url) {
-		this.downloadUrl = url;
-	}
-
-	public Boolean getTesting() {
-		return this.testing;
-	}
-
-	public void setTesting(Boolean test) {
-		this.testing = test;
-	}
+	@Getter @Setter private static String bootstrapVer = "0.0.0";
+	@Getter @Setter private static String downloadUrl = "https://github.com/unigrid-project/janus-java/releases/download/";
+	@Getter @Setter private static boolean testing;
+	@Getter @Setter private static boolean bootstrapUpdate;
 }

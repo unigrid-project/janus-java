@@ -110,9 +110,10 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 		//Force bootstrap update when it is awilable so the user has the latest one!!!
 		//TODO: maken an event of this insted or an observer
-		if(BootstrapModel.getInstance().getBootstrapUpdate()) {
+		if(BootstrapModel.isBootstrapUpdate()) {
 			update.doUpdate();
 		}
+
 		//final Window window = ((Node) event.getSource()).getScene().getWindow();
 		//window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
 		System.exit(0);

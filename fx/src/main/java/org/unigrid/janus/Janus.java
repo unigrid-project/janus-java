@@ -72,7 +72,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private UpdateWallet updateWallet;
 	@Inject private SplashScreenController splashController;
 	@Inject private Wallet wallet;
-	@Inject private BootstrapModel bootModel;
 	//@Inject private TrayService tray;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
