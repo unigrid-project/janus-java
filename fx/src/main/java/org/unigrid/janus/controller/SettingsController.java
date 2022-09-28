@@ -65,7 +65,8 @@ import org.unigrid.janus.model.rpc.entity.EncryptWallet;
 import org.unigrid.janus.model.rpc.entity.ImportWallet;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 import org.unigrid.janus.model.signal.DebugMessage;
-import org.unigrid.janus.model.signal.Reset;
+import org.unigrid.janus.model.signal.Navigate;
+import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
@@ -78,7 +79,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
-	@Inject private Event<Reset> resetEvent;
+	@Inject private Event<Navigate> navigateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
 	private static WindowService window = WindowService.getInstance();
@@ -271,12 +272,14 @@ public class SettingsController implements Initializable, PropertyChangeListener
 					}
 					taPassphrase.setText("");
 					taRepeatPassphrase.setText("");
-					taRepeatPassphrase.setBorder(new Border(
-						new BorderStroke(Color.TRANSPARENT,
-							BorderStrokeStyle.SOLID,
-							new CornerRadii(3),
-							new BorderWidths(1))));
-					resetEvent.fire(new Reset());
+
+					taRepeatPassphrase.setBorder(new Border(new BorderStroke(Color.TRANSPARENT,
+						BorderStrokeStyle.SOLID,
+						new CornerRadii(3),
+						new BorderWidths(1)
+					)));
+
+					navigateEvent.fire(Navigate.builder().location(WALLET_TAB).build());
 					janusModel.setAppState(JanusModel.AppState.RESTARTING);
 					//wallet.setLocked(true);
 				}

@@ -72,6 +72,8 @@ import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.SendTransaction;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 import org.unigrid.janus.model.service.PollingService;
+import org.unigrid.janus.model.signal.Navigate;
+import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
@@ -81,6 +83,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
+	@Inject private Event<Navigate> navigateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
 	private TransactionList transList = new TransactionList();
@@ -206,7 +209,6 @@ public class WalletController implements Initializable, PropertyChangeListener {
 					}
 
 					btn.setGraphic(fontIcon);
-					//debug.print(trans.getCategory(), WalletController.class.getSimpleName());
 					return new ReadOnlyObjectWrapper(btn);
 				}
 			});
@@ -436,7 +438,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	@FXML
 	private void onReceiveClicked(MouseEvent event) {
-		//WINDOW.getMainWindowController().tabSelect(4);
+		navigateEvent.fire(Navigate.builder().location(ADDRESS_TAB).build());
 	}
 
 	private void onErrorMessage(String message) {

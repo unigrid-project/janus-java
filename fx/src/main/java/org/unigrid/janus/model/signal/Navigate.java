@@ -16,9 +16,19 @@
 
 package org.unigrid.janus.model.signal;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
-@Data
-public class Reset {
-	/* Empty on purpose */
+@Data @Builder
+public class Navigate {
+	@AllArgsConstructor
+	public static enum Location {
+		WALLET_TAB(1), ADDRESS_TAB(4);
+
+		@Getter private final int index;
+	}
+
+	private Location location;
 }

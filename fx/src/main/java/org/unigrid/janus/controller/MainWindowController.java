@@ -42,7 +42,8 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.LockWallet;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.unigrid.janus.model.signal.Reset;
+import org.unigrid.janus.model.signal.Navigate;
+import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
@@ -293,7 +294,10 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		pnlOverlay.setVisible(true);
 	}
 
-	private void eventReset(@Observes Reset reset) {
-		select(pnlWallet, btnWallet);
+	private void eventNavigate(@Observes Navigate navigate) {
+		switch (navigate.getLocation()) {
+			case ADDRESS_TAB -> select(pnlAddress, btnAddress);
+			case WALLET_TAB -> select(pnlWallet, btnWallet);
+		}
 	}
 }
