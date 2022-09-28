@@ -27,7 +27,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.UpdateURL;
-import org.apache.commons.lang3.SystemUtils;
+import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.cdi.EagerExtension;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
@@ -38,8 +38,15 @@ public class JanusLauncher implements Launcher {
 	@InjectTarget
 	private Map<String, String> inputArgs = new HashMap<String, String>();
 
-	@InjectTarget
+	@InjectTarget(required = false)
+	// TODO enable once bootstraps are updated
 	private HostServices hostService;
+
+	@InjectTarget(required = false)
+	private String bootstrapVer;
+
+	@InjectTarget(required = false)
+	private String downloadUrl;
 
 	@Override @SneakyThrows
 	public void run(LaunchContext lc) {
@@ -60,11 +67,26 @@ public class JanusLauncher implements Launcher {
 			UpdateURL.setWindowsUrl(inputArgs.get("URL"));
 		}
 
+		System.out.println("bootstrapVer in fx: " + bootstrapVer);
+
+		if(bootstrapVer != null && !bootstrapVer.equals("")) {
+			BootstrapModel.getInstance().setBootstrapVer(bootstrapVer);
+		}
+
+		if (inputArgs.containsKey("downloadUrl")) {
+			BootstrapModel.getInstance().setDownloadUrl(inputArgs.get("downloadUrl"));
+		}
+
+		if (inputArgs.containsKey("testing")) {
+			BootstrapModel.getInstance().setDownloadUrl(inputArgs.get("testing"));
+		}
+
 		if(inputArgs.containsKey("BootstrapURL")){
 			UpdateURL.setBootstrapUrl(inputArgs.get("BootstrapURL"));
 		}
 
 		Platform.runLater(() -> {
+			System.out.println("run later");
 			Janus janus = container.select(Janus.class).get();
 			System.out.println(lc.getClassLoader());
 			Stage stage = new Stage();

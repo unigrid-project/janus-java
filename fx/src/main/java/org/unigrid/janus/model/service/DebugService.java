@@ -68,7 +68,7 @@ public class DebugService {
 	}
 
 	public void trace(String msg) {
-			System.out.println(msg);		
+		System.out.println(msg);
 	}
 
 	public String getCurrentDate() {

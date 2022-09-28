@@ -13,7 +13,6 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -44,14 +43,22 @@ import org.update4j.OS;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Objects;
+//import java.util.Objects;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.unigrid.janus.Janus;
 import org.unigrid.janus.model.entity.Feed;
@@ -69,10 +76,12 @@ public class UpdateWallet extends TimerTask {
 	private static DebugService debug = new DebugService();
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
 	private static final String BOOTSTRAP_URL = UpdateURL.getBootstrapUrl();
+	private String DOWNLOAD_URL = BootstrapModel.getInstance().getDownloadUrl();
 	// private static PollingService polling = new PollingService();
 	private OS os = OS.CURRENT;
+	private int exitCode = 0;
 
-	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
+	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][]{
 		{OS.LINUX, UpdateURL.getLinuxUrl()},
 		{OS.WINDOWS, UpdateURL.getWindowsUrl()},
 		{OS.MAC, UpdateURL.getMacUrl()}
@@ -83,8 +92,6 @@ public class UpdateWallet extends TimerTask {
 		UPDATE_NOT_READY
 	}
 
-	private boolean bootstrapUpdate = false;
-
 	@Getter
 	private static final String UPDATE_PROPERTY = "update";
 
@@ -94,10 +101,11 @@ public class UpdateWallet extends TimerTask {
 	private static PropertyChangeSupport pcs;
 	private Client client;
 	private Feed githubJson;
+	private BootstrapModel bootstrapModel = BootstrapModel.getInstance();
 
 	public UpdateWallet() {
 		System.out.println("Init walletUpdate");
-
+		bootstrapModel.getBootstrapVer();
 		initWebTarget();
 		if (this.pcs != null) {
 			// TODO: Should this really be a fallthrough ? It looks dangerous.
@@ -138,7 +146,7 @@ public class UpdateWallet extends TimerTask {
 		}
 
 		String title = "Unigrid";
-		String launcherMessage = "New launcher update ready \nPlease press the update button!";
+		String launcherMessage = "A new Unigrid launcher update is ready \nPlease press the update button!";
 		String fxMessage = "New update ready \nPlease press the update button!";
 		if (checkUpdateBootstrap()) {
 
@@ -196,7 +204,7 @@ public class UpdateWallet extends TimerTask {
 			System.err.println(mle.getMessage());
 		}
 
-		try (Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			updateConfig = Configuration.read(in);
 			System.out.println("Reading the config file");
 		} catch (IOException e) {
@@ -228,13 +236,18 @@ public class UpdateWallet extends TimerTask {
 			System.out.println(e.getCause().toString());
 		}
 
-		String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
-		String filteredVer = fullVer.replace("-SNAPSHOT", "");
+		//String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
+		//String filteredVer = fullVer.replace("-SNAPSHOT", "");
+		String filteredVer = BootstrapModel.getInstance().getBootstrapVer();
+		System.out.println("getBootstrapVer in UpdateWallet Check: " + BootstrapModel.getInstance().getBootstrapVer());
 
 		if ((getVersionNumber(filteredVer, 0) == getVersionNumber(getLatestVersion(), 0))
-			&& (getVersionNumber(filteredVer, 2) == getVersionNumber(getLatestVersion(), 2))
+			&& (getVersionNumber(filteredVer, 2)
+			== getVersionNumber(getLatestVersion(), 2))
+			&& (getVersionNumber(filteredVer, 4)
+			== getVersionNumber(getLatestVersion(), 4))
 			|| getLatestVersion().equals("")) {
-			bootstrapUpdate = false;
+			bootstrapModel.setBootstrapUpdate(false);
 			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());
 			System.out.println("The latest version of the bootstrap is the same as the one we have");
 		} else {
@@ -243,11 +256,13 @@ public class UpdateWallet extends TimerTask {
 				System.out.println("downloading linux installer");
 				if (getLinuxIDLike().equals("debian")
 					&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
+					removeOldInstall(linuxPath);
 					downloadFile(getDownloadURL(getLatestVersion(),
 						getDEBFileName(getLatestVersion())),
 						linuxPath,
 						getDEBFileName(getLatestVersion()));
 				} else {
+					removeOldInstall(linuxPath);
 					downloadFile(getDownloadURL(getLatestVersion(),
 						getRPMFileName(getLatestVersion())),
 						linuxPath,
@@ -256,19 +271,21 @@ public class UpdateWallet extends TimerTask {
 				System.out.println("Did it start??");
 			} else if (OS.CURRENT == OS.MAC
 				&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
+				removeOldInstall(macPath);
 				downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
 					macPath,
 					getDMGFileName(getLatestVersion()));
 			} else if (OS.CURRENT == OS.WINDOWS
 				&& !checkTempFolder(getMSIFileName(getLatestVersion()), windowsPath)) {
+				removeOldInstall(windowsPath);
 				downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
 					windowsPath,
 					getMSIFileName(getLatestVersion()));
 			}
-			bootstrapUpdate = true;
+			bootstrapModel.setBootstrapUpdate(true);
 		}
-		System.out.println("are we upadting the bootstrap: " + bootstrapUpdate);
-		return bootstrapUpdate;
+		System.out.println("are we upadting the bootstrap: " + bootstrapModel.getBootstrapUpdate());
+		return bootstrapModel.getBootstrapUpdate();
 	}
 
 	private boolean checkTempFolder(String fileName, String path) {
@@ -287,12 +304,11 @@ public class UpdateWallet extends TimerTask {
 
 	public void doUpdate() {
 		final Object obj = new Object();
-		System.out.println(bootstrapUpdate);
+		System.out.println(bootstrapModel.getBootstrapUpdate());
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				boolean isBootstrapUpdate = false;
-				if (false) { //(checkUpdateBootstrap()) {
+				if (bootstrapModel.getBootstrapUpdate()) {
 					Process process;
 					//TODO: Add RPM install line
 					String linuxDebInstallExec = String.format("pkexec dpkg -i %s%s", linuxPath,
@@ -309,7 +325,8 @@ public class UpdateWallet extends TimerTask {
 								try {
 									Process p = Runtime.getRuntime()
 										.exec(linuxDebInstallExec);
-									p.waitFor();
+									exitCode = p.waitFor();
+									System.out.println(exitCode);
 								} catch (Exception e) {
 									System.out.println(e.getMessage());
 								}
@@ -317,7 +334,7 @@ public class UpdateWallet extends TimerTask {
 								try {
 									Process p = Runtime.getRuntime()
 										.exec(linuxRpmInstallExec);
-									p.waitFor();
+									exitCode = p.waitFor();
 								} catch (Exception e) {
 									System.out.println(e.getMessage());
 								}
@@ -327,9 +344,9 @@ public class UpdateWallet extends TimerTask {
 							try {
 								Process p = Runtime.getRuntime()
 									.exec(new String[]{"open", macInstallExec});
-								int exitCode = p.waitFor();
+								exitCode = p.waitFor();
 								System.out.println("exitCode " + exitCode);
-								isBootstrapUpdate = true;
+								bootstrapModel.setBootstrapUpdate(true);
 							} catch (Exception e) {
 								//TODO: handle exception
 								System.out.println("cant open dmg: " + e.getMessage());
@@ -338,7 +355,10 @@ public class UpdateWallet extends TimerTask {
 							try {
 								System.out.println(windowsInstallExec);
 								Process p = Runtime.getRuntime().exec(windowsInstallExec);
-								p.waitFor();
+								exitCode = p.exitValue();
+								if (exitCode == 0) {
+									System.exit(0);
+								}
 							} catch (Exception e) {
 								System.out.println(e.getMessage());
 							}
@@ -354,14 +374,15 @@ public class UpdateWallet extends TimerTask {
 					synchronized (obj) {
 						obj.notifyAll();
 					}
-					System.out.println("!!!!We got passed the notyfiy");
-					if (OS.CURRENT == OS.LINUX) {
-						System.out.println("run the app agien on linux");
+					System.out.println("!!!!We got passed the notify");
+					if (OS.CURRENT == OS.LINUX && exitCode == 0) {
+						System.out.println("run the app again on linux");
 						Runtime.getRuntime().exec(linuxExec);
 						System.out.println("Did it start??");
-					} else if (OS.CURRENT == OS.MAC && !isBootstrapUpdate) {
+					} else if (OS.CURRENT == OS.MAC && !bootstrapModel.getBootstrapUpdate()
+						 && exitCode == 0) {
 						Runtime.getRuntime().exec(macExec);
-					} else if (OS.CURRENT == OS.WINDOWS) {
+					} else if (OS.CURRENT == OS.WINDOWS && exitCode == 0) {
 						Runtime.getRuntime().exec(windowsExec);
 					}
 				} catch (Exception e) {
@@ -379,7 +400,45 @@ public class UpdateWallet extends TimerTask {
 				System.out.println(e.getMessage());
 			}
 		}
+		if (exitCode != 0) {
+			failedToInstallNewBootstrap();
+		}
 		System.exit(0);
+	}
+
+	private void failedToInstallNewBootstrap() {
+		String link = "https://github.com/unigrid-project/janus-java/releases";
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Unigrid");
+		alert.setHeaderText("Failed to install new launcher.");
+		alert.setContentText("Please install manually\n " + link);
+		alert.showAndWait();
+
+		switch (OS.CURRENT) {
+			case LINUX:
+				try {
+					System.out.println("Hello!!!!!!");
+					Runtime.getRuntime().exec("xdg-open " + linuxPath);
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
+				break;
+			case MAC:
+				try {
+					Runtime.getRuntime().exec("open " + macPath);
+				} catch (IOException ex) {
+					System.out.println(ex.getMessage());
+				}
+				break;
+
+			case WINDOWS:
+				try {
+					Runtime.getRuntime().exec("explorer " + windowsPath);
+				} catch (IOException ex) {
+					System.out.println(ex.getMessage());
+				}
+				break;
+		}
 	}
 
 	private static String getFirstKeywordMatch(String s, String keyword) {
@@ -396,10 +455,11 @@ public class UpdateWallet extends TimerTask {
 
 	private void downloadFile(String url, String path, String fileName) {
 		try {
-			FileUtils.copyURLToFile(new URL(url), new File(path + fileName));
+			FileUtils.copyURLToFile(new URL(url), new File(path + fileName),5000, 5000);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			System.out.println("FILE FAILED TO DOWNLOAD" + e.getMessage());
 		}
+		System.out.println("DOWNLOADED: " + url);
 	}
 
 	private String getDEBFileName(String version) {
@@ -434,7 +494,7 @@ public class UpdateWallet extends TimerTask {
 	}
 
 	private String getDownloadURL(String version, String fileName) {
-		return String.format("https://github.com/unigrid-project/janus-java/releases/download/v%s/%s",
+		return String.format(DOWNLOAD_URL.concat("v%s/%s"),
 			version, fileName);
 	}
 
@@ -460,5 +520,15 @@ public class UpdateWallet extends TimerTask {
 
 		String majorVersion = String.valueOf(c[index]);
 		return Integer.parseInt(majorVersion);
+	}
+
+	private void removeOldInstall(String path) {
+		File file = new File(path);
+		if (!file.exists()) {
+			return;
+		}
+		for (File f : file.listFiles()) {
+			f.delete();
+		}
 	}
 }

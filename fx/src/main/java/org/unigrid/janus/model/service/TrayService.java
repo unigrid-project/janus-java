@@ -14,6 +14,9 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
+// TODO: Re-enable when Bootstrap is updated with the Swing FX dependency
+
+/*
 package org.unigrid.janus.model.service;
 
 import com.dustinredmond.fxtrayicon.FXTrayIcon;
@@ -82,3 +85,4 @@ public class TrayService {
 		}
 	}
 }
+*/

@@ -21,8 +21,6 @@ import mockit.Mock;
 import org.unigrid.janus.model.UpdateURL;
 
 public class ConfigUrlMockUp extends MockUp<UpdateURL> {
-
-	
 	public String getLinuxUrl() {
 		return ConfigUrlMockUp.class.getResource("get_update4j_config.xml").toString();
 	}

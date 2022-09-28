@@ -190,14 +190,13 @@ public class Wallet {
 	}
 
 	public int getBlocks() {
-		
 		return this.blocks;
 	}
 
 	public void setBlocks(int newValue) {
 		int oldValue = this.blocks;
 		this.blocks = newValue;
-		System.out.println("setting blocks: " + this.blocks);
+		//System.out.println("setting blocks: " + this.blocks);
 		this.pcs.firePropertyChange(this.BLOCKS_PROPERTY, oldValue, newValue);
 	}
 
@@ -359,7 +358,7 @@ public class Wallet {
 			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			System.out.println(e.getCause().toString());
+			//System.out.println(e.getCause().toString());
 			return 0;
 		}
 	}
