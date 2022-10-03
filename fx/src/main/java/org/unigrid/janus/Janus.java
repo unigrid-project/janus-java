@@ -48,7 +48,6 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
-import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
@@ -155,7 +154,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	}
 
-	public void startFromBootstrap(Stage stage ) throws Exception {
+	public void startFromBootstrap(Stage stage) throws Exception {
 		System.out.println(CDI.current());
 		//tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());

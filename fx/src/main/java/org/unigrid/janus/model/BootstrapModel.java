@@ -23,7 +23,10 @@ import org.unigrid.janus.model.cdi.Eager;
 @Eager
 public class BootstrapModel {
 	@Getter @Setter private static String bootstrapVer = "0.0.0";
-	@Getter @Setter private static String downloadUrl = "https://github.com/unigrid-project/janus-java/releases/download/";
+
+	@Getter @Setter private static String downloadUrl =
+		"https://github.com/unigrid-project/janus-java/releases/download/";
+
 	@Getter @Setter private static boolean testing;
 	@Getter @Setter private static boolean bootstrapUpdate;
 }

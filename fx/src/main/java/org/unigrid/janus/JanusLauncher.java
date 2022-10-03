@@ -28,7 +28,6 @@ import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.UpdateURL;
 import org.unigrid.janus.model.BootstrapModel;
-import org.unigrid.janus.model.cdi.EagerExtension;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
@@ -68,7 +67,7 @@ public class JanusLauncher implements Launcher {
 
 		System.out.println("bootstrapVer in fx: " + bootstrapVer);
 
-		if(bootstrapVer != null && !bootstrapVer.equals("")) {
+		if (bootstrapVer != null && !bootstrapVer.equals("")) {
 			BootstrapModel.setBootstrapVer(bootstrapVer);
 		}
 
@@ -80,7 +79,7 @@ public class JanusLauncher implements Launcher {
 			BootstrapModel.setDownloadUrl(inputArgs.get("testing"));
 		}
 
-		if(inputArgs.containsKey("BootstrapURL")){
+		if (inputArgs.containsKey("BootstrapURL")) {
 			UpdateURL.setBootstrapUrl(inputArgs.get("BootstrapURL"));
 		}
 

@@ -31,13 +31,13 @@ public class SendTransaction extends BaseResult<String> {
 		/* sendtoaddress "DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1 "category" "recipent" */
 		public Request(Address address, String category, Recipent recipent) {
 			super(METHOD);
-			setParams(new Object[]{ address.getAddress(), address.getAmount(), category, recipent });
+			setParams(new Object[]{address.getAddress(), address.getAmount(), category, recipent});
 		}
 
 		/* sendtoaddress "DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1 */
 		public Request(Address address) {
 			super(METHOD);
-			setParams(new Object[]{ address.getAddress(), address.getAmount() });
+			setParams(new Object[]{address.getAddress(), address.getAmount()});
 		}
 	}
 }

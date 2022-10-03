@@ -110,16 +110,16 @@ public class OverlayController implements Initializable {
 		// TODO: What exactly do these numbers mean ? Please change this to an enum and explain it.
 		switch (wallet.getUnlockState()) {
 			case 1:
-				sendArgs = new Object[] { passphraseInput.getText(), stakingStartTime, true };
+				sendArgs = new Object[]{passphraseInput.getText(), stakingStartTime, true};
 				break;
 			case 2:
-				sendArgs = new Object[] { passphraseInput.getText(), 0 };
+				sendArgs = new Object[]{passphraseInput.getText(), 0};
 				break;
 			case 3:
 			case 4:
 			case 5:
 				// unlock for 30 seconds only
-				sendArgs = new Object[] { passphraseInput.getText(), 30 };
+				sendArgs = new Object[]{passphraseInput.getText(), 30};
 				break;
 			default:
 				throw new AssertionError();

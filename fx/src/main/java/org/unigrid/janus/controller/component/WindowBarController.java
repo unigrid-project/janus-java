@@ -108,14 +108,14 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		// application is closed
 		rpc.stopPolling();
 
-		//Force bootstrap update when it is awilable so the user has the latest one!!!
-		//TODO: maken an event of this insted or an observer
-		if(BootstrapModel.isBootstrapUpdate()) {
+		// Force bootstrap update when it is awilable so the user has the latest one!!!
+		// TODO: maken an event of this insted or an observer
+		if (BootstrapModel.isBootstrapUpdate()) {
 			update.doUpdate();
 		}
 
-		//final Window window = ((Node) event.getSource()).getScene().getWindow();
-		//window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
+		// final Window window = ((Node) event.getSource()).getScene().getWindow();
+		// window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
 		System.exit(0);
 	}
 
@@ -133,7 +133,8 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	public void showUpdateButton() {
 		System.out.println("Update button visable");
-		//tray.updateNewEventImage();
+		// tray.updateNewEventImage();
+
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {

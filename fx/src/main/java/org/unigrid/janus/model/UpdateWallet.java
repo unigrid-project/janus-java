@@ -29,7 +29,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.TimerTask;
-
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Pos;
 import lombok.Getter;
@@ -39,7 +38,6 @@ import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.service.DebugService;
 import org.update4j.Configuration;
 import org.update4j.OS;
-
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -68,7 +66,7 @@ public class UpdateWallet extends TimerTask {
 
 	private static final String BASE_URL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/%s";
 	private static final String BOOTSTRAP_URL = UpdateURL.getBootstrapUrl();
-	// private static PollingService polling = new PollingService();
+
 	private OS os = OS.CURRENT;
 	private int exitCode = 0;
 
@@ -446,21 +444,9 @@ public class UpdateWallet extends TimerTask {
 		}
 	}
 
-	private static String getFirstKeywordMatch(String s, String keyword) {
-		String[] parts = s.split("=");
-
-		for (String part : parts) {
-			if (part.contains(keyword)) {
-				return s.split("=")[1];
-			}
-		}
-
-		return null;
-	}
-
 	private void downloadFile(String url, String path, String fileName) {
 		try {
-			FileUtils.copyURLToFile(new URL(url), new File(path + fileName),5000, 5000);
+			FileUtils.copyURLToFile(new URL(url), new File(path + fileName), 5000, 5000);
 		} catch (Exception e) {
 			System.out.println("FILE FAILED TO DOWNLOAD" + e.getMessage());
 		}
@@ -485,16 +471,21 @@ public class UpdateWallet extends TimerTask {
 
 	private String getLatestVersion() {
 		githubJson = initWebTarget();
+
 		if (githubJson == null) {
 			System.out.println("githubjson is null");
 			return "";
 		}
+
 		String githubEntry = githubJson.getEntry().get(0).getId();
+
 		if (githubEntry.equals("") || githubEntry == null) {
 			return "";
 		}
+
 		githubEntry = githubEntry.split("/")[2].substring(1);
 		System.out.println("Github tag for this version: " + githubEntry);
+
 		return githubEntry;
 	}
 
@@ -505,6 +496,7 @@ public class UpdateWallet extends TimerTask {
 	private String getLinuxIDLike() {
 		String s = "";
 		Map<String, String> osDetails = new HashMap<String, String>();
+
 		try {
 			Process process = Runtime.getRuntime().exec("cat /etc/os-release");
 			BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -516,6 +508,7 @@ public class UpdateWallet extends TimerTask {
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
+
 		return osDetails.get("ID_LIKE");
 	}
 
@@ -528,9 +521,11 @@ public class UpdateWallet extends TimerTask {
 
 	private void removeOldInstall(String path) {
 		File file = new File(path);
+
 		if (!file.exists()) {
 			return;
 		}
+
 		for (File f : file.listFiles()) {
 			f.delete();
 		}

@@ -24,14 +24,14 @@ import lombok.Getter;
 @Data @Builder
 public class UnlockRequest {
 	@AllArgsConstructor
-	public static enum Type {
+	public enum Type {
 		ORDINARY("UNLOCK", 2, "Unlock your wallet by entering your passphrase "
 			+ "and pressing the UNLOCK button."),
 
-		TIMED( "UNLOCK", 4, "Please enter your passphrase in order to perform "
+		TIMED("UNLOCK", 4, "Please enter your passphrase in order to perform "
 			+ "this task. The wallet will automatically lock itself after 30 seconds."),
 
-		FOR_DUMP( "EXPORT", 5, "Please enter your passphrase to export your private keys. If your "
+		FOR_DUMP("EXPORT", 5, "Please enter your passphrase to export your private keys. If your "
 			+ "wallet was staking you will need to enable again after the task completes."),
 
 		FOR_GRIDNODE("START", 4, "Please enter your passphrase to enable your gridnodes. If your "

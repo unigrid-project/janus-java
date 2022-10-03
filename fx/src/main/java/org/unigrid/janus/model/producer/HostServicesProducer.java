@@ -18,7 +18,6 @@ package org.unigrid.janus.model.producer;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-import java.util.Objects;
 import javafx.application.HostServices;
 import lombok.Setter;
 
@@ -28,10 +27,6 @@ public class HostServicesProducer {
 
 	@Produces
 	public HostServices produce() {
-		/*if (Objects.isNull(hostServices)) {
-			return (HostServices) new Object();
-		}*/
-
 		return hostServices;
 	}
 }
