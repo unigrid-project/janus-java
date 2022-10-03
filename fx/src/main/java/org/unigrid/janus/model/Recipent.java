@@ -16,15 +16,27 @@
 
 package org.unigrid.janus.model;
 
-import java.math.BigDecimal;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class Address {
-	private String address;
-	private BigDecimal amount;
+public class Recipent {
+	private String name;
+	private Address address;
+
+	@Data
+	private static class Address {
+		private String street;
+		private String postalCode;
+		private String country;
+
+		@Override
+		public String toString() {
+			return String.format("//%s//%s//%s", street, postalCode, country);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s%s", name, address);
+	}
 }

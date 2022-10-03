@@ -18,6 +18,7 @@ package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -62,6 +63,7 @@ import javafx.util.converter.DoubleStringConverter;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.Address;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
@@ -75,6 +77,7 @@ import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.signal.Navigate;
 import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
+import org.unigrid.janus.model.signal.WalletRequest;
 
 @ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {
@@ -112,7 +115,6 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		debug.log("Initializing wallet transactions");
 		wallet.addPropertyChangeListener(this);
 		transList.addPropertyChangeListener(this);
-		WINDOW.setWalletController(this);
 		setupWalletTransactions();
 	}
 
@@ -366,10 +368,6 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				ugdAddressTxt.setText("");
 				onErrorMessage("Please enter a valid Unigrid address.");
 			} else {
-				wallet.setSendArgs(new Object[]{ugdAddressTxt.getText(),
-					Double.parseDouble(amountToSend.getText())}
-				);
-
 				if (wallet.getLocked()) {
 					onErrorMessage("Locked wallet");
 
@@ -377,37 +375,9 @@ public class WalletController implements Initializable, PropertyChangeListener {
 						UnlockRequest.builder().type(UnlockRequest.Type.ORDINARY).build()
 					);
 				} else {
-					// Object[] sendArgs = new Object[]{ugdAddressTxt.getText(),
-					// Integer.parseInt(amountToSend.getText())};
-
-					final SendTransaction send = rpc.call(new SendTransaction.Request(
-						wallet.getSendArgs()),
-						SendTransaction.class
-					);
-
-					if (send.getError() != null) {
-						onErrorMessage(send.getError().getMessage());
-					} else {
-						onSuccessMessage("TRANSACTION SENT!");
-						resetText();
-					}
+					eventWalletRequest(WalletRequest.SEND_TRANSACTION);
 				}
 			}
-		}
-	}
-
-	public void sendTransactionAfterUnlock() {
-		final SendTransaction send = rpc.call(new SendTransaction.Request(wallet.getSendArgs()),
-			SendTransaction.class
-		);
-
-		if (send.getError() != null) {
-			onErrorMessage(send.getError().getMessage());
-		} else {
-			onSuccessMessage("TRANSACTION SENT!");
-			debug.log(send.getResult());
-			resetText();
-			wallet.setSendArgs(null);
 		}
 	}
 
@@ -477,4 +447,18 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 		pause.play();
 	}
+
+	private void eventWalletRequest(@Observes WalletRequest walletRequest) {
+		final Address address = new Address(ugdAddressTxt.getText(), new BigDecimal(amountToSend.getText()));
+		final SendTransaction send = rpc.call(new SendTransaction.Request(address), SendTransaction.class);
+
+		if (send.getError() == null) {
+			onSuccessMessage("TRANSACTION SENT!");
+			debug.log(send.getResult());
+			resetText();
+		} else {
+			onErrorMessage(send.getError().getMessage());
+		}
+	}
+
 }
