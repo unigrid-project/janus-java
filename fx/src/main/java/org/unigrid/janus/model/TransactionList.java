@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.Data;
 import java.beans.PropertyChangeSupport;
@@ -26,6 +27,7 @@ import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 
+@ApplicationScoped
 public class TransactionList {
 	public static final String TRANSACTION_LIST = "transactionlist";
 

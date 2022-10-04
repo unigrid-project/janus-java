@@ -26,7 +26,7 @@
    <scene>
       <Scene fill="#000024" stylesheets="@main.css">
          <root>
-            <StackPane prefHeight="600.0" prefWidth="1000.0">
+            <StackPane fx:id="pnlParent" prefHeight="600.0" prefWidth="1000.0">
                <children>
                   <BorderPane pickOnBounds="false" prefHeight="300.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
                      <top>

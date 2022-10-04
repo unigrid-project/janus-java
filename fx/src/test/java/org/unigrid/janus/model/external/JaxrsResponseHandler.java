@@ -16,35 +16,25 @@
 
 package org.unigrid.janus.model.external;
 
-import java.util.ArrayList;
-import java.util.List;
-import mockit.MockUp;
-import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
-import org.unigrid.janus.model.entity.Feed;
+import jakarta.json.bind.JsonbBuilder;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
+import java.util.function.Supplier;
+import org.unigrid.janus.model.rpc.entity.BaseResult;
 
-public class ResponseMockUp extends MockUp<OutboundJaxrsResponse> {
+public class JaxrsResponseHandler {
 
-	protected <T> T readEntities(Class<T> clazz) {
-		switch (clazz.getSimpleName()) {
-			case "Feed" -> {
-				return (T) feed((Class<List>) clazz);
-			}
-			case "String" -> {
-				return (T) "2088092";
-			}
-			default -> {
-				return null;
-			}
+	public static <T extends BaseResult, R> T handle(Class<T> clazz, Type resultClazz, Supplier supplier) {
+		try {
+			final String jsonFile = (String) supplier.get();
+			final T result = clazz.getDeclaredConstructor().newInstance();
+			result.setResult(JsonbBuilder.create().fromJson(JaxrsResponseHandler.class
+				.getResourceAsStream(jsonFile), resultClazz));
+
+			return result;
+		} catch (IllegalAccessException | InstantiationException | InvocationTargetException
+			| NoSuchMethodException ex) {
+			throw new IllegalStateException("Failed to parse response.");
 		}
-	}
-
-	public Feed feed(Class<List> clazz) {
-		final Feed result = new Feed();
-		List<Feed.Entry> list = new ArrayList<Feed.Entry>();
-		Feed.Entry entry = new Feed.Entry();
-		entry.setId("tag:github.com,2008:Repository/354793431/v1.0.7");
-		list.add(entry);
-		result.setEntry(list);
-		return result;
 	}
 }

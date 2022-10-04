@@ -22,7 +22,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.concurrent.atomic.AtomicInteger;
 import mockit.Mock;
 import mockit.MockUp;
-import net.jqwik.api.Disabled;
+import mockit.Mocked;
 import net.jqwik.api.Property;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.constraints.IntRange;
@@ -33,7 +33,10 @@ public class PollingServiceTest extends BaseMockedWeldTest {
 	@Inject
 	private PollingService pollingService;
 
-	@Disabled @Property
+	@Mocked
+	private DebugService debug;
+
+	@Property
 	public void shouldPollWithTheRightInterval(@ForAll @IntRange(min = 1, max = 4) int interval) {
 		final AtomicInteger calls = new AtomicInteger();
 

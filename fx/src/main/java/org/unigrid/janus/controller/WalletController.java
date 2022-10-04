@@ -79,18 +79,19 @@ import org.unigrid.janus.model.signal.Navigate;
 import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import org.unigrid.janus.model.signal.WalletRequest;
+import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private PollingService polling;
 	@Inject private RPCService rpc;
+	@Inject private TransactionList transactionList;
 	@Inject private Wallet wallet;
 
 	@Inject private Event<Navigate> navigateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
-	private TransactionList transList = new TransactionList();
 	private static final WindowService WINDOW = WindowService.getInstance();
 	private int syncIntervalShort = 30000;
 	private int syncIntervalLong = 3600000;
@@ -115,7 +116,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		/* Empty on purpose */
 		debug.log("Initializing wallet transactions");
 		wallet.addPropertyChangeListener(this);
-		transList.addPropertyChangeListener(this);
+		transactionList.addPropertyChangeListener(this);
 		setupWalletTransactions();
 	}
 
@@ -314,8 +315,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			// can determine from this if a send transaction needs a passphrase
 		}
 
-		if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
-			tblWalletTrans.setItems(transList.getTransactions());
+		if (event.getPropertyName().equals(transactionList.TRANSACTION_LIST)) {
+			tblWalletTrans.setItems(transactionList.getTransactions());
 		}
 
 		if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
@@ -323,7 +324,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				ListTransactions.class
 			);
 
-			transList.setTransactions(trans, 0);
+			transactionList.setTransactions(trans, 0);
 		}
 	}
 
@@ -370,8 +371,12 @@ public class WalletController implements Initializable, PropertyChangeListener {
 					onErrorMessage("Locked wallet");
 					
 					unlockRequestEvent.fire(
-						UnlockRequest.builder().type(UnlockRequest.Type.ORDINARY).build()
+						UnlockRequest.builder().type(UnlockRequest.Type.FOR_SEND).build()
 					);
+
+					FxUtils.executeParentById("pnlParent", tblWalletTrans, (node) -> {
+						node.getScene().lookup("#pnlOverlay").setVisible(true);
+					});
 				} else {
 					eventWalletRequest(WalletRequest.SEND_TRANSACTION);
 				}

@@ -43,6 +43,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.Timer;
+import lombok.Getter;
+import lombok.Setter;
 import org.unigrid.janus.model.cdi.Eager;
 
 @Eager
@@ -52,9 +54,10 @@ public class RPCService {
 	private static final String PROPERTY_USERNAME = Preferences.PROPS.getString(PROPERTY_USERNAME_KEY);
 	private static final String PROPERTY_PASSWORD_KEY = "janus.rpc.password";
 	private static final String PROPERTY_PASSWORD = Preferences.PROPS.getString(PROPERTY_PASSWORD_KEY);
+	@Getter @Setter private Boolean pollingTimerRunning = false;
 
-	private static Timer pollingTimer;
-	private static WebTarget target;
+	private Timer pollingTimer;
+	private WebTarget target;
 	private User credentials;
 
 	@Inject private Daemon daemon;
@@ -121,12 +124,14 @@ public class RPCService {
 		debug.print("pollForInfo", RPCService.class.getSimpleName());
 		pollingTimer = new Timer(true);
 		pollingTimer.schedule(new PollingTask(), 0, interval);
+		setPollingTimerRunning(true);
 	}
 
 	public void stopPolling() {
 		if (pollingTimer != null) {
 			pollingTimer.cancel();
 			pollingTimer.purge();
+			setPollingTimerRunning(false);
 		}
 	}
 

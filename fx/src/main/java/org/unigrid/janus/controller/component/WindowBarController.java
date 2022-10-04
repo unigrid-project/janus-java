@@ -84,7 +84,9 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 		Tooltip t = new Tooltip("A new update is ready. Please restart the wallet");
 		t.install(updateButton, t);
-		pollingService.pollForUpdate(liveTimeInterval);
+		if (!pollingService.getUpdateTimerRunning()) {
+			pollingService.pollForUpdate(liveTimeInterval);
+		}
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
