@@ -80,13 +80,13 @@ public class TransactionsControllerTest extends BaseFxTest {
 				if (Objects.isNull(e)) {
 					if (clazz.equals(StakingStatus.class)) {
 						return (T) JaxrsResponseHandler.handle(StakingStatus.class,
-							StakingStatus.Result.class, ()
-							-> "staking_status_not_staking.json");
+							StakingStatus.Result.class,
+							() -> "staking_status_not_staking.json");
 					}
 					if (clazz.equals(GetWalletInfo.class)) {
 						return (T) JaxrsResponseHandler.handle(GetWalletInfo.class,
-							GetWalletInfo.Result.class, ()
-							-> "get_wallet_info_unlocked.json");
+							GetWalletInfo.Result.class,
+							() -> "get_wallet_info_unlocked.json");
 					}
 					if (clazz.equals(GetUnlockState.class)) {
 						return (T) JaxrsResponseHandler.handle(GetUnlockState.class,
