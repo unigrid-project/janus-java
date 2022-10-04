@@ -60,9 +60,9 @@ import org.unigrid.janus.model.TransactionList.LoadReport;
 public class TransactionsController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
+	@Inject private TransactionList transactionList;
 	@Inject private Wallet wallet;
 
-	private static TransactionList transList = new TransactionList();
 	private static WindowService window = WindowService.getInstance();
 
 	@FXML private TableView tblTransactions;
@@ -75,7 +75,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 	public void initialize(URL url, ResourceBundle rb) {
 		debug.log("Initializing transactions");
 		window.setTransactionsController(this);
-		transList.addPropertyChangeListener(this);
+		transactionList.addPropertyChangeListener(this);
 		wallet.addPropertyChangeListener(this);
 		setupTransactions();
 	}
@@ -218,7 +218,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 		debug.log("Loading transactions");
 		ListTransactions trans = rpc.call(new ListTransactions.Request(page * 100, 100),
 			ListTransactions.class);
-		transList.setTransactions(trans, 0);
+		transactionList.setTransactions(trans, 0);
 	}
 
 	private ScrollBar getVerticalScrollbar(TableView<?> table) {
@@ -243,16 +243,16 @@ public class TransactionsController implements Initializable, PropertyChangeList
 
 		if (value == bar.getMax()) {
 			debug.log("Adding new transactions.");
-			LoadReport report = transList.loadTransactions(40);
+			LoadReport report = transactionList.loadTransactions(40);
 			bar.setValue(value * report.getOldSize() / report.getNewSize());
 		}
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
+		if (event.getPropertyName().equals(transactionList.TRANSACTION_LIST)) {
 			debug.log("Transactions list changed");
 
-			tblTransactions.setItems(transList.getTransactions());
+			tblTransactions.setItems(transactionList.getTransactions());
 			ScrollBar bar = getVerticalScrollbar(tblTransactions);
 
 			debug.log(String.format("Was scrollbar found: %b", (bar != null)));
@@ -263,7 +263,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 		}
 		// if balance changes, load the transactions.
 		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
-			if (transList.getTransactions().size() == 0) {
+			if (transactionList.getTransactions().size() == 0) {
 				loadTransactions(0);
 			}
 		}

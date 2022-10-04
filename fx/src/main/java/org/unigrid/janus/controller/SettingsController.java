@@ -32,6 +32,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.input.MouseEvent;
@@ -68,6 +69,7 @@ import org.unigrid.janus.model.signal.DebugMessage;
 import org.unigrid.janus.model.signal.Navigate;
 import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
+import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
 public class SettingsController implements Initializable, PropertyChangeListener, Showable {
@@ -337,7 +339,11 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		debug.log("Dump wallet clicked!");
 
 		if (wallet.getLocked()) {
-			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_GRIDNODE).build());
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_DUMP).build());
+
+			FxUtils.executeParentById("pnlParent", (Node) event.getSource(), (node) -> {
+				node.getScene().lookup("#pnlOverlay").setVisible(true);
+			});
 		} else {
 			dumpKeys();
 		}

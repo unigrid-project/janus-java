@@ -82,8 +82,9 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 		} catch (IOException ex) {
 			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
 		}
-
-		pollingService.poll(SIX_HOURS_IN_MS);
+		if (!pollingService.getPollingTimerRunning()) {
+			pollingService.poll(SIX_HOURS_IN_MS);
+		}
 	}
 
 	public void pullNewDocumentaion() throws JsonProcessingException, IOException {

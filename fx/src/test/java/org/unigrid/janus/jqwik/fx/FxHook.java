@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -29,11 +30,13 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import net.jqwik.api.lifecycle.AroundContainerHook;
 import net.jqwik.api.lifecycle.AroundPropertyHook;
 import net.jqwik.api.lifecycle.PropertyExecutionResult;
 import net.jqwik.api.lifecycle.PropertyExecutor;
 import net.jqwik.api.lifecycle.PropertyLifecycleContext;
+import static org.awaitility.Awaitility.await;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.testfx.api.FxToolkit;
 import org.unigrid.janus.model.cdi.CDIUtil;
@@ -152,10 +155,13 @@ public class FxHook implements AroundContainerHook, AroundPropertyHook {
 		return reference.get();
 	}
 
-	@Override
+	@Override @SneakyThrows
 	public PropertyExecutionResult aroundProperty(PropertyLifecycleContext context, PropertyExecutor property) {
 		final FxResource resource = findResource(context);
 		Application application = setupFx(context.testInstance(), resource);
+
+		await().until(() -> Objects.nonNull(FxToolkit.toolkitContext().getRegisteredStage().getScene()));
+		FxToolkit.showStage();
 
 		final PropertyExecutionResult result = property.execute();
 		shutdownFx(application);

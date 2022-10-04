@@ -32,7 +32,7 @@
             </FlowPane>
             <FlowPane alignment="CENTER" prefHeight="50.0" prefWidth="450.0" VBox.vgrow="ALWAYS">
                <children>
-                  <Button mnemonicParsing="false" onMouseClicked="#onStartAllNodesPressed" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Start">
+                  <Button fx:id="btnNodeStart" mnemonicParsing="false" onMouseClicked="#onStartAllNodesPressed" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Start">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -43,7 +43,7 @@
                         <Insets left="10.0" top="10.0" />
                      </FlowPane.margin>
                   </Button>
-                  <Button mnemonicParsing="false" onMouseClicked="#onRefreshNodeListPressed" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Refresh">
+                  <Button fx:id="btnNodeRefresh" mnemonicParsing="false" onMouseClicked="#onRefreshNodeListPressed" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Refresh">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -54,7 +54,7 @@
                         <Insets left="10.0" top="10.0" />
                      </FlowPane.margin>
                   </Button>
-                  <Button mnemonicParsing="false" onMouseClicked="#onGenerateKeyClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Setup">
+                  <Button fx:id="btnNodeSetup" mnemonicParsing="false" onMouseClicked="#onGenerateKeyClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Setup">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -138,7 +138,7 @@
             </FlowPane>
             <FlowPane nodeOrientation="LEFT_TO_RIGHT" prefHeight="50.0" prefWidth="450.0">
                <children>
-                  <Button mnemonicParsing="false" onMouseClicked="#onGenerateNewKeyClicked" prefWidth="120.0" text="Generate">
+                  <Button fx:id="btnNodeSetupGenerate" mnemonicParsing="false" onMouseClicked="#onGenerateNewKeyClicked" prefWidth="120.0" text="Generate">
                      <tooltip>
                         <Tooltip text="Click here to generate key" />
                      </tooltip>
@@ -149,7 +149,7 @@
                         <Insets bottom="3.0" top="3.0" />
                      </padding>
                   </Button>
-                  <Button mnemonicParsing="false" onMouseClicked="#onCloseGridnodeClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Close">
+                  <Button fx:id="btnNodeSetupClose" mnemonicParsing="false" onMouseClicked="#onCloseGridnodeClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Close">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -174,7 +174,7 @@
                               <Font size="16.0" />
                            </font>
                         </Text>
-                        <Button mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;">
+                        <Button fx:id="btnNodeSetupCopy" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;">
                            <tooltip>
                               <Tooltip fx:id="connectionTltp" text="Copy to clipboard" />
                            </tooltip>
@@ -188,7 +188,7 @@
                               <WindowBarButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#onCopyToClipboardClicked" prefHeight="20.0" prefWidth="20.0" style="-fx-shape: &quot;M320 64h-49.61C262.1 27.48 230.7 0 192 0S121 27.48 113.6 64H64C28.65 64 0 92.66 0 128v320c0 35.34 28.65 64 64 64h256c35.35 0 64-28.66 64-64V128C384 92.66 355.3 64 320 64zM192 48c13.23 0 24 10.77 24 24S205.2 96 192 96S168 85.23 168 72S178.8 48 192 48zM336 448c0 8.82-7.178 16-16 16H64c-8.822 0-16-7.18-16-16V128c0-8.82 7.178-16 16-16h18.26C80.93 117.1 80 122.4 80 128v16C80 152.8 87.16 160 96 160h192c8.836 0 16-7.164 16-16V128c0-5.559-.9316-10.86-2.264-16H320c8.822 0 16 7.18 16 16V448z&quot;; -fx-background-size: 25px; -fx-background-color: white;" />
                            </graphic>
                         </Button>
-                        <Button mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;">
+                        <Button fx:id="btnNodeSetupClear" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;">
                            <tooltip>
                               <Tooltip fx:id="connectionTltp1" text="Clear from view" />
                            </tooltip>
