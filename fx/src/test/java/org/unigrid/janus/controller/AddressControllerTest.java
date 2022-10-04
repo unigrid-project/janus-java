@@ -133,12 +133,12 @@ public class AddressControllerTest extends BaseFxTest {
 		robot.clickOn("#chkAddress");
 
 		verifyThat("#tblAddresses", hasNumRows(1));
-		verifyThat("#tblAddresses", hasTableCell(2000.0));
+		verifyThat("#tblAddresses", hasTableCell("2000.00000000"));
 
 		robot.clickOn("#chkAddress");
 		verifyThat("#tblAddresses", hasNumRows(2));
-		verifyThat("#tblAddresses", hasTableCell(0.0));
-		verifyThat("#tblAddresses", hasTableCell(2000.0));
+		verifyThat("#tblAddresses", hasTableCell("0.00000000"));
+		verifyThat("#tblAddresses", hasTableCell("2000.00000000"));
 	}
 
 	@Example
