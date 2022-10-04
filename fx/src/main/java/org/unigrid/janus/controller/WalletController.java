@@ -64,6 +64,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.Address;
+import org.unigrid.janus.model.Address.Amount;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
@@ -449,7 +450,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	}
 
 	private void eventWalletRequest(@Observes WalletRequest walletRequest) {
-		final Address address = new Address(ugdAddressTxt.getText(), new BigDecimal(amountToSend.getText()));
+		final Address address = new Address(ugdAddressTxt.getText(), new Amount(amountToSend.getText()));
 		final SendTransaction send = rpc.call(new SendTransaction.Request(address), SendTransaction.class);
 
 		if (send.getError() == null) {

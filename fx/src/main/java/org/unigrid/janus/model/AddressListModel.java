@@ -56,10 +56,9 @@ public class AddressListModel {
 	public void setAddresses(ListAddressBalances list) {
 		int oldCount = 0;
 		addresses.clear();
-
 		int newCount = 0;
+
 		for (Address g : list.getResult()) {
-			//System.out.println(String.format("address: %s", g.getAmount()));
 			if (selected) {
 				if (g.getAmount().doubleValue() > 0) {
 					addresses.add(g);
