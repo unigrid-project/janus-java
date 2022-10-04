@@ -36,7 +36,6 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 public class WindowService {
 	@Inject private DebugService debug;
 
-	private static TransactionsController transController;
 	private static SettingsController settingsController;
 	private static DocumentationController docsController;
 
@@ -70,14 +69,6 @@ public class WindowService {
 				"ERROR: (browse url) %s",
 				ex.getMessage()));
 		}
-	}
-
-	public TransactionsController getTransactionsController() {
-		return this.transController;
-	}
-
-	public void setTransactionsController(TransactionsController controller) {
-		this.transController = controller;
 	}
 
 	public DocumentationController getDocsController() {

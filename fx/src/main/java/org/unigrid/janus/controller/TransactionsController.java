@@ -74,19 +74,10 @@ public class TransactionsController implements Initializable, PropertyChangeList
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		debug.log("Initializing transactions");
-		window.setTransactionsController(this);
+
 		transactionList.addPropertyChangeListener(this);
 		wallet.addPropertyChangeListener(this);
 		setupTransactions();
-	}
-
-	public void onShown() {
-		try {
-			// TODO: anything to render after the app is shown (not transactions tab)
-			debug.log("Transactions shown called.");
-		} catch (Exception e) {
-			debug.log(String.format("ERROR: (transactions shown) %s", e.getMessage()));
-		}
 	}
 
 	private void setupTransactions() {
