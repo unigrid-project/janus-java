@@ -35,6 +35,6 @@ public class ValidateAddress extends BaseResult<ValidateAddress.Result> {
 	@Data
 	public static class Result {
 		@JsonbProperty("isvalid")
-		private Boolean valid;
+		private boolean valid;
 	}
 }

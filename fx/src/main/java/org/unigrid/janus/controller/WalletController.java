@@ -364,10 +364,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			debug.log(String.format("ERROR: %s", call.getError()));
 			onErrorMessage("Please enter a valid Unigrid address.");
 		} else {
-			if (!call.getResult().getValid()) {
-				ugdAddressTxt.setText("");
-				onErrorMessage("Please enter a valid Unigrid address.");
-			} else {
+			if (call.getResult().isValid()) {
 				if (wallet.getLocked()) {
 					onErrorMessage("Locked wallet");
 
@@ -377,6 +374,9 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				} else {
 					eventWalletRequest(WalletRequest.SEND_TRANSACTION);
 				}
+			} else {
+				ugdAddressTxt.setText("");
+				onErrorMessage("Please enter a valid Unigrid address.");
 			}
 		}
 	}
