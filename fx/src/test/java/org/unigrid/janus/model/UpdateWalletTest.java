@@ -52,8 +52,8 @@ public class UpdateWalletTest extends BaseMockedWeldTest {
 		updateWallet.run();
 		return testUpdateTrue;
 	}
-
-	/*@Example
+/*
+	@Example
 	public boolean checkBootstrapUpdateIsTrue() {
 		testUpdateTrue = false;
 		new ConfigUrlMockUp();
@@ -98,6 +98,6 @@ public class UpdateWalletTest extends BaseMockedWeldTest {
 		UpdateWallet updateWallet = new UpdateWallet();
 		updateWallet.run();
 		return testUpdateTrue;
-	}*/
-
+	}
+*/
 }

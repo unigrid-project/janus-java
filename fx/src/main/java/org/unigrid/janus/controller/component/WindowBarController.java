@@ -147,7 +147,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	public void onUpdate(MouseEvent event) {
 		System.out.println("onUpdate clicked???");
 		updateButton.setVisible(false);
-		update.doUpdate();
 		// TODO: move this code into UpdateWallet.java
 		// linux the Unigrid app is not executable
 	}

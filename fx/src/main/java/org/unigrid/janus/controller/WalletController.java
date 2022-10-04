@@ -368,7 +368,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			if (call.getResult().isValid()) {
 				if (wallet.getLocked()) {
 					onErrorMessage("Locked wallet");
-
+					
 					unlockRequestEvent.fire(
 						UnlockRequest.builder().type(UnlockRequest.Type.ORDINARY).build()
 					);
