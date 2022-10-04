@@ -16,19 +16,6 @@
 
 package org.unigrid.janus.model.signal;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-
-@Data @Builder
-public class Navigate {
-	@AllArgsConstructor
-	public enum Location {
-		WALLET_TAB(1), ADDRESS_TAB(4);
-
-		@Getter private final int index;
-	}
-
-	private Location location;
+public enum NodeRequest {
+	START_MISSING;
 }

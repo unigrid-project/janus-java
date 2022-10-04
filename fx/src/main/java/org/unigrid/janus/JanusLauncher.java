@@ -28,7 +28,7 @@ import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.UpdateURL;
 import org.unigrid.janus.model.BootstrapModel;
-import org.unigrid.janus.model.cdi.EagerExtension;
+import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
 import org.update4j.service.Launcher;
@@ -38,7 +38,6 @@ public class JanusLauncher implements Launcher {
 	private Map<String, String> inputArgs = new HashMap<String, String>();
 
 	@InjectTarget(required = false)
-	// TODO enable once bootstraps are updated
 	private HostServices hostService;
 
 	@InjectTarget(required = false)
@@ -56,9 +55,9 @@ public class JanusLauncher implements Launcher {
 			System.out.println(entry.getValue());
 		}
 
-		final SeContainer container = SeContainerInitializer.newInstance()
-			.addExtensions(EagerExtension.class).initialize();
+		final SeContainer container = SeContainerInitializer.newInstance().initialize();
 		System.out.println(CDI.current());
+
 		if (inputArgs.containsKey("URL")) {
 			System.out.println(inputArgs.get("URL"));
 			UpdateURL.setLinuxUrl(inputArgs.get("URL"));
@@ -68,23 +67,25 @@ public class JanusLauncher implements Launcher {
 
 		System.out.println("bootstrapVer in fx: " + bootstrapVer);
 
-		if(bootstrapVer != null && !bootstrapVer.equals("")) {
-			BootstrapModel.getInstance().setBootstrapVer(bootstrapVer);
+		if (bootstrapVer != null && !bootstrapVer.equals("")) {
+			BootstrapModel.setBootstrapVer(bootstrapVer);
 		}
 
 		if (inputArgs.containsKey("downloadUrl")) {
-			BootstrapModel.getInstance().setDownloadUrl(inputArgs.get("downloadUrl"));
+			BootstrapModel.setDownloadUrl(inputArgs.get("downloadUrl"));
 		}
 
 		if (inputArgs.containsKey("testing")) {
-			BootstrapModel.getInstance().setDownloadUrl(inputArgs.get("testing"));
+			BootstrapModel.setDownloadUrl(inputArgs.get("testing"));
 		}
 
-		if(inputArgs.containsKey("BootstrapURL")){
+		if (inputArgs.containsKey("BootstrapURL")) {
 			UpdateURL.setBootstrapUrl(inputArgs.get("BootstrapURL"));
 		}
 
 		Platform.runLater(() -> {
+			HostServicesProducer.setHostServices(hostService);
+
 			System.out.println("run later");
 			Janus janus = container.select(Janus.class).get();
 			System.out.println(lc.getClassLoader());
@@ -97,8 +98,10 @@ public class JanusLauncher implements Launcher {
 			System.out.println("launcher start");
 
 			try {
-				janus.startFromBootstrap(stage, hostService);
+				janus.startFromBootstrap(stage);
 			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("crashorama: " + e.getMessage());
 				System.exit(1);
 			}
 		});

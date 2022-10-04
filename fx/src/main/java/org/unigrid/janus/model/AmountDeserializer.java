@@ -14,27 +14,19 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.model;
 
-import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.serializer.DeserializationContext;
+import jakarta.json.bind.serializer.JsonbDeserializer;
+import jakarta.json.stream.JsonParser;
+import java.lang.reflect.Type;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.unigrid.janus.model.Address.Amount;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class ValidateAddress extends BaseResult<ValidateAddress.Result> {
-	private static final String METHOD = "validateaddress";
-
-	public static class Request extends BaseRequest {
-		public Request(String address) {
-			super(METHOD);
-			this.setParams(new Object[]{address});
-		}
-	}
-
-	@Data
-	public static class Result {
-		@JsonbProperty("isvalid")
-		private boolean valid;
+public class AmountDeserializer implements JsonbDeserializer<Amount> {
+	@Override
+	public Amount deserialize(JsonParser parser, DeserializationContext context, Type type) {
+		return new Amount(parser.getString());
 	}
 }

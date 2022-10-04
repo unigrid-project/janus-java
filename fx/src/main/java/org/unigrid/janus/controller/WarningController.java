@@ -19,7 +19,6 @@ package org.unigrid.janus.controller;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.input.MouseEvent;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.service.DebugService;

@@ -16,10 +16,34 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.json.bind.annotation.JsonbTypeDeserializer;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Address {
 	private String address;
-	private double amount;
+	private Amount amount;
+
+	@JsonbTypeDeserializer(AmountDeserializer.class)
+	public static class Amount extends BigDecimal {
+		private static final int DECIMALS = 8;
+
+		public Amount(BigDecimal amount) {
+			super(amount.toString());
+		}
+
+		public Amount(String amount) {
+			super(amount);
+		}
+		@Override
+		public String toString() {
+			return this.setScale(DECIMALS, RoundingMode.UP).toPlainString();
+		}
+	}
 }

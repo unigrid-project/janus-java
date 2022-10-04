@@ -48,7 +48,6 @@ import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.view.MainWindow;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
-import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
@@ -72,7 +71,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private UpdateWallet updateWallet;
 	@Inject private SplashScreenController splashController;
 	@Inject private Wallet wallet;
-	@Inject private BootstrapModel bootModel;
 	//@Inject private TrayService tray;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
@@ -89,8 +87,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private Boolean checkForStatus = true;
 
 	@PostConstruct
-	@SneakyThrows
 	private void init() {
+		System.out.println("getting to init");
 		startDaemon();
 		// janusModel.getAppState().addObserver
 		janusModel.addPropertyChangeListener(this);
@@ -156,12 +154,11 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	}
 
-	public void startFromBootstrap(Stage stage, HostServices hostServices) throws Exception {
+	public void startFromBootstrap(Stage stage) throws Exception {
 		System.out.println(CDI.current());
 		//tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
-		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {

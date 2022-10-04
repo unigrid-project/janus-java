@@ -20,10 +20,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.Timer;
-import java.util.TimerTask;
 import lombok.Getter;
 import lombok.Setter;
-import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.cdi.CDIUtil;
 
@@ -66,7 +64,6 @@ public class PollingService {
 		debug.print("starting the update timer", PollingService.class.getSimpleName());
 
 		// TODO: Apparently, Java timers don't like proxy objects - can we clean this up ?
-		
 		updateTimer.scheduleAtFixedRate(CDIUtil.unproxy(updateWallet), 0, interval);
 	}
 

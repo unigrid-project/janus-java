@@ -28,7 +28,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
-import org.unigrid.janus.model.event.CloseJanusEvent;
+import org.unigrid.janus.model.signal.CloseJanus;
 import org.unigrid.janus.model.service.WindowService;
 
 @Eager
@@ -41,7 +41,7 @@ public class MainWindow implements Window {
 
 	@Inject private Stage stage;
 	@Inject private JanusModel janusModel;
-	@Inject private Event<CloseJanusEvent> closeJanusEvent;
+	@Inject private Event<CloseJanus> closeJanusEvent;
 
 	@PostConstruct
 	private void init() {
@@ -65,7 +65,7 @@ public class MainWindow implements Window {
 		stage.hide();
 	}
 
-	private void onClose(@Observes Event<CloseJanusEvent> event) {
+	private void onClose(@Observes Event<CloseJanus> event) {
 		this.stage.setWidth(900);
 		this.stage.hide();
 	}

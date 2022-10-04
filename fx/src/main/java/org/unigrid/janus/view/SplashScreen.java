@@ -21,17 +21,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -49,20 +46,19 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
-
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
-import org.unigrid.janus.model.event.CloseJanusEvent;
+import org.unigrid.janus.model.signal.CloseJanus;
 import org.unigrid.janus.model.service.WindowService;
 
 @Eager
 @Data
 @ApplicationScoped
 public class SplashScreen implements Window {
-	@Inject private SplashScreenController splashScreenController; // TODO: Big no no. Controller should not see the view.
+	@Inject private SplashScreenController splashScreenController; // TODO: Big no no. View should not see this.
 	@Inject private Stage stageSplash;
 	@Inject private WindowService window;
 
@@ -121,7 +117,7 @@ public class SplashScreen implements Window {
 		//spinnerPreLoad.setVisible(false);
 	}
 
-	private void onClose(@Observes Event<CloseJanusEvent> event) {
+	private void onClose(@Observes Event<CloseJanus> closeJanus) {
 		this.stageSplash.close();
 	}
 
@@ -163,14 +159,18 @@ public class SplashScreen implements Window {
 			@Override
 			public void onFileChange(File file) {
 				super.onFileChange(file);
+
 				if (file.equals(debug)) {
 					System.out.println("DEBUG UPDATED: " + file);
+
 					try {
 						updateDebug();
 					} catch (IOException ex) {
-						Logger.getLogger(SplashScreen.class.getName()).log(Level.SEVERE, null, ex);
+						Logger.getLogger(SplashScreen.class.getName())
+							.log(Level.SEVERE, null, ex);
 					}
 				}
+
 				//System.out.println("File updated: " + file);
 			}
 
@@ -200,14 +200,13 @@ public class SplashScreen implements Window {
 		StringBuffer sbuffer = new StringBuffer();
 		FileReader fileReader = new FileReader(debug);
 		BufferedReader br = new BufferedReader(fileReader);
-
 		String line;
+
 		while ((line = br.readLine()) != null) {
 			sbuffer.append(line + "\n");
-
 		}
 
-		splashScreenController.setDebugText(sbuffer.toString()); // TODO: Big no no. Controller should not see the view.
+		splashScreenController.setDebugText(sbuffer.toString()); // TODO: Big no no. View should not see this.
 	}
 
 	public void startMonitor() throws Exception {

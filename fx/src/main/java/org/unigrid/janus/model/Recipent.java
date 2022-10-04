@@ -14,27 +14,29 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.model;
 
-import jakarta.json.bind.annotation.JsonbProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class ValidateAddress extends BaseResult<ValidateAddress.Result> {
-	private static final String METHOD = "validateaddress";
+public class Recipent {
+	private String name;
+	private Address address;
 
-	public static class Request extends BaseRequest {
-		public Request(String address) {
-			super(METHOD);
-			this.setParams(new Object[]{address});
+	@Data
+	private static class Address {
+		private String street;
+		private String postalCode;
+		private String country;
+
+		@Override
+		public String toString() {
+			return String.format("//%s//%s//%s", street, postalCode, country);
 		}
 	}
 
-	@Data
-	public static class Result {
-		@JsonbProperty("isvalid")
-		private boolean valid;
+	@Override
+	public String toString() {
+		return String.format("%s%s", name, address);
 	}
 }

@@ -22,6 +22,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -63,6 +64,7 @@ import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.signal.NodeRequest;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.model.signal.UnlockRequest;
 
@@ -101,7 +103,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	public void initialize(URL url, ResourceBundle rb) {
 		setupNodeList();
 		wallet.addPropertyChangeListener(this);
-		window.setNodeController(this);
+
 		Platform.runLater(() -> {
 			try {
 				vpsConect.setVisible(false);
@@ -269,14 +271,8 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		if (wallet.getLocked()) {
 			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_GRIDNODE).build());
 		} else {
-			startMissingNodes();
+			eventNodeRequest(NodeRequest.START_MISSING);
 		}
-	}
-
-	public void startMissingNodes() {
-		rpc.callToJson(new GridnodeEntity.Request(new Object[]{"start-missing", "0"}));
-		getNodeList();
-		debug.log("Attempting to start nodes");
 	}
 
 	@FXML
@@ -369,5 +365,11 @@ public class NodesController implements Initializable, PropertyChangeListener {
 			debug.log("loading gridnode list");
 			getNodeList();
 		}
+	}
+
+	private void eventNodeRequest(@Observes NodeRequest nodeRequest) {
+		rpc.callToJson(new GridnodeEntity.Request(new Object[]{"start-missing", "0"}));
+		getNodeList();
+		debug.log("Attempting to start nodes");
 	}
 }

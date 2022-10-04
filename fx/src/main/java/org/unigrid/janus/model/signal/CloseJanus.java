@@ -12,23 +12,13 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model.signal;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
-@Data @Builder
-public class Navigate {
-	@AllArgsConstructor
-	public enum Location {
-		WALLET_TAB(1), ADDRESS_TAB(4);
-
-		@Getter private final int index;
-	}
-
-	private Location location;
+@Data
+public class CloseJanus {
+	/* Empty on purpose */
 }
