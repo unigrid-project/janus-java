@@ -26,7 +26,6 @@ import javafx.scene.control.ButtonType;
 import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.controller.DocumentationController;
 import org.unigrid.janus.controller.TransactionsController;
-import org.unigrid.janus.controller.OverlayController;
 import org.unigrid.janus.controller.SettingsController;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
@@ -37,7 +36,6 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 public class WindowService {
 	@Inject private DebugService debug;
 
-	private static OverlayController olController;
 	private static TransactionsController transController;
 	private static SettingsController settingsController;
 	private static DocumentationController docsController;
@@ -72,14 +70,6 @@ public class WindowService {
 				"ERROR: (browse url) %s",
 				ex.getMessage()));
 		}
-	}
-
-	public OverlayController getOverlayController() {
-		return this.olController;
-	}
-
-	public void setOverlayController(OverlayController controller) {
-		this.olController = controller;
 	}
 
 	public TransactionsController getTransactionsController() {

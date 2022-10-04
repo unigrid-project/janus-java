@@ -68,7 +68,7 @@ public class OverlayController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		window.setOverlayController(this);
+		/* Empty on purpose */
 	}
 
 	private void eventUnlockRequest(@Observes UnlockRequest unlockRequest) {
