@@ -86,8 +86,8 @@ public class WalletControllerTest extends BaseFxTest {
 				if (Objects.isNull(e)) {
 					if (clazz.equals(StakingStatus.class)) {
 						return (T) JaxrsResponseHandler.handle(StakingStatus.class,
-							StakingStatus.Result.class, ()
-							-> "staking_status_not_staking.json");
+							StakingStatus.Result.class,
+							() -> "staking_status_not_staking.json");
 					}
 					if (clazz.equals(GetWalletInfo.class)) {
 						return (T) JaxrsResponseHandler.handle(GetWalletInfo.class,

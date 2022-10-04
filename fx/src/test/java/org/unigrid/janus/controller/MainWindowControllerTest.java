@@ -197,7 +197,7 @@ public class MainWindowControllerTest extends BaseFxTest {
 		isLocked = true;
 		rpc.pollForInfo(100000);
 
-		await().until(() -> wallet != null && wallet.getLocked() != null && wallet.getLocked() == true);
+		await().until(() -> wallet != null && wallet.getLocked() != null && wallet.getLocked());
 
 		verifyThat("#lockBtn", isVisible());
 		robot.clickOn("#lockBtn");
@@ -216,11 +216,9 @@ public class MainWindowControllerTest extends BaseFxTest {
 	@Example
 	public void shouldLock() {
 		isLocked = false;
-		System.out.println("---wallet---"+wallet);
 		rpc.pollForInfo(100000);
-		await().until(() -> wallet != null && wallet.getLocked() != null && wallet.getLocked() == false);
+		await().until(() -> wallet != null && wallet.getLocked() != null && !wallet.getLocked());
 
-		System.out.println("---wallet.getLocked()---"+wallet.getLocked());
 		verifyThat("#unlockedBtn", n -> n.isVisible());
 		robot.clickOn("#unlockedBtn");
 		verifyThat("#lockBtn", isVisible());

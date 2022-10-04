@@ -38,6 +38,4 @@ public class MockitHook extends TestRunnerDecorator implements AroundPropertyHoo
 	public void afterContainer(ContainerLifecycleContext context) {
 		cleanUpAllMocks();
 	}
-
-
 }

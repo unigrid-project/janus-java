@@ -41,6 +41,7 @@ public class Address {
 		public Amount(String amount) {
 			super(amount);
 		}
+
 		@Override
 		public String toString() {
 			return this.setScale(DECIMALS, RoundingMode.UP).toPlainString();
