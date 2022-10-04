@@ -115,7 +115,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	@FXML
-	public void onShowDebug(MouseEvent event) throws NullPointerException {
+	public void onShowDebug(MouseEvent event) {
 		File debugLog = DataDirectory.getDebugLog();
 		try {
 			hostServices.showDocument(debugLog.getAbsolutePath());
