@@ -90,21 +90,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		pnlOverlay.setVisible(false);
 		pnlWarning.setVisible(false);
 		wallet.addPropertyChangeListener(this);
-	}
-
-	@FXML
-	private void onShown(WindowEvent event) {
-		debug.log("Shown event fired!");
 		lockBtn.iconColorProperty().setValue(Color.RED);
-
-		Platform.runLater(() -> {
-			try {
-				debug.log("Shown event executing.");
-				window.getTransactionsController().onShown();
-			} catch (Exception e) {
-				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
-			}
-		});
 	}
 
 	private void select(VBox panel, ToggleButton button) {
