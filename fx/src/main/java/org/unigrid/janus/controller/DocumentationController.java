@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.inject.spi.CDI;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -77,8 +78,6 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 		try {
 			pullNewDocumentaion();
-		} catch (JsonProcessingException ex) {
-			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
 			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -102,6 +101,8 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 		} catch (MalformedURLException ex) {
 			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (UnknownHostException ex) {
+			debug.log("Unable to connect to documentation backend. No Internet connection?");
 		}
 	}
 
