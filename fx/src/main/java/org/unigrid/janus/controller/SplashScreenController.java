@@ -37,7 +37,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.DataDirectory;
-import org.unigrid.janus.model.SplashModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.WindowService;
@@ -50,7 +49,6 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	@Inject private DebugService debug;
 	@Inject private HostServices hostServices;
 
-	private SplashModel splashModel = new SplashModel();
 	@FXML private ProgressBar progBar;
 	@FXML private FontIcon spinnerPreLoad;
 	@FXML private Label lblText;
