@@ -24,7 +24,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import lombok.RequiredArgsConstructor;
-import org.unigrid.janus.controller.DocumentationController;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.BaseResult;
 
@@ -33,8 +32,6 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 @RequiredArgsConstructor
 public class WindowService {
 	@Inject private DebugService debug;
-
-	private static DocumentationController docsController;
 
 	private static WindowService serviceInstance = null;
 
@@ -66,14 +63,6 @@ public class WindowService {
 				"ERROR: (browse url) %s",
 				ex.getMessage()));
 		}
-	}
-
-	public DocumentationController getDocsController() {
-		return this.docsController;
-	}
-
-	public void setDocsController(DocumentationController controller) {
-		this.docsController = controller;
 	}
 
 	public void notifyIfError(BaseResult result) {

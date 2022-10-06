@@ -70,7 +70,6 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		window.setDocsController(this);
 		wallet.addPropertyChangeListener(this);
 		documentationList.addPropertyChangeListener(this);
 		pollingService = CDI.current().select(PollingService.class).get();
