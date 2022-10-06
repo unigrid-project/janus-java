@@ -50,6 +50,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import org.apache.commons.io.FileUtils;
 import org.unigrid.janus.model.entity.Feed;
+import org.unigrid.janus.view.AlertDialog;
 
 @ApplicationScoped
 public class UpdateWallet extends TimerTask {
@@ -396,12 +397,11 @@ public class UpdateWallet extends TimerTask {
 	}
 
 	private void failedToInstallNewBootstrap() {
-		String link = "https://github.com/unigrid-project/janus-java/releases";
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Unigrid");
-		alert.setHeaderText("Failed to install new launcher.");
-		alert.setContentText("Please install manually\n " + link);
-		alert.showAndWait();
+		final String link = "https://github.com/unigrid-project/janus-java/releases";
+
+		AlertDialog.openVerbose(Alert.AlertType.INFORMATION,
+			"Failed to install new launcher.", "Please install manually\n " + link
+		);
 
 		switch (OS.CURRENT) {
 			case LINUX:

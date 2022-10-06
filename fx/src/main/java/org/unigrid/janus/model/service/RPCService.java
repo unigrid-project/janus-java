@@ -35,9 +35,6 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 import jakarta.ws.rs.core.Response;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -160,14 +157,6 @@ public class RPCService {
 	public String resultToJson(BaseResult result) {
 		Jsonb jsonb = JsonbBuilder.create();
 		return jsonb.toJson(result);
-	}
-
-	public <R> String alert(R request) {
-		String result = callToJson(request);
-		Alert a = new Alert(AlertType.INFORMATION, result, ButtonType.OK);
-
-		a.showAndWait();
-		return result;
 	}
 
 	private static String convertStreamToString(InputStream is) {

@@ -24,13 +24,23 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @Data
 public class AlertDialog {
+	public static void openVerbose(AlertType type, String header, String message) {
+		final Alert alert = new Alert(type);
+
+		alert.setTitle("Unigrid Janus");
+		alert.setHeaderText(header);
+		alert.setContentText(message);
+		alert.showAndWait();
+	}
+
+	public static void open(AlertType type, String message) {
+		final Alert alert = new Alert(AlertType.ERROR, message, ButtonType.OK);
+		alert.showAndWait();
+	}
+
 	public static void open(BaseResult result, AlertType type) {
 		if (result.hasError()) {
-			final Alert a = new Alert(AlertType.ERROR,
-				String.format("Daemon Error: %s", result.getError().getMessage()),
-				ButtonType.OK);
-
-			a.showAndWait();
+			open(type, String.format("RPC Error: %s", result.getError().getMessage()));
 		}
 	}
 }

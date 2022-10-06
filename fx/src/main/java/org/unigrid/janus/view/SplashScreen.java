@@ -36,7 +36,6 @@ import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -87,8 +86,7 @@ public class SplashScreen implements Window {
 			stageSplash.show();
 			startSpinner();
 		} catch (Exception e) {
-			Alert a = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
-			a.showAndWait();
+			AlertDialog.open(Alert.AlertType.ERROR, e.getMessage());
 		}
 	}
 

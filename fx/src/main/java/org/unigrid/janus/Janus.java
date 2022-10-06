@@ -34,11 +34,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
@@ -54,6 +52,7 @@ import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
 
 @Eager
@@ -101,14 +100,11 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	public void startDaemon() {
 		debug.print("Janus starting daemon...", Janus.class.getSimpleName());
-		// TODO: should this change to spalshScreenInsted
+
 		try {
 			daemon.start();
 		} catch (Exception e) {
-			Alert a = new Alert(AlertType.ERROR,
-				e.getMessage(),
-				ButtonType.OK);
-			a.showAndWait();
+			AlertDialog.open(AlertType.ERROR, e.getMessage());
 		}
 
 		debug.print("Daemon start done", Janus.class.getSimpleName());
@@ -193,8 +189,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 				System.err.print("error: " + e.getCause().toString());
 			}
 
-			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
-			a.showAndWait();
+			AlertDialog.open(AlertType.ERROR, e.getMessage());
 		}
 	}
 
