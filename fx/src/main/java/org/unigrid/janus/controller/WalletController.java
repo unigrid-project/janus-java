@@ -65,7 +65,7 @@ import org.unigrid.janus.model.Address;
 import org.unigrid.janus.model.Address.Amount;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.TransactionList;
@@ -81,6 +81,7 @@ import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {
+	@Inject private BrowserService browser;
 	@Inject private DebugService debug;
 	@Inject private PollingService polling;
 	@Inject private RPCService rpc;
@@ -90,7 +91,6 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	@Inject private Event<Navigate> navigateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
-	private static final WindowService WINDOW = WindowService.getInstance();
 	private int syncIntervalShort = 30000;
 	private int syncIntervalLong = 3600000;
 
@@ -187,7 +187,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				btn.setTooltip(new Tooltip(trans.getCategory()));
 
 				btn.setOnAction(e -> {
-					WINDOW.browseURL("https://explorer.unigrid.org/tx/" + trans.getTxid());
+					browser.navigateTransaction(trans.getTxid());
 				});
 
 				FontIcon fontIcon = new FontIcon("fas-wallet");
@@ -221,9 +221,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 				link.setOnAction(e -> {
 					if (e.getTarget().equals(link)) {
-						WINDOW.browseURL("https://explorer"
-							+ ".unigrid.org/address/"
-							+ trans.getAddress());
+						browser.navigateAddress(trans.getAddress());
 					}
 				});
 

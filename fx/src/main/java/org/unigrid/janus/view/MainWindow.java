@@ -23,10 +23,8 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.signal.CloseJanus;
-import org.unigrid.janus.model.service.WindowService;
 
 @Eager
 @ApplicationScoped
@@ -34,11 +32,7 @@ public class MainWindow implements Window {
 	public static final int MIN_WIDTH = 800;
 	public static final int MIN_HEIGHT = 500;
 
-	private WindowService window = WindowService.getInstance();
-
 	@Inject private Stage stage;
-	@Inject private JanusModel janusModel;
-	@Inject private Event<CloseJanus> closeJanusEvent;
 
 	@PostConstruct
 	private void init() {

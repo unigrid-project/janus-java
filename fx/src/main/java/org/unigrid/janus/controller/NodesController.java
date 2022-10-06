@@ -52,7 +52,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
-import javafx.util.Callback;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -63,13 +62,14 @@ import org.unigrid.janus.model.rpc.entity.GridnodeEntity;
 import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.model.signal.NodeRequest;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
+	@Inject private BrowserService browser;
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
@@ -77,7 +77,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@Inject private Event<State> stateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
-	private static WindowService window = WindowService.getInstance();
 	private static GridnodeListModel nodes = new GridnodeListModel();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
@@ -129,56 +128,51 @@ public class NodesController implements Initializable, PropertyChangeListener {
 				new PropertyValueFactory<Gridnode, String>("alias"));
 			colNodeAddress.setCellValueFactory(
 				new PropertyValueFactory<Gridnode, String>("address"));
-			colNodeTxhash.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Gridnode, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
 
-				public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Gridnode, Hyperlink> t) {
+			colNodeTxhash.setCellValueFactory(cell -> {
+				Gridnode gridnode = ((TableColumn.CellDataFeatures<Gridnode, Hyperlink>) cell).getValue();
+				String text = gridnode.getTxhash() + " " + gridnode.getOutputidx();
+				Hyperlink link = new Hyperlink();
+				link.setText(text);
 
-					Gridnode gridnode = t.getValue();
-					String text = gridnode.getTxhash() + " " + gridnode.getOutputidx();
+				link.setOnAction(e -> {
+					if (e.getTarget().equals(link)) {
+						browser.navigateTransaction(gridnode.getTxhash());
+					}
+				});
 
-					Hyperlink link = new Hyperlink();
-					link.setText(text);
+				Button btn = new Button();
+				FontIcon fontIcon = new FontIcon("fas-clipboard");
+				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+				btn.setGraphic(fontIcon);
 
-					link.setOnAction(e -> {
-						if (e.getTarget().equals(link)) {
-							// TODO: Not a proper setter!
-							window.browseURL("https://explorer.unigrid.org/tx/"
-								+ gridnode.getTxhash()
-							);
-						}
-					});
+				btn.setOnAction(e -> {
+					final Clipboard cb = Clipboard.getSystemClipboard();
+					final ClipboardContent content1 = new ClipboardContent();
 
-					Button btn = new Button();
-					FontIcon fontIcon = new FontIcon("fas-clipboard");
-					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-					btn.setGraphic(fontIcon);
+					content1.putString(gridnode.getTxhash());
+					cb.setContent(content1);
 
-					btn.setOnAction(e -> {
-						final Clipboard cb = Clipboard.getSystemClipboard();
-						final ClipboardContent content = new ClipboardContent();
-						content.putString(gridnode.getTxhash());
-						cb.setContent(content);
-						if (SystemUtils.IS_OS_MAC_OSX) {
-							Notifications
-								.create()
-								.title("Key copied to clipboard")
-								.text(gridnode.getTxhash())
-								.position(Pos.TOP_RIGHT)
-								.showInformation();
-						} else {
-							Notifications
-								.create()
-								.title("Key copied to clipboard")
-								.text(gridnode.getTxhash())
-								.showInformation();
-						}
-					});
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						Notifications
+							.create()
+							.title("Key copied to clipboard")
+							.text(gridnode.getTxhash())
+							.position(Pos.TOP_RIGHT)
+							.showInformation();
+					} else {
+						Notifications
+							.create()
+							.title("Key copied to clipboard")
+							.text(gridnode.getTxhash())
+							.showInformation();
+					}
+				});
 
-					link.setGraphic(btn);
-					link.setAlignment(Pos.CENTER_RIGHT);
-					return new ReadOnlyObjectWrapper(link);
-				}
+				link.setGraphic(btn);
+				link.setAlignment(Pos.CENTER_RIGHT);
+
+				return new ReadOnlyObjectWrapper(link);
 			});
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup node table) %s", e.getMessage()));
@@ -223,7 +217,9 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	public void loadGridnodes() {
 		try {
 			GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"outputs"}),
-				GridnodeList.class);
+				GridnodeList.class
+			);
+
 			nodes.setGridnodes(result);
 			tblGridnodeKeys.setItems(nodes.getGridnodes());
 		} catch (Exception e) {
@@ -253,11 +249,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	private void copyToClipboard(String gridnode) {
 		content.putString(gridnode);
 		clipboard.setContent(content);
-		Notifications
-			.create()
-			.title("Gridnode copied to clipboard")
-			.text(gridnode)
-			.showInformation();
+		Notifications.create().title("Gridnode copied to clipboard").text(gridnode).showInformation();
 	}
 
 	@FXML
@@ -293,7 +285,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 			PrintStream commander = new PrintStream(inputStream, true);
 
 			channel.setOutputStream(System.out, true);
-
 			channel.connect();
 
 			commander.println("ls -la");

@@ -40,7 +40,7 @@ import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.view.MainWindow;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
@@ -61,7 +61,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private Daemon daemon;
 	@Inject private RPCService rpc;
 	@Inject private DebugService debug;
-	@Inject private WindowService window;
+	@Inject private BrowserService window;
 	@Inject private MainWindow mainWindow;
 	@Inject private JanusPreloader preloader;
 	@Inject private JanusModel janusModel;

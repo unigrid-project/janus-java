@@ -39,12 +39,12 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 
 @Eager
 @ApplicationScoped
 public class SplashScreenController implements Initializable, PropertyChangeListener {
-	private WindowService window;
+	private BrowserService window;
 
 	@Inject private DebugService debug;
 	@Inject private HostServices hostServices;
@@ -60,8 +60,6 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		window = window.getInstance();
-
 		Platform.runLater(() -> {
 			progBar.setVisible(false);
 			// Font font = Font.loadFont("fonts/PressStart2P-vaV7.ttf", 10);

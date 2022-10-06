@@ -50,16 +50,16 @@ import org.unigrid.janus.model.rpc.entity.GetNewAddress;
 import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 
 @ApplicationScoped
 public class AddressController implements Initializable, PropertyChangeListener {
+	@Inject private BrowserService browser;
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
 	private final AddressListModel addresses = new AddressListModel();
-	private final WindowService window = WindowService.getInstance();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
@@ -90,18 +90,18 @@ public class AddressController implements Initializable, PropertyChangeListener 
 				String text = address.getAddress();
 				Hyperlink link = new Hyperlink();
 				link.setText(text);
+
 				link.setOnAction(e -> {
 					if (e.getTarget().equals(link)) {
-						// TODO: Not a proper setter!
-						window.browseURL("https://explorer.unigrid.org/address/"
-							+ address.getAddress()
-						);
+						browser.navigateAddress(address.getAddress());
 					}
 				});
+
 				Button btn = new Button();
 				FontIcon fontIcon = new FontIcon("fas-clipboard");
 				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
 				btn.setGraphic(fontIcon);
+
 				btn.setOnAction(e -> {
 					final Clipboard cb = Clipboard.getSystemClipboard();
 					final ClipboardContent content1 = new ClipboardContent();
@@ -122,13 +122,14 @@ public class AddressController implements Initializable, PropertyChangeListener 
 							.showInformation();
 					}
 				});
+
 				link.setGraphic(btn);
 				link.setAlignment(Pos.CENTER_RIGHT);
+
 				return new ReadOnlyObjectWrapper(link);
 			});
 
 			colAddressBalance.setCellValueFactory(new PropertyValueFactory<Address, String>("amount"));
-
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup address table) %s", e.getMessage()));
 		}

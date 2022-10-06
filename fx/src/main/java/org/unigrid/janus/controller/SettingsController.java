@@ -59,7 +59,6 @@ import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.rpc.entity.DumpWallet;
 import org.unigrid.janus.model.rpc.entity.BackupWallet;
 import org.unigrid.janus.model.Wallet;
@@ -88,8 +87,6 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@Inject private Event<Navigate> navigateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 	@Inject private Event<WalletRequest> walletRequestEvent;
-
-	private static WindowService window = WindowService.getInstance();
 
 	private static final int TAB_SETTINGS_GENERAL = 1;
 	private static final int TAB_SETTINGS_DISPLAY = 2;

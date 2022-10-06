@@ -20,44 +20,50 @@ import java.awt.Desktop;
 import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.model.cdi.Eager;
+import org.update4j.OS;
 
 @Eager
 @ApplicationScoped
 @RequiredArgsConstructor
-public class WindowService {
+public class BrowserService {
+	private static final String BASE_URL_TEMPLATE = "https://explorer.unigrid.org/%s/%s";
+	private static final String ADDRESS_PART = "address";
+	private static final String TX_PART = "tx";
+
 	@Inject private DebugService debug;
 
-	private static WindowService serviceInstance = null;
-
-	public static WindowService getInstance() {
-		if (serviceInstance == null) {
-			serviceInstance = new WindowService();
-		}
-		return serviceInstance;
+	public void navigateAddress(String address) {
+		navigate(String.format(BASE_URL_TEMPLATE, ADDRESS_PART, address));
 	}
 
-	public void browseURL(String url) {
+	public void navigateTransaction(String tx) {
+		navigate(String.format(BASE_URL_TEMPLATE, TX_PART, tx));
+	}
+
+	public void navigate(String url) {
 		try {
-			String os = System.getProperty("os.name").toLowerCase();
-			if (os.indexOf("win") >= 0) {
-				if (Desktop.isDesktopSupported()
-					&& Desktop.getDesktop().isSupported(
-						Desktop.Action.BROWSE)) {
-					Desktop.getDesktop().browse(
-						new URI(url));
+			switch (OS.CURRENT) {
+				case WINDOWS -> {
+					if (Desktop.isDesktopSupported()
+						&& Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+						Desktop.getDesktop().browse(new URI(url));
+					}
 				}
-			} else if (os.indexOf("mac") >= 0) {
-				Runtime rt = Runtime.getRuntime();
-				rt.exec("open " + url);
-			} else { // linux
-				new ProcessBuilder("x-www-browser", url).start();
+
+				case MAC -> {
+					Runtime.getRuntime().exec("open " + url);
+				}
+
+				default -> {
+					Runtime.getRuntime().exec("xxx-www-browser " + url);
+				}
 			}
-		} catch (Exception ex) {
-			debug.log(String.format(
-				"ERROR: (browse url) %s",
-				ex.getMessage()));
+		} catch (IOException | URISyntaxException ex) {
+			debug.log(String.format("ERROR: (browse url) %s", ex.getMessage()));
 		}
 	}
 }

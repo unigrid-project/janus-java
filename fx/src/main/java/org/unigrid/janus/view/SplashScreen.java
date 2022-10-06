@@ -52,7 +52,7 @@ import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.signal.CloseJanus;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 
 @Eager
 @Data
@@ -61,7 +61,7 @@ public class SplashScreen implements Window {
 	@Inject private JanusModel janusModel;
 	@Inject private SplashScreenController splashScreenController; // TODO: Big no no. View should not see this.
 	@Inject private Stage stageSplash;
-	@Inject private WindowService window;
+	@Inject private BrowserService window;
 
 	private FontIcon spinnerPreLoad;
 	private RotateTransition rt;

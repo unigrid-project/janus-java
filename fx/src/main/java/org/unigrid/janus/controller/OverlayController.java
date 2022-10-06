@@ -37,7 +37,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
@@ -56,8 +55,6 @@ public class OverlayController implements Initializable {
 	@Inject private Event<NodeRequest> nodeRequestEvent;
 	@Inject private Event<WalletRequest> walletRequestEvent;
 	@Inject private Event<State> stateEvent;
-
-	private static WindowService window = WindowService.getInstance();
 
 	@FXML private GridPane pnlUnlock;
 	@FXML private PasswordField passphraseInput;
