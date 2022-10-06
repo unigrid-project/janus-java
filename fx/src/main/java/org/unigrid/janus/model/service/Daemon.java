@@ -33,7 +33,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.cdi.Eager;
-import org.unigrid.janus.model.rpc.entity.BlockCount;
+import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.view.AlertDialog;
 import org.update4j.OS;
 
@@ -104,7 +104,7 @@ public class Daemon {
 		boolean isRunning;
 
 		try {
-			rpc.call(new BlockCount(), BlockCount.class);
+			rpc.call(new GetBlockCount.Request(), GetBlockCount.class);
 			isRunning = false;
 		} catch (jakarta.ws.rs.ProcessingException e) {
 

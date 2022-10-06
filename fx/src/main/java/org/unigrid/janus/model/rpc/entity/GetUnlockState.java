@@ -22,11 +22,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class GetUnlockState extends BaseResult<GetUnlockState.Result> {
-
 	public static final String METHOD = "getunlockstate";
 
 	public static class Request extends BaseRequest {
-
 		public Request() {
 			super(METHOD);
 		}

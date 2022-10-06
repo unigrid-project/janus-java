@@ -33,7 +33,7 @@ public class ListTransactions extends BaseResult<List<ListTransactions.Result>> 
 		}
 	}
 
-	@Data
 	public static class Result extends Transaction {
+		/* Empty on purpose */
 	}
 }

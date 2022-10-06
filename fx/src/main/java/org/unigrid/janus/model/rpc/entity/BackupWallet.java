@@ -33,5 +33,6 @@ public class BackupWallet extends BaseResult<BackupWallet.Result> {
 
 	@Data
 	public static class Result {
+		/* Empty on purpose */
 	}
 }

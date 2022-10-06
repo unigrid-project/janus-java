@@ -30,8 +30,7 @@ public class LockWallet extends BaseResult<LockWallet.Result> {
 		}
 	}
 
-	@Data
 	public static class Result {
-
+		/* Empty on purpose */
 	}
 }

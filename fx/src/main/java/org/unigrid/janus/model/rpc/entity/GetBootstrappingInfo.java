@@ -22,11 +22,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class GetBootstrappingInfo extends BaseResult<GetBootstrappingInfo.Result> {
-
 	public static final String METHOD = "getbootstrappinginfo";
 
 	public static class Request extends BaseRequest {
-
 		public Request() {
 			super(METHOD);
 		}

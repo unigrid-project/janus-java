@@ -33,5 +33,6 @@ public class DumpWallet extends BaseResult<DumpWallet.Result> {
 
 	@Data
 	public static class Result {
+		/* Empty on purpose */
 	}
 }
