@@ -33,6 +33,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.input.MouseEvent;
@@ -70,6 +71,7 @@ import org.unigrid.janus.model.signal.Navigate;
 import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import org.unigrid.janus.model.signal.WalletRequest;
+import org.unigrid.janus.view.AlertDialog;
 import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
@@ -361,8 +363,9 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		File file = fileChooser.showSaveDialog(stage);
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
 		// debug.log(rpc.callToJson(new BackupWallet.Request(file.getAbsolutePath())));
+
 		final BackupWallet result = rpc.call(new BackupWallet.Request(file.getAbsolutePath()), BackupWallet.class);
-		window.notifyIfError(result);
+		AlertDialog.open(result, Alert.AlertType.ERROR);
 		debug.log(String.format("Backup wallet result: %s", rpc.resultToJson(result)));
 	}
 
@@ -395,7 +398,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 				DumpWallet.class
 			);
 
-			window.notifyIfError(result);
+			AlertDialog.open(result, Alert.AlertType.ERROR);
 			debug.log(String.format("Dump wallet result: %s", rpc.resultToJson(result)));
 		}
 	}

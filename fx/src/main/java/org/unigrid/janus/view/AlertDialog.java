@@ -16,17 +16,21 @@
 
 package org.unigrid.janus.view;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import lombok.Data;
+import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @Data
-public class StageProperties {
-	public enum DecoratorState {
-		RESIZING, MOVING, IDLE
-	}
+public class AlertDialog {
+	public static void open(BaseResult result, AlertType type) {
+		if (result.hasError()) {
+			final Alert a = new Alert(AlertType.ERROR,
+				String.format("Daemon Error: %s", result.getError().getMessage()),
+				ButtonType.OK);
 
-	private DecoratorState decoratorState = DecoratorState.IDLE;
-
-	public static StageProperties get(Object s) {
-		return (StageProperties) s;
+			a.showAndWait();
+		}
 	}
 }

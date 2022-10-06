@@ -18,6 +18,5 @@ package org.unigrid.janus.view;
 
 public interface Window {
 	void show();
-
 	void hide();
 }

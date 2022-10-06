@@ -20,12 +20,8 @@ import java.awt.Desktop;
 import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.model.cdi.Eager;
-import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @Eager
 @ApplicationScoped
@@ -62,15 +58,6 @@ public class WindowService {
 			debug.log(String.format(
 				"ERROR: (browse url) %s",
 				ex.getMessage()));
-		}
-	}
-
-	public void notifyIfError(BaseResult result) {
-		if (result.hasError()) {
-			Alert a = new Alert(AlertType.ERROR,
-				String.format("Daemon Error: %s", result.getError().getMessage()),
-				ButtonType.OK);
-			a.showAndWait();
 		}
 	}
 }
