@@ -46,11 +46,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Properties;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import org.apache.commons.io.FileUtils;
-import org.unigrid.janus.Janus;
 import org.unigrid.janus.model.entity.Feed;
 
 @ApplicationScoped
@@ -218,19 +216,6 @@ public class UpdateWallet extends TimerTask {
 	}
 
 	private Boolean checkUpdateBootstrap() {
-		String delimiter = ".";
-		Properties myProperties = new Properties();
-
-		try {
-			myProperties.load(Janus.class.getResourceAsStream("application.properties"));
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-			System.out.println(e.getCause().toString());
-		}
-
-		// String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
-		// String filteredVer = fullVer.replace("-SNAPSHOT", "");
-
 		String filteredVer = BootstrapModel.getBootstrapVer();
 		System.out.println("getBootstrapVer in UpdateWallet Check: " + BootstrapModel.getBootstrapVer());
 

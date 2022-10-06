@@ -25,9 +25,7 @@ import jakarta.inject.Inject;
 //import java.awt.SystemTray;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.util.Objects;
-import java.util.Properties;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -203,32 +201,9 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@SneakyThrows
 	private void startSplashScreen() {
 		debug.print("opening splash screen...", Janus.class.getSimpleName());
-		System.out.println("start splashscreen");
-		Properties myProperties = new Properties();
-
-		try {
-			myProperties.load(getClass().getResourceAsStream("application.properties"));
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-
-		String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
-		String filteredVer = fullVer.replace("-SNAPSHOT", "");
-		janusModel.setVersion(filteredVer);
-
-		//System.out.println("version: " + filteredVer);
 		janusModel.setAppState(JanusModel.AppState.STARTING);
-
-		System.out.println(preloader);
 		preloader.initText();
-		System.out.println("a");
-
-		// TODO: Can probably be removed? Use the value from JanusModel instead.
-		preloader.setVersion(filteredVer);
-
-		System.out.println("b");
 		preloader.show();
-		System.out.println("c");
 		startUp();
 	}
 

@@ -50,6 +50,7 @@ import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.DataDirectory;
+import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.signal.CloseJanus;
 import org.unigrid.janus.model.service.WindowService;
@@ -58,6 +59,7 @@ import org.unigrid.janus.model.service.WindowService;
 @Data
 @ApplicationScoped
 public class SplashScreen implements Window {
+	@Inject private JanusModel janusModel;
 	@Inject private SplashScreenController splashScreenController; // TODO: Big no no. View should not see this.
 	@Inject private Stage stageSplash;
 	@Inject private WindowService window;
@@ -69,13 +71,8 @@ public class SplashScreen implements Window {
 	private Label lbl;
 	private FileAlterationMonitor monitor = new FileAlterationMonitor(2000);
 
-	public SplashScreen() {
-
-	}
-
 	@PostConstruct
 	private void init() {
-		System.out.println(stageSplash);
 		stageSplash.centerOnScreen();
 		stageSplash.initStyle(StageStyle.UNDECORATED);
 		stageSplash.setResizable(false);
@@ -83,6 +80,9 @@ public class SplashScreen implements Window {
 
 	@SneakyThrows
 	public void show() {
+		lbl = (Label) stageSplash.getScene().lookup("#verLbl");
+		lbl.setText("version: ".concat(janusModel.getVersion()));
+
 		try {
 			stageSplash.show();
 			startSpinner();
@@ -144,11 +144,6 @@ public class SplashScreen implements Window {
 
 	public void setText(String s) {
 		text.setText(s);
-	}
-
-	public void setVersion(String version) {
-		lbl = (Label) stageSplash.getScene().lookup("#verLbl");
-		lbl.setText("version: ".concat(version));
 	}
 
 	private void readDebug() throws IOException, Exception {

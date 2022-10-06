@@ -19,37 +19,47 @@ package org.unigrid.janus.model;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import lombok.Getter;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Properties;
+import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Setter;
 import org.unigrid.janus.model.cdi.Eager;
 
+@Data
 @Eager
 @ApplicationScoped
 public class JanusModel {
 	public static final String APP_STATE_CHANGE = "appstatechange";
 	public static final String APP_RESTARTING = "apprestarting";
-	@Getter @Setter
-	private String version;
 	private static PropertyChangeSupport pcs;
 
-	@Getter
+	private AppState appState;
+	@Setter(AccessLevel.NONE) private Boolean hasRun;
+	@Setter(AccessLevel.NONE) private String version = "";
+
 	public enum AppState {
-		STARTING,
-		LOADED,
-		RESTARTING
+		STARTING, LOADED, RESTARTING
 	}
 
-	@Getter
-	private AppState appState;
-
-	@Getter @Setter
-	private Boolean hasRun;
-
 	public JanusModel() {
-		if (this.pcs != null) {
-			return;
+		final Properties properties = new Properties();
+
+		try {
+			properties.load(getClass().getResourceAsStream("application.properties"));
+
+			version = Objects.requireNonNull(properties.getProperty("proj.ver"))
+				.replace("-SNAPSHOT", "");
+		} catch (NullPointerException | IOException e) {
+			throw new IllegalStateException(e);
 		}
-		this.pcs = new PropertyChangeSupport(this);
+
+		//appState = JanusModel.AppState.STARTING;
+
+		if (pcs == null) {
+			pcs = new PropertyChangeSupport(this);
+		}
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
