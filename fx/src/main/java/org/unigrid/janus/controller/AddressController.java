@@ -23,7 +23,6 @@ import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -86,56 +85,46 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	private void setupAddressList() {
 		try {
-			colAddress.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Address, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
-
-				public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address, Hyperlink> t) {
-
-					Address address = t.getValue();
-					String text = address.getAddress();
-
-					Hyperlink link = new Hyperlink();
-					link.setText(text);
-
-					link.setOnAction(e -> {
-						if (e.getTarget().equals(link)) {
-							// TODO: Not a proper setter!
-							window.browseURL("https://explorer.unigrid.org/address/"
-								+ address.getAddress()
-							);
-						}
-					});
-
-					Button btn = new Button();
-					FontIcon fontIcon = new FontIcon("fas-clipboard");
-					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-					btn.setGraphic(fontIcon);
-
-					btn.setOnAction(e -> {
-						final Clipboard cb = Clipboard.getSystemClipboard();
-						final ClipboardContent content = new ClipboardContent();
-						content.putString(address.getAddress());
-						cb.setContent(content);
-						if (SystemUtils.IS_OS_MAC_OSX) {
-							Notifications
-								.create()
-								.title("Address copied to clipboard")
-								.text(address.getAddress())
-								.position(Pos.TOP_RIGHT)
-								.showInformation();
-						} else {
-							Notifications
-								.create()
-								.title("Address copied to clipboard")
-								.text(address.getAddress())
-								.showInformation();
-						}
-					});
-
-					link.setGraphic(btn);
-					link.setAlignment(Pos.CENTER_RIGHT);
-					return new ReadOnlyObjectWrapper(link);
-				}
+			colAddress.setCellValueFactory(cell -> {
+				Address address = ((TableColumn.CellDataFeatures<Address, Hyperlink>) cell).getValue();
+				String text = address.getAddress();
+				Hyperlink link = new Hyperlink();
+				link.setText(text);
+				link.setOnAction(e -> {
+					if (e.getTarget().equals(link)) {
+						// TODO: Not a proper setter!
+						window.browseURL("https://explorer.unigrid.org/address/"
+							+ address.getAddress()
+						);
+					}
+				});
+				Button btn = new Button();
+				FontIcon fontIcon = new FontIcon("fas-clipboard");
+				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+				btn.setGraphic(fontIcon);
+				btn.setOnAction(e -> {
+					final Clipboard cb = Clipboard.getSystemClipboard();
+					final ClipboardContent content1 = new ClipboardContent();
+					content1.putString(address.getAddress());
+					cb.setContent(content1);
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						Notifications
+							.create()
+							.title("Address copied to clipboard")
+							.text(address.getAddress())
+							.position(Pos.TOP_RIGHT)
+							.showInformation();
+					} else {
+						Notifications
+							.create()
+							.title("Address copied to clipboard")
+							.text(address.getAddress())
+							.showInformation();
+					}
+				});
+				link.setGraphic(btn);
+				link.setAlignment(Pos.CENTER_RIGHT);
+				return new ReadOnlyObjectWrapper(link);
 			});
 
 			colAddressBalance.setCellValueFactory(new PropertyValueFactory<Address, String>("amount"));
@@ -145,6 +134,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		}
 	}
 
+	// TODO: Why is this not being used?
 	private void addButtonToTable() {
 		TableColumn<Address, Void> colBtn = new TableColumn("Copy");
 		colBtn.setStyle("-fx-alignment: CENTER;");
@@ -198,13 +188,8 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	}
 
 	public void loadAddresses() {
-		// try {
 		ListAddressBalances addr = rpc.call(new ListAddressBalances.Request(), ListAddressBalances.class);
 		addresses.setAddresses(addr);
-		// } catch (Exception e) {
-		// debug.print("loadAddresses " + e.getCause().getMessage().toString(),
-		// AddressController.class.getSimpleName());
-		// }
 	}
 
 	@FXML
