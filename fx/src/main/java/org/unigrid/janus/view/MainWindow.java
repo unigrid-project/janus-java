@@ -23,9 +23,6 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.signal.CloseJanus;
@@ -52,13 +49,7 @@ public class MainWindow implements Window {
 	}
 
 	public void show() {
-		try {
-			window.getSettingsController().setVersion(janusModel.getVersion());
-			stage.show();
-		} catch (Exception e) {
-			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
-			a.showAndWait();
-		}
+		stage.show();
 	}
 
 	public void hide() {

@@ -69,6 +69,7 @@ import org.unigrid.janus.model.signal.DebugMessage;
 import org.unigrid.janus.model.signal.Navigate;
 import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
+import org.unigrid.janus.model.signal.WalletRequest;
 import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
@@ -78,11 +79,13 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	@Inject private DebugService debug;
 	@Inject private HostServices hostServices;
+	@Inject private JanusModel janusModel;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
 	@Inject private Event<Navigate> navigateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
+	@Inject private Event<WalletRequest> walletRequestEvent;
 
 	private static WindowService window = WindowService.getInstance();
 
@@ -91,7 +94,6 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private static final int TAB_SETTINGS_PASSPHRASE = 3;
 	private static final int TAB_SETTINGS_EXPORT = 4;
 	private static final int TAB_SETTINGS_DEBUG = 5;
-	private static JanusModel janusModel = new JanusModel();
 
 	@FXML private ListView lstDebug;
 
@@ -119,9 +121,9 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		lstDebug.setPrefWidth(500);
 		lstDebug.setPrefHeight(500); //TODO: Put these constants in a model perhaps?
 		lstDebug.scrollTo(debugItems.size());
+		verLbl.setText("version: ".concat(janusModel.getVersion()));
 
 		wallet.addPropertyChangeListener(this);
-		window.setSettingsController(this);
 		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));
 	}
 
@@ -345,21 +347,8 @@ public class SettingsController implements Initializable, PropertyChangeListener
 				node.getScene().lookup("#pnlOverlay").setVisible(true);
 			});
 		} else {
-			dumpKeys();
+			eventWalletRequest(WalletRequest.DUMP_KEYS);
 		}
-	}
-
-	public void dumpKeys() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Export");
-		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
-		fileChooser.setInitialFileName("wallet.txt");
-		File file = fileChooser.showSaveDialog(stage);
-		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
-		// debug.log(rpc.callToJson(new DumpWallet.Request(file.getAbsolutePath())));
-		final DumpWallet result = rpc.call(new DumpWallet.Request(file.getAbsolutePath()), DumpWallet.class);
-		window.notifyIfError(result);
-		debug.log(String.format("Dump wallet result: %s", rpc.resultToJson(result)));
 	}
 
 	@FXML
@@ -382,10 +371,6 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		Preferences.get().put("notifications", String.valueOf(chkNotifications.isSelected()));
 	}
 
-	public void setVersion(String version) {
-		verLbl.setText("version: ".concat(version));
-	}
-
 	@Override
 	public void onShow(Stage stage) {
 		this.stage = stage;
@@ -394,6 +379,25 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@Override
 	public void onHide(Stage stage) {
 		/* Empty on purpose */
+	}
+
+	public void eventWalletRequest(@Observes WalletRequest walletRequest) {
+		if (walletRequest == WalletRequest.DUMP_KEYS) {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Export");
+			fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
+			fileChooser.setInitialFileName("wallet.txt");
+			File file = fileChooser.showSaveDialog(stage);
+
+			debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
+
+			final DumpWallet result = rpc.call(new DumpWallet.Request(file.getAbsolutePath()),
+				DumpWallet.class
+			);
+
+			window.notifyIfError(result);
+			debug.log(String.format("Dump wallet result: %s", rpc.resultToJson(result)));
+		}
 	}
 
 	public void eventDebugMessage(@Observes DebugMessage debugMessage) {

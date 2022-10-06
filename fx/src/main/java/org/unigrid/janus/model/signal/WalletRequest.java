@@ -17,5 +17,5 @@
 package org.unigrid.janus.model.signal;
 
 public enum WalletRequest {
-	SEND_TRANSACTION;
+	DUMP_KEYS, SEND_TRANSACTION;
 }

@@ -188,7 +188,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private void startMainWindow() {
 		try {
 			mainWindow.show();
-
 		} catch (Exception e) {
 			System.out.print("error: " + e.getMessage());
 
@@ -223,7 +222,10 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		System.out.println(preloader);
 		preloader.initText();
 		System.out.println("a");
+
+		// TODO: Can probably be removed? Use the value from JanusModel instead.
 		preloader.setVersion(filteredVer);
+
 		System.out.println("b");
 		preloader.show();
 		System.out.println("c");

@@ -159,7 +159,7 @@ public class OverlayController implements Initializable {
 					} else if (wallet.getUnlockState() == 4) {
 						nodeRequestEvent.fire(NodeRequest.START_MISSING);
 					} else if (wallet.getUnlockState() == 5) {
-						window.getSettingsController().dumpKeys();
+						walletRequestEvent.fire(WalletRequest.DUMP_KEYS);
 					}
 
 					if (wallet.getUnlockState() != 1) {

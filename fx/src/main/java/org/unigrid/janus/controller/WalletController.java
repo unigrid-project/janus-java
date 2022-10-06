@@ -32,14 +32,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.layout.FlowPane;
-import javafx.util.Callback;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.beans.PropertyChangeEvent;
 import java.util.function.UnaryOperator;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.geometry.Pos;
@@ -173,120 +171,104 @@ public class WalletController implements Initializable, PropertyChangeListener {
 
 	private void setupWalletTransactions() {
 		try {
-			colWalletTransDate.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>,
-				ObservableValue<String>>() {
+			colWalletTransDate.setCellValueFactory(cell -> {
+				long time = ((CellDataFeatures<Transaction, String>) cell).getValue().getTime();
+				Date date = new Date(time * 1000L);
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-				public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
-					long time = t.getValue().getTime();
-					Date date = new Date(time * 1000L);
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-					return new ReadOnlyStringWrapper(sdf.format(date));
-				}
+				return new ReadOnlyStringWrapper(sdf.format(date));
 			});
 
-			colWalletTransType.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
+			colWalletTransType.setCellValueFactory(cell -> {
+				Transaction trans = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
+				int confirmations = trans.getConfirmations();
+				Button btn = new Button();
 
-				public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
-					Transaction trans = t.getValue();
-					int confrimations = trans.getConfirmations();
-					Button btn = new Button();
+				btn.setTooltip(new Tooltip(trans.getCategory()));
 
-					btn.setTooltip(new Tooltip(trans.getCategory()));
+				btn.setOnAction(e -> {
+					WINDOW.browseURL("https://explorer.unigrid.org/tx/" + trans.getTxid());
+				});
 
-					btn.setOnAction(e -> {
-						WINDOW.browseURL("https://explorer.unigrid.org/tx/" + trans.getTxid());
-					});
+				FontIcon fontIcon = new FontIcon("fas-wallet");
 
-					FontIcon fontIcon = new FontIcon("fas-wallet");
-
-					if (trans.isGenerated()) {
-						if (trans.getGeneratedfrom().equals("stake")) {
-							fontIcon = new FontIcon("fas-coins");
-							fontIcon.setIconColor(setColor(255, 140, 0, confrimations));
-						} else {
-							fontIcon = new FontIcon("fas-cubes");
-							fontIcon.setIconColor(setColor(104, 197, 255, confrimations));
-						}
-						btn.setTooltip(new Tooltip(trans.getGeneratedfrom()));
-					} else if (trans.getCategory().equals("send")
-						|| trans.getCategory().equals("fee")) {
-						fontIcon = new FontIcon("fas-arrow-right");
-						fontIcon.setIconColor(setColor(255, 0, 0, confrimations));
-					} else if (trans.getCategory().equals("receive")) {
-						fontIcon = new FontIcon("fas-arrow-left");
-						fontIcon.setIconColor(setColor(48, 186, 69, confrimations));
+				if (trans.isGenerated()) {
+					if (trans.getGeneratedfrom().equals("stake")) {
+						fontIcon = new FontIcon("fas-coins");
+						fontIcon.setIconColor(setColor(255, 140, 0, confirmations));
+					} else {
+						fontIcon = new FontIcon("fas-cubes");
+						fontIcon.setIconColor(setColor(104, 197, 255, confirmations));
 					}
-
-					btn.setGraphic(fontIcon);
-					return new ReadOnlyObjectWrapper(btn);
+					btn.setTooltip(new Tooltip(trans.getGeneratedfrom()));
+				} else if (trans.getCategory().equals("send")
+					|| trans.getCategory().equals("fee")) {
+					fontIcon = new FontIcon("fas-arrow-right");
+					fontIcon.setIconColor(setColor(255, 0, 0, confirmations));
+				} else if (trans.getCategory().equals("receive")) {
+					fontIcon = new FontIcon("fas-arrow-left");
+					fontIcon.setIconColor(setColor(48, 186, 69, confirmations));
 				}
+
+				btn.setGraphic(fontIcon);
+				return new ReadOnlyObjectWrapper(btn);
 			});
 
-			colWalletTransAddress.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
+			colWalletTransAddress.setCellValueFactory(cell -> {
+				Hyperlink link = new Hyperlink();
+				Transaction trans = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
+				link.setText(trans.getAddress());
 
-				public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
-					Hyperlink link = new Hyperlink();
-					Transaction trans = t.getValue();
-					link.setText(trans.getAddress());
-
-					link.setOnAction(e -> {
-						if (e.getTarget().equals(link)) {
-							WINDOW.browseURL("https://explorer"
-								+ ".unigrid.org/address/"
-								+ trans.getAddress());
-						}
-					});
-
-					Button btn = new Button();
-					FontIcon fontIcon = new FontIcon("fas-clipboard");
-					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-					btn.setGraphic(fontIcon);
-
-					btn.setOnAction(e -> {
-						final Clipboard cb = Clipboard.getSystemClipboard();
-						final ClipboardContent content = new ClipboardContent();
-
-						content.putString(trans.getTxid());
-						cb.setContent(content);
-
-						if (SystemUtils.IS_OS_MAC_OSX) {
-							Notifications
-								.create()
-								.title("Transaction copied to clipboard")
-								.text(trans.getTxid())
-								.position(Pos.TOP_RIGHT)
-								.showInformation();
-						} else {
-							Notifications
-								.create()
-								.title("Transaction copied to clipboard")
-								.text(trans.getTxid())
-								.showInformation();
-						}
-					});
-
-					link.setGraphic(btn);
-					link.setAlignment(Pos.CENTER_RIGHT);
-					return new ReadOnlyObjectWrapper(link);
-				}
-			});
-
-			colWalletTransAmount.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>,
-				ObservableValue<String>>() {
-
-				public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
-					Transaction trans = t.getValue();
-					double amount = trans.getAmount();
-
-					if (trans.getCategory().equals("send")) {
-						amount += trans.getFee();
+				link.setOnAction(e -> {
+					if (e.getTarget().equals(link)) {
+						WINDOW.browseURL("https://explorer"
+							+ ".unigrid.org/address/"
+							+ trans.getAddress());
 					}
+				});
 
-					return new ReadOnlyStringWrapper(String.format("%.8f", amount));
+				Button btn = new Button();
+				FontIcon fontIcon = new FontIcon("fas-clipboard");
+				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+				btn.setGraphic(fontIcon);
+
+				btn.setOnAction(e -> {
+					final Clipboard cb = Clipboard.getSystemClipboard();
+					final ClipboardContent content = new ClipboardContent();
+
+					content.putString(trans.getTxid());
+					cb.setContent(content);
+
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						Notifications
+							.create()
+							.title("Transaction copied to clipboard")
+							.text(trans.getTxid())
+							.position(Pos.TOP_RIGHT)
+							.showInformation();
+					} else {
+						Notifications
+							.create()
+							.title("Transaction copied to clipboard")
+							.text(trans.getTxid())
+							.showInformation();
+					}
+				});
+
+				link.setGraphic(btn);
+				link.setAlignment(Pos.CENTER_RIGHT);
+				return new ReadOnlyObjectWrapper(link);
+			});
+
+			colWalletTransAmount.setCellValueFactory(cell -> {
+				Transaction trans = ((CellDataFeatures<Transaction, String>) cell).getValue();
+				double amount = trans.getAmount();
+
+				if (trans.getCategory().equals("send")) {
+					amount += trans.getFee();
 				}
+
+				return new ReadOnlyStringWrapper(String.format("%.8f", amount));
 			});
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
@@ -298,28 +280,28 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
+		if (event.getPropertyName().equals(Wallet.BALANCE_PROPERTY)) {
 			debug.log("Value: " + event.getNewValue().toString());
 			lblBalance.setText(((BigDecimal) event.getNewValue()).toPlainString());
 			lblBalanceSend.setText(((BigDecimal) event.getNewValue()).toPlainString());
 		}
 
-		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
+		if (event.getPropertyName().equals(Wallet.BLOCKS_PROPERTY)) {
 			if (!polling.getSyncTimerRunning() && !polling.getLongSyncTimerRunning()) {
 				this.compareBlockHeights();
 			}
 		}
 
-		if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
+		if (event.getPropertyName().equals(Wallet.LOCKED_PROPERTY)) {
 			boolean locked = (boolean) event.getNewValue();
 			// can determine from this if a send transaction needs a passphrase
 		}
 
-		if (event.getPropertyName().equals(transactionList.TRANSACTION_LIST)) {
+		if (event.getPropertyName().equals(TransactionList.TRANSACTION_LIST)) {
 			tblWalletTrans.setItems(transactionList.getTransactions());
 		}
 
-		if (event.getPropertyName().equals(wallet.TRANSACTION_COUNT)) {
+		if (event.getPropertyName().equals(Wallet.TRANSACTION_COUNT)) {
 			final ListTransactions trans = rpc.call(new ListTransactions.Request(0, 10),
 				ListTransactions.class
 			);
@@ -328,7 +310,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		}
 	}
 
-	private UnaryOperator<Change> integerFilter = change -> {
+	private final UnaryOperator<Change> integerFilter = change -> {
 		String newText = change.getControlNewText();
 
 		if (newText.matches("\\d*|\\d+\\.\\d*")) {
@@ -369,7 +351,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			if (call.getResult().isValid()) {
 				if (wallet.getLocked()) {
 					onErrorMessage("Locked wallet");
-					
+
 					unlockRequestEvent.fire(
 						UnlockRequest.builder().type(UnlockRequest.Type.FOR_SEND).build()
 					);
@@ -455,16 +437,17 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	}
 
 	private void eventWalletRequest(@Observes WalletRequest walletRequest) {
-		final Address address = new Address(ugdAddressTxt.getText(), new Amount(amountToSend.getText()));
-		final SendTransaction send = rpc.call(new SendTransaction.Request(address), SendTransaction.class);
+		if (walletRequest == WalletRequest.SEND_TRANSACTION) {
+			final Address address = new Address(ugdAddressTxt.getText(), new Amount(amountToSend.getText()));
+			final SendTransaction send = rpc.call(new SendTransaction.Request(address), SendTransaction.class);
 
-		if (send.getError() == null) {
-			onSuccessMessage("TRANSACTION SENT!");
-			debug.log(send.getResult());
-			resetText();
-		} else {
-			onErrorMessage(send.getError().getMessage());
+			if (send.getError() == null) {
+				onSuccessMessage("TRANSACTION SENT!");
+				debug.log(send.getResult());
+				resetText();
+			} else {
+				onErrorMessage(send.getError().getMessage());
+			}
 		}
 	}
-
 }

@@ -234,6 +234,7 @@ public class UpdateWallet extends TimerTask {
 		String filteredVer = BootstrapModel.getBootstrapVer();
 		System.out.println("getBootstrapVer in UpdateWallet Check: " + BootstrapModel.getBootstrapVer());
 
+		//TODO: Move "VersionNumber" to a seperate class with a comparator so we can clean this up
 		if ((getVersionNumber(filteredVer, 0) == getVersionNumber(getLatestVersion(), 0))
 			&& (getVersionNumber(filteredVer, 2) == getVersionNumber(getLatestVersion(), 2))
 			&& (getVersionNumber(filteredVer, 4) == getVersionNumber(getLatestVersion(), 4))
