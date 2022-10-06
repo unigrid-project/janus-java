@@ -106,6 +106,8 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	@FXML
 	private void onExit(MouseEvent event) {
+		((Node) event.getSource()).getScene().getWindow().hide();
+
 		// TODO: find a place to do this that is guaranteed to be called when
 		// application is closed
 		rpc.stopPolling();

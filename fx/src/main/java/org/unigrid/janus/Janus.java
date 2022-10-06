@@ -119,6 +119,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@Override
 	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
+		Platform.setImplicitExit(false);
+
 		debug.print("start", Janus.class.getSimpleName());
 		//tray.initTrayService(stage);
 		HostServicesProducer.setHostServices(hostServices);
