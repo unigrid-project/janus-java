@@ -48,7 +48,6 @@ import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.producer.HostServicesProducer;
-import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
@@ -78,9 +77,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private String walletVersion;
 	private String progress = "0";
 	private Info info = new Info();
-	private GetWalletInfo walletInfo = new GetWalletInfo();
-	private GetBlockCount blockCount = new GetBlockCount();
-	private GetBootstrappingInfo boostrapInfo = new GetBootstrappingInfo();
 	private Boolean checkForStatus = true;
 
 	@PostConstruct
@@ -210,19 +206,21 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 			@Override
 			protected Void call() throws Exception {
 				debug.print("started while loop and calling unigridd RPC...", Janus.class.getSimpleName());
-				Thread.sleep(2000);
+				GetWalletInfo walletInfo = null;
+				Thread.sleep(1000);
+
 				do {
 					try {
-						walletInfo = rpc.call(new GetWalletInfo.Request(),
-							GetWalletInfo.class);
+						walletInfo = rpc.call(new GetWalletInfo.Request(), GetWalletInfo.class);
 
-						boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
-							GetBootstrappingInfo.class);
+						final GetBootstrappingInfo boostrapInfo = rpc.call(
+							new GetBootstrappingInfo.Request(), GetBootstrappingInfo.class
+						);
 
 						walletStatus = boostrapInfo.getResult().getWalletstatus();
 						progress = boostrapInfo.getResult().getProgress();
 						status = boostrapInfo.getResult().getStatus();
-						Thread.sleep(1000);
+						Thread.sleep(2000);
 					} catch (Exception e) {
 						debug.print("RPC call error: " + e.getMessage().toString(),
 							Janus.class.getSimpleName()
@@ -276,7 +274,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 								splashController.setText("Starting unigrid backend");
 							});
 					}
-				} while (walletInfo.hasError());
+				} while (Objects.isNull(walletInfo) || walletInfo.hasError());
 
 				debug.print("startup completed should load main screen..." + walletStatus,
 					Janus.class.getSimpleName()
