@@ -23,7 +23,6 @@ import javafx.application.Platform;
 import javafx.scene.control.TableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import mockit.Mock;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
@@ -37,8 +36,6 @@ import static org.testfx.matcher.control.TableViewMatchers.hasTableCell;
 import static org.testfx.matcher.control.TextMatchers.hasText;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
 import org.unigrid.janus.jqwik.fx.FxResource;
-import org.unigrid.janus.jqwik.fx.FxStart;
-import org.unigrid.janus.jqwik.fx.FxStop;
 import org.unigrid.janus.model.external.JaxrsResponseHandler;
 import org.unigrid.janus.model.external.ResponseMockUp;
 import org.unigrid.janus.model.rpc.entity.GetNewAddress;
@@ -56,23 +53,6 @@ public class AddressControllerTest extends BaseFxTest {
 
 	@Inject
 	private RPCService rpc;
-
-	@FxStart // TODO: Remove this method
-	public void startWithStage(Stage stage) {
-		System.out.println("I take a stage!");
-		System.out.println("I'm starting a test run and I am only here for demo purposes!");
-	}
-
-	@FxStart // TODO: Remove this method
-	public void start() {
-		System.out.println("I do not take a stage...");
-		System.out.println("I'm starting a test run and I am only here for demo purposes!");
-	}
-
-	@FxStop // TODO: Remove this method
-	public void stop() {
-		System.out.println("I'm stopping a test run and I am only here for demo purposes!");
-	}
 
 	@BeforeContainer
 	private static void before() {

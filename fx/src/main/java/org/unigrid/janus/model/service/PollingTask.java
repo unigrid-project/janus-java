@@ -57,16 +57,17 @@ public class PollingTask extends TimerTask {
 				);
 
 				wallet.setBalance(walletInfo.getResult().getTotalbalance());
-				wallet.setBlocks(Integer.parseInt(blockCount.getResult().toString()));
-				wallet.setConnections(Integer.parseInt(connCount.getResult().toString()));
+				wallet.setBlocks(blockCount.getResult());
+				wallet.setConnections(connCount.getResult());
 				wallet.setEncryptedState(walletInfo);
 				wallet.setWalletState(Wallet.LockState.from(unlockState.getResult().getState()));
 				wallet.setStakingStatus(staking);
 				wallet.setTransactionCount(walletInfo.getResult().getTxcount());
 				wallet.setStatus("done");
 			} catch (Exception e) {
-				System.out.println("SHITPICKLE: " + e.getMessage());
-				wallet.setOffline(Boolean.TRUE);
+				e.printStackTrace();
+				System.out.println(e.getMessage());
+				wallet.setOffline(true);
 				rpc.stopPolling();
 			}
 		});

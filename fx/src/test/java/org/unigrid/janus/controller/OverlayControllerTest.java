@@ -112,11 +112,11 @@ public class OverlayControllerTest extends BaseFxTest {
 					}
 					if (clazz.equals(GetBlockCount.class)) {
 						return (T) JaxrsResponseHandler.handle(GetBlockCount.class,
-							String.class, () -> "get_block_count.json");
+							Integer.class, () -> "get_block_count.json");
 					}
 					if (clazz.equals(GetConnectionCount.class)) {
 						return (T) JaxrsResponseHandler.handle(GetConnectionCount.class,
-							String.class, () -> "getconnectioncount.json");
+							Integer.class, () -> "getconnectioncount.json");
 					}
 					if (clazz.equals(ValidateAddress.class)) {
 						final ValidateAddress result = new ValidateAddress();

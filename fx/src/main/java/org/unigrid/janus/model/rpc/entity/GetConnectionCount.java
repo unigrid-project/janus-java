@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class GetConnectionCount extends BaseResult<String> {
+public class GetConnectionCount extends BaseResult<Integer> {
 	public static final String METHOD = "getconnectioncount";
 
 	public static class Request extends BaseRequest {

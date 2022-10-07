@@ -57,7 +57,6 @@ import org.unigrid.janus.view.MainWindow;
 
 @FxResource(clazz = MainWindow.class, name = "mainWindow.fxml")
 public class WalletControllerTest extends BaseFxTest {
-
 	@Inject
 	private FxRobot robot;
 
@@ -123,11 +122,11 @@ public class WalletControllerTest extends BaseFxTest {
 					}
 					if (clazz.equals(GetBlockCount.class)) {
 						return (T) JaxrsResponseHandler.handle(GetBlockCount.class,
-							String.class, () -> "get_block_count.json");
+							Integer.class, () -> "get_block_count.json");
 					}
 					if (clazz.equals(GetConnectionCount.class)) {
 						return (T) JaxrsResponseHandler.handle(GetConnectionCount.class,
-							String.class, () -> "getconnectioncount.json");
+							Integer.class, () -> "getconnectioncount.json");
 					}
 					if (clazz.equals(SendTransaction.class)) {
 						return (T) new SendTransaction();
