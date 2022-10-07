@@ -46,7 +46,6 @@ import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.signal.State;
@@ -112,12 +111,6 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		// application is closed
 		rpc.stopPolling();
 
-		// Force bootstrap update when it is awilable so the user has the latest one!!!
-		// TODO: maken an event of this insted or an observer
-		if (BootstrapModel.isBootstrapUpdate()) {
-			update.doUpdate();
-		}
-
 		// final Window window = ((Node) event.getSource()).getScene().getWindow();
 		// window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
 		System.exit(0);
@@ -151,6 +144,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	public void onUpdate(MouseEvent event) {
 		System.out.println("onUpdate clicked???");
 		updateButton.setVisible(false);
+		update.doUpdate();
 		// TODO: move this code into UpdateWallet.java
 		// linux the Unigrid app is not executable
 	}

@@ -106,5 +106,9 @@
 			<property name="file" value="../checkstyle-suppress.xml"/>
 			<property name="optional" value="true"/>
 		</module>
+		<module name="SuppressionXpathFilter">
+			<property name="file" value="checkstyle-suppress.xml"/>
+			<property name="optional" value="true"/>
+		</module>
 	</module>
 </module>
