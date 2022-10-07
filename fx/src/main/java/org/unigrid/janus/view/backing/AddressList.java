@@ -40,7 +40,7 @@ public class AddressList extends SimpleListProperty<Address> {
 		set(source.sorted((l, r) -> {
 			Comparator<Address> comparator = Comparator.comparing(Address::getAmount);
 
-			if (sortType == SortType.ASCENDING) {
+			if (sortType == SortType.DESCENDING) {
 				comparator = comparator.reversed();
 			}
 

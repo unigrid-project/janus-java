@@ -235,7 +235,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	@FXML
 	private void onSortChange(MouseEvent event) {
 		final AddressList addressList = (AddressList) tblAddresses.getItems();
-		addressList.setSortType(chkAddress.isSelected() ? SortType.DESCENDING : SortType.ASCENDING);
+		addressList.setSortType(chkAmountSort.isSelected() ? SortType.DESCENDING : SortType.ASCENDING);
 		loadAddresses();
 	}
 }
