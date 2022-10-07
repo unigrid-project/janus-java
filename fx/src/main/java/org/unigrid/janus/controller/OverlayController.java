@@ -33,16 +33,16 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.application.Platform;
-import javafx.scene.Parent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
+import org.unigrid.janus.model.signal.NodeRequest;
 import org.unigrid.janus.model.signal.State;
+import org.unigrid.janus.model.signal.WalletRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import org.unigrid.janus.view.FxUtils;
 
@@ -52,9 +52,9 @@ public class OverlayController implements Initializable {
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
+	@Inject private Event<NodeRequest> nodeRequestEvent;
+	@Inject private Event<WalletRequest> walletRequestEvent;
 	@Inject private Event<State> stateEvent;
-
-	private static WindowService window = WindowService.getInstance();
 
 	@FXML private GridPane pnlUnlock;
 	@FXML private PasswordField passphraseInput;
@@ -65,7 +65,7 @@ public class OverlayController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		window.setOverlayController(this);
+		/* Empty on purpose */
 	}
 
 	private void eventUnlockRequest(@Observes UnlockRequest unlockRequest) {
@@ -107,16 +107,16 @@ public class OverlayController implements Initializable {
 		// TODO: What exactly do these numbers mean ? Please change this to an enum and explain it.
 		switch (wallet.getUnlockState()) {
 			case 1:
-				sendArgs = new Object[] { passphraseInput.getText(), stakingStartTime, true };
+				sendArgs = new Object[]{passphraseInput.getText(), stakingStartTime, true};
 				break;
 			case 2:
-				sendArgs = new Object[] { passphraseInput.getText(), 0 };
+				sendArgs = new Object[]{passphraseInput.getText(), 0};
 				break;
 			case 3:
 			case 4:
 			case 5:
 				// unlock for 30 seconds only
-				sendArgs = new Object[] { passphraseInput.getText(), 30 };
+				sendArgs = new Object[]{passphraseInput.getText(), 30};
 				break;
 			default:
 				throw new AssertionError();
@@ -152,12 +152,11 @@ public class OverlayController implements Initializable {
 
 					//TODO: Get rid of these numbers and use an enum instead!
 					if (wallet.getUnlockState() == 3) {
-						// send transaction
-						window.getWalletController().sendTransactionAfterUnlock();
+						walletRequestEvent.fire(WalletRequest.SEND_TRANSACTION);
 					} else if (wallet.getUnlockState() == 4) {
-						window.getNodeController().startMissingNodes();
+						nodeRequestEvent.fire(NodeRequest.START_MISSING);
 					} else if (wallet.getUnlockState() == 5) {
-						window.getSettingsController().dumpKeys();
+						walletRequestEvent.fire(WalletRequest.DUMP_KEYS);
 					}
 
 					if (wallet.getUnlockState() != 1) {

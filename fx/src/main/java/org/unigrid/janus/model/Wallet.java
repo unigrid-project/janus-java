@@ -76,9 +76,6 @@ public class Wallet {
 	private boolean encrypted;
 	private static boolean offline = false;
 
-	@Getter @Setter
-	private Object[] sendArgs;
-
 	@Inject private DebugService debug;
 
 	@AllArgsConstructor

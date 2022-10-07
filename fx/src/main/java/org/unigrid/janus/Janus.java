@@ -25,9 +25,7 @@ import jakarta.inject.Inject;
 //import java.awt.SystemTray;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.util.Objects;
-import java.util.Properties;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -36,27 +34,24 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import lombok.SneakyThrows;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.view.MainWindow;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
-import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.producer.HostServicesProducer;
-import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
 
 @Eager
@@ -65,14 +60,13 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private Daemon daemon;
 	@Inject private RPCService rpc;
 	@Inject private DebugService debug;
-	@Inject private WindowService window;
+	@Inject private BrowserService window;
 	@Inject private MainWindow mainWindow;
 	@Inject private JanusPreloader preloader;
 	@Inject private JanusModel janusModel;
 	@Inject private UpdateWallet updateWallet;
 	@Inject private SplashScreenController splashController;
 	@Inject private Wallet wallet;
-	@Inject private BootstrapModel bootModel;
 	//@Inject private TrayService tray;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
@@ -83,14 +77,11 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private String walletVersion;
 	private String progress = "0";
 	private Info info = new Info();
-	private GetWalletInfo walletInfo = new GetWalletInfo();
-	private GetBlockCount blockCount = new GetBlockCount();
-	private GetBootstrappingInfo boostrapInfo = new GetBootstrappingInfo();
 	private Boolean checkForStatus = true;
 
 	@PostConstruct
-	@SneakyThrows
 	private void init() {
+		System.out.println("getting to init");
 		startDaemon();
 		// janusModel.getAppState().addObserver
 		janusModel.addPropertyChangeListener(this);
@@ -105,14 +96,11 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	public void startDaemon() {
 		debug.print("Janus starting daemon...", Janus.class.getSimpleName());
-		// TODO: should this change to spalshScreenInsted
+
 		try {
 			daemon.start();
 		} catch (Exception e) {
-			Alert a = new Alert(AlertType.ERROR,
-				e.getMessage(),
-				ButtonType.OK);
-			a.showAndWait();
+			AlertDialog.open(AlertType.ERROR, e.getMessage());
 		}
 
 		debug.print("Daemon start done", Janus.class.getSimpleName());
@@ -127,6 +115,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@Override
 	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
+		Platform.setImplicitExit(false);
+
 		debug.print("start", Janus.class.getSimpleName());
 		//tray.initTrayService(stage);
 		HostServicesProducer.setHostServices(hostServices);
@@ -156,12 +146,11 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	}
 
-	public void startFromBootstrap(Stage stage, HostServices hostServices) throws Exception {
+	public void startFromBootstrap(Stage stage) throws Exception {
 		System.out.println(CDI.current());
 		//tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
-		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
 		ready.addListener(new ChangeListener<Boolean>() {
@@ -191,7 +180,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private void startMainWindow() {
 		try {
 			mainWindow.show();
-
 		} catch (Exception e) {
 			System.out.print("error: " + e.getMessage());
 
@@ -199,37 +187,16 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 				System.err.print("error: " + e.getCause().toString());
 			}
 
-			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
-			a.showAndWait();
+			AlertDialog.open(AlertType.ERROR, e.getMessage());
 		}
 	}
 
 	@SneakyThrows
 	private void startSplashScreen() {
 		debug.print("opening splash screen...", Janus.class.getSimpleName());
-		System.out.println("start splashscreen");
-		Properties myProperties = new Properties();
-
-		try {
-			myProperties.load(getClass().getResourceAsStream("application.properties"));
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-
-		String fullVer = Objects.requireNonNull((String) myProperties.get("proj.ver"));
-		String filteredVer = fullVer.replace("-SNAPSHOT", "");
-		janusModel.setVersion(filteredVer);
-
-		//System.out.println("version: " + filteredVer);
 		janusModel.setAppState(JanusModel.AppState.STARTING);
-
-		System.out.println(preloader);
 		preloader.initText();
-		System.out.println("a");
-		preloader.setVersion(filteredVer);
-		System.out.println("b");
 		preloader.show();
-		System.out.println("c");
 		startUp();
 	}
 
@@ -239,19 +206,21 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 			@Override
 			protected Void call() throws Exception {
 				debug.print("started while loop and calling unigridd RPC...", Janus.class.getSimpleName());
-				Thread.sleep(2000);
+				GetWalletInfo walletInfo = null;
+				Thread.sleep(1000);
+
 				do {
 					try {
-						walletInfo = rpc.call(new GetWalletInfo.Request(),
-							GetWalletInfo.class);
+						walletInfo = rpc.call(new GetWalletInfo.Request(), GetWalletInfo.class);
 
-						boostrapInfo = rpc.call(new GetBootstrappingInfo.Request(),
-							GetBootstrappingInfo.class);
+						final GetBootstrappingInfo boostrapInfo = rpc.call(
+							new GetBootstrappingInfo.Request(), GetBootstrappingInfo.class
+						);
 
 						walletStatus = boostrapInfo.getResult().getWalletstatus();
 						progress = boostrapInfo.getResult().getProgress();
 						status = boostrapInfo.getResult().getStatus();
-						Thread.sleep(1000);
+						Thread.sleep(2000);
 					} catch (Exception e) {
 						debug.print("RPC call error: " + e.getMessage().toString(),
 							Janus.class.getSimpleName()
@@ -305,7 +274,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 								splashController.setText("Starting unigrid backend");
 							});
 					}
-				} while (walletInfo.hasError());
+				} while (Objects.isNull(walletInfo) || walletInfo.hasError());
 
 				debug.print("startup completed should load main screen..." + walletStatus,
 					Janus.class.getSimpleName()

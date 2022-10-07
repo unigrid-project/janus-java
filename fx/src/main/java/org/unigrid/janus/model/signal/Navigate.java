@@ -24,7 +24,7 @@ import lombok.Getter;
 @Data @Builder
 public class Navigate {
 	@AllArgsConstructor
-	public static enum Location {
+	public enum Location {
 		WALLET_TAB(1), ADDRESS_TAB(4);
 
 		@Getter private final int index;

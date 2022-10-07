@@ -32,8 +32,7 @@ public class ListAddressGroupings extends BaseResult<List<ListAddressGroupings.R
 		}
 	}
 
-	@Data
 	public static class Result extends Address {
-
+		/* Empty on purpose */
 	}
 }

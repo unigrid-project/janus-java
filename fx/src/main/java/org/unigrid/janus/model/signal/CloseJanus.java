@@ -12,22 +12,13 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.model.signal;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class BlockCount extends BaseResult<String> {
-	private static final String METHOD = "getblockcount";
-
-	public static class Request extends BaseRequest {
-		public Request() {
-			super(METHOD);
-		}
-	}
-
+public class CloseJanus {
+	/* Empty on purpose */
 }

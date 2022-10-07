@@ -16,24 +16,21 @@
 
 package org.unigrid.janus.model.external;
 
-import jakarta.json.bind.JsonbBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import mockit.Mock;
 import mockit.MockUp;
 import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
-import org.unigrid.janus.model.rpc.entity.GetNewAddress;
-import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
+import org.unigrid.janus.model.entity.Feed;
 
 public class ResponseMockUp extends MockUp<OutboundJaxrsResponse> {
-	@Mock
-	public <T> T readEntity(Class<T> clazz) {
+
+	protected <T> T readEntities(Class<T> clazz) {
 		switch (clazz.getSimpleName()) {
-			case "GetNewAddress" -> {
-				return (T) getNewAddress((Class<String>) clazz);
+			case "Feed" -> {
+				return (T) feed((Class<List>) clazz);
 			}
-			case "ListAddressBalances" -> {
-				return (T) listAddressBalances((Class<List>) clazz, null);
+			case "String" -> {
+				return (T) "2088092";
 			}
 			default -> {
 				return null;
@@ -41,20 +38,13 @@ public class ResponseMockUp extends MockUp<OutboundJaxrsResponse> {
 		}
 	}
 
-	public GetNewAddress getNewAddress(Class<String> clazz) {
-		final GetNewAddress gna = new GetNewAddress();
-		gna.setResult(JsonbBuilder.create().fromJson(ResponseMockUp.class
-			.getResourceAsStream("get_new_address.json"), String.class));
-		return gna;
-	}
-
-	public ListAddressBalances listAddressBalances(Class<List> clazz, List list) {
-		final ListAddressBalances addr = new ListAddressBalances();
-		addr.setResult(JsonbBuilder.create().fromJson(
-			ResponseMockUp.class.getResourceAsStream("list_address_balances.json"),
-			new ArrayList<ListAddressBalances.Result>() {
-			}
-				.getClass().getGenericSuperclass()));
-		return addr;
+	public Feed feed(Class<List> clazz) {
+		final Feed result = new Feed();
+		List<Feed.Entry> list = new ArrayList<Feed.Entry>();
+		Feed.Entry entry = new Feed.Entry();
+		entry.setId("tag:github.com,2008:Repository/354793431/v1.0.7");
+		list.add(entry);
+		result.setEntry(list);
+		return result;
 	}
 }

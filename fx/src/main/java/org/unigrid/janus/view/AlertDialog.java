@@ -12,21 +12,35 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.view;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.unigrid.janus.model.rpc.entity.BaseResult;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class WalletInfo extends BaseResult<String> {
-	private static final String METHOD = "getwalletinfo";
+public class AlertDialog {
+	public static void openVerbose(AlertType type, String header, String message) {
+		final Alert alert = new Alert(type);
 
-	public static class Request extends BaseRequest {
-		public Request() {
-			super(METHOD);
+		alert.setTitle("Unigrid Janus");
+		alert.setHeaderText(header);
+		alert.setContentText(message);
+		alert.showAndWait();
+	}
+
+	public static void open(AlertType type, String message) {
+		final Alert alert = new Alert(AlertType.ERROR, message, ButtonType.OK);
+		alert.showAndWait();
+	}
+
+	public static void open(BaseResult result, AlertType type) {
+		if (result.hasError()) {
+			open(type, String.format("RPC Error: %s", result.getError().getMessage()));
 		}
 	}
 }

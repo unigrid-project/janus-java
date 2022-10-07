@@ -32,6 +32,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.input.MouseEvent;
@@ -57,7 +59,6 @@ import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.rpc.entity.DumpWallet;
 import org.unigrid.janus.model.rpc.entity.BackupWallet;
 import org.unigrid.janus.model.Wallet;
@@ -68,6 +69,9 @@ import org.unigrid.janus.model.signal.DebugMessage;
 import org.unigrid.janus.model.signal.Navigate;
 import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
+import org.unigrid.janus.model.signal.WalletRequest;
+import org.unigrid.janus.view.AlertDialog;
+import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
 public class SettingsController implements Initializable, PropertyChangeListener, Showable {
@@ -76,20 +80,19 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	@Inject private DebugService debug;
 	@Inject private HostServices hostServices;
+	@Inject private JanusModel janusModel;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
 	@Inject private Event<Navigate> navigateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
-
-	private static WindowService window = WindowService.getInstance();
+	@Inject private Event<WalletRequest> walletRequestEvent;
 
 	private static final int TAB_SETTINGS_GENERAL = 1;
 	private static final int TAB_SETTINGS_DISPLAY = 2;
 	private static final int TAB_SETTINGS_PASSPHRASE = 3;
 	private static final int TAB_SETTINGS_EXPORT = 4;
 	private static final int TAB_SETTINGS_DEBUG = 5;
-	private static JanusModel janusModel = new JanusModel();
 
 	@FXML private ListView lstDebug;
 
@@ -117,9 +120,9 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		lstDebug.setPrefWidth(500);
 		lstDebug.setPrefHeight(500); //TODO: Put these constants in a model perhaps?
 		lstDebug.scrollTo(debugItems.size());
+		verLbl.setText("version: ".concat(janusModel.getVersion()));
 
 		wallet.addPropertyChangeListener(this);
-		window.setSettingsController(this);
 		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));
 	}
 
@@ -205,29 +208,33 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	}
 
 	@FXML
-	private void onOpenConf(MouseEvent event) {
+	private void onOpenConf(MouseEvent event) throws NullPointerException {
 		File conf = DataDirectory.getConfigFile();
 		try {
 			hostServices.showDocument(conf.getAbsolutePath());
-		} catch (Exception e) {
+		} catch (NullPointerException e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
 	}
 
 	@FXML
-	private void onOpenGridnode(MouseEvent event) {
+	private void onOpenGridnode(MouseEvent event) throws NullPointerException {
 		File gridnode = DataDirectory.getGridnodeFile();
 		try {
 			hostServices.showDocument(gridnode.getAbsolutePath());
-		} catch (Exception e) {
+		} catch (NullPointerException e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
 	}
 
 	@FXML
-	private void onOpenUnigrid(MouseEvent event) {
+	private void onOpenUnigrid(MouseEvent event) throws NullPointerException {
 		String gridnode = DataDirectory.get();
-		hostServices.showDocument(gridnode);
+		try {
+			hostServices.showDocument(gridnode);
+		} catch (NullPointerException e) {
+			System.out.println("Null Host services " + e.getMessage());
+		}
 	}
 
 	@FXML
@@ -333,23 +340,14 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		debug.log("Dump wallet clicked!");
 
 		if (wallet.getLocked()) {
-			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_GRIDNODE).build());
-		} else {
-			dumpKeys();
-		}
-	}
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_DUMP).build());
 
-	public void dumpKeys() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Export");
-		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
-		fileChooser.setInitialFileName("wallet.txt");
-		File file = fileChooser.showSaveDialog(stage);
-		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
-		// debug.log(rpc.callToJson(new DumpWallet.Request(file.getAbsolutePath())));
-		final DumpWallet result = rpc.call(new DumpWallet.Request(file.getAbsolutePath()), DumpWallet.class);
-		window.notifyIfError(result);
-		debug.log(String.format("Dump wallet result: %s", rpc.resultToJson(result)));
+			FxUtils.executeParentById("pnlParent", (Node) event.getSource(), (node) -> {
+				node.getScene().lookup("#pnlOverlay").setVisible(true);
+			});
+		} else {
+			eventWalletRequest(WalletRequest.DUMP_KEYS);
+		}
 	}
 
 	@FXML
@@ -362,18 +360,15 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		File file = fileChooser.showSaveDialog(stage);
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
 		// debug.log(rpc.callToJson(new BackupWallet.Request(file.getAbsolutePath())));
+
 		final BackupWallet result = rpc.call(new BackupWallet.Request(file.getAbsolutePath()), BackupWallet.class);
-		window.notifyIfError(result);
+		AlertDialog.open(result, Alert.AlertType.ERROR);
 		debug.log(String.format("Backup wallet result: %s", rpc.resultToJson(result)));
 	}
 
 	@FXML
 	private void onNotificationsShown(MouseEvent event) {
 		Preferences.get().put("notifications", String.valueOf(chkNotifications.isSelected()));
-	}
-
-	public void setVersion(String version) {
-		verLbl.setText("version: ".concat(version));
 	}
 
 	@Override
@@ -384,6 +379,25 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@Override
 	public void onHide(Stage stage) {
 		/* Empty on purpose */
+	}
+
+	public void eventWalletRequest(@Observes WalletRequest walletRequest) {
+		if (walletRequest == WalletRequest.DUMP_KEYS) {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Export");
+			fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.txt"));
+			fileChooser.setInitialFileName("wallet.txt");
+			File file = fileChooser.showSaveDialog(stage);
+
+			debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
+
+			final DumpWallet result = rpc.call(new DumpWallet.Request(file.getAbsolutePath()),
+				DumpWallet.class
+			);
+
+			AlertDialog.open(result, Alert.AlertType.ERROR);
+			debug.log(String.format("Dump wallet result: %s", rpc.resultToJson(result)));
+		}
 	}
 
 	public void eventDebugMessage(@Observes DebugMessage debugMessage) {

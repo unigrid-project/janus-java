@@ -84,7 +84,9 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 		Tooltip t = new Tooltip("A new update is ready. Please restart the wallet");
 		t.install(updateButton, t);
-		pollingService.pollForUpdate(liveTimeInterval);
+		if (!pollingService.getUpdateTimerRunning()) {
+			pollingService.pollForUpdate(liveTimeInterval);
+		}
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
@@ -104,17 +106,20 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	@FXML
 	private void onExit(MouseEvent event) {
+		((Node) event.getSource()).getScene().getWindow().hide();
+
 		// TODO: find a place to do this that is guaranteed to be called when
 		// application is closed
 		rpc.stopPolling();
 
-		//Force bootstrap update when it is awilable so the user has the latest one!!!
-		//TODO: maken an event of this insted or an observer
-		if(BootstrapModel.getInstance().getBootstrapUpdate()) {
+		// Force bootstrap update when it is awilable so the user has the latest one!!!
+		// TODO: maken an event of this insted or an observer
+		if (BootstrapModel.isBootstrapUpdate()) {
 			update.doUpdate();
 		}
-		//final Window window = ((Node) event.getSource()).getScene().getWindow();
-		//window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
+
+		// final Window window = ((Node) event.getSource()).getScene().getWindow();
+		// window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
 		System.exit(0);
 	}
 
@@ -132,7 +137,8 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	public void showUpdateButton() {
 		System.out.println("Update button visable");
-		//tray.updateNewEventImage();
+		// tray.updateNewEventImage();
+
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {

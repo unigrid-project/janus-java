@@ -44,7 +44,9 @@ public class LongPollingTask extends TimerTask {
 					LongPollingTask.class.getSimpleName()
 				);
 
-				polling.stopPolling();
+				if (polling.getSyncTimerRunning()) {
+					polling.stopSyncPoll();
+				}
 			}
 		});
 	}

@@ -25,12 +25,10 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.WindowEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.AnchorPane;
-import javafx.application.Platform;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javafx.animation.FadeTransition;
@@ -38,7 +36,6 @@ import javafx.scene.control.Tooltip;
 import javafx.util.Duration;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.LockWallet;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -53,9 +50,6 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@Inject private Wallet wallet;
 
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
-
-	private static WindowService window = WindowService.getInstance();
-	// private static WarningController warning = new WarningController();
 
 	// @FXML private Label lblBlockCount;
 	// @FXML private Label lblConnection;
@@ -90,21 +84,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		pnlOverlay.setVisible(false);
 		pnlWarning.setVisible(false);
 		wallet.addPropertyChangeListener(this);
-	}
-
-	@FXML
-	private void onShown(WindowEvent event) {
-		debug.log("Shown event fired!");
 		lockBtn.iconColorProperty().setValue(Color.RED);
-
-		Platform.runLater(() -> {
-			try {
-				debug.log("Shown event executing.");
-				window.getTransactionsController().onShown();
-			} catch (Exception e) {
-				debug.log(String.format("ERROR: (onShown) %s", e.getMessage()));
-			}
-		});
 	}
 
 	private void select(VBox panel, ToggleButton button) {
@@ -155,6 +135,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		select(pnlSettings, btnSettings);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
 			String blocks;
@@ -167,7 +148,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			blocksTltp.setText(blocks);
 		}
 
-		if (event.getPropertyName().equals(wallet.CONNECTIONS_PROPERTY)) {
+		if (event.getPropertyName().equals(Wallet.CONNECTIONS_PROPERTY)) {
 			connectionTltp.setText(String.format("Connections: %d", (int) event.getNewValue()));
 			int connections = (int) event.getNewValue();
 
@@ -182,7 +163,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			}
 		}
 
-		if (event.getPropertyName().equals(wallet.LOCKED_PROPERTY)) {
+		if (event.getPropertyName().equals(Wallet.LOCKED_PROPERTY)) {
 			boolean locked = (boolean) event.getNewValue();
 			debug.log(String.format("Wallet Locked: %s", locked));
 
@@ -198,7 +179,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 		}
 
-		if (event.getPropertyName().equals(wallet.LOCKED_STATE_PROPERTY)) {
+		if (event.getPropertyName().equals(Wallet.LOCKED_STATE_PROPERTY)) {
 			Wallet.LockState lockedState = (Wallet.LockState) event.getNewValue();
 			debug.print(lockedState.toString(), this.getClass().getSimpleName());
 
@@ -212,7 +193,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			}
 		}
 
-		if (event.getPropertyName().equals(wallet.SYNC_STATE)) {
+		if (event.getPropertyName().equals(Wallet.SYNC_STATE)) {
 			Wallet.SyncStatus syncStatus = (Wallet.SyncStatus) event.getNewValue();
 			debug.print("sync state: " + syncStatus, this.getClass().getSimpleName());
 
@@ -229,7 +210,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			}
 		}
 
-		if (event.getPropertyName().equals(wallet.STAKING_PROPERTY)) {
+		if (event.getPropertyName().equals(Wallet.STAKING_PROPERTY)) {
 			boolean staking = (boolean) event.getNewValue();
 
 			if (staking) {
@@ -241,7 +222,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			}
 		}
 
-		if (event.getPropertyName().equals(wallet.IS_OFFLINE)) {
+		if (event.getPropertyName().equals(Wallet.IS_OFFLINE)) {
 			debug.print("wallet.IS_OFFLINE", this.getClass().getSimpleName());
 
 			if (wallet.getOffline()) {

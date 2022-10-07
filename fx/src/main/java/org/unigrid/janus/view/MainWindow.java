@@ -23,13 +23,8 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
-import org.unigrid.janus.model.event.CloseJanusEvent;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.signal.CloseJanus;
 
 @Eager
 @ApplicationScoped
@@ -37,11 +32,7 @@ public class MainWindow implements Window {
 	public static final int MIN_WIDTH = 800;
 	public static final int MIN_HEIGHT = 500;
 
-	private WindowService window = WindowService.getInstance();
-
 	@Inject private Stage stage;
-	@Inject private JanusModel janusModel;
-	@Inject private Event<CloseJanusEvent> closeJanusEvent;
 
 	@PostConstruct
 	private void init() {
@@ -52,20 +43,14 @@ public class MainWindow implements Window {
 	}
 
 	public void show() {
-		try {
-			window.getSettingsController().setVersion(janusModel.getVersion());
-			stage.show();
-		} catch (Exception e) {
-			Alert a = new Alert(AlertType.ERROR, e.getMessage(), ButtonType.OK);
-			a.showAndWait();
-		}
+		stage.show();
 	}
 
 	public void hide() {
 		stage.hide();
 	}
 
-	private void onClose(@Observes Event<CloseJanusEvent> event) {
+	private void onClose(@Observes Event<CloseJanus> event) {
 		this.stage.setWidth(900);
 		this.stage.hide();
 	}

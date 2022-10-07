@@ -14,11 +14,19 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.cdi;
+package org.unigrid.janus.model;
 
-public class Eager<T> {
+import jakarta.json.bind.serializer.DeserializationContext;
+import jakarta.json.bind.serializer.JsonbDeserializer;
+import jakarta.json.stream.JsonParser;
+import java.lang.reflect.Type;
+import lombok.Data;
+import org.unigrid.janus.model.Address.Amount;
 
-	public static <T> void instantiate(T obj) {
-		obj.toString();
+@Data
+public class AmountDeserializer implements JsonbDeserializer<Amount> {
+	@Override
+	public Amount deserialize(JsonParser parser, DeserializationContext context, Type type) {
+		return new Amount(parser.getString());
 	}
 }

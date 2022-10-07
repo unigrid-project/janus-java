@@ -37,20 +37,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.DataDirectory;
-import org.unigrid.janus.model.SplashModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 
 @Eager
 @ApplicationScoped
 public class SplashScreenController implements Initializable, PropertyChangeListener {
-	private WindowService window;
+	private BrowserService window;
 
 	@Inject private DebugService debug;
 	@Inject private HostServices hostServices;
 
-	private SplashModel splashModel = new SplashModel();
 	@FXML private ProgressBar progBar;
 	@FXML private FontIcon spinnerPreLoad;
 	@FXML private Label lblText;
@@ -62,8 +60,6 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		window = window.getInstance();
-
 		Platform.runLater(() -> {
 			progBar.setVisible(false);
 			// Font font = Font.loadFont("fonts/PressStart2P-vaV7.ttf", 10);
@@ -115,8 +111,12 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	@FXML
-	public void onShowDebug(MouseEvent event) throws Exception {
+	public void onShowDebug(MouseEvent event) {
 		File debugLog = DataDirectory.getDebugLog();
-		hostServices.showDocument(debugLog.getAbsolutePath());
+		try {
+			hostServices.showDocument(debugLog.getAbsolutePath());
+		} catch (NullPointerException e) {
+			System.out.println("Null Host services " + e.getMessage());
+		}
 	}
 }

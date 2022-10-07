@@ -12,24 +12,32 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
- */
+*/
 
 package org.unigrid.janus.model.rpc.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.unigrid.janus.model.Address;
+import org.unigrid.janus.model.Recipent;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class SendTransaction extends BaseResult<String> {
 	private static final String METHOD = "sendtoaddress";
 
-	// sendtoaddress "DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1
 	public static class Request extends BaseRequest {
-		// TODO: Set this up with 3 arguments, two required and one optional.
-		public Request(Object[] args) {
+		// TODO: Start using category and recipent
+		/* sendtoaddress "DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1 "category" "recipent" */
+		public Request(Address address, String category, Recipent recipent) {
 			super(METHOD);
-			this.setParams(args);
+			setParams(new Object[]{address.getAddress(), address.getAmount(), category, recipent});
+		}
+
+		/* sendtoaddress "DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1 */
+		public Request(Address address) {
+			super(METHOD);
+			setParams(new Object[]{address.getAddress(), address.getAmount()});
 		}
 	}
 }

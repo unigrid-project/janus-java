@@ -42,8 +42,7 @@ public class UnlockWallet extends BaseResult<UnlockWallet.Result> {
 		}
 	}
 
-	@Data
 	public static class Result {
-
+		/* Empty on purpose */
 	}
 }
