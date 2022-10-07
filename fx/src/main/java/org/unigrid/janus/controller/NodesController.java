@@ -150,7 +150,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 					final Clipboard cb = Clipboard.getSystemClipboard();
 					final ClipboardContent content1 = new ClipboardContent();
 
-					content1.putString(gridnode.getTxhash());
+					content1.putString(text);
 					cb.setContent(content1);
 
 					if (SystemUtils.IS_OS_MAC_OSX) {
