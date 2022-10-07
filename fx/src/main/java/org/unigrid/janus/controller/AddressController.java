@@ -1,18 +1,18 @@
 /*
-    The Janus Wallet
-    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+	The Janus Wallet
+	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
-    This program is free software: you can redistribute it and/or modify it under the terms of the
-    addended GNU Affero General Public License as published by the Free Software Foundation, version 3
-    of the License (see COPYING and COPYING.addendum).
+	This program is free software: you can redistribute it and/or modify it under the terms of the
+	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
+	of the License (see COPYING and COPYING.addendum).
 
-    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received an addended copy of the GNU Affero General Public License with this program.
-    If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
- */
+	You should have received an addended copy of the GNU Affero General Public License with this program.
+	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
+*/
 
 package org.unigrid.janus.controller;
 
@@ -31,6 +31,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.SortType;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
@@ -43,7 +44,6 @@ import javafx.util.Callback;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.unigrid.janus.model.AddressListModel;
 import org.unigrid.janus.model.Address;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.GetNewAddress;
@@ -51,6 +51,7 @@ import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.BrowserService;
+import org.unigrid.janus.view.backing.AddressList;
 
 @ApplicationScoped
 public class AddressController implements Initializable, PropertyChangeListener {
@@ -59,7 +60,6 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 
-	private final AddressListModel addresses = new AddressListModel();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
@@ -74,12 +74,12 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		wallet.addPropertyChangeListener(this);
-		addresses.addPropertyChangeListener(this);
-
 		setupAddressList();
 
-		addresses.setSelected(chkAddress.isSelected());
-		addresses.setSorted(chkAmountSort.isSelected());
+		final AddressList addressList = new AddressList();
+		addressList.setHideEmpty(chkAddress.isSelected());
+		addressList.setSortType(chkAmountSort.isSelected() ? SortType.DESCENDING : SortType.ASCENDING);
+		tblAddresses.setItems(addressList);
 		// addButtonToTable();
 	}
 
@@ -138,7 +138,7 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	// TODO: Why is this not being used?
 	private void addButtonToTable() {
 		TableColumn<Address, Void> colBtn = new TableColumn("Copy");
-		colBtn.setStyle("-fx-alignment: CENTER;");
+		colBtn.setStyle("-fx-alignment: center;");
 		Callback<TableColumn<Address, Void>, TableCell<Address, Void>> cellFactory;
 
 		cellFactory = (final TableColumn<Address, Void> param) -> {
@@ -175,10 +175,6 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getPropertyName().equals(addresses.ADDRESS_LIST)) {
-			tblAddresses.setItems(addresses.getAddresses());
-		}
-
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
 			loadAddresses();
 		}
@@ -188,9 +184,10 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		}
 	}
 
-	public void loadAddresses() {
+	private void loadAddresses() {
+		final AddressList addressList = (AddressList) tblAddresses.getItems();
 		ListAddressBalances addr = rpc.call(new ListAddressBalances.Request(), ListAddressBalances.class);
-		addresses.setAddresses(addr);
+		addressList.getSource().setAll(addr.getResult());
 	}
 
 	@FXML
@@ -230,15 +227,15 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	@FXML
 	private void onChecboxChange(MouseEvent event) {
-		addresses.setSelected(chkAddress.isSelected());
-		addresses.setSorted(chkAmountSort.isSelected());
+		final AddressList addressList = (AddressList) tblAddresses.getItems();
+		addressList.setHideEmpty(chkAddress.isSelected());
 		loadAddresses();
 	}
 
 	@FXML
 	private void onSortChange(MouseEvent event) {
-		addresses.setSelected(chkAddress.isSelected());
-		addresses.setSorted(chkAmountSort.isSelected());
+		final AddressList addressList = (AddressList) tblAddresses.getItems();
+		addressList.setSortType(chkAddress.isSelected() ? SortType.DESCENDING : SortType.ASCENDING);
 		loadAddresses();
 	}
 }
