@@ -331,9 +331,10 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	public static String getFileUrl(OS os, boolean testing) {
 		String isTesting = testing ? "-test" : "";
+		String osName = os.equals(os.WINDOWS) ? os.name().toLowerCase() : os.getShortName();
 
 		return System.getProperty("user.dir").concat("/config/target/") + "config-"
-			+ os.getShortName() + isTesting + ".xml";
+			+ osName + isTesting + ".xml";
 	}
 
 	public static String getDaemonUrl(OS os) {

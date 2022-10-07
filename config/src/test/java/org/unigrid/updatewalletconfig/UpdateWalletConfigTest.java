@@ -19,6 +19,7 @@ package org.unigrid.updatewalletconfig;
 import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,8 +28,6 @@ import java.util.Properties;
 import mockit.Invocation;
 import mockit.Mock;
 import mockit.MockUp;
-import mockit.Mocked;
-import net.jqwik.api.Disabled;
 import net.jqwik.api.Example;
 import org.apache.maven.MavenExecutionException;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
@@ -73,9 +72,9 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 		request.setRoot(new org.eclipse.aether.graph.Dependency(artifact, ""));
 	}
 
-	@Example @Disabled
+	@Example
 	public <T extends RepositorySystem> void shouldBeAbleToHandleSingleDependency()
-		throws PlexusContainerException, MavenExecutionException, IOException {
+		throws PlexusContainerException, MavenExecutionException, IOException, URISyntaxException {
 
 		new MockUp<UpdateWalletConfig>() {
 			@Mock
@@ -93,9 +92,10 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 			@Mock
 			public String getFileUrl(OS os, boolean testing) {
 				String isTesting = testing ? "-test" : "";
+				String osName = os.equals(os.WINDOWS) ? os.name().toLowerCase() : os.getShortName();
 
 				return System.getProperty("user.dir").concat("/target/") + "config-"
-					+ os.getShortName() + isTesting + ".xml";
+					+ osName + isTesting + ".xml";
 			}
 		};
 
@@ -138,21 +138,21 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 					if (collectRequest.getRoot().getArtifact().getArtifactId().equals("fx")) {
 						setupRootArtifact("org.unigrid.test:fx:1.0.9-SNAPSHOT", collectRequest);
 
-						final org.eclipse.aether.graph.Dependency depOne =
-							createDependency("com.google.inject:guice:5.1.0");
+						final org.eclipse.aether.graph.Dependency depOne
+							= createDependency("com.google.inject:guice:5.1.0");
 
-						final org.eclipse.aether.graph.Dependency depTwo =
-							createDependency("org.openjfx:javafx-controls:jar:17-ea+7");
+						final org.eclipse.aether.graph.Dependency depTwo
+							= createDependency("org.openjfx:javafx-controls:jar:17-ea+7");
 
-						final org.eclipse.aether.graph.Dependency depThree =
-							createDependency("org.slf4j:slf4j-api:2.0.0-alpha7");
+						final org.eclipse.aether.graph.Dependency depThree
+							= createDependency("org.slf4j:slf4j-api:2.0.0-alpha7");
 
 						collectRequest.setDependencies(Arrays.asList(depOne, depTwo, depThree));
 					} else if (collectRequest.getRoot().getArtifact().getArtifactId().equals("bootstrap")) {
-						org.eclipse.aether.artifact.DefaultArtifact artifact = new org.eclipse.aether.artifact.DefaultArtifact("org.unigrid.test:bootstrap:1.0.9-SNAPSHOT");
-						collectRequest.setRootArtifact(artifact);
-						collectRequest.setRoot(new org.eclipse.aether.graph.Dependency(artifact, ""));
-						org.eclipse.aether.graph.Dependency dependency = new org.eclipse.aether.graph.Dependency(new org.eclipse.aether.artifact.DefaultArtifact("org.openjfx:javafx-controls:jar:17-ea+7"), "");
+						setupRootArtifact("org.unigrid.test:bootstrap:1.0.9-SNAPSHOT", collectRequest);
+
+						final org.eclipse.aether.graph.Dependency dependency
+							= createDependency("org.openjfx:javafx-controls:jar:17-ea+7");
 						collectRequest.setDependencies(Arrays.asList(dependency));
 					}
 				}
@@ -163,10 +163,11 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 
 		config.afterSessionEnd(setupMavenSession());
 
-		System.out.println(UpdateWalletConfig.class.getResource("config-linux-test.xml"));
-		System.out.println(UpdateWalletConfigTest.class.getResource("config-linux-test.xml"));
-		System.out.println(getClass().getResource("config-linux-test.xml"));
-		//assertConfigFileIsEquals();
+		List<String> filenames = Arrays.asList("linux-test", "linux", "mac-test", "mac", "windows-test",
+			"windows");
+		for (String f : filenames) {
+			assertConfigFileIsEquals(f);
+		}
 	}
 
 	public MavenSession setupMavenSession() throws PlexusContainerException {
@@ -191,7 +192,8 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 
 		request.setGoals(Arrays.asList("install"));
 
-		MavenSession session = new MavenSession(container, MavenRepositorySystemUtils.newSession(), request, result);
+		MavenSession session = new MavenSession(container, MavenRepositorySystemUtils.newSession(),
+			request, result);
 
 		List list = new ArrayList();
 		list.add(new MavenProject(projectModel));
@@ -212,9 +214,10 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 		return projectModel;
 	}
 
-	public void assertConfigFileIsEquals() throws IOException {
-		File FileTarget = new File(System.getProperty("user.dir").concat("/src/test/resources/config-linux-test.xml"));
-		File FileResource = new File(System.getProperty("user.dir").concat("/target/config-linux-test.xml"));
+	public void assertConfigFileIsEquals(String suffix) throws IOException, URISyntaxException {
+		File FileTarget = new File(getClass().getResource("config-" + suffix + ".xml").toURI());
+		File FileResource = new File(System.getProperty("user.dir")
+			.concat("/target/" + "config-" + suffix + ".xml"));
 
 		boolean fileSizeIsEqual = FileTarget.length() == FileResource.length();
 		long mismatch = Files.mismatch(FileTarget.toPath(), FileResource.toPath());

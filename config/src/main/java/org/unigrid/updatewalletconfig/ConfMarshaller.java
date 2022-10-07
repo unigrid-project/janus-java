@@ -25,6 +25,7 @@ public class ConfMarshaller {
 	public void mashal(Configuration configuration, String destination) {
 		JAXBContext jaxbContext = null;
 		Marshaller jaxbMarshaller = null;
+
 		try {
 			jaxbContext = JAXBContext.newInstance(Configuration.class);
 			jaxbMarshaller = jaxbContext.createMarshaller();
