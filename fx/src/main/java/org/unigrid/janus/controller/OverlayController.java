@@ -41,6 +41,7 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 import org.unigrid.janus.model.signal.NodeRequest;
+import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.model.signal.WalletRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
@@ -182,8 +183,12 @@ public class OverlayController implements Initializable {
 		pnlUnlock.setVisible(false);
 		submitBtn.setDisable(false);
 
-		FxUtils.executeParentById("pnlOverlay", pnlUnlock, (node) -> {
-			node.setVisible(false);
+		eventOverlayRequest(OverlayRequest.CLOSE);
+	}
+
+	private void eventOverlayRequest(@Observes OverlayRequest overlayRequest) {
+		FxUtils.executeParentById("pnlOverlay", pnlUnlock, node -> {
+			node.setVisible(overlayRequest == OverlayRequest.OPEN);
 		});
 	}
 }

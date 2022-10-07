@@ -75,9 +75,9 @@ import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.signal.Navigate;
 import static org.unigrid.janus.model.signal.Navigate.Location.*;
+import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import org.unigrid.janus.model.signal.WalletRequest;
-import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {
@@ -89,6 +89,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	@Inject private Wallet wallet;
 
 	@Inject private Event<Navigate> navigateEvent;
+	@Inject private Event<OverlayRequest> overlayRequest;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
 	private int syncIntervalShort = 30000;
@@ -354,9 +355,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 						UnlockRequest.builder().type(UnlockRequest.Type.FOR_SEND).build()
 					);
 
-					FxUtils.executeParentById("pnlParent", tblWalletTrans, (node) -> {
-						node.getScene().lookup("#pnlOverlay").setVisible(true);
-					});
+					overlayRequest.fire(OverlayRequest.OPEN);
 				} else {
 					eventWalletRequest(WalletRequest.SEND_TRANSACTION);
 				}

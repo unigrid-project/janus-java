@@ -15,8 +15,11 @@
  */
 package org.unigrid.updatewalletconfig;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
+import org.unigrid.updatewalletconfig.xml.Feed;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -60,42 +63,45 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	private String fxVersion = "";
 
-	@Requirement
-	private Logger logger;
-
 	@Override
 	public void afterSessionEnd(MavenSession mavenSession) throws MavenExecutionException {
 		if (!mavenSession.getResult().getExceptions().isEmpty()) {
 			return;
 		}
+
+		if (!mavenSession.getGoals().contains("install") && !mavenSession.getGoals().contains("package")
+			&& !mavenSession.getGoals().contains("validate")) {
+			return;
+		}
+
 		basedir = mavenSession.getRepositorySession().getLocalRepository().getBasedir();
 		MavenProject fxProject = null;
 
-		if (mavenSession.getGoals().contains("validate") || mavenSession.getGoals().contains("package")
-			|| mavenSession.getGoals().contains("install")) {
-			logger.info("Goal: " + mavenSession.getGoals());
-			for (MavenProject msp : mavenSession.getProjects()) {
-				if (msp.getArtifactId().equals("fx")) {
-					fxProject = msp;
-				}
+		System.out.println("Goal: " + mavenSession.getGoals());
+
+		for (MavenProject mp : mavenSession.getProjects()) {
+			if (mp.getArtifactId().equals("fx")) {
+				fxProject = mp;
+			}
+		}
+
+		if (fxProject != null && fxProject.getDependencies().size() != 0) {
+			System.out.println("Fx Project: " + fxProject.getGroupId() + ":" + fxProject.getArtifactId()
+				+ ":" + fxProject.getVersion());
+
+			if (fxVersion.isEmpty()) {
+				fxVersion = fxProject.getVersion().replace("-SNAPSHOT", "");
+				configuration.getProperties().add(new Property("fx.version", fxVersion));
 			}
 
-			if (fxProject != null && fxProject.getDependencies().size() != 0) {
-				logger.info("Fx Project: " + fxProject.getGroupId() + ":" + fxProject.getArtifactId()
-					+ ":" + fxProject.getVersion());
-				if (fxVersion.isEmpty()) {
-					fxVersion = fxProject.getVersion().replace("-SNAPSHOT", "");
-					configuration.getProperties().add(new Property("fx.version", fxVersion));
-				}
+			OS[] os = new OS[]{OS.LINUX, OS.LINUX, OS.MAC, OS.MAC, OS.WINDOWS, OS.WINDOWS};
 
-				OS[] os = new OS[]{OS.LINUX, OS.LINUX, OS.MAC, OS.MAC, OS.WINDOWS, OS.WINDOWS};
-				for (int i = 0; i < os.length; i++) {
-					generateUpdateConfigFile(fxProject, os[i], i % 2 == 0);
-				}
-			} else {
-				throw new MavenExecutionException("Fx Project not found or no local dependencies found!"
-					+ " Try mvn clean install or mvn clean package", new IllegalStateException());
+			for (int i = 0; i < os.length; i++) {
+				generateUpdateConfigFile(fxProject, os[i], i % 2 == 0);
 			}
+		} else {
+			throw new MavenExecutionException("Fx Project not found or no local dependencies found!"
+				+ " Try mvn clean install or mvn clean package", new IllegalStateException());
 		}
 	}
 
@@ -109,10 +115,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 		final String[] opens = fx.getProperties().getProperty("config.opens").split("\n");
 		final String[] exports = fx.getProperties().getProperty("config.exports").split("\n");
+
 		for (FileMetadata file : files) {
-			/*logger.info("getUri: " + file.getUri());
-			logger.info("getArtifactId: " + file.getArtifactId());
-			logger.info("getGroupId: " + file.getGroupId());*/
 			List<Package> opensPackages = getOpensExports(file, opens);
 			if (opensPackages != null && !opensPackages.isEmpty()) {
 				file.setOpensPackages(getOpensExports(file, opens));
@@ -128,11 +132,13 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 		ConfMarshaller marshaller = new ConfMarshaller();
 		marshaller.mashal(configuration, getFileUrl(os, testing));
-		logger.info("Config File created: " + getFileUrl(os, testing));
+
+		System.out.println("Config File created: " + getFileUrl(os, testing));
 	}
 
 	public List<Package> getOpensExports(FileMetadata file, String[] opensExportsList) {
 		List<Package> packages = null;
+
 		for (String element : opensExportsList) {
 			element.trim();
 			if (!element.isEmpty()) {
@@ -148,6 +154,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				}
 			}
 		}
+
 		return packages;
 	}
 
@@ -164,6 +171,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					type, impl, exception));
 			}
 		});
+
 		return locator.getService(RepositorySystem.class);
 	}
 
@@ -178,16 +186,16 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			Artifact artifact = new DefaultArtifact(currentArtifact);
 			CollectRequest collectRequest = new CollectRequest();
 			collectRequest.setRoot(new Dependency(artifact, ""));
-			RepositorySystem system = newRepositorySystem();
-			CollectResult collectResult = system.collectDependencies(defSession, collectRequest);
+			CollectResult collectResult = newRepositorySystem().collectDependencies(defSession, collectRequest);
 			// Console Dependency Tree Dump
 			// collectResult.getRoot().accept(new ConsoleDependencyGraphDumper());
-			files = getListByRecursion(collectResult.getRoot().getChildren(), files);
 
+			files = getListByRecursion(collectResult.getRoot().getChildren(), files);
 		} catch (DependencyCollectionException | NoLocalRepositoryManagerException e) {
 			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
 				.log(Level.SEVERE, null, e);
 		}
+
 		return files;
 	}
 
@@ -203,17 +211,19 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					node.getArtifact().getVersion(),
 					node.getArtifact().getClassifier()
 				));
+
 				getListByRecursion(node.getChildren(), files);
 			});
 		}
+
 		return files;
 	}
 
 	public List<FileMetadata> getExternalDependencies(OS os, File baseDir, boolean testing)
 		throws MavenExecutionException {
-
 		String isTesting = testing ? "-testing" : "";
 		List<FileMetadata> list = new ArrayList();
+
 		try {
 			String version = "";
 			for (Property property : configuration.getProperties()) {
@@ -235,12 +245,13 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				throw new MavenExecutionException("Local jar not found!"
 					+ " Try mvn clean install or mvn clean package", new IllegalStateException());
 			}
+
 			list.add(getFileByUrl(getDaemonUrl(os)));
-			// list.add(getFileByUrl(getHedgehogUrl(OS.CURRENT)));
 		} catch (IOException ex) {
 			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
 				.log(Level.SEVERE, null, ex);
 		}
+
 		return list;
 	}
 
@@ -248,6 +259,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		String localUrl = getLocalUrl(groupId, artifactId, version, classifier);
 		File file = new File(localUrl);
 		FileMetadata tempFile = null;
+
 		if (file.exists()) {
 			try {
 				String filePath = file.getAbsolutePath().replace(basedir.getPath(), "${maven.central}");
@@ -270,8 +282,9 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					.log(Level.SEVERE, null, ex);
 			}
 		} else {
-			logger.info("    !!! Url to file doesn't exist: " + localUrl);
+			System.out.println("    !!! Url to file doesn't exist: " + localUrl);
 		}
+
 		return tempFile;
 	}
 
@@ -282,16 +295,20 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 	public FileMetadata getFileByUrl(String url) {
 		try {
 			URL tempUrl = new URL(url);
+
 			FileMetadata tempFile = new FileMetadata(
 				tempUrl.toString(),
 				ConfFileUtil.getFileSize(tempUrl),
 				ConfFileUtil.getChecksumStringyByInputStream(tempUrl.openStream())
 			);
+
 			tempFile.setModulePath(false);
+
 			return tempFile;
 		} catch (IOException ex) {
 			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName()).log(Level.SEVERE, null, ex);
 		}
+
 		return null;
 	}
 
@@ -314,70 +331,37 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	public static String getFileUrl(OS os, boolean testing) {
 		String isTesting = testing ? "-test" : "";
+		String osName = os.equals(os.WINDOWS) ? os.name().toLowerCase() : os.getShortName();
+
 		return System.getProperty("user.dir").concat("/config/target/") + "config-"
-			+ os.getShortName() + isTesting + ".xml";
+			+ osName + isTesting + ".xml";
 	}
 
 	public static String getDaemonUrl(OS os) {
-		String s = "";
+		String url = "https://github.com/unigrid-project/daemon/releases.atom";
+		Client client = ClientBuilder.newBuilder().build();
+		Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+		Feed result = response.readEntity(Feed.class);
 
-		String jsonSearch = "$['assets'][*]['browser_download_url']";
-		DocumentContext jsonPath = null;
-		try {
-			jsonPath = JsonPath
-				.parse(new URL("https://api.github.com/repos/unigrid-project/daemon/releases/latest"));
-			List<String> githubUrls = jsonPath.read(jsonSearch);
-
-			if (os.equals(OS.LINUX)) {
-				/*List<Map<String, Object>> data = jsonPath
-				.read("$['assets'][*][?('linux' in @['browser_download_url'])]");
-			s = data.get(0).toString();
-			String arg = "linux-gnu.tar.gz";
-			for (int i = 0; i < githubUrls.size(); i++) {
-				if(Pattern.matches(githubUrls.get(i), arg)){
-					s = githubUrls.get(i);
-				}
-			}*/
-				s = githubUrls.get(2);
-				System.out.println(s);
-			} else if (os.equals(OS.MAC)) {
-				s = githubUrls.get(0);
-				System.out.println(s);
-			} else if (os.equals(OS.WINDOWS)) {
-				s = githubUrls.get(1);
-				System.out.println(s);
-			}
-			return s;
-		} catch (IOException e) {
-		}
-		return "";
+		return getZipUrl(os, result.getEntry().get(0).getLink().getHref());
 	}
 
-	public static String getHedgehogUrl(OS os) {
-		String s = "";
+	public static String getZipUrl(OS os, String daemonUrl) {
+		final String affix = "/unigrid-";
+		String[] split = daemonUrl.split("/", 0);
+		final String version = split[split.length - 1].replace("v", "");
+		daemonUrl = daemonUrl.replace("https://github.com/unigrid-project/daemon/releases/tag/",
+			"https://github.com/unigrid-project/daemon/releases/download/");
 
-		String jsonSearch = "$['assets'][*]['browser_download_url']";
-		DocumentContext jsonPath = null;
-		try {
-			jsonPath = JsonPath
-				.parse(new URL("https://api.github.com/repos/unigrid-project/hedgehog/releases/latest"));
-			List<String> githubUrls = jsonPath.read(jsonSearch);
-
-			if (os.equals(OS.LINUX)) {
-				s = githubUrls.get(2);
-				System.out.println(s);
-			} else if (os.equals(OS.MAC)) {
-				s = githubUrls.get(0);
-				System.out.println(s);
-			} else if (os.equals(OS.WINDOWS)) {
-				s = githubUrls.get(1);
-				System.out.println(s);
-			}
-			return s;
-
-		} catch (IOException e) {
+		if (os.equals(OS.LINUX)) {
+			return daemonUrl + affix + version + "-x86_64-linux-gnu.tar.gz";
+		} else if (os.equals(OS.MAC)) {
+			return daemonUrl + affix + version + "-osx64.tar.gz";
+		} else if (os.equals(OS.WINDOWS)) {
+			return daemonUrl + affix + version + "-win64.zip";
 		}
-		return "";
+
+		return daemonUrl + affix + version + "-x86_64-linux-gnu.tar.gz";
 	}
 
 	public static String getLocalUrl(String groupId, String artifactId, String version, String classifier) {
@@ -387,10 +371,13 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		builder.append(artifactId).append("/");
 		builder.append(version).append('/');
 		builder.append(artifactId).append("-").append(version);
+
 		if (classifier.isEmpty() != true) {
 			builder.append("-").append(classifier);
 		}
+
 		builder.append(".jar");
+
 		return builder.toString();
 	}
 }

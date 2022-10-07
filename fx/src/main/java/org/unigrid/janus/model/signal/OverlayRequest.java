@@ -12,27 +12,10 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
- */
+*/
 
-package org.unigrid.updatewalletconfig;
+package org.unigrid.janus.model.signal;
 
-import jakarta.xml.bind.Marshaller;
-import java.io.File;
-import jakarta.xml.bind.JAXBContext;
-
-public class ConfMarshaller {
-
-	public void mashal(Configuration configuration, String destination) {
-		JAXBContext jaxbContext = null;
-		Marshaller jaxbMarshaller = null;
-
-		try {
-			jaxbContext = JAXBContext.newInstance(Configuration.class);
-			jaxbMarshaller = jaxbContext.createMarshaller();
-			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			jaxbMarshaller.marshal(configuration, new File(destination));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+public enum OverlayRequest {
+	OPEN, CLOSE;
 }
