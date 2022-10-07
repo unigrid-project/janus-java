@@ -85,19 +85,19 @@ public class TransactionList {
 	}
 
 	// return index of first duplicate, or -1 if not found.
-	public int isDuplicate(Transaction trans, boolean beginning) {
+	public int isDuplicate(Transaction transaction, boolean beginning) {
 		int result = -1;
 
-		if (trans.getTxid() == null) {
+		if (transaction.getTxId() == null) {
 			return -1;
 		}
 
 		try {
 			int index = 0;
 
-			for (Transaction t : this.transactions) {
-				if (t.getTxid() != null && trans.getTxid() != null) {
-					if (t.getTxid().equals(trans.getTxid())) {
+			for (Transaction t : transactions) {
+				if (t.getTxId() != null && transaction.getTxId() != null) {
+					if (t.getTxId().equals(transaction.getTxId())) {
 						result = index;
 						break;
 					}
@@ -113,12 +113,12 @@ public class TransactionList {
 		return result;
 	}
 
-	public Transaction getMultiPart(Transaction trans, boolean beginning) {
+	public Transaction getMultiPart(Transaction transaction, boolean beginning) {
 		Transaction result = null;
 
 		for (Transaction t : this.transactions) {
 			if (t.getCategory().equals("multipart")
-				&& t.getTxid().equals(trans.getTxid())) {
+				&& t.getTxId().equals(transaction.getTxId())) {
 				result = t;
 				break;
 			}

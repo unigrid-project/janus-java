@@ -22,7 +22,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import javafx.util.Callback;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -90,31 +89,32 @@ public class TransactionsController implements Initializable, PropertyChangeList
 			});
 
 			colTransType.setCellValueFactory(cell -> {
-				Transaction trans = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
+				final Transaction transaction = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
 				Button btn = new Button();
-				int confrimations = trans.getConfirmations();
-				btn.setTooltip(new Tooltip(trans.getCategory()));
+				int confrimations = transaction.getConfirmations();
+
+				btn.setTooltip(new Tooltip(transaction.getCategory()));
 
 				btn.setOnAction(e -> {
-					browser.navigateTransaction(trans.getTxid());
+					browser.navigateTransaction(transaction.getTxId());
 				});
 
 				FontIcon fontIcon = new FontIcon("fas-wallet");
 
-				if (trans.isGenerated()) {
-					if (trans.getGeneratedfrom().equals("stake")) {
+				if (transaction.isGenerated()) {
+					if (transaction.getGeneratedfrom().equals("stake")) {
 						fontIcon = new FontIcon("fas-coins");
 						fontIcon.setIconColor(setColor(255, 140, 0, confrimations));
 					} else {
 						fontIcon = new FontIcon("fas-cubes");
 						fontIcon.setIconColor(setColor(104, 197, 255, confrimations));
 					}
-					btn.setTooltip(new Tooltip(trans.getGeneratedfrom()));
-				} else if (trans.getCategory().equals("send")
-					|| trans.getCategory().equals("fee")) {
+					btn.setTooltip(new Tooltip(transaction.getGeneratedfrom()));
+				} else if (transaction.getCategory().equals("send")
+					|| transaction.getCategory().equals("fee")) {
 					fontIcon = new FontIcon("fas-arrow-right");
 					fontIcon.setIconColor(setColor(255, 0, 0, confrimations));
-				} else if (trans.getCategory().equals("receive")) {
+				} else if (transaction.getCategory().equals("receive")) {
 					fontIcon = new FontIcon("fas-arrow-left");
 					fontIcon.setIconColor(setColor(48, 186, 69, confrimations));
 				}
@@ -124,14 +124,15 @@ public class TransactionsController implements Initializable, PropertyChangeList
 			});
 
 			colTransAddress.setCellValueFactory(cell -> {
-				Hyperlink link = new Hyperlink();
-				Transaction trans = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
-				link.setText(trans.getAddress());
+				final Hyperlink link = new Hyperlink();
+				final Transaction transaction = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
+
+				link.setText(transaction.getAddress());
 
 				link.setOnAction(e -> {
 					if (e.getTarget().equals(link)) {
 						final String baseUrl = "https://explorer.unigrid.org/address/";
-						browser.navigate(baseUrl + trans.getAddress());
+						browser.navigate(baseUrl + transaction.getAddress());
 					}
 				});
 
@@ -143,20 +144,20 @@ public class TransactionsController implements Initializable, PropertyChangeList
 				btn.setOnAction(e -> {
 					final Clipboard cb = Clipboard.getSystemClipboard();
 					final ClipboardContent content = new ClipboardContent();
-					content.putString(trans.getTxid());
+					content.putString(transaction.getTxId());
 					cb.setContent(content);
 					if (SystemUtils.IS_OS_MAC_OSX) {
 						Notifications
 							.create()
 							.title("Transaction copied to clipboard")
-							.text(trans.getTxid())
+							.text(transaction.getTxId())
 							.position(Pos.TOP_RIGHT)
 							.showInformation();
 					} else {
 						Notifications
 							.create()
 							.title("Transaction copied to clipboard")
-							.text(trans.getTxid())
+							.text(transaction.getTxId())
 							.showInformation();
 					}
 				});
@@ -165,22 +166,17 @@ public class TransactionsController implements Initializable, PropertyChangeList
 				link.setAlignment(Pos.CENTER_RIGHT);
 				return new ReadOnlyObjectWrapper(link);
 			});
-			colTransAmount.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>,
-				ObservableValue<String>>() {
 
-				public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
-					Transaction trans = t.getValue();
-					double amount = trans.getAmount();
+			colTransAmount.setCellValueFactory(cell -> {
+				final Transaction transaction = ((CellDataFeatures<Transaction, String>) cell).getValue();
+				double amount = transaction.getAmount();
 
-					if (trans.getCategory().equals("send")) {
-						amount += trans.getFee();
-					}
-
-					return new ReadOnlyStringWrapper(String.format("%.8f", amount));
+				if (transaction.getCategory().equals("send")) {
+					amount += transaction.getFee();
 				}
-			}
-			);
 
+				return new ReadOnlyStringWrapper(String.format("%.8f", amount));
+			});
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup wallet table) %s", e.getMessage()));
 		}
