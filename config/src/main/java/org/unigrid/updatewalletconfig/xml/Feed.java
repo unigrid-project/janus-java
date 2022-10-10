@@ -14,25 +14,41 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.updatewalletconfig;
+package org.unigrid.updatewalletconfig.xml;
 
-import jakarta.xml.bind.Marshaller;
-import java.io.File;
-import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import lombok.Data;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
-public class ConfMarshaller {
+@Data
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement(namespace = "http://www.w3.org/2005/Atom")
+public class Feed {
+	@XmlElement
+	private String id;
 
-	public void mashal(Configuration configuration, String destination) {
-		JAXBContext jaxbContext = null;
-		Marshaller jaxbMarshaller = null;
+	@XmlElement
+	private List<Entry> entry;
 
-		try {
-			jaxbContext = JAXBContext.newInstance(Configuration.class);
-			jaxbMarshaller = jaxbContext.createMarshaller();
-			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			jaxbMarshaller.marshal(configuration, new File(destination));
-		} catch (Exception e) {
-			e.printStackTrace();
+	@Data
+	@XmlAccessorType(XmlAccessType.NONE)
+	public static class Entry {
+
+		@XmlElement
+		private String id;
+
+		@XmlElement
+		private Link link;
+
+		@Data
+		@XmlAccessorType(XmlAccessType.NONE)
+		public static class Link {
+			@XmlAttribute
+			private String href;
 		}
 	}
 }
