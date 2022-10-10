@@ -33,5 +33,6 @@ public class UpdatePassphrase extends BaseResult<UpdatePassphrase.Result> {
 
 	@Data
 	public static class Result {
+		/* Empty on purpose */
 	}
 }

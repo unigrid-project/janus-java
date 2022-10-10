@@ -24,7 +24,6 @@ import org.unigrid.janus.model.Address;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class ListAddressBalances extends BaseResult<List<ListAddressBalances.Result>> {
-
 	private static final String METHOD = "listaddressbalances";
 
 	public static class Request extends BaseRequest {
@@ -33,7 +32,6 @@ public class ListAddressBalances extends BaseResult<List<ListAddressBalances.Res
 		}
 	}
 
-	@Data
 	public static class Result extends Address {
 	}
 }

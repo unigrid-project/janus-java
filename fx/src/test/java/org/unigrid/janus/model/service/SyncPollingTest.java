@@ -20,26 +20,23 @@ import jakarta.inject.Inject;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.concurrent.atomic.AtomicInteger;
-import lombok.SneakyThrows;
 import mockit.Mock;
 import mockit.MockUp;
+import mockit.Mocked;
 import net.jqwik.api.Property;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.constraints.IntRange;
-import org.unigrid.janus.jqwik.WeldSetup;
 import static org.awaitility.Awaitility.await;
-import org.unigrid.janus.jqwik.fx.BaseFxTest;
-import org.unigrid.janus.jqwik.fx.FxResource;
-import org.unigrid.janus.view.MainWindow;
+import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 
-@FxResource(clazz = MainWindow.class, name = "mainWindow.fxml")
-@WeldSetup({PollingService.class, DebugService.class})
-public class SyncPollingTest  extends BaseFxTest {
-
+public class SyncPollingTest  extends BaseMockedWeldTest {
 	@Inject
 	private PollingService pollingService;
 
-	@Property @SneakyThrows
+	@Mocked
+	private DebugService debug;
+
+	@Property
 	public void shouldPollWithTheRightInterval(@ForAll @IntRange(min = 1, max = 4) int interval) {
 		final AtomicInteger calls = new AtomicInteger();
 

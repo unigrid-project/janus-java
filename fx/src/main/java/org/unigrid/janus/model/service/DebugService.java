@@ -23,39 +23,23 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import jakarta.enterprise.context.ApplicationScoped;
-import javafx.scene.control.ListView;
-import javafx.collections.ObservableList;
-import javafx.collections.FXCollections;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
+import org.unigrid.janus.model.signal.DebugMessage;
 
 @Eager
 @ApplicationScoped
 public class DebugService {
-	private static ListView output;
-	private static ObservableList<String> items;
-
-	public void setListView(ListView lv) {
-		output = lv;
-
-		if (lv != null && items != null) {
-			output.setItems(items);
-		}
-	}
+	@Inject private Event<DebugMessage> debugMessageEvent;
 
 	public void log(String msg) {
-		if (output != null) {
-			output.getItems().add(msg);
-		} else {
-			if (items == null) {
-				items = FXCollections.observableArrayList();
-			}
-
-			items.add(msg);
-		}
+		debugMessageEvent.fire(DebugMessage.builder().message(msg).build());
 	}
 
 	public void print(String msg, String className) {
+		debugMessageEvent.fire(DebugMessage.builder().message(msg).build());
 		String path = DataDirectory.get().concat("/wallet.log");
 
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(path, true))) {
@@ -68,7 +52,7 @@ public class DebugService {
 	}
 
 	public void trace(String msg) {
-			System.out.println(msg);		
+		System.out.println(msg);
 	}
 
 	public String getCurrentDate() {

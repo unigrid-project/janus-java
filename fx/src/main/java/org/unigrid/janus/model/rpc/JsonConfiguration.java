@@ -21,13 +21,13 @@ import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.config.PropertyNamingStrategy;
 import jakarta.ws.rs.ext.ContextResolver;
+import org.unigrid.janus.model.AmountDeserializer;
 
 public class JsonConfiguration implements ContextResolver<Jsonb> {
 	private JsonbConfig getJsonbConfig() {
 		return new JsonbConfig().withPropertyNamingStrategy(
 			PropertyNamingStrategy.LOWER_CASE_WITH_DASHES
-			//PropertyNamingStrategy.LOWER_CASE_WITH_UNDERSCORES
-		);
+		).withDeserializers(new AmountDeserializer());
 	}
 
 	@Override

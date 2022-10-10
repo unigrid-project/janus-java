@@ -20,7 +20,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
@@ -28,47 +27,47 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.PollingService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.inject.spi.CDI;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.paint.Paint;
-import javafx.util.Callback;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.DocList;
 import org.unigrid.janus.model.Documentation;
 
 @ApplicationScoped
 public class DocumentationController implements Initializable, PropertyChangeListener {
-	private static DebugService debug = new DebugService();
-	private static Wallet wallet;
-	private static WindowService window = WindowService.getInstance();
+	private static final String DOCUMENTATION_URL = "https://docs.unigrid.org/docs/data/index.json";
+	private static final int SIX_HOURS_IN_MS = 60 * 60 * 6 * 1000;
+
+	@Inject private BrowserService browser;
+	@Inject private DebugService debug;
+	@Inject private PollingService pollingService;
+	@Inject private Wallet wallet;
+
 	private static DocList documentationList = new DocList();
 
 	@FXML private TableView tblDocs;
 	@FXML private TableColumn colDescription;
-	@Inject private PollingService pollingService;
-
-	private String url = "https://docs.unigrid.org/docs/data/index.json";
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
-		window.setDocsController(this);
 		wallet.addPropertyChangeListener(this);
 		documentationList.addPropertyChangeListener(this);
 		pollingService = CDI.current().select(PollingService.class).get();
@@ -76,13 +75,12 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 		try {
 			pullNewDocumentaion();
-		} catch (JsonProcessingException ex) {
-			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
 			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		// polls every six hours
-		pollingService.poll(21600000);
+		if (!pollingService.getPollingTimerRunning()) {
+			pollingService.poll(SIX_HOURS_IN_MS);
+		}
 	}
 
 	public void pullNewDocumentaion() throws JsonProcessingException, IOException {
@@ -91,19 +89,23 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 		try {
 			mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			//List<DocList> docList = Arrays.asList(mapper.readValue(new URL(url), DocList[].class));
-			List<Documentation> docList = Arrays.asList(mapper.readValue(new URL(url), Documentation[].class));
+
+			List<Documentation> docList = Arrays.asList(mapper.readValue(new URL(DOCUMENTATION_URL),
+				Documentation[].class)
+			);
+
 			documentationList.setDoclist(docList);
-			//System.out.println("\nJSON array to List of objects");
-			//docList.stream().forEach(x -> System.out.println(x));
 
 		} catch (MalformedURLException ex) {
 			Logger.getLogger(DocumentationController.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (UnknownHostException ex) {
+			debug.log("Unable to connect to documentation backend. No Internet connection?");
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getPropertyName().equals(documentationList.DOCUMENTATION_LIST)) {
+		if (event.getPropertyName().equals(DocList.DOCUMENTATION_LIST)) {
 			debug.print("DOCUMENTATION_LIST", DocumentationController.class.getSimpleName());
 			tblDocs.setItems(documentationList.getDoclist());
 		}
@@ -111,32 +113,26 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 
 	private void setupDocList() {
 		try {
-			colDescription.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Documentation,
-				Hyperlink>, ObservableValue<Hyperlink>>() {
+			colDescription.setCellValueFactory(cell -> {
+				Documentation doc = ((CellDataFeatures<Documentation, Hyperlink>) cell).getValue();
+				String text = doc.getTitle();
+				Hyperlink link = new Hyperlink();
+				link.setText(text);
 
-				public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Documentation,
-					Hyperlink> t) {
+				link.setOnAction(e -> {
+					if (e.getTarget().equals(link)) {
+						browser.navigate(doc.getLink());
+					}
+				});
 
-					Documentation doc = t.getValue();
-					String text = doc.getTitle();
-					Hyperlink link = new Hyperlink();
-					link.setText(text);
+				Button btn = new Button();
+				FontIcon fontIcon = new FontIcon("far-newspaper");
+				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+				btn.setGraphic(fontIcon);
+				link.setGraphic(btn);
+				link.setAlignment(Pos.CENTER_RIGHT);
 
-					link.setOnAction(e -> {
-						if (e.getTarget().equals(link)) {
-							window.browseURL(doc.getLink());
-						}
-					});
-
-					Button btn = new Button();
-					FontIcon fontIcon = new FontIcon("far-newspaper");
-					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-					btn.setGraphic(fontIcon);
-					link.setGraphic(btn);
-					link.setAlignment(Pos.CENTER_RIGHT);
-
-					return new ReadOnlyObjectWrapper(link);
-				}
+				return new ReadOnlyObjectWrapper(link);
 			});
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup node table) %s", e.getMessage()));

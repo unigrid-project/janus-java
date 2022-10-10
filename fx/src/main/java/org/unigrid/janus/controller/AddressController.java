@@ -1,28 +1,28 @@
 /*
-    The Janus Wallet
-    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+	The Janus Wallet
+	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
-    This program is free software: you can redistribute it and/or modify it under the terms of the
-    addended GNU Affero General Public License as published by the Free Software Foundation, version 3
-    of the License (see COPYING and COPYING.addendum).
+	This program is free software: you can redistribute it and/or modify it under the terms of the
+	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
+	of the License (see COPYING and COPYING.addendum).
 
-    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received an addended copy of the GNU Affero General Public License with this program.
-    If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
- */
+	You should have received an addended copy of the GNU Affero General Public License with this program.
+	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
+*/
 
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -31,6 +31,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.SortType;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
@@ -43,117 +44,101 @@ import javafx.util.Callback;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.unigrid.janus.model.AddressListModel;
 import org.unigrid.janus.model.Address;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.GetNewAddress;
 import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
+import org.unigrid.janus.view.backing.AddressList;
 
 @ApplicationScoped
 public class AddressController implements Initializable, PropertyChangeListener {
+	@Inject private BrowserService browser;
+	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
 
-	private static DebugService debug = new DebugService();
-	private static RPCService rpc = new RPCService();
-	private static Wallet wallet;
-	private static AddressListModel addresses = new AddressListModel();
-	private static WindowService window = WindowService.getInstance();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
-	@FXML
-	private TableView tblAddresses;
-	@FXML
-	private TableColumn colAddress;
-	@FXML
-	private TableColumn colAddressBalance;
-	@FXML
-	private HBox newAddressDisplay;
-	@FXML
-	private Text addressDisplay;
-	@FXML
-	private CheckBox chkAddress;
-	@FXML
-	private CheckBox chkAmountSort;
+	@FXML private TableView tblAddresses;
+	@FXML private TableColumn colAddress;
+	@FXML private TableColumn colAddressBalance;
+	@FXML private HBox newAddressDisplay;
+	@FXML private Text addressDisplay;
+	@FXML private CheckBox chkAddress;
+	@FXML private CheckBox chkAmountSort;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
-		window.setAddressController(this);
 		wallet.addPropertyChangeListener(this);
-		addresses.addPropertyChangeListener(this);
 		setupAddressList();
-		addresses.setSelected(chkAddress.isSelected());
-		addresses.setSorted(chkAmountSort.isSelected());
+
+		final AddressList addressList = new AddressList();
+		addressList.setHideEmpty(chkAddress.isSelected());
+		addressList.setSortType(chkAmountSort.isSelected() ? SortType.DESCENDING : SortType.ASCENDING);
+		tblAddresses.setItems(addressList);
 		// addButtonToTable();
 	}
 
 	private void setupAddressList() {
 		try {
-			colAddress.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Address, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
+			colAddress.setCellValueFactory(cell -> {
+				Address address = ((TableColumn.CellDataFeatures<Address, Hyperlink>) cell).getValue();
+				String text = address.getAddress();
+				Hyperlink link = new Hyperlink();
+				link.setText(text);
 
-				public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Address, Hyperlink> t) {
+				link.setOnAction(e -> {
+					if (e.getTarget().equals(link)) {
+						browser.navigateAddress(address.getAddress());
+					}
+				});
 
-					Address address = t.getValue();
-					String text = address.getAddress();
+				Button btn = new Button();
+				FontIcon fontIcon = new FontIcon("fas-clipboard");
+				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+				btn.setGraphic(fontIcon);
 
-					Hyperlink link = new Hyperlink();
-					link.setText(text);
+				btn.setOnAction(e -> {
+					final Clipboard cb = Clipboard.getSystemClipboard();
+					final ClipboardContent content1 = new ClipboardContent();
+					content1.putString(address.getAddress());
+					cb.setContent(content1);
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						Notifications
+							.create()
+							.title("Address copied to clipboard")
+							.text(address.getAddress())
+							.position(Pos.TOP_RIGHT)
+							.showInformation();
+					} else {
+						Notifications
+							.create()
+							.title("Address copied to clipboard")
+							.text(address.getAddress())
+							.showInformation();
+					}
+				});
 
-					link.setOnAction(e -> {
-						if (e.getTarget().equals(link)) {
-							// TODO: Not a proper setter!
-							window.browseURL("https://explorer.unigrid.org/address/"
-								+ address.getAddress()
-							);
-						}
-					});
+				link.setGraphic(btn);
+				link.setAlignment(Pos.CENTER_RIGHT);
 
-					Button btn = new Button();
-					FontIcon fontIcon = new FontIcon("fas-clipboard");
-					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-					btn.setGraphic(fontIcon);
-
-					btn.setOnAction(e -> {
-						final Clipboard cb = Clipboard.getSystemClipboard();
-						final ClipboardContent content = new ClipboardContent();
-						content.putString(address.getAddress());
-						cb.setContent(content);
-						if (SystemUtils.IS_OS_MAC_OSX) {
-							Notifications
-								.create()
-								.title("Address copied to clipboard")
-								.text(address.getAddress())
-								.position(Pos.TOP_RIGHT)
-								.showInformation();
-						} else {
-							Notifications
-								.create()
-								.title("Address copied to clipboard")
-								.text(address.getAddress())
-								.showInformation();
-						}
-					});
-
-					link.setGraphic(btn);
-					link.setAlignment(Pos.CENTER_RIGHT);
-					return new ReadOnlyObjectWrapper(link);
-				}
+				return new ReadOnlyObjectWrapper(link);
 			});
 
 			colAddressBalance.setCellValueFactory(new PropertyValueFactory<Address, String>("amount"));
-
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup address table) %s", e.getMessage()));
 		}
 	}
 
+	// TODO: Why is this not being used?
 	private void addButtonToTable() {
 		TableColumn<Address, Void> colBtn = new TableColumn("Copy");
-		colBtn.setStyle("-fx-alignment: CENTER;");
+		colBtn.setStyle("-fx-alignment: center;");
 		Callback<TableColumn<Address, Void>, TableCell<Address, Void>> cellFactory;
 
 		cellFactory = (final TableColumn<Address, Void> param) -> {
@@ -190,10 +175,6 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getPropertyName().equals(addresses.ADDRESS_LIST)) {
-			tblAddresses.setItems(addresses.getAddresses());
-		}
-
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
 			loadAddresses();
 		}
@@ -203,14 +184,10 @@ public class AddressController implements Initializable, PropertyChangeListener 
 		}
 	}
 
-	public void loadAddresses() {
-		// try {
+	private void loadAddresses() {
+		final AddressList addressList = (AddressList) tblAddresses.getItems();
 		ListAddressBalances addr = rpc.call(new ListAddressBalances.Request(), ListAddressBalances.class);
-		addresses.setAddresses(addr);
-		// } catch (Exception e) {
-		// debug.print("loadAddresses " + e.getCause().getMessage().toString(),
-		// AddressController.class.getSimpleName());
-		// }
+		addressList.getSource().setAll(addr.getResult());
 	}
 
 	@FXML
@@ -250,15 +227,15 @@ public class AddressController implements Initializable, PropertyChangeListener 
 
 	@FXML
 	private void onChecboxChange(MouseEvent event) {
-		addresses.setSelected(chkAddress.isSelected());
-		addresses.setSorted(chkAmountSort.isSelected());
+		final AddressList addressList = (AddressList) tblAddresses.getItems();
+		addressList.setHideEmpty(chkAddress.isSelected());
 		loadAddresses();
 	}
 
 	@FXML
 	private void onSortChange(MouseEvent event) {
-		addresses.setSelected(chkAddress.isSelected());
-		addresses.setSorted(chkAmountSort.isSelected());
+		final AddressList addressList = (AddressList) tblAddresses.getItems();
+		addressList.setSortType(chkAmountSort.isSelected() ? SortType.DESCENDING : SortType.ASCENDING);
 		loadAddresses();
 	}
 }

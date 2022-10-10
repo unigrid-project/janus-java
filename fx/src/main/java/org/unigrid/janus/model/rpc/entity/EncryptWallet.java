@@ -33,5 +33,6 @@ public class EncryptWallet extends BaseResult<EncryptWallet.Result> {
 
 	@Data
 	public static class Result {
+		/* Empty on purpose */
 	}
 }

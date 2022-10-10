@@ -16,11 +16,14 @@
 
 package org.unigrid.janus.model.service;
 
+// import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.Timer;
 import lombok.Getter;
 import lombok.Setter;
 import org.unigrid.janus.model.UpdateWallet;
+import org.unigrid.janus.model.cdi.CDIUtil;
 
 @ApplicationScoped
 public class PollingService {
@@ -28,38 +31,55 @@ public class PollingService {
 	private Timer updateTimer;
 	private Timer syncTimer;
 	private Timer longSyncTimer;
-	@Getter @Setter
-	private Boolean syncTimerRunning = false;
-	@Getter @Setter
-	private Boolean longSyncTimerRunning = false;
 
-	private DebugService debug = new DebugService();
-	//@Inject private UpdateWallet updateWallet;
+	@Getter @Setter private Boolean syncTimerRunning = false;
+	@Getter @Setter private Boolean longSyncTimerRunning = false;
+	@Getter @Setter private Boolean pollingTimerRunning = false;
+	@Getter @Setter private Boolean updateTimerRunning = false;
+
+	@Inject private DebugService debug;
+	@Inject private UpdateWallet updateWallet;
+
+	// TODO: These methods are all doing the same thing - generalize and put into a common class!
+
+	/*@PostConstruct
+	private void init() {
+		longSyncTimer = new Timer(true);
+		pollingTimer = new Timer(true);
+		syncTimer = new Timer(true);
+		updateTimer = new Timer(true);
+	}*/
 
 	public void poll(int interval) {
 		debug.print("poll started", PollingService.class.getSimpleName());
 		pollingTimer = new Timer(true);
 		pollingTimer.scheduleAtFixedRate(new LongPollingTask(), 0, interval);
+		setPollingTimerRunning(true);
 	}
 
 	public void stopPolling() {
 		if (pollingTimer != null) {
 			pollingTimer.cancel();
 			pollingTimer.purge();
+			setPollingTimerRunning(false);
 		}
 	}
 
 	public void pollForUpdate(int interval) {
 		debug.print("starting the update timer", PollingService.class.getSimpleName());
-		updateTimer = new Timer(false);
-		updateTimer.scheduleAtFixedRate(new UpdateWallet(), 0, interval);
 
+		// TODO: Apparently, Java timers don't like proxy objects - can we clean this up ?
+
+		updateTimer = new Timer(true);
+		updateTimer.scheduleAtFixedRate(CDIUtil.unproxy(updateWallet), 0, interval);
+		setUpdateTimerRunning(true);
 	}
 
 	public void stopPollingForUpdate() {
 		if (updateTimer != null) {
 			updateTimer.cancel();
 			updateTimer.purge();
+			setUpdateTimerRunning(false);
 		}
 	}
 

@@ -17,6 +17,7 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -48,7 +49,7 @@ import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
@@ -57,12 +58,11 @@ import org.unigrid.janus.model.TransactionList.LoadReport;
 
 @ApplicationScoped
 public class TransactionsController implements Initializable, PropertyChangeListener {
-
-	private static DebugService debug = new DebugService();
-	private static RPCService rpc = new RPCService();
-	private static TransactionList transList = new TransactionList();
-	private Wallet wallet;
-	private static WindowService window = WindowService.getInstance();
+	@Inject private BrowserService browser;
+	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
+	@Inject private TransactionList transactionList;
+	@Inject private Wallet wallet;
 
 	@FXML private TableView tblTransactions;
 	@FXML private TableColumn colTransDate;
@@ -72,123 +72,98 @@ public class TransactionsController implements Initializable, PropertyChangeList
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		/* Empty on purpose */
-		wallet = window.getWallet();
 		debug.log("Initializing transactions");
-		window.setTransactionsController(this);
-		transList.addPropertyChangeListener(this);
+
+		transactionList.addPropertyChangeListener(this);
 		wallet.addPropertyChangeListener(this);
 		setupTransactions();
 	}
 
-	public void onShown() {
-		try {
-			// TODO: anything to render after the app is shown (not transactions tab)
-			debug.log("Transactions shown called.");
-		} catch (Exception e) {
-			debug.log(String.format("ERROR: (transactions shown) %s", e.getMessage()));
-		}
-	}
-
 	private void setupTransactions() {
 		try {
-			colTransDate.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>,
-				ObservableValue<String>>() {
+			colTransDate.setCellValueFactory(cell -> {
+				long time = ((CellDataFeatures<Transaction, String>) cell).getValue().getTime();
+				Date date = new Date(time * 1000L);
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-				public ObservableValue<String> call(CellDataFeatures<Transaction, String> t) {
-					long time = t.getValue().getTime();
-					Date date = new Date(time * 1000L);
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					return new ReadOnlyStringWrapper(sdf.format(date));
-					// return new ReadOnlyStringWrapper("n/a");
-				}
+				return new ReadOnlyStringWrapper(sdf.format(date));
 			});
 
-			colTransType.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
+			colTransType.setCellValueFactory(cell -> {
+				Transaction trans = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
+				Button btn = new Button();
+				int confrimations = trans.getConfirmations();
+				btn.setTooltip(new Tooltip(trans.getCategory()));
 
-				public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
-					Transaction trans = t.getValue();
-					Button btn = new Button();
-					int confrimations = trans.getConfirmations();
-					btn.setTooltip(new Tooltip(trans.getCategory()));
+				btn.setOnAction(e -> {
+					browser.navigateTransaction(trans.getTxid());
+				});
 
-					btn.setOnAction(e -> {
-						// TODO: Put this in a model - dont duplicate the same string over and over.
-						window.browseURL("https://explorer.unigrid.org/tx/" + trans.getTxid());
-					});
+				FontIcon fontIcon = new FontIcon("fas-wallet");
 
-					FontIcon fontIcon = new FontIcon("fas-wallet");
-
-					if (trans.isGenerated()) {
-						if (trans.getGeneratedfrom().equals("stake")) {
-							fontIcon = new FontIcon("fas-coins");
-							fontIcon.setIconColor(setColor(255, 140, 0, confrimations));
-						} else {
-							fontIcon = new FontIcon("fas-cubes");
-							fontIcon.setIconColor(setColor(104, 197, 255, confrimations));
-						}
-						btn.setTooltip(new Tooltip(trans.getGeneratedfrom()));
-					} else if (trans.getCategory().equals("send")
-						|| trans.getCategory().equals("fee")) {
-						fontIcon = new FontIcon("fas-arrow-right");
-						fontIcon.setIconColor(setColor(255, 0, 0, confrimations));
-					} else if (trans.getCategory().equals("receive")) {
-						fontIcon = new FontIcon("fas-arrow-left");
-						fontIcon.setIconColor(setColor(48, 186, 69, confrimations));
+				if (trans.isGenerated()) {
+					if (trans.getGeneratedfrom().equals("stake")) {
+						fontIcon = new FontIcon("fas-coins");
+						fontIcon.setIconColor(setColor(255, 140, 0, confrimations));
+					} else {
+						fontIcon = new FontIcon("fas-cubes");
+						fontIcon.setIconColor(setColor(104, 197, 255, confrimations));
 					}
-
-					btn.setGraphic(fontIcon);
-					return new ReadOnlyObjectWrapper(btn);
+					btn.setTooltip(new Tooltip(trans.getGeneratedfrom()));
+				} else if (trans.getCategory().equals("send")
+					|| trans.getCategory().equals("fee")) {
+					fontIcon = new FontIcon("fas-arrow-right");
+					fontIcon.setIconColor(setColor(255, 0, 0, confrimations));
+				} else if (trans.getCategory().equals("receive")) {
+					fontIcon = new FontIcon("fas-arrow-left");
+					fontIcon.setIconColor(setColor(48, 186, 69, confrimations));
 				}
+
+				btn.setGraphic(fontIcon);
+				return new ReadOnlyObjectWrapper(btn);
 			});
 
-			colTransAddress.setCellValueFactory(new Callback<CellDataFeatures<Transaction, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
+			colTransAddress.setCellValueFactory(cell -> {
+				Hyperlink link = new Hyperlink();
+				Transaction trans = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
+				link.setText(trans.getAddress());
 
-				public ObservableValue<Hyperlink> call(CellDataFeatures<Transaction, Hyperlink> t) {
-					Hyperlink link = new Hyperlink();
-					Transaction trans = t.getValue();
-					link.setText(trans.getAddress());
+				link.setOnAction(e -> {
+					if (e.getTarget().equals(link)) {
+						final String baseUrl = "https://explorer.unigrid.org/address/";
+						browser.navigate(baseUrl + trans.getAddress());
+					}
+				});
 
-					link.setOnAction(e -> {
-						if (e.getTarget().equals(link)) {
-							window.browseURL("https://explorer.unigrid.org/address/"
-								+ trans.getAddress()
-							);
-						}
-					});
+				Button btn = new Button();
+				FontIcon fontIcon = new FontIcon("fas-clipboard");
+				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+				btn.setGraphic(fontIcon);
 
-					Button btn = new Button();
-					FontIcon fontIcon = new FontIcon("fas-clipboard");
-					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-					btn.setGraphic(fontIcon);
+				btn.setOnAction(e -> {
+					final Clipboard cb = Clipboard.getSystemClipboard();
+					final ClipboardContent content = new ClipboardContent();
+					content.putString(trans.getTxid());
+					cb.setContent(content);
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						Notifications
+							.create()
+							.title("Transaction copied to clipboard")
+							.text(trans.getTxid())
+							.position(Pos.TOP_RIGHT)
+							.showInformation();
+					} else {
+						Notifications
+							.create()
+							.title("Transaction copied to clipboard")
+							.text(trans.getTxid())
+							.showInformation();
+					}
+				});
 
-					btn.setOnAction(e -> {
-						final Clipboard cb = Clipboard.getSystemClipboard();
-						final ClipboardContent content = new ClipboardContent();
-						content.putString(trans.getTxid());
-						cb.setContent(content);
-						if (SystemUtils.IS_OS_MAC_OSX) {
-							Notifications
-								.create()
-								.title("Transaction copied to clipboard")
-								.text(trans.getTxid())
-								.position(Pos.TOP_RIGHT)
-								.showInformation();
-						} else {
-							Notifications
-								.create()
-								.title("Transaction copied to clipboard")
-								.text(trans.getTxid())
-								.showInformation();
-						}
-					});
-
-					link.setGraphic(btn);
-					link.setAlignment(Pos.CENTER_RIGHT);
-					return new ReadOnlyObjectWrapper(link);
-				}
+				link.setGraphic(btn);
+				link.setAlignment(Pos.CENTER_RIGHT);
+				return new ReadOnlyObjectWrapper(link);
 			});
 			colTransAmount.setCellValueFactory(new Callback<CellDataFeatures<Transaction, String>,
 				ObservableValue<String>>() {
@@ -219,7 +194,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 		debug.log("Loading transactions");
 		ListTransactions trans = rpc.call(new ListTransactions.Request(page * 100, 100),
 			ListTransactions.class);
-		transList.setTransactions(trans, 0);
+		transactionList.setTransactions(trans, 0);
 	}
 
 	private ScrollBar getVerticalScrollbar(TableView<?> table) {
@@ -244,16 +219,16 @@ public class TransactionsController implements Initializable, PropertyChangeList
 
 		if (value == bar.getMax()) {
 			debug.log("Adding new transactions.");
-			LoadReport report = transList.loadTransactions(40);
+			LoadReport report = transactionList.loadTransactions(40);
 			bar.setValue(value * report.getOldSize() / report.getNewSize());
 		}
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getPropertyName().equals(transList.TRANSACTION_LIST)) {
+		if (event.getPropertyName().equals(transactionList.TRANSACTION_LIST)) {
 			debug.log("Transactions list changed");
 
-			tblTransactions.setItems(transList.getTransactions());
+			tblTransactions.setItems(transactionList.getTransactions());
 			ScrollBar bar = getVerticalScrollbar(tblTransactions);
 
 			debug.log(String.format("Was scrollbar found: %b", (bar != null)));
@@ -264,7 +239,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 		}
 		// if balance changes, load the transactions.
 		if (event.getPropertyName().equals(wallet.BALANCE_PROPERTY)) {
-			if (transList.getTransactions().size() == 0) {
+			if (transactionList.getTransactions().size() == 0) {
 				loadTransactions(0);
 			}
 		}

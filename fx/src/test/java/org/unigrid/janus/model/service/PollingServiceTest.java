@@ -22,17 +22,19 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.concurrent.atomic.AtomicInteger;
 import mockit.Mock;
 import mockit.MockUp;
+import mockit.Mocked;
 import net.jqwik.api.Property;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.constraints.IntRange;
 import org.unigrid.janus.jqwik.BaseMockedWeldTest;
-import org.unigrid.janus.jqwik.WeldSetup;
 import static org.awaitility.Awaitility.await;
 
-@WeldSetup({PollingService.class, DebugService.class})
 public class PollingServiceTest extends BaseMockedWeldTest {
 	@Inject
 	private PollingService pollingService;
+
+	@Mocked
+	private DebugService debug;
 
 	@Property
 	public void shouldPollWithTheRightInterval(@ForAll @IntRange(min = 1, max = 4) int interval) {

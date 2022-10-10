@@ -16,6 +16,8 @@
 
 package org.unigrid.janus.controller.component;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.net.URL;
@@ -32,10 +34,12 @@ import org.unigrid.janus.view.decorator.Decorator;
 import org.unigrid.janus.view.decorator.MovableWindowDecorator;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.WindowService;
 import org.unigrid.janus.model.Wallet;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
@@ -44,70 +48,47 @@ import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
-import org.unigrid.janus.model.service.TrayService;
+import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.view.component.WindowBarButton;
+import org.unigrid.janus.controller.Showable;
 
-public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener {
+@Dependent
+public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener, Showable {
+	private static final Set<WindowBarController> CONTROLLERS = Collections.synchronizedSet(new HashSet<>());
+
 	private Decorator movableWindowDecorator;
-
-	@Getter
-	private Stage stage;
-
-	private static RPCService rpc = new RPCService();
 	private RotateTransition rt;
-	private Wallet wallet;
-
-	private static DebugService debug = new DebugService();
-	private static WindowService window = WindowService.getInstance();
+	@Getter private Stage stage;
 
 	@FXML private FontIcon spinner;
 	@FXML private WindowBarButton updateButton;
 
+	@Inject private DebugService debug;
 	@Inject private PollingService pollingService;
+	@Inject private RPCService rpc;
 	@Inject private UpdateWallet update;
-	@Inject private TrayService tray;
+	@Inject private Wallet wallet;
+
+	// @Inject private TrayService tray;
 
 	private int testTimeInterval = 10000;
 	private int liveTimeInterval = 21600000;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		//TODO: Remove when FX integration is done
-		System.out.println("Initilizing window bar");
-
-		update = CDI.current().select(UpdateWallet.class).get();
 		pollingService = CDI.current().select(PollingService.class).get();
 		update.addPropertyChangeListener(this);
-		wallet = window.getWallet();
 		wallet.addPropertyChangeListener(this);
-		window.setWindowBarController(this);
 		updateButton.setVisible(false);
 
 		Tooltip t = new Tooltip("A new update is ready. Please restart the wallet");
 		t.install(updateButton, t);
-
-		//TODO: 2 minuts set for testing purpeses change to every 6 hours after testing is done
-		pollingService.pollForUpdate(liveTimeInterval);
+		if (!pollingService.getUpdateTimerRunning()) {
+			pollingService.pollForUpdate(liveTimeInterval);
+		}
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
-		/*if (event.getPropertyName().equals(wallet.MONEYSUPPLY_PROPERTY)) {
-			String sValue = String.format("%.8f", (double) event.getNewValue());
-			debug.log(String.format("Money supply: %s", sValue));
-			Label supply = (Label) window.lookup("txtSupply");
-			if (supply != null) {
-				supply.setText(sValue);
-			}
-		}*/
-
-		if (event.getPropertyName().equals(wallet.PROCESSING_PROPERTY)) {
-			if (wallet.getProcessingStatus()) {
-				String status = String.format("processing status %s",
-					(boolean) wallet.getProcessingStatus());
-				//debug.log(status);
-			}
-		}
-
 		if (event.getPropertyName().equals(update.getUPDATE_PROPERTY())) {
 			showUpdateButton();
 		}
@@ -124,11 +105,14 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	@FXML
 	private void onExit(MouseEvent event) {
+		((Node) event.getSource()).getScene().getWindow().hide();
+
 		// TODO: find a place to do this that is guaranteed to be called when
 		// application is closed
 		rpc.stopPolling();
-		//final Window window = ((Node) event.getSource()).getScene().getWindow();
-		//window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
+
+		// final Window window = ((Node) event.getSource()).getScene().getWindow();
+		// window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
 		System.exit(0);
 	}
 
@@ -144,24 +128,10 @@ public class WindowBarController implements Decoratable, Initializable, Property
 		stage.setIconified(!stage.isIconified());
 	}
 
-	public void startSpinner() {
-		spinner.setVisible(true);
-		rt = new RotateTransition(Duration.millis(50000), spinner);
-		rt.setByAngle(20000);
-		rt.setCycleCount(Animation.INDEFINITE);
-		rt.setAutoReverse(true);
-		rt.setInterpolator(Interpolator.LINEAR);
-		rt.play();
-	}
-
-	public void stopSpinner() {
-		rt.stop();
-		spinner.setVisible(false);
-	}
-
 	public void showUpdateButton() {
 		System.out.println("Update button visable");
-		//tray.updateNewEventImage();
+		// tray.updateNewEventImage();
+
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -172,9 +142,46 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	@FXML
 	public void onUpdate(MouseEvent event) {
+		System.out.println("onUpdate clicked???");
 		updateButton.setVisible(false);
 		update.doUpdate();
 		// TODO: move this code into UpdateWallet.java
 		// linux the Unigrid app is not executable
+	}
+
+	private void startSpinner() {
+		spinner.setVisible(true);
+		rt = new RotateTransition(Duration.millis(50000), spinner);
+		rt.setByAngle(20000);
+		rt.setCycleCount(Animation.INDEFINITE);
+		rt.setAutoReverse(true);
+		rt.setInterpolator(Interpolator.LINEAR);
+		rt.play();
+	}
+
+	private void stopSpinner() {
+		rt.stop();
+		spinner.setVisible(false);
+	}
+
+	/* Because of the dependant scope, we have to save the controllers locally and loop through them */
+	public void eventState(@Observes State state) {
+		for (WindowBarController c : CONTROLLERS) {
+			if (state.isWorking()) {
+				c.startSpinner();
+			} else {
+				c.stopSpinner();
+			}
+		}
+	}
+
+	@Override
+	public void onShow(Stage stage) {
+		CONTROLLERS.add(this);
+	}
+
+	@Override
+	public void onHide(Stage stage) {
+		CONTROLLERS.remove(this);
 	}
 }

@@ -18,11 +18,15 @@ package org.unigrid.janus.model.producer;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.inject.spi.InjectionPoint;
 import java.beans.Introspector;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
+import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
+import org.unigrid.janus.model.cdi.CDIUtil;
+import org.unigrid.janus.controller.Showable;
 
 @Dependent
 public class StageProducer {
@@ -31,36 +35,43 @@ public class StageProducer {
 	@Produces
 	public Stage produce(final InjectionPoint point) {
 		final Class<?> clazz = point.getMember().getDeclaringClass();
-		FXMLLoader loader = new FXMLLoader();
+		final FXMLLoader loader = new FXMLLoader();
 
-		/* loader.setControllerFactory(controller -> {
-			final BeanManager manager = CDI.current().getBeanManager();
-			final Bean<?> bean = manager.getBeans(controller).iterator().next();
-			System.out.println("Bean context " + manager.getContext(bean.getScope()).get(bean));
-			return manager.getContext(bean.getScope()).get(bean);
+		loader.setControllerFactory(c -> {
+			final Object o = CDI.current().select(c).get();
 
-			/*try {
-				return controller.getDeclaredConstructor().newInstance();
-			} catch(Exception e) {
-				return null;
+			if (o instanceof TargetInstanceProxy) {
+				return CDIUtil.unproxy(o);
 			}
-		}); */
+
+			return o;
+		});
 
 		final String name = Introspector.decapitalize(clazz.getSimpleName());
 		loader.setClassLoader(clazz.getClassLoader());
-
-		System.out.println(loader.getClassLoader());
-		System.out.println(name.concat(FXML_SUFFIX));
 		loader.setLocation(clazz.getResource(name.concat(FXML_SUFFIX)));
 
 		try {
-			return loader.load();
-		} catch (IOException e) {
-			//TODO: Throw illegal state
-			System.out.println(e.getMessage());
-			System.out.println(e.getCause());
-		}
+			final Stage stage = loader.load();
 
-		return null;
+			if (loader.getController() instanceof Showable) {
+				final Showable showable = loader.getController();
+
+				stage.setOnShown(e -> {
+					showable.onShow(stage);
+				});
+
+				stage.setOnHidden(e -> {
+					showable.onHide(stage);
+				});
+			}
+
+			return stage;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println(e.getCause());
+			throw new IllegalStateException("Unable to load FXML file. " + e.getMessage());
+		}
 	}
 }

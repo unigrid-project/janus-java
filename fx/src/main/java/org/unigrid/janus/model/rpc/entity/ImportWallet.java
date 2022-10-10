@@ -33,5 +33,6 @@ public class ImportWallet extends BaseResult<ImportWallet.Result> {
 
 	@Data
 	public static class Result {
+		/* Empty purpose */
 	}
 }

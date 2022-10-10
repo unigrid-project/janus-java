@@ -30,7 +30,9 @@
 		<module name="ParameterName"/>
 		<module name="StaticVariableName"/>
 		<module name="TypeName"/>
-		<module name="AvoidStarImport"/>
+		<module name="AvoidStarImport">
+			<property name="allowStaticMemberImports" value="true"/>
+		</module>
 		<module name="IllegalImport"/>
 		<module name="RedundantImport"/>
 		<module name="UnusedImports">
@@ -99,6 +101,14 @@
 		<module name="AnnotationLocation">
 			<property name="allowSamelineMultipleAnnotations" value="true"/>
 			<property name="allowSamelineParameterizedAnnotation" value="true"/>
+		</module>
+		<module name="SuppressionXpathFilter">
+			<property name="file" value="../checkstyle-suppress.xml"/>
+			<property name="optional" value="true"/>
+		</module>
+		<module name="SuppressionXpathFilter">
+			<property name="file" value="checkstyle-suppress.xml"/>
+			<property name="optional" value="true"/>
 		</module>
 	</module>
 </module>

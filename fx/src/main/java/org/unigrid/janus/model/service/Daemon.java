@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -34,7 +33,8 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.cdi.Eager;
-import org.unigrid.janus.model.rpc.entity.BlockCount;
+import org.unigrid.janus.model.rpc.entity.GetBlockCount;
+import org.unigrid.janus.view.AlertDialog;
 import org.update4j.OS;
 
 @Eager
@@ -104,7 +104,7 @@ public class Daemon {
 		boolean isRunning;
 
 		try {
-			rpc.call(new BlockCount(), BlockCount.class);
+			rpc.call(new GetBlockCount.Request(), GetBlockCount.class);
 			isRunning = false;
 		} catch (jakarta.ws.rs.ProcessingException e) {
 
@@ -161,12 +161,9 @@ public class Daemon {
 
 	@SneakyThrows
 	private void findFile() {
-
-		Alert alert = new Alert(AlertType.INFORMATION);
-		alert.setTitle("Unigrid Janus");
-		alert.setHeaderText("Unigrid backend program not found!");
-		alert.setContentText("Set the path to unigridd");
-		alert.showAndWait();
+		AlertDialog.openVerbose(AlertType.INFORMATION,
+			"Unigrid backend program not found!", "Set the path to unigridd"
+		);
 
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Pick file unigridd");

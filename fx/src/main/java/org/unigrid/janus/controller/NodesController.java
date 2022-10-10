@@ -21,6 +21,9 @@ import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.InputStream;
@@ -49,7 +52,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
-import javafx.util.Callback;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -60,56 +62,47 @@ import org.unigrid.janus.model.rpc.entity.GridnodeEntity;
 import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.WindowService;
+import org.unigrid.janus.model.service.BrowserService;
+import org.unigrid.janus.model.signal.NodeRequest;
+import org.unigrid.janus.model.signal.State;
+import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
-	private static DebugService debug = new DebugService();
-	private static RPCService rpc = new RPCService();
-	private static WindowService window = WindowService.getInstance();
+	@Inject private BrowserService browser;
+	@Inject private DebugService debug;
+	@Inject private RPCService rpc;
+	@Inject private Wallet wallet;
+
+	@Inject private Event<State> stateEvent;
+	@Inject private Event<UnlockRequest> unlockRequestEvent;
+
 	private static GridnodeListModel nodes = new GridnodeListModel();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
-	private Wallet wallet;
-
-	@FXML
-	private TextField vpsPassword;
-	@FXML
-	private TextField vpsAddress;
-	@FXML
-	private TextArea vpsOutput;
-	@FXML
-	private VBox vpsConect;
-	@FXML
-	private VBox genereateKeyPnl;
-	@FXML
-	private TableView tblGridnodes;
-	@FXML
-	private TableView tblGridnodeKeys;
-	@FXML
-	private TableColumn colNodeStatus;
-	@FXML
-	private TableColumn colNodeAlias;
-	@FXML
-	private TableColumn colNodeAddress;
-	@FXML
-	private TableColumn colNodeStart;
-	@FXML
-	private TableColumn colNodeTxhash;
-	@FXML
-	private HBox newGridnodeDisplay;
-	@FXML
-	private Text gridnodeDisplay;
+	@FXML private TextField vpsPassword;
+	@FXML private TextField vpsAddress;
+	@FXML private TextArea vpsOutput;
+	@FXML private VBox vpsConect;
+	@FXML private VBox genereateKeyPnl;
+	@FXML private TableView tblGridnodes;
+	@FXML private TableView tblGridnodeKeys;
+	@FXML private TableColumn colNodeStatus;
+	@FXML private TableColumn colNodeAlias;
+	@FXML private TableColumn colNodeAddress;
+	@FXML private TableColumn colNodeStart;
+	@FXML private TableColumn colNodeTxhash;
+	@FXML private HBox newGridnodeDisplay;
+	@FXML private Text gridnodeDisplay;
 
 	private String serverResponse;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		wallet = window.getWallet();
 		setupNodeList();
 		wallet.addPropertyChangeListener(this);
-		window.setNodeController(this);
+
 		Platform.runLater(() -> {
 			try {
 				vpsConect.setVisible(false);
@@ -135,56 +128,51 @@ public class NodesController implements Initializable, PropertyChangeListener {
 				new PropertyValueFactory<Gridnode, String>("alias"));
 			colNodeAddress.setCellValueFactory(
 				new PropertyValueFactory<Gridnode, String>("address"));
-			colNodeTxhash.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Gridnode, Hyperlink>,
-				ObservableValue<Hyperlink>>() {
 
-				public ObservableValue<Hyperlink> call(TableColumn.CellDataFeatures<Gridnode, Hyperlink> t) {
+			colNodeTxhash.setCellValueFactory(cell -> {
+				Gridnode gridnode = ((TableColumn.CellDataFeatures<Gridnode, Hyperlink>) cell).getValue();
+				String text = gridnode.getTxhash() + " " + gridnode.getOutputidx();
+				Hyperlink link = new Hyperlink();
+				link.setText(text);
 
-					Gridnode gridnode = t.getValue();
-					String text = gridnode.getTxhash() + " " + gridnode.getOutputidx();
+				link.setOnAction(e -> {
+					if (e.getTarget().equals(link)) {
+						browser.navigateTransaction(gridnode.getTxhash());
+					}
+				});
 
-					Hyperlink link = new Hyperlink();
-					link.setText(text);
+				Button btn = new Button();
+				FontIcon fontIcon = new FontIcon("fas-clipboard");
+				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+				btn.setGraphic(fontIcon);
 
-					link.setOnAction(e -> {
-						if (e.getTarget().equals(link)) {
-							// TODO: Not a proper setter!
-							window.browseURL("https://explorer.unigrid.org/tx/"
-								+ gridnode.getTxhash()
-							);
-						}
-					});
+				btn.setOnAction(e -> {
+					final Clipboard cb = Clipboard.getSystemClipboard();
+					final ClipboardContent content1 = new ClipboardContent();
 
-					Button btn = new Button();
-					FontIcon fontIcon = new FontIcon("fas-clipboard");
-					fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-					btn.setGraphic(fontIcon);
+					content1.putString(text);
+					cb.setContent(content1);
 
-					btn.setOnAction(e -> {
-						final Clipboard cb = Clipboard.getSystemClipboard();
-						final ClipboardContent content = new ClipboardContent();
-						content.putString(gridnode.getTxhash());
-						cb.setContent(content);
-						if (SystemUtils.IS_OS_MAC_OSX) {
-							Notifications
-								.create()
-								.title("Key copied to clipboard")
-								.text(gridnode.getTxhash())
-								.position(Pos.TOP_RIGHT)
-								.showInformation();
-						} else {
-							Notifications
-								.create()
-								.title("Key copied to clipboard")
-								.text(gridnode.getTxhash())
-								.showInformation();
-						}
-					});
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						Notifications
+							.create()
+							.title("Key copied to clipboard")
+							.text(gridnode.getTxhash())
+							.position(Pos.TOP_RIGHT)
+							.showInformation();
+					} else {
+						Notifications
+							.create()
+							.title("Key copied to clipboard")
+							.text(gridnode.getTxhash())
+							.showInformation();
+					}
+				});
 
-					link.setGraphic(btn);
-					link.setAlignment(Pos.CENTER_RIGHT);
-					return new ReadOnlyObjectWrapper(link);
-				}
+				link.setGraphic(btn);
+				link.setAlignment(Pos.CENTER_RIGHT);
+
+				return new ReadOnlyObjectWrapper(link);
 			});
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup node table) %s", e.getMessage()));
@@ -199,12 +187,12 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	private void getNodeList() {
 		debug.log("Loading gridnode list");
-		window.getWindowBarController().startSpinner();
+
+		stateEvent.fire(State.builder().working(true).build());
 		GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
 		nodes.setGridnodes(result);
-		nodes.getGridnodes();
-		window.getWindowBarController().stopSpinner();
-		//debug.log(String.format("gridnode result: %s", nodes.getGridnodes()));
+		nodes.getGridnodes(); //TODO: Why this call?
+		stateEvent.fire(State.builder().working(false).build());
 	}
 
 	@FXML
@@ -219,6 +207,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 			new GridnodeEntity.Request(new Object[]{"genkey"}),
 			GridnodeEntity.class
 		);
+
 		gridnodeDisplay.setText(newGridnode.getResult().toString());
 		newGridnodeDisplay.setVisible(true);
 		copyToClipboard(gridnodeDisplay.getText());
@@ -228,7 +217,9 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	public void loadGridnodes() {
 		try {
 			GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"outputs"}),
-				GridnodeList.class);
+				GridnodeList.class
+			);
+
 			nodes.setGridnodes(result);
 			tblGridnodeKeys.setItems(nodes.getGridnodes());
 		} catch (Exception e) {
@@ -258,11 +249,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	private void copyToClipboard(String gridnode) {
 		content.putString(gridnode);
 		clipboard.setContent(content);
-		Notifications
-			.create()
-			.title("Gridnode copied to clipboard")
-			.text(gridnode)
-			.showInformation();
+		Notifications.create().title("Gridnode copied to clipboard").text(gridnode).showInformation();
 	}
 
 	@FXML
@@ -274,16 +261,10 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML
 	private void onStartAllNodesPressed(MouseEvent e) {
 		if (wallet.getLocked()) {
-			window.getMainWindowController().unlockForGridnode();
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_GRIDNODE).build());
 		} else {
-			startMissingNodes();
+			eventNodeRequest(NodeRequest.START_MISSING);
 		}
-	}
-
-	public void startMissingNodes() {
-		rpc.callToJson(new GridnodeEntity.Request(new Object[]{"start-missing", "0"}));
-		getNodeList();
-		debug.log("ATTEMPTING TO START NODES");
 	}
 
 	@FXML
@@ -292,6 +273,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		Session session = null;
 		Channel channel = null;
 		ChannelShell shell = null;
+
 		try {
 			session = new JSch().getSession("root", vpsAddress.getText(), port);
 			session.setPassword(vpsPassword.getText());
@@ -303,7 +285,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 			PrintStream commander = new PrintStream(inputStream, true);
 
 			channel.setOutputStream(System.out, true);
-
 			channel.connect();
 
 			commander.println("ls -la");
@@ -369,10 +350,17 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		if (event.getPropertyName().equals(nodes.GRIDNODE_LIST)) {
 			tblGridnodes.setItems(nodes.getGridnodes());
 		}
+
 		// after wallet is done loading, load the gridnodes.
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
 			debug.log("loading gridnode list");
 			getNodeList();
 		}
+	}
+
+	private void eventNodeRequest(@Observes NodeRequest nodeRequest) {
+		rpc.callToJson(new GridnodeEntity.Request(new Object[]{"start-missing", "0"}));
+		getNodeList();
+		debug.log("Attempting to start nodes");
 	}
 }

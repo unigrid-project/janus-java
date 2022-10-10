@@ -24,11 +24,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class GetWalletInfo extends BaseResult<GetWalletInfo.Result> {
-
 	public static final String METHOD = "getwalletinfo";
 
 	public static class Request extends BaseRequest {
-
 		public Request() {
 			super(METHOD);
 		}

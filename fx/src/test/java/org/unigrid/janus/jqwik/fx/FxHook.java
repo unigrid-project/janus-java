@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.jqwik.fx;
 
+import jakarta.enterprise.inject.spi.CDI;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,12 +29,17 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import net.jqwik.api.lifecycle.AroundContainerHook;
 import net.jqwik.api.lifecycle.AroundPropertyHook;
 import net.jqwik.api.lifecycle.PropertyExecutionResult;
 import net.jqwik.api.lifecycle.PropertyExecutor;
 import net.jqwik.api.lifecycle.PropertyLifecycleContext;
+import static org.awaitility.Awaitility.await;
+import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.testfx.api.FxToolkit;
+import org.unigrid.janus.model.cdi.CDIUtil;
+import org.unigrid.janus.model.producer.HostServicesProducer;
 
 public class FxHook implements AroundContainerHook, AroundPropertyHook {
 	private static final int HIGH_PRIORITY = 1024;
@@ -48,6 +54,11 @@ public class FxHook implements AroundContainerHook, AroundPropertyHook {
 					consumer.accept(m);
 				}
 			}
+		}
+
+		@Override
+		public void init() throws Exception {
+			HostServicesProducer.setHostServices(getHostServices());
 		}
 
 		@Override
@@ -84,12 +95,23 @@ public class FxHook implements AroundContainerHook, AroundPropertyHook {
 	private Application setupFx(Object instance, FxResource resource) {
 		try {
 			FxToolkit.registerPrimaryStage();
+			final Application application = FxToolkit.setupApplication(() -> new ApplicationAdapter(instance));
 
 			Platform.runLater(() -> {
 				try {
 					FXMLLoader loader = new FXMLLoader();
 					loader.setClassLoader(resource.clazz().getClassLoader());
 					loader.setLocation(resource.clazz().getResource(resource.name()));
+
+					loader.setControllerFactory(c -> {
+						final Object o = CDI.current().select(c).get();
+
+						if (o instanceof TargetInstanceProxy) {
+							return CDIUtil.unproxy(o);
+						}
+
+						return o;
+					});
 
 					FxToolkit.toolkitContext().setRegisteredStage(loader.load());
 					FxToolkit.showStage();
@@ -98,7 +120,7 @@ public class FxHook implements AroundContainerHook, AroundPropertyHook {
 				}
 			});
 
-			return FxToolkit.setupApplication(() -> new ApplicationAdapter(instance));
+			return application;
 
 		} catch (TimeoutException ex) {
 			System.err.print(ex);
@@ -132,10 +154,13 @@ public class FxHook implements AroundContainerHook, AroundPropertyHook {
 		return reference.get();
 	}
 
-	@Override
+	@Override @SneakyThrows
 	public PropertyExecutionResult aroundProperty(PropertyLifecycleContext context, PropertyExecutor property) {
 		final FxResource resource = findResource(context);
 		Application application = setupFx(context.testInstance(), resource);
+
+		await().until(() -> Objects.nonNull(FxToolkit.toolkitContext().getRegisteredStage().getScene()));
+		FxToolkit.showStage();
 
 		final PropertyExecutionResult result = property.execute();
 		shutdownFx(application);

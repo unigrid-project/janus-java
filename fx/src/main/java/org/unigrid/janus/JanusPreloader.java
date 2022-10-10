@@ -45,12 +45,6 @@ public class JanusPreloader {
 
 	public void initText() throws Exception {
 		splashScreen.initText();
-		/*try {
-			splashScreen.readDebug();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 	}
 
 	public void setText(String s) {
@@ -71,9 +65,5 @@ public class JanusPreloader {
 
 	public void stopSpinner() {
 		splashScreen.stopSpinner();
-	}
-
-	public void setVersion(String version) {
-		splashScreen.setVersion(version);
 	}
 }

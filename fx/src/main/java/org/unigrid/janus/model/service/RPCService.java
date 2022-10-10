@@ -35,14 +35,13 @@ import org.unigrid.janus.model.rpc.entity.BaseResult;
 import jakarta.ws.rs.core.Response;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.Timer;
+import lombok.Getter;
+import lombok.Setter;
 import org.unigrid.janus.model.cdi.Eager;
 
 @Eager
@@ -52,9 +51,10 @@ public class RPCService {
 	private static final String PROPERTY_USERNAME = Preferences.PROPS.getString(PROPERTY_USERNAME_KEY);
 	private static final String PROPERTY_PASSWORD_KEY = "janus.rpc.password";
 	private static final String PROPERTY_PASSWORD = Preferences.PROPS.getString(PROPERTY_PASSWORD_KEY);
+	@Getter @Setter private Boolean pollingTimerRunning = false;
 
-	private static Timer pollingTimer;
-	private static WebTarget target;
+	private Timer pollingTimer;
+	private WebTarget target;
 	private User credentials;
 
 	@Inject private Daemon daemon;
@@ -121,12 +121,14 @@ public class RPCService {
 		debug.print("pollForInfo", RPCService.class.getSimpleName());
 		pollingTimer = new Timer(true);
 		pollingTimer.schedule(new PollingTask(), 0, interval);
+		setPollingTimerRunning(true);
 	}
 
 	public void stopPolling() {
 		if (pollingTimer != null) {
 			pollingTimer.cancel();
 			pollingTimer.purge();
+			setPollingTimerRunning(false);
 		}
 	}
 
@@ -155,14 +157,6 @@ public class RPCService {
 	public String resultToJson(BaseResult result) {
 		Jsonb jsonb = JsonbBuilder.create();
 		return jsonb.toJson(result);
-	}
-
-	public <R> String alert(R request) {
-		String result = callToJson(request);
-		Alert a = new Alert(AlertType.INFORMATION, result, ButtonType.OK);
-
-		a.showAndWait();
-		return result;
 	}
 
 	private static String convertStreamToString(InputStream is) {

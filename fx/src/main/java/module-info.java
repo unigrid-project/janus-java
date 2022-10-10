@@ -54,14 +54,14 @@ module fx {
 	requires org.slf4j;
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
-	requires FXTrayIcon;
-	requires javafx.swing;
+	//requires FXTrayIcon;
+	//requires javafx.swing;
 	requires j8fu;
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
 	
-	opens org.unigrid.janus to weld.core.impl, org.update4j, javafx.swing;
+	opens org.unigrid.janus to weld.core.impl, org.update4j;//, javafx.swing;
 	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics,
 		weld.core.impl;
 	opens org.unigrid.janus.controller to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j,
@@ -71,7 +71,7 @@ module fx {
 	opens org.unigrid.janus.model to weld.core.impl, javafx.base , jakarta.xml.bind, jakarta.ws.rs, com.fasterxml.jackson.databind,
 		jersey.media.jaxb;
 	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson;
-	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2, javafx.swing;
+	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2;//, javafx.swing;
 	opens org.unigrid.janus.model.entity to jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
 
 	exports org.unigrid.janus;
@@ -80,7 +80,7 @@ module fx {
 		javafx.controls, org.update4j, javafx.graphics;
 	exports org.unigrid.janus.controller to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls,
 		org.update4j, javafx.graphics;
-	exports org.unigrid.janus.model.event to weld.core.impl;
+	exports org.unigrid.janus.model.signal to weld.core.impl;
 	exports org.unigrid.janus.model.producer to weld.core.impl;
 	exports org.unigrid.janus.model.setup to weld.core.impl;
 	exports org.unigrid.janus.model.rpc to weld.core.impl;
