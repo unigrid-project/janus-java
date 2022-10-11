@@ -136,9 +136,9 @@
                   </Label>
                </children>
             </FlowPane>
-            <FlowPane nodeOrientation="LEFT_TO_RIGHT" prefHeight="50.0" prefWidth="450.0">
+            <FlowPane alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="50.0" prefWidth="450.0">
                <children>
-                  <Button fx:id="btnNodeSetupGenerate" mnemonicParsing="false" onMouseClicked="#onGenerateNewKeyClicked" prefWidth="120.0" text="Generate">
+                  <Button fx:id="btnNodeSetupGenerate" mnemonicParsing="false" onMouseClicked="#onGenerateNewKeyClicked" prefWidth="120.0" text="Generate Key">
                      <tooltip>
                         <Tooltip text="Click here to generate key" />
                      </tooltip>
