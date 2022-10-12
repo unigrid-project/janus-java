@@ -29,8 +29,10 @@ import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
@@ -55,6 +57,7 @@ import javafx.scene.text.Text;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.Gridnode;
 import org.unigrid.janus.model.GridnodeListModel;
 import org.unigrid.janus.model.Wallet;
@@ -73,7 +76,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
-
+	@Inject private HostServices hostServices;
 	@Inject private Event<State> stateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
@@ -214,6 +217,16 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		loadGridnodes();
 	}
 
+	@FXML
+	private void onOpenGridnodeConfigClicked(MouseEvent e) throws NullPointerException {
+		File gridnode = DataDirectory.getGridnodeFile();
+		try {
+			hostServices.showDocument(gridnode.getAbsolutePath());
+		} catch (NullPointerException error) {
+			debug.print(error.getMessage(), SettingsController.class.getSimpleName());
+		}
+	}
+
 	public void loadGridnodes() {
 		try {
 			GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"outputs"}),
@@ -230,6 +243,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	@FXML
 	private void onCloseGridnodeClicked(MouseEvent event) {
+		getNodeList();
 		genereateKeyPnl.setVisible(false);
 		newGridnodeDisplay.setVisible(false);
 		gridnodeDisplay.setText("");
