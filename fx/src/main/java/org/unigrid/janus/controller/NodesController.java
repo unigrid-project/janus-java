@@ -94,7 +94,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML private TableColumn colNodeStatus;
 	@FXML private TableColumn colNodeAlias;
 	@FXML private TableColumn colNodeAddress;
-	@FXML private TableColumn colNodeStart;
 	@FXML private TableColumn colNodeTxhash;
 	@FXML private HBox newGridnodeDisplay;
 	@FXML private Text gridnodeDisplay;
