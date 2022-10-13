@@ -280,11 +280,13 @@
 						--add-opens fx/org.unigrid.janus.model=jakarta.xml.bind
 						--add-opens fx/org.unigrid.janus.model=jersey-client
 						--add-opens fx/org.unigrid.janus.model.entity=jersey-client
+						--add-opens fx/org.unigrid.janus.view.backing=weld.core.impl
 						--add-exports fx/org.unigrid.janus.cdi=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.controller.component=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.model=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.model.producer=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.model.service=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.view.backing=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.model.service.external=jersey.client
 						--add-exports fx/org.unigrid.janus.model.external=jersey.common
 						--add-exports fx/org.unigrid.janus.model.external=org.update4j
