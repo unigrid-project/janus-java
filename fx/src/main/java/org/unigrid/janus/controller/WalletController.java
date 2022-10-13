@@ -68,7 +68,6 @@ import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.Wallet;
-import org.unigrid.janus.model.TransactionList;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.SendTransaction;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
@@ -78,6 +77,7 @@ import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import org.unigrid.janus.model.signal.WalletRequest;
+import org.unigrid.janus.view.backing.TransactionList;
 
 @ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {

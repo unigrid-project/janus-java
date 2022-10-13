@@ -14,16 +14,22 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.view.backing;
 
 import jakarta.inject.Inject;
+import java.io.File;
+import java.io.IOException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
+import org.apache.commons.io.FileUtils;
+import org.unigrid.janus.model.DataDirectory;
+import org.unigrid.janus.model.Gridnode;
 import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.service.DebugService;
 
-public class GridnodeListModel {
+// TODO: Clean me
+public class GridnodeTxidList {
 	public static final String GRIDNODE_LIST = "gridnodeList";
 
 	@Inject private DebugService debug;
@@ -31,11 +37,22 @@ public class GridnodeListModel {
 	@Getter
 	private ObservableList<Gridnode> gridnodes = FXCollections.observableArrayList();
 
-	public void setGridnodes(GridnodeList list) {
+	public void setGridnodes(GridnodeList list) throws IOException {
 		gridnodes.clear();
 
 		for (Gridnode g : list.getResult()) {
+			//System.out.println("gridnode txhash: " + g.getTxhash());
+			g.setAvailableTxhash(isTxidInUse(g.getTxhash()));
 			gridnodes.add(g);
 		}
+	}
+
+	private boolean isTxidInUse(String txhash) throws IOException {
+		File confFile = DataDirectory.getGridnodeFile();
+		String data = FileUtils.readFileToString(confFile, "UTF-8");
+		//System.out.println(data);
+		int intIndex = data.indexOf(txhash);
+
+		return (intIndex != -1);
 	}
 }
