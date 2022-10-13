@@ -62,8 +62,6 @@ import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.Gridnode;
-import org.unigrid.janus.model.GridnodeListModel;
-import org.unigrid.janus.model.GridnodeTxidList;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.GridnodeEntity;
 import org.unigrid.janus.model.rpc.entity.GridnodeList;
@@ -74,6 +72,8 @@ import org.unigrid.janus.model.signal.NodeRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.model.signal.UnlockRequest;
+import org.unigrid.janus.view.backing.GridnodeListModel;
+import org.unigrid.janus.view.backing.GridnodeTxidList;
 
 @ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
@@ -192,7 +192,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 				btn.setStyle("-fx-cursor: hand");
 				FontIcon fontIcon = new FontIcon("far-check-circle");
 
-				if(used){
+				if (used) {
 					fontIcon = new FontIcon("fas-ban");
 					fontIcon.setIconColor(setColor(255, 0, 0, 10));
 					btn.setTooltip(new Tooltip("txhash is already in use"));

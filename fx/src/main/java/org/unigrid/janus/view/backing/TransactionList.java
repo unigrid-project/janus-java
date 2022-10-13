@@ -14,7 +14,7 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.view.backing;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,10 +23,12 @@ import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 
+// TODO: Clean me
 @ApplicationScoped
 public class TransactionList {
 	public static final String TRANSACTION_LIST = "transactionlist";

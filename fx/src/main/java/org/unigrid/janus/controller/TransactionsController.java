@@ -52,8 +52,8 @@ import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
-import org.unigrid.janus.model.TransactionList;
-import org.unigrid.janus.model.TransactionList.LoadReport;
+import org.unigrid.janus.view.backing.TransactionList;
+import org.unigrid.janus.view.backing.TransactionList.LoadReport;
 
 @ApplicationScoped
 public class TransactionsController implements Initializable, PropertyChangeListener {
