@@ -43,15 +43,18 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import org.apache.commons.lang3.SystemUtils;
@@ -60,6 +63,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.Gridnode;
 import org.unigrid.janus.model.GridnodeListModel;
+import org.unigrid.janus.model.GridnodeTxidList;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.GridnodeEntity;
 import org.unigrid.janus.model.rpc.entity.GridnodeList;
@@ -67,6 +71,7 @@ import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.model.signal.NodeRequest;
+import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.model.signal.UnlockRequest;
 
@@ -79,8 +84,10 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@Inject private HostServices hostServices;
 	@Inject private Event<State> stateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
+	@Inject private Event<OverlayRequest> overlayRequest;
 
 	private static GridnodeListModel nodes = new GridnodeListModel();
+	private static GridnodeTxidList txList = new GridnodeTxidList();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
 
@@ -91,6 +98,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML private VBox genereateKeyPnl;
 	@FXML private TableView tblGridnodes;
 	@FXML private TableView tblGridnodeKeys;
+	@FXML private TableColumn tblTxInUse;
 	@FXML private TableColumn colNodeStatus;
 	@FXML private TableColumn colNodeAlias;
 	@FXML private TableColumn colNodeAddress;
@@ -176,9 +184,32 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 				return new ReadOnlyObjectWrapper(link);
 			});
+
+			tblTxInUse.setCellValueFactory(cell -> {
+				final Gridnode txList = ((CellDataFeatures<Gridnode, Hyperlink>) cell).getValue();
+				Button btn = new Button();
+				Boolean used = txList.isAvailableTxhash();
+				btn.setStyle("-fx-cursor: hand");
+				FontIcon fontIcon = new FontIcon("far-check-circle");
+
+				if(used){
+					fontIcon = new FontIcon("fas-ban");
+					fontIcon.setIconColor(setColor(255, 0, 0, 10));
+					btn.setTooltip(new Tooltip("txhash is already in use"));
+				} else {
+					fontIcon.setIconColor(setColor(48, 186, 69, 10));
+					btn.setTooltip(new Tooltip("txhash is available for use"));
+				}
+				btn.setGraphic(fontIcon);
+				return new ReadOnlyObjectWrapper(btn);
+			});
 		} catch (Exception e) {
 			debug.log(String.format("ERROR: (setup node table) %s", e.getMessage()));
 		}
+	}
+
+	private Color setColor(int r, int g, int b, int number) {
+		return Color.rgb(r, g, b, Math.min(1.0f, Math.max(0.8f, 0.8f))); //number * 0.1f)));
 	}
 
 	private void updateTerminal(String str) {
@@ -198,9 +229,9 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	}
 
 	@FXML
-	private void onGenerateKeyClicked(MouseEvent event) {
+	private void onSetupClicked(MouseEvent event) {
 		genereateKeyPnl.setVisible(true);
-		loadGridnodes();
+		loadAvailableInputsForGridnode();
 	}
 
 	@FXML
@@ -213,7 +244,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		gridnodeDisplay.setText(newGridnode.getResult().toString());
 		newGridnodeDisplay.setVisible(true);
 		copyToClipboard(gridnodeDisplay.getText());
-		loadGridnodes();
+		loadAvailableInputsForGridnode();
 	}
 
 	@FXML
@@ -226,16 +257,17 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		}
 	}
 
-	public void loadGridnodes() {
+	public void loadAvailableInputsForGridnode() {
 		try {
 			GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"outputs"}),
 				GridnodeList.class
 			);
 
-			nodes.setGridnodes(result);
-			tblGridnodeKeys.setItems(nodes.getGridnodes());
+			txList.setGridnodes(result);
+
+			tblGridnodeKeys.setItems(txList.getGridnodes());
 		} catch (Exception e) {
-			debug.print("loadGridnodes " + e.getMessage(),
+			debug.print("loadAvailableInputsForGridnode " + e.getMessage(),
 				NodesController.class.getSimpleName());
 		}
 	}
@@ -274,7 +306,9 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML
 	private void onStartAllNodesPressed(MouseEvent e) {
 		if (wallet.getLocked()) {
+			System.out.println(wallet.getLocked());
 			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_GRIDNODE).build());
+			overlayRequest.fire(OverlayRequest.OPEN);
 		} else {
 			eventNodeRequest(NodeRequest.START_MISSING);
 		}

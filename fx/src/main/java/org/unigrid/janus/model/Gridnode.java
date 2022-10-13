@@ -26,4 +26,6 @@ public class Gridnode {
 	private int outputidx;
 	private String txhash;
 	private String status;
+	private boolean availableTxhash;
+	private String whatIsGoingOn;
 }
