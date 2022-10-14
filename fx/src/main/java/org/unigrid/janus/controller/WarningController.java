@@ -18,8 +18,14 @@ package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import javafx.application.HostServices;
+import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
+
+import java.io.File;
+
+import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
@@ -32,6 +38,7 @@ public class WarningController {
 
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
+	@Inject private HostServices hostServices;
 
 	private static JanusModel janusModel = new JanusModel();
 
@@ -45,5 +52,15 @@ public class WarningController {
 		FxUtils.executeParentById("pnlWarning", (Node) event.getSource(), (node) -> {
 			node.setVisible(false);
 		});
+	}
+
+	@FXML
+	public void onShowDebug(MouseEvent event) {
+		File debugLog = DataDirectory.getDebugLog();
+		try {
+			hostServices.showDocument(debugLog.getAbsolutePath());
+		} catch (NullPointerException e) {
+			System.out.println("Null Host services " + e.getMessage());
+		}
 	}
 }
