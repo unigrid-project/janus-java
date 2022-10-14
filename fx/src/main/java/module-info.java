@@ -60,7 +60,8 @@ module fx {
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
-	
+
+	opens org.unigrid.janus.view.backing to weld.core.impl;
 	opens org.unigrid.janus to weld.core.impl, org.update4j;//, javafx.swing;
 	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics,
 		weld.core.impl;
