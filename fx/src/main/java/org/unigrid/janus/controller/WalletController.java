@@ -144,6 +144,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		} else {
 			//wallet.setCheckExplorer(Boolean.FALSE);
 			if (polling.getSyncTimerRunning()) {
+				// TODO call refresh on the gridnode list here
+				// on load if the wallet is not synced they will appear missing
 				polling.stopSyncPoll();
 			}
 			// FIRE STOP SYNCING EVENT
