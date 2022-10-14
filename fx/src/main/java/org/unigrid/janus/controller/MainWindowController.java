@@ -83,6 +83,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	public void initialize(URL url, ResourceBundle rb) {
 		pnlOverlay.setVisible(false);
 		pnlWarning.setVisible(false);
+		pnlSplash.setVisible(false);
 		wallet.addPropertyChangeListener(this);
 		lockBtn.iconColorProperty().setValue(Color.RED);
 	}
@@ -280,5 +281,12 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 			case ADDRESS_TAB -> select(pnlAddress, btnAddress);
 			case WALLET_TAB -> select(pnlWallet, btnWallet);
 		}
+	}
+
+	public void showSplashScreen() {
+		System.out.println("Show the shutdown splash screen");
+		pnlSplash.setVisible(true);
+		rpc.stopPolling();
+		System.exit(0);
 	}
 }

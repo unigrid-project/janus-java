@@ -14,12 +14,13 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.view.backing;
 
 import jakarta.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Getter;
+import org.unigrid.janus.model.Gridnode;
 import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.service.DebugService;
 
@@ -32,14 +33,10 @@ public class GridnodeListModel {
 	private ObservableList<Gridnode> gridnodes = FXCollections.observableArrayList();
 
 	public void setGridnodes(GridnodeList list) {
-		int oldCount = 0;
 		gridnodes.clear();
 
-		int newCount = 0;
 		for (Gridnode g : list.getResult()) {
 			gridnodes.add(g);
-			//TODO: is this used for something
-			newCount++;
 		}
 	}
 }

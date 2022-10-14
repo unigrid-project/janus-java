@@ -465,7 +465,7 @@ public class UpdateWallet extends TimerTask {
 
 		String githubEntry = githubJson.getEntry().get(0).getId();
 
-		if (githubEntry.equals("") || githubEntry == null) {
+		if (githubEntry == null || githubEntry.equals("")) {
 			return "";
 		}
 

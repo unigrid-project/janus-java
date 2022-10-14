@@ -14,7 +14,7 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.view.backing;
 
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeListener;
@@ -22,8 +22,10 @@ import java.beans.PropertyChangeSupport;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.unigrid.janus.model.Documentation;
 import org.unigrid.janus.model.service.DebugService;
 
+// TODO: Clean me
 public class DocList {
 	public static final String DOCUMENTATION_LIST = "docList";
 
