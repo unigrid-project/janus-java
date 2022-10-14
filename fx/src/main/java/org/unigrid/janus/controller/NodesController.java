@@ -188,7 +188,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 			tblTxInUse.setCellValueFactory(cell -> {
 				final Gridnode txList = ((CellDataFeatures<Gridnode, Hyperlink>) cell).getValue();
 				Button btn = new Button();
-				Boolean used = txList.isAvailableTxhash();
+				boolean used = txList.isAvailableTxhash();
 				btn.setStyle("-fx-cursor: hand");
 				FontIcon fontIcon = new FontIcon("far-check-circle");
 
