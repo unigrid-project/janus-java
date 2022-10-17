@@ -20,6 +20,9 @@ import java.awt.Desktop;
 import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import javafx.application.HostServices;
+import javafx.scene.control.Hyperlink;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,7 @@ public class BrowserService {
 	private static final String TX_PART = "tx";
 
 	@Inject private DebugService debug;
+	@Inject private HostServices hostServices;
 
 	public void navigateAddress(String address) {
 		navigate(String.format(BASE_URL_TEMPLATE, ADDRESS_PART, address));
@@ -46,24 +50,9 @@ public class BrowserService {
 
 	public void navigate(String url) {
 		try {
-			switch (OS.CURRENT) {
-				case WINDOWS -> {
-					if (Desktop.isDesktopSupported()
-						&& Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-						Desktop.getDesktop().browse(new URI(url));
-					}
-				}
-
-				case MAC -> {
-					Runtime.getRuntime().exec("open " + url);
-				}
-
-				default -> {
-					Runtime.getRuntime().exec("xxx-www-browser " + url);
-				}
-			}
-		} catch (IOException | URISyntaxException ex) {
-			debug.log(String.format("ERROR: (browse url) %s", ex.getMessage()));
+			hostServices.showDocument(url);
+		} catch (NullPointerException e) {
+			debug.print(e.getMessage(), BrowserService.class.getSimpleName());
 		}
 	}
 }
