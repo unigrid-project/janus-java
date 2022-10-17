@@ -16,18 +16,11 @@
 
 package org.unigrid.janus.model.service;
 
-import java.awt.Desktop;
-import java.net.URI;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javafx.application.HostServices;
-import javafx.scene.control.Hyperlink;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.model.cdi.Eager;
-import org.update4j.OS;
 
 @Eager
 @ApplicationScoped
