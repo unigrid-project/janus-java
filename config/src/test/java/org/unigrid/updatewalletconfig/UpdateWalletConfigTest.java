@@ -80,7 +80,7 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 			@Mock
 			public List<FileMetadata> getDependencies(Invocation inv, String currentArtifact) {
 				currentArtifact = currentArtifact.contains("org.unigrid:bootstrap")
-					? "org.unigrid.test:bootstrap:1.0.10-SNAPSHOT" : currentArtifact;
+					? "org.unigrid.test:bootstrap:1.0.11-SNAPSHOT" : currentArtifact;
 				return inv.proceed(currentArtifact);
 			}
 
@@ -136,7 +136,7 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 
 				if (collectRequest.getRoot().getArtifact().getGroupId().equals("org.unigrid.test")) {
 					if (collectRequest.getRoot().getArtifact().getArtifactId().equals("fx")) {
-						setupRootArtifact("org.unigrid.test:fx:1.0.10-SNAPSHOT", collectRequest);
+						setupRootArtifact("org.unigrid.test:fx:1.0.11-SNAPSHOT", collectRequest);
 
 						final org.eclipse.aether.graph.Dependency depOne
 							= createDependency("com.google.inject:guice:5.1.0");
@@ -149,7 +149,7 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 
 						collectRequest.setDependencies(Arrays.asList(depOne, depTwo, depThree));
 					} else if (collectRequest.getRoot().getArtifact().getArtifactId().equals("bootstrap")) {
-						setupRootArtifact("org.unigrid.test:bootstrap:1.0.10-SNAPSHOT", collectRequest);
+						setupRootArtifact("org.unigrid.test:bootstrap:1.0.11-SNAPSHOT", collectRequest);
 
 						final org.eclipse.aether.graph.Dependency dependency
 							= createDependency("org.openjfx:javafx-controls:jar:17-ea+7");
@@ -209,7 +209,7 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 		projectModel.setModelVersion("4.0.0");
 		projectModel.setGroupId("org.unigrid.test");
 		projectModel.setArtifactId(artifactId);
-		projectModel.setVersion("1.0.10-SNAPSHOT");
+		projectModel.setVersion("1.0.11-SNAPSHOT");
 
 		return projectModel;
 	}
