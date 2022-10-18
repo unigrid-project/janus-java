@@ -16,7 +16,6 @@
 
 package org.unigrid.janus.model.entity;
 
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.json.bind.annotation.JsonbProperty;
