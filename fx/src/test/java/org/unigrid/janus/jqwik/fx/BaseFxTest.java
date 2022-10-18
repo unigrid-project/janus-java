@@ -16,19 +16,21 @@
 
 package org.unigrid.janus.jqwik.fx;
 
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.jqwik.api.lifecycle.AddLifecycleHook;
+import net.jqwik.api.lifecycle.BeforeContainer;
 import net.jqwik.api.lifecycle.PropagationMode;
-import static org.awaitility.Awaitility.await;
-import org.testfx.api.FxToolkit;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.unigrid.janus.jqwik.BaseMockedWeldTest;
+import org.unigrid.janus.model.service.RPCService;
 
 @AddLifecycleHook(value = FxHook.class, propagateTo = PropagationMode.ALL_DESCENDANTS)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BaseFxTest extends BaseMockedWeldTest {
-	protected void waitForScene() {
-		await().until(() -> Objects.nonNull(FxToolkit.toolkitContext().getRegisteredStage().getScene()));
+	@BeforeContainer
+	public static void beforeContainer() {
+		System.setProperty(RPCService.PROPERTY_USERNAME_KEY, RandomStringUtils.randomAlphabetic(20));
+		System.setProperty(RPCService.PROPERTY_PASSWORD_KEY, RandomStringUtils.randomAlphabetic(20));
 	}
 }
