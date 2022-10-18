@@ -126,6 +126,9 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 				});
 
 				Button btn = new Button();
+				btn.setOnAction(e -> {
+					browser.navigate(doc.getLink());
+				});
 				FontIcon fontIcon = new FontIcon("far-newspaper");
 				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
 				btn.setGraphic(fontIcon);
