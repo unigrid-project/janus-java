@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+//import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.util.List;
 import java.util.Objects;
@@ -43,13 +43,15 @@ public class Transaction {
 	private String generatedfrom;
 	private List<Transaction> parts;
 
-	@JsonProperty("txid")
-	private String txId;
+	// TODO this doesnt work
+	// had to revert for now to get a hotfix released
+	//@JsonProperty("txid")
+	private String txid;
 
 	public boolean hasPart(Transaction transaction) {
 		boolean result = false;
 
-		if (txId.equals(transaction.txId) && Objects.nonNull(parts)) {
+		if (txid.equals(transaction.txid) && Objects.nonNull(parts)) {
 			for (Transaction t : parts) {
 				if ((t.address.equals(transaction.address)) && (t.category.equals(transaction.category))
 					&& (t.amount == transaction.amount) && (t.time == transaction.time)) {
@@ -78,7 +80,7 @@ public class Transaction {
 
 	public Transaction convertToMultiPart() {
 		final Transaction transaction = new Transaction(account, address, "multipart", amount, time);
-		transaction.setTxId(txId);
+		transaction.setTxid(txid);
 		transaction.addPart(this);
 
 		return transaction;

@@ -190,7 +190,7 @@ public class WalletController implements Initializable, PropertyChangeListener {
 				btn.setTooltip(new Tooltip(transaction.getCategory()));
 
 				btn.setOnAction(e -> {
-					browser.navigateTransaction(transaction.getTxId());
+					browser.navigateTransaction(transaction.getTxid());
 				});
 
 				FontIcon fontIcon = new FontIcon("fas-wallet");
@@ -237,21 +237,21 @@ public class WalletController implements Initializable, PropertyChangeListener {
 					final Clipboard cb = Clipboard.getSystemClipboard();
 					final ClipboardContent content = new ClipboardContent();
 
-					content.putString(transaction.getTxId());
+					content.putString(transaction.getTxid());
 					cb.setContent(content);
 
 					if (SystemUtils.IS_OS_MAC_OSX) {
 						Notifications
 							.create()
 							.title("Transaction copied to clipboard")
-							.text(transaction.getTxId())
+							.text(transaction.getTxid())
 							.position(Pos.TOP_RIGHT)
 							.showInformation();
 					} else {
 						Notifications
 							.create()
 							.title("Transaction copied to clipboard")
-							.text(transaction.getTxId())
+							.text(transaction.getTxid())
 							.showInformation();
 					}
 				});

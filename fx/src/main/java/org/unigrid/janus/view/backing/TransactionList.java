@@ -90,7 +90,7 @@ public class TransactionList {
 	public int isDuplicate(Transaction transaction, boolean beginning) {
 		int result = -1;
 
-		if (transaction.getTxId() == null) {
+		if (transaction.getTxid() == null) {
 			return -1;
 		}
 
@@ -98,8 +98,8 @@ public class TransactionList {
 			int index = 0;
 
 			for (Transaction t : transactions) {
-				if (t.getTxId() != null && transaction.getTxId() != null) {
-					if (t.getTxId().equals(transaction.getTxId())) {
+				if (t.getTxid() != null && transaction.getTxid() != null) {
+					if (t.getTxid().equals(transaction.getTxid())) {
 						result = index;
 						break;
 					}
@@ -120,7 +120,7 @@ public class TransactionList {
 
 		for (Transaction t : this.transactions) {
 			if (t.getCategory().equals("multipart")
-				&& t.getTxId().equals(transaction.getTxId())) {
+				&& t.getTxid().equals(transaction.getTxid())) {
 				result = t;
 				break;
 			}
