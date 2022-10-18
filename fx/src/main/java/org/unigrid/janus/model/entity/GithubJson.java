@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -33,7 +33,7 @@ public class GithubJson {
 	public static class Asset {
 		@JsonbProperty("browser_download_url")
 		private String browserDownloadUrl;
-		@JsonProperty("name")
+		@JsonbProperty("name")
 		private String name;
 	}
 }

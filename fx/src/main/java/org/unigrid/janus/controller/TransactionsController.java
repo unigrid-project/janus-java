@@ -96,7 +96,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 				btn.setTooltip(new Tooltip(transaction.getCategory()));
 
 				btn.setOnAction(e -> {
-					browser.navigateTransaction(transaction.getTxid());
+					browser.navigateTransaction(transaction.getTxId());
 				});
 
 				FontIcon fontIcon = new FontIcon("fas-wallet");
@@ -144,21 +144,21 @@ public class TransactionsController implements Initializable, PropertyChangeList
 				btn.setOnAction(e -> {
 					final Clipboard cb = Clipboard.getSystemClipboard();
 					final ClipboardContent content = new ClipboardContent();
-					content.putString(transaction.getTxid());
-					System.out.println("transaction.getTxid() " + transaction.getTxid());
+					content.putString(transaction.getTxId());
+					System.out.println("transaction.getTxid() " + transaction.getTxId());
 					cb.setContent(content);
 					if (SystemUtils.IS_OS_MAC_OSX) {
 						Notifications
 							.create()
 							.title("Transaction copied to clipboard")
-							.text(transaction.getTxid())
+							.text(transaction.getTxId())
 							.position(Pos.TOP_RIGHT)
 							.showInformation();
 					} else {
 						Notifications
 							.create()
 							.title("Transaction copied to clipboard")
-							.text(transaction.getTxid())
+							.text(transaction.getTxId())
 							.showInformation();
 					}
 				});
