@@ -291,6 +291,14 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		copyToClipboard(gridnodeDisplay.getText());
 	}
 
+	@FXML
+	private void onCopyScriptClicked(MouseEvent event) {
+		content.putString("bash -ic \"$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/"
+			+ "main/node_installer.sh)\"; source ~/.bashrc");
+		clipboard.setContent(content);
+		Notifications.create().title("Gridnode script copied to clipboard").showInformation();
+	}
+
 	private void copyToClipboard(String gridnode) {
 		content.putString(gridnode);
 		clipboard.setContent(content);
