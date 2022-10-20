@@ -34,7 +34,7 @@ public class DataDirectory {
 	public static final String CONFIG_FILE = "unigrid.conf";
 	public static final String GRIDNODE_FILE = "masternode.conf";
 	public static final String DEBUG_LOG = "debug.log";
-	private static final String OSX_SUPPORT_DIR = "Library/Application\\ Support";
+	private static final String OSX_SUPPORT_DIR = "Library/Application Support";
 
 	public static final String DATADIR_CONFIG_RPCUSER_KEY = "rpcuser";
 	public static final String DATADIR_CONFIG_RPCPASSWORD_KEY = "rpcpassword";
