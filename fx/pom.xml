@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	 xmlns="http://maven.apache.org/POM/4.0.0"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.unigrid.janus</groupId>
 	<artifactId>fx</artifactId>
@@ -15,12 +15,17 @@
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<config.opens>
-			fx=jakarta.xml.bind/jakarta.xml.bind-api
+		<config.opens> fx=jakarta.xml.bind/jakarta.xml.bind-api
 		</config.opens>
 		<config.exports>
 		</config.exports>
 	</properties>
+	<repositories>
+		<repository>
+			<id>terminalfx-repo</id>
+			<url>https://github.com/javaterminal/terminalfx/raw/master/releases</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>com.jcraft</groupId>
@@ -218,6 +223,11 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.0-alpha7</version>
 		</dependency>
+		<dependency>
+			<groupId>com.kodedu.terminalfx</groupId>
+			<artifactId>terminalfx</artifactId>
+			<version>1.2.0</version>
+		</dependency>
 		<!--<dependency>
 		    <groupId>com.dustinredmond.fxtrayicon</groupId>
 		    <artifactId>FXTrayIcon</artifactId>
@@ -262,9 +272,9 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>
-						-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar
-						-Dcoverage-classes=loaded
+						-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar -Dcoverage-classes=loaded
 						--add-modules org.update4j
+						--add-modules=javafx.controls,javafx.graphics
 						--add-opens fx/org.unigrid.janus.controller=ALL-UNNAMED
 						--add-opens fx/org.unigrid.janus.controller.component=ALL-UNNAMED
 						--add-opens fx/org.unigrid.janus.model=ALL-UNNAMED
@@ -281,6 +291,7 @@
 						--add-opens fx/org.unigrid.janus.model=jersey-client
 						--add-opens fx/org.unigrid.janus.model.entity=jersey-client
 						--add-opens fx/org.unigrid.janus.view.backing=weld.core.impl
+						--add-opens fx/org.unigrid.janus.view.Terminal=com.kodedu.terminalfx
 						--add-exports fx/org.unigrid.janus.cdi=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.controller.component=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.model=ALL-UNNAMED

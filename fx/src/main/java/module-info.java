@@ -54,6 +54,7 @@ module fx {
 	requires org.slf4j;
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
+	requires com.kodedu.terminalfx;
 	//requires FXTrayIcon;
 	//requires javafx.swing;
 	requires j8fu;
@@ -67,7 +68,7 @@ module fx {
 		weld.core.impl;
 	opens org.unigrid.janus.controller to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j,
 		javafx.graphics;
-	opens org.unigrid.janus.view to weld.core.impl;
+	opens org.unigrid.janus.view to weld.core.impl, com.kodedu.terminalfx, javafx.fx;
 	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls;
 	opens org.unigrid.janus.model to weld.core.impl, javafx.base , jakarta.xml.bind, jakarta.ws.rs, com.fasterxml.jackson.databind,
 		jersey.media.jaxb;
@@ -77,6 +78,7 @@ module fx {
 
 	exports org.unigrid.janus;
 	
+	exports org.unigrid.janus.view to com.kodedu.terminalfx;
 	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml, javafx.base,
 		javafx.controls, org.update4j, javafx.graphics;
 	exports org.unigrid.janus.controller to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls,

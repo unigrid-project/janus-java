@@ -20,6 +20,9 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+import com.kodedu.terminalfx.TerminalBuilder;
+import com.kodedu.terminalfx.TerminalTab;
+import com.kodedu.terminalfx.config.TerminalConfig;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
@@ -42,6 +45,8 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -105,6 +110,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML private TableColumn colNodeTxhash;
 	@FXML private HBox newGridnodeDisplay;
 	@FXML private Text gridnodeDisplay;
+	@FXML private TabPane tabPane;
 
 	private String serverResponse;
 
@@ -127,8 +133,26 @@ public class NodesController implements Initializable, PropertyChangeListener {
 				debug.log(String.format("ERROR: (gridnode init) %s", e.getMessage()));
 			}
 		});
-	}
+		TerminalConfig darkConfig = new TerminalConfig();
+		darkConfig.setBackgroundColor(Color.rgb(16, 16, 16));
+		darkConfig.setForegroundColor(Color.rgb(240, 240, 240));
+		darkConfig.setCursorColor(Color.rgb(255, 0, 0, 0.5));
+		darkConfig.setCtrlCCopy(true);
+		darkConfig.setCtrlVPaste(true);
+		darkConfig.setCursorBlink(true);
+		darkConfig.setCursorColor(Color.GREEN);
+		TerminalBuilder terminalBuilder = new TerminalBuilder(darkConfig);
+		TerminalTab terminal = terminalBuilder.newTerminal();
+		//TabPane tabPane = new TabPane();
+		
+		tabPane.getTabs().add(terminal);
+		terminal.onTerminalFxReady(() -> {
+			terminal.getTerminal().getOutputWriter();
+			//terminal.getTerminal().command("bash -ic \"$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh)\"\r");
+		});
 
+	}
+ 
 	private void setupNodeList() {
 		try {
 			tblGridnodes.setItems(nodes.getGridnodes());
