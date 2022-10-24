@@ -219,7 +219,7 @@ public class UpdateWallet extends TimerTask {
 	private Boolean checkUpdateBootstrap() {
 		String filteredVer = BootstrapModel.getBootstrapVer();
 		System.out.println("getBootstrapVer in UpdateWallet Check: " + BootstrapModel.getBootstrapVer());
-
+		boolean didDownloadFile = false;
 		//TODO: Move "VersionNumber" to a seperate class with a comparator so we can clean this up
 		if ((getVersionNumber(filteredVer, 0) == getVersionNumber(getLatestVersion(), 0))
 			&& (getVersionNumber(filteredVer, 2) == getVersionNumber(getLatestVersion(), 2))
@@ -230,19 +230,21 @@ public class UpdateWallet extends TimerTask {
 			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());
 			System.out.println("The latest version of the bootstrap is the same as the one we have");
 		} else {
+
 			if (OS.CURRENT == OS.LINUX) {
 				Path path = Paths.get(linuxPath);
 				System.out.println("downloading linux installer");
+				
 				if (getLinuxIDLike().equals("debian")
 					&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
 					removeOldInstall(linuxPath);
-					downloadFile(getDownloadURL(getLatestVersion(),
+					didDownloadFile = downloadFile(getDownloadURL(getLatestVersion(),
 						getDEBFileName(getLatestVersion())),
 						linuxPath,
 						getDEBFileName(getLatestVersion()));
 				} else {
 					removeOldInstall(linuxPath);
-					downloadFile(getDownloadURL(getLatestVersion(),
+					didDownloadFile = downloadFile(getDownloadURL(getLatestVersion(),
 						getRPMFileName(getLatestVersion())),
 						linuxPath,
 						getRPMFileName(getLatestVersion()));
@@ -251,17 +253,17 @@ public class UpdateWallet extends TimerTask {
 			} else if (OS.CURRENT == OS.MAC
 				&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
 				removeOldInstall(macPath);
-				downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
+				didDownloadFile = downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
 					macPath,
 					getDMGFileName(getLatestVersion()));
 			} else if (OS.CURRENT == OS.WINDOWS
 				&& !checkTempFolder(getMSIFileName(getLatestVersion()), windowsPath)) {
 				removeOldInstall(windowsPath);
-				downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
+				didDownloadFile = downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
 					windowsPath,
 					getMSIFileName(getLatestVersion()));
 			}
-			BootstrapModel.setBootstrapUpdate(true);
+			BootstrapModel.setBootstrapUpdate(didDownloadFile);
 		}
 		System.out.println("are we upadting the bootstrap: " + BootstrapModel.isBootstrapUpdate());
 		return BootstrapModel.isBootstrapUpdate();
@@ -430,13 +432,16 @@ public class UpdateWallet extends TimerTask {
 		}
 	}
 
-	private void downloadFile(String url, String path, String fileName) {
+	private boolean downloadFile(String url, String path, String fileName) {
+		File file =  new File(path + fileName);
 		try {
-			FileUtils.copyURLToFile(new URL(url), new File(path + fileName), 5000, 5000);
+			FileUtils.copyURLToFile(new URL(url), file, 5000, 5000);
 		} catch (Exception e) {
 			System.out.println("FILE FAILED TO DOWNLOAD" + e.getMessage());
 		}
+
 		System.out.println("DOWNLOADED: " + url);
+		return file.exists();
 	}
 
 	private String getDEBFileName(String version) {
