@@ -24,7 +24,7 @@ import org.unigrid.janus.model.DataDirectory;
 
 public class OsxUtils {
 
-    public void openFileOsx(String file) {
+	public void openFileOsx(String file) {
 		File path = new File(DataDirectory.get());
 		String[] cmds = new String[3];
 		cmds[0] = "open";
@@ -39,17 +39,17 @@ public class OsxUtils {
 		}
 	}
 
-    public void openDirectory(String directory) throws IOException {
-        if(!Desktop.isDesktopSupported()) {
-            System.out.println("Cannot open data directory as desktop is not supported");
-            return;
-        }
+	public void openDirectory(String directory) throws IOException {
+		if (!Desktop.isDesktopSupported()) {
+			System.out.println("Cannot open data directory as desktop is not supported");
+			return;
+		}
 
-        File location = new File(directory);
-        Desktop desktop = Desktop.getDesktop();
-        if(location.exists()) {
-            desktop.open(location);
-        }
+		File location = new File(directory);
+		Desktop desktop = Desktop.getDesktop();
+		if (location.exists()) {
+			desktop.open(location);
+		}
 
-    }
+	}
 }
