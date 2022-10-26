@@ -128,7 +128,7 @@
             </StackPane>
          </children>
       </VBox>
-      <VBox fx:id="genereateKeyPnl" maxWidth="1.7976931348623157E308" prefHeight="364.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <VBox fx:id="genereateKeyPnl" maxWidth="1.7976931348623157E308" prefHeight="364.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <FlowPane alignment="CENTER" columnHalignment="CENTER" VBox.vgrow="ALWAYS">
                <children>
