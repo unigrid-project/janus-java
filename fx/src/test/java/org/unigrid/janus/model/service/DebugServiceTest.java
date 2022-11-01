@@ -14,41 +14,41 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.model.service;
 
 import jakarta.inject.Inject;
-import java.math.BigDecimal;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import net.jqwik.api.Example;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import org.unigrid.janus.jqwik.BaseMockedWeldTest;
-import org.unigrid.janus.jqwik.WeldSetup;
-import org.unigrid.janus.model.Address.Amount;
 
-@WeldSetup(Address.class)
-public class AddressTest extends BaseMockedWeldTest {
-	@Inject
-	private Address address;
+public class DebugServiceTest extends BaseMockedWeldTest {
+
+	private final PrintStream standardOut = System.out;
+	private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+
+	@Inject private DebugService debugService;
 
 	@Example
-	public boolean testAddressProperties() {
-		final String addr = "HAjsFi8JShq9Hfx5xYseGMoy8Mzbbo3Reu";
-
-		address.setAddress(addr);
-		return addr.endsWith(address.getAddress());
+	public boolean testFormattedCurrentDate() {
+		String currentDate = new SimpleDateFormat("yyyy.MM.dd.HH.mm").format(new Date());
+		return currentDate.equals(debugService.getCurrentDate());
 	}
 
 	@Example
-	public boolean testAmountString() {
-		final Amount amountString = new Amount("10");
+	public void testTrace() {
+		System.setOut(new PrintStream(outputStreamCaptor));
 
-		String res = "10.00000000";
-		return amountString.toString().equals(res);
+		debugService.trace("Hello!!!");
+
+		assertThat("Hello!!!", equalTo(outputStreamCaptor.toString()
+			.trim()));
+
+		System.setOut(standardOut);
 	}
 
-	@Example
-	public boolean testAmountNumber() {
-		final Amount amountNum = new Amount(BigDecimal.TEN);
-
-		String res = "10.00000000";
-		return amountNum.toString().equals(res);
-	}
 }

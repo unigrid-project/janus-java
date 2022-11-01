@@ -249,7 +249,7 @@
                               <Label layoutY="27.0" text="Create a backup of your wallet to store in case your computer breaks down or is lost." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                               <HBox layoutY="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                                  <children>
-                                    <Button mnemonicParsing="false" onMouseClicked="#onBackupWallet" style="-fx-cursor: hand;" text="Backup" />
+                                    <Button fx:id="btnSetExportBackup" mnemonicParsing="false" onMouseClicked="#onBackupWallet" text="Backup" />
                                  </children>
                               </HBox>
                            </children>

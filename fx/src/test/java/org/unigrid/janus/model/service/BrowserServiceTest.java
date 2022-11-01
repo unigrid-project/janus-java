@@ -14,41 +14,42 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.model.service;
 
-import jakarta.inject.Inject;
-import java.math.BigDecimal;
+import mockit.Expectations;
+import mockit.Mocked;
 import net.jqwik.api.Example;
 import org.unigrid.janus.jqwik.BaseMockedWeldTest;
-import org.unigrid.janus.jqwik.WeldSetup;
-import org.unigrid.janus.model.Address.Amount;
 
-@WeldSetup(Address.class)
-public class AddressTest extends BaseMockedWeldTest {
-	@Inject
-	private Address address;
+public class BrowserServiceTest extends BaseMockedWeldTest {
 
 	@Example
-	public boolean testAddressProperties() {
-		final String addr = "HAjsFi8JShq9Hfx5xYseGMoy8Mzbbo3Reu";
+	public void shouldCallNavigateFromAddress(@Mocked BrowserService service) {
+		new Expectations(service) {
+			{
+				service.navigateAddress(anyString);
+				times = 1;
+				service.navigate(anyString);
+				times = 1;
 
-		address.setAddress(addr);
-		return addr.endsWith(address.getAddress());
+			}
+		};
+
+		service.navigateAddress("test");
 	}
 
 	@Example
-	public boolean testAmountString() {
-		final Amount amountString = new Amount("10");
+	public void shouldCallNavigateFromTransaction(@Mocked BrowserService service) {
+		new Expectations(service) {
+			{
+				service.navigateTransaction(anyString);
+				times = 1;
+				service.navigate(anyString);
+				times = 1;
 
-		String res = "10.00000000";
-		return amountString.toString().equals(res);
-	}
+			}
+		};
 
-	@Example
-	public boolean testAmountNumber() {
-		final Amount amountNum = new Amount(BigDecimal.TEN);
-
-		String res = "10.00000000";
-		return amountNum.toString().equals(res);
+		service.navigateTransaction("012345");
 	}
 }

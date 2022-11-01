@@ -16,39 +16,28 @@
 
 package org.unigrid.janus.model;
 
-import jakarta.inject.Inject;
-import java.math.BigDecimal;
 import net.jqwik.api.Example;
-import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 import org.unigrid.janus.jqwik.WeldSetup;
-import org.unigrid.janus.model.Address.Amount;
 
 @WeldSetup(Address.class)
-public class AddressTest extends BaseMockedWeldTest {
-	@Inject
-	private Address address;
+public class UpdateURLTest {
 
 	@Example
-	public boolean testAddressProperties() {
-		final String addr = "HAjsFi8JShq9Hfx5xYseGMoy8Mzbbo3Reu";
-
-		address.setAddress(addr);
-		return addr.endsWith(address.getAddress());
+	public boolean testLinuxUrl() {
+		return UpdateURL.getLinuxUrl().equals("https://raw.githubusercontent.com/unigrid-project/"
+			+ "unigrid-update/main/config-linux.xml");
 	}
 
 	@Example
-	public boolean testAmountString() {
-		final Amount amountString = new Amount("10");
-
-		String res = "10.00000000";
-		return amountString.toString().equals(res);
+	public boolean testMacUrl() {
+		return UpdateURL.getMacUrl().equals("https://raw.githubusercontent.com/unigrid-project/"
+			+ "unigrid-update/main/config-mac.xml");
 	}
 
 	@Example
-	public boolean testAmountNumber() {
-		final Amount amountNum = new Amount(BigDecimal.TEN);
-
-		String res = "10.00000000";
-		return amountNum.toString().equals(res);
+	public boolean testWindowsUrl() {
+		return UpdateURL.getWindowsUrl().equals("https://raw.githubusercontent.com/unigrid-project/"
+			+ "unigrid-update/main/config-windows.xml");
 	}
+
 }
