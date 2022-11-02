@@ -24,6 +24,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.module.ModuleDescriptor.Version;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -216,15 +217,14 @@ public class UpdateWallet extends TimerTask {
 		return update;
 	}
 
-	private Boolean checkUpdateBootstrap() {
+	public Boolean checkUpdateBootstrap() {
 		String filteredVer = BootstrapModel.getBootstrapVer();
+		String latestVersion = getLatestVersion();
 		System.out.println("getBootstrapVer in UpdateWallet Check: " + BootstrapModel.getBootstrapVer());
 
 		//TODO: Move "VersionNumber" to a seperate class with a comparator so we can clean this up
-		if ((getVersionNumber(filteredVer, 0) == getVersionNumber(getLatestVersion(), 0))
-			&& (getVersionNumber(filteredVer, 2) == getVersionNumber(getLatestVersion(), 2))
-			&& (getVersionNumber(filteredVer, 4) == getVersionNumber(getLatestVersion(), 4))
-			|| getLatestVersion().equals("")) {
+		if (Version.parse(filteredVer).compareTo(Version.parse(latestVersion)) == 0
+			|| latestVersion.equals("")) {
 
 			BootstrapModel.setBootstrapUpdate(false);
 			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());
@@ -496,13 +496,6 @@ public class UpdateWallet extends TimerTask {
 		}
 
 		return osDetails.get("ID_LIKE");
-	}
-
-	private int getVersionNumber(String version, int index) {
-		char[] c = version.toCharArray();
-
-		String majorVersion = String.valueOf(c[index]);
-		return Integer.parseInt(majorVersion);
 	}
 
 	private void removeOldInstall(String path) {
