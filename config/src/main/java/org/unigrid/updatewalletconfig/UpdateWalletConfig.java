@@ -63,6 +63,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	private String fxVersion = "";
 
+	private String fxVersionWithSnapshot = "";
+
 	@Override
 	public void afterSessionEnd(MavenSession mavenSession) throws MavenExecutionException {
 		if (!mavenSession.getResult().getExceptions().isEmpty()) {
@@ -88,6 +90,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		if (fxProject != null && fxProject.getDependencies().size() != 0) {
 			System.out.println("Fx Project: " + fxProject.getGroupId() + ":" + fxProject.getArtifactId()
 				+ ":" + fxProject.getVersion());
+
+			fxVersionWithSnapshot = fxProject.getVersion();
 
 			if (fxVersion.isEmpty()) {
 				fxVersion = fxProject.getVersion().replace("-SNAPSHOT", "");
@@ -196,6 +200,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				.log(Level.SEVERE, null, e);
 		}
 
+		System.out.println(currentArtifact + " dependencies: " + files.size());
+
 		return files;
 	}
 
@@ -234,9 +240,9 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				}
 			}
 			String updateUrl = "https://github.com/unigrid-project/unigrid-update"
-				+ isTesting + "/releases/download/v" + fxVersion + "/fx-" + version + "-SNAPSHOT.jar";
-			File localJar = new File(baseDir.getAbsolutePath() + "/target/fx-" + fxVersion
-				+ "-SNAPSHOT.jar");
+				+ isTesting + "/releases/download/v" + fxVersion + "/fx-" + fxVersionWithSnapshot + ".jar";
+			File localJar = new File(baseDir.getAbsolutePath() + "/target/fx-" + fxVersionWithSnapshot + ".jar");
+
 			if (localJar.exists() != false) {
 				FileMetadata tempFile = new FileMetadata(updateUrl, localJar.length(),
 					ConfFileUtil.getChecksumString(localJar.toPath()));

@@ -28,6 +28,7 @@ import java.util.Properties;
 import mockit.Invocation;
 import mockit.Mock;
 import mockit.MockUp;
+import net.jqwik.api.Disabled;
 import net.jqwik.api.Example;
 import org.apache.maven.MavenExecutionException;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
@@ -72,7 +73,7 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 		request.setRoot(new org.eclipse.aether.graph.Dependency(artifact, ""));
 	}
 
-	@Example
+	@Example @Disabled
 	public <T extends RepositorySystem> void shouldBeAbleToHandleSingleDependency()
 		throws PlexusContainerException, MavenExecutionException, IOException, URISyntaxException {
 
