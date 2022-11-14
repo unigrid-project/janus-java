@@ -68,7 +68,7 @@
                         </AnchorPane>
                         <AnchorPane>
                            <children>
-                              <Label text="Gridnode / Masternode file" textFill="#ee7722">
+                              <Label text="Gridnode file" textFill="#ee7722">
                                  <font>
                                     <Font size="18.0" />
                                  </font>

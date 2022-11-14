@@ -24,9 +24,9 @@ import org.unigrid.janus.model.Gridnode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class GridnodeList extends BaseResult<List<GridnodeList.Result>> {
-	private static final String METHOD = "masternode";
+	private static final String METHOD = "gridnode";
 
-	// masternode <start|start-alias|start-many|stop|stop-alias|stop-many|list|list-conf|
+	// gridnode <start|start-alias|start-many|stop|stop-alias|stop-many|list|list-conf|
 	// count|debug|current|winners|genkey|enforce|outputs> [passphrase]
 	public static class Request extends BaseRequest {
 		public Request(Object[] args) {
