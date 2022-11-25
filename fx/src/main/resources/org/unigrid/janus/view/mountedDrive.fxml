@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.ProgressBar?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import org.unigrid.janus.view.component.PTableColumn?>
+<?import org.unigrid.janus.view.component.WindowBarButton?>
+
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="364.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.MountedDriveController">
+   <children>
+      <VBox maxWidth="1.7976931348623157E308" prefHeight="364.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <FlowPane alignment="CENTER" columnHalignment="CENTER" VBox.vgrow="ALWAYS">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" text="Unigrid drive" textAlignment="CENTER" textFill="#ff8b2d">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </FlowPane>
+            <FlowPane alignment="CENTER" prefHeight="50.0" prefWidth="450.0" VBox.vgrow="ALWAYS">
+               <children>
+		       <TextField fx:id="tf1" maxHeight="30.0" maxWidth="200.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="24.0" prefWidth="200.0" promptText="" />
+		</children>
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </FlowPane>
+	 </children>
+      </VBox>
+   </children>
+</AnchorPane>

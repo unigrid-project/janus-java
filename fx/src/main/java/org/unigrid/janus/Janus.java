@@ -51,6 +51,8 @@ import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.service.api.MountFailureException;
+import org.unigrid.janus.model.service.api.Mountable;
 import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
 
@@ -67,6 +69,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private UpdateWallet updateWallet;
 	@Inject private SplashScreenController splashController;
 	@Inject private Wallet wallet;
+	@Inject private Mountable mountable;
 	//@Inject private TrayService tray;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
@@ -79,6 +82,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private Info info = new Info();
 	private Boolean checkForStatus = true;
 
+	@SneakyThrows
 	@PostConstruct
 	private void init() {
 		System.out.println("getting to init");
@@ -122,6 +126,15 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
+		var t = new Thread(() -> {
+			try {
+				mountable.mount();
+			} catch(MountFailureException ex) {
+				System.err.println(ex);
+			}
+		});
+		t.start();
+
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
@@ -134,6 +147,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							// rpc.stopPolling();
 							wallet.setOffline(Boolean.FALSE);
 							startMainWindow();
+
 							rpc.pollForInfo(10 * 1000);
 							janusModel.setAppState(JanusModel.AppState.LOADED);
 							preloader.stopSpinner();
