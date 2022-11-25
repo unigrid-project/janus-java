@@ -57,6 +57,8 @@ module fx {
 	//requires FXTrayIcon;
 	//requires javafx.swing;
 	requires j8fu;
+	requires jnr.winfsp;
+	requires org.jnrproject.ffi;
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
