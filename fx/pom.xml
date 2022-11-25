@@ -20,7 +20,11 @@
 		</config.opens>
 		<config.exports>
 		</config.exports>
+<<<<<<< HEAD
 		<surefireArgLine />
+=======
+		<maven.test.skip>true</maven.test.skip>
+>>>>>>> BM-Janus-DriveMount
 	</properties>
         <repositories>
             <repository>
@@ -244,7 +248,27 @@
 		    <artifactId>FXTrayIcon</artifactId>
 		    <version>3.3.0</version>
 		</dependency>-->
+		
+		<dependency>
+			<groupId>com.github.jnrwinfspteam</groupId>
+			<artifactId>jnr-winfsp</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>com.github.jnr</groupId>
+			<artifactId>jnr-ffi</artifactId>
+			<version>2.2.12</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>com.github.jnr</groupId>
+			<artifactId>jnr-posix</artifactId>
+			<version>3.1.15</version>
+		</dependency>
+	
 	</dependencies>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -314,7 +338,14 @@
 <!--			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+<<<<<<< HEAD
 			</plugin>-->
+=======
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+>>>>>>> BM-Janus-DriveMount
 			<plugin>
 				<groupId>pl.gdela</groupId>
 				<artifactId>socomo-maven</artifactId>
@@ -351,6 +382,7 @@
 						--add-exports fx/org.unigrid.janus.model.service=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.view.backing=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.model.service.external=jersey.client
+						--add-exports fx/org.unigrid.janus.model.service.external=javafx.graphics
 						--add-exports fx/org.unigrid.janus.model.external=jersey.common
 						--add-exports fx/org.unigrid.janus.model.external=org.update4j
 						--add-exports fx/org.unigrid.janus.model.external=ALL-UNNAMED
@@ -360,6 +392,7 @@
 						--add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
 						--add-exports javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED
 						--add-reads org.update4j=fx
+						--add-reads javafx.graphics=fx
 					</argLine>
 					<systemPropertyVariables>
 						<glass.platform>Monocle</glass.platform>
