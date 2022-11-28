@@ -3,22 +3,27 @@ package org.unigrid.janus.model.filesystem.memoryfs;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import net.fusejna.StructStat;
-import org.unigrid.janus.model.filesystem.memoryfs.linux.MemoryFS;
-import org.unigrid.janus.model.signal.UsedSpace;
 
 @Data
-public abstract class VirtualAbstractPath {
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+public abstract class VirtualAbstractPath<T> {
+	@NonNull
 	private String name;
 	private VirtualDirectory parent;
-
-	protected VirtualAbstractPath(final String name) {
-		this(name, null);
+	private T userData;
+	
+	protected VirtualAbstractPath(String name, VirtualDirectory parent, T userData) {
+		this(name, parent);
+		this.userData = userData;
 	}
 
-	protected VirtualAbstractPath(final String name, final VirtualDirectory parent) {
-		this.name = name;
+	protected VirtualAbstractPath(String name, VirtualDirectory parent) {
+		this(name);
 		this.parent = parent;
 	}
 
