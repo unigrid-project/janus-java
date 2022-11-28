@@ -8,6 +8,7 @@ import com.github.jnrwinfspteam.jnrwinfsp.util.NaturalOrderComparator;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
+import jakarta.enterprise.inject.spi.CDI;
 import java.io.IOException;
 import jnr.ffi.Pointer;
 
@@ -43,11 +44,11 @@ public class WinFspMem extends WinFspStubFS {
 
 	private final PrintStream verboseOut;
 
-	public WinFspMem() throws NTStatusException {
-		this(false);
+	public WinFspMem(Event<UsedSpace> usedSpaceEvent) throws NTStatusException {
+		this(false,usedSpaceEvent);
 	}
 
-	public WinFspMem(boolean verbose) throws NTStatusException {
+	public WinFspMem(boolean verbose, Event<UsedSpace> usedSpaceEvent) throws NTStatusException {
 		this.rootPath = Path.of("\\").normalize();
 		this.objects = new HashMap<>();
 		this.objects.put(rootPath.toString(), new DirObj(
@@ -61,6 +62,7 @@ public class WinFspMem extends WinFspStubFS {
 		this.volumeLabel = "Unigrid";
 
 		this.verboseOut = verbose ? System.out : new PrintStream(OutputStream.nullOutputStream());
+		this.usedSpaceEvent = usedSpaceEvent;
 	}
 
 	public void winVfsRunner() throws NTStatusException, ServiceException {

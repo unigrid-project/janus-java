@@ -20,6 +20,7 @@ package org.unigrid.janus;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 //import java.awt.SystemTray;
@@ -54,6 +55,7 @@ import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.service.api.MountFailureException;
 import org.unigrid.janus.model.service.api.Mountable;
+import org.unigrid.janus.model.signal.UsedSpace;
 import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
 
@@ -72,6 +74,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private Wallet wallet;
 	@Inject private Mountable mountable;
 	@Inject private WinFspMem winmem;
+	@Inject private Event<UsedSpace> usedSpaceEvent;
 	//@Inject private TrayService tray;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
@@ -125,7 +128,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 		new Thread(() -> {
 			try {
-				winmem.winVfsRunner();
+				new WinFspMem(usedSpaceEvent).winVfsRunner();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
