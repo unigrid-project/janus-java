@@ -20,11 +20,8 @@
 		</config.opens>
 		<config.exports>
 		</config.exports>
-<<<<<<< HEAD
 		<surefireArgLine />
-=======
 		<maven.test.skip>true</maven.test.skip>
->>>>>>> BM-Janus-DriveMount
 	</properties>
         <repositories>
             <repository>
@@ -335,17 +332,15 @@
 					</execution>
 				</executions>
 			</plugin>
-<!--			<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-<<<<<<< HEAD
-			</plugin>-->
-=======
+			
 				<configuration>
 					<skip>true</skip>
 				</configuration>
+			
 			</plugin>
->>>>>>> BM-Janus-DriveMount
 			<plugin>
 				<groupId>pl.gdela</groupId>
 				<artifactId>socomo-maven</artifactId>
