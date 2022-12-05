@@ -16,10 +16,10 @@
 
 package org.unigrid.janus.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.util.List;
 import java.util.Objects;
+import jakarta.json.bind.annotation.JsonbProperty;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -43,7 +43,7 @@ public class Transaction {
 	private String generatedfrom;
 	private List<Transaction> parts;
 
-	@JsonProperty("txid")
+	@JsonbProperty("txid")
 	private String txId;
 
 	public boolean hasPart(Transaction transaction) {

@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import org.unigrid.janus.view.component.PTableColumn?>
 <?import org.unigrid.janus.view.component.WindowBarButton?>
 
@@ -174,6 +175,20 @@
                      </padding>
                      <FlowPane.margin>
                         <Insets top="10.0" />
+                     </FlowPane.margin>
+                  </Button>
+                  <Button mnemonicParsing="false" onMouseClicked="#onCopyScriptClicked" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;">
+                     <graphic>
+                        <FontIcon iconColor="#ffffffbd" iconLiteral="fas-file-signature" iconSize="20" selectionFill="#ffffff1c" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
+                     </graphic>
+                     <tooltip>
+                        <Tooltip fx:id="stakingTltp" text="Copy gridnode install script" />
+                     </tooltip>
+                     <padding>
+                        <Insets left="5.0" right="5.0" />
+                     </padding>
+                     <FlowPane.margin>
+                        <Insets left="10.0" top="10.0" />
                      </FlowPane.margin>
                   </Button>
                </children>

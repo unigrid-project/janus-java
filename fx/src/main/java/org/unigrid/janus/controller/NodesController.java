@@ -74,6 +74,7 @@ import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import org.unigrid.janus.view.backing.GridnodeListModel;
 import org.unigrid.janus.view.backing.GridnodeTxidList;
+import org.unigrid.janus.view.backing.OsxUtils;
 
 @ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
@@ -90,6 +91,8 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	private static GridnodeTxidList txList = new GridnodeTxidList();
 	private final Clipboard clipboard = Clipboard.getSystemClipboard();
 	private final ClipboardContent content = new ClipboardContent();
+
+	private OsxUtils osxUtils = new OsxUtils();
 
 	@FXML private TextField vpsPassword;
 	@FXML private TextField vpsAddress;
@@ -251,7 +254,11 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	private void onOpenGridnodeConfigClicked(MouseEvent e) throws NullPointerException {
 		File gridnode = DataDirectory.getGridnodeFile();
 		try {
-			hostServices.showDocument(gridnode.getAbsolutePath());
+			if (SystemUtils.IS_OS_MAC_OSX) {
+				osxUtils.openFileOsx(DataDirectory.GRIDNODE_FILE);
+			} else {
+				hostServices.showDocument(gridnode.getAbsolutePath());
+			}
 		} catch (NullPointerException error) {
 			debug.print(error.getMessage(), SettingsController.class.getSimpleName());
 		}
@@ -289,6 +296,14 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML
 	private void onCopyToClipboardClicked(MouseEvent event) {
 		copyToClipboard(gridnodeDisplay.getText());
+	}
+
+	@FXML
+	private void onCopyScriptClicked(MouseEvent event) {
+		content.putString("bash -ic \"$(wget -4qO- -o- raw.githubusercontent.com/unigrid-project/unigrid-installer/"
+			+ "main/node_installer.sh)\"; source ~/.bashrc");
+		clipboard.setContent(content);
+		Notifications.create().title("Gridnode script copied to clipboard").showInformation();
 	}
 
 	private void copyToClipboard(String gridnode) {

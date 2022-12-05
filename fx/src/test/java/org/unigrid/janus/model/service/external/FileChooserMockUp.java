@@ -14,23 +14,24 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.jqwik.fx;
+package org.unigrid.janus.model.service.external;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import net.jqwik.api.lifecycle.AddLifecycleHook;
-import net.jqwik.api.lifecycle.BeforeContainer;
-import net.jqwik.api.lifecycle.PropagationMode;
+import java.io.File;
+import java.io.IOException;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
+import mockit.Mock;
+import mockit.MockUp;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.unigrid.janus.jqwik.BaseMockedWeldTest;
-import org.unigrid.janus.model.service.RPCService;
 
-@AddLifecycleHook(value = FxHook.class, propagateTo = PropagationMode.ALL_DESCENDANTS)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BaseFxTest extends BaseMockedWeldTest {
-	@BeforeContainer
-	public static void beforeContainer() {
-		System.setProperty(RPCService.PROPERTY_USERNAME_KEY, RandomStringUtils.randomAlphabetic(20));
-		System.setProperty(RPCService.PROPERTY_PASSWORD_KEY, RandomStringUtils.randomAlphabetic(20));
+public class FileChooserMockUp extends MockUp<FileChooser> {
+	@Mock
+	public File showOpenDialog(Window window) throws IOException {
+		return File.createTempFile(RandomStringUtils.randomAlphabetic(20), "");
+	}
+
+	@Mock
+	public File showSaveDialog(Window window) throws IOException {
+		return File.createTempFile(RandomStringUtils.randomAlphabetic(20), "");
 	}
 }

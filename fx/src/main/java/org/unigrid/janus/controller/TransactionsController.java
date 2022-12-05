@@ -145,6 +145,7 @@ public class TransactionsController implements Initializable, PropertyChangeList
 					final Clipboard cb = Clipboard.getSystemClipboard();
 					final ClipboardContent content = new ClipboardContent();
 					content.putString(transaction.getTxId());
+					System.out.println("transaction.getTxid() " + transaction.getTxId());
 					cb.setContent(content);
 					if (SystemUtils.IS_OS_MAC_OSX) {
 						Notifications
