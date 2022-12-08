@@ -298,20 +298,6 @@ public class Wallet {
 		this.pcs.firePropertyChange(this.STATUS_PROPERTY, oldValue, newValue);
 	}
 
-	public void setInfo(Info newInfo) {
-		this.setBalance(newInfo.getResult().getBalance());
-		this.setTotalBalance(newInfo.getResult().getTotalbalance());
-		this.setMoneysupply(newInfo.getResult().getMoneysupply());
-		this.setBlocks(newInfo.getResult().getBlocks());
-		this.setConnections(newInfo.getResult().getConnections());
-		//disable processing indicator
-		this.setProcessingStatus();
-		this.setStatus(newInfo.getResult().getBootstrapping().getWalletstatus());
-		//String unlock = String.format("Unlock Until: %s", newInfo.getResult().getUnlockUntil());
-		//debug.log(unlock);
-
-	}
-
 	public void setWalletState(LockState state) {
 		LockState oldValue = this.lockState;
 		lockState = state;
