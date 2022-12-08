@@ -38,7 +38,6 @@ import javafx.scene.input.KeyEvent;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.Wallet;
-import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 import org.unigrid.janus.model.signal.NodeRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;

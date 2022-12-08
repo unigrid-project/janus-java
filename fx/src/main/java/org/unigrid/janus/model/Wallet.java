@@ -30,7 +30,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
-import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.service.DebugService;
 
