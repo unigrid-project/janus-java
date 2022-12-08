@@ -133,8 +133,6 @@ public class OverlayController implements Initializable {
 				Jsonb jsonb = JsonbBuilder.create();
 
 				if (call.getError() != null) {
-					final Info info = rpc.call(new Info.Request(), Info.class);
-					wallet.setInfo(info);
 					String result = call.getError().getMessage();
 
 					if (result != null) {

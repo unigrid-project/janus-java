@@ -50,7 +50,6 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
-import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
 
@@ -76,7 +75,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private String startupStatus;
 	private String walletVersion;
 	private String progress = "0";
-	private Info info = new Info();
 	private Boolean checkForStatus = true;
 
 	@PostConstruct
