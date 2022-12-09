@@ -26,7 +26,6 @@ public class BootstrapModel {
 
 	@Getter @Setter private static String downloadUrl =
 		"https://github.com/unigrid-project/janus-java/releases/download/";
-
-	@Getter @Setter private static boolean testing;
+	@Getter @Setter private static boolean testnet;
 	@Getter @Setter private static boolean bootstrapUpdate;
 }

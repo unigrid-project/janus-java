@@ -28,8 +28,6 @@ import org.update4j.OS;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import java.io.File;
 import java.util.ArrayList;
 import org.eclipse.aether.repository.LocalRepository;
@@ -247,6 +245,10 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			}
 
 			list.add(getFileByUrl(getDaemonUrl(os)));
+			// TODO add a way for this to be handled automatically
+			/*if (testing) {
+				list.add(getFileByUrl("https://github.com/unigrid-project/daemon/releases/download/v2.9.3/unigrid-2.9.3-x86_64-linux-testnet.tar.gz"));
+			}*/
 		} catch (IOException ex) {
 			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
 				.log(Level.SEVERE, null, ex);
