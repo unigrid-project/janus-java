@@ -71,6 +71,11 @@ public class JanusLauncher implements Launcher {
 			BootstrapModel.setBootstrapVer(bootstrapVer);
 		}
 
+		if (inputArgs.containsKey("testnet")) {
+			System.out.println("**** TESTNET ****");
+			BootstrapModel.setTestnet(true);
+		}
+
 		if (inputArgs.containsKey("downloadUrl")) {
 			BootstrapModel.setDownloadUrl(inputArgs.get("downloadUrl"));
 		}

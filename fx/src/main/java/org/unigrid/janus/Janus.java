@@ -214,10 +214,16 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 						final GetBootstrappingInfo boostrapInfo = rpc.call(
 							new GetBootstrappingInfo.Request(), GetBootstrappingInfo.class
 						);
+						try {
+							walletStatus = boostrapInfo.getResult().getWalletstatus();
+							progress = boostrapInfo.getResult().getProgress();
+							status = boostrapInfo.getResult().getStatus();
+						} catch (Exception e) {
+							// TODO: handle exception
+							debug.print("boostrapInfo null: " + e.getMessage().toString(),
+								Janus.class.getSimpleName());
+						}
 
-						walletStatus = boostrapInfo.getResult().getWalletstatus();
-						progress = boostrapInfo.getResult().getProgress();
-						status = boostrapInfo.getResult().getStatus();
 						Thread.sleep(2000);
 					} catch (Exception e) {
 						debug.print("RPC call error: " + e.getMessage().toString(),
