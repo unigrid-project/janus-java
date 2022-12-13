@@ -45,10 +45,10 @@ import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.view.MainWindow;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
-import org.unigrid.janus.memoryfs.win.WinFspMem;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.filesystem.memoryfs.linux.WinFspMem;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
@@ -73,7 +73,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private SplashScreenController splashController;
 	@Inject private Wallet wallet;
 	@Inject private Mountable mountable;
-	@Inject private WinFspMem winmem;
 	@Inject private Event<UsedSpace> usedSpaceEvent;
 	//@Inject private TrayService tray;
 
@@ -124,29 +123,45 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@Override
 	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
-		Platform.setImplicitExit(false);
+		Platform.setImplicitExit(false);		
+		
+		String operatingSystem = System.getProperty("os.name").toLowerCase();
 
-		new Thread(() -> {
-			try {
-				new WinFspMem(usedSpaceEvent).winVfsRunner();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}).start();
+		if (operatingSystem.contains("win")) {
+			
+			new Thread(() -> {
+				try {
+					new WinFspMem(usedSpaceEvent).winVfsRunner();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}).start();
+			
+		} else if (operatingSystem.contains("nix") || operatingSystem.contains("nux") ||
+			operatingSystem.contains("aix")) {
+			
+			var t = new Thread(() -> {
+				try {
+					mountable.mount();
+				} catch (MountFailureException ex) {
+					System.err.println(ex);
+				}
+			});
+			t.start();
+			
+			
+		} else if (operatingSystem.contains("mac")) {
+			// CALL MAC MOUNT HERE
+		}
+
+
 
 		debug.print("start", Janus.class.getSimpleName());
 		//tray.initTrayService(stage);
 		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
-		var t = new Thread(() -> {
-			try {
-				mountable.mount();
-			} catch(MountFailureException ex) {
-				System.err.println(ex);
-			}
-		});
-		t.start();
+
 
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override

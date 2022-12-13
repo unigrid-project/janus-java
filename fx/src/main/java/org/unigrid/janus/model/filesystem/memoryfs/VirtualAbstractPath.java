@@ -3,6 +3,8 @@ package org.unigrid.janus.model.filesystem.memoryfs;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NonNull;
@@ -12,18 +14,20 @@ import net.fusejna.StructStat;
 @Data
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class VirtualAbstractPath<T> {
-	@NonNull
-	private String name;
+	private final String separator;
+	@NonNull private String name;
+	private VirtualTimeInfo timeInfo = VirtualTimeInfo.builder().build();
 	private VirtualDirectory parent;
 	private T userData;
-	
-	protected VirtualAbstractPath(String name, VirtualDirectory parent, T userData) {
-		this(name, parent);
+	private final Supplier<String> rootPathSupplier;
+
+	protected VirtualAbstractPath(String separator, String name, VirtualDirectory parent, T userData, Supplier<String> rootPathSupplier) {
+		this(separator, name, parent, rootPathSupplier);
 		this.userData = userData;
 	}
 
-	protected VirtualAbstractPath(String name, VirtualDirectory parent) {
-		this(name);
+	protected VirtualAbstractPath(String separator, String name, VirtualDirectory parent, Supplier<String> rootPathSupplier) {
+		this(separator, name, rootPathSupplier);
 		this.parent = parent;
 	}
 
@@ -36,24 +40,20 @@ public abstract class VirtualAbstractPath<T> {
 	}
 
 	public Path getPath() {
-		final String systemUser = System.getProperty("user.name");
-		final List<String> mount = List.of(systemUser, "unigrid");
 		final List<String> paths = new ArrayList<>();
 		VirtualAbstractPath p = this;
 		while (p != null) {
 			paths.add(0, p.getName());
 			p = p.getParent();
 		}
-		final String absolutePath = Path.of("home", mount.toArray(new String[0])).toString();
-		return Path.of(absolutePath, paths.toArray(new String[0]));
-
+		return Path.of(rootPathSupplier.get(), paths.toArray(new String[0]));
 	}
 
-	public abstract VirtualAbstractPath find(String path);
+	public abstract Optional<VirtualAbstractPath<T>> find(String path);
 	public abstract void getattr(StructStat.StatWrapper stat);
 
 	public void rename(String newName) {
-		while (newName.startsWith("/")) {
+		while (newName.startsWith(separator)) {
 			newName = newName.substring(1);
 		}
 		name = newName;
@@ -69,5 +69,29 @@ public abstract class VirtualAbstractPath<T> {
 		}
 
 		return depth;
+	}
+
+	public long getFolderSize() {
+		int size = 0;
+		
+		if (this instanceof VirtualDirectory<T> memoryDirectory) {
+			for (VirtualAbstractPath<T> mp : memoryDirectory.getChildren()) {
+				size += mp.getFolderSize();
+			}
+		} else if (this instanceof VirtualFile<T> memoryFile) {
+			size += memoryFile.getSize();
+		}
+		return size;
+	}
+	
+	public static String getLastComponent(String separator, String path) {
+		while (path.substring(path.length() - 1).equals(separator)) {
+			path = path.substring(0, path.length() - 1);
+		}
+
+		if (path.isEmpty()) {
+			return "";
+		}
+		return path.substring(path.lastIndexOf(separator) + 1);
 	}
 }

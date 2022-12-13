@@ -7,18 +7,17 @@ import jakarta.enterprise.event.Event;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import lombok.Getter;
-
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 import net.fusejna.DirectoryFiller;
 import net.fusejna.ErrorCodes;
 import net.fusejna.FuseException;
-import net.fusejna.FuseFilesystem;
 import net.fusejna.StructFuseFileInfo.FileInfoWrapper;
 import net.fusejna.StructStat.StatWrapper;
 import net.fusejna.StructStatvfs;
-import net.fusejna.XattrFiller;
 import net.fusejna.types.TypeMode.ModeWrapper;
 import net.fusejna.util.FuseFilesystemAdapterAssumeImplemented;
 import org.unigrid.janus.model.service.api.MountFailureException;
@@ -27,7 +26,16 @@ import org.unigrid.janus.model.signal.UsedSpace;
 
 public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements Mountable
 {
-	private final VirtualDirectory rootDirectory = new VirtualDirectory("");
+	private final static String SEPARATOR = "/";
+
+	private final Supplier<String> rootPathSupplier = () -> {
+		final String systemUser = System.getProperty("user.name");
+		final List<String> mount = List.of(systemUser, "unigrid");
+
+		return Path.of("home", mount.toArray(new String[0])).toString();
+	};
+
+	private final VirtualDirectory rootDirectory = new VirtualDirectory(SEPARATOR, "", rootPathSupplier);
 	private final Event<UsedSpace> usedSpaceEvent;
 
 	public MemoryFS(Event<UsedSpace> usedSpaceEvent)
@@ -35,15 +43,15 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 		this.usedSpaceEvent = usedSpaceEvent;
 
 		// Sprinkle some files around
-		rootDirectory.addChild(VirtualFile.create("Sample file.txt", "Hello there, feel free to look around.\n"));
-		rootDirectory.addChild(VirtualDirectory.create("Sample directory"));
-		final VirtualDirectory dirWithFiles = VirtualDirectory.create("Directory with files");
+		rootDirectory.addChild(VirtualFile.create(SEPARATOR, "Sample file.txt", "Hello there, feel free to look around.\n", rootPathSupplier));
+		rootDirectory.addChild(VirtualDirectory.create(SEPARATOR, "Sample directory", rootPathSupplier));
+		final VirtualDirectory dirWithFiles = VirtualDirectory.create(SEPARATOR, "Directory with files", rootPathSupplier);
 		rootDirectory.addChild(dirWithFiles);
-		dirWithFiles.addChild(VirtualFile.create("hello.txt", "This is some sample text.\n"));
-		dirWithFiles.addChild(VirtualFile.create("hello again.txt", "This another file with text in it! Oh my!\n"));
-		final VirtualDirectory nestedDirectory = VirtualDirectory.create("Sample nested directory");
+		dirWithFiles.addChild(VirtualFile.create(SEPARATOR, "hello.txt", "This is some sample text.\n", rootPathSupplier));
+		dirWithFiles.addChild(VirtualFile.create(SEPARATOR, "hello again.txt", "This another file with text in it! Oh my!\n", rootPathSupplier));
+		final VirtualDirectory nestedDirectory = VirtualDirectory.create(SEPARATOR, "Sample nested directory", rootPathSupplier);
 		dirWithFiles.addChild(nestedDirectory);
-		nestedDirectory.addChild(VirtualFile.create("So deep.txt", "Man, I'm like, so deep in this here file structure.\n"));
+		nestedDirectory.addChild(VirtualFile.create(SEPARATOR, "So deep.txt", "Man, I'm like, so deep in this here file structure.\n", rootPathSupplier));
 	}
 
 	@Override
@@ -53,78 +61,54 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public int create(final String path, final ModeWrapper mode, final FileInfoWrapper info)
-	{
+	public int create(final String path, final ModeWrapper mode, final FileInfoWrapper info) {
 		if (getMemoryPath(path) != null) {
 			return -ErrorCodes.EEXIST();
 		}
-		final VirtualAbstractPath parent = getParentPath(path);
-		if (parent instanceof VirtualDirectory) {
-			((VirtualDirectory) parent).mkfile(getLastComponent(path));
+
+		final Optional<VirtualAbstractPath<?>> parent = getParentPath(path);
+
+		if (parent.get() instanceof VirtualDirectory directory) {
+			directory.mkfile(VirtualAbstractPath.getLastComponent(SEPARATOR, path));
 			return 0;
 		}
+
 		return -ErrorCodes.ENOENT();
 	}
 
 	@Override
-	public int getattr(final String path, final StatWrapper stat)
-	{
-		final VirtualAbstractPath p = getMemoryPath(path);
-		if (p != null) {
-			p.getattr(stat);
+	public int getattr(final String path, final StatWrapper stat) {
+		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
+
+		if (p.isPresent()) {
+			p.get().getattr(stat);
 			return 0;
 		}
+
 		return -ErrorCodes.ENOENT();
 	}
 
-	private String getLastComponent(String path)
-	{
-		while (path.substring(path.length() - 1).equals("/")) {
-			path = path.substring(0, path.length() - 1);
-		}
-		if (path.isEmpty()) {
-			return "";
-		}
-		return path.substring(path.lastIndexOf("/") + 1);
+	private Optional<VirtualAbstractPath<?>> getParentPath(final String path) {
+		return rootDirectory.find(path.substring(0, path.lastIndexOf(SEPARATOR)));
 	}
 
-	private VirtualAbstractPath getParentPath(final String path)
-	{
-		return rootDirectory.find(path.substring(0, path.lastIndexOf("/")));
-	}
-
-	public VirtualAbstractPath getMemoryPath(final String path)
-	{
+	public Optional<VirtualAbstractPath<?>> getMemoryPath(String path) {
 		return rootDirectory.find(path);
 	}
-
-	
-	public static long getFolderSize(VirtualAbstractPath memoryPath) {
-		int size = 0;
-
-		if (memoryPath instanceof VirtualDirectory memoryDirectory) {
-			for (VirtualAbstractPath mp : memoryDirectory.getChildren()) {
-				size += getFolderSize(mp);
-			}
-			
-		} else if (memoryPath instanceof VirtualFile memoryFile) {
-			size += memoryFile.getSize();
-		}
-
-		return size;
-	}
 	
 	@Override
-	public int mkdir(final String path, final ModeWrapper mode)
-	{
-		if (getMemoryPath(path) != null) {
+	public int mkdir(final String path, final ModeWrapper mode) {
+		if (getMemoryPath(path).isPresent()) {
 			return -ErrorCodes.EEXIST();
 		}
-		final VirtualAbstractPath parent = getParentPath(path);
-		if (parent instanceof VirtualDirectory) {
-			((VirtualDirectory) parent).mkdir(getLastComponent(path));
+
+		final Optional<VirtualAbstractPath<?>> parent = getParentPath(path);
+
+		if (parent.get() instanceof VirtualDirectory directory) {
+			directory.mkdir(VirtualAbstractPath.getLastComponent(SEPARATOR, path));
 			return 0;
 		}
+
 		return -ErrorCodes.ENOENT();
 	}
 
@@ -150,93 +134,99 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public int read(final String path, final ByteBuffer buffer, final long size, final long offset, final FileInfoWrapper info)
-	{
-		final VirtualAbstractPath p = getMemoryPath(path);
-		if (p == null) {
+	public int read(final String path, final ByteBuffer buffer, final long size, final long offset, final FileInfoWrapper info) {
+		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
+
+		if (p.isEmpty()) {
 			return -ErrorCodes.ENOENT();
 		}
-		if (!(p instanceof VirtualFile)) {
+		if (!(p.get() instanceof VirtualFile)) {
 			return -ErrorCodes.EISDIR();
 		}
-		return ((VirtualFile) p).read(buffer, size, offset);
+
+		return ((VirtualFile<?>) p.get()).read(buffer, size, offset);
 	}
 
 	@Override
 	public int readdir(final String path, final DirectoryFiller filler)
 	{
-		final VirtualAbstractPath p = getMemoryPath(path);
+		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
 		if (p == null) {
 			return -ErrorCodes.ENOENT();
 		}
-		if (!(p instanceof VirtualDirectory)) {
+		if (!(p.get() instanceof VirtualDirectory)) {
 			return -ErrorCodes.ENOTDIR();
 		}
-		((VirtualDirectory) p).read(filler);
+		((VirtualDirectory) p.get()).read(filler);
 		return 0;
 	}
 
 	@Override
 	public int rename(final String path, final String newName)
 	{
-		final VirtualAbstractPath p = getMemoryPath(path);
+		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
+
 		if (p == null) {
 			return -ErrorCodes.ENOENT();
 		}
-		final VirtualAbstractPath newParent = getParentPath(newName);
+
+		final Optional<VirtualAbstractPath<?>> newParent = getParentPath(newName);
+
 		if (newParent == null) {
 			return -ErrorCodes.ENOENT();
 		}
-		if (!(newParent instanceof VirtualDirectory)) {
+		if (!(newParent.get() instanceof VirtualDirectory)) {
 			return -ErrorCodes.ENOTDIR();
 		}
-		p.delete();
-		((VirtualDirectory) newParent).deleteChild(getMemoryPath(newName));
-		p.rename(newName.substring(newName.lastIndexOf("/")));
-		((VirtualDirectory) newParent).addChild(p);
-		usedSpaceEvent.fire(UsedSpace.builder().size(MemoryFS.getFolderSize(rootDirectory)).build());
+
+		p.get().delete();
+		((VirtualDirectory) newParent.get()).deleteChild(getMemoryPath(newName).get());
+		p.get().rename(newName.substring(newName.lastIndexOf(SEPARATOR)));
+		((VirtualDirectory) newParent.get()).addChild(p.get());
+		usedSpaceEvent.fire(UsedSpace.builder().size(rootDirectory.getFolderSize()).build());
 		return 0;
 	}
 
 	@Override
 	public int rmdir(final String path)
 	{
-		final VirtualAbstractPath p = getMemoryPath(path);
+		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
+
 		if (p == null) {
 			return -ErrorCodes.ENOENT();
 		}
-		if (!(p instanceof VirtualDirectory)) {
+		if (!(p.get() instanceof VirtualDirectory)) {
 			return -ErrorCodes.ENOTDIR();
 		}
-		p.delete();
-		usedSpaceEvent.fire(UsedSpace.builder().size(MemoryFS.getFolderSize(rootDirectory)).build());
+		p.get().delete();
+		usedSpaceEvent.fire(UsedSpace.builder().size(rootDirectory.getFolderSize()).build());
 		return 0;
 	}
 
 	@Override
 	public int truncate(final String path, final long offset)
 	{
-		final VirtualAbstractPath p = getMemoryPath(path);
+		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
 		if (p == null) {
 			return -ErrorCodes.ENOENT();
 		}
-		if (!(p instanceof VirtualFile)) {
+		if (!(p.get() instanceof VirtualFile)) {
 			return -ErrorCodes.EISDIR();
 		}
-		((VirtualFile) p).truncate(offset);
+		((VirtualFile) p.get()).truncate(offset);
 		return 0;
 	}
 
 	@Override
 	public int unlink(final String path)
 	{
-		final VirtualAbstractPath p = getMemoryPath(path);
+		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
 		if (p == null) {
 			return -ErrorCodes.ENOENT();
 		}
-		p.delete();
+		p.get().delete();
 		
-		usedSpaceEvent.fire(UsedSpace.builder().size(MemoryFS.getFolderSize(rootDirectory)).build());
+		usedSpaceEvent.fire(UsedSpace.builder().size(rootDirectory.getFolderSize()).build());
 		return 0;
 	}
 
@@ -244,15 +234,15 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	public int write(final String path, final ByteBuffer buf, final long bufSize, final long writeOffset,
 			final FileInfoWrapper wrapper)
 	{
-		final VirtualAbstractPath p = getMemoryPath(path);
+		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
 		if (p == null) {
 			return -ErrorCodes.ENOENT();
 		}
-		if (!(p instanceof VirtualFile)) {
+		if (!(p.get() instanceof VirtualFile)) {
 			return -ErrorCodes.EISDIR();
 		}
-		int ret = ((VirtualFile) p).write(buf, bufSize, writeOffset);
-		usedSpaceEvent.fire(UsedSpace.builder().size(MemoryFS.getFolderSize(rootDirectory)).build());
+		int ret = ((VirtualFile) p.get()).write(buf, bufSize, writeOffset);
+		usedSpaceEvent.fire(UsedSpace.builder().size(rootDirectory.getFolderSize()).build());
 		return ret;
 	}
 
@@ -261,7 +251,7 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 		final int i = super.statfs(path, wrapper);
 		
 		wrapper.blocks(58*1024*1024).bsize(8192).bfree(58*1024*1024);
-		usedSpaceEvent.fire(UsedSpace.builder().size(MemoryFS.getFolderSize(rootDirectory)).build());
+		usedSpaceEvent.fire(UsedSpace.builder().size(rootDirectory.getFolderSize()).build());
                 return i;
 	}
 
@@ -269,7 +259,4 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	public String toString() {
 		return rootDirectory.toString();
 	}
-		
-
-	
 }

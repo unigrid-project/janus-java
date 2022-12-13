@@ -61,6 +61,7 @@ module fx {
 
 	requires jnr.winfsp;
 	requires org.jnrproject.ffi;
+	requires it.unimi.dsi.fastutil;
 
 
 	uses org.update4j.service.Launcher;
