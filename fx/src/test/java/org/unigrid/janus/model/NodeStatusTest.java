@@ -12,30 +12,29 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.unigrid.janus.model.Gridnode;
+import java.util.regex.Pattern;
+import net.jqwik.api.Example;
+import org.unigrid.janus.jqwik.WeldSetup;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-public class GridnodeEntity extends BaseResult<String> {
-	private static final String METHOD = "masternode";
+@WeldSetup(Address.class)
+public class NodeStatusTest {
 
-	// masternode <start|start-alias|start-many|stop|stop-alias|stop-many|list|list-conf|
-	// add-conf|write-conf|count|debug|current|winners|genkey|enforce|outputs> [passphrase]
-	public static class Request extends BaseRequest {
-		public Request(Object[] args) {
-			super(METHOD);
-			this.setParams(args);
+	@Example
+	public boolean shouldReturnTrueOnFindGridnodeOutput() {
+		String str = "ugd_docker_1 88.131.213.107:51576 69ZH36wDddyp5xEdwU4UT16JR66B7gMwAvNnH121ypToeSgEkxG 149448f8c06cda10f1e7a30db5df0911cb7e3e6c1b8e3656c232f3caa3cb7965 0";
+		String pattern[] = new String[] { "ugd_docker_[0-9]+", "[0-9]+(\\.[0-9]+){3}:[0-9]+", "[A-Za-z0-9]{51}", "[A-Za-z0-9]{64}", "[0-9]+" };
+		String[] split = str.split(" ");
+
+		boolean match = split.length == 5;
+
+		for (int i = 0; i < split.length; i++) {
+			match &= Pattern.matches(pattern[i], split[i]);
 		}
-	}
 
-	@Data
-	public static class Result extends Gridnode {
-		/* Empty on purpose */
+		return match;
 	}
 }

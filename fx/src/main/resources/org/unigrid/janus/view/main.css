@@ -96,6 +96,7 @@
 	-fx-background-color: transparent;
 }
 
+#pnlNodeStatus .label,
 .table-view .column-header-background .label {
 	-fx-text-fill: #aad;
 }
@@ -164,6 +165,7 @@
 	-fx-text-fill: white;
 }
 
+#pnlScrollNodeStatus > .viewport,
 .dialog-pane {
 	-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);
 }

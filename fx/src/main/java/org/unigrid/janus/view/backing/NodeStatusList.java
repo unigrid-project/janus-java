@@ -12,30 +12,29 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.view.backing;
 
+import java.util.ArrayList;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.unigrid.janus.model.Gridnode;
+import org.unigrid.janus.model.NodeStatus;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class GridnodeEntity extends BaseResult<String> {
-	private static final String METHOD = "masternode";
+public class NodeStatusList extends SimpleListProperty<NodeStatus> {
+	private final ObservableList<NodeStatus> source;
 
-	// masternode <start|start-alias|start-many|stop|stop-alias|stop-many|list|list-conf|
-	// add-conf|write-conf|count|debug|current|winners|genkey|enforce|outputs> [passphrase]
-	public static class Request extends BaseRequest {
-		public Request(Object[] args) {
-			super(METHOD);
-			this.setParams(args);
-		}
+	public NodeStatusList() {
+		super();
+		source = FXCollections.observableArrayList(new ArrayList<NodeStatus>());
 	}
 
-	@Data
-	public static class Result extends Gridnode {
-		/* Empty on purpose */
+	public ObservableList<NodeStatus> getSource() {
+		return source;
 	}
 }

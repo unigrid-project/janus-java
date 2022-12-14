@@ -16,26 +16,29 @@
 
 package org.unigrid.janus.model.rpc.entity;
 
+import java.math.BigDecimal;
+import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.unigrid.janus.model.Gridnode;
+import org.unigrid.janus.model.Recipent;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class GridnodeEntity extends BaseResult<String> {
-	private static final String METHOD = "masternode";
+public class SendMany extends BaseResult<String> {
+	private static final String METHOD = "sendmany";
 
-	// masternode <start|start-alias|start-many|stop|stop-alias|stop-many|list|list-conf|
-	// add-conf|write-conf|count|debug|current|winners|genkey|enforce|outputs> [passphrase]
 	public static class Request extends BaseRequest {
-		public Request(Object[] args) {
+		// TODO: Start using category and recipent
+		/* sendmany "tabby" '{"DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1', "HCV3aBdr9MCn1P8p5aWSRCrZHULNFGBoEZ" 0.2}' 6 "testing" */
+		public Request(String fromAccount, Map<String, BigDecimal> mapAmount, int minConf, Recipent recipent) {
 			super(METHOD);
-			this.setParams(args);
+			setParams(new Object[]{"", mapAmount, minConf, recipent});
 		}
-	}
 
-	@Data
-	public static class Result extends Gridnode {
-		/* Empty on purpose */
+		/* sendtoaddress '{"DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1', "HCV3aBdr9MCn1P8p5aWSRCrZHULNFGBoEZ" 0.2}' */
+		public Request(String fromAccount, Map<String, BigDecimal> mapAmount) {
+			super(METHOD);
+			setParams(new Object[]{fromAccount, mapAmount});
+		}
 	}
 }
