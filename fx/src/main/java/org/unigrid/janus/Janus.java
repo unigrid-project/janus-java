@@ -51,6 +51,7 @@ import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.service.TrayService;
 import org.unigrid.janus.model.service.api.MountFailureException;
 import org.unigrid.janus.model.service.api.Mountable;
 import org.unigrid.janus.view.AlertDialog;
@@ -70,7 +71,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private SplashScreenController splashController;
 	@Inject private Wallet wallet;
 	@Inject private Mountable mountable;
-	//@Inject private TrayService tray;
+	@Inject private TrayService tray;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
@@ -95,6 +96,10 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(janusModel.APP_RESTARTING)) {
 			this.restartDaemon();
+		} else if (event.getPropertyName().equals(janusModel.APP_HIDING)) {
+			this.hideMainWindow();
+		} else if (event.getPropertyName().equals(janusModel.APP_SHOW)) {
+			this.showMainWindow();
 		}
 	}
 
@@ -122,7 +127,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		Platform.setImplicitExit(false);
 
 		debug.print("start", Janus.class.getSimpleName());
-		//tray.initTrayService(stage);
+		
 		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
@@ -147,7 +152,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							// rpc.stopPolling();
 							wallet.setOffline(Boolean.FALSE);
 							startMainWindow();
-
+							tray.initTrayService(stage);
 							rpc.pollForInfo(10 * 1000);
 							janusModel.setAppState(JanusModel.AppState.LOADED);
 							preloader.stopSpinner();
@@ -162,7 +167,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	public void startFromBootstrap(Stage stage) throws Exception {
 		System.out.println(CDI.current());
-		//tray.initTrayService(stage);
+		Platform.setImplicitExit(false);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
 		startSplashScreen();
@@ -179,6 +184,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							// rpc.stopPolling();
 							wallet.setOffline(Boolean.FALSE);
 							startMainWindow();
+							tray.initTrayService(stage);
 							rpc.pollForInfo(10 * 1000);
 							janusModel.setAppState(JanusModel.AppState.LOADED);
 							preloader.stopSpinner();
@@ -318,5 +324,14 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		startSplashScreen();
 		mainWindow.hide();
 		janusModel.addPropertyChangeListener(this);
+	}
+
+	public void hideMainWindow() {
+		mainWindow.hide();
+	}
+
+	public void showMainWindow() {
+		startMainWindow();					
+		janusModel.setAppState(JanusModel.AppState.LOADED);
 	}
 }

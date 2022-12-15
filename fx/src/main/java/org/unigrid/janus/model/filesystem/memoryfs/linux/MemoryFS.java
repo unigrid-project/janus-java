@@ -8,17 +8,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import lombok.Getter;
 
 import net.fusejna.DirectoryFiller;
 import net.fusejna.ErrorCodes;
 import net.fusejna.FuseException;
-import net.fusejna.FuseFilesystem;
 import net.fusejna.StructFuseFileInfo.FileInfoWrapper;
 import net.fusejna.StructStat.StatWrapper;
 import net.fusejna.StructStatvfs;
-import net.fusejna.XattrFiller;
 import net.fusejna.types.TypeMode.ModeWrapper;
 import net.fusejna.util.FuseFilesystemAdapterAssumeImplemented;
 import org.unigrid.janus.model.service.api.MountFailureException;
@@ -259,8 +255,11 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	@Override
 	public int statfs(String path, StructStatvfs.StatvfsWrapper wrapper) {
 		final int i = super.statfs(path, wrapper);
-		
-		wrapper.blocks(58*1024*1024).bsize(8192).bfree(58*1024*1024);
+		wrapper.bsize(8192);
+		wrapper.blocks(4096 * 50);
+		wrapper.bavail(4096 * 50);
+		wrapper.bfree(4096 * 50);
+		//wrapper.blocks(58*1024*1024).bsize(8192).bfree(58*1024*1024);
 		usedSpaceEvent.fire(UsedSpace.builder().size(MemoryFS.getFolderSize(rootDirectory)).build());
                 return i;
 	}

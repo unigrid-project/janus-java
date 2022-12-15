@@ -54,7 +54,7 @@ module fx {
 	requires org.slf4j;
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
-	//requires FXTrayIcon;
+	requires SystemTray;
 	//requires javafx.swing;
 	requires j8fu;
         requires fuse.jna;

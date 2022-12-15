@@ -47,6 +47,7 @@ import javafx.application.HostServices;
 //import ch.qos.logback.classic.Level;
 //import ch.qos.logback.classic.Logger;
 //import org.slf4j.LoggerFactory;
+import javafx.application.Platform;
 
 public class App extends Application implements Delegate {
 
@@ -57,7 +58,7 @@ public class App extends Application implements Delegate {
 
 	@Override
 	public void start(Stage stage) throws IOException {
-
+		Platform.setImplicitExit(false);
 		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		//root.setLevel(Level.ALL);
 		stage.setMinWidth(600);

@@ -33,6 +33,8 @@ import org.unigrid.janus.model.cdi.Eager;
 public class JanusModel {
 	public static final String APP_STATE_CHANGE = "appstatechange";
 	public static final String APP_RESTARTING = "apprestarting";
+	public static final String APP_HIDING = "apphiding";
+	public static final String APP_SHOW = "appshow";
 	private static PropertyChangeSupport pcs;
 
 	private AppState appState;
@@ -40,7 +42,7 @@ public class JanusModel {
 	@Setter(AccessLevel.NONE) private String version = "";
 
 	public enum AppState {
-		STARTING, LOADED, RESTARTING
+		STARTING, LOADED, RESTARTING, HIDE, SHOW
 	}
 
 	public JanusModel() {
@@ -76,6 +78,14 @@ public class JanusModel {
 		System.out.println("appState " + state);
 		if (state == AppState.RESTARTING) {
 			this.pcs.firePropertyChange(this.APP_RESTARTING,
+				Math.random(), Math.random());
+		}
+		if (state == AppState.HIDE) {
+			this.pcs.firePropertyChange(this.APP_HIDING,
+				Math.random(), Math.random());
+		}
+		if (state == AppState.SHOW) {
+			this.pcs.firePropertyChange(this.APP_SHOW,
 				Math.random(), Math.random());
 		}
 	}

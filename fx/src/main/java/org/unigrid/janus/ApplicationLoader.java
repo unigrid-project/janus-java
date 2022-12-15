@@ -19,6 +19,7 @@ package org.unigrid.janus;
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 
