@@ -55,9 +55,13 @@ module fx {
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
 	requires SystemTray;
-	//requires javafx.swing;
 	requires j8fu;
         requires fuse.jna;
+
+	//requires jnr.winfsp;
+	requires org.jnrproject.ffi;
+	requires it.unimi.dsi.fastutil;
+
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;

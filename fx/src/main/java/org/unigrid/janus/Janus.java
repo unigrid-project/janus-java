@@ -20,6 +20,7 @@ package org.unigrid.janus;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 //import java.awt.SystemTray;
@@ -47,6 +48,7 @@ import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.filesystem.memoryfs.linux.WinFspMem;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
@@ -54,6 +56,7 @@ import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.service.TrayService;
 import org.unigrid.janus.model.service.api.MountFailureException;
 import org.unigrid.janus.model.service.api.Mountable;
+import org.unigrid.janus.model.signal.UsedSpace;
 import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
 
@@ -72,6 +75,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private Wallet wallet;
 	@Inject private Mountable mountable;
 	@Inject private TrayService tray;
+	@Inject private Event<UsedSpace> usedSpaceEvent;
+	//@Inject private TrayService tray;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
@@ -124,21 +129,45 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@Override
 	public void start(Stage stage, Application.Parameters parameters, HostServices hostServices) throws Exception {
-		Platform.setImplicitExit(false);
+		Platform.setImplicitExit(false);		
+		
+		String operatingSystem = System.getProperty("os.name").toLowerCase();
+
+		if (operatingSystem.contains("win")) {
+			
+			new Thread(() -> {
+				try {
+					new WinFspMem(usedSpaceEvent).winVfsRunner();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}).start();
+			
+		} else if (operatingSystem.contains("nix") || operatingSystem.contains("nux") ||
+			operatingSystem.contains("aix")) {
+			
+			var t = new Thread(() -> {
+				try {
+					mountable.mount();
+				} catch (MountFailureException ex) {
+					System.err.println(ex);
+				}
+			});
+			t.start();
+			
+			
+		} else if (operatingSystem.contains("mac")) {
+			// CALL MAC MOUNT HERE
+		}
+
+
 
 		debug.print("start", Janus.class.getSimpleName());
 		
 		HostServicesProducer.setHostServices(hostServices);
 		startSplashScreen();
 
-		var t = new Thread(() -> {
-			try {
-				mountable.mount();
-			} catch(MountFailureException ex) {
-				System.err.println(ex);
-			}
-		});
-		t.start();
+
 
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override

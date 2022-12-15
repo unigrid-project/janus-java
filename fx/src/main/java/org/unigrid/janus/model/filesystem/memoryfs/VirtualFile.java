@@ -1,46 +1,43 @@
 package org.unigrid.janus.model.filesystem.memoryfs;
 
-import java.io.IOException;
+import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Optional;
+import java.util.function.Supplier;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import net.fusejna.StructStat;
 import net.fusejna.types.TypeMode;
-//import org.apache.commons.collections.BufferUnderflowException;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public class VirtualFile extends VirtualAbstractPath {
-	private ByteArrayOutputStream contents = new ByteArrayOutputStream();
-	private long size = 0;
+public class VirtualFile<T> extends VirtualAbstractPath<T> {
 	
-	public VirtualFile(final String name, final VirtualDirectory parent) {
-		super(name, parent);
+	private FastByteArrayOutputStream contents = new FastByteArrayOutputStream();	
+	@Getter @Setter private long size = 0;
+
+	public VirtualFile(String separator, String name, VirtualDirectory<T> parent, Supplier<String> rootPathSupplier) {
+		super(separator, name, parent, rootPathSupplier);
 	}
 
 	@SneakyThrows
-	public VirtualFile(final String name, final String text)  {
-		super(name);
+	public VirtualFile(String separator, final String name, final String text, Supplier<String> rootPathSupplier)  {
+		super(separator, name, rootPathSupplier);
 		contents.write(text.getBytes(StandardCharsets.UTF_8));
 		size = text.length();
 	}
 
 	@Override
-	public VirtualAbstractPath find(String path) {
-		return this;
+	public Optional<VirtualAbstractPath<T>> find(String path) {
+		return Optional.of(this);
 	}
 
 	@Override
 	public void getattr(final StructStat.StatWrapper stat) {
 		stat.setMode(TypeMode.NodeType.FILE).size(getSize());
-	}
-
-	public long getSize() {
-		return size;
 	}
 
 	private byte[] getArray(ByteBuffer buffer) {
@@ -58,51 +55,56 @@ public class VirtualFile extends VirtualAbstractPath {
 	}
 
 	public int read(ByteBuffer buffer, long size, long offset) {
-		try {
-			final byte[] out = new byte[(int) size];
+		long bytesToRead = size;
 
-			contents.toInputStream().read(out, (int) offset, (int) size);
-			buffer.put(out, (int) offset, (int) size);
-			return (int) size;
-
-		} catch (IOException ex) {
-			Logger.getLogger(VirtualFile.class.getName()).log(Level.SEVERE, null, ex);
+		if (offset >= getSize()) {
+			return 0;
 		}
 
-		return -1;
+		if (getSize() < offset + size) {
+			bytesToRead = getSize() - offset;
+		}
+
+		buffer.put(contents.array, (int) offset, (int) bytesToRead);
+		return (int) bytesToRead;
 	}
 
+	@SneakyThrows
 	public void truncate(final long size) {		
-		final byte[] truncated = Arrays.copyOfRange(contents.toByteArray(), 0, (int) size);
+		final byte[] truncated = Arrays.copyOfRange(contents.array, 0, (int) size);
 		contents.reset();
 		contents.write(truncated, 0, (int) size);
 		this.size = size;
 	}
 
+	@SneakyThrows
 	public int write(ByteBuffer buffer, long bufSize, long writeOffset) {
-		final byte[] truncated = Arrays.copyOfRange(getArray(buffer), 0, (int) bufSize);
-		final byte[] output = ArrayUtils.insert((int) 0, contents.toByteArray(), truncated);
+		final byte[] data = Arrays.copyOfRange(getArray(buffer), 0, (int) bufSize);
 
-		size = bufSize;
-		contents.reset();
-		contents.write(output, 0, output.length);
+		contents.position(writeOffset);
+		contents.write(data, 0, (int) bufSize);
 
-		return (int) size;
+		this.size = contents.length;
+		return (int) bufSize;
 	}
 
-	public static VirtualFile create(String fileName, String content) {
-		final VirtualFile file = new VirtualFile(fileName, content);
+	public static <T> VirtualFile<T> create(String separator, String fileName, String content,
+		Supplier<String> rootPathSupplier) {
+
+		final VirtualFile<T> file = new VirtualFile(separator, fileName, content, rootPathSupplier);
 		return file;
 	}
 	
 	
-	public static VirtualFile create(String fileName, VirtualDirectory directory) {
-		final VirtualFile file = new VirtualFile(fileName, directory);
+	public static <T> VirtualFile<T> create(String separator, String fileName, VirtualDirectory<T> directory,
+		Supplier<String> rootPathSupplier) {
+
+		final VirtualFile<T> file = new VirtualFile(separator, fileName, directory, rootPathSupplier);
 		return file;
 	}
 	
 	@Override
 	public String toString() {
-		return StringUtils.repeat('\t', getDepth()) + "File: " + hashCode() +"/   "+ getName() + "\n";
+		return StringUtils.repeat('\t', getDepth()) + "File: " + hashCode() + getSeparator() + "   "+ getName() + "\n";
 	}
 }
