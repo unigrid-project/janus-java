@@ -48,7 +48,7 @@ import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
-import org.unigrid.janus.model.filesystem.memoryfs.linux.WinFspMem;
+//import org.unigrid.janus.model.filesystem.memoryfs.linux.WinFspMem;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
@@ -137,7 +137,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 			
 			new Thread(() -> {
 				try {
-					new WinFspMem(usedSpaceEvent).winVfsRunner();
+					//new WinFspMem(usedSpaceEvent).winVfsRunner();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

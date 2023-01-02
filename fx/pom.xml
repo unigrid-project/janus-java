@@ -243,11 +243,11 @@
 			<artifactId>SystemTray</artifactId>
 			<version>4.1</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.github.jnrwinfspteam</groupId>
 			<artifactId>jnr-winfsp</artifactId>
 			<version>1.0.0</version>
-		</dependency>
+		</dependency> -->
 	
 		<dependency>
 			<groupId>com.github.jnr</groupId>

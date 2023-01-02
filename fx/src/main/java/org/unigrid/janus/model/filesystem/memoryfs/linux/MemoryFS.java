@@ -1,3 +1,4 @@
+
 package org.unigrid.janus.model.filesystem.memoryfs.linux;
 
 import org.unigrid.janus.model.filesystem.memoryfs.VirtualDirectory;
@@ -254,7 +255,7 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 		wrapper.bavail(4096 * 50);
 		wrapper.bfree(4096 * 50);
 		//wrapper.blocks(58*1024*1024).bsize(8192).bfree(58*1024*1024);
-		usedSpaceEvent.fire(UsedSpace.builder().size(MemoryFS.getFolderSize(rootDirectory)).build());
+		usedSpaceEvent.fire(UsedSpace.builder().size(rootDirectory.getFolderSize()).build());
                 return i;
 	}
 
