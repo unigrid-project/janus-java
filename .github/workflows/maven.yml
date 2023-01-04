@@ -1,13 +1,15 @@
 name: Janus build status
 
 on:
+  push:
+    branches: [ "*" ]
   pull_request:
     branches: [ "master" ]
 
 jobs:
   build:
 
-    runs-on: macos-latest
+    runs-on: buildjet-4vcpu-ubuntu-2204
 
     steps:
     - uses: actions/checkout@v3
@@ -17,10 +19,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-        # cd into config and run mvn install
+
     - name: Build config jar
       working-directory: config
       run: mvn install
 
+    - name: Install xvfb
+      run: sudo apt-get install xvfb
+
     - name: Build main
-      run: mvn install
+      run: xvfb-run mvn install
