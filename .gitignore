@@ -19,3 +19,4 @@ fx/unigridd
 fx/unigrid-cli
 
 .jqwik-database
+.idea/
