@@ -23,13 +23,11 @@ import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import net.jqwik.api.Disabled;
 import net.jqwik.api.Example;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 
-@Disabled("disabled until we can figure out how to fix why this is failing")
 public class DebugServiceTest extends BaseMockedWeldTest {
 
 	private final PrintStream standardOut = System.out;
