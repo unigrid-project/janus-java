@@ -1,6 +1,5 @@
 name: Janus build status
 
-
 on:
   push:
     branches: [ "*" ]
@@ -27,4 +26,3 @@ jobs:
 
     - name: Build main
       run: mvn install
-
