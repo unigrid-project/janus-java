@@ -47,6 +47,7 @@ import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
 import org.unigrid.janus.model.rpc.entity.BackupWallet;
 import org.unigrid.janus.model.service.DaemonMockUp;
+import org.unigrid.janus.model.DataDirectoryMockup;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.FileChooserMockUp;
@@ -72,6 +73,7 @@ public class SettingsControllerTest extends BaseFxTest {
 	public static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
+		new DataDirectoryMockup();
 		new DaemonMockUp();
 
 		new ResponseMockUp() {
