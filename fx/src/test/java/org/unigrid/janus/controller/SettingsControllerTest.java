@@ -17,12 +17,10 @@
 package org.unigrid.janus.controller;
 
 import jakarta.inject.Inject;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;
 import javafx.scene.input.KeyCode;
 import mockit.Mock;
-import mockit.MockUp;
 import mockit.Mocked;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
@@ -131,16 +129,7 @@ public class SettingsControllerTest extends BaseFxTest {
 						return (T) new BackupWallet();
 					}
 				}
-				new MockUp<Wallet>() {
-					@Mock
-					public void setBalance(BigDecimal newValue) {
-					}
 
-					@Mock
-					public BigDecimal getBalance(BigDecimal newValue) {
-						return BigDecimal.ONE;
-					}
-				};
 				return e;
 			}
 		};

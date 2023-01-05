@@ -17,7 +17,6 @@
 package org.unigrid.janus.controller;
 
 import jakarta.inject.Inject;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;
 import javafx.geometry.VerticalDirection;
@@ -121,17 +120,6 @@ public class TransactionsControllerTest extends BaseFxTest {
 							String.class, () -> "getconnectioncount.json");
 					}
 				}
-
-				new MockUp<Wallet>() {
-					@Mock
-					public void setBalance(BigDecimal newValue) {
-					}
-
-					@Mock
-					public BigDecimal getBalance(BigDecimal newValue) {
-						return BigDecimal.ONE;
-					}
-				};
 
 				new MockUp<DebugService>() {
 					@Mock

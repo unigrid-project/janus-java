@@ -18,13 +18,10 @@ package org.unigrid.janus.controller;
 
 import jakarta.inject.Inject;
 import jakarta.json.bind.JsonbBuilder;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;
 import mockit.Mock;
-import mockit.MockUp;
 import mockit.Mocked;
-import net.jqwik.api.Disabled;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 import static org.awaitility.Awaitility.await;
@@ -143,16 +140,7 @@ public class WalletControllerTest extends BaseFxTest {
 						return (T) result;
 					}
 				}
-				new MockUp<Wallet>() {
-					@Mock
-					public void setBalance(BigDecimal newValue) {
-					}
 
-					@Mock
-					public BigDecimal getBalance(BigDecimal newValue) {
-						return BigDecimal.ONE;
-					}
-				};
 				return e;
 			}
 		};
@@ -200,7 +188,7 @@ public class WalletControllerTest extends BaseFxTest {
 	}
 
 	// TODO this test fails everytime
-	@Example @Disabled
+	@Example
 	public void shouldShowErrorMessageOnSendEmptyInputs() {
 		robot.clickOn("#btnWalletTransaction");
 		robot.clickOn("#btnWalletTransactionSend");

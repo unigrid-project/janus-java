@@ -12,9 +12,11 @@
 		<artifactId>parent</artifactId>
 		<version>1.0.11-SNAPSHOT</version>
 	</parent>
+	<version>1.0.9-SNAPSHOT</version>
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jpackage.version>1.0.11</jpackage.version>
 	</properties>
 	<dependencies>
 		<!--<dependency>
@@ -99,7 +101,7 @@
 							<goal>jpackage</goal>
 						</goals>
 						<configuration>
-							<appVersion>1.0.11</appVersion>
+							<appVersion>${jpackage.version}</appVersion>
 							<vendor>org.unigrid</vendor>
 							<module>org.unigrid.bootstrap/org.unigrid.bootstrap.App</module>
                                                         <modulePaths>
@@ -122,7 +124,7 @@
 							<goal>jpackage</goal>
 						</goals>
 						<configuration>
-							<appVersion>1.0.11</appVersion>
+							<appVersion>${jpackage.version}</appVersion>
 							<appImage>target/dist/Unigrid</appImage>
 						</configuration>
 					</execution>
