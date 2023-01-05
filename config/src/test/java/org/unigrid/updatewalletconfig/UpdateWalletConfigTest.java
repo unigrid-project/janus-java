@@ -73,7 +73,8 @@ public class UpdateWalletConfigTest extends BaseMockedWeldTest {
 		request.setRoot(new org.eclipse.aether.graph.Dependency(artifact, ""));
 	}
 
-	@Example @Disabled
+	@Example
+	@Disabled("the jars do not exists in the target folder, so the test fails")
 	public <T extends RepositorySystem> void shouldBeAbleToHandleSingleDependency()
 		throws PlexusContainerException, MavenExecutionException, IOException, URISyntaxException {
 

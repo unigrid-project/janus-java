@@ -47,6 +47,7 @@ import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 import org.unigrid.janus.model.service.DaemonMockUp;
+import org.unigrid.janus.model.DataDirectoryMockup;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
@@ -74,6 +75,7 @@ public class WalletControllerTest extends BaseFxTest {
 	public static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
+		new DataDirectoryMockup();
 		new DaemonMockUp();
 
 		new ResponseMockUp() {

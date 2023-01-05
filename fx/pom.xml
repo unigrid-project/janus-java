@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	 xmlns="http://maven.apache.org/POM/4.0.0"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.unigrid.janus</groupId>
 	<artifactId>fx</artifactId>
@@ -212,6 +212,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>4.11.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.3.0-alpha16</version>
@@ -264,9 +270,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<reuseForks>false</reuseForks>
 					<argLine>
-						-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar
-						-Dcoverage-classes=loaded
+						-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar -Dcoverage-classes=loaded
 						--add-modules org.update4j
 						--add-opens fx/org.unigrid.janus.controller=ALL-UNNAMED
 						--add-opens fx/org.unigrid.janus.controller.component=ALL-UNNAMED
@@ -291,6 +297,7 @@
 						--add-exports fx/org.unigrid.janus.model.service=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.view.backing=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.model.service.external=jersey.client
+						--add-exports fx/org.unigrid.janus.model.service.external=javafx.graphics
 						--add-exports fx/org.unigrid.janus.model.external=jersey.common
 						--add-exports fx/org.unigrid.janus.model.external=org.update4j
 						--add-exports fx/org.unigrid.janus.model.external=ALL-UNNAMED
@@ -300,6 +307,7 @@
 						--add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
 						--add-exports javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED
 						--add-reads org.update4j=fx
+						--add-reads javafx.graphics=fx
 					</argLine>
 					<systemPropertyVariables>
 						<glass.platform>Monocle</glass.platform>

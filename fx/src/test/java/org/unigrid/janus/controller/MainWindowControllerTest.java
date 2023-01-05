@@ -20,14 +20,19 @@ import jakarta.inject.Inject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 import static org.awaitility.Awaitility.await;
+import org.kordamp.ikonli.javafx.FontIcon;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.api.FxRobot;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
 import org.unigrid.janus.jqwik.fx.FxResource;
@@ -45,6 +50,7 @@ import org.unigrid.janus.model.rpc.entity.LockWallet;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 import org.unigrid.janus.model.service.DaemonMockUp;
+import org.unigrid.janus.model.DataDirectoryMockup;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
@@ -73,6 +79,7 @@ public class MainWindowControllerTest extends BaseFxTest {
 	public static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
+		new DataDirectoryMockup();
 		new DaemonMockUp();
 
 		new ResponseMockUp() {
@@ -127,7 +134,20 @@ public class MainWindowControllerTest extends BaseFxTest {
 					}
 					if (clazz.equals(GetConnectionCount.class)) {
 						return (T) JaxrsResponseHandler.handle(GetConnectionCount.class,
-							Integer.class, () -> "getconnectioncount.json");
+							Integer.class, () -> {
+								int connections = wallet.getConnections();
+
+								if (connections > 0 && connections < 5) {
+									return "getconnectioncount.json";
+								} else if (connections >= 5 && connections < 10) {
+									return "get_medium_connection_count.json";
+								} else if (connections >= 10) {
+									return "get_high_connection_count.json";
+								}
+
+								return "get_no_connection_count.json";
+
+							});
 					}
 				}
 				return e;
@@ -225,4 +245,23 @@ public class MainWindowControllerTest extends BaseFxTest {
 
 		rpc.stopPolling();
 	}
+
+	@Example
+	public void shouldChangeSatelliteIconColor() {
+		Paint color;
+		FontIcon icon = (FontIcon) robot.lookup("#satelliteIcn").queryAll().iterator().next();
+
+		wallet.setConnections(7);
+		color = icon.getIconColor();
+		assertThat(color.toString(), equalTo(Color.YELLOWGREEN.toString()));
+
+		wallet.setConnections(99);
+		color = icon.getIconColor();
+		assertThat(color.toString(), equalTo(Color.GREEN.toString()));
+
+		wallet.setConnections(-1);
+		color = icon.getIconColor();
+		assertThat(color.toString(), equalTo(Color.RED.toString()));
+	}
+
 }

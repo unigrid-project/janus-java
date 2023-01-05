@@ -12,30 +12,26 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.model.service.external;
 
-import java.util.List;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.unigrid.janus.model.Gridnode;
+import java.io.File;
+import java.io.IOException;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
+import mockit.Mock;
+import mockit.MockUp;
+import org.apache.commons.lang3.RandomStringUtils;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-public class GridnodeList extends BaseResult<List<GridnodeList.Result>> {
-	private static final String METHOD = "gridnode";
-
-	// gridnode <start|start-alias|start-many|stop|stop-alias|stop-many|list|list-conf|
-	// count|debug|current|winners|genkey|enforce|outputs> [passphrase]
-	public static class Request extends BaseRequest {
-		public Request(Object[] args) {
-			super(METHOD);
-			this.setParams(args);
-		}
+public class FileChooserMockUp extends MockUp<FileChooser> {
+	@Mock
+	public File showOpenDialog(Window window) throws IOException {
+		return File.createTempFile(RandomStringUtils.randomAlphabetic(20), "");
 	}
 
-	public static class Result extends Gridnode {
-		/* Empty on purpose */
+	@Mock
+	public File showSaveDialog(Window window) throws IOException {
+		return File.createTempFile(RandomStringUtils.randomAlphabetic(20), "");
 	}
 }

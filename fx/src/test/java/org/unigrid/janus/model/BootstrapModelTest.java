@@ -16,21 +16,21 @@
 
 package org.unigrid.janus.model;
 
-import jakarta.inject.Inject;
 import net.jqwik.api.Example;
-import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 import org.unigrid.janus.jqwik.WeldSetup;
 
 @WeldSetup(Address.class)
-public class AddressTest extends BaseMockedWeldTest {
-	@Inject
-	private Address address;
+public class BootstrapModelTest {
 
 	@Example
-	public boolean testAddressProperties() {
-		final String addr = "HAjsFi8JShq9Hfx5xYseGMoy8Mzbbo3Reu";
-
-		address.setAddress(addr);
-		return addr.endsWith(address.getAddress());
+	public boolean testBootstrapVersion() {
+		return BootstrapModel.getBootstrapVer().equals("0.0.0");
 	}
+
+	@Example
+	public boolean testDownloadUrl() {
+		return BootstrapModel.getDownloadUrl().equals("https://github.com/unigrid-project"
+			+ "/janus-java/releases/download/");
+	}
+
 }

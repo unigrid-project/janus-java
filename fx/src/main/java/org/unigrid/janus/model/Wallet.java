@@ -30,7 +30,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
-import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.service.DebugService;
 
@@ -296,20 +295,6 @@ public class Wallet {
 		String oldValue = this.status;
 		this.status = newValue;
 		this.pcs.firePropertyChange(this.STATUS_PROPERTY, oldValue, newValue);
-	}
-
-	public void setInfo(Info newInfo) {
-		this.setBalance(newInfo.getResult().getBalance());
-		this.setTotalBalance(newInfo.getResult().getTotalbalance());
-		this.setMoneysupply(newInfo.getResult().getMoneysupply());
-		this.setBlocks(newInfo.getResult().getBlocks());
-		this.setConnections(newInfo.getResult().getConnections());
-		//disable processing indicator
-		this.setProcessingStatus();
-		this.setStatus(newInfo.getResult().getBootstrapping().getWalletstatus());
-		//String unlock = String.format("Unlock Until: %s", newInfo.getResult().getUnlockUntil());
-		//debug.log(unlock);
-
 	}
 
 	public void setWalletState(LockState state) {

@@ -45,6 +45,7 @@ import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.service.DaemonMockUp;
+import org.unigrid.janus.model.DataDirectoryMockup;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
@@ -57,7 +58,7 @@ public class TransactionsControllerTest extends BaseFxTest {
 	@Inject
 	private FxRobot robot;
 
-	@Inject
+	@Mocked
 	private RPCService rpc;
 
 	@Inject
@@ -70,6 +71,7 @@ public class TransactionsControllerTest extends BaseFxTest {
 	public static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
+		new DataDirectoryMockup();
 		new DaemonMockUp();
 
 		new ResponseMockUp() {

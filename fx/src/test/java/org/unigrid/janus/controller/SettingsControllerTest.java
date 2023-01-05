@@ -43,9 +43,12 @@ import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.UpdatePassphrase;
+import org.unigrid.janus.model.rpc.entity.BackupWallet;
 import org.unigrid.janus.model.service.DaemonMockUp;
+import org.unigrid.janus.model.DataDirectoryMockup;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
+import org.unigrid.janus.model.service.external.FileChooserMockUp;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
 import org.unigrid.janus.model.service.external.WebTargetMockUp;
 import org.unigrid.janus.view.MainWindow;
@@ -68,6 +71,7 @@ public class SettingsControllerTest extends BaseFxTest {
 	public static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
+		new DataDirectoryMockup();
 		new DaemonMockUp();
 
 		new ResponseMockUp() {
@@ -121,6 +125,9 @@ public class SettingsControllerTest extends BaseFxTest {
 					if (clazz.equals(DumpWallet.class)) {
 						return (T) new DumpWallet();
 					}
+					if (clazz.equals(BackupWallet.class)) {
+						return (T) new BackupWallet();
+					}
 				}
 
 				return e;
@@ -162,4 +169,19 @@ public class SettingsControllerTest extends BaseFxTest {
 		robot.type(KeyCode.ENTER);
 		verifyThat("#pnlWallet", isVisible());
 	}
+
+	@Example
+	public void shouldAskForFile() {
+		new FileChooserMockUp();
+
+		robot.clickOn("#btnSettings");
+		robot.clickOn("#btnSetExport");
+
+		robot.clickOn("#btnSetExportImport");
+		robot.clickOn("#btnSetExportBackup");
+
+		wallet.setLocked(Boolean.FALSE);
+		robot.clickOn("#btnSetExportExport");
+	}
+
 }

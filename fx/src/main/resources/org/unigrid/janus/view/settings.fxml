@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
+<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
    <children>
       <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
@@ -68,7 +68,7 @@
                         </AnchorPane>
                         <AnchorPane>
                            <children>
-                              <Label text="Gridnode / Masternode file" textFill="#ee7722">
+                              <Label text="Gridnode file" textFill="#ee7722">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -249,7 +249,7 @@
                               <Label layoutY="27.0" text="Create a backup of your wallet to store in case your computer breaks down or is lost." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                               <HBox layoutY="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                                  <children>
-                                    <Button mnemonicParsing="false" onMouseClicked="#onBackupWallet" style="-fx-cursor: hand;" text="Backup" />
+                                    <Button fx:id="btnSetExportBackup" mnemonicParsing="false" onMouseClicked="#onBackupWallet" text="Backup" />
                                  </children>
                               </HBox>
                            </children>
