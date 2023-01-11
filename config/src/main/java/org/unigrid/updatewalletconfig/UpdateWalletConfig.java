@@ -113,6 +113,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		files.removeAll(bootstrapFiles);
 		files.addAll(0, externalFiles);
 
+		files.add(getWinFspUrl(fx.getProperties().getProperty("config.dependency.windows.winfsp")));
+
 		final String[] opens = fx.getProperties().getProperty("config.opens").split("\n");
 		final String[] exports = fx.getProperties().getProperty("config.exports").split("\n");
 
@@ -379,5 +381,25 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		builder.append(".jar");
 
 		return builder.toString();
+	}
+
+	public FileMetadata getWinFspUrl(String url) {
+		try {
+			URL tempUrl = new URL(url);
+
+			FileMetadata tempFile = new FileMetadata(
+				tempUrl.toString(),
+				ConfFileUtil.getFileSize(tempUrl),
+				ConfFileUtil.getChecksumStringyByInputStream(tempUrl.openStream())
+			);
+
+			tempFile.setModulePath(false);
+
+			return tempFile;
+		} catch (IOException ex) {
+			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName()).log(Level.SEVERE, null, ex);
+		}
+
+		return null;
 	}
 }
