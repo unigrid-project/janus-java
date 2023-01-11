@@ -227,6 +227,10 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 				}
 			}
 
+			if (!winFspFolderExists()) {
+				installWinfsp();
+			}
+
 			launch();
 		});
 
@@ -479,7 +483,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			case LINUX ->
 				"/.unigrid/dependencies";
 			case WINDOWS ->
-				"/AppData/Roaming/UNIGRID/dependencies";
+				"\\AppData\\Roaming\\UNIGRID\\dependencies";
 			case MAC ->
 				"/Library/Application Support/UNIGRID/dependencies";
 			default ->
@@ -552,5 +556,38 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		fileName = strings[strings.length - 1];
 		System.out.println(fileName);
 		return fileName;
+	}
+	
+	private boolean winFspFolderExists() {
+		Path winFspfolderPath = Paths.get(System.getenv("ProgramFiles(x86)").concat("\\WinFsp"));
+		if (Files.exists(winFspfolderPath) && Files.isDirectory(winFspfolderPath)) {
+			return true;
+		}
+		return false;
+	}
+
+	private void installWinfsp() {
+		String winFspFileName = getWinFspFileName();
+		if (!winFspFileName.equals("")) {
+			String installationPath = getBaseDirectory() + "\\lib\\" + winFspFileName;
+			try {
+				ProcessBuilder pb = new ProcessBuilder("msiexec", "/i", installationPath, "/qb!");
+				pb.start();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private String getWinFspFileName() {
+		File directory = new File(getBaseDirectory() + "\\" + "lib");
+		File[] files = directory.listFiles();
+
+		for (File file : files) {
+			if (file.getName().startsWith("winfsp")) {
+				return file.getName();
+			}
+		}
+		return "";
 	}
 }
