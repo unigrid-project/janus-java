@@ -4,7 +4,6 @@ import com.github.jnrwinfspteam.jnrwinfsp.WinFspStubFS;
 import com.github.jnrwinfspteam.jnrwinfsp.api.*;
 import com.github.jnrwinfspteam.jnrwinfsp.service.ServiceException;
 import com.github.jnrwinfspteam.jnrwinfsp.service.ServiceRunner;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import jnr.ffi.Pointer;
@@ -21,7 +20,6 @@ import org.unigrid.janus.model.filesystem.memoryfs.VirtualFile;
 import org.unigrid.janus.model.filesystem.memoryfs.WinFspInfo;
 import org.unigrid.janus.model.signal.UsedSpace;
 
-@ApplicationScoped
 public class WinFspMem extends WinFspStubFS {
 	
 	private final static String SEPARATOR = "\\";
