@@ -334,7 +334,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		if (operatingSystem.contains("win")) {
 			new Thread(() -> {
 				try {
-					new WinFspMem(usedSpaceEvent).winVfsRunner();
+					//new WinFspMem(usedSpaceEvent).winVfsRunner();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -355,7 +355,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		} else if (operatingSystem.contains("mac")) {
 			// CALL MAC MOUNT HERE
 		}
-
+	}
 
 	public void hideMainWindow() {
 		mainWindow.hide();
