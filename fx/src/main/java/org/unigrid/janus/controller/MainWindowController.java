@@ -62,12 +62,14 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML private ToggleButton btnAddress;
 	@FXML private ToggleButton btnDocs;
 	@FXML private ToggleButton btnSettings;
+	@FXML private ToggleButton btnStorage;
 	@FXML private VBox pnlWallet;
 	@FXML private VBox pnlTransactions;
 	@FXML private VBox pnlNodes;
 	@FXML private VBox pnlAddress;
 	@FXML private VBox pnlSettings;
 	@FXML private VBox pnlDocs;
+	@FXML private VBox pnlStorage;
 	@FXML private AnchorPane pnlOverlay;
 	@FXML private AnchorPane pnlWarning;
 	@FXML private FontIcon lockBtn;
@@ -101,6 +103,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		btnAddress.setSelected(false);
 		btnDocs.setSelected(false);
 		pnlDocs.setVisible(false);
+		btnStorage.setSelected(false);
+		pnlStorage.setVisible(false);
 
 		panel.setVisible(true);
 		button.setSelected(true);
@@ -129,6 +133,11 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private void onDocsClicked(MouseEvent event) {
 		select(pnlDocs, btnDocs);
+	}
+
+	@FXML
+	private void onStorageClicked(MouseEvent event) {
+		select(pnlStorage, btnStorage);
 	}
 
 	@FXML

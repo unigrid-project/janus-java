@@ -14,26 +14,12 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
 */
 
-module org.unigrid.bootstrap {
-	requires javafx.controls;
-	requires javafx.fxml;
-	requires java.base;
-	requires org.update4j;
-	requires java.instrument;
-	requires java.sql;
-	requires jdk.security.auth;
-	requires transitive java.xml;
-	requires jdk.zipfs;
-	requires java.compiler;
-	requires jdk.crypto.ec;
-	requires sentry;
-	requires javafx.swing;
-	requires org.jnrproject.ffi;
-	//requires jnr.winfsp;
+package org.unigrid.janus.model.signal;
 
-	opens org.unigrid.bootstrap to javafx.fxml, org.update4j;
-	opens org.unigrid.bootstrap.controller to javafx.fxml;
+import lombok.Builder;
+import lombok.Data;
 
-	exports org.unigrid.bootstrap to org.update4j, javafx.graphics;
-	exports org.unigrid.bootstrap.controller;
+@Data @Builder
+public class UsedSpace {
+	private long size;
 }

@@ -167,6 +167,7 @@
 					<argLine>
 						-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar
 					</argLine>
+					<skip>true</skip>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -35,6 +35,7 @@ public class DataDirectory {
 	public static final String GRIDNODE_FILE = "gridnode.conf";
 	public static final String DEBUG_LOG = "debug.log";
 	private static final String OSX_SUPPORT_DIR = "Library/Application Support";
+	private static final String UNIGRID_DRIVE = "unigrid";
 
 	public static final String DATADIR_CONFIG_RPCUSER_KEY = "rpcuser";
 	public static final String DATADIR_CONFIG_RPCPASSWORD_KEY = "rpcpassword";
@@ -108,6 +109,10 @@ public class DataDirectory {
 
 	public static File getDebugLog() {
 		return Paths.get(get(), DEBUG_LOG).toFile();
+	}
+
+	public static String getDriveLocation() {
+		return Paths.get(System.getProperty("user.home"), UNIGRID_DRIVE).toString();
 	}
 
 	public static File getGridnodeFile() {

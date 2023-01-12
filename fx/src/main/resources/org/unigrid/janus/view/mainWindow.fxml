@@ -182,6 +182,24 @@
                                           </FontIcon>
                                        </graphic>
                                     </ToggleButton>
+				    <ToggleButton fx:id="btnStorage" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onStorageClicked" prefWidth="150.0" style="-fx-cursor: hand;" text="Storage">
+                                       <padding>
+                                          <Insets bottom="8.0" left="16.0" right="8.0" top="8.0" />
+                                       </padding>
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="sidepane" />
+                                       </toggleGroup>
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" />
+                                       </VBox.margin><VBox fx:id="pnlStorage" alignment="CENTER" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <fx:include source="storage.fxml" VBox.vgrow="ALWAYS" />
+                                 </children>
+                              </VBox>
+                                    </ToggleButton>
                                     <VBox alignment="BOTTOM_LEFT" VBox.vgrow="ALWAYS">
                                        <VBox.margin>
                                           <Insets bottom="2.0" />
@@ -332,6 +350,11 @@
 							  <VBox fx:id="pnlDocs" alignment="CENTER" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
                                     <fx:include source="documentation.fxml" VBox.vgrow="ALWAYS" />
+                                 </children>
+                              </VBox>
+			      <VBox fx:id="pnlStorage" alignment="CENTER" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <fx:include source="storage.fxml" VBox.vgrow="ALWAYS" />
                                  </children>
                               </VBox>
                               <VBox fx:id="pnlSettings" alignment="CENTER" styleClass="settings" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

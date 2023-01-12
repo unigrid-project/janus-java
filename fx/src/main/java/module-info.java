@@ -54,9 +54,14 @@ module fx {
 	requires org.slf4j;
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
-	//requires FXTrayIcon;
-	//requires javafx.swing;
+	requires SystemTray;
 	requires j8fu;
+        requires fuse.jna;
+
+	//requires jnr.winfsp;
+	requires org.jnrproject.ffi;
+	requires it.unimi.dsi.fastutil;
+
 
 	uses org.update4j.service.Launcher;
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
@@ -74,6 +79,7 @@ module fx {
 	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson;
 	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2;//, javafx.swing;
 	opens org.unigrid.janus.model.entity to jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
+	opens org.unigrid.janus.model.filesystem to weld.core.impl;
 
 	exports org.unigrid.janus;
 	

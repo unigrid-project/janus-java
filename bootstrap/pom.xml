@@ -96,7 +96,22 @@
             <artifactId>awaitility</artifactId>
             <version>4.2.0</version>
             <scope>test</scope>
-        </dependency>
+        </dependency>	
+	<dependency>
+		<groupId>com.github.jnrwinfspteam</groupId>
+		<artifactId>jnr-winfsp</artifactId>
+		<version>1.0.0</version>
+	</dependency>
+	<dependency>
+		<groupId>com.github.jnr</groupId>
+		<artifactId>jnr-ffi</artifactId>
+		<version>2.2.12</version>
+	</dependency>
+	<dependency>
+		<groupId>com.github.jnr</groupId>
+		<artifactId>jnr-posix</artifactId>
+		<version>3.1.15</version>
+	</dependency>
     </dependencies>
     <build>
         <plugins>

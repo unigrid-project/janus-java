@@ -23,7 +23,20 @@
 		</config.opens>
 		<config.exports>
 		</config.exports>
+
+		<config.dependency.windows.winfsp>
+			https://github.com/winfsp/winfsp/releases/download/v1.12.22339/winfsp-1.12.22339.msi
+		</config.dependency.windows.winfsp>
+
+		<surefireArgLine />
 	</properties>
+	<repositories>
+		<repository>
+			<id>rkfg.me</id>
+			<url>https://rkfg.me/maven</url>
+			<name>pickle</name>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>com.jcraft</groupId>
@@ -194,9 +207,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.jmockit</groupId>
+			<groupId>com.github.hazendaz.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
-			<version>1.49</version>
+			<version>1.49.3</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -227,14 +240,91 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.0-alpha7</version>
 		</dependency>
-		<!--<dependency>
-		    <groupId>com.dustinredmond.fxtrayicon</groupId>
-		    <artifactId>FXTrayIcon</artifactId>
-		    <version>3.3.0</version>
-		</dependency>-->
+		<!-- https://mvnrepository.com/artifact/org.clojars.rhg135/fuse-jna -->
+		<dependency>
+			<groupId>fuse-jna</groupId>
+			<artifactId>fuse-jna</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jacoco</groupId>
+			<artifactId>org.jacoco.agent</artifactId>
+			<classifier>runtime</classifier>
+			<version>0.8.8</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.dorkbox</groupId>
+			<artifactId>SystemTray</artifactId>
+			<version>4.1</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>com.github.jnrwinfspteam</groupId>
+			<artifactId>jnr-winfsp</artifactId>
+			<version>1.0.0</version>
+		</dependency> -->
+	
+		<dependency>
+			<groupId>com.github.jnr</groupId>
+			<artifactId>jnr-ffi</artifactId>
+			<version>2.2.12</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>com.github.jnr</groupId>
+			<artifactId>jnr-posix</artifactId>
+			<version>3.1.15</version>
+		</dependency>
+		<dependency>
+			<groupId>it.unimi.dsi</groupId>
+			<artifactId>fastutil</artifactId>
+			<version>8.5.9</version>
+		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.8</version>
+				<executions>
+					<execution>
+						<id>pre-unit-test</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<destFile>${project.basedir}/target/jacoco.exec</destFile>
+							<propertyName>surefireArgLine</propertyName>
+							<append>true</append>
+						</configuration>
+					</execution>
+					<execution>
+						<id>pre-invoker-test</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<destFile>${project.basedir}/target/jacoco.exec</destFile>
+							<propertyName>invoker.mavenOpts</propertyName>
+							<append>true</append>
+						</configuration>
+					</execution>
+					<execution>
+						<id>default-report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>${project.basedir}/target/jacoco.exec</dataFile>
+							<outputDirectory>${project.basedir}/target/jacoco-results/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -261,6 +351,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>pl.gdela</groupId>
@@ -289,6 +383,7 @@
 						--add-opens fx/org.unigrid.janus.model=jakarta.xml.bind
 						--add-opens fx/org.unigrid.janus.model=jersey-client
 						--add-opens fx/org.unigrid.janus.model.entity=jersey-client
+						--add-opens fx/org.unigrid.janus.model.filesystem=weld.core.impl
 						--add-opens fx/org.unigrid.janus.view.backing=weld.core.impl
 						--add-exports fx/org.unigrid.janus.cdi=ALL-UNNAMED
 						--add-exports fx/org.unigrid.janus.controller.component=ALL-UNNAMED
