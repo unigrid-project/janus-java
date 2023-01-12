@@ -31,6 +31,7 @@ import javax.naming.ConfigurationException;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
+import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
@@ -97,7 +98,9 @@ public class Daemon {
 
 	private void runDaemon() throws IOException {
 		debug.print("starting daemon", Daemon.class.getSimpleName());
-		process = Optional.of(Runtime.getRuntime().exec(new String[] {location}));
+		String testnet = BootstrapModel.isTestnet() ? "-testnet" : "-daemon";
+		ProcessBuilder pb = new ProcessBuilder(location, testnet);
+		process = Optional.of(pb.start());
 	}
 
 	private boolean isDaemonRunning() {
@@ -204,6 +207,9 @@ public class Daemon {
 			}
 		} catch (MalformedURLException e) {
 			/* Empty on purose */
+		}
+		if (BootstrapModel.isTestnet()) {
+			return "http://127.0.0.1:51995";
 		}
 
 		return "http://127.0.0.1:51993";
