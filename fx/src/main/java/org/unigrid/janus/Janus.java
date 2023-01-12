@@ -362,6 +362,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		}
 	}
 
+
 	public void hideMainWindow() {
 		mainWindow.hide();
 	}
