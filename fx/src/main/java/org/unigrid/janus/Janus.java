@@ -85,7 +85,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private String startupStatus;
 	private String walletVersion;
 	private String progress = "0";
-	private Info info = new Info();
 	private Boolean checkForStatus = true;
 
 	@SneakyThrows
@@ -237,10 +236,16 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 						final GetBootstrappingInfo boostrapInfo = rpc.call(
 							new GetBootstrappingInfo.Request(), GetBootstrappingInfo.class
 						);
+						try {
+							walletStatus = boostrapInfo.getResult().getWalletstatus();
+							progress = boostrapInfo.getResult().getProgress();
+							status = boostrapInfo.getResult().getStatus();
+						} catch (Exception e) {
+							// TODO: handle exception
+							debug.print("boostrapInfo null: " + e.getMessage().toString(),
+								Janus.class.getSimpleName());
+						}
 
-						walletStatus = boostrapInfo.getResult().getWalletstatus();
-						progress = boostrapInfo.getResult().getProgress();
-						status = boostrapInfo.getResult().getStatus();
 						Thread.sleep(2000);
 					} catch (Exception e) {
 						debug.print("RPC call error: " + e.getMessage().toString(),
@@ -334,7 +339,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		if (operatingSystem.contains("win")) {
 			new Thread(() -> {
 				try {
-					new WinFspMem(usedSpaceEvent).winVfsRunner();
+					//new WinFspMem(usedSpaceEvent).winVfsRunner();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -355,6 +360,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		} else if (operatingSystem.contains("mac")) {
 			// CALL MAC MOUNT HERE
 		}
+	}
 
 
 	public void hideMainWindow() {

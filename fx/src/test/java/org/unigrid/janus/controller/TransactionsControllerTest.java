@@ -17,7 +17,6 @@
 package org.unigrid.janus.controller;
 
 import jakarta.inject.Inject;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;
 import javafx.geometry.VerticalDirection;
@@ -46,6 +45,7 @@ import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.service.DaemonMockUp;
+import org.unigrid.janus.model.DataDirectoryMockup;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
@@ -58,7 +58,7 @@ public class TransactionsControllerTest extends BaseFxTest {
 	@Inject
 	private FxRobot robot;
 
-	@Inject
+	@Mocked
 	private RPCService rpc;
 
 	@Inject
@@ -71,6 +71,7 @@ public class TransactionsControllerTest extends BaseFxTest {
 	public static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
+		new DataDirectoryMockup();
 		new DaemonMockUp();
 
 		new ResponseMockUp() {
@@ -119,17 +120,6 @@ public class TransactionsControllerTest extends BaseFxTest {
 							String.class, () -> "getconnectioncount.json");
 					}
 				}
-
-				new MockUp<Wallet>() {
-					@Mock
-					public void setBalance(BigDecimal newValue) {
-					}
-
-					@Mock
-					public BigDecimal getBalance(BigDecimal newValue) {
-						return BigDecimal.ONE;
-					}
-				};
 
 				new MockUp<DebugService>() {
 					@Mock

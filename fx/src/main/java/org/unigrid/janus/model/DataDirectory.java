@@ -32,7 +32,7 @@ import org.apache.commons.lang3.SystemUtils;
 public class DataDirectory {
 	private static final String APPLICATION_NAME = "UNIGRID";
 	public static final String CONFIG_FILE = "unigrid.conf";
-	public static final String GRIDNODE_FILE = "masternode.conf";
+	public static final String GRIDNODE_FILE = "gridnode.conf";
 	public static final String DEBUG_LOG = "debug.log";
 	private static final String OSX_SUPPORT_DIR = "Library/Application Support";
 	private static final String UNIGRID_DRIVE = "unigrid";

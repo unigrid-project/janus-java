@@ -8,7 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="AnchorPane" maxHeight="300.0" maxWidth="600.0" prefHeight="300.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.bootstrap.controller.UpdateViewController">
+<AnchorPane id="AnchorPane" maxHeight="300.0" maxWidth="600.0" prefHeight="300.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.bootstrap.controller.UpdateViewController">
     <stylesheets>
         <URL value="@updateview.css" />
     </stylesheets>

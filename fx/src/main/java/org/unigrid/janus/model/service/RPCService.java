@@ -135,7 +135,7 @@ public class RPCService {
 	}
 
 	public <R, T> T call(R request, Class<T> clazz) {
-		// debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
+		//debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
 		return target.request().post(Entity.json(request)).readEntity(clazz);
 	}
 
