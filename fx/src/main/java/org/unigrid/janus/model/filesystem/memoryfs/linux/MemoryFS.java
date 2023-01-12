@@ -1,3 +1,4 @@
+
 package org.unigrid.janus.model.filesystem.memoryfs.linux;
 
 import org.unigrid.janus.model.filesystem.memoryfs.VirtualDirectory;
@@ -249,8 +250,11 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	@Override
 	public int statfs(String path, StructStatvfs.StatvfsWrapper wrapper) {
 		final int i = super.statfs(path, wrapper);
-		
-		wrapper.blocks(58*1024*1024).bsize(8192).bfree(58*1024*1024);
+		wrapper.bsize(8192);
+		wrapper.blocks(4096 * 50);
+		wrapper.bavail(4096 * 50);
+		wrapper.bfree(4096 * 50);
+		//wrapper.blocks(58*1024*1024).bsize(8192).bfree(58*1024*1024);
 		usedSpaceEvent.fire(UsedSpace.builder().size(rootDirectory.getFolderSize()).build());
                 return i;
 	}

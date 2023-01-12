@@ -54,12 +54,11 @@ module fx {
 	requires org.slf4j;
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
-	//requires FXTrayIcon;
-	//requires javafx.swing;
+	requires SystemTray;
 	requires j8fu;
         requires fuse.jna;
 
-	requires jnr.winfsp;
+	//requires jnr.winfsp;
 	requires org.jnrproject.ffi;
 	requires it.unimi.dsi.fastutil;
 

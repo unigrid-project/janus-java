@@ -46,12 +46,14 @@ import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.view.component.WindowBarButton;
 import org.unigrid.janus.controller.MainWindowController;
 import org.unigrid.janus.controller.Showable;
+import org.unigrid.janus.model.service.TrayService;
 
 @Dependent
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener, Showable {
@@ -65,12 +67,13 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@FXML private WindowBarButton updateButton;
 
 	@Inject private DebugService debug;
+	@Inject private JanusModel janusModel;
 	@Inject private PollingService pollingService;
 	@Inject private RPCService rpc;
 	@Inject private UpdateWallet update;
 	@Inject private Wallet wallet;
 	@Inject private MainWindowController mainWindow;
-	// @Inject private TrayService tray;
+	@Inject private TrayService tray;
 
 	private int testTimeInterval = 10000;
 	private int liveTimeInterval = 21600000;
@@ -107,17 +110,17 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@FXML
 	private void onExit(MouseEvent event) throws Exception {
 		// TODO setting splash screen to visible is too slow
-		mainWindow.showSplashScreen();
+		//mainWindow.showSplashScreen();
 
-		((Node) event.getSource()).getScene().getWindow().hide();
-
+		//((Node) event.getSource()).getScene().getWindow().hide();
+		janusModel.setAppState(JanusModel.AppState.HIDE);
 		// TODO: find a place to do this that is guaranteed to be called when
 		// application is closed
-		rpc.stopPolling();
+		//rpc.stopPolling();
 
 		// final Window window = ((Node) event.getSource()).getScene().getWindow();
 		// window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
-		System.exit(0);
+		//System.exit(0);
 	}
 
 	@FXML
@@ -134,7 +137,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 
 	public void showUpdateButton() {
 		System.out.println("Update button visable");
-		// tray.updateNewEventImage();
+		tray.updateNewEventImage();
 
 		Platform.runLater(new Runnable() {
 			@Override
