@@ -1,4 +1,3 @@
-
 package org.unigrid.janus.model.filesystem.memoryfs.linux;
 
 import org.unigrid.janus.model.filesystem.memoryfs.VirtualDirectory;
@@ -25,8 +24,8 @@ import org.unigrid.janus.model.service.api.MountFailureException;
 import org.unigrid.janus.model.service.api.Mountable;
 import org.unigrid.janus.model.signal.UsedSpace;
 
-public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements Mountable
-{
+public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements Mountable {
+
 	private final static String SEPARATOR = "/";
 
 	private final Supplier<String> rootPathSupplier = () -> {
@@ -39,8 +38,7 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	private final VirtualDirectory rootDirectory = new VirtualDirectory(SEPARATOR, "", rootPathSupplier);
 	private final Event<UsedSpace> usedSpaceEvent;
 
-	public MemoryFS(Event<UsedSpace> usedSpaceEvent)
-	{
+	public MemoryFS(Event<UsedSpace> usedSpaceEvent) {
 		this.usedSpaceEvent = usedSpaceEvent;
 
 		// Sprinkle some files around
@@ -56,14 +54,13 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public int access(final String path, final int access)
-	{
+	public int access(final String path, final int access) {
 		return 0;
 	}
 
 	@Override
 	public int create(final String path, final ModeWrapper mode, final FileInfoWrapper info) {
-		if (getMemoryPath(path) != null) {
+		if (getMemoryPath(path).isPresent()) {
 			return -ErrorCodes.EEXIST();
 		}
 
@@ -73,7 +70,6 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 			directory.mkfile(VirtualAbstractPath.getLastComponent(SEPARATOR, path));
 			return 0;
 		}
-
 		return -ErrorCodes.ENOENT();
 	}
 
@@ -85,7 +81,6 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 			p.get().getattr(stat);
 			return 0;
 		}
-
 		return -ErrorCodes.ENOENT();
 	}
 
@@ -96,7 +91,7 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	public Optional<VirtualAbstractPath<?>> getMemoryPath(String path) {
 		return rootDirectory.find(path);
 	}
-	
+
 	@Override
 	public int mkdir(final String path, final ModeWrapper mode) {
 		if (getMemoryPath(path).isPresent()) {
@@ -114,13 +109,12 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public void mount() throws MountFailureException
-	{
+	public void mount() throws MountFailureException {
 		try {
 			String systemUser = System.getProperty("user.name");
-			Files.createDirectories(Paths.get("/home/"+systemUser+"/unigrid"));
+			Files.createDirectories(Paths.get("/home/" + systemUser + "/unigrid"));
 
-			String path = "/home/"+systemUser+"/unigrid";
+			String path = "/home/" + systemUser + "/unigrid";
 			log(true).mount(path);
 
 		} catch (IOException | FuseException ex) {
@@ -129,8 +123,7 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public int open(final String path, final FileInfoWrapper info)
-	{
+	public int open(final String path, final FileInfoWrapper info) {
 		return 0;
 	}
 
@@ -149,10 +142,9 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public int readdir(final String path, final DirectoryFiller filler)
-	{
+	public int readdir(final String path, final DirectoryFiller filler) {
 		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
-		if (p == null) {
+		if (p.isEmpty()) {
 			return -ErrorCodes.ENOENT();
 		}
 		if (!(p.get() instanceof VirtualDirectory)) {
@@ -163,17 +155,16 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public int rename(final String path, final String newName)
-	{
+	public int rename(final String path, final String newName) {
 		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
 
-		if (p == null) {
+		if (p.isEmpty()) {
 			return -ErrorCodes.ENOENT();
 		}
 
 		final Optional<VirtualAbstractPath<?>> newParent = getParentPath(newName);
 
-		if (newParent == null) {
+		if (newParent.isEmpty()) {
 			return -ErrorCodes.ENOENT();
 		}
 		if (!(newParent.get() instanceof VirtualDirectory)) {
@@ -189,11 +180,10 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public int rmdir(final String path)
-	{
+	public int rmdir(final String path) {
 		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
 
-		if (p == null) {
+		if (p.isEmpty()) {
 			return -ErrorCodes.ENOENT();
 		}
 		if (!(p.get() instanceof VirtualDirectory)) {
@@ -205,10 +195,9 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public int truncate(final String path, final long offset)
-	{
+	public int truncate(final String path, final long offset) {
 		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
-		if (p == null) {
+		if (p.isEmpty()) {
 			return -ErrorCodes.ENOENT();
 		}
 		if (!(p.get() instanceof VirtualFile)) {
@@ -219,24 +208,22 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 	}
 
 	@Override
-	public int unlink(final String path)
-	{
+	public int unlink(final String path) {
 		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
-		if (p == null) {
+		if (p.isEmpty()) {
 			return -ErrorCodes.ENOENT();
 		}
 		p.get().delete();
-		
+
 		usedSpaceEvent.fire(UsedSpace.builder().size(rootDirectory.getFolderSize()).build());
 		return 0;
 	}
 
 	@Override
 	public int write(final String path, final ByteBuffer buf, final long bufSize, final long writeOffset,
-			final FileInfoWrapper wrapper)
-	{
+		final FileInfoWrapper wrapper) {
 		final Optional<VirtualAbstractPath<?>> p = getMemoryPath(path);
-		if (p == null) {
+		if (p.isEmpty()) {
 			return -ErrorCodes.ENOENT();
 		}
 		if (!(p.get() instanceof VirtualFile)) {
@@ -256,7 +243,7 @@ public class MemoryFS extends FuseFilesystemAdapterAssumeImplemented implements 
 		wrapper.bfree(4096 * 50);
 		//wrapper.blocks(58*1024*1024).bsize(8192).bfree(58*1024*1024);
 		usedSpaceEvent.fire(UsedSpace.builder().size(rootDirectory.getFolderSize()).build());
-                return i;
+		return i;
 	}
 
 	@Override
