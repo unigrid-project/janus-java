@@ -1,3 +1,4 @@
+
 /*
 	The Janus Wallet
 	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
@@ -14,24 +15,14 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.model;
 
+import java.io.Serializable;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.unigrid.janus.model.GridnodeDeployment;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class GetNewAddress extends BaseResult<String> {
-	private static final String METHOD = "getnewaddress";
-
-	public static class Request extends BaseRequest {
-		public Request(String name) {
-			super(METHOD);
-			this.setParams(new Object[]{name});
-		}
-	}
-
-	public static Request getNewAddress() {
-		return new Request("");
-	}
+public class DeployNodes {
+	private GridnodeDeployment nodeAuth;
+	private int count;
 }

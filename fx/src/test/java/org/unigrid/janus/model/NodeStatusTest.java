@@ -18,9 +18,7 @@ package org.unigrid.janus.model;
 
 import java.util.regex.Pattern;
 import net.jqwik.api.Example;
-import org.unigrid.janus.jqwik.WeldSetup;
 
-@WeldSetup(Address.class)
 public class NodeStatusTest {
 
 	@Example

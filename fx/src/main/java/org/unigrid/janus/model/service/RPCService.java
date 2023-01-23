@@ -40,6 +40,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.Timer;
+import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.Setter;
 import org.unigrid.janus.model.cdi.Eager;
@@ -139,6 +140,11 @@ public class RPCService {
 		return target.request().post(Entity.json(request)).readEntity(clazz);
 	}
 
+	public <R, T> CompletableFuture<T> callAsync(R request, Class<T> clazz) {
+		return CompletableFuture.supplyAsync(() -> target.request().post(Entity.json(request)).readEntity(clazz));
+	}
+
+	// TODO: Remove
 	public <R> String callToJson(R request) {
 		Response r = target.request().post(Entity.json(request));
 		String result = "{}";
@@ -156,11 +162,13 @@ public class RPCService {
 		return result;
 	}
 
+	// TODO: Remove
 	public String resultToJson(BaseResult result) {
 		Jsonb jsonb = JsonbBuilder.create();
 		return jsonb.toJson(result);
 	}
 
+	// TODO: Remove
 	private static String convertStreamToString(InputStream is) {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		StringBuilder sb = new StringBuilder();

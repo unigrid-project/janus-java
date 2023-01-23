@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+	Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -14,24 +14,23 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.view.component;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
+import javafx.scene.layout.GridPane;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-public class GetNewAddress extends BaseResult<String> {
-	private static final String METHOD = "getnewaddress";
-
-	public static class Request extends BaseRequest {
-		public Request(String name) {
-			super(METHOD);
-			this.setParams(new Object[]{name});
+public class GridPaneTable extends GridPane {
+	public ObservableList<ObservableList<Node>> getChildrenAsRows(int columnLimit) {
+		ObservableList<ObservableList<Node>> rowList = FXCollections.observableArrayList();
+		for (Node n : super.getChildren()) {
+			ObservableList<Node> row = FXCollections.observableArrayList();
+			for (int i = 0; i < columnLimit; i++) {
+				row.add(super.getChildren().get(i));
+			}
+			rowList.add(row);
 		}
-	}
-
-	public static Request getNewAddress() {
-		return new Request("");
+		return rowList;
 	}
 }

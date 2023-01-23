@@ -74,7 +74,6 @@
 					</configuration>
 					<executions>
 						<execution>
-							<phase>process-sources</phase>
 							<goals>
 								<goal>check</goal>
 							</goals>

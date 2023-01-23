@@ -307,7 +307,7 @@
                   </Slider>
                </children>
             </FlowPane>
-            <TextField fx:id="tfNodeAddAddress" promptText="SERVER IP ADDRESS">
+            <TextField fx:id="tfNodeAddAddress" promptText="SERVER ADDRESS:PORT">
                <VBox.margin>
                   <Insets left="20.0" right="20.0" top="20.0" />
                </VBox.margin>
@@ -339,7 +339,7 @@
                         <Insets right="20.0" />
                      </FlowPane.margin>
                   </Button>
-                  <Button fx:id="btnNodeAddProgress" mnemonicParsing="false" onMouseClicked="#onNodeProgressClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Progress">
+                  <Button fx:id="btnNodeAddProgress" mnemonicParsing="false" onMouseClicked="#onNodeProgressClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Status">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -389,10 +389,10 @@
                <children>
                   <ScrollPane fx:id="pnlScrollNodeStatus" fitToWidth="true" hbarPolicy="NEVER">
                      <content>
-                        <GridPane fx:id="pnlNodeStatus" hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="200.0" minWidth="450.0" vgap="5.0" visible="false">
+                        <GridPane fx:id="pnlNodeStatus" hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="200.0" minWidth="450.0" vgap="5.0">
                           <columnConstraints>
-                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="100.0" percentWidth="40.0" />
-                              <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="50.0" percentWidth="20.0" />
+                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="75.0" percentWidth="30.0" />
+                              <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="75.0" percentWidth="30.0" />
                               <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="50.0" percentWidth="20.0" />
                               <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" minWidth="50.0" />
                           </columnConstraints>

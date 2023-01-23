@@ -55,6 +55,7 @@ module fx {
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
 	requires javafaker;
+	requires org.apache.commons.collections4;
 	//requires FXTrayIcon;
 	//requires javafx.swing;
 	requires j8fu;

@@ -26,6 +26,8 @@ import com.jcraft.jsch.Session;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -37,11 +39,16 @@ import java.io.File;
 import static java.lang.Integer.parseInt;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,9 +59,11 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -79,12 +88,19 @@ import javafx.scene.text.Text;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.DataDirectory;
+import org.unigrid.janus.model.FXMLInjectable;
+import org.unigrid.janus.model.FXMLName;
 import org.unigrid.janus.model.Gridnode;
+import org.unigrid.janus.model.GridnodeDatabase;
+import org.unigrid.janus.model.GridnodeDeployment;
+import org.unigrid.janus.model.GridnodeDeployment.Authentication;
 import org.unigrid.janus.model.NodeStatus;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.cdi.CDIUtil;
 import org.unigrid.janus.model.rpc.entity.GetNewAddress;
 import org.unigrid.janus.model.rpc.entity.GridnodeEntity;
 import org.unigrid.janus.model.rpc.entity.GridnodeList;
@@ -93,7 +109,9 @@ import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.BrowserService;
+import org.unigrid.janus.model.service.GridnodeService;
 import org.unigrid.janus.model.signal.NodeRequest;
+import org.unigrid.janus.model.signal.NodeUpdate;
 import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.model.signal.UnlockRequest;
@@ -106,12 +124,15 @@ import org.unigrid.janus.view.backing.OsxUtils;
 public class NodesController implements Initializable, PropertyChangeListener {
 	@Inject private BrowserService browser;
 	@Inject private DebugService debug;
+	@Inject private GridnodeService gridnodeService;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
 	@Inject private HostServices hostServices;
+	@Inject @FXMLName("nodeEntry") private Instance<FXMLInjectable<GridPane>> nodeEntry;
 	@Inject private Event<State> stateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 	@Inject private Event<OverlayRequest> overlayRequest;
+	@Inject private Event<GridnodeDeployment> gridnodeEvent;
 
 	private static GridnodeListModel nodes = new GridnodeListModel();
 	private static GridnodeTxidList txList = new GridnodeTxidList();
@@ -149,8 +170,25 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	private String serverResponse;
 
+	private void initializeGridnodeList() {
+		final List<Pair<Gridnode, GridnodeDeployment.State>> nodes = gridnodeService.getGridnodeDatabase().getIndividualGridnodesWithState();
+		for (Pair<Gridnode, GridnodeDeployment.State> p : nodes) {
+			gridPaneAddNode(p.getKey());
+		}
+	}
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		/*for (int i = 0; i < 5; i++) {
+			FXMLInjectable<GridPane> g = nodeEntry.get();
+			CDIUtil.instantiate(g.get());
+			System.out.println("g: " + g);
+			System.out.println("g.get: " + g.get());
+		}*/
+		CDIUtil.instantiate(nodeEntry.get());
+		System.out.println("userdata:" + nodeEntry.get().get().getUserData());
+		initializeGridnodeList();
+		gridnodeService.start();
 		setupNodeList();
 		wallet.addPropertyChangeListener(this);
 
@@ -210,7 +248,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 						}
 					}
 				});
-				// this.getNodeList();
 			} catch (Exception e) {
 				debug.log(String.format("ERROR: (gridnode init) %s", e.getMessage()));
 			}
@@ -229,13 +266,13 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 			colNodeTxhash.setCellValueFactory(cell -> {
 				Gridnode gridnode = ((TableColumn.CellDataFeatures<Gridnode, Hyperlink>) cell).getValue();
-				String text = gridnode.getTxhash() + " " + gridnode.getOutputidx();
+				String text = gridnode.getTxHash() + " " + gridnode.getOutputIndex();
 				Hyperlink link = new Hyperlink();
 				link.setText(text);
 
 				link.setOnAction(e -> {
 					if (e.getTarget().equals(link)) {
-						browser.navigateTransaction(gridnode.getTxhash());
+						browser.navigateTransaction(gridnode.getTxHash());
 					}
 				});
 
@@ -255,14 +292,14 @@ public class NodesController implements Initializable, PropertyChangeListener {
 						Notifications
 							.create()
 							.title("Key copied to clipboard")
-							.text(gridnode.getTxhash())
+							.text(gridnode.getTxHash())
 							.position(Pos.TOP_RIGHT)
 							.showInformation();
 					} else {
 						Notifications
 							.create()
 							.title("Key copied to clipboard")
-							.text(gridnode.getTxhash())
+							.text(gridnode.getTxHash())
 							.showInformation();
 					}
 				});
@@ -324,6 +361,16 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	@FXML
 	private void onNodeAddClicked(MouseEvent event) {
+		/* Test 
+		
+		GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
+		for (Object g : result.getResult()){
+			System.out.println("result gridnode: " + g);
+		}
+		final GridnodeList confList = rpc.call(GridnodeList.listConf(), GridnodeList.class);
+		for (Gridnode g : confList.getResult()){
+			System.out.println("Conflist gridnode privateKey: " + g.getPrivateKey());
+		} */
 		pnlNodeAdd.setVisible(true);
 	}
 
@@ -449,11 +496,12 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 			return;
 		}
+		tfNodeAdd.setText("1");
+		tfNodeAddAddress.setText("brizo.unigrid.org:22004");
+		tfNodeAddUsername.setText("tim");
+		tfNodeAddPassword.setText("Chexa5Eiseixeo");
 
-		String host = tfNodeAddAddress.getText();
-		String username = tfNodeAddUsername.getText();
-		String password = tfNodeAddPassword.getText();
-		int node = parseInt(tfNodeAdd.getText());
+		final int node = parseInt(tfNodeAdd.getText());
 
 		if (tfNodeAddAddress.getText().equals("") && tfNodeAddAddress.getText() != null) {
 			onErrorMessage("Please enter an address.");
@@ -472,115 +520,142 @@ public class NodesController implements Initializable, PropertyChangeListener {
 			return;
 		}
 
+		String[] addressSplit = tfNodeAddAddress.getText().split(":");
+
+		InetSocketAddress address = new InetSocketAddress(
+			addressSplit[0],
+			Integer.valueOf(addressSplit[1])
+		);
+
+		final Authentication auth = Authentication.builder().auth(
+			tfNodeAddUsername.getText(),
+			tfNodeAddPassword.getText(),
+			address
+		).build();
+
+		gridnodeService.deploy(auth, node);
+
 		pnlNodeAddProgress.setVisible(true);
 		tfNodeAddAddress.setText("");
 		tfNodeAddUsername.setText("");
 		tfNodeAddPassword.setText("");
 		tfNodeAdd.setText("0");
-		String name = new Faker().superhero().name();
-		String txHash = "";
-		Map<String, BigDecimal> mapAmount = new HashMap();
+	}
 
-		for (int i = 0; i < node; i++) {
-			GetNewAddress newAddress = rpc.call(new GetNewAddress.Request(""), GetNewAddress.class);
-			final ValidateAddress call = rpc.call(new ValidateAddress.Request(newAddress
-				.getResult().toString()), ValidateAddress.class);
-			if (call.getError() != null) {
-				System.out.println(String.format("ERROR: %s", call.getError()));
-				debug.log(String.format("ERROR: %s", call.getError()));
-			} else {
-				mapAmount.put(newAddress.getResult(), new BigDecimal(3000));
-			}
+	private void eventNodeUpdate(@Observes NodeUpdate nodeUpdate) {
+		switch (nodeUpdate.getGridnode().getValue()) {
+			case ONE_PREDEPLOYING:
+				gridPaneAddNode(nodeUpdate.getGridnode().getKey());
+				break;
+			case THREE_DEPLOYMENT:
+				//gridPaneUpdateNodes();
+				break;
+			case FOUR_DEPLOYED:
+				gridPaneRemoveNode(nodeUpdate.getGridnode().getKey());
+				break;
+			default:
+				break;
 		}
+	}
 
-		SendMany sendMany = rpc.call(new SendMany.Request("", mapAmount), SendMany.class);
-		txHash = sendMany.getResult();
+	private void gridPaneAddNode(Gridnode gridnode) {
+		System.out.println("---gridPaneAddNode---");
+		final GridnodeDeployment deployment = gridnodeService.getGridnodeDatabase().getParent(
+			gridnode
+		).get();
+		Platform.runLater(() -> {
+			int row = pnlNodeStatus.getRowCount();
 
-		ArrayList<Integer> ouputIndexList = new ArrayList<>();
-		final String hash = txHash;
-
-		Thread prepareNodeSetup = new Thread(() -> {
-			while (ouputIndexList.size() < node) {
-				GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"outputs"}),
-					GridnodeList.class
-				);
-
-				for (Gridnode hashNode : result.getResult()) {
-					if (!hashNode.isAvailableTxhash()) {
-						if (hashNode.getTxhash().equals(hash)) {
-							ouputIndexList.add(hashNode.getOutputidx());
-						}
-					}
-				}
-
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException ex) {
-					Logger.getLogger(NodesController.class.getName())
-						.log(Level.SEVERE, null, ex);
-				}
-			}
-		});
-		prepareNodeSetup.start();
-
-		for (int j = 0; j < node; j++) {
-			GridnodeEntity newGridnode = rpc.call(
-				new GridnodeEntity.Request(new Object[]{"genkey"}),
-				GridnodeEntity.class
+			Label username = (Label) nodeEntry.get().get().getChildren().get(
+				GridnodeDeployment.Authentication.USERNAME_NODE);
+			username.setText(deployment.getAuthentication().get().getUsername());
+			Label address = (Label) nodeEntry.get().get().getChildren().get(
+				GridnodeDeployment.Authentication.ADDRESS_NODE
 			);
+			address.setText(String.format("%s:%s", 
+				deployment.getAuthentication().get().getAddress().getHostString(),
+				deployment.getAuthentication().get().getAddress().getPort()
+			));
 
-			NodeStatus nodeStatus = new NodeStatus();
-			nodeStatus.setNodeNumber(j + 1);
-			nodeStatus.setName(name);
-			nodeStatus.setIpAddress(host);
-			nodeStatus.setProgress(NodeStatus.INPROGRESS);
-			nodeStatus.responseAddLine("Waiting block confirmation...\n");
-			nodeStatusList.getSource().add(nodeStatus);
-			getProgressList();
+			ProgressBar progress = (ProgressBar) nodeEntry.get().get().getChildren().get(
+				GridnodeDeployment.Authentication.PROGRESS_NODE);
+			progress.setProgress(0);
 
-			final int pos = nodeStatusList.getSource().indexOf(nodeStatus);
-			final int index = j;
+			TextArea ta = (TextArea) nodeEntry.get().get().getChildren().get(
+				GridnodeDeployment.Authentication.OUTPUT_TA_NODE);
 
-			Thread newThread = new Thread(() -> {
-				while (ouputIndexList.size() != node) {
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException ex) {
-						Logger.getLogger(NodesController.class.getName())
-							.log(Level.SEVERE, null, ex);
+			Button btn = (Button) nodeEntry.get().get().getChildren().get(
+				GridnodeDeployment.Authentication.OUTPUT_BTN_NODE);
+
+			final FontIcon fontIcon = new FontIcon("fas-arrow-right");
+			fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+
+			btn.setGraphic(fontIcon);
+			btn.setOnAction(e -> {
+				ta.setVisible(ta.isVisible() == true ? false : true);
+				btn.setGraphic(new FontIcon(ta.isVisible() == true ? "fas-arrow-down" : "fas-arrow-right"));
+			});
+
+			pnlNodeStatus.addRow(row, username, address, progress, btn);
+			pnlNodeStatus.addRow(row + 1, ta);
+		});
+	}
+
+	private void gridPaneRemoveNode(Gridnode gridnode) {
+	}
+
+	private void gridPaneUpdateNodes() {
+		/*int i = 0;
+		for (Pair<Gridnode, GridnodeDeployment.State> g : gridnodeService.getGridnodeDatabase().getIndividualGridnodesWithState()) {
+			for (Node n :pnlNodeStatus.getChildren()) {
+				i++;
+				if (n instanceof Label) {
+					Label l = (Label) n;
+					if (!l.equals("Hidden Title") && i % 6 == 0) {
+						g.getKey().getPrivateKey().equals(l.getText());
+					}
+					//name
+					if (i % 6 == 1) {
+						//g.getKey().getAlias().equals(l.getText());
+					}
+					if (i % 6 == 2) {
+						g.getKey().getAlias().equals(l.getText());
+					}
+					//progress
+					if (i % 6 == 3) {
+						//g.getKey().getAlias().equals(l.getText());
+					}
+					//Output button
+					if (i % 6 == 4) {
+						//g.getKey().getAlias().equals(l.getText());
+					}
+					//Output text area
+					if (i % 6 == 5) {
+						//g.getKey().getAlias().equals(l.getText());
 					}
 				}
-
-				//int port = 22;
-				//int port = 444;
-				int port = 22004;
-
-				String wget = "wget -O- raw.githubusercontent.com/TimNhanTa/installer/master/node_installer.sh";
-				//String wget = "wget -O- raw.githubusercontent.com/unigrid-project/unigrid-installer/main/node_installer.sh";
-				String command = "echo " + password + " | sudo -S sudo echo >/dev/null && sudo "
-					+ wget + " | sudo bash -s --"
-					+ " -t \"" + hash + " " + ouputIndexList.get(index) + "\""
-					+ " -k \"" + newGridnode.getResult() + "\""
-					+ " -i \"" + (index + 1) + "\""
-					+ " -n \"" + name.replaceAll(" ", "_").toLowerCase() + "\"";
-				String commandType = "exec";
-
-				sendCommandToVps(pos, host, port, username, password, command, commandType);
-
-				nodeStatusList.getSource().remove(nodeStatus);
-				Platform.runLater(
-					() -> {
-						getProgressList();
-					});
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException ex) {
-					Logger.getLogger(NodesController.class.getName())
-						.log(Level.SEVERE, null, ex);
-				}
+			}
+		}*/
+		
+			/*final GridnodeDeployment deployment = gridnodeDatabase.getParent(
+				gridnode
+			).get();
+			final Button btn = new Button("");
+			final FontIcon fontIcon = new FontIcon("fas-arrow-right");
+			fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+			btn.setGraphic(fontIcon);
+			btn.setOnAction(e -> {
+				ta.setVisible(ta.isVisible() == true ? false : true);
+				btn.setGraphic(new FontIcon(ta.isVisible() == true ? "fas-arrow-down" : "fas-arrow-right"));
 			});
-			newThread.start();
-		}
+
+			pnlNodeStatus.addRow(0,
+				new Label(deployment.getAuthentication().get().getUsername()),
+				new Label(deployment.getAuthentication().get().getIpaddress()),
+				new ProgressBar(GridnodeDeployment.State.PENDING),
+				btn
+			);*/
+			
 	}
 
 	private void getProgressList() {
@@ -588,17 +663,20 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 		pnlNodeStatus.setVisible(nodeStatusList.getSource().size() != 0);
 		pnlNodeStatus.getChildren().clear();
-		int row = 0;
+		pnlNodeStatus.addRow(0, 
+			new Label("Name"),
+			new Label("Address"),
+			new Label("Progress"),
+			new Label("Output")
+			);
+		/*int row = 0;
 		pnlNodeStatus.add(new Label("Name"), 0, row, 1, 1);
 		pnlNodeStatus.add(new Label("Address"), 1, row, 1, 1);
 		pnlNodeStatus.add(new Label("Progress"), 2, row, 1, 1);
 		pnlNodeStatus.add(new Label("Output"), 3, row, 1, 1);
-		row++;
+		row++;*/
 
 		for (NodeStatus progress : nodeStatusList.getSource()) {
-			pnlNodeStatus.add(new Label(progress.getFullDescription()), 0, row, 1, 1);
-			pnlNodeStatus.add(new Label(progress.getIpAddress()), 1, row, 1, 1);
-			pnlNodeStatus.add(new ProgressBar(progress.getProgress()), 2, row, 1, 1);
 			Button btn = new Button("");
 			String iconCode = progress.isShowOutput() ? "fas-arrow-down" : "fas-arrow-right";
 			FontIcon fontIcon = new FontIcon(iconCode);
@@ -608,20 +686,42 @@ public class NodesController implements Initializable, PropertyChangeListener {
 				progress.setShowOutput(!progress.isShowOutput());
 				getProgressList();
 			});
+			pnlNodeStatus.addRow(0,
+				new Label(progress.getFullDescription()),
+				new Label(progress.getIpAddress()),
+				new ProgressBar(progress.getProgress()),
+				btn
+			);
+			/*pnlNodeStatus.add(new Label(progress.getFullDescription()), 0, row, 1, 1);
+			pnlNodeStatus.add(new Label(progress.getIpAddress()), 1, row, 1, 1);
+			pnlNodeStatus.add(new ProgressBar(progress.getProgress()), 2, row, 1, 1);*/
+
+			//pnlNodeStatus.getChildren().get(0).setL
+			
+			/*Button btn = new Button("");
+			String iconCode = progress.isShowOutput() ? "fas-arrow-down" : "fas-arrow-right";
+			FontIcon fontIcon = new FontIcon(iconCode);
+			fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+			btn.setGraphic(fontIcon);
+			btn.setOnAction(e -> {
+				progress.setShowOutput(!progress.isShowOutput());
+				getProgressList();
+			});
 			pnlNodeStatus.add(btn, 3, row, 1, 1);
-			row++;
+			row++;*/
 
 			TextArea ta = new TextArea();
 			ta.setText(progress.getOutputAsString());
 			ta.positionCaret(progress.getOutputAsString().length());
-			ta.setEditable(false);
+			/*ta.setEditable(false);
 			ta.setWrapText(true);
 			ta.setMinHeight(NodeStatus.OUTPUT_HEIGHT);
-			ta.setMinWidth(NodeStatus.OUTPUT_WIDTH);
+			ta.setMinWidth(NodeStatus.OUTPUT_WIDTH);*/
 			ta.setVisible(progress.isShowOutput());
 			ta.setManaged(progress.isShowOutput());
-			pnlNodeStatus.add(ta, 0, row, NodeStatus.GRIDPANE_MAX_COLUMN, 1);
-			row++;
+			pnlNodeStatus.addRow(0,ta);
+			/*pnlNodeStatus.add(ta, 0, row, NodeStatus.GRIDPANE_MAX_COLUMN, 1);
+			row++;*/
 		}
 	}
 
@@ -633,63 +733,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		public synchronized void write(byte[] b, int off, int len) {
 			for (String line : new String(b, off, len).split("\n")) {
 				consumer.accept(line);
-			}
-		}
-	}
-
-	public void sendCommandToVps(int i, String host, int port, String username, String password, String command,
-		String commandType) {
-		Session session = null;
-		ChannelExec channel = null;
-
-		try {
-			session = new JSch().getSession(username, host, port);
-			session.setPassword(password);
-			session.setConfig("StrictHostKeyChecking", "no");
-			session.connect();
-
-			channel = (ChannelExec) session.openChannel(commandType);
-			channel.setCommand(command);
-
-			channel.setOutputStream(new InterceptingOutputStream(s -> {
-				System.out.println(i + ": " + s);
-				final String output = s.replaceAll("\u001B\\[[;\\d]*m", "").trim();
-
-				nodeStatusList.getSource().get(i).responseAddLine(output + "\n");
-				checkStepAndProgressFromOutput(nodeStatusList.getSource().get(i), output);
-				if (checkStringIsGridnodeOutput(output)) {
-					String[] split = output.split(" ");
-					rpc.call(new GridnodeEntity.Request(new Object[]{"add-conf", split[0], split[1], split[2], split[3], split[4]}), GridnodeEntity.class);
-				}
-				Platform.runLater(() -> {
-					getProgressList();
-				});
-			}));
-
-			channel.connect();
-
-			Thread.sleep(2700000);
-
-			session.disconnect();
-		} catch (InterruptedException ex) {
-			Logger.getLogger(NodesController.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (JSchException ex) {
-			pnlNodeAddProgress.setVisible(false);
-
-			if (ex.getCause() != null && (ex.getCause().getMessage().contains("Auth fail")
-				|| ex.getCause().getMessage().equals("Connection refused"))) {
-				onErrorMessage(ex.getCause().getMessage());
-			} else {
-				onErrorMessage("Authentication failed");
-			}
-
-			Logger.getLogger(NodesController.class.getName()).log(Level.SEVERE, null, ex);
-		} finally {
-			if (session != null) {
-				session.disconnect();
-			}
-			if (channel != null) {
-				channel.disconnect();
 			}
 		}
 	}
@@ -749,24 +792,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 				status.setProgress(progress);
 			}
 		}
-	}
-
-	public boolean checkStringIsGridnodeOutput(String str) {
-		String[] split = str.split(" ");
-		String pattern[] = new String[]{"ugd_docker_[0-9]+", "[0-9]+(\\.[0-9]+){3}:[0-9]+", "[A-Za-z0-9]{51}", "[A-Za-z0-9]{64}", "[0-9]+"};
-		boolean exactListSize = split.length == 5;
-
-		if (!exactListSize) {
-			return false;
-		}
-
-		boolean match = exactListSize;
-
-		for (int i = 0; i < split.length; i++) {
-			match &= Pattern.matches(pattern[i], split[i]);
-		}
-
-		return match;
 	}
 
 	private void onErrorMessage(String message) {
@@ -851,7 +876,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		} catch (Exception e) {
 			System.out.println("Error while reading channel output: " + e);
 		}
-
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {

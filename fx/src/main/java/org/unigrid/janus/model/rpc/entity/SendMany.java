@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.unigrid.janus.model.Recipent;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -28,11 +27,15 @@ public class SendMany extends BaseResult<String> {
 	private static final String METHOD = "sendmany";
 
 	public static class Request extends BaseRequest {
-		// TODO: Start using category and recipent
-		/* sendmany "tabby" '{"DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1', "HCV3aBdr9MCn1P8p5aWSRCrZHULNFGBoEZ" 0.2}' 6 "testing" */
-		public Request(String fromAccount, Map<String, BigDecimal> mapAmount, int minConf, Recipent recipent) {
+		public Request(Object[] args) {
 			super(METHOD);
-			setParams(new Object[]{"", mapAmount, minConf, recipent});
+			this.setParams(args);
+		}
+
+		/* sendMany "tabby" '{"DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1', "HCV3aBdr9MCn1P8p5aWSRCrZHULNFGBoEZ" 0.2}' 6 "testing" */
+		public Request(String fromAccount, Map<String, BigDecimal> mapAmount, int minConf, String comment) {
+			super(METHOD);
+			setParams(new Object[]{"", mapAmount, minConf, comment});
 		}
 
 		/* sendtoaddress '{"DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1', "HCV3aBdr9MCn1P8p5aWSRCrZHULNFGBoEZ" 0.2}' */
@@ -40,5 +43,13 @@ public class SendMany extends BaseResult<String> {
 			super(METHOD);
 			setParams(new Object[]{fromAccount, mapAmount});
 		}
+	}
+
+	public static Request sendMany(String fromAccount, Map<String, BigDecimal> mapAmount) {
+		return sendMany(fromAccount, mapAmount, 1, "");
+	}
+
+	public static Request sendMany(String fromAccount, Map<String, BigDecimal> mapAmount, int minConf, String comment) {
+		return new Request(new Object[]{"", mapAmount, minConf, comment});
 	}
 }

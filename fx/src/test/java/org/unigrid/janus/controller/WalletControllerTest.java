@@ -35,6 +35,7 @@ import org.testfx.matcher.control.TextInputControlMatchers;
 import org.testfx.matcher.control.TextMatchers;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
 import org.unigrid.janus.jqwik.fx.FxResource;
+import org.unigrid.janus.model.Gridnode;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.external.JaxrsResponseHandler;
 import org.unigrid.janus.model.external.ResponseMockUp;
@@ -111,7 +112,7 @@ public class WalletControllerTest extends BaseFxTest {
 					}
 					if (clazz.equals(GridnodeList.class)) {
 						return (T) JaxrsResponseHandler.handle(GridnodeList.class,
-							new ArrayList<GridnodeList.Result>() {
+							new ArrayList<Gridnode>() {
 							}.getClass().getGenericSuperclass(),
 							() -> "list_gridnodes_outputs.json");
 					}

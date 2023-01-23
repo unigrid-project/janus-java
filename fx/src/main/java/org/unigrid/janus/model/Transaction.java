@@ -41,6 +41,7 @@ public class Transaction {
 	private int confirmations;
 	private boolean generated;
 	private String generatedfrom;
+	private String comment;
 	private List<Transaction> parts;
 
 	@JsonbProperty("txid")

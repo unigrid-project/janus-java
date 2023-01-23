@@ -19,6 +19,9 @@ package org.unigrid.janus.model.cdi;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 
 public class CDIUtil {
+	public static <T> void instantiate(T proxy) {
+		proxy.toString(); /* Will force CDI to instantiate this referenced insteance */
+	}
 	public static <T> T unproxy(T proxy) {
 		return (T) ((TargetInstanceProxy) proxy).weld_getTargetInstance();
 	}

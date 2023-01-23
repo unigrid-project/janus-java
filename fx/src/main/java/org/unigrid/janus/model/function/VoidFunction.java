@@ -14,24 +14,9 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.model.function;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-@Data
-@EqualsAndHashCode(callSuper = false)
-public class GetNewAddress extends BaseResult<String> {
-	private static final String METHOD = "getnewaddress";
-
-	public static class Request extends BaseRequest {
-		public Request(String name) {
-			super(METHOD);
-			this.setParams(new Object[]{name});
-		}
-	}
-
-	public static Request getNewAddress() {
-		return new Request("");
-	}
+@FunctionalInterface
+public interface VoidFunction {
+	void apply();
 }

@@ -16,10 +16,11 @@
 
 package org.unigrid.janus.model.rpc.entity;
 
+import java.io.Serializable;
 import lombok.Data;
 
 @Data
-public class BaseResult<T> {
+public class BaseResult<T> implements Serializable {
 	private T result;
 	private ErrorResult error;
 	private String id;
@@ -29,7 +30,7 @@ public class BaseResult<T> {
 	}
 
 	@Data
-	public static class ErrorResult {
+	public static class ErrorResult implements Serializable {
 		private int code;
 		private String message;
 	}

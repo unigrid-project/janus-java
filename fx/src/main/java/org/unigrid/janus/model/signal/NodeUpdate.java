@@ -12,26 +12,24 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model.rpc;
+package org.unigrid.janus.model.signal;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import jakarta.json.bind.JsonbConfig;
-import jakarta.json.bind.config.PropertyNamingStrategy;
-import jakarta.ws.rs.ext.ContextResolver;
-import org.unigrid.janus.model.AmountDeserializer;
+import lombok.Builder;
+import lombok.Data;
+import org.apache.commons.lang3.tuple.Pair;
+import org.unigrid.janus.model.Gridnode;
+import org.unigrid.janus.model.GridnodeDeployment.State;
 
-public class JsonConfiguration implements ContextResolver<Jsonb> {
-	private JsonbConfig getJsonbConfig() {
-		return new JsonbConfig().withPropertyNamingStrategy(
-			PropertyNamingStrategy.CASE_INSENSITIVE
-		).withDeserializers(new AmountDeserializer());
-	}
+@Data @Builder
+public class NodeUpdate {
+	private Pair<Gridnode, State> gridnode;
 
-	@Override
-	public Jsonb getContext(Class<?> type) {
-		return JsonbBuilder.newBuilder().withConfig(getJsonbConfig()).build();
+	public static class NodeUpdateBuilder {
+		public NodeUpdateBuilder pair(Gridnode gridnode, State state) {
+			this.gridnode = Pair.of(gridnode, state);
+			return this;
+		}
 	}
 }

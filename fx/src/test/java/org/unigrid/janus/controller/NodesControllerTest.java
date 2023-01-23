@@ -35,6 +35,8 @@ import static org.testfx.matcher.control.TableViewMatchers.hasTableCell;
 import static org.testfx.matcher.control.TextMatchers.hasText;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
 import org.unigrid.janus.jqwik.fx.FxResource;
+import org.unigrid.janus.model.Gridnode;
+import org.unigrid.janus.model.Gridnode.Status;
 import org.unigrid.janus.model.external.JaxrsResponseHandler;
 import org.unigrid.janus.model.external.ResponseMockUp;
 import org.unigrid.janus.model.rpc.entity.GridnodeEntity;
@@ -66,7 +68,7 @@ public class NodesControllerTest extends BaseFxTest {
 				if (Objects.isNull(e)) {
 					if (clazz.equals(GridnodeList.class)) {
 						return (T) JaxrsResponseHandler.handle(GridnodeList.class,
-							new ArrayList<GridnodeList.Result>() {
+							new ArrayList<Gridnode>() {
 							}.getClass().getGenericSuperclass(),
 							() -> "list_gridnodes_outputs.json");
 					}
@@ -85,7 +87,7 @@ public class NodesControllerTest extends BaseFxTest {
 	public void shouldShowNodesOnRefreshClicked() {
 		String alias = "alias-test";
 		String address = "ABtm9BuS3t9eZaf4G7HitmzXEMPL3P7McZ";
-		String status = "online";
+		Status status = Gridnode.Status.ENABLED;
 
 		robot.clickOn("#btnNodes");
 		robot.clickOn("#btnNodeRefresh");
@@ -94,7 +96,7 @@ public class NodesControllerTest extends BaseFxTest {
 			.queryAll().iterator().next() != null);
 
 		TableView tb = (TableView) robot.lookup("#tblGridnodes").queryAll().iterator().next();
-		GridnodeList.Result nodes = (GridnodeList.Result) tb.getItems().get(0);
+		Gridnode nodes = (Gridnode) tb.getItems().get(0);
 
 		await().until(() -> nodes != null);
 

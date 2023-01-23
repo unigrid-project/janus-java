@@ -27,13 +27,17 @@ import javafx.stage.Stage;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.unigrid.janus.model.cdi.CDIUtil;
 import org.unigrid.janus.controller.Showable;
+import org.unigrid.janus.model.FXMLInjectable;
+import org.unigrid.janus.model.FXMLInjectableImpl;
+import org.unigrid.janus.model.FXMLName;
+import org.unigrid.janus.view.FxUtils;
 
 @Dependent
-public class StageProducer {
+public class FXMLInjectableProducer {
 	private static final String FXML_SUFFIX = ".fxml";
 
 	@Produces
-	public Stage produce(final InjectionPoint point) {
+	public <T, I> FXMLInjectable<T> produce(final InjectionPoint point) {
 		final Class<?> clazz = point.getMember().getDeclaringClass();
 		final FXMLLoader loader = new FXMLLoader();
 
@@ -47,14 +51,20 @@ public class StageProducer {
 			return o;
 		});
 
-		final String name = Introspector.decapitalize(clazz.getSimpleName());
-		loader.setClassLoader(clazz.getClassLoader());
-		loader.setLocation(clazz.getResource(name.concat(FXML_SUFFIX)));
+		if (point.getAnnotated().isAnnotationPresent(FXMLName.class)) {
+			final String name = point.getAnnotated().getAnnotation(FXMLName.class).value();
+			loader.setClassLoader(FxUtils.class.getClassLoader());
+			loader.setLocation(FxUtils.class.getResource(name.concat(FXML_SUFFIX)));
+		} else {
+			final String name = Introspector.decapitalize(clazz.getSimpleName());
+			loader.setClassLoader(clazz.getClassLoader());
+			loader.setLocation(clazz.getResource(name.concat(FXML_SUFFIX)));
+		}
 
 		try {
-			final Stage stage = loader.load();
+			final I injectable = loader.load();
 
-			if (loader.getController() instanceof Showable) {
+			if (loader.getController() instanceof Showable && injectable instanceof Stage stage) {
 				final Showable showable = loader.getController();
 
 				stage.setOnShown(e -> {
@@ -66,7 +76,7 @@ public class StageProducer {
 				});
 			}
 
-			return stage;
+			return (FXMLInjectable<T>) FXMLInjectableImpl.of(injectable);
 
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -51,6 +51,7 @@ import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.service.GridnodeService;
 import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
 

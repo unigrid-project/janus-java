@@ -26,6 +26,7 @@ import jakarta.enterprise.inject.spi.ProcessBean;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: EagerExtension unused, add it
 public class EagerExtension implements Extension {
 	private final List<Bean<?>> eagerBeansList = new ArrayList<>();
 

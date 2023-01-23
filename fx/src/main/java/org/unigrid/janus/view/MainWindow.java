@@ -23,6 +23,7 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.unigrid.janus.model.FXMLInjectable;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.signal.CloseJanus;
 
@@ -32,26 +33,26 @@ public class MainWindow implements Window {
 	public static final int MIN_WIDTH = 800;
 	public static final int MIN_HEIGHT = 500;
 
-	@Inject private Stage stage;
+	@Inject private FXMLInjectable<Stage> stage;
 
 	@PostConstruct
 	private void init() {
-		stage.centerOnScreen();
-		stage.initStyle(StageStyle.UNDECORATED);
-		stage.setResizable(true);
-		stage.setUserData(new StageProperties());
+		stage.get().centerOnScreen();
+		stage.get().initStyle(StageStyle.UNDECORATED);
+		stage.get().setResizable(true);
+		stage.get().setUserData(new StageProperties());
 	}
 
 	public void show() {
-		stage.show();
+		stage.get().show();
 	}
 
 	public void hide() {
-		stage.hide();
+		stage.get().hide();
 	}
 
 	private void onClose(@Observes Event<CloseJanus> event) {
-		this.stage.setWidth(900);
-		this.stage.hide();
+		this.stage.get().setWidth(900);
+		this.stage.get().hide();
 	}
 }

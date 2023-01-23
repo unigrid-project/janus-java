@@ -49,6 +49,7 @@ import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.DataDirectory;
+import org.unigrid.janus.model.FXMLInjectable;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.signal.CloseJanus;
@@ -60,7 +61,7 @@ import org.unigrid.janus.model.service.BrowserService;
 public class SplashScreen implements Window {
 	@Inject private JanusModel janusModel;
 	@Inject private SplashScreenController splashScreenController; // TODO: Big no no. View should not see this.
-	@Inject private Stage stageSplash;
+	@Inject private FXMLInjectable<Stage> stageSplash;
 	@Inject private BrowserService window;
 
 	private FontIcon spinnerPreLoad;
@@ -72,18 +73,18 @@ public class SplashScreen implements Window {
 
 	@PostConstruct
 	private void init() {
-		stageSplash.centerOnScreen();
-		stageSplash.initStyle(StageStyle.UNDECORATED);
-		stageSplash.setResizable(false);
+		stageSplash.get().centerOnScreen();
+		stageSplash.get().initStyle(StageStyle.UNDECORATED);
+		stageSplash.get().setResizable(false);
 	}
 
 	@SneakyThrows
 	public void show() {
-		lbl = (Label) stageSplash.getScene().lookup("#verLbl");
+		lbl = (Label) stageSplash.get().getScene().lookup("#verLbl");
 		lbl.setText("version: ".concat(janusModel.getVersion()));
 
 		try {
-			stageSplash.show();
+			stageSplash.get().show();
 			startSpinner();
 		} catch (Exception e) {
 			AlertDialog.open(Alert.AlertType.ERROR, e.getMessage());
@@ -93,11 +94,11 @@ public class SplashScreen implements Window {
 	@Override
 	public void hide() {
 		stopMonitor();
-		stageSplash.close();
+		stageSplash.get().close();
 	}
 
 	public void startSpinner() {
-		spinnerPreLoad = (FontIcon) stageSplash.getScene().lookup("#spinnerPreLoad");
+		spinnerPreLoad = (FontIcon) stageSplash.get().getScene().lookup("#spinnerPreLoad");
 		spinnerPreLoad.setVisible(true);
 
 		rt = new RotateTransition(Duration.millis(50000), spinnerPreLoad);
@@ -116,12 +117,12 @@ public class SplashScreen implements Window {
 	}
 
 	private void onClose(@Observes Event<CloseJanus> closeJanus) {
-		this.stageSplash.close();
+		this.stageSplash.get().close();
 	}
 
 	public void initText() {
-		text = (Label) stageSplash.getScene().lookup("#lblText");
-		status = (Label) stageSplash.getScene().lookup("#lblStatus");
+		text = (Label) stageSplash.get().getScene().lookup("#lblText");
+		status = (Label) stageSplash.get().getScene().lookup("#lblStatus");
 
 		InputStream in = getClass().getResourceAsStream("fonts/PressStart2P-vaV7.ttf");
 		Font font = Font.loadFont(in, 10);

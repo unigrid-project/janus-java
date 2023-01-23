@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+	Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -14,24 +14,33 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.rpc.entity;
+package org.unigrid.janus.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.io.Serializable;
+import java.util.function.Consumer;
 
-@Data
-@EqualsAndHashCode(callSuper = false)
-public class GetNewAddress extends BaseResult<String> {
-	private static final String METHOD = "getnewaddress";
+public class SerializableOptional<T> implements Serializable {
+	private T value;
 
-	public static class Request extends BaseRequest {
-		public Request(String name) {
-			super(METHOD);
-			this.setParams(new Object[]{name});
-		}
+	public static <T> SerializableOptional<T> empty() {
+		return new SerializableOptional<>();
 	}
 
-	public static Request getNewAddress() {
-		return new Request("");
+	public T get() {
+		return value;
+	}
+
+	public static <T> SerializableOptional<T> of(T value) {
+		if (value == null) {
+			throw new NullPointerException("Optional should not be null - use empty()");
+		}
+
+		SerializableOptional<T> optional = new SerializableOptional<>();
+		optional.value = value;
+		return optional;
+	}
+
+	public void ifPresent(Consumer<? super T> consumer) {
+		consumer.accept(value);
 	}
 }

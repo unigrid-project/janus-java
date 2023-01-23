@@ -12,26 +12,17 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
+package org.unigrid.janus.jqwik;
 
-package org.unigrid.janus.model.rpc;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import jakarta.json.bind.JsonbConfig;
-import jakarta.json.bind.config.PropertyNamingStrategy;
-import jakarta.ws.rs.ext.ContextResolver;
-import org.unigrid.janus.model.AmountDeserializer;
-
-public class JsonConfiguration implements ContextResolver<Jsonb> {
-	private JsonbConfig getJsonbConfig() {
-		return new JsonbConfig().withPropertyNamingStrategy(
-			PropertyNamingStrategy.CASE_INSENSITIVE
-		).withDeserializers(new AmountDeserializer());
-	}
-
-	@Override
-	public Jsonb getContext(Class<?> type) {
-		return JsonbBuilder.newBuilder().withConfig(getJsonbConfig()).build();
-	}
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.PARAMETER, ElementType.TYPE_USE })
+public @interface NotNull {
+	/* Empty on purpose */
 }
+

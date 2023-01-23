@@ -42,7 +42,7 @@ public class GridnodeTxidList {
 
 		for (Gridnode g : list.getResult()) {
 			//System.out.println("gridnode txhash: " + g.getTxhash());
-			g.setAvailableTxhash(isTxidInUse(g.getTxhash()));
+			g.setAvailableTxhash(isTxidInUse(g.getTxHash()));
 			gridnodes.add(g);
 		}
 	}

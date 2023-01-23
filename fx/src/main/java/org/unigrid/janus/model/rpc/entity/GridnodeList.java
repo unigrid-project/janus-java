@@ -12,10 +12,11 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model.rpc.entity;
 
+import java.io.Serializable;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,11 +24,9 @@ import org.unigrid.janus.model.Gridnode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class GridnodeList extends BaseResult<List<GridnodeList.Result>> {
+public class GridnodeList extends BaseResult<List<Gridnode>> implements Serializable {
 	private static final String METHOD = "masternode";
 
-	// masternode <start|start-alias|start-many|stop|stop-alias|stop-many|list|list-conf|
-	// count|debug|current|winners|genkey|enforce|outputs> [passphrase]
 	public static class Request extends BaseRequest {
 		public Request(Object[] args) {
 			super(METHOD);
@@ -35,7 +34,7 @@ public class GridnodeList extends BaseResult<List<GridnodeList.Result>> {
 		}
 	}
 
-	public static class Result extends Gridnode {
-		/* Empty on purpose */
+	public static Request listConf() {
+		return new Request(new Object[]{"list-conf"});
 	}
 }

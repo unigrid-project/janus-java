@@ -37,6 +37,7 @@ public class NodeStatus {
 	public static final int TOTAL_STEPS = 3;
 
 	private String name;
+	private String username;
 	private String stepDescription = "";
 	private String ipAddress;
 	private double progress = INPROGRESS;

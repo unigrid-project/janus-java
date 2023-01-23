@@ -5,6 +5,6 @@
 		"privateKey": "privateKey-test",
 		"txhash": "a5678e1234a157139e3a8921e235b97f9c7592d91dc832b1641da63aba65eb83",
 		"outputidx": 1,
-		"status": "online"
+		"status": "ENABLED"
 	}
 ]
