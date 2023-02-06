@@ -16,22 +16,17 @@
 
 package org.unigrid.janus.controller;
 
-import com.github.javafaker.Faker;
 import com.jcraft.jsch.Channel;
-import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -42,23 +37,19 @@ import java.math.RoundingMode;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -75,18 +66,17 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.controlsfx.control.Notifications;
@@ -95,17 +85,17 @@ import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.FXMLInjectable;
 import org.unigrid.janus.model.FXMLName;
 import org.unigrid.janus.model.Gridnode;
-import org.unigrid.janus.model.GridnodeDatabase;
 import org.unigrid.janus.model.GridnodeDeployment;
 import org.unigrid.janus.model.GridnodeDeployment.Authentication;
-import org.unigrid.janus.model.NodeStatus;
+import static org.unigrid.janus.model.GridnodeDeployment.State.FIVE_POSTDEPLOYMENT;
+import static org.unigrid.janus.model.GridnodeDeployment.State.FOUR_DEPLOYED;
+import static org.unigrid.janus.model.GridnodeDeployment.State.ONE_PREDEPLOYING;
+import static org.unigrid.janus.model.GridnodeDeployment.State.THREE_DEPLOYMENT;
+import static org.unigrid.janus.model.GridnodeDeployment.State.TWO_PENDING;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.cdi.CDIUtil;
-import org.unigrid.janus.model.rpc.entity.GetNewAddress;
 import org.unigrid.janus.model.rpc.entity.GridnodeEntity;
 import org.unigrid.janus.model.rpc.entity.GridnodeList;
-import org.unigrid.janus.model.rpc.entity.SendMany;
-import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.BrowserService;
@@ -119,6 +109,7 @@ import org.unigrid.janus.view.backing.GridnodeListModel;
 import org.unigrid.janus.view.backing.GridnodeTxidList;
 import org.unigrid.janus.view.backing.NodeStatusList;
 import org.unigrid.janus.view.backing.OsxUtils;
+import org.unigrid.janus.view.component.CustomGridPane;
 
 @ApplicationScoped
 public class NodesController implements Initializable, PropertyChangeListener {
@@ -156,7 +147,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML private VBox genereateKeyPnl;
 	@FXML private VBox pnlNodeAdd;
 	@FXML private VBox pnlNodeAddProgress;
-	@FXML private GridPane pnlNodeStatus;
+	@FXML private CustomGridPane pnlNodeStatus;
 	@FXML private TableView tblGridnodes;
 	@FXML private TableView tblGridnodeKeys;
 	@FXML private TableColumn tblTxInUse;
@@ -186,9 +177,10 @@ public class NodesController implements Initializable, PropertyChangeListener {
 			System.out.println("g.get: " + g.get());
 		}*/
 		CDIUtil.instantiate(nodeEntry.get());
-		System.out.println("userdata:" + nodeEntry.get().get().getUserData());
+		//System.out.println("userdata:" + nodeEntry.get().get().getUserData());
 		initializeGridnodeList();
 		gridnodeService.start();
+		getNodeList();
 		setupNodeList();
 		wallet.addPropertyChangeListener(this);
 
@@ -256,13 +248,13 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	private void setupNodeList() {
 		try {
-			tblGridnodes.setItems(nodes.getGridnodes());
-			colNodeStatus.setCellValueFactory(
+			setItems(nodes.getGridnodes());
+			/*colNodeStatus.setCellValueFactory(
 				new PropertyValueFactory<Gridnode, String>("status"));
 			colNodeAlias.setCellValueFactory(
 				new PropertyValueFactory<Gridnode, String>("alias"));
 			colNodeAddress.setCellValueFactory(
-				new PropertyValueFactory<Gridnode, String>("address"));
+				new PropertyValueFactory<Gridnode, String>("address"));*/
 
 			colNodeTxhash.setCellValueFactory(cell -> {
 				Gridnode gridnode = ((TableColumn.CellDataFeatures<Gridnode, Hyperlink>) cell).getValue();
@@ -355,22 +347,122 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	@FXML
 	private void onSetupClicked(MouseEvent event) {
+		/*
+		GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
+		GridnodeList resultNew = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
+		List<Gridnode> grr = new ArrayList<>();
+		
+		for (Gridnode g : result.getResult()) {
+			boolean exist = true;
+			for (Gridnode n : resultNew.getResult()) {
+				if (g.getAlias().equals(n.getAlias())) {
+					exist &= false;
+				}
+			}if (exist) {
+				grr.add(g);
+			}
+		}
+		System.out.println("");System.out.println("");
+		System.out.println("ggr: " + grr);
+		System.out.println("");System.out.println("");
+		resultNew.getResult().removeAll(result.getResult());
+		System.out.println("res: " + resultNew.getResult());
+		GridnodeList resulttt = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
+		GridnodeList resultttNew = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
+		Gridnode g = new Gridnode();
+		g.setAlias("test");
+		resultttNew.getResult().add(g);
+		resultttNew.getResult().removeAll(resulttt.getResult());
+		System.out.println("res: " + resultttNew.getResult());
+		/*
+		for (Node n : nodeEntry.get().get().getChildren()) {
+			System.out.println("n.class: " + n.getClass());
+			System.out.println("n.id: " + n.getId());
+		}
+
+		StackPane statusStackPane = (StackPane) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryStackPaneStatus")).findFirst().get();
+		FlowPane flowPane = (FlowPane) statusStackPane.getChildren().stream().filter((n)-> n.getId().equals("entryFlowPane")).findFirst().get();
+		TextArea ta = (TextArea) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryOutputTa")).findFirst().get();
+		Button btn = (Button) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryOutputBtn")).findFirst().get();
+
+
+		final FontIcon fontIconRight = new FontIcon("fas-arrow-right");
+		fontIconRight.setIconColor(Paint.valueOf("#FFFFFF"));
+		btn.setGraphic(fontIconRight);
+		ProgressBar progress = (ProgressBar) flowPane.getChildren().stream().filter((n)-> n.getId().equals("entryProgressBar")).findFirst().get();
+		Label status = (Label) statusStackPane.getChildren().stream().filter((n)-> n.getId().equals("entryStatus")).findFirst().get();
+		Label alias = (Label) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryAlias")).findFirst().get();
+		Label address = (Label) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryAddress")).findFirst().get();
+		Label privateKey = (Label) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryPrivateKey")).findFirst().get();
+
+		// TEST
+		
+		System.out.println("::::::::::::TEST:::::::::::::");
+		System.out.println(":::::::::::::::::::::::::");
+		flowPane.setVisible(true);
+		progress.setVisible(true);
+		progress.setProgress(0.22);
+		status.setVisible(false);
+		alias.setText("myUsername");
+
+		address.setText("123.0213.023.22:333");
+	
+		privateKey.setText("TestOfPrivateKeysss");
+		pnlNodeStatus.addChirldren(statusStackPane, alias, address, btn, privateKey, ta);
+		//System.out.println("p88 children As Row: "+pnlNodeStatus.getChildrenAsRow("TestOfPrivateKey"));
+		System.out.println("p99 children: " + pnlNodeStatus.getChildren("TestOfPrivateKeysss","entryOutputTa"));
+
+		TextArea textArea = (TextArea) pnlNodeStatus.getChildren("TestOfPrivateKeysss", "entryOutputTa");
+		if (textArea != null) {
+			System.out.println("TextArea:" + textArea);
+			textArea.setVisible(true);
+			textArea.setText("text area output here!");
+
+		}*/
+		//pnlNodeStatus.removeChildren("TestOfPrivateKey");
+		/* Test 
+		FlowPane flowPane = (FlowPane) statusStackPane.getChildren().stream().filter((n)-> n.getId().equals("entryFlowPane")).findFirst().get();
+		ProgressBar progress2 = (ProgressBar) flowPane.getChildren().stream().filter((n)-> n.getId().equals("entryProgressBar")).findFirst().get();
+		progress2.setProgress(0.22);
+
+		Label alias2 = (Label) nodeEntry.get().get().getChildren().get(GridnodeDeployment.Authentication.ALIAS_NODE);
+		alias2.setText("22myUsername");
+
+		Label address2 = (Label) nodeEntry.get().get().getChildren().get(GridnodeDeployment.Authentication.ADDRESS_NODE
+		);
+		address2.setText("222.0213.023.22:333");
+
+		TextArea ta2 = (TextArea) nodeEntry.get().get().getChildren().get(
+			GridnodeDeployment.Authentication.OUTPUT_TA_NODE);
+
+		Button btn2 = (Button) nodeEntry.get().get().getChildren().get(
+			GridnodeDeployment.Authentication.OUTPUT_BTN_NODE);
+
+		Label privateKey2 = (Label) nodeEntry.get().get().getChildren().get(
+			GridnodeDeployment.Authentication.PRIVATEKEY_NODE);
+		privateKey2.setText("22TestOfPrivateKey");
+		pnlNodeStatus.addChirldren(progress2, alias2, address2, btn2, privateKey2, ta2);
+		
+		System.out.println("Verify is true / same");
+		System.out.println("TEST: " + pnlNodeStatus.getChildrenAsRows().get(GridnodeDeployment.Authentication.STATUS_NODE));		
+//System.out.println(((ProgressBar)pnlNodeStatus.getChildrenAsRows().get(GridnodeDeployment.Authentication.STATUS_NODE)).getProgress() == progress.getProgress());
+
+		System.out.println("size:" + pnlNodeStatus.getChildrenAsRows().size());
+		System.out.println("list: " + pnlNodeStatus.getChildrenAsRows());
+		Gridnode gridnode = new Gridnode();
+		InetSocketAddress address3 = new InetSocketAddress("101.21.321.31",222);
+		
+		final GridnodeEntity gridnodeAddConf = rpc.call(GridnodeEntity.addConf("mYaliased_2",
+			address3, "privatEKey","segewgewgewg32g32gg32", 2), GridnodeEntity.class);
+		
+		*/
+
 		genereateKeyPnl.setVisible(true);
 		loadAvailableInputsForGridnode();
 	}
 
 	@FXML
 	private void onNodeAddClicked(MouseEvent event) {
-		/* Test 
-		
-		GridnodeList result = rpc.call(new GridnodeList.Request(new Object[]{"list-conf"}), GridnodeList.class);
-		for (Object g : result.getResult()){
-			System.out.println("result gridnode: " + g);
-		}
-		final GridnodeList confList = rpc.call(GridnodeList.listConf(), GridnodeList.class);
-		for (Gridnode g : confList.getResult()){
-			System.out.println("Conflist gridnode privateKey: " + g.getPrivateKey());
-		} */
 		pnlNodeAdd.setVisible(true);
 	}
 
@@ -436,11 +528,6 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		tfNodeAddAddress.setText("");
 		tfNodeAddUsername.setText("");
 		tfNodeAddPassword.setText("");
-	}
-
-	@FXML
-	private void onCloseProgressClicked(MouseEvent event) {
-		pnlNodeAddProgress.setVisible(false);
 	}
 
 	@FXML
@@ -535,263 +622,201 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 		gridnodeService.deploy(auth, node);
 
-		pnlNodeAddProgress.setVisible(true);
 		tfNodeAddAddress.setText("");
 		tfNodeAddUsername.setText("");
 		tfNodeAddPassword.setText("");
 		tfNodeAdd.setText("0");
+		pnlNodeAdd.setVisible(false);
 	}
 
 	private void eventNodeUpdate(@Observes NodeUpdate nodeUpdate) {
-		switch (nodeUpdate.getGridnode().getValue()) {
-			case ONE_PREDEPLOYING:
-				gridPaneAddNode(nodeUpdate.getGridnode().getKey());
-				break;
-			case THREE_DEPLOYMENT:
-				//gridPaneUpdateNodes();
-				break;
-			case FOUR_DEPLOYED:
-				gridPaneRemoveNode(nodeUpdate.getGridnode().getKey());
-				break;
-			default:
-				break;
+		if (nodeUpdate.getGridnode() != null) {
+			switch (nodeUpdate.getGridnode().getValue()) {
+				case ONE_PREDEPLOYING:
+					gridPaneAddNode(nodeUpdate.getGridnode().getKey());
+					break;
+				case TWO_PENDING:
+					//gridPaneUpdateNodes(nodeUpdate.getGridnode().getKey(), nodeUpdate.getGridnode().getValue());
+					break;
+				case THREE_DEPLOYMENT:
+					gridPaneUpdateNodes(
+						nodeUpdate.getGridnode().getKey(),
+						nodeUpdate.getStepName(),
+						nodeUpdate.getStep(),
+						nodeUpdate.getProgress()
+					);
+					break;
+				case FOUR_DEPLOYED:
+					gridPaneRemoveNode(nodeUpdate.getGridnode().getKey());
+					break;
+				default:
+					break;
+			}
+		} else if (nodeUpdate.getConfList() != null) {
+			gridPaneUpdateConfList(nodeUpdate.getConfList());
 		}
 	}
 
 	private void gridPaneAddNode(Gridnode gridnode) {
 		System.out.println("---gridPaneAddNode---");
-		final GridnodeDeployment deployment = gridnodeService.getGridnodeDatabase().getParent(
-			gridnode
-		).get();
+		BigDecimal maxNodes = wallet.getBalance();
+		System.out.println("----balances: " + maxNodes);
 		Platform.runLater(() -> {
-			int row = pnlNodeStatus.getRowCount();
+			StackPane statusStackPane = (StackPane) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryStackPaneStatus")).findFirst().get();
+			FlowPane flowPane = (FlowPane) statusStackPane.getChildren().stream().filter((n)-> n.getId().equals("entryFlowPane")).findFirst().get();
+			TextArea ta = (TextArea) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryOutputTa")).findFirst().get();
+			Button btn = (Button) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryOutputBtn")).findFirst().get();
 
-			Label username = (Label) nodeEntry.get().get().getChildren().get(
-				GridnodeDeployment.Authentication.USERNAME_NODE);
-			username.setText(deployment.getAuthentication().get().getUsername());
-			Label address = (Label) nodeEntry.get().get().getChildren().get(
-				GridnodeDeployment.Authentication.ADDRESS_NODE
-			);
-			address.setText(String.format("%s:%s", 
-				deployment.getAuthentication().get().getAddress().getHostString(),
-				deployment.getAuthentication().get().getAddress().getPort()
-			));
+			//ProgressBar progress = (ProgressBar) flowPane.getChildren().stream().filter((n)-> n.getId().equals("entryProgressBar")).findFirst().get();
+			//FontIcon fontIcon = (FontIcon) flowPane.getChildren().stream().filter((n)-> n.getId().equals("entryStatusFontIcon")).findFirst().get();
 
-			ProgressBar progress = (ProgressBar) nodeEntry.get().get().getChildren().get(
-				GridnodeDeployment.Authentication.PROGRESS_NODE);
-			progress.setProgress(0);
+			Label status = (Label) statusStackPane.getChildren().stream().filter((n)-> n.getId().equals("entryStatus")).findFirst().get();
+			Label alias = (Label) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryAlias")).findFirst().get();
+			Label address = (Label) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryAddress")).findFirst().get();
+			Label privateKey = (Label) nodeEntry.get().get().getChildren().stream().filter((n)-> n.getId().equals("entryPrivateKey")).findFirst().get();
+			alias.setText("");
 
-			TextArea ta = (TextArea) nodeEntry.get().get().getChildren().get(
-				GridnodeDeployment.Authentication.OUTPUT_TA_NODE);
+			privateKey.setText(gridnode.getPrivateKey());
 
-			Button btn = (Button) nodeEntry.get().get().getChildren().get(
-				GridnodeDeployment.Authentication.OUTPUT_BTN_NODE);
+			if (gridnode.isGridnodeDeployed()) {
+				flowPane.setVisible(false);
+				status.setVisible(true);
+				status.setText(gridnode.getStatus().name());
+				alias.setText(gridnode.getAlias());
+				address.setText(gridnode.getAddress());
+				privateKey.setText(gridnode.getPrivateKey());
+				pnlNodeStatus.addChirldren(statusStackPane, alias, address, privateKey);
+			} else {
+				final GridnodeDeployment deployment = gridnodeService.getGridnodeDatabase().getParent(
+					gridnode
+				).get();
+				flowPane.setVisible(true);
+				status.setVisible(false);
+				address.setText(String.format("%s:%s", 
+					deployment.getAuthentication().get().getAddress().getHostString(),
+					deployment.getAuthentication().get().getAddress().getPort()
+				));
+				final FontIcon fontIconRight = new FontIcon("fas-arrow-right");
+				fontIconRight.setIconColor(Paint.valueOf("#FFFFFF"));
+				btn.setGraphic(fontIconRight);
+				final FontIcon fontIconDown = new FontIcon("fas-arrow-down");
+				fontIconDown.setIconColor(Paint.valueOf("#FFFFFF"));
+				btn.setOnAction(e -> {
+					ta.setMinHeight(ta.isVisible() == true ? 0 : 100);
+					ta.setMaxHeight(ta.isVisible() == true ? 0 : Double.MAX_VALUE);
+					ta.setVisible(ta.isVisible() == true ? false : true);
+					btn.setGraphic(ta.isVisible() == true ? fontIconDown : fontIconRight);
+				});
+				pnlNodeStatus.addChirldren(statusStackPane, alias, address, btn, privateKey, ta);
+			}
+		});
+	}
 
-			final FontIcon fontIcon = new FontIcon("fas-arrow-right");
-			fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+	private void gridPaneUpdateNodes(Gridnode gridnode, String description, int step, double progressValue) {
+		Platform.runLater(() -> {
+			TextArea ta = (TextArea) pnlNodeStatus.getChildren(gridnode.getPrivateKey(), "entryOutputTa");
+			if (ta != null) {
+				ta.setText(gridnode.getResponseAsString());
+				ta.setScrollTop(Double.MAX_VALUE);
 
-			btn.setGraphic(fontIcon);
-			btn.setOnAction(e -> {
-				ta.setVisible(ta.isVisible() == true ? false : true);
-				btn.setGraphic(new FontIcon(ta.isVisible() == true ? "fas-arrow-down" : "fas-arrow-right"));
-			});
+				Label alias = (Label) pnlNodeStatus.getChildren(gridnode.getPrivateKey(), "entryAlias");
+				if (alias.getText().isEmpty() && gridnode.getAlias() != null) {
+					alias.setText(gridnode.getAlias());
+				}
+				if (!description.isEmpty()) {
+					StackPane statusStackPane = (StackPane) pnlNodeStatus.getChildren(gridnode.getPrivateKey(),"entryStackPaneStatus");
+					FlowPane flowPane = (FlowPane) statusStackPane.getChildren().stream().filter((n) -> n.getId().equals("entryFlowPane")).findFirst().get();
+					Button btn = (Button) flowPane.getChildren().stream().filter((n) -> n.getId().equals("entryStatusBtn")).findFirst().get();
+					FontIcon fontIcon = (FontIcon) btn.getGraphic();
+					Tooltip tltp = btn.getTooltip();
+					ProgressBar progress = (ProgressBar) flowPane.getChildren().stream().filter((n) -> n.getId().equals("entryProgressBar")).findFirst().get();
+					progress.setProgress(progressValue);
+					if (description.equalsIgnoreCase("Copy volume")
+						|| description.equalsIgnoreCase("Sync Unigrid")) {
 
-			pnlNodeStatus.addRow(row, username, address, progress, btn);
-			pnlNodeStatus.addRow(row + 1, ta);
+						fontIcon.setIconLiteral("fas-clone");
+						fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+						tltp.setText("Step " + step + "/2: " + description);
+						btn.setGraphic(fontIcon);
+						btn.setTooltip(tltp);
+					} else if (description.equalsIgnoreCase("Loading Backend")) {
+						fontIcon.setIconLiteral("fas-spinner");
+						fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+						btn.setGraphic(fontIcon);
+						tltp.setText("Step " + step + "/2: " + description);
+						btn.setTooltip(tltp);
+					} else if (description.equalsIgnoreCase("Node Is Deployed!")
+						|| (description.equalsIgnoreCase("Loading Backend")
+						&& progress.getProgress() == 1.0)) {
+						fontIcon.setIconLiteral("fas-check");
+						fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+						btn.setGraphic(fontIcon);
+						tltp.setText("Step " + step + "/2: " + description);
+						btn.setTooltip(tltp);
+					}
+				}
+			}
 		});
 	}
 
 	private void gridPaneRemoveNode(Gridnode gridnode) {
+		Platform.runLater(() -> {
+			pnlNodeStatus.removeChildren(gridnode.getPrivateKey());
+			//nodes.getGridnodes().add(gridnode);
+		});
 	}
 
-	private void gridPaneUpdateNodes() {
-		/*int i = 0;
-		for (Pair<Gridnode, GridnodeDeployment.State> g : gridnodeService.getGridnodeDatabase().getIndividualGridnodesWithState()) {
-			for (Node n :pnlNodeStatus.getChildren()) {
-				i++;
-				if (n instanceof Label) {
-					Label l = (Label) n;
-					if (!l.equals("Hidden Title") && i % 6 == 0) {
-						g.getKey().getPrivateKey().equals(l.getText());
-					}
-					//name
-					if (i % 6 == 1) {
-						//g.getKey().getAlias().equals(l.getText());
-					}
-					if (i % 6 == 2) {
-						g.getKey().getAlias().equals(l.getText());
-					}
-					//progress
-					if (i % 6 == 3) {
-						//g.getKey().getAlias().equals(l.getText());
-					}
-					//Output button
-					if (i % 6 == 4) {
-						//g.getKey().getAlias().equals(l.getText());
-					}
-					//Output text area
-					if (i % 6 == 5) {
-						//g.getKey().getAlias().equals(l.getText());
-					}
-				}
-			}
+	private void gridPaneUpdateConfList(List<Gridnode> gridnodes) {
+		System.out.println("  Gridnodes: ");
+		System.out.println("  nodes.getGridnodes(): " + nodes.getGridnodes());
+		System.out.println("  Gridnodes: " + nodes.getGridnodes());
+		System.out.println("  Gridnodes: ");
+
+		/*if (nodes.getGridnodes().indexOf(gridnode) == -1) {
+			nodes.getGridnodes().add(gridnode);
 		}*/
+		ObservableList<Gridnode> newConfList = FXCollections.observableArrayList();
+		ObservableList<Gridnode> removedConfList = FXCollections.observableArrayList();
+		for (Gridnode g : gridnodes) {
+			if (g.isGridnodeDeployed()) {
+				boolean exist = true;
+				for (ObservableList<Node> nodeList : pnlNodeStatus.getChildrenAsRows()) {
+					Label privateKeyLabel = (Label) nodeList.stream().filter((n)-> n.getId().equals("entryPrivateKey")).findFirst().get();
+
+					if (privateKeyLabel.getText().equals(g.getPrivateKey())) {
+						exist &= false;
+					}
+				}
+				if (exist) {
+					removedConfList.add(g);
+				}
+			}
+		}
+		for (Gridnode n : removedConfList) {
+			gridPaneRemoveNode(n);
+		}
+		for (Gridnode n : gridnodes) {
+			if (n.isGridnodeDeployed()) {
+				boolean exist = true;
+				for (Gridnode g : nodes.getGridnodes()) {
+					if (n.getPrivateKey().equals(g.getPrivateKey()) && n.
+						getOutputIndex() == g.getOutputIndex()) {
+						exist &= false;
+					}
+				}
+				if (exist) {
+					newConfList.add(n);
+				}
+			}
+		}
+		for (Gridnode n : newConfList) {
+			gridPaneAddNode(n);
+		}
 		
-			/*final GridnodeDeployment deployment = gridnodeDatabase.getParent(
-				gridnode
-			).get();
-			final Button btn = new Button("");
-			final FontIcon fontIcon = new FontIcon("fas-arrow-right");
-			fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-			btn.setGraphic(fontIcon);
-			btn.setOnAction(e -> {
-				ta.setVisible(ta.isVisible() == true ? false : true);
-				btn.setGraphic(new FontIcon(ta.isVisible() == true ? "fas-arrow-down" : "fas-arrow-right"));
-			});
-
-			pnlNodeStatus.addRow(0,
-				new Label(deployment.getAuthentication().get().getUsername()),
-				new Label(deployment.getAuthentication().get().getIpaddress()),
-				new ProgressBar(GridnodeDeployment.State.PENDING),
-				btn
-			);*/
-			
-	}
-
-	private void getProgressList() {
-		debug.log("Loading progress list");
-
-		pnlNodeStatus.setVisible(nodeStatusList.getSource().size() != 0);
-		pnlNodeStatus.getChildren().clear();
-		pnlNodeStatus.addRow(0, 
-			new Label("Name"),
-			new Label("Address"),
-			new Label("Progress"),
-			new Label("Output")
-			);
-		/*int row = 0;
-		pnlNodeStatus.add(new Label("Name"), 0, row, 1, 1);
-		pnlNodeStatus.add(new Label("Address"), 1, row, 1, 1);
-		pnlNodeStatus.add(new Label("Progress"), 2, row, 1, 1);
-		pnlNodeStatus.add(new Label("Output"), 3, row, 1, 1);
-		row++;*/
-
-		for (NodeStatus progress : nodeStatusList.getSource()) {
-			Button btn = new Button("");
-			String iconCode = progress.isShowOutput() ? "fas-arrow-down" : "fas-arrow-right";
-			FontIcon fontIcon = new FontIcon(iconCode);
-			fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-			btn.setGraphic(fontIcon);
-			btn.setOnAction(e -> {
-				progress.setShowOutput(!progress.isShowOutput());
-				getProgressList();
-			});
-			pnlNodeStatus.addRow(0,
-				new Label(progress.getFullDescription()),
-				new Label(progress.getIpAddress()),
-				new ProgressBar(progress.getProgress()),
-				btn
-			);
-			/*pnlNodeStatus.add(new Label(progress.getFullDescription()), 0, row, 1, 1);
-			pnlNodeStatus.add(new Label(progress.getIpAddress()), 1, row, 1, 1);
-			pnlNodeStatus.add(new ProgressBar(progress.getProgress()), 2, row, 1, 1);*/
-
-			//pnlNodeStatus.getChildren().get(0).setL
-			
-			/*Button btn = new Button("");
-			String iconCode = progress.isShowOutput() ? "fas-arrow-down" : "fas-arrow-right";
-			FontIcon fontIcon = new FontIcon(iconCode);
-			fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-			btn.setGraphic(fontIcon);
-			btn.setOnAction(e -> {
-				progress.setShowOutput(!progress.isShowOutput());
-				getProgressList();
-			});
-			pnlNodeStatus.add(btn, 3, row, 1, 1);
-			row++;*/
-
-			TextArea ta = new TextArea();
-			ta.setText(progress.getOutputAsString());
-			ta.positionCaret(progress.getOutputAsString().length());
-			/*ta.setEditable(false);
-			ta.setWrapText(true);
-			ta.setMinHeight(NodeStatus.OUTPUT_HEIGHT);
-			ta.setMinWidth(NodeStatus.OUTPUT_WIDTH);*/
-			ta.setVisible(progress.isShowOutput());
-			ta.setManaged(progress.isShowOutput());
-			pnlNodeStatus.addRow(0,ta);
-			/*pnlNodeStatus.add(ta, 0, row, NodeStatus.GRIDPANE_MAX_COLUMN, 1);
-			row++;*/
-		}
-	}
-
-	@RequiredArgsConstructor
-	public static class InterceptingOutputStream extends ByteArrayOutputStream {
-		private final Consumer<String> consumer;
-
-		@Override
-		public synchronized void write(byte[] b, int off, int len) {
-			for (String line : new String(b, off, len).split("\n")) {
-				consumer.accept(line);
-			}
-		}
-	}
-
-	public void checkStepAndProgressFromOutput(NodeStatus status, String output) {
-		String stepOutputs[] = new String[]{"", "Unigrid sync status", "Loading the Unigrid backend"};
-		String stepDescription[] = new String[]{"Copy Volume", "Sync Unigrid", "Loading Backend"};
-		double progress = NodeStatus.INPROGRESS;
-
-		String normalSpacedString = StringUtils.normalizeSpace(output);
-		String stringRegex = "[0-9]+\\.[0-9]+\\w+ ([0-9]+)% [0-9]+\\.[0-9]+\\w+\\/\\w+ [0-9]+:[0-9]+:[0-9]+";
-
-		Pattern patternVolume = Pattern.compile(stringRegex);
-		Matcher matcher = patternVolume.matcher(normalSpacedString);
-
-		if (matcher.find()) {
-			status.setStep(1);
-			status.setStepDescription(stepDescription[0]);
-
-			try {
-				if (!matcher.group(1).equals("")) {
-					progress = Integer.parseInt(matcher.group(1)) / 100.0;
-					status.setProgress(progress);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		for (int i = 1; i < stepOutputs.length; i++) {
-			if (output.contains(stepOutputs[i])) {
-				status.setStep(i + 1);
-				status.setStepDescription(stepDescription[i]);
-				if (i == 1) {
-					String[] split = output.split("\\.");
-					String clean = split[split.length - 2].replaceAll("\\D+", "");
-
-					try {
-						if (!clean.equals("")) {
-							progress = Integer.parseInt(clean) / 100.0;
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				} else if (i == 2) {
-					String clean = output.replaceAll("\\D+", "");
-
-					try {
-						if (!clean.equals("")) {
-							progress = ((Integer.parseInt(clean) + 1) * 3.34) / 100;
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-
-				status.setProgress(progress);
-			}
-		}
+		System.out.println("  Gridnodes: ");
+		System.out.println("  nodes.getGridnodes(): " + nodes.getGridnodes());
+		System.out.println("  Gridnodes: " + gridnodes);
+		System.out.println("  Gridnodes: ");
 	}
 
 	private void onErrorMessage(String message) {
@@ -880,13 +905,18 @@ public class NodesController implements Initializable, PropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(nodes.GRIDNODE_LIST)) {
-			tblGridnodes.setItems(nodes.getGridnodes());
+			//pnlNodeStatus.setItems(nodes.getGridnodes());
 		}
 
 		// after wallet is done loading, load the gridnodes.
 		if (event.getPropertyName().equals(wallet.STATUS_PROPERTY)) {
 			debug.log("loading gridnode list");
 			getNodeList();
+		}
+	}
+	public void setItems(ObservableList<Gridnode> gridnodes) {
+		for (Gridnode gridnode : gridnodes) {
+			gridPaneAddNode(gridnode);
 		}
 	}
 

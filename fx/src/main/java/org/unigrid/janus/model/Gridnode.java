@@ -18,16 +18,21 @@ package org.unigrid.janus.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Queue;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Data @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Gridnode implements Serializable, Comparable<Gridnode>, ObservableCollectionMember {
+	private static final int MAX_OUTPUT_SIZE = 65535;
 	private String alias;
 	private String address;
 	private String privateKey;
@@ -35,6 +40,7 @@ public class Gridnode implements Serializable, Comparable<Gridnode>, ObservableC
 	private String txHash;
 	private Status status;
 	private boolean availableTxhash;
+	private transient Queue<Character> response = new CircularFifoQueue<Character>(MAX_OUTPUT_SIZE);
 
 	public void setOutput(Output output) {
 		this.outputIndex = output.getOutputidx();
@@ -47,6 +53,18 @@ public class Gridnode implements Serializable, Comparable<Gridnode>, ObservableC
 
 	@Override
 	public int compareTo(Gridnode n) {
+		if (this.address == null) {
+			if (this.alias == null) {
+				return 0;
+			}
+			if (n.alias == null) {
+				return 0;
+			}
+			return this.alias.compareTo(n.alias);
+		}
+		if (n.address == null) {
+			return 0;
+		}
 		final int addressCompare = this.address.compareTo(n.address);
 
 		if (addressCompare == 0) {
@@ -67,7 +85,11 @@ public class Gridnode implements Serializable, Comparable<Gridnode>, ObservableC
 	}
 	
 	public boolean isGridnodeDeployed() {
-		return alias != null && address != null && privateKey != null && txHash != null ? true : false;
+		return address != null && !address.isEmpty()
+			&& alias != null && !alias.isEmpty()
+			&& privateKey != null && !privateKey.isEmpty()
+			&& txHash != null && !txHash.isEmpty()
+			? true : false;
 	}
 
 	@Override
@@ -82,6 +104,9 @@ public class Gridnode implements Serializable, Comparable<Gridnode>, ObservableC
 			.append(availableTxhash).build();
 	}
 
+	public void responseAddLine(String line) {
+		response.addAll(line.chars().mapToObj(c -> (char) c).collect(Collectors.toList()));
+	}
 
 	@Override
 	public int hashCode() {
@@ -91,5 +116,9 @@ public class Gridnode implements Serializable, Comparable<Gridnode>, ObservableC
 	@Override
 	public boolean equals(Object obj) {
 		return super.equals(obj);
+	}
+
+	public String getResponseAsString() {
+		return StringUtils.join(response.toArray(), null);
 	}
 }

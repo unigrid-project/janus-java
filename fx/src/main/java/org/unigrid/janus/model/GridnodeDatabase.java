@@ -82,7 +82,7 @@ public class GridnodeDatabase implements Serializable {
 
 	public Optional<GridnodeDeployment> getNewlyDeployed() {
 		for (GridnodeDeployment gd : gridnodeDeployments) {
-			if (gd.isNewlyDeployed()) {
+			if (gd.getCount() != 0){
 				return Optional.of(gd);
 			}
 		}
@@ -120,6 +120,22 @@ public class GridnodeDatabase implements Serializable {
 	public boolean isDeployingGridnode(GridnodeDeployment gridnodeDeployment) {
 		return gridnodeDeployment.getGridnodes().values().stream().filter(n -> n.equals(State.THREE_DEPLOYMENT)).
 			count() != 0;
+	}
+	public Optional<GridnodeDeployment> getGridnodeDeployment(GridnodeDeployment gridnodeDeployment) {
+		Optional<GridnodeDeployment> grids = gridnodeDeployments.stream().filter(n->n.getAuthentication().get().equals(gridnodeDeployment.getAuthentication().get())).findFirst();
+		grids.ifPresent(g -> {
+			g.getAuthentication().ifPresent(a -> {
+				System.out.println("gridds:auth: " + grids.get().getAuthentication().get());
+				System.out.println("gridds:count: " + grids.get().getCount());
+
+			});
+		});
+		
+		for (GridnodeDeployment g : gridnodeDeployments) {
+			System.out.println("::::zzz.ggg:getcount " + g.getCount());
+			System.out.println("::::zzz.ggg:auth " + g.getAuthentication().get());
+		}
+		return grids;
 	}
 
 	public List<Gridnode> getIndividualGridnodes() {

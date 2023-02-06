@@ -20,9 +20,11 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
 import java.util.function.Consumer;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.unigrid.janus.controller.NodesController;
 
 @Data
@@ -42,11 +44,24 @@ public class SSHConnection {
 
 		return sshService;
 	}
+
 	public void send(String command, String commandType, Consumer<String> consumer) throws JSchException {
 		channel = (ChannelExec) session.openChannel(commandType);
 		channel.setCommand(command);
-		channel.setOutputStream(new NodesController.InterceptingOutputStream(consumer));
+		channel.setOutputStream(new InterceptingOutputStream(consumer));
 		channel.connect();
+	}
+
+	@RequiredArgsConstructor
+	public class InterceptingOutputStream extends ByteArrayOutputStream {
+		private final Consumer<String> consumer;
+
+		@Override
+		public synchronized void write(byte[] b, int off, int len) {
+			for (String line : new String(b, off, len).split("\n")) {
+				consumer.accept(line);
+			}
+		}
 	}
 
 	public void close() {

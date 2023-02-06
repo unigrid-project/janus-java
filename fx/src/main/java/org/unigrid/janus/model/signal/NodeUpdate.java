@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model.signal;
 
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,7 +25,11 @@ import org.unigrid.janus.model.GridnodeDeployment.State;
 
 @Data @Builder
 public class NodeUpdate {
+	private List<Gridnode> confList;
 	private Pair<Gridnode, State> gridnode;
+	private String stepName;
+	private int  step;
+	private double progress;
 
 	public static class NodeUpdateBuilder {
 		public NodeUpdateBuilder pair(Gridnode gridnode, State state) {

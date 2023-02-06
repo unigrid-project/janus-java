@@ -39,6 +39,14 @@ public class GridnodeEntity extends BaseResult<String> {
 		return new Request((new Object[]{"genkey"}));
 	}
 
+	public static Request startAlias(String lockWalletOnFinished, String alias) {
+
+		return new Request((new Object[]{"start-alias",
+			lockWalletOnFinished,
+			alias
+		}));
+	}
+
 	public static Request addConf(String alias, InetSocketAddress address, String privateKey, String txHash,
 		int outputIdx) {
 

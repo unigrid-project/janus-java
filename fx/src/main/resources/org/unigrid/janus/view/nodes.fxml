@@ -13,7 +13,6 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
@@ -21,6 +20,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import org.unigrid.janus.view.component.CustomGridPane?>
 <?import org.unigrid.janus.view.component.PTableColumn?>
 <?import org.unigrid.janus.view.component.WindowBarButton?>
 
@@ -127,7 +127,37 @@
                            </VBox.margin></TextArea>
                      </children>
                   </VBox>
-                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" StackPane.alignment="CENTER">
+                  <ScrollPane fx:id="pnlScrollNodeStatus" fitToWidth="true" hbarPolicy="NEVER">
+                     <content>
+                        <CustomGridPane fx:id="pnlNodeStatus" hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="200.0" minWidth="450.0" vgap="5.0">
+                          <columnConstraints>
+                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="75.0" percentWidth="30.0" />
+                              <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="75.0" percentWidth="30.0" />
+                              <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="50.0" percentWidth="20.0" />
+                              <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" minWidth="50.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Status" />
+                              <Label text="Alias" CustomGridPane.columnIndex="1" />
+                              <Label text="Address" CustomGridPane.columnIndex="2" />
+                              <Label text="Output" CustomGridPane.columnIndex="3" />
+                           </children>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <padding>
+                              <Insets bottom="50.0" left="55.0" right="55.0" top="50.0" />
+                           </padding>
+                        </CustomGridPane>
+                     </content>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </ScrollPane>
+                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" nodeOrientation="LEFT_TO_RIGHT" visible="false" StackPane.alignment="CENTER">
                      <children>
                         <TableView fx:id="tblGridnodes" VBox.vgrow="ALWAYS">
                            <columns>
@@ -339,17 +369,6 @@
                         <Insets right="20.0" />
                      </FlowPane.margin>
                   </Button>
-                  <Button fx:id="btnNodeAddProgress" mnemonicParsing="false" onMouseClicked="#onNodeProgressClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Status">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                     <padding>
-                        <Insets bottom="3.0" top="3.0" />
-                     </padding>
-                     <FlowPane.margin>
-                        <Insets right="20.0" />
-                     </FlowPane.margin>
-                  </Button>
                   <Button fx:id="btnNodeAddClose" mnemonicParsing="false" onMouseClicked="#onCloseGridnodeAddClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Close">
                      <font>
                         <Font size="14.0" />
@@ -364,77 +383,6 @@
                </children>
                <VBox.margin>
                   <Insets bottom="20.0" top="10.0" />
-               </VBox.margin>
-            </FlowPane>
-         </children>
-      </VBox>
-      <VBox fx:id="pnlNodeAddProgress" layoutX="10.0" layoutY="10.0" maxWidth="1.7976931348623157E308" prefHeight="364.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <children>
-            <FlowPane alignment="CENTER" columnHalignment="CENTER" VBox.vgrow="ALWAYS">
-               <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" text="Setup Status" textAlignment="CENTER" textFill="#ff8b2d">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                     <padding>
-                        <Insets bottom="20.0" />
-                     </padding>
-                  </Label>
-               </children>
-               <VBox.margin>
-                  <Insets top="20.0" />
-               </VBox.margin>
-            </FlowPane>
-            <StackPane VBox.vgrow="ALWAYS">
-               <children>
-                  <ScrollPane fx:id="pnlScrollNodeStatus" fitToWidth="true" hbarPolicy="NEVER">
-                     <content>
-                        <GridPane fx:id="pnlNodeStatus" hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="200.0" minWidth="450.0" vgap="5.0">
-                          <columnConstraints>
-                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="75.0" percentWidth="30.0" />
-                              <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="75.0" percentWidth="30.0" />
-                              <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="50.0" percentWidth="20.0" />
-                              <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" minWidth="50.0" />
-                          </columnConstraints>
-                          <rowConstraints>
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-                          </rowConstraints>
-                           <children>
-                              <Label text="Name" />
-                              <Label text="Address" GridPane.columnIndex="1" />
-                              <Label text="Progress" GridPane.columnIndex="2" />
-                              <Label text="Output" GridPane.columnIndex="3" />
-                           </children>
-                           <opaqueInsets>
-                              <Insets />
-                           </opaqueInsets>
-                           <padding>
-                              <Insets bottom="50.0" left="55.0" right="55.0" top="50.0" />
-                           </padding>
-                        </GridPane>
-                     </content>
-                     <opaqueInsets>
-                        <Insets />
-                     </opaqueInsets>
-                  </ScrollPane>
-               </children>
-            </StackPane>
-            <FlowPane alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="50.0" prefWidth="450.0">
-               <children>
-                  <Button fx:id="btnNodeAddProgressClose" mnemonicParsing="false" onMouseClicked="#onCloseProgressClicked" prefWidth="120.0" style="-fx-background-radius: 50; -fx-border-color: #e72; -fx-border-radius: 50; -fx-border-width: 2; -fx-cursor: hand;" text="Close">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                     <padding>
-                        <Insets bottom="3.0" top="3.0" />
-                     </padding>
-                     <FlowPane.margin>
-                        <Insets />
-                     </FlowPane.margin>
-                  </Button>
-               </children>
-               <VBox.margin>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </VBox.margin>
             </FlowPane>
          </children>

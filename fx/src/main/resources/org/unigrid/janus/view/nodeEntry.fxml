@@ -1,32 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<GridPane hgap="5.0" stylesheets="@main.css" vgap="5.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.NodeEntryController">
-   <userData>
-   </userData>
-   <columnConstraints>
-      <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="75.0" percentWidth="30.0" />
-      <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="75.0" percentWidth="20.0" />
-      <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="50.0" percentWidth="20.0" />
-      <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="50.0" />
-   </columnConstraints>
-   <rowConstraints>
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-   </rowConstraints>
+<GridPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.NodeEntryController">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="30.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="30.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="15.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="5.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
    <children>
-      <Label fx:id="entryAddress" />
-      <Label fx:id="entryName" GridPane.columnIndex="1" />
-      <ProgressBar fx:id="entyProgress" prefWidth="200.0" progress="0.0" GridPane.columnIndex="2" />
-      <Button mnemonicParsing="false" GridPane.columnIndex="3" />
-      <TextArea fx:id="entryOutput" editable="false" minHeight="100.0" minWidth="300.0" wrapText="true" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+      <StackPane fx:id="entryStackPaneStatus">
+         <children>
+            <Label fx:id="entryStatus" />
+            <FlowPane fx:id="entryFlowPane" visible="false">
+               <children>
+                  <Button fx:id="entryStatusBtn" disable="true" mnemonicParsing="false">
+                     <graphic>
+                        <FontIcon fx:id="entryStatusFontIcon" fill="WHITE" iconColor="WHITE" iconLiteral="fas-clone" />
+                     </graphic>
+                     <tooltip>
+                        <Tooltip fx:id="entryStatusTltp" text="Copy volume" />
+                     </tooltip>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </Button>
+                  <ProgressBar fx:id="entryProgressBar" prefWidth="150.0" progress="0.0">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding></ProgressBar>
+               </children>
+            </FlowPane>
+         </children>
+      </StackPane>
+      <Label fx:id="entryAlias" GridPane.columnIndex="1" />
+      <Label fx:id="entryAddress" GridPane.columnIndex="2" />
+      <Button fx:id="entryOutputBtn" mnemonicParsing="false" GridPane.columnIndex="3" />
+      <TextArea fx:id="entryOutputTa" editable="false" maxHeight="0.0" minHeight="0.0" minWidth="300.0" visible="false" wrapText="true" GridPane.columnSpan="4" GridPane.rowIndex="1" GridPane.rowSpan="2" />
+      <Label fx:id="entryPrivateKey" visible="false" GridPane.columnIndex="4" GridPane.rowIndex="1" />
    </children>
 </GridPane>

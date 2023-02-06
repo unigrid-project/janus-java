@@ -16,21 +16,15 @@
 
 package org.unigrid.janus.view.component;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.Node;
-import javafx.scene.layout.GridPane;
+import net.jqwik.api.Example;
+import org.unigrid.janus.jqwik.WeldSetup;
 
-public class GridPaneTable extends GridPane {
-	public ObservableList<ObservableList<Node>> getChildrenAsRows(int columnLimit) {
-		ObservableList<ObservableList<Node>> rowList = FXCollections.observableArrayList();
-		for (Node n : super.getChildren()) {
-			ObservableList<Node> row = FXCollections.observableArrayList();
-			for (int i = 0; i < columnLimit; i++) {
-				row.add(super.getChildren().get(i));
-			}
-			rowList.add(row);
-		}
-		return rowList;
+@WeldSetup(CustomGridPane.class)
+public class CustomGridPaneTest {
+	private CustomGridPane pane = null;
+
+	@Example
+	public boolean shouldReplaceChildren() {
+		return true;
 	}
 }

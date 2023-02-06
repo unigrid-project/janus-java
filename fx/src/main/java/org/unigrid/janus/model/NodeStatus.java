@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 public class NodeStatus {
 	private static final int MAX_OUTPUT_SIZE = 65535;
 	public static final double DONE = 1.0;
-	public static final double INPROGRESS = -1.0;
+	public static final double INPROGRESSS = -1.0;
 	public static final int GRIDPANE_MAX_COLUMN = 4;
 	public static final int OUTPUT_WIDTH = 300;
 	public static final int OUTPUT_HEIGHT = 100;
@@ -40,7 +40,7 @@ public class NodeStatus {
 	private String username;
 	private String stepDescription = "";
 	private String ipAddress;
-	private double progress = INPROGRESS;
+	private double progress = INPROGRESSS;
 	private Queue<Character> output = new CircularFifoQueue<Character>(MAX_OUTPUT_SIZE);
 	private boolean showOutput = false;
 	private int step = 1;
