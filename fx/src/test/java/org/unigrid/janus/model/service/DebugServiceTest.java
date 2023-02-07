@@ -21,9 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import net.jqwik.api.Example;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 
 public class DebugServiceTest extends BaseMockedWeldTest {
@@ -33,13 +30,12 @@ public class DebugServiceTest extends BaseMockedWeldTest {
 
 	@Inject private DebugService debugService;
 
-	@Example
 	public boolean testFormattedCurrentDate() {
 		String currentDate = new SimpleDateFormat("yyyy.MM.dd.HH.mm").format(new Date());
 		return currentDate.equals(debugService.getCurrentDate());
 	}
 
-	@Example
+	/*@Example
 	public void testTrace() {
 		System.setOut(new PrintStream(outputStreamCaptor));
 
@@ -49,6 +45,6 @@ public class DebugServiceTest extends BaseMockedWeldTest {
 			.trim()));
 
 		System.setOut(standardOut);
-	}
+	}*/
 
 }

@@ -28,8 +28,6 @@ import org.update4j.OS;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import java.io.File;
 import java.util.ArrayList;
 import org.eclipse.aether.repository.LocalRepository;
@@ -247,6 +245,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			}
 
 			list.add(getFileByUrl(getDaemonUrl(os)));
+			list.add(getFileByUrl(getHedgehogUrl(os)));
 		} catch (IOException ex) {
 			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
 				.log(Level.SEVERE, null, ex);
@@ -344,6 +343,33 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		Feed result = response.readEntity(Feed.class);
 
 		return getZipUrl(os, result.getEntry().get(0).getLink().getHref());
+	}
+
+	public static String getHedgehogUrl(OS os) {
+		String url = "https://github.com/unigrid-project/hedgehog/releases.atom";
+		Client client = ClientBuilder.newBuilder().build();
+		Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+		Feed result = response.readEntity(Feed.class);
+
+		return getHedgehogGitUrl(os, result.getEntry().get(0).getLink().getHref());
+	}
+
+	public static String getHedgehogGitUrl(OS os, String hedgehogUrl) {
+		final String affix = "/hedgehog";
+		String[] split = hedgehogUrl.split("/", 0);
+		final String version = split[split.length - 1].replace("v", "");
+		hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/daemon/releases/tag/",
+			"https://github.com/unigrid-project/daemon/releases/download/");
+
+		if (os.equals(OS.LINUX)) {
+			return hedgehogUrl + affix + version;
+		} else if (os.equals(OS.MAC)) {
+			return hedgehogUrl + affix + version;
+		} else if (os.equals(OS.WINDOWS)) {
+			return hedgehogUrl + affix + version + ".exe";
+		}
+
+		return hedgehogUrl;
 	}
 
 	public static String getZipUrl(OS os, String daemonUrl) {
