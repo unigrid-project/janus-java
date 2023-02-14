@@ -232,7 +232,7 @@
 			</plugin>
 			<!-- Uncomment tentackle to build module jars for fx to make a new config.xml for update.
 			Comment to speed up the build process for testing -->
-			<plugin>
+			<!--<plugin>
 				<groupId>org.tentackle</groupId>
 				<artifactId>tentackle-jlink-maven-plugin</artifactId>
 				<configuration>
@@ -248,7 +248,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin>-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>

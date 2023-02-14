@@ -58,6 +58,9 @@ public class DataDirectory {
 			}
 		}
 
+		if (BootstrapModel.getInstance().isTesting()) {
+			return Paths.get(head, tail, "testnet4").toString();
+		}
 		return Paths.get(head, tail).toString();
 	}
 

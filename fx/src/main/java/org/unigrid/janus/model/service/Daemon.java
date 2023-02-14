@@ -36,6 +36,7 @@ import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.view.AlertDialog;
 import org.update4j.OS;
+import org.unigrid.janus.model.BootstrapModel;
 
 @Eager
 @ApplicationScoped
@@ -97,7 +98,12 @@ public class Daemon {
 
 	private void runDaemon() throws IOException {
 		debug.print("starting daemon", Daemon.class.getSimpleName());
-		process = Optional.of(Runtime.getRuntime().exec(new String[] {location}));
+		if (BootstrapModel.getInstance().isTesting()) {
+			System.out.println("We are testing");
+			process = Optional.of(Runtime.getRuntime().exec(new String[] {location, "-testnet"}));
+		} else {
+			process = Optional.of(Runtime.getRuntime().exec(new String[] {location}));
+		}
 	}
 
 	private boolean isDaemonRunning() {
@@ -204,6 +210,10 @@ public class Daemon {
 			}
 		} catch (MalformedURLException e) {
 			/* Empty on purose */
+		}
+
+		if (BootstrapModel.getInstance().isTesting()) {
+			return "http://127.0.0.1:51995";
 		}
 
 		return "http://127.0.0.1:51993";
