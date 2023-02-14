@@ -24,6 +24,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
@@ -57,6 +58,10 @@ public class Hedgehog {
 			String name = file.getPath().getFileName().toString();
 			if (name.contains("hedgehog")) {
 				hedgehogExecName = file.getPath().toString();
+
+				if (!file.getPath().toFile().canExecute()) {
+					file.getPath().toFile().setExecutable(true);
+				}
 			}
 		}
 	}
@@ -66,6 +71,7 @@ public class Hedgehog {
 		ProcessBuilder pb = new ProcessBuilder();
 		pb.command(hedgehogExecName, "daemon");
 		p = pb.start();
+		p.waitFor(10, TimeUnit.SECONDS);
 	}
 
 	public Process getProcess() {

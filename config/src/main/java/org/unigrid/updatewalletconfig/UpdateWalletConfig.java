@@ -244,8 +244,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					+ " Try mvn clean install or mvn clean package", new IllegalStateException());
 			}
 
-			list.add(getFileByUrl(getDaemonUrl(os)));
-			list.add(getFileByUrl(getHedgehogUrl(os)));
+			list.add(getFileByUrl(getDaemonUrl(os, testing)));
+			list.add(getFileByUrl(getHedgehogUrl(os, testing)));
 		} catch (IOException ex) {
 			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
 				.log(Level.SEVERE, null, ex);
@@ -336,35 +336,63 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			+ osName + isTesting + ".xml";
 	}
 
-	public static String getDaemonUrl(OS os) {
-		String url = "https://github.com/unigrid-project/daemon/releases.atom";
-		Client client = ClientBuilder.newBuilder().build();
-		Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
-		Feed result = response.readEntity(Feed.class);
+	public static String getDaemonUrl(OS os, boolean testing) {
+		//Feed result = new Feed();
+		if (testing) {
+			String url = "https://github.com/unigrid-project/daemonTesting/releases.atom";
+			Client client = ClientBuilder.newBuilder().build();
+			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+			Feed result = response.readEntity(Feed.class);
+			return getZipUrl(os, result.getEntry().get(0).getLink().getHref(), testing);
+		} else {
+			String url = "https://github.com/unigrid-project/daemon/releases.atom";
+			Client client = ClientBuilder.newBuilder().build();
+			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+			Feed result = response.readEntity(Feed.class);
+			return getZipUrl(os, result.getEntry().get(0).getLink().getHref(), testing);
+		}
 
-		return getZipUrl(os, result.getEntry().get(0).getLink().getHref());
 	}
 
-	public static String getHedgehogUrl(OS os) {
-		String url = "https://github.com/unigrid-project/hedgehog/releases.atom";
-		Client client = ClientBuilder.newBuilder().build();
-		Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
-		Feed result = response.readEntity(Feed.class);
+	public static String getHedgehogUrl(OS os, boolean testing) {
+		Feed result = new Feed();
+		if (testing) {
+			String url = "https://github.com/unigrid-project/hedgehogTesting/releases.atom";
+			Client client = ClientBuilder.newBuilder().build();
+			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+			result = response.readEntity(Feed.class);
+			if (result.getEntry().get(0).getLink().getHref() == "") {
+				return "";
+			}
+		} else {
+			String url = "https://github.com/unigrid-project/hedgehogTesting/releases.atom";
+			Client client = ClientBuilder.newBuilder().build();
+			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+			result = response.readEntity(Feed.class);
+		}
 
-		return getHedgehogGitUrl(os, result.getEntry().get(0).getLink().getHref());
+		return getHedgehogGitUrl(os, result.getEntry().get(0).getLink().getHref(), testing);
 	}
 
-	public static String getHedgehogGitUrl(OS os, String hedgehogUrl) {
+	public static String getHedgehogGitUrl(OS os, String hedgehogUrl, boolean testing) {
+		if (hedgehogUrl.equals("")) {
+			return "";
+		}
 		final String affix = "/hedgehog";
 		String[] split = hedgehogUrl.split("/", 0);
 		final String version = split[split.length - 1].replace("v", "");
-		hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/daemon/releases/tag/",
-			"https://github.com/unigrid-project/daemon/releases/download/");
+		if (testing) {
+			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehogTesting/releases/tag/",
+				"https://github.com/unigrid-project/hedgehogTesting/releases/download/");
+		} else {
+			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehogTesting/releases/tag/",
+				"https://github.com/unigrid-project/hedgehogTesting/releases/download/");
+		}
 
 		if (os.equals(OS.LINUX)) {
-			return hedgehogUrl + affix + version;
+			return hedgehogUrl + affix + ".bin";
 		} else if (os.equals(OS.MAC)) {
-			return hedgehogUrl + affix + version;
+			return hedgehogUrl + affix;
 		} else if (os.equals(OS.WINDOWS)) {
 			return hedgehogUrl + affix + version + ".exe";
 		}
@@ -372,12 +400,17 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		return hedgehogUrl;
 	}
 
-	public static String getZipUrl(OS os, String daemonUrl) {
+	public static String getZipUrl(OS os, String daemonUrl, boolean testing) {
 		final String affix = "/unigrid-";
 		String[] split = daemonUrl.split("/", 0);
 		final String version = split[split.length - 1].replace("v", "");
-		daemonUrl = daemonUrl.replace("https://github.com/unigrid-project/daemon/releases/tag/",
-			"https://github.com/unigrid-project/daemon/releases/download/");
+		if (testing) {
+			daemonUrl = daemonUrl.replace("https://github.com/unigrid-project/daemonTesting/releases/tag/",
+				"https://github.com/unigrid-project/daemonTesting/releases/download/");
+		} else {
+			daemonUrl = daemonUrl.replace("https://github.com/unigrid-project/daemon/releases/tag/",
+				"https://github.com/unigrid-project/daemon/releases/download/");
+		}
 
 		if (os.equals(OS.LINUX)) {
 			return daemonUrl + affix + version + "-x86_64-linux-gnu.tar.gz";
