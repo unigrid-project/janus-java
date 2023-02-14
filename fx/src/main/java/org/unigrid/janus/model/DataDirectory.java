@@ -57,10 +57,7 @@ public class DataDirectory {
 				tail = Paths.get(".".concat(APPLICATION_NAME).toLowerCase()).toString();
 			}
 		}
-
-		if (BootstrapModel.getInstance().isTesting()) {
-			return Paths.get(head, tail, "testnet4").toString();
-		}
+		
 		return Paths.get(head, tail).toString();
 	}
 
