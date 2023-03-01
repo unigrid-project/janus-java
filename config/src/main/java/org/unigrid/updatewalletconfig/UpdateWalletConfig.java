@@ -378,7 +378,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		if (hedgehogUrl.equals("")) {
 			return "";
 		}
-		final String affix = "/hedgehog";
+		final String affix = "/hedgehog-";
 		String[] split = hedgehogUrl.split("/", 0);
 		final String version = split[split.length - 1].replace("v", "");
 		if (testing) {
@@ -390,11 +390,11 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		}
 
 		if (os.equals(OS.LINUX)) {
-			return hedgehogUrl + affix + ".bin";
+			return hedgehogUrl + affix + version + "-x86_64-linux-gnu.bin";
 		} else if (os.equals(OS.MAC)) {
-			return hedgehogUrl + affix;
+			return hedgehogUrl + affix + version + "-osx64.bin";
 		} else if (os.equals(OS.WINDOWS)) {
-			return hedgehogUrl + affix + version + ".exe";
+			return hedgehogUrl + affix + version + "-win64.exe";
 		}
 
 		return hedgehogUrl;
