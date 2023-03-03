@@ -57,7 +57,7 @@ public class DataDirectory {
 				tail = Paths.get(".".concat(APPLICATION_NAME).toLowerCase()).toString();
 			}
 		}
-		
+
 		return Paths.get(head, tail).toString();
 	}
 
