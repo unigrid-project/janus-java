@@ -219,12 +219,9 @@ public class UpdateWallet extends TimerTask {
 	private Boolean checkUpdateBootstrap() {
 		String filteredVer = BootstrapModel.getBootstrapVer();
 		System.out.println("getBootstrapVer in UpdateWallet Check: " + BootstrapModel.getBootstrapVer());
-
+		VersionNumber versionNumber = new VersionNumber(filteredVer);
 		//TODO: Move "VersionNumber" to a seperate class with a comparator so we can clean this up
-		if ((getVersionNumber(filteredVer, 0) == getVersionNumber(getLatestVersion(), 0))
-			&& (getVersionNumber(filteredVer, 2) == getVersionNumber(getLatestVersion(), 2))
-			&& (getVersionNumber(filteredVer, 4) == getVersionNumber(getLatestVersion(), 4))
-			|| getLatestVersion().equals("")) {
+		if (versionNumber.compareTo(getLatestVersion()) == 0 || getLatestVersion().equals("")) {
 
 			BootstrapModel.setBootstrapUpdate(false);
 			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());
@@ -496,13 +493,6 @@ public class UpdateWallet extends TimerTask {
 		}
 
 		return osDetails.get("ID_LIKE");
-	}
-
-	private int getVersionNumber(String version, int index) {
-		char[] c = version.toCharArray();
-
-		String majorVersion = String.valueOf(c[index]);
-		return Integer.parseInt(majorVersion);
 	}
 
 	private void removeOldInstall(String path) {

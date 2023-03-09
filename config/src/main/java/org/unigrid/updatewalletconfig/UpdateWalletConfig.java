@@ -74,6 +74,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 		basedir = mavenSession.getRepositorySession().getLocalRepository().getBasedir();
 		MavenProject fxProject = null;
+		//MavenProject bootstrapProject = null;
 
 		System.out.println("Goal: " + mavenSession.getGoals());
 
@@ -81,6 +82,9 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			if (mp.getArtifactId().equals("fx")) {
 				fxProject = mp;
 			}
+			//if (mp.getArtifactId().equals("bootstrap")) {
+			//	bootstrapProject = mp;
+			//}
 		}
 
 		if (fxProject != null && fxProject.getDependencies().size() != 0) {
@@ -90,6 +94,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			if (fxVersion.isEmpty()) {
 				fxVersion = fxProject.getVersion().replace("-SNAPSHOT", "");
 				configuration.getProperties().add(new Property("fx.version", fxVersion));
+				//String bootstrapVersion = bootstrapProject.getVersion().replace("-SNAPSHOT", "");
+				//configuration.getProperties().add(new Property("bootstrapVersion", bootstrapVersion));
 			}
 
 			OS[] os = new OS[]{OS.LINUX, OS.LINUX, OS.MAC, OS.MAC, OS.WINDOWS, OS.WINDOWS};

@@ -98,11 +98,11 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	public void setConfig(Configuration config, Stage primaryStage, Map<String, String> input, HostServices hostServices) {
 		this.config = config;
 		this.primaryStage = primaryStage;
-		Properties myProperties = new Properties();
+		final Properties properties = new Properties();
 
 		try {
-			myProperties.load(App.class.getResourceAsStream("application.properties"));
-			bootstrapVersion = Objects.requireNonNull((String) myProperties.get("proj.ver")).replace("-SNAPSHOT", "");
+			properties.load(getClass().getResourceAsStream("application.properties"));
+			bootstrapVersion = Objects.requireNonNull(properties.getProperty("proj.ver"));
 			System.out.println("bootstrap version: " + bootstrapVersion);
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
@@ -324,7 +324,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 				if (a.isDirectory()) {
 					File[] unigrid = a.listFiles();
 					for (File b : unigrid) {
-						if (!b.exists()) {
+						if (b == null || !b.exists()) {
 							break;
 						}
 						File[] bintar = b.listFiles();
