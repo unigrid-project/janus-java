@@ -371,7 +371,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				return "";
 			}
 		} else {
-			String url = "https://github.com/unigrid-project/hedgehogTesting/releases.atom";
+			String url = "https://github.com/unigrid-project/hedgehog/releases.atom";
 			Client client = ClientBuilder.newBuilder().build();
 			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
 			result = response.readEntity(Feed.class);
@@ -391,8 +391,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehogTesting/releases/tag/",
 				"https://github.com/unigrid-project/hedgehogTesting/releases/download/");
 		} else {
-			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehogTesting/releases/tag/",
-				"https://github.com/unigrid-project/hedgehogTesting/releases/download/");
+			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehog/releases/tag/",
+				"https://github.com/unigrid-project/hedgehog/releases/download/");
 		}
 
 		if (os.equals(OS.LINUX)) {
