@@ -118,7 +118,7 @@ public class UpdateViewTest extends BaseMockedWeldTest {
 		File file = new File(System.getProperty("user.dir")
 			.concat("/target/update-dependencies/temp/lib/slf4j-api-2.0.0-alpha7.jar"));
 
-		Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> {
+		Awaitility.await().until(() -> {
 			return file.length() == dependencyFileSize;
 		});
 

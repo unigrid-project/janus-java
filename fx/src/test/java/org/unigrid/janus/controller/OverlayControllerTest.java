@@ -18,11 +18,9 @@ package org.unigrid.janus.controller;
 
 import jakarta.inject.Inject;
 import jakarta.json.bind.JsonbBuilder;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;
 import mockit.Mock;
-import mockit.MockUp;
 import mockit.Mocked;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
@@ -46,6 +44,7 @@ import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
 import org.unigrid.janus.model.service.DaemonMockUp;
+import org.unigrid.janus.model.DataDirectoryMockup;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
@@ -71,6 +70,7 @@ public class OverlayControllerTest extends BaseFxTest {
 	public static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
+		new DataDirectoryMockup();
 		new DaemonMockUp();
 
 		new ResponseMockUp() {
@@ -127,16 +127,7 @@ public class OverlayControllerTest extends BaseFxTest {
 						return (T) result;
 					}
 				}
-				new MockUp<Wallet>() {
-					@Mock
-					public void setBalance(BigDecimal newValue) {
-					}
 
-					@Mock
-					public BigDecimal getBalance(BigDecimal newValue) {
-						return BigDecimal.ONE;
-					}
-				};
 				return e;
 			}
 		};
@@ -144,8 +135,8 @@ public class OverlayControllerTest extends BaseFxTest {
 
 	@Example
 	public void shoulStartStakingOverlay() {
-		rpc.pollForInfo(900000);
-		await().until(() -> wallet != null && wallet.getStakingStatus() != null);
+		rpc.pollForInfo(500);
+		await().until(() -> wallet.getStakingStatus() != null);
 		rpc.stopPolling();
 
 		robot.clickOn("#coinsBtn");
@@ -154,7 +145,7 @@ public class OverlayControllerTest extends BaseFxTest {
 
 	@Example
 	public void shouldStartLockOverlay() {
-		rpc.pollForInfo(900000);
+		rpc.pollForInfo(500);
 		await().until(() -> wallet != null && wallet.getStakingStatus() != null);
 		rpc.stopPolling();
 
@@ -164,7 +155,7 @@ public class OverlayControllerTest extends BaseFxTest {
 
 	@Example
 	public void shouldStartUnlockForSendingOverlay() {
-		rpc.pollForInfo(900000);
+		rpc.pollForInfo(500);
 		await().until(() -> wallet != null && wallet.getStakingStatus() != null);
 		rpc.stopPolling();
 
@@ -179,7 +170,7 @@ public class OverlayControllerTest extends BaseFxTest {
 
 	@Example
 	public void shouldStartUnlockForDump() {
-		rpc.pollForInfo(900000);
+		rpc.pollForInfo(500);
 		await().until(() -> wallet != null && wallet.getStakingStatus() != null);
 		rpc.stopPolling();
 
@@ -191,7 +182,7 @@ public class OverlayControllerTest extends BaseFxTest {
 
 	@Example
 	public void shouldShowErrorMessageOnEmptyInputs() {
-		rpc.pollForInfo(900000);
+		rpc.pollForInfo(500);
 		await().until(() -> wallet != null && wallet.getStakingStatus() != null);
 		rpc.stopPolling();
 

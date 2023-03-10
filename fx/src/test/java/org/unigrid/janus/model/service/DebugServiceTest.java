@@ -17,10 +17,12 @@
 package org.unigrid.janus.model.service;
 
 import jakarta.inject.Inject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import net.jqwik.api.Example;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -33,22 +35,38 @@ public class DebugServiceTest extends BaseMockedWeldTest {
 
 	@Inject private DebugService debugService;
 
+	// test that debugService is not null
 	@Example
-	public boolean testFormattedCurrentDate() {
+	public void testDebugServiceNotNull() {
+		assertThat(debugService, equalTo(debugService));
+	}
+
+	// test that debugService.getCurrentDate() returns a string with the current date
+	@Example
+	void testGetCurrentDate() {
 		String currentDate = new SimpleDateFormat("yyyy.MM.dd.HH.mm").format(new Date());
-		return currentDate.equals(debugService.getCurrentDate());
+		String date = debugService.getCurrentDate();
+
+		assertThat(date, equalTo(currentDate));
+	}
+
+	// test that debugService.print() prints a message to the console
+	@Example
+	void testPrint() {
+		System.setOut(new PrintStream(outputStreamCaptor));
+		debugService.print("test", "DebugServiceTest");
+		System.setOut(standardOut);
+
+		assertThat(outputStreamCaptor.toString().trim(), equalTo("test"));
 	}
 
 	@Example
 	public void testTrace() {
 		System.setOut(new PrintStream(outputStreamCaptor));
-
-		debugService.trace("Hello!!!");
-
-		assertThat("Hello!!!", equalTo(outputStreamCaptor.toString()
-			.trim()));
-
+		debugService.trace("test");
 		System.setOut(standardOut);
+
+		assertThat(outputStreamCaptor.toString().trim(), equalTo("test"));
 	}
 
 }
