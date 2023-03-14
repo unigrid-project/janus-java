@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Optional;
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -416,10 +417,15 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	}
 
 	public void eventDebugMessage(@Observes DebugMessage debugMessage) {
-		debugItems.add(debugMessage.getMessage());
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				debugItems.add(debugMessage.getMessage());
 
-		if (Objects.nonNull(lstDebug)) {
-			lstDebug.scrollTo(debugItems.size());
-		}
+				if (Objects.nonNull(lstDebug)) {
+					lstDebug.scrollTo(debugItems.size());
+				}
+			}
+		});
 	}
 }
