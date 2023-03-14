@@ -17,6 +17,8 @@
 package org.unigrid.janus.model;
 
 import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.Objects;
 import org.unigrid.janus.model.external.ConfigUrlMockUp;
 import net.jqwik.api.Example;
 import mockit.Mock;
@@ -24,6 +26,7 @@ import mockit.MockUp;
 import mockit.Invocation;
 import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 import org.unigrid.janus.model.cdi.Invoke;
+import org.unigrid.janus.model.entity.Feed;
 import org.unigrid.janus.model.external.ConfigurationMockUp;
 
 public class UpdateWalletTest extends BaseMockedWeldTest {
@@ -31,6 +34,39 @@ public class UpdateWalletTest extends BaseMockedWeldTest {
 	private String result;
 
 	@Inject private UpdateWallet updateWallet;
+
+	@Example
+	public boolean shouldReturnTrueOnCheckUpdateBootstrap() {
+		String versionSuffix = "_fx";
+		String newVersion = Objects.isNull(System.getProperty("release.tag"))
+			? "1.0.11" + versionSuffix : System.getProperty("release.tag").substring(1);
+		String currentVersion = Objects.isNull(System.getProperty("current.tag"))
+			? "1.0.10" + versionSuffix : System.getProperty("current.tag").substring(1);
+
+		new MockUp<UpdateWallet>() {
+			@Mock
+			public Feed initWebTarget(Invocation invocation) {
+				String id = "tag:github.com,2008:Repository/354793431/v" + newVersion;
+				Feed.Entry entry = new Feed.Entry();
+				entry.setId(id);
+				Feed feed = new Feed();
+				ArrayList<Feed.Entry> list = new ArrayList<Feed.Entry>();
+				list.add(entry);
+				feed.setEntry(list);
+
+				return feed;
+			}
+		};
+
+		new MockUp<BootstrapModel>() {
+			@Mock
+			public String getBootstrapVer() {
+				return currentVersion;
+			}
+		};
+
+		return updateWallet.checkUpdateBootstrap();
+	}
 
 	@Example
 	public boolean checkUpdateIsTrue() {

@@ -2,6 +2,9 @@ The Janus Wallet © The Unigrid Foundation
 =========================================
 <img align="right" alt="Janus cryptocurrency wallet" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Meyers_b9_s0153_b1.png" width="300"/>
 
+[![Janus build status](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml/badge.svg)](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml)
+
+
 About Unigrid
 -------------
 For more information, as well as an immediately useable, binary version of the Unigrid software, see https://www.unigrid.org
@@ -22,7 +25,7 @@ Building
 --------
 To build a working package, you first need to create an app-image that can hold the native binaries of the Unigrid daemon;
 ```
-mvn clean package # will build a jlink distribution and an app-image
+mvn clean install # will build a jlink distribution and an app-image
 ```
 
 Finally, we create the actual installer image with everything;
@@ -43,7 +46,7 @@ To perform a new release we now must also update the config files and upload the
 Once the version number has been updated you can run the build process.
 
 ```
-mvn clean package
+mvn clean install
 ```
 
 In the next step we must update the `fxJarUrl` in UpdateWalletConfig.java. To generate this new url we will have to create a release in this repo [unigrid-update](https://github.com/unigrid-project/unigrid-update/releases). Create a new tag using this format `v1.0.1` then name the release title the version number `1.0.1`.

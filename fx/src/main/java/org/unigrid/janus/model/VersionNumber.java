@@ -50,6 +50,7 @@ public class VersionNumber implements Comparable<String> {
 	}
 
 	private void setVersionNumber(String s) {
+		versionNumber = s;
 		version = patternMatcher(s);
 	}
 

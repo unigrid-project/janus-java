@@ -128,7 +128,6 @@
                                                 --add-opens org.unigrid.bootstrap/org.unigrid.bootstrap=ALL-UNNAMED
                                                 --add-exports org.unigrid.bootstrap/org.unigrid.bootstrap.jqwik=ALL-UNNAMED
                                         </argLine>
-                 
                                 </configuration>
                         </plugin>
                         <!--<plugin>

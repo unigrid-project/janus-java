@@ -31,6 +31,7 @@ public class BootstrapModel {
 		"https://github.com/unigrid-project/janus-java/releases/download/";
 
 	@Getter @Setter private static boolean testing = false;
+	@Getter @Setter private static boolean testnet;
 	@Getter @Setter private static boolean bootstrapUpdate;
 
 	private BootstrapModel() {

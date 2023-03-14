@@ -40,6 +40,7 @@ import org.unigrid.janus.model.external.ResponseMockUp;
 import org.unigrid.janus.model.rpc.entity.GridnodeEntity;
 import org.unigrid.janus.model.rpc.entity.GridnodeList;
 import org.unigrid.janus.model.service.DaemonMockUp;
+import org.unigrid.janus.model.DataDirectoryMockup;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
 import org.unigrid.janus.model.service.external.WebTargetMockUp;
@@ -57,8 +58,10 @@ public class NodesControllerTest extends BaseFxTest {
 	public static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
-		new DaemonMockUp();
+		new DataDirectoryMockup();
 
+		new DaemonMockUp();
+		System.out.println("Before container");
 		new ResponseMockUp() {
 			@Mock
 			public <T> T readEntity(Class<T> clazz) {

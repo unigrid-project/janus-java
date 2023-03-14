@@ -417,11 +417,11 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	}
 
 	public void eventDebugMessage(@Observes DebugMessage debugMessage) {
-		debugItems.add(debugMessage.getMessage());
-
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
+				debugItems.add(debugMessage.getMessage());
+
 				if (Objects.nonNull(lstDebug)) {
 					lstDebug.scrollTo(debugItems.size());
 				}

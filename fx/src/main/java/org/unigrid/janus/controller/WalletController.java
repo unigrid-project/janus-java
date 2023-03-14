@@ -62,6 +62,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.Address;
+import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.Address.Amount;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
@@ -120,7 +121,11 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	}
 
 	public void compareBlockHeights() {
-		//if (wallet.getCheckExplorer()) {
+		if (BootstrapModel.isTestnet()) {
+			// FIRE STOP SYNCING EVENT
+			wallet.setSyncStatus(Wallet.SyncStatus.from("synced"));
+			return;
+		}
 		int explorerHeight;
 		try {
 			explorerHeight = wallet.getExplorerHeight();

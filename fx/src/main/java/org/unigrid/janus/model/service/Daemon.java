@@ -98,12 +98,9 @@ public class Daemon {
 
 	private void runDaemon() throws IOException {
 		debug.print("starting daemon", Daemon.class.getSimpleName());
-		if (BootstrapModel.getInstance().isTesting()) {
-			System.out.println("We are testing");
-			process = Optional.of(Runtime.getRuntime().exec(new String[] {location, "-testnet"}));
-		} else {
-			process = Optional.of(Runtime.getRuntime().exec(new String[] {location}));
-		}
+		String testnet = BootstrapModel.isTestnet() ? "-testnet" : "-daemon";
+		ProcessBuilder pb = new ProcessBuilder(location, testnet);
+		process = Optional.of(pb.start());
 	}
 
 	private boolean isDaemonRunning() {
@@ -210,6 +207,9 @@ public class Daemon {
 			}
 		} catch (MalformedURLException e) {
 			/* Empty on purose */
+		}
+		if (BootstrapModel.isTestnet()) {
+			return "http://127.0.0.1:51995";
 		}
 
 		if (BootstrapModel.getInstance().isTesting()) {
