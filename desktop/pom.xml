@@ -6,7 +6,7 @@
 	<artifactId>desktop</artifactId>
 	<packaging>jlink</packaging>
 	<name>Unigrid Janus Desktop Application</name>
-        <version>1.0.9-SNAPSHOT</version>
+        <version>1.0.10-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.unigrid.janus</groupId>
