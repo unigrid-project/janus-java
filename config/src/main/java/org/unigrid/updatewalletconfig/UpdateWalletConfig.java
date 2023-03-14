@@ -399,7 +399,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				"https://github.com/unigrid-project/hedgehogTesting/releases/download/");
 		} else {
 			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehogTesting/releases/tag/",
-				"https://github.com/unigrid-project/hedgehog/releases/download/");
+				"https://github.com/unigrid-project/hedgehogTesting/releases/download/");
 		}
 
 		if (os.equals(OS.LINUX)) {
