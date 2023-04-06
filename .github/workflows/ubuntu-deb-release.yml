@@ -83,8 +83,8 @@ jobs:
 
       - name: Push pom files to master
         run: |
-          git config --global user.name 'Github Actions'
-          git config --global user.email 'actions@github.com'
+          git config --global user.name 'dekm'
+          git config --global user.email 'gevan73@gmail.com'
           git add "./*pom.xml"
           git commit -m "Github Actions: Replace maven version in pom.xml with tag version"
           git push https://${{ secrets.PAT }}@github.com/unigrid-project/janus-java.git HEAD:master 
