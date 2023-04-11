@@ -106,7 +106,7 @@ BootstrapURL=<DIFFERENT BOOTSTRAP VERSION>
 Example using a different config file for FX on Linux:
 ```
 cd desktop/target/dist/Unigrid/bin/
-./Unigrid URL=https://github.com/unigrid-project/unigrid-update-testing
+./Unigrid URL=https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-linux-test.xml
 ```
 
 Troubleshooting
