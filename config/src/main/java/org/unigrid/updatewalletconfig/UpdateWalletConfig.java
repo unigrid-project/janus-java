@@ -62,6 +62,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 	private String fxVersion = "";
 
 	private String fxVersionWithSnapshot = "";
+	
+	private String bootstrapVersion = "";
 
 	@Override
 	public void afterSessionEnd(MavenSession mavenSession) throws MavenExecutionException {
@@ -76,7 +78,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 		basedir = mavenSession.getRepositorySession().getLocalRepository().getBasedir();
 		MavenProject fxProject = null;
-		//MavenProject bootstrapProject = null;
+		MavenProject bootstrapProject = null;
 
 		System.out.println("Goal: " + mavenSession.getGoals());
 
@@ -84,10 +86,12 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			if (mp.getArtifactId().equals("fx")) {
 				fxProject = mp;
 			}
-			//if (mp.getArtifactId().equals("bootstrap")) {
-			//	bootstrapProject = mp;
-			//}
+			if (mp.getArtifactId().equals("bootstrap")) {
+				bootstrapProject = mp;
+			}
 		}
+		
+		bootstrapVersion = bootstrapProject.getVersion();
 
 		if (fxProject != null && fxProject.getDependencies().size() != 0) {
 			System.out.println("Fx Project: " + fxProject.getGroupId() + ":" + fxProject.getArtifactId()
@@ -116,7 +120,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 	public void generateUpdateConfigFile(MavenProject fx, OS os, boolean testing) throws MavenExecutionException {
 		String version = fx.getVersion();
 		List<FileMetadata> files = getDependencies(getFxDependencyString(fx));
-		List<FileMetadata> bootstrapFiles = getDependencies("org.unigrid:bootstrap:" + version);
+		List<FileMetadata> bootstrapFiles = getDependencies("org.unigrid:bootstrap:" + bootstrapVersion);
 		List<FileMetadata> externalFiles = getExternalDependencies(os, fx.getBasedir(), testing);
 		files.removeAll(bootstrapFiles);
 		files.addAll(0, externalFiles);
@@ -378,7 +382,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				return "";
 			}
 		} else {
-			String url = "https://github.com/unigrid-project/hedgehogTesting/releases.atom";
+			String url = "https://github.com/unigrid-project/hedgehog/releases.atom";
 			Client client = ClientBuilder.newBuilder().build();
 			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
 			result = response.readEntity(Feed.class);
@@ -398,8 +402,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehogTesting/releases/tag/",
 				"https://github.com/unigrid-project/hedgehogTesting/releases/download/");
 		} else {
-			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehogTesting/releases/tag/",
-				"https://github.com/unigrid-project/hedgehogTesting/releases/download/");
+			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehog/releases/tag/",
+				"https://github.com/unigrid-project/hedgehog/releases/download/");
 		}
 
 		if (os.equals(OS.LINUX)) {
