@@ -112,6 +112,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@SneakyThrows
 	private void destroy() {
 		// TODO: should this change to spalshScreenInsted
+		hedgehog.stopHedgehog();
 		daemon.stop();
 	}
 

@@ -28,10 +28,12 @@ import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
+import org.unigrid.janus.model.cdi.Eager;
 import org.update4j.Configuration;
 import org.update4j.FileMetadata;
 import org.update4j.OS;
 
+@Eager
 @ApplicationScoped
 public class Hedgehog {
 
