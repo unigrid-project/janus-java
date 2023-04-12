@@ -98,7 +98,7 @@ public class Daemon {
 
 	private void runDaemon() throws IOException {
 		debug.print("starting daemon", Daemon.class.getSimpleName());
-		String testnet = BootstrapModel.isTestnet() ? "-testnet" : "-daemon";
+		String testnet = BootstrapModel.isTestnet() ? "-testnet" : "-server";
 		ProcessBuilder pb = new ProcessBuilder(location, testnet);
 		process = Optional.of(pb.start());
 	}
