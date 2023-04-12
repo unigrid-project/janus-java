@@ -50,6 +50,8 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
+//import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.service.Hedgehog;
 import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
 
@@ -57,6 +59,7 @@ import org.unigrid.janus.view.AlertDialog;
 @ApplicationScoped
 public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private Daemon daemon;
+	@Inject private Hedgehog hedgehog;
 	@Inject private RPCService rpc;
 	@Inject private DebugService debug;
 	@Inject private BrowserService window;
@@ -96,6 +99,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		debug.print("Janus starting daemon...", Janus.class.getSimpleName());
 
 		try {
+			hedgehog.startHedgehog();
 			daemon.start();
 		} catch (Exception e) {
 			AlertDialog.open(AlertType.ERROR, e.getMessage());

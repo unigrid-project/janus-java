@@ -219,11 +219,11 @@ public class UpdateWallet extends TimerTask {
 
 	public Boolean checkUpdateBootstrap() {
 		String filteredVer = BootstrapModel.getBootstrapVer();
-		String latestVersion = getLatestVersion();
+		VersionNumber latestVersion = new VersionNumber(getLatestVersion());
 		System.out.println("getBootstrapVer in UpdateWallet Check: " + BootstrapModel.getBootstrapVer());
-
+		System.out.println("latestVersion in UpdateWallet Check: " + latestVersion.getVersionNumber());
 		//TODO: Move "VersionNumber" to a seperate class with a comparator so we can clean this up
-		if (Version.parse(filteredVer).compareTo(Version.parse(latestVersion)) == 0
+		if (Version.parse(filteredVer).compareTo(Version.parse(latestVersion.getVersionNumber())) == 0
 			|| latestVersion.equals("")) {
 
 			BootstrapModel.setBootstrapUpdate(false);
@@ -234,32 +234,34 @@ public class UpdateWallet extends TimerTask {
 				Path path = Paths.get(linuxPath);
 				System.out.println("downloading linux installer");
 				if (getLinuxIDLike().equals("debian")
-					&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
+					&& !checkTempFolder(getDEBFileName(latestVersion.getVersionNumber()), linuxPath)) {
 					removeOldInstall(linuxPath);
-					downloadFile(getDownloadURL(getLatestVersion(),
-						getDEBFileName(getLatestVersion())),
+					downloadFile(getDownloadURL(latestVersion.getVersionNumber(),
+						getDEBFileName(latestVersion.getVersionNumber())),
 						linuxPath,
-						getDEBFileName(getLatestVersion()));
+						getDEBFileName(latestVersion.getVersionNumber()));
 				} else {
 					removeOldInstall(linuxPath);
-					downloadFile(getDownloadURL(getLatestVersion(),
-						getRPMFileName(getLatestVersion())),
+					downloadFile(getDownloadURL(latestVersion.getVersionNumber(),
+						getRPMFileName(latestVersion.getVersionNumber())),
 						linuxPath,
-						getRPMFileName(getLatestVersion()));
+						getRPMFileName(latestVersion.getVersionNumber()));
 				}
 				System.out.println("Did it start??");
 			} else if (OS.CURRENT == OS.MAC
-				&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
+				&& !checkTempFolder(getDMGFileName(latestVersion.getVersionNumber()), macPath)) {
 				removeOldInstall(macPath);
-				downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
+				downloadFile(getDownloadURL(latestVersion.getVersionNumber(),
+					getDMGFileName(latestVersion.getVersionNumber())),
 					macPath,
-					getDMGFileName(getLatestVersion()));
+					getDMGFileName(latestVersion.getVersionNumber()));
 			} else if (OS.CURRENT == OS.WINDOWS
-				&& !checkTempFolder(getMSIFileName(getLatestVersion()), windowsPath)) {
+				&& !checkTempFolder(getMSIFileName(latestVersion.getVersionNumber()), windowsPath)) {
 				removeOldInstall(windowsPath);
-				downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
+				downloadFile(getDownloadURL(latestVersion.getVersionNumber(),
+					getMSIFileName(latestVersion.getVersionNumber())),
 					windowsPath,
-					getMSIFileName(getLatestVersion()));
+					getMSIFileName(latestVersion.getVersionNumber()));
 			}
 			BootstrapModel.setBootstrapUpdate(true);
 		}

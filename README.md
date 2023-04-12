@@ -43,6 +43,14 @@ Releasing
 
 To perform a new release we now must also update the config files and upload the fx SNAPSHOT jar. First thing before the above building steps is to update the version number. This can be found in the poms. For example if we are going to bump from version 1.0.0 to 1.0.1 search and replace all `1.0.0-SNAPSHOT` with `1.0.1-SNAPSHOT`. *Note: UpdateWalletConfig will also need an updated url for the compiled fx-1.0.1-SNAPSHOT.jar which we will add later.*
 
+*Note: if anything was changed with the config project you will need to rebuild this first.*
+
+```
+cd config
+mvn clean install
+```
+
+
 Once the version number has been updated you can run the build process.
 
 ```
@@ -81,6 +89,25 @@ git clone https://github.com/unigrid-project/unigrid-update.git
 
 Then update each config file with each updated output inside `config\UpdateWalletConfig` and push your changes. GitHub can take a few minutes to update the url's and as soon as these update all wallets will have access to the latest changes.
 
+Testing
+---------------
+To test the bootstrap with different daemon and fx you can pass in different args depending on what you are testing.
+
+To change the config URL FX checks:
+```
+URL=<CONFIG URL>
+```
+
+To change the location FX checks for the bootstrap:
+```
+BootstrapURL=<DIFFERENT BOOTSTRAP VERSION>
+```
+
+Example using a different config file for FX on Linux:
+```
+cd desktop/target/dist/Unigrid/bin/
+./Unigrid URL=https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-linux-test.xml
+```
 
 Troubleshooting
 ---------------

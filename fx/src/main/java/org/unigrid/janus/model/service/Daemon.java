@@ -31,12 +31,12 @@ import javax.naming.ConfigurationException;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
-import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.view.AlertDialog;
 import org.update4j.OS;
+import org.unigrid.janus.model.BootstrapModel;
 
 @Eager
 @ApplicationScoped
@@ -209,6 +209,10 @@ public class Daemon {
 			/* Empty on purose */
 		}
 		if (BootstrapModel.isTestnet()) {
+			return "http://127.0.0.1:51995";
+		}
+
+		if (BootstrapModel.getInstance().isTesting()) {
 			return "http://127.0.0.1:51995";
 		}
 
