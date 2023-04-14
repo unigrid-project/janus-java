@@ -24,6 +24,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.module.ModuleDescriptor.Version;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -216,15 +217,14 @@ public class UpdateWallet extends TimerTask {
 		return update;
 	}
 
-	private Boolean checkUpdateBootstrap() {
+	public Boolean checkUpdateBootstrap() {
 		String filteredVer = BootstrapModel.getBootstrapVer();
+		VersionNumber latestVersion = new VersionNumber(getLatestVersion());
 		System.out.println("getBootstrapVer in UpdateWallet Check: " + BootstrapModel.getBootstrapVer());
-
+		System.out.println("latestVersion in UpdateWallet Check: " + latestVersion.getVersionNumber());
 		//TODO: Move "VersionNumber" to a seperate class with a comparator so we can clean this up
-		if ((getVersionNumber(filteredVer, 0) == getVersionNumber(getLatestVersion(), 0))
-			&& (getVersionNumber(filteredVer, 2) == getVersionNumber(getLatestVersion(), 2))
-			&& (getVersionNumber(filteredVer, 4) == getVersionNumber(getLatestVersion(), 4))
-			|| getLatestVersion().equals("")) {
+		if (Version.parse(filteredVer).compareTo(Version.parse(latestVersion.getVersionNumber())) == 0
+			|| latestVersion.equals("")) {
 
 			BootstrapModel.setBootstrapUpdate(false);
 			debug.print("VERSION: " + filteredVer, UpdateWallet.class.getSimpleName());
@@ -234,32 +234,34 @@ public class UpdateWallet extends TimerTask {
 				Path path = Paths.get(linuxPath);
 				System.out.println("downloading linux installer");
 				if (getLinuxIDLike().equals("debian")
-					&& !checkTempFolder(getDEBFileName(getLatestVersion()), linuxPath)) {
+					&& !checkTempFolder(getDEBFileName(latestVersion.getVersionNumber()), linuxPath)) {
 					removeOldInstall(linuxPath);
-					downloadFile(getDownloadURL(getLatestVersion(),
-						getDEBFileName(getLatestVersion())),
+					downloadFile(getDownloadURL(latestVersion.getVersionNumber(),
+						getDEBFileName(latestVersion.getVersionNumber())),
 						linuxPath,
-						getDEBFileName(getLatestVersion()));
+						getDEBFileName(latestVersion.getVersionNumber()));
 				} else {
 					removeOldInstall(linuxPath);
-					downloadFile(getDownloadURL(getLatestVersion(),
-						getRPMFileName(getLatestVersion())),
+					downloadFile(getDownloadURL(latestVersion.getVersionNumber(),
+						getRPMFileName(latestVersion.getVersionNumber())),
 						linuxPath,
-						getRPMFileName(getLatestVersion()));
+						getRPMFileName(latestVersion.getVersionNumber()));
 				}
 				System.out.println("Did it start??");
 			} else if (OS.CURRENT == OS.MAC
-				&& !checkTempFolder(getDMGFileName(getLatestVersion()), macPath)) {
+				&& !checkTempFolder(getDMGFileName(latestVersion.getVersionNumber()), macPath)) {
 				removeOldInstall(macPath);
-				downloadFile(getDownloadURL(getLatestVersion(), getDMGFileName(getLatestVersion())),
+				downloadFile(getDownloadURL(latestVersion.getVersionNumber(),
+					getDMGFileName(latestVersion.getVersionNumber())),
 					macPath,
-					getDMGFileName(getLatestVersion()));
+					getDMGFileName(latestVersion.getVersionNumber()));
 			} else if (OS.CURRENT == OS.WINDOWS
-				&& !checkTempFolder(getMSIFileName(getLatestVersion()), windowsPath)) {
+				&& !checkTempFolder(getMSIFileName(latestVersion.getVersionNumber()), windowsPath)) {
 				removeOldInstall(windowsPath);
-				downloadFile(getDownloadURL(getLatestVersion(), getMSIFileName(getLatestVersion())),
+				downloadFile(getDownloadURL(latestVersion.getVersionNumber(),
+					getMSIFileName(latestVersion.getVersionNumber())),
 					windowsPath,
-					getMSIFileName(getLatestVersion()));
+					getMSIFileName(latestVersion.getVersionNumber()));
 			}
 			BootstrapModel.setBootstrapUpdate(true);
 		}
@@ -465,7 +467,7 @@ public class UpdateWallet extends TimerTask {
 
 		String githubEntry = githubJson.getEntry().get(0).getId();
 
-		if (githubEntry.equals("") || githubEntry == null) {
+		if (githubEntry == null || githubEntry.equals("")) {
 			return "";
 		}
 
@@ -496,13 +498,6 @@ public class UpdateWallet extends TimerTask {
 		}
 
 		return osDetails.get("ID_LIKE");
-	}
-
-	private int getVersionNumber(String version, int index) {
-		char[] c = version.toCharArray();
-
-		String majorVersion = String.valueOf(c[index]);
-		return Integer.parseInt(majorVersion);
 	}
 
 	private void removeOldInstall(String path) {

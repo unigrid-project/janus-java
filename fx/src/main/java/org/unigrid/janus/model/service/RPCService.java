@@ -47,10 +47,11 @@ import org.unigrid.janus.model.cdi.Eager;
 @Eager
 @ApplicationScoped
 public class RPCService {
-	private static final String PROPERTY_USERNAME_KEY = "janus.rpc.username";
+	public static final String PROPERTY_USERNAME_KEY = "janus.rpc.username";
+	public static final String PROPERTY_PASSWORD_KEY = "janus.rpc.password";
 	private static final String PROPERTY_USERNAME = Preferences.PROPS.getString(PROPERTY_USERNAME_KEY);
-	private static final String PROPERTY_PASSWORD_KEY = "janus.rpc.password";
 	private static final String PROPERTY_PASSWORD = Preferences.PROPS.getString(PROPERTY_PASSWORD_KEY);
+
 	@Getter @Setter private Boolean pollingTimerRunning = false;
 
 	private Timer pollingTimer;
@@ -112,6 +113,7 @@ public class RPCService {
 
 		} catch (ConfigurationException | org.apache.commons.configuration2.ex.ConfigurationException ex) {
 			debug.print("Bajs det gick åt helvete!!!!!!!!!!!!!!!!", RPCService.class.getSimpleName());
+			ex.printStackTrace();
 		}
 
 		debug.print("after DataDirectory getConfig", RPCService.class.getSimpleName());
@@ -133,7 +135,7 @@ public class RPCService {
 	}
 
 	public <R, T> T call(R request, Class<T> clazz) {
-		// debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
+		//debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
 		return target.request().post(Entity.json(request)).readEntity(clazz);
 	}
 

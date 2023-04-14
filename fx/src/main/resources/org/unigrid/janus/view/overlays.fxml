@@ -13,7 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" onKeyPressed="#setKeyListern" fx:controller="org.unigrid.janus.controller.OverlayController">
+<AnchorPane onKeyPressed="#setKeyListern" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.OverlayController">
    <children>
       <GridPane fx:id="pnlUnlock" layoutX="10.0" layoutY="10.0" prefHeight="360.0" prefWidth="450.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <columnConstraints>
@@ -30,12 +30,12 @@
          <children>
             <HBox nodeOrientation="RIGHT_TO_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <children>
-                  <Button id="submitBtn" fx:id="submitBtn" mnemonicParsing="false" onMouseClicked="#onSubmitPassphrasePressed" text="SUBMIT">
+                  <Button id="submitBtn" fx:id="submitBtn" mnemonicParsing="false" onMouseClicked="#onSubmitPassphrasePressed" style="-fx-cursor: hand;" text="SUBMIT">
                      <HBox.margin>
                         <Insets left="20.0" top="20.0" />
                      </HBox.margin>
                   </Button>
-                  <Button id="cancelBtn" mnemonicParsing="false" onMouseClicked="#onCancelLockPressed" text="CANCEL">
+                  <Button id="cancelBtn" mnemonicParsing="false" onMouseClicked="#onCancelLockPressed" style="-fx-cursor: hand;" text="CANCEL">
                      <HBox.margin>
                         <Insets left="20.0" right="20.0" top="20.0" />
                      </HBox.margin>

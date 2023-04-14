@@ -24,10 +24,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Optional;
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -53,6 +55,8 @@ import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
 import javafx.stage.Stage;
+
+import org.apache.commons.lang3.SystemUtils;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Preferences;
@@ -71,6 +75,7 @@ import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import org.unigrid.janus.model.signal.WalletRequest;
 import org.unigrid.janus.view.AlertDialog;
+import org.unigrid.janus.view.backing.OsxUtils;
 
 @ApplicationScoped
 public class SettingsController implements Initializable, PropertyChangeListener, Showable {
@@ -93,6 +98,8 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private static final int TAB_SETTINGS_PASSPHRASE = 3;
 	private static final int TAB_SETTINGS_EXPORT = 4;
 	private static final int TAB_SETTINGS_DEBUG = 5;
+
+	private OsxUtils osxUtils = new OsxUtils();
 
 	@FXML private ListView lstDebug;
 
@@ -211,7 +218,11 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private void onOpenConf(MouseEvent event) throws NullPointerException {
 		File conf = DataDirectory.getConfigFile();
 		try {
-			hostServices.showDocument(conf.getAbsolutePath());
+			if (SystemUtils.IS_OS_MAC_OSX) {
+				osxUtils.openFileOsx(DataDirectory.CONFIG_FILE);
+			} else {
+				hostServices.showDocument(conf.getAbsolutePath());
+			}
 		} catch (NullPointerException e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
@@ -221,19 +232,27 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	private void onOpenGridnode(MouseEvent event) throws NullPointerException {
 		File gridnode = DataDirectory.getGridnodeFile();
 		try {
-			hostServices.showDocument(gridnode.getAbsolutePath());
+			if (SystemUtils.IS_OS_MAC_OSX) {
+				osxUtils.openFileOsx(DataDirectory.GRIDNODE_FILE);
+			} else {
+				hostServices.showDocument(gridnode.getAbsolutePath());
+			}
 		} catch (NullPointerException e) {
 			debug.print(e.getMessage(), SettingsController.class.getSimpleName());
 		}
 	}
 
 	@FXML
-	private void onOpenUnigrid(MouseEvent event) throws NullPointerException {
-		String gridnode = DataDirectory.get();
+	private void onOpenUnigrid(MouseEvent event) throws NullPointerException, IOException {
+		String directory = DataDirectory.get();
 		try {
-			hostServices.showDocument(gridnode);
-		} catch (NullPointerException e) {
-			System.out.println("Null Host services " + e.getMessage());
+			if (SystemUtils.IS_OS_MAC_OSX) {
+				osxUtils.openDirectory(directory);
+			} else {
+				hostServices.showDocument(directory);
+			}
+		} catch (NullPointerException | IOException e) {
+			System.out.println("open data directory " + e.getMessage());
 		}
 	}
 
@@ -398,10 +417,15 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	}
 
 	public void eventDebugMessage(@Observes DebugMessage debugMessage) {
-		debugItems.add(debugMessage.getMessage());
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				debugItems.add(debugMessage.getMessage());
 
-		if (Objects.nonNull(lstDebug)) {
-			lstDebug.scrollTo(debugItems.size());
-		}
+				if (Objects.nonNull(lstDebug)) {
+					lstDebug.scrollTo(debugItems.size());
+				}
+			}
+		});
 	}
 }

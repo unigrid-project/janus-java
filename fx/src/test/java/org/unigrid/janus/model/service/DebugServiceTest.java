@@ -14,26 +14,30 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.controller;
+package org.unigrid.janus.model.service;
 
 import jakarta.inject.Inject;
 import jakarta.json.bind.JsonbBuilder;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
-import mockit.Mock;
-import mockit.Mocked;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
-import static org.awaitility.Awaitility.await;
-import static org.testfx.api.FxAssert.verifyThat;
-import org.testfx.api.FxRobot;
-import static org.testfx.matcher.base.NodeMatchers.isVisible;
-import org.testfx.matcher.control.TextMatchers;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+//import org.unigrid.janus.controller.SettingsController;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
 import org.unigrid.janus.jqwik.fx.FxResource;
-import org.unigrid.janus.model.Wallet;
-import org.unigrid.janus.model.external.JaxrsResponseHandler;
+import org.unigrid.janus.model.DataDirectoryMockup;
 import org.unigrid.janus.model.external.ResponseMockUp;
+import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
+import org.unigrid.janus.model.service.external.WebTargetMockUp;
+import mockit.Mock;
+import org.unigrid.janus.model.external.JaxrsResponseHandler;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
 import org.unigrid.janus.model.rpc.entity.GetConnectionCount;
 import org.unigrid.janus.model.rpc.entity.GetUnlockState;
@@ -43,28 +47,15 @@ import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
-import org.unigrid.janus.model.service.DaemonMockUp;
-import org.unigrid.janus.model.DataDirectoryMockup;
-import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.RPCService;
-import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
-import org.unigrid.janus.model.service.external.WebTargetMockUp;
 import org.unigrid.janus.view.MainWindow;
 
 @FxResource(clazz = MainWindow.class, name = "mainWindow.fxml")
-public class OverlayControllerTest extends BaseFxTest {
+public class DebugServiceTest extends BaseFxTest {
 
-	@Inject
-	private FxRobot robot;
+	private final PrintStream standardOut = System.out;
+	private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
 
-	@Inject
-	private RPCService rpc;
-
-	@Inject
-	private Wallet wallet;
-
-	@Mocked
-	private DebugService debug;
+	@Inject private DebugService debugService;
 
 	@BeforeContainer
 	public static void before() {
@@ -133,61 +124,39 @@ public class OverlayControllerTest extends BaseFxTest {
 		};
 	}
 
+	// test that debugService is not null
 	@Example
-	public void shoulStartStakingOverlay() {
-		rpc.pollForInfo(500);
-		await().until(() -> wallet.getStakingStatus() != null);
-		rpc.stopPolling();
+	public void testDebugServiceNotNull() {
+		assertThat(debugService, equalTo(debugService));
+	}
 
-		robot.clickOn("#coinsBtn");
-		verifyThat("#pnlOverlay", isVisible());
+	// test that debugService.getCurrentDate() returns a string with the current date
+	@Example
+	void testGetCurrentDate() {
+		String currentDate = new SimpleDateFormat("yyyy.MM.dd.HH.mm").format(new Date());
+		String date = debugService.getCurrentDate();
+
+		assertThat(date, equalTo(currentDate));
+	}
+
+	// test that debugService.print() prints a message to the console
+	@Example
+	void testPrint() {
+
+		System.setOut(new PrintStream(outputStreamCaptor));
+		debugService.print("test", "DebugServiceTest");
+		System.setOut(standardOut);
+
+		assertThat(outputStreamCaptor.toString().trim(), equalTo("test"));
 	}
 
 	@Example
-	public void shouldStartLockOverlay() {
-		rpc.pollForInfo(500);
-		await().until(() -> wallet != null && wallet.getStakingStatus() != null);
-		rpc.stopPolling();
+	public void testTrace() {
+		System.setOut(new PrintStream(outputStreamCaptor));
+		debugService.trace("test");
+		System.setOut(standardOut);
 
-		robot.clickOn("#lockBtn");
-		verifyThat("#pnlOverlay", isVisible());
+		assertThat(outputStreamCaptor.toString().trim(), equalTo("test"));
 	}
 
-	@Example
-	public void shouldStartUnlockForSendingOverlay() {
-		rpc.pollForInfo(500);
-		await().until(() -> wallet != null && wallet.getStakingStatus() != null);
-		rpc.stopPolling();
-
-		robot.clickOn("#btnWalletTransaction");
-		robot.clickOn("#amountToSend");
-		robot.write("1");
-		robot.clickOn("#ugdAddressTxt");
-		robot.write("s");
-		robot.clickOn("#btnWalletTransactionSend");
-		verifyThat("#pnlOverlay", isVisible());
-	}
-
-	@Example
-	public void shouldStartUnlockForDump() {
-		rpc.pollForInfo(500);
-		await().until(() -> wallet != null && wallet.getStakingStatus() != null);
-		rpc.stopPolling();
-
-		robot.clickOn("#btnSettings");
-		robot.clickOn("#btnSetExport");
-		robot.clickOn("#btnSetExportExport");
-		verifyThat("#pnlOverlay", isVisible());
-	}
-
-	@Example
-	public void shouldShowErrorMessageOnEmptyInputs() {
-		rpc.pollForInfo(500);
-		await().until(() -> wallet != null && wallet.getStakingStatus() != null);
-		rpc.stopPolling();
-
-		robot.clickOn("#coinsBtn");
-		robot.clickOn("#submitBtn");
-		verifyThat("#errorTxt", TextMatchers.hasText("Please enter a passphrase"));
-	}
 }

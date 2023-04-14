@@ -14,23 +14,42 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.jqwik.fx;
+package org.unigrid.janus.model.service;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import net.jqwik.api.lifecycle.AddLifecycleHook;
-import net.jqwik.api.lifecycle.BeforeContainer;
-import net.jqwik.api.lifecycle.PropagationMode;
-import org.apache.commons.lang3.RandomStringUtils;
+import mockit.Expectations;
+import mockit.Mocked;
+import net.jqwik.api.Example;
 import org.unigrid.janus.jqwik.BaseMockedWeldTest;
-import org.unigrid.janus.model.service.RPCService;
 
-@AddLifecycleHook(value = FxHook.class, propagateTo = PropagationMode.ALL_DESCENDANTS)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BaseFxTest extends BaseMockedWeldTest {
-	@BeforeContainer
-	public static void beforeContainer() {
-		System.setProperty(RPCService.PROPERTY_USERNAME_KEY, RandomStringUtils.randomAlphabetic(20));
-		System.setProperty(RPCService.PROPERTY_PASSWORD_KEY, RandomStringUtils.randomAlphabetic(20));
+public class BrowserServiceTest extends BaseMockedWeldTest {
+
+	@Example
+	public void shouldCallNavigateFromAddress(@Mocked BrowserService service) {
+		new Expectations(service) {
+			{
+				service.navigateAddress(anyString);
+				times = 1;
+				service.navigate(anyString);
+				times = 1;
+
+			}
+		};
+
+		service.navigateAddress("test");
+	}
+
+	@Example
+	public void shouldCallNavigateFromTransaction(@Mocked BrowserService service) {
+		new Expectations(service) {
+			{
+				service.navigateTransaction(anyString);
+				times = 1;
+				service.navigate(anyString);
+				times = 1;
+
+			}
+		};
+
+		service.navigateTransaction("012345");
 	}
 }

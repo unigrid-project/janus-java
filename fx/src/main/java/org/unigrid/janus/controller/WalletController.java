@@ -62,13 +62,13 @@ import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.Address;
+import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.Address.Amount;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.model.Transaction;
 import org.unigrid.janus.model.Wallet;
-import org.unigrid.janus.model.TransactionList;
 import org.unigrid.janus.model.rpc.entity.ListTransactions;
 import org.unigrid.janus.model.rpc.entity.SendTransaction;
 import org.unigrid.janus.model.rpc.entity.ValidateAddress;
@@ -78,6 +78,7 @@ import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import org.unigrid.janus.model.signal.WalletRequest;
+import org.unigrid.janus.view.backing.TransactionList;
 
 @ApplicationScoped
 public class WalletController implements Initializable, PropertyChangeListener {
@@ -120,7 +121,11 @@ public class WalletController implements Initializable, PropertyChangeListener {
 	}
 
 	public void compareBlockHeights() {
-		//if (wallet.getCheckExplorer()) {
+		if (BootstrapModel.isTestnet()) {
+			// FIRE STOP SYNCING EVENT
+			wallet.setSyncStatus(Wallet.SyncStatus.from("synced"));
+			return;
+		}
 		int explorerHeight;
 		try {
 			explorerHeight = wallet.getExplorerHeight();
@@ -144,6 +149,8 @@ public class WalletController implements Initializable, PropertyChangeListener {
 		} else {
 			//wallet.setCheckExplorer(Boolean.FALSE);
 			if (polling.getSyncTimerRunning()) {
+				// TODO call refresh on the gridnode list here
+				// on load if the wallet is not synced they will appear missing
 				polling.stopSyncPoll();
 			}
 			// FIRE STOP SYNCING EVENT
@@ -181,32 +188,32 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			});
 
 			colWalletTransType.setCellValueFactory(cell -> {
-				Transaction trans = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
-				int confirmations = trans.getConfirmations();
+				final Transaction transaction = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
+				int confirmations = transaction.getConfirmations();
 				Button btn = new Button();
 
-				btn.setTooltip(new Tooltip(trans.getCategory()));
+				btn.setTooltip(new Tooltip(transaction.getCategory()));
 
 				btn.setOnAction(e -> {
-					browser.navigateTransaction(trans.getTxid());
+					browser.navigateTransaction(transaction.getTxId());
 				});
 
 				FontIcon fontIcon = new FontIcon("fas-wallet");
 
-				if (trans.isGenerated()) {
-					if (trans.getGeneratedfrom().equals("stake")) {
+				if (transaction.isGenerated()) {
+					if (transaction.getGeneratedfrom().equals("stake")) {
 						fontIcon = new FontIcon("fas-coins");
 						fontIcon.setIconColor(setColor(255, 140, 0, confirmations));
 					} else {
 						fontIcon = new FontIcon("fas-cubes");
 						fontIcon.setIconColor(setColor(104, 197, 255, confirmations));
 					}
-					btn.setTooltip(new Tooltip(trans.getGeneratedfrom()));
-				} else if (trans.getCategory().equals("send")
-					|| trans.getCategory().equals("fee")) {
+					btn.setTooltip(new Tooltip(transaction.getGeneratedfrom()));
+				} else if (transaction.getCategory().equals("send")
+					|| transaction.getCategory().equals("fee")) {
 					fontIcon = new FontIcon("fas-arrow-right");
 					fontIcon.setIconColor(setColor(255, 0, 0, confirmations));
-				} else if (trans.getCategory().equals("receive")) {
+				} else if (transaction.getCategory().equals("receive")) {
 					fontIcon = new FontIcon("fas-arrow-left");
 					fontIcon.setIconColor(setColor(48, 186, 69, confirmations));
 				}
@@ -216,13 +223,13 @@ public class WalletController implements Initializable, PropertyChangeListener {
 			});
 
 			colWalletTransAddress.setCellValueFactory(cell -> {
-				Hyperlink link = new Hyperlink();
-				Transaction trans = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
-				link.setText(trans.getAddress());
+				final Hyperlink link = new Hyperlink();
+				final Transaction transaction = ((CellDataFeatures<Transaction, Hyperlink>) cell).getValue();
+				link.setText(transaction.getAddress());
 
 				link.setOnAction(e -> {
 					if (e.getTarget().equals(link)) {
-						browser.navigateAddress(trans.getAddress());
+						browser.navigateAddress(transaction.getAddress());
 					}
 				});
 
@@ -235,21 +242,21 @@ public class WalletController implements Initializable, PropertyChangeListener {
 					final Clipboard cb = Clipboard.getSystemClipboard();
 					final ClipboardContent content = new ClipboardContent();
 
-					content.putString(trans.getTxid());
+					content.putString(transaction.getTxId());
 					cb.setContent(content);
 
 					if (SystemUtils.IS_OS_MAC_OSX) {
 						Notifications
 							.create()
 							.title("Transaction copied to clipboard")
-							.text(trans.getTxid())
+							.text(transaction.getTxId())
 							.position(Pos.TOP_RIGHT)
 							.showInformation();
 					} else {
 						Notifications
 							.create()
 							.title("Transaction copied to clipboard")
-							.text(trans.getTxid())
+							.text(transaction.getTxId())
 							.showInformation();
 					}
 				});

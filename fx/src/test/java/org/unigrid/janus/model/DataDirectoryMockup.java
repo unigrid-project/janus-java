@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+	Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -12,19 +12,24 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model;
 
-import lombok.Data;
+import org.apache.commons.configuration2.Configuration;
+import org.mockito.Mockito;
+import mockit.Mock;
+import mockit.MockUp;
 
-@Data
-public class Gridnode {
-	private String alias;
-	private String address;
-	private String privateKey;
-	private int outputidx;
-	private String txhash;
-	private String status;
-	private boolean availableTxhash;
+public class DataDirectoryMockup extends MockUp<DataDirectory> {
+	@Mock
+	public static Configuration getConfig(boolean blocking) {
+		// create a mock Configuration object
+		Configuration mockConfig = Mockito.mock(Configuration.class);
+
+		Mockito.when(mockConfig.getString("rpcuser")).thenReturn("user");
+		Mockito.when(mockConfig.getString("rpcpassword")).thenReturn("password");
+
+		return mockConfig;
+	}
 }

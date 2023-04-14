@@ -50,7 +50,8 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
-import org.unigrid.janus.model.rpc.entity.Info;
+//import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.service.Hedgehog;
 import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
 
@@ -58,6 +59,7 @@ import org.unigrid.janus.view.AlertDialog;
 @ApplicationScoped
 public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject private Daemon daemon;
+	@Inject private Hedgehog hedgehog;
 	@Inject private RPCService rpc;
 	@Inject private DebugService debug;
 	@Inject private BrowserService window;
@@ -76,7 +78,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private String startupStatus;
 	private String walletVersion;
 	private String progress = "0";
-	private Info info = new Info();
 	private Boolean checkForStatus = true;
 
 	@PostConstruct
@@ -98,6 +99,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		debug.print("Janus starting daemon...", Janus.class.getSimpleName());
 
 		try {
+			hedgehog.startHedgehog();
 			daemon.start();
 		} catch (Exception e) {
 			AlertDialog.open(AlertType.ERROR, e.getMessage());
@@ -110,6 +112,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@SneakyThrows
 	private void destroy() {
 		// TODO: should this change to spalshScreenInsted
+		hedgehog.stopHedgehog();
 		daemon.stop();
 	}
 
@@ -216,10 +219,16 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 						final GetBootstrappingInfo boostrapInfo = rpc.call(
 							new GetBootstrappingInfo.Request(), GetBootstrappingInfo.class
 						);
+						try {
+							walletStatus = boostrapInfo.getResult().getWalletstatus();
+							progress = boostrapInfo.getResult().getProgress();
+							status = boostrapInfo.getResult().getStatus();
+						} catch (Exception e) {
+							// TODO: handle exception
+							debug.print("boostrapInfo null: " + e.getMessage().toString(),
+								Janus.class.getSimpleName());
+						}
 
-						walletStatus = boostrapInfo.getResult().getWalletstatus();
-						progress = boostrapInfo.getResult().getProgress();
-						status = boostrapInfo.getResult().getStatus();
 						Thread.sleep(2000);
 					} catch (Exception e) {
 						debug.print("RPC call error: " + e.getMessage().toString(),

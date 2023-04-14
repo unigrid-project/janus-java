@@ -12,19 +12,26 @@
 
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.model.service.external;
 
-import lombok.Data;
+import java.io.File;
+import java.io.IOException;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
+import mockit.Mock;
+import mockit.MockUp;
+import org.apache.commons.lang3.RandomStringUtils;
 
-@Data
-public class Gridnode {
-	private String alias;
-	private String address;
-	private String privateKey;
-	private int outputidx;
-	private String txhash;
-	private String status;
-	private boolean availableTxhash;
+public class FileChooserMockUp extends MockUp<FileChooser> {
+	@Mock
+	public File showOpenDialog(Window window) throws IOException {
+		return File.createTempFile(RandomStringUtils.randomAlphabetic(20), "");
+	}
+
+	@Mock
+	public File showSaveDialog(Window window) throws IOException {
+		return File.createTempFile(RandomStringUtils.randomAlphabetic(20), "");
+	}
 }

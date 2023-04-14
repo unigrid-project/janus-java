@@ -2,6 +2,9 @@ The Janus Wallet © The Unigrid Foundation
 =========================================
 <img align="right" alt="Janus cryptocurrency wallet" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Meyers_b9_s0153_b1.png" width="300"/>
 
+[![Janus build status](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml/badge.svg)](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml)
+
+
 About Unigrid
 -------------
 For more information, as well as an immediately useable, binary version of the Unigrid software, see https://www.unigrid.org
@@ -22,7 +25,7 @@ Building
 --------
 To build a working package, you first need to create an app-image that can hold the native binaries of the Unigrid daemon;
 ```
-mvn clean package # will build a jlink distribution and an app-image
+mvn clean install # will build a jlink distribution and an app-image
 ```
 
 Finally, we create the actual installer image with everything;
@@ -40,10 +43,18 @@ Releasing
 
 To perform a new release we now must also update the config files and upload the fx SNAPSHOT jar. First thing before the above building steps is to update the version number. This can be found in the poms. For example if we are going to bump from version 1.0.0 to 1.0.1 search and replace all `1.0.0-SNAPSHOT` with `1.0.1-SNAPSHOT`. *Note: UpdateWalletConfig will also need an updated url for the compiled fx-1.0.1-SNAPSHOT.jar which we will add later.*
 
+*Note: if anything was changed with the config project you will need to rebuild this first.*
+
+```
+cd config
+mvn clean install
+```
+
+
 Once the version number has been updated you can run the build process.
 
 ```
-mvn clean package
+mvn clean install
 ```
 
 In the next step we must update the `fxJarUrl` in UpdateWalletConfig.java. To generate this new url we will have to create a release in this repo [unigrid-update](https://github.com/unigrid-project/unigrid-update/releases). Create a new tag using this format `v1.0.1` then name the release title the version number `1.0.1`.
@@ -78,6 +89,25 @@ git clone https://github.com/unigrid-project/unigrid-update.git
 
 Then update each config file with each updated output inside `config\UpdateWalletConfig` and push your changes. GitHub can take a few minutes to update the url's and as soon as these update all wallets will have access to the latest changes.
 
+Testing
+---------------
+To test the bootstrap with different daemon and fx you can pass in different args depending on what you are testing.
+
+To change the config URL FX checks:
+```
+URL=<CONFIG URL>
+```
+
+To change the location FX checks for the bootstrap:
+```
+BootstrapURL=<DIFFERENT BOOTSTRAP VERSION>
+```
+
+Example using a different config file for FX on Linux:
+```
+cd desktop/target/dist/Unigrid/bin/
+./Unigrid URL=https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-linux-test.xml
+```
 
 Troubleshooting
 ---------------

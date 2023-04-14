@@ -16,30 +16,21 @@
 
 package org.unigrid.janus.model;
 
-import jakarta.inject.Inject;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import lombok.Getter;
-import org.unigrid.janus.model.rpc.entity.GridnodeList;
-import org.unigrid.janus.model.service.DebugService;
+import net.jqwik.api.Example;
+import org.unigrid.janus.jqwik.WeldSetup;
 
-public class GridnodeListModel {
-	public static final String GRIDNODE_LIST = "gridnodeList";
+@WeldSetup(Address.class)
+public class BootstrapModelTest {
 
-	@Inject private DebugService debug;
-
-	@Getter
-	private ObservableList<Gridnode> gridnodes = FXCollections.observableArrayList();
-
-	public void setGridnodes(GridnodeList list) {
-		int oldCount = 0;
-		gridnodes.clear();
-
-		int newCount = 0;
-		for (Gridnode g : list.getResult()) {
-			gridnodes.add(g);
-			//TODO: is this used for something
-			newCount++;
-		}
+	@Example
+	public boolean testBootstrapVersion() {
+		return BootstrapModel.getBootstrapVer().equals("0.0.0");
 	}
+
+	@Example
+	public boolean testDownloadUrl() {
+		return BootstrapModel.getDownloadUrl().equals("https://github.com/unigrid-project"
+			+ "/janus-java/releases/download/");
+	}
+
 }

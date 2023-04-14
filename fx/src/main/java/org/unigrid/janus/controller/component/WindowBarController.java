@@ -50,7 +50,9 @@ import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.view.component.WindowBarButton;
+import org.unigrid.janus.controller.MainWindowController;
 import org.unigrid.janus.controller.Showable;
+import org.unigrid.janus.model.service.Hedgehog;
 
 @Dependent
 public class WindowBarController implements Decoratable, Initializable, PropertyChangeListener, Showable {
@@ -68,7 +70,8 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@Inject private RPCService rpc;
 	@Inject private UpdateWallet update;
 	@Inject private Wallet wallet;
-
+	@Inject private MainWindowController mainWindow;
+	@Inject private Hedgehog hedgehog;
 	// @Inject private TrayService tray;
 
 	private int testTimeInterval = 10000;
@@ -104,7 +107,10 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	}
 
 	@FXML
-	private void onExit(MouseEvent event) {
+	private void onExit(MouseEvent event) throws Exception {
+		// TODO setting splash screen to visible is too slow
+		mainWindow.showSplashScreen();
+
 		((Node) event.getSource()).getScene().getWindow().hide();
 
 		// TODO: find a place to do this that is guaranteed to be called when

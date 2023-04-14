@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -9,8 +10,9 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane stylesheets="@main.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.WarningController">
+<AnchorPane stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.WarningController">
    <children>
       <GridPane fx:id="pnlUnlock" layoutX="10.0" layoutY="10.0" prefHeight="360.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <columnConstraints>
@@ -23,6 +25,8 @@
             <RowConstraints minHeight="40.0" prefHeight="30.0" vgrow="NEVER" />
             <RowConstraints minHeight="30.0" prefHeight="30.0" valignment="CENTER" vgrow="NEVER" />
             <RowConstraints minHeight="10.0" prefHeight="60.0" />
+            <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="ALWAYS" />
+            <RowConstraints minHeight="10.0" prefHeight="50.0" valignment="TOP" vgrow="NEVER" />
          </rowConstraints>
          <children>
             <HBox nodeOrientation="RIGHT_TO_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
@@ -41,6 +45,24 @@
                <font>
                   <Font size="19.0" />
                </font></Text>
+            <Button alignment="CENTER_RIGHT" contentDisplay="CENTER" mnemonicParsing="false" onMouseClicked="#onShowDebug" opacity="0.64" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-cursor: hand;" GridPane.columnIndex="2" GridPane.rowIndex="5">
+               <graphic>
+                  <FontIcon fx:id="coinsBtn" iconColor="WHITE" iconLiteral="fas-bug" iconSize="15" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="0.5" />
+               </graphic>
+               <tooltip>
+                  <Tooltip fx:id="bugTooltip" text="Show debug log">
+                     <graphic>
+                        <FontIcon fx:id="bug" iconColor="WHITE" iconLiteral="fas-bug" iconSize="15" onTouchPressed="#onShowDebug" styleClass="spinner" />
+                     </graphic>
+                  </Tooltip>
+               </tooltip>
+               <padding>
+                  <Insets left="5.0" right="10.0" />
+               </padding>
+               <GridPane.margin>
+                  <Insets left="50.0" top="15.0" />
+               </GridPane.margin>
+            </Button>
          </children>
       </GridPane>
    </children>

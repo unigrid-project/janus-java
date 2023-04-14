@@ -191,12 +191,6 @@ public class AddressController implements Initializable, PropertyChangeListener 
 	}
 
 	@FXML
-	private void onLoadPressed(MouseEvent e) {
-		// debug.log("Calling address list refresh");
-		loadAddresses();
-	}
-
-	@FXML
 	private void onGenerateAddressClicked(MouseEvent e) {
 		GetNewAddress newAddress = rpc.call(new GetNewAddress.Request(""), GetNewAddress.class);
 		addressDisplay.setText(newAddress.getResult().toString());

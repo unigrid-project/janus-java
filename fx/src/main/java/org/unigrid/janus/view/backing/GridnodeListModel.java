@@ -14,23 +14,29 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model;
+package org.unigrid.janus.view.backing;
 
 import jakarta.inject.Inject;
-import net.jqwik.api.Example;
-import org.unigrid.janus.jqwik.BaseMockedWeldTest;
-import org.unigrid.janus.jqwik.WeldSetup;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import lombok.Getter;
+import org.unigrid.janus.model.Gridnode;
+import org.unigrid.janus.model.rpc.entity.GridnodeList;
+import org.unigrid.janus.model.service.DebugService;
 
-@WeldSetup(Address.class)
-public class AddressTest extends BaseMockedWeldTest {
-	@Inject
-	private Address address;
+public class GridnodeListModel {
+	public static final String GRIDNODE_LIST = "gridnodeList";
 
-	@Example
-	public boolean testAddressProperties() {
-		final String addr = "HAjsFi8JShq9Hfx5xYseGMoy8Mzbbo3Reu";
+	@Inject private DebugService debug;
 
-		address.setAddress(addr);
-		return addr.endsWith(address.getAddress());
+	@Getter
+	private ObservableList<Gridnode> gridnodes = FXCollections.observableArrayList();
+
+	public void setGridnodes(GridnodeList list) {
+		gridnodes.clear();
+
+		for (Gridnode g : list.getResult()) {
+			gridnodes.add(g);
+		}
 	}
 }

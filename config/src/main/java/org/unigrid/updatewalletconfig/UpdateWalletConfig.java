@@ -28,8 +28,6 @@ import org.update4j.OS;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
 import java.io.File;
 import java.util.ArrayList;
 import org.eclipse.aether.repository.LocalRepository;
@@ -63,6 +61,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	private String fxVersion = "";
 
+	private String fxVersionWithSnapshot = "";
+
 	@Override
 	public void afterSessionEnd(MavenSession mavenSession) throws MavenExecutionException {
 		if (!mavenSession.getResult().getExceptions().isEmpty()) {
@@ -76,6 +76,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 		basedir = mavenSession.getRepositorySession().getLocalRepository().getBasedir();
 		MavenProject fxProject = null;
+		MavenProject bootstrapProject = null;
 
 		System.out.println("Goal: " + mavenSession.getGoals());
 
@@ -83,21 +84,28 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			if (mp.getArtifactId().equals("fx")) {
 				fxProject = mp;
 			}
+			if (mp.getArtifactId().equals("bootstrap")) {
+				bootstrapProject = mp;
+			}
 		}
 
 		if (fxProject != null && fxProject.getDependencies().size() != 0) {
 			System.out.println("Fx Project: " + fxProject.getGroupId() + ":" + fxProject.getArtifactId()
 				+ ":" + fxProject.getVersion());
 
+			fxVersionWithSnapshot = fxProject.getVersion();
+
 			if (fxVersion.isEmpty()) {
 				fxVersion = fxProject.getVersion().replace("-SNAPSHOT", "");
 				configuration.getProperties().add(new Property("fx.version", fxVersion));
+				String bootstrapVersion = bootstrapProject.getVersion().replace("-SNAPSHOT", "");
+				configuration.getProperties().add(new Property("bootstrapVersion", bootstrapVersion));
 			}
 
 			OS[] os = new OS[]{OS.LINUX, OS.LINUX, OS.MAC, OS.MAC, OS.WINDOWS, OS.WINDOWS};
 
 			for (int i = 0; i < os.length; i++) {
-				generateUpdateConfigFile(fxProject, os[i], i % 2 == 0);
+				generateUpdateConfigFile(fxProject, bootstrapProject, os[i], i % 2 == 0);
 			}
 		} else {
 			throw new MavenExecutionException("Fx Project not found or no local dependencies found!"
@@ -105,10 +113,11 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		}
 	}
 
-	public void generateUpdateConfigFile(MavenProject fx, OS os, boolean testing) throws MavenExecutionException {
+	public void generateUpdateConfigFile(MavenProject fx, MavenProject bootstrap, OS os, boolean testing) throws MavenExecutionException {
 		String version = fx.getVersion();
+		String bootstrapVersion = bootstrap.getVersion();
 		List<FileMetadata> files = getDependencies(getFxDependencyString(fx));
-		List<FileMetadata> bootstrapFiles = getDependencies("org.unigrid:bootstrap:" + version);
+		List<FileMetadata> bootstrapFiles = getDependencies("org.unigrid:bootstrap:" + bootstrapVersion);
 		List<FileMetadata> externalFiles = getExternalDependencies(os, fx.getBasedir(), testing);
 		files.removeAll(bootstrapFiles);
 		files.addAll(0, externalFiles);
@@ -196,6 +205,8 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				.log(Level.SEVERE, null, e);
 		}
 
+		System.out.println(currentArtifact + " dependencies: " + files.size());
+
 		return files;
 	}
 
@@ -234,9 +245,9 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				}
 			}
 			String updateUrl = "https://github.com/unigrid-project/unigrid-update"
-				+ isTesting + "/releases/download/v" + fxVersion + "/fx-" + version + "-SNAPSHOT.jar";
-			File localJar = new File(baseDir.getAbsolutePath() + "/target/fx-" + fxVersion
-				+ "-SNAPSHOT.jar");
+				+ isTesting + "/releases/download/v" + fxVersion + "/fx-" + fxVersionWithSnapshot + ".jar";
+			File localJar = new File(baseDir.getAbsolutePath() + "/target/fx-" + fxVersionWithSnapshot + ".jar");
+
 			if (localJar.exists() != false) {
 				FileMetadata tempFile = new FileMetadata(updateUrl, localJar.length(),
 					ConfFileUtil.getChecksumString(localJar.toPath()));
@@ -246,7 +257,9 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 					+ " Try mvn clean install or mvn clean package", new IllegalStateException());
 			}
 
-			list.add(getFileByUrl(getDaemonUrl(os)));
+			list.add(getFileByUrl(getDaemonUrl(os, testing)));
+			list.add(getFileByUrl(getHedgehogUrl(os, testing)));
+
 		} catch (IOException ex) {
 			java.util.logging.Logger.getLogger(UpdateWalletConfig.class.getName())
 				.log(Level.SEVERE, null, ex);
@@ -337,21 +350,81 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			+ osName + isTesting + ".xml";
 	}
 
-	public static String getDaemonUrl(OS os) {
-		String url = "https://github.com/unigrid-project/daemon/releases.atom";
-		Client client = ClientBuilder.newBuilder().build();
-		Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
-		Feed result = response.readEntity(Feed.class);
+	public static String getDaemonUrl(OS os, boolean testing) {
+		//Feed result = new Feed();
+		if (testing) {
+			String url = "https://github.com/unigrid-project/daemonTesting/releases.atom";
+			Client client = ClientBuilder.newBuilder().build();
+			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+			Feed result = response.readEntity(Feed.class);
+			return getZipUrl(os, result.getEntry().get(0).getLink().getHref(), testing);
+		} else {
+			String url = "https://github.com/unigrid-project/daemon/releases.atom";
+			Client client = ClientBuilder.newBuilder().build();
+			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+			Feed result = response.readEntity(Feed.class);
+			return getZipUrl(os, result.getEntry().get(0).getLink().getHref(), testing);
+		}
 
-		return getZipUrl(os, result.getEntry().get(0).getLink().getHref());
 	}
 
-	public static String getZipUrl(OS os, String daemonUrl) {
+	public static String getHedgehogUrl(OS os, boolean testing) {
+		Feed result = new Feed();
+		if (testing) {
+			String url = "https://github.com/unigrid-project/hedgehogTesting/releases.atom";
+			Client client = ClientBuilder.newBuilder().build();
+			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+			result = response.readEntity(Feed.class);
+			if (result.getEntry().get(0).getLink().getHref() == "") {
+				return "";
+			}
+		} else {
+			String url = "https://github.com/unigrid-project/hedgehog/releases.atom";
+			Client client = ClientBuilder.newBuilder().build();
+			Response response = client.target(url).request(MediaType.APPLICATION_XML_TYPE).get();
+			result = response.readEntity(Feed.class);
+		}
+
+		return getHedgehogGitUrl(os, result.getEntry().get(0).getLink().getHref(), testing);
+	}
+
+	public static String getHedgehogGitUrl(OS os, String hedgehogUrl, boolean testing) {
+		if (hedgehogUrl.equals("")) {
+			return "";
+		}
+		final String affix = "/hedgehog-";
+		String[] split = hedgehogUrl.split("/", 0);
+		final String version = split[split.length - 1].replace("v", "");
+		if (testing) {
+			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehogTesting/releases/tag/",
+				"https://github.com/unigrid-project/hedgehogTesting/releases/download/");
+		} else {
+			hedgehogUrl = hedgehogUrl.replace("https://github.com/unigrid-project/hedgehog/releases/tag/",
+				"https://github.com/unigrid-project/hedgehog/releases/download/");
+		}
+
+		if (os.equals(OS.LINUX)) {
+			return hedgehogUrl + affix + version + "-x86_64-linux-gnu.bin";
+		} else if (os.equals(OS.MAC)) {
+			return hedgehogUrl + affix + version + "-osx64.bin";
+		} else if (os.equals(OS.WINDOWS)) {
+			return hedgehogUrl + affix + version + "-win64.exe";
+		}
+
+		return hedgehogUrl;
+	}
+
+	public static String getZipUrl(OS os, String daemonUrl, boolean testing) {
 		final String affix = "/unigrid-";
 		String[] split = daemonUrl.split("/", 0);
 		final String version = split[split.length - 1].replace("v", "");
-		daemonUrl = daemonUrl.replace("https://github.com/unigrid-project/daemon/releases/tag/",
-			"https://github.com/unigrid-project/daemon/releases/download/");
+		if (testing) {
+			daemonUrl = daemonUrl.replace("https://github.com/unigrid-project/daemonTesting/releases/tag/",
+				"https://github.com/unigrid-project/daemonTesting/releases/download/");
+		} else {
+			daemonUrl = daemonUrl.replace("https://github.com/unigrid-project/daemon/releases/tag/",
+				"https://github.com/unigrid-project/daemon/releases/download/");
+		}
 
 		if (os.equals(OS.LINUX)) {
 			return daemonUrl + affix + version + "-x86_64-linux-gnu.tar.gz";

@@ -48,8 +48,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.paint.Paint;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.unigrid.janus.model.DocList;
 import org.unigrid.janus.model.Documentation;
+import org.unigrid.janus.view.backing.DocList;
 
 @ApplicationScoped
 public class DocumentationController implements Initializable, PropertyChangeListener {
@@ -126,6 +126,9 @@ public class DocumentationController implements Initializable, PropertyChangeLis
 				});
 
 				Button btn = new Button();
+				btn.setOnAction(e -> {
+					browser.navigate(doc.getLink());
+				});
 				FontIcon fontIcon = new FontIcon("far-newspaper");
 				fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
 				btn.setGraphic(fontIcon);
