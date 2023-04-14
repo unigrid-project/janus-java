@@ -12,12 +12,12 @@
 		<artifactId>parent</artifactId>
 		<version>1.0.11</version>
 	</parent>
-	<version>1.0.11</version>
+	<version>1.0.12</version>
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<release.tag>1.0.11</release.tag>
-		<current.tag>1.0.10</current.tag>
+		<release.tag>1.0.12</release.tag>
+		<current.tag>1.0.12</current.tag>
 		<config.opens>
 			fx=jakarta.xml.bind/jakarta.xml.bind-api
 		</config.opens>
