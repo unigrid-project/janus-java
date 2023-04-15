@@ -25,6 +25,8 @@ import jakarta.inject.Inject;
 //import java.awt.SystemTray;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javafx.application.Application;
 import javafx.application.HostServices;
@@ -42,6 +44,7 @@ import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.view.MainWindow;
+import org.update4j.OS;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.JanusModel;
@@ -231,6 +234,12 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 						Thread.sleep(2000);
 					} catch (Exception e) {
+						// if we are in here this likely means unigridd is not responding
+						// there needs to be a better way to handle this
+						// display a message to the user that unigridd is not responding
+						// add a button to the splash screen to retry
+						// can we force quite the app and restart it?
+
 						debug.print("RPC call error: " + e.getMessage().toString(),
 							Janus.class.getSimpleName()
 						);
@@ -250,6 +259,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 								Janus.class.getSimpleName()
 							);
 						}
+						forceQuitDaemon();
 					}
 
 					//TODO: Remove - model layer should not directly call these
@@ -313,5 +323,37 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		startSplashScreen();
 		mainWindow.hide();
 		janusModel.addPropertyChangeListener(this);
+	}
+
+	public void forceQuitDaemon() {
+		try {
+            String daemonName = "unigridd";
+			OS os = OS.CURRENT;
+            List<String> command = new ArrayList<>();
+            
+            if (os.equals(OS.WINDOWS)) {
+                command.add("taskkill");
+                command.add("/IM");
+                command.add("unigridd.exe");
+                command.add("/F");
+            } else if (os.equals(OS.MAC) || os.equals(OS.LINUX)) {
+                command.add("pkill");
+                command.add("-9");
+                command.add("-f");
+                command.add(daemonName);
+            } else {
+                throw new UnsupportedOperationException("Unsupported operating system.");
+            }
+
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            Process process = processBuilder.start();
+            process.waitFor();
+			debug.print("Daemon process killed.",
+					Janus.class.getSimpleName()
+				);
+			this.restartDaemon();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 	}
 }
