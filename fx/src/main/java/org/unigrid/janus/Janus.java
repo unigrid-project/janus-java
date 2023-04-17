@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -42,7 +41,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
@@ -189,12 +187,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							// rpc.stopPolling();
 							wallet.setOffline(Boolean.FALSE);
 
-							PauseTransition pause = new PauseTransition(Duration.seconds(3));
-							pause.setOnFinished(event -> {
-								startMainWindow();
-								rpc.pollForInfo(10 * 1000);
-							});
-							pause.play();
+							startMainWindow();
+							rpc.pollForInfo(10 * 1000);
 							janusModel.setAppState(JanusModel.AppState.LOADED);
 							preloader.stopSpinner();
 							preloader.hide();
