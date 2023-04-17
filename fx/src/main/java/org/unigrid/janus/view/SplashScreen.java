@@ -92,7 +92,7 @@ public class SplashScreen implements Window {
 
 	@Override
 	public void hide() {
-		stopMonitor();
+		//stopMonitor();
 		stageSplash.close();
 	}
 

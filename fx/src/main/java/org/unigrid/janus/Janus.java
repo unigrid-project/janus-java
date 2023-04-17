@@ -25,9 +25,13 @@ import jakarta.inject.Inject;
 //import java.awt.SystemTray;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -38,6 +42,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
@@ -174,8 +179,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
-			public void changed(ObservableValue<? extends Boolean> ov, Boolean t,
-					Boolean t1) {
+			public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
 				if (t1) {
 					ready.setValue(Boolean.FALSE);
 
@@ -184,8 +188,13 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							debug.print("run poll", Janus.class.getSimpleName());
 							// rpc.stopPolling();
 							wallet.setOffline(Boolean.FALSE);
-							startMainWindow();
-							rpc.pollForInfo(10 * 1000);
+
+							PauseTransition pause = new PauseTransition(Duration.seconds(3));
+							pause.setOnFinished(event -> {
+								startMainWindow();
+								rpc.pollForInfo(10 * 1000);
+							});
+							pause.play();
 							janusModel.setAppState(JanusModel.AppState.LOADED);
 							preloader.stopSpinner();
 							preloader.hide();
@@ -232,6 +241,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 				do {
 					try {
+						debug.print("startUp try loop...",
+								Janus.class.getSimpleName());
 						walletInfo = rpc.call(new GetWalletInfo.Request(),
 								GetWalletInfo.class);
 
@@ -247,14 +258,25 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							debug.print("boostrapInfo null: " + e.getMessage().toString(),
 									Janus.class.getSimpleName());
 						}
-
-						Thread.sleep(2000);
 					} catch (Exception e) {
 						// if we are in here this likely means unigridd is not responding
 						// there needs to be a better way to handle this
 						// display a message to the user that unigridd is not responding
 						// add a button to the splash screen to retry
 						// can we force quite the app and restart it?
+						if (walletInfo != null) {
+							debug.print(walletInfo.getResult().toString(),
+									Janus.class.getSimpleName());
+							if (walletInfo.hasError()) {
+								debug.print(walletInfo.getError().toString(),
+										Janus.class.getSimpleName());
+								debug.print(walletInfo.getError().toString(),
+										Janus.class.getSimpleName());
+							}
+						} else {
+							debug.print("walletInfo null",
+									Janus.class.getSimpleName());
+						}
 
 						debug.print("RPC call error: " + e.getMessage().toString(),
 								Janus.class.getSimpleName());
@@ -271,7 +293,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							debug.print("RPC call error: " + x.toString(),
 									Janus.class.getSimpleName());
 						}
-						forceQuitDaemon();
+						// forceQuitDaemon();
 					}
 
 					// TODO: Remove - model layer should not directly call these
@@ -301,6 +323,11 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							splashController.showSpinner();
 							splashController.setText("Starting unigrid backend");
 						});
+					}
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						// Handle interruption, if necessary
 					}
 				} while (Objects.isNull(walletInfo) || walletInfo.hasError());
 
@@ -358,11 +385,31 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 			ProcessBuilder processBuilder = new ProcessBuilder(command);
 			Process process = processBuilder.start();
+
+			// Read the output of the process to prevent hanging
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+			boolean processNotFound = false;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+				if (os.equals(OS.WINDOWS) && line.contains("ERROR: The process")) {
+					processNotFound = true;
+				}
+			}
+
 			process.waitFor();
-			debug.print("Daemon process killed.", Janus.class.getSimpleName());
+
+			if (processNotFound) {
+				debug.print("unigridd.exe not found, attempting to restart now.",
+						Janus.class.getSimpleName());
+				// Handle the case when the process is not found
+			} else {
+				debug.print("Daemon process killed.", Janus.class.getSimpleName());
+			}
 			this.restartDaemon(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 }
