@@ -169,9 +169,8 @@
 								<configuration>
 									<type>MSI</type>
 									<winMenu>true</winMenu>
-                                                                        <winMenuGroup>Unigrid</winMenuGroup>
-                                                                        <winShortcut>true</winShortcut>
-                                                                        <winConsole>false</winConsole>
+									<winMenuGroup>Unigrid</winMenuGroup>
+									<winShortcut>true</winShortcut>
 								</configuration>
 							</execution>
 						</executions>
