@@ -18,13 +18,15 @@ package org.unigrid.janus.model.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
@@ -60,7 +62,7 @@ public class Hedgehog {
 			String name = file.getPath().getFileName().toString();
 			if (name.contains("hedgehog")) {
 				hedgehogExecName = file.getPath().toString();
-
+				System.out.println(hedgehogExecName);
 				if (!file.getPath().toFile().canExecute()) {
 					file.getPath().toFile().setExecutable(true);
 				}
@@ -73,7 +75,21 @@ public class Hedgehog {
 		ProcessBuilder pb = new ProcessBuilder();
 		pb.command(hedgehogExecName, "daemon");
 		p = pb.start();
-		p.waitFor(10, TimeUnit.SECONDS);
+		//p.waitFor(10, TimeUnit.SECONDS);
+		connectToHedgehog();
+	}
+
+	public boolean connectToHedgehog() {
+		String uri = "https://127.0.0.1:52884/gridspork";
+		Client client = ClientBuilder.newClient();
+		int statusCode = 0;
+
+		while (statusCode == 200) {
+			Response response = client.target(uri).request().get();
+			statusCode = response.getStatus();
+		}
+
+		return true;
 	}
 
 	public Process getProcess() {
