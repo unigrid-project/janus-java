@@ -1,42 +1,48 @@
 name: Create New Release
 
 on:
-  push:
-    tags:
-      - "v*_fx"
-      - "v*_bootstrap"
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version'
+        required: true
+      target_module:
+        description: 'Target module'
+        required: true
+        default: 'fx'
+        type: choice
+        options:
+        - fx
+        - bootstrap
 
 env:
+  GITHUB_TOKEN: ${{ secrets.ACTION_PAT }}
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GROUP_ID: org.unigrid*
-  ARTIFACT_ID_DESKTOP: desktop
-  UPDATEREPO: unigrid-project/unigrid-update-testing
-  TAG_MATCHER: v*_*
-  TAG_PATTERN_FX: v*_fx
-  TAG_PATTERN_BOOTSTRAP: v*_bootstrap
+  UPDATE_REPO: unigrid-project/unigrid-update-testing
+  JANUS_REPO: unigrid-project/janus-java-testing
   EXCLUDE_CONFIG_FILES_ARG: #--exclude 'config*test.xml'
   INCLUDE_CONFIG_FILES_MATCHER: 'config/target/config*test.xml'
+  USERNAME: 'Github Actions'
+  EMAIL: 'actions@github.com'
 
 jobs:
   create-release:
     runs-on: ubuntu-latest
     permissions: write-all
     outputs:
-      tag: ${{ env.TAG }}
+      tag: ${{ inputs.release_version }}
       version: ${{ env.VERSION }}
-      artifact_id: ${{ env.ARTIFACT_ID }}
       bootstrap_snapshot: ${{ env.BOOTSTRAP_SNAPSHOT }}
       fx_snapshot: ${{ env.FX_SNAPSHOT }}
 
     steps:
-      - name: Wait for tests to succeed
-        uses: lewagon/wait-on-check-action@v1.2.0
-        with:
-          ref: ${{ github.ref }}
-          check-name: 'Run tests'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
+      - name: print release_version
+        run: echo ${{ inputs.release_version }}
+      - name: print target_module
+        run: echo ${{ inputs.target_module }}
+      - name: print full tag
+        run: echo ${{ inputs.release_version }}_${{ inputs.target_module }}
 
       - uses: actions/checkout@v3
         with:
@@ -50,14 +56,29 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.6
+
+      - name: Maven version
+        run: |
+          mvn -v
+
+      - name: Run Test
+        run: |
+          xvfb-run -a mvn -f config/pom.xml clean install
+          xvfb-run -a mvn test -Dcheckstyle.skip
+
       - name: Set env before removal of snapshot
         run: |
           echo "FX_SNAPSHOT=$(echo $(mvn -f fx/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout))" >> $GITHUB_ENV
           echo "BOOTSTRAP_SNAPSHOT=$(echo $(mvn -f bootstrap/pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout))" >> $GITHUB_ENV
+          echo FX_SNAPSHOT ${{ env.FX_SNAPSHOT }}
+          echo BOOTSTRAP_SNAPSHOT ${{ env.BOOTSTRAP_SNAPSHOT }}
 
       - name: Remove Snapshots suffix
         run: |
-          xvfb-run -a mvn -f config/pom.xml clean install -Dmaven.test.skip=true -B -e
           mvn versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true -DupdateMatchingVersions=false
           mvn -f fx/pom.xml versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true -DupdateMatchingVersions=false
           mvn -f desktop/pom.xml versions:set -DgenerateBackupPoms=false -DremoveSnapshot=true -DupdateMatchingVersions=false
@@ -66,28 +87,24 @@ jobs:
 
       - name: Set env tag, version, artifact id
         run: |
-          echo "TAG=$(echo $(git describe --tags --abbrev=0 --match ${{ env.TAG_MATCHER }}))" >> $GITHUB_ENV
-          echo "VERSION=$(echo $(git describe --tags --abbrev=0 --match ${{ env.TAG_MATCHER }}) | cut --complement -c 1 | cut -d '_' -f1)" >> $GITHUB_ENV
+          echo "VERSION=$(echo ${{ inputs.release_version }} | cut --complement -c 1 | cut -d '_' -f1)" >> $GITHUB_ENV
           echo "PARENT_TAG=v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
-          if [[ $(git describe --tags --abbrev=0 --match ${{ env.TAG_MATCHER }}) == ${{ env.TAG_PATTERN_BOOTSTRAP }} ]];
+
+      - name: Bump version
+        run: |
+          mvn -f ${{ inputs.target_module }}/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=${{ env.VERSION }} -DgenerateBackupPoms=false -DupdateMatchingVersions=false
+          if [[ ${{ inputs.target_module }} == 'bootstrap' ]];
           then
-            echo "Release for bootstrap"
-            echo "ARTIFACT_ID=bootstrap" >> $GITHUB_ENV
-          elif [[ $(git describe --tags --abbrev=0 --match ${{ env.TAG_MATCHER }}) == ${{ env.TAG_PATTERN_FX }} ]];
-          then
-            echo "Release for fx"
-            echo "ARTIFACT_ID=fx" >> $GITHUB_ENV
-          else
-            echo "No artifact id found!!!"
+            mvn -f desktop/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=${{ env.VERSION }} -DgenerateBackupPoms=false -DupdateMatchingVersions=false
           fi
 
       - name: Push pom files to master
         run: |
-          git config --global user.name 'dekm'
-          git config --global user.email 'gevan73@gmail.com'
+          git config --global user.name ${{ env.USERNAME }}
+          git config --global user.email ${{ env.EMAIL }}
           git add "./*pom.xml"
-          git commit -m "Github Actions: Replace maven version in pom.xml with tag version"
-          git push https://${{ secrets.PAT }}@github.com/unigrid-project/janus-java.git HEAD:master 
+          git commit -m "Github Actions: Update maven version in pom.xml"
+          git push https://${{ secrets.ACTION_PAT }}@github.com/${{ env.JANUS_REPO }} HEAD:master
 
       - name: Change tag pointing to master latest commit
         run: |
@@ -96,21 +113,15 @@ jobs:
           git checkout master
           git tag -a ${{ env.PARENT_TAG }} -m "Tag for release"
           git push origin ${{ env.PARENT_TAG }}
-          git tag -f -a ${{ env.TAG }} -m "Tag for release"
-          git push -f origin ${{ env.TAG }}
-
-      - name: print tag
-        run: echo ${{ env.TAG }}
-
-      - name: print latest tag
-        run: echo $(git describe --tags --abbrev=0 --match ${{ env.TAG_MATCHER }})
+          git tag -a ${{ inputs.release_version }}_${{ inputs.target_module }} -m "Tag for release"
+          git push origin ${{ inputs.release_version }}_${{ inputs.target_module }}
 
       - id: create_release
         name: Release
-        run: gh release create ${{ env.TAG }} -d -p -t "${{ env.TAG }}" --generate-notes
+        run: gh release create ${{ inputs.release_version }}_${{ inputs.target_module }} -d -p -t "${{ inputs.release_version }}_${{ inputs.target_module }}" --generate-notes
 
   upload-fx:
-    if: ${{ needs.create-release.outputs.artifact_id == 'fx' }}
+    if: ${{ inputs.target_module == 'fx' }}
     runs-on: ubuntu-latest
     needs: create-release
     permissions: write-all
@@ -129,22 +140,23 @@ jobs:
 
       - name: Build fx
         run: |
-          xvfb-run -a mvn -f config/pom.xml clean install -Dmaven.test.skip=true -B -e
-          xvfb-run -a mvn clean install -Dmaven.test.skip=true -B -e
-          gh release upload ${{ needs.create-release.outputs.tag }} fx/target/fx-${{ needs.create-release.outputs.version }}.jar
+          xvfb-run -a mvn -f config/pom.xml clean install -Dmaven.test.skip=true -Dcheckstyle.skip -B -e
+          xvfb-run -a mvn clean install -Dmaven.test.skip=true -Dcheckstyle.skip -B -e
+          gh release upload ${{ inputs.release_version }}_${{ inputs.target_module }} fx/target/fx-${{ needs.create-release.outputs.version }}.jar
 
-      - run: mkdir -p artifacts
+      - name: Prepare artifacts
+        run: |
+          mkdir -p artifacts
+          rsync -av ${{ env.EXCLUDE_CONFIG_FILES_ARG }} ${{ env.INCLUDE_CONFIG_FILES_MATCHER }} fx/target/fx*.jar artifacts
 
-      - run: rsync -av ${{ env.EXCLUDE_CONFIG_FILES_ARG }} ${{ env.INCLUDE_CONFIG_FILES_MATCHER }} fx/target/fx*.jar artifacts
-
-      - name: Archive production artifacts
+      - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
           name: artifacts
           path: artifacts
 
   upload-installer-linux:
-    if: ${{ needs.create-release.outputs.artifact_id == 'bootstrap' }}
+    if: ${{ inputs.target_module == 'bootstrap' }}
     runs-on: ubuntu-latest
     needs: create-release
     permissions: write-all
@@ -161,18 +173,27 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.6
+
+      - name: Maven version
+        run: |
+          mvn -v
+
       - name: Build Installer
         run: |
-          xvfb-run -a mvn -f config/pom.xml clean install -Dmaven.test.skip=true -B -e
-          xvfb-run -a mvn clean install -Dmaven.test.skip=true -B -e
-          xvfb-run -a mvn -f desktop/pom.xml jpackage:jpackage@installer -Djpackage.version=${{ needs.create-release.outputs.version }} -Dmaven.test.skip=true -B -e
+          xvfb-run -a mvn -f config/pom.xml clean install -Dmaven.test.skip=true -Dcheckstyle.skip -B -e
+          xvfb-run -a mvn clean install -Dmaven.test.skip=true -Dcheckstyle.skip -B -e
+          xvfb-run -a mvn -f desktop/pom.xml jpackage:jpackage@installer -Djpackage.version=${{ needs.create-release.outputs.version }} -Dmaven.test.skip=true -Dcheckstyle.skip -B -e
           cp desktop/target/dist/unigrid_${{ needs.create-release.outputs.version }}*amd64.deb .
           mv unigrid_${{ needs.create-release.outputs.version }}*amd64.deb unigrid_${{ needs.create-release.outputs.version }}_amd64.deb
-          gh release upload ${{ needs.create-release.outputs.tag }} unigrid_${{ needs.create-release.outputs.version }}_amd64.deb
+          gh release upload ${{ inputs.release_version }}_${{ inputs.target_module }} unigrid_${{ needs.create-release.outputs.version }}_amd64.deb
           sudo apt-get -y install alien
           alien -r unigrid_${{ needs.create-release.outputs.version }}_amd64.deb
           mv unigrid-${{ needs.create-release.outputs.version }}*x86_64.rpm unigrid-${{ needs.create-release.outputs.version }}-x86_64.rpm
-          gh release upload ${{ needs.create-release.outputs.tag }} unigrid-${{ needs.create-release.outputs.version }}-x86_64.rpm
+          gh release upload ${{ inputs.release_version }}_${{ inputs.target_module }} unigrid-${{ needs.create-release.outputs.version }}-x86_64.rpm
 
       - run: mkdir -p artifacts
 
@@ -185,7 +206,7 @@ jobs:
           path: artifacts
 
   upload-installer-windows:
-    if: ${{ needs.create-release.outputs.artifact_id == 'bootstrap' }}
+    if: ${{ inputs.target_module == 'bootstrap' }}
     runs-on: windows-latest
     needs: create-release
     permissions: write-all
@@ -202,6 +223,15 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.6
+
+      - name: Maven version
+        run: |
+          mvn -v
+
       - name: Build Installer
         run: |
           mvn -f config/pom.xml clean install `-Dmaven.test.skip=true -B -e
@@ -209,10 +239,10 @@ jobs:
           mvn -f desktop/pom.xml jpackage:jpackage@installer `-Djpackage.version=${{ needs.create-release.outputs.version }} `-Dmaven.test.skip=true -B -e
           cp desktop/target/dist/Unigrid-${{ needs.create-release.outputs.version }}*.msi .
           mv Unigrid-${{ needs.create-release.outputs.version }}*.msi Unigrid-${{ needs.create-release.outputs.version }}.msi
-          gh release upload ${{ needs.create-release.outputs.tag }} Unigrid-${{ needs.create-release.outputs.version }}.msi
+          gh release upload ${{ inputs.release_version }}_${{ inputs.target_module }} Unigrid-${{ needs.create-release.outputs.version }}.msi
 
   upload-installer-mac:
-    if: ${{ needs.create-release.outputs.artifact_id == 'bootstrap' }}
+    if: ${{ inputs.target_module == 'bootstrap' }}
     runs-on: macos-latest
     needs: create-release
     permissions: write-all
@@ -229,11 +259,20 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.6
+
+      - name: Maven version
+        run: |
+          mvn -v
+
       - name: Build Installer
         run: |
-          mvn -f config/pom.xml clean install -Dmaven.test.skip=true -B -e
-          mvn clean install -Dmaven.test.skip=true -B -e
-          mvn -f desktop/pom.xml jpackage:jpackage@installer -Djpackage.version=${{ needs.create-release.outputs.version }} -Dmaven.test.skip=true -B -e
+          mvn -f config/pom.xml clean install -Dmaven.test.skip=true -Dcheckstyle.skip -B -e
+          mvn clean install -Dmaven.test.skip=true -Dcheckstyle.skip -B -e
+          mvn -f desktop/pom.xml jpackage:jpackage@installer -Djpackage.version=${{ needs.create-release.outputs.version }} -Dmaven.test.skip=true -Dcheckstyle.skip -B -e
           cp desktop/target/dist/Unigrid-${{ needs.create-release.outputs.version }}*.dmg .
           mv Unigrid-${{ needs.create-release.outputs.version }}*.dmg Unigrid-${{ needs.create-release.outputs.version }}.dmg
           ls
@@ -242,18 +281,19 @@ jobs:
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-          KEYCHAIN_NAME: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
           KEYCHAIN_PWD: ${{ secrets.KEYCHAIN_PWD }}
         run: |
           echo $MACOS_CERTIFICATE | base64 -d > certificate.p12
-          security create-keychain -p $KEYCHAIN_PWD $KEYCHAIN_NAME
-          security default-keychain -s $KEYCHAIN_NAME
-          security unlock-keychain -p $KEYCHAIN_PWD $KEYCHAIN_NAME
-          security import certificate.p12 -k $KEYCHAIN_NAME -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PWD $KEYCHAIN_NAME
+          security create-keychain -p $KEYCHAIN_PWD build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p $KEYCHAIN_PWD build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PWD build.keychain
           /usr/bin/codesign --force -s "Developer ID Application: UGD Software AB (XH4NHZYJ98)" ./Unigrid-${{ needs.create-release.outputs.version }}.dmg -v
           codesign -dv --verbose=4 Unigrid-${{ needs.create-release.outputs.version }}.dmg && echo SIGNED!
-          gh release upload ${{ needs.create-release.outputs.tag }} Unigrid-${{ needs.create-release.outputs.version }}.dmg
+          codesign -vv -d Unigrid-${{ needs.create-release.outputs.version }}.dmg
+          gh release upload ${{ inputs.release_version }}_${{ inputs.target_module }} Unigrid-${{ needs.create-release.outputs.version }}.dmg
 
   update-repository:
     runs-on: ubuntu-latest
@@ -276,16 +316,21 @@ jobs:
 
       - run: ls artifacts
 
-      - run: git clone https://${{ secrets.PAT }}@github.com/${{ env.UPDATEREPO }} update-repository
+      - name: Update config files
+        run: |
+          git clone https://${{ secrets.ACTION_PAT }}@github.com/${{ env.UPDATE_REPO }} unigrid-update
+          git -C unigrid-update checkout main
+          cp -rf artifacts/config*.xml unigrid-update/
 
-      - run: cp -rf artifacts/* update-repository
-
-      - run: ls update-repository
+          if [[ ${{ inputs.target_module }} 'fx' ]];
+          then
+            cp -rf artifacts/fx*.jar unigrid-update/
+          fi
+          ls unigrid-update
   
       - name: Set env
         run: |
-          cd update-repository
-          if [[ $(git status --porcelain) ]];
+          if [[ $(git -C unigrid-update status --porcelain) ]];
           then
             echo "There are untracked files"
             echo "GITDIFF=true" >> $GITHUB_ENV
@@ -297,19 +342,11 @@ jobs:
       - name: Commit config files
         if: ${{ env.GITDIFF == 'true' }}
         run: |
-          cd update-repository
-          git config user.name 'Github Actions'
-          git config user.email 'actions@github.com'
-          git add .
-          git commit -m "Github Actions: Add files for release"
-          git push origin master
-
-      - name: Create tag - when tag created will trigger create release
-        if: ${{ needs.create-release.outputs.artifact_id == 'fx' }}
-        run: |
-          cd update-repository
-          git tag -f -a v${{ needs.create-release.outputs.version }} -m "Tag for release"
-          git push origin v${{ needs.create-release.outputs.version }}
+          git -C unigrid-update config --global user.name ${{ env.USERNAME }}
+          git -C unigrid-update config --global user.email ${{ env.EMAIL }}
+          git -C unigrid-update add .
+          git -C unigrid-update commit -m "Github Actions: Add files for release"
+          git -C unigrid-update push origin main
 
   bump-version:
     runs-on: ubuntu-latest
@@ -331,22 +368,22 @@ jobs:
 
       - name: Bump version
         run: |
-          xvfb-run -a mvn -f config/pom.xml clean install -Dmaven.test.skip=true -B -e
+          xvfb-run -a mvn -f config/pom.xml clean install -Dmaven.test.skip=true -Dcheckstyle.skip -B -e
           mvn versions:set -DnextSnapshot=true -DgenerateBackupPoms=false -DprocessDependencies=false -DupdateMatchingVersions=false
-          mvn -f ${{ needs.create-release.outputs.artifact_id }}/pom.xml versions:set -DnextSnapshot=true -DgenerateBackupPoms=false -DupdateMatchingVersions=false
+          mvn -f ${{ inputs.target_module }}/pom.xml versions:set -DnextSnapshot=true -DgenerateBackupPoms=false -DupdateMatchingVersions=false
 
       - name: Set Snapshot
         run: |
-          if [[ $(git describe --tags --abbrev=0 --match ${{ env.TAG_MATCHER }}) == ${{ env.TAG_PATTERN_BOOTSTRAP }} ]];
+          if [[ ${{ inputs.target_module }} == 'bootstrap' ]];
           then
             echo Release Bootstrap
-            mvn -f ${{ env.ARTIFACT_ID_DESKTOP }}/pom.xml versions:set -DnextSnapshot=true -DgenerateBackupPoms=false -DupdateMatchingVersions=false
+            mvn -f desktop/pom.xml versions:set -DnextSnapshot=true -DgenerateBackupPoms=false -DupdateMatchingVersions=false
             mvn -f fx/pom.xml versions:set -DnewVersion=${{ needs.create-release.outputs.fx_snapshot }} -DgenerateBackupPoms=false -DupdateMatchingVersions=false
-          elif [[ $(git describe --tags --abbrev=0 --match ${{ env.TAG_MATCHER }}) == ${{ env.TAG_PATTERN_FX }} ]];
+          elif [[ ${{ inputs.target_module }} == 'fx' ]];
           then
             echo Release Fx
             mvn -f bootstrap/pom.xml versions:set -DnewVersion=${{ needs.create-release.outputs.bootstrap_snapshot }} -DgenerateBackupPoms=false -DupdateMatchingVersions=false
-            mvn -f ${{ env.ARTIFACT_ID_DESKTOP }}/pom.xml versions:set -DnewVersion=${{ needs.create-release.outputs.bootstrap_snapshot }} -DgenerateBackupPoms=false -DupdateMatchingVersions=false
+            mvn -f desktop/pom.xml versions:set -DnewVersion=${{ needs.create-release.outputs.bootstrap_snapshot }} -DgenerateBackupPoms=false -DupdateMatchingVersions=false
           fi
 
       - name: Commit versions without snapshot
