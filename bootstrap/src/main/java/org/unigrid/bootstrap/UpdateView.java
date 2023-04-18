@@ -204,7 +204,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 							Sentry.captureException(s);
 							System.out.println(s);
 							System.out.println("updatehandler = null");
-							status.setText("No updates found");
+							Platform.runLater(new Runnable() {
+								@Override
+								public void run() {
+									status.setText("No updates found");
+								}
+							});
 
 							synchronized (launchTrigger) {
 								launchTrigger.notifyAll();
