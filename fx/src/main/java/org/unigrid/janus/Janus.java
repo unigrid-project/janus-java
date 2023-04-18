@@ -114,9 +114,14 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	public void startDaemon() {
 		debug.print("Janus starting daemon...", Janus.class.getSimpleName());
-
 		try {
 			hedgehog.startHedgehog();
+			//AlertDialog.open(AlertType.ERROR, "Something fucked up!");
+		} catch (Exception e) {
+			AlertDialog.open(AlertType.ERROR, e.getMessage());
+		}
+		try {
+			
 			daemon.start();
 		} catch (Exception e) {
 			AlertDialog.open(AlertType.ERROR, e.getMessage());
