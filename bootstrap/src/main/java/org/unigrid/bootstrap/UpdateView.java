@@ -204,7 +204,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 							Sentry.captureException(s);
 							System.out.println(s);
 							System.out.println("updatehandler = null");
-							status.setText("No updates found");
+							Platform.runLater(new Runnable() {
+								@Override
+								public void run() {
+									status.setText("No updates found");
+								}
+							});
 
 							synchronized (launchTrigger) {
 								launchTrigger.notifyAll();
@@ -406,6 +411,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		System.out.println(untarName);
 		Path source = Paths.get(startLoacation + "/lib/" + untarName);
 		Path target = Paths.get(startLoacation + "/bin/");
+		
 
 		try {
 			unzipFolder(source, target);
@@ -498,6 +504,10 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 		if (!depenendencies.exists()) {
 			depenendencies.mkdirs();
+			if(OS.CURRENT == OS.WINDOWS) {
+				depenendencies.setReadable(true);
+				depenendencies.setWritable(true);
+			}
 		}
 
 		return blockRoot;

@@ -34,6 +34,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -52,16 +53,27 @@ import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.signal.CloseJanus;
+import org.unigrid.janus.model.signal.SplashMessage;
 import org.unigrid.janus.model.service.BrowserService;
+import org.unigrid.janus.model.service.DebugService;
 
 @Eager
 @Data
 @ApplicationScoped
 public class SplashScreen implements Window {
-	@Inject private JanusModel janusModel;
-	@Inject private SplashScreenController splashScreenController; // TODO: Big no no. View should not see this.
-	@Inject private Stage stageSplash;
-	@Inject private BrowserService window;
+	@Inject
+	private DebugService debug;
+	@Inject
+	private JanusModel janusModel;
+	@Inject
+	private SplashScreenController splashScreenController;
+	// TODO: Big no no. View should
+	// not see this.
+
+	@Inject
+	private Stage stageSplash;
+	@Inject
+	private BrowserService window;
 
 	private FontIcon spinnerPreLoad;
 	private RotateTransition rt;
@@ -92,7 +104,7 @@ public class SplashScreen implements Window {
 
 	@Override
 	public void hide() {
-		stopMonitor();
+		// stopMonitor();
 		stageSplash.close();
 	}
 
@@ -101,7 +113,7 @@ public class SplashScreen implements Window {
 		spinnerPreLoad.setVisible(true);
 
 		rt = new RotateTransition(Duration.millis(50000), spinnerPreLoad);
-		//rt.setRate(1.0);
+		// rt.setRate(1.0);
 		rt.setByAngle(20000);
 		rt.setCycleCount(Animation.INDEFINITE);
 		rt.setAutoReverse(true);
@@ -112,11 +124,24 @@ public class SplashScreen implements Window {
 
 	public void stopSpinner() {
 		rt.stop();
-		//spinnerPreLoad.setVisible(false);
+		// spinnerPreLoad.setVisible(false);
 	}
 
 	private void onClose(@Observes Event<CloseJanus> closeJanus) {
 		this.stageSplash.close();
+	}
+
+	private void onMessage(@Observes SplashMessage splashMessage) {
+		debug.print("Splash message from event:" + splashMessage.getMessage(),
+				SplashScreen.class.getSimpleName());
+		if (stageSplash.isShowing()) {
+			Platform.runLater(() -> {
+				text.setText(splashMessage.getMessage());
+			});
+		} else {
+			debug.print("Splash screen is not showing yet: " + splashMessage.getMessage(),
+				SplashScreen.class.getSimpleName());
+		}
 	}
 
 	public void initText() {
@@ -132,16 +157,18 @@ public class SplashScreen implements Window {
 		status.setFont(font);
 		status.setText("...");
 
-		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.7), evt -> status.setVisible(false)),
-			new KeyFrame(Duration.seconds(0.2), evt -> status.setVisible(true))
-		);
+		Timeline timeline = new Timeline(
+				new KeyFrame(Duration.seconds(0.7), evt -> status.setVisible(false)),
+				new KeyFrame(Duration.seconds(0.2), evt -> status.setVisible(true)));
 
 		timeline.setCycleCount(Animation.INDEFINITE);
 		timeline.play();
 	}
 
 	public void setText(String s) {
-		text.setText(s);
+		if (stageSplash.isShowing()) {
+			text.setText(s);
+		}
 	}
 
 	private void readDebug() throws IOException, Exception {
@@ -159,22 +186,22 @@ public class SplashScreen implements Window {
 					try {
 						updateDebug();
 					} catch (IOException ex) {
-						Logger.getLogger(SplashScreen.class.getName())
-							.log(Level.SEVERE, null, ex);
+						Logger.getLogger(SplashScreen.class.getName()).log(Level.SEVERE,
+								null, ex);
 					}
 				}
 
-				//System.out.println("File updated: " + file);
+				// System.out.println("File updated: " + file);
 			}
 
 			@Override
 			public void onStart(FileAlterationObserver observer) {
-				//System.out.println("observer start: " + observer);
+				// System.out.println("observer start: " + observer);
 			}
 
 			@Override
 			public void onStop(FileAlterationObserver observer) {
-				//System.out.println("observer stop: " + observer);
+				// System.out.println("observer stop: " + observer);
 			}
 		});
 
@@ -198,8 +225,11 @@ public class SplashScreen implements Window {
 		while ((line = br.readLine()) != null) {
 			sbuffer.append(line + "\n");
 		}
+		// TODO: Big no no. View
+		// should not see
+		// this.
+		splashScreenController.setDebugText(sbuffer.toString());
 
-		splashScreenController.setDebugText(sbuffer.toString()); // TODO: Big no no. View should not see this.
 	}
 
 	public void startMonitor() throws Exception {
