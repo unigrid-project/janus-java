@@ -28,7 +28,8 @@ public class ApplicationLoader extends Application {
 	@Override
 	public void init() throws Exception {
 		HostServicesProducer.setHostServices(getHostServices());
-
+		// TODO remove this.. just adding to change the fx file size
+		// and recompile new configs
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
 		application = container.select(Janus.class).get();
 	}

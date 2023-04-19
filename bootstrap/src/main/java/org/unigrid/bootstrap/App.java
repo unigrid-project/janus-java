@@ -40,8 +40,6 @@ import io.sentry.Sentry;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
-import java.util.Objects;
-import java.util.Properties;
 import java.util.UUID;
 import javafx.application.HostServices;
 //import ch.qos.logback.classic.Level;
