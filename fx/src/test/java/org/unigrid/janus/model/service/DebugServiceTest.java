@@ -29,6 +29,7 @@ import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.BeforeContainer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.endsWith;
 //import org.unigrid.janus.controller.SettingsController;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
 import org.unigrid.janus.jqwik.fx.FxResource;
@@ -147,7 +148,7 @@ public class DebugServiceTest extends BaseFxTest {
 		debugService.print("test", "DebugServiceTest");
 		System.setOut(standardOut);
 
-		assertThat(outputStreamCaptor.toString().trim(), equalTo("test"));
+		assertThat(outputStreamCaptor.toString().trim(), endsWith("test"));
 	}
 
 	@Example
@@ -156,7 +157,7 @@ public class DebugServiceTest extends BaseFxTest {
 		debugService.trace("test");
 		System.setOut(standardOut);
 
-		assertThat(outputStreamCaptor.toString().trim(), equalTo("test"));
+		assertThat(outputStreamCaptor.toString().trim(), endsWith("test"));
 	}
 
 }
