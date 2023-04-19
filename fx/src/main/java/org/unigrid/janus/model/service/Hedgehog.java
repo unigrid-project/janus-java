@@ -18,8 +18,12 @@ package org.unigrid.janus.model.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -27,18 +31,39 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
 import org.unigrid.janus.model.cdi.Eager;
+import org.unigrid.janus.model.signal.SplashMessage;
 import org.update4j.Configuration;
 import org.update4j.FileMetadata;
 import org.update4j.OS;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.X509Certificate;
+
 @Eager
 @ApplicationScoped
 public class Hedgehog {
+
+	@Inject
+	private DebugService debug;
+	@Inject
+	private Event<SplashMessage> splashMessageEvent;
 
 	private Configuration config = null;
 
@@ -46,11 +71,10 @@ public class Hedgehog {
 
 	private Process p;
 
-	private static final Map<?, ?> OS_CONFIG = ArrayUtils.toMap(new Object[][] {
-		{OS.LINUX, UpdateURL.getLinuxUrl()},
-		{OS.WINDOWS, UpdateURL.getWindowsUrl()},
-		{OS.MAC, UpdateURL.getMacUrl()}
-	});
+	private static final Map<?, ?> OS_CONFIG = ArrayUtils
+		.toMap(new Object[][]{{OS.LINUX, UpdateURL.getLinuxUrl()},
+			{OS.WINDOWS, UpdateURL.getWindowsUrl()},
+			{OS.MAC, UpdateURL.getMacUrl()}});
 
 	@PostConstruct
 	@SneakyThrows
@@ -76,21 +100,97 @@ public class Hedgehog {
 		ProcessBuilder pb = new ProcessBuilder();
 		pb.command(hedgehogExecName, "daemon");
 		p = pb.start();
-		p.waitFor(10, TimeUnit.SECONDS);
-		//connectToHedgehog();
+		debug.print("Connecting to Hedgehog...", Hedgehog.class.getSimpleName());
+		// splashMessageEvent.fire(
+		// SplashMessage.builder().message("Starting Hedgehog").build());
+		// p.waitFor(10, TimeUnit.SECONDS);
+		CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+			try {
+				return connectToHedgehog();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+		int statusCode = future.get();
+		if (statusCode == 200) {
+			debug.print("Connected to Hedgehog", Hedgehog.class.getSimpleName());
+			splashMessageEvent.fire(
+				SplashMessage.builder().message("Connected to Hedgehog").build());
+		} else {
+			debug.print("Failed to connect to Hedgehog (status code " + statusCode + ")",
+				Hedgehog.class.getSimpleName());
+		}
 	}
 
-	public boolean connectToHedgehog() {
+	public int connectToHedgehog()
+		throws InterruptedException, ExecutionException, TimeoutException {
 		String uri = "https://127.0.0.1:52884/gridspork";
-		Client client = ClientBuilder.newClient();
-		int statusCode = 0;
 
-		while (statusCode != 200) {
-			Response response = client.target(uri).request().get();
-			statusCode = response.getStatus();
+		// Trust all certificates
+		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+			public X509Certificate[] getAcceptedIssuers() {
+				return new X509Certificate[0];
+			}
+
+			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			}
+
+			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			}
+		}
+		};
+
+		SSLContext sc = null;
+		try {
+			sc = SSLContext.getInstance("SSL");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		} catch (Exception e) {
+			// Handle the exception
+
 		}
 
-		return true;
+		// Disable hostname verification
+		HostnameVerifier allHostsValid = (hostname, session) -> true;
+		Client client = ClientBuilder.newBuilder().sslContext(sc)
+			.hostnameVerifier(allHostsValid).build();
+
+		final AtomicInteger statusCode = new AtomicInteger(-1);
+		WebTarget target = client.target(uri);
+		Callable<Integer> task = () -> {
+			while (statusCode.get() != 200) {
+				Response response;
+				try {
+					response = target.request()
+						.property("javax.xml.ws.client.receiveTimeout", 10000)
+						// 10 second timeout
+						.get();
+				} catch (ProcessingException e) {
+					System.err.println("response Error: " + e.getMessage());
+					debug.print("response Error: " + e.getMessage(),
+						Hedgehog.class.getSimpleName());
+					// You may want to wait a bit before retrying
+					continue;
+				}
+				statusCode.set(response.getStatus());
+			}
+			return statusCode.get();
+		};
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		Future<Integer> future = executor.submit(task);
+		int timeout = 5; // Timeout in seconds
+		try {
+			statusCode.set(future.get(timeout, TimeUnit.SECONDS));
+		} catch (TimeoutException e) {
+			future.cancel(true); // Interrupt the task if it's still running
+			throw e; // Rethrow the TimeoutException
+		} finally {
+			executor.shutdown(); // Shutdown the executor
+		}
+		debug.print("Status Code: " + statusCode.get(), Hedgehog.class.getSimpleName());
+		splashMessageEvent.fire(
+			SplashMessage.builder().message("Connected to Hedgehog...").build());
+		return statusCode.get();
 	}
 
 	public Process getProcess() {
