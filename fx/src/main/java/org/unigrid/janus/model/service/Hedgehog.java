@@ -44,7 +44,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
@@ -214,7 +213,6 @@ public class Hedgehog {
 			Platform.runLater(() -> splashMessageEvent.fire(
 				SplashMessage.builder().message("Connected to Hedgehog").build()));
 		}
-
 		return statusCode.get();
 	}
 

@@ -411,6 +411,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		System.out.println(untarName);
 		Path source = Paths.get(startLoacation + "/lib/" + untarName);
 		Path target = Paths.get(startLoacation + "/bin/");
+		
 
 		try {
 			unzipFolder(source, target);
@@ -500,12 +501,28 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		);
 
 		File depenendencies = new File(blockRoot);
+		File file = new File(depenendencies.getAbsolutePath() + "/lib");
 
 		if (!depenendencies.exists()) {
 			depenendencies.mkdirs();
+			if(OS.CURRENT == OS.WINDOWS) {
+				setPermissions(depenendencies);
+			}
+		}
+		if (!file.exists()) {
+			if(OS.CURRENT == OS.WINDOWS) {
+				file.mkdirs();
+				setPermissions(file);
+			}
 		}
 
 		return blockRoot;
+	}
+	
+	public static void setPermissions(File file) {
+		file.setExecutable(true);
+		file.setReadable(true);
+		file.setWritable(true);
 	}
 
 	@Override
