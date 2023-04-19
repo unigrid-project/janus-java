@@ -21,6 +21,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 //import java.awt.SystemTray;
@@ -41,12 +42,14 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
+import org.unigrid.janus.model.signal.HedgehogError;
 import org.unigrid.janus.model.signal.SplashMessage;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.BrowserService;
@@ -68,6 +71,7 @@ import org.unigrid.janus.view.AlertDialog;
 @Eager
 @ApplicationScoped
 public class Janus extends BaseApplication implements PropertyChangeListener {
+
 	@Inject
 	private Daemon daemon;
 	@Inject
@@ -126,7 +130,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 			// AlertDialog.open(AlertType.ERROR, "Something fucked up!");
 		} catch (Exception e) {
 			debug.print("Hedgehog startup catch: " + e.getMessage(),
-					Janus.class.getSimpleName());
+				Janus.class.getSimpleName());
 			// AlertDialog.open(AlertType.ERROR, "Hedgehog start error: " +
 			// e.getMessage());
 		}
@@ -149,7 +153,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@Override
 	public void start(Stage stage, Application.Parameters parameters,
-			HostServices hostServices) throws Exception {
+		HostServices hostServices) throws Exception {
 		Platform.setImplicitExit(false);
 
 		debug.print("start", Janus.class.getSimpleName());
@@ -161,7 +165,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> ov, Boolean t,
-					Boolean t1) {
+				Boolean t1) {
 				if (t1) {
 					ready.setValue(Boolean.FALSE);
 
@@ -195,7 +199,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> ov, Boolean t,
-					Boolean t1) {
+				Boolean t1) {
 				if (t1) {
 					ready.setValue(Boolean.FALSE);
 
@@ -247,7 +251,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 			@Override
 			protected Void call() throws Exception {
 				debug.print("started while loop and calling unigridd RPC...",
-						Janus.class.getSimpleName());
+					Janus.class.getSimpleName());
 				GetWalletInfo walletInfo = null;
 				Thread.sleep(1000);
 
@@ -255,11 +259,11 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 					try {
 						debug.print("startUp try loop...", Janus.class.getSimpleName());
 						walletInfo = rpc.call(new GetWalletInfo.Request(),
-								GetWalletInfo.class);
+							GetWalletInfo.class);
 
 						final GetBootstrappingInfo boostrapInfo = rpc.call(
-								new GetBootstrappingInfo.Request(),
-								GetBootstrappingInfo.class);
+							new GetBootstrappingInfo.Request(),
+							GetBootstrappingInfo.class);
 						try {
 							walletStatus = boostrapInfo.getResult().getWalletstatus();
 							progress = boostrapInfo.getResult().getProgress();
@@ -267,7 +271,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 						} catch (Exception e) {
 							// TODO: handle exception
 							debug.print("boostrapInfo null: " + e.getMessage().toString(),
-									Janus.class.getSimpleName());
+								Janus.class.getSimpleName());
 						}
 					} catch (Exception e) {
 						// if we are in here this likely means unigridd is not responding
@@ -277,33 +281,32 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 						// can we force quite the app and restart it?
 						if (walletInfo != null) {
 							debug.print(walletInfo.getResult().toString(),
-									Janus.class.getSimpleName());
+								Janus.class.getSimpleName());
 							if (walletInfo.hasError()) {
 								debug.print(walletInfo.getError().toString(),
-										Janus.class.getSimpleName());
+									Janus.class.getSimpleName());
 								debug.print(walletInfo.getError().toString(),
-										Janus.class.getSimpleName());
+									Janus.class.getSimpleName());
 							}
 						} else {
 							debug.print("walletInfo null", Janus.class.getSimpleName());
 						}
 
 						debug.print("RPC call error: " + e.getMessage().toString(),
-								Janus.class.getSimpleName());
+							Janus.class.getSimpleName());
 
 						for (var x : e.getSuppressed()) {
 							debug.print("RPC call error: " + x.getCause().getMessage(),
-									Janus.class.getSimpleName());
+								Janus.class.getSimpleName());
 						}
 
 						debug.print("RPC call error: " + e.getCause().getMessage(),
-								Janus.class.getSimpleName());
+							Janus.class.getSimpleName());
 
 						for (var x : e.getStackTrace()) {
 							debug.print("RPC call error: " + x.toString(),
-									Janus.class.getSimpleName());
+								Janus.class.getSimpleName());
 						}
-						// forceQuitDaemon();
 					}
 
 					// TODO: Remove - model layer should not directly call these
@@ -313,7 +316,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							splashController.showProgressBar();
 
 							PauseTransition delay = new PauseTransition(
-									Duration.seconds(3));
+								Duration.seconds(4));
 							delay.setOnFinished(event -> {
 								splashController.setText("Downloading blockchain");
 							});
@@ -330,7 +333,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							splashController.showProgressBar();
 
 							PauseTransition delay = new PauseTransition(
-									Duration.seconds(3));
+								Duration.seconds(4));
 							delay.setOnFinished(event -> {
 								splashController.setText("Unarchiving blockchain");
 							});
@@ -347,7 +350,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							splashController.showSpinner();
 
 							PauseTransition delay = new PauseTransition(
-									Duration.seconds(3));
+								Duration.seconds(4));
 							delay.setOnFinished(event -> {
 								splashController.setText("Starting unigrid backend");
 							});
@@ -362,7 +365,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 				} while (Objects.isNull(walletInfo) || walletInfo.hasError());
 
 				debug.print("startup completed should load main screen..." + walletStatus,
-						Janus.class.getSimpleName());
+					Janus.class.getSimpleName());
 
 				// TODO: Remove - model layer should not directly call this
 				splashController.hideProgBar();
@@ -393,6 +396,23 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		janusModel.addPropertyChangeListener(this);
 	}
 
+	private void onError(@Observes HedgehogError hedgehogError) {
+		Platform.runLater(() -> {
+			System.out.println("onError called: " + hedgehogError);
+			if (hedgehogError == HedgehogError.NOT_FOUND) {
+				AlertDialog.open(Alert.AlertType.ERROR,
+					"Hedgehog was not found in your dependencies/lib folder. "
+					+ "Please check your antivirus has not quarantined it.");
+				forceQuitDaemon();
+			} else if (hedgehogError == HedgehogError.CONNECTION_FAILED) {
+				AlertDialog.open(Alert.AlertType.ERROR,
+					"Connection failed to Hedgehog. "
+					+ "Please make sure your firewall is not blocking it.");
+				forceQuitDaemon();
+			}
+		});
+	}
+
 	public void forceQuitDaemon() {
 		try {
 			String daemonName = "unigridd";
@@ -418,7 +438,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 			// Read the output of the process to prevent hanging
 			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(process.getInputStream()));
+				new InputStreamReader(process.getInputStream()));
 			String line;
 			boolean processNotFound = false;
 			while ((line = reader.readLine()) != null) {
@@ -432,15 +452,17 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 			if (processNotFound) {
 				debug.print("unigridd.exe not found, attempting to restart now.",
-						Janus.class.getSimpleName());
+					Janus.class.getSimpleName());
 				// Handle the case when the process is not found
 			} else {
 				debug.print("Daemon process killed.", Janus.class.getSimpleName());
 			}
-			this.restartDaemon(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		debug.print("Shutting down Janus because of an issue.", Janus.class.getSimpleName());
+		preloader.stopSpinner();
+		preloader.hide();
+		Platform.exit();
 	}
-
 }
