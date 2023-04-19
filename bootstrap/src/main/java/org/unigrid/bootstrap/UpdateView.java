@@ -501,16 +501,28 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		);
 
 		File depenendencies = new File(blockRoot);
+		File file = new File(depenendencies.getAbsolutePath() + "/lib");
 
 		if (!depenendencies.exists()) {
 			depenendencies.mkdirs();
 			if(OS.CURRENT == OS.WINDOWS) {
-				depenendencies.setReadable(true);
-				depenendencies.setWritable(true);
+				setPermissions(depenendencies);
+			}
+		}
+		if (!file.exists()) {
+			if(OS.CURRENT == OS.WINDOWS) {
+				file.mkdirs();
+				setPermissions(file);
 			}
 		}
 
 		return blockRoot;
+	}
+	
+	public static void setPermissions(File file) {
+		file.setExecutable(true);
+		file.setReadable(true);
+		file.setWritable(true);
 	}
 
 	@Override
