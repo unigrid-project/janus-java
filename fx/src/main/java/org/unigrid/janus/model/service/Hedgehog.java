@@ -171,7 +171,7 @@ public class Hedgehog {
 		final AtomicInteger statusCode = new AtomicInteger(-1);
 		WebTarget target = client.target(uri);
 		Callable<Integer> task = () -> {
-			int maxRetries = 3; // Limit the number of retries
+			int maxRetries = 10; // Limit the number of retries
 			int retries = 0;
 			while (statusCode.get() != 200 && retries < maxRetries) {
 				retries++;
