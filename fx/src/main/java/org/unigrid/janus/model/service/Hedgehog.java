@@ -27,6 +27,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
@@ -75,8 +76,8 @@ public class Hedgehog {
 		ProcessBuilder pb = new ProcessBuilder();
 		pb.command(hedgehogExecName, "daemon");
 		p = pb.start();
-		//p.waitFor(10, TimeUnit.SECONDS);
-		connectToHedgehog();
+		p.waitFor(10, TimeUnit.SECONDS);
+		//connectToHedgehog();
 	}
 
 	public boolean connectToHedgehog() {
@@ -84,7 +85,7 @@ public class Hedgehog {
 		Client client = ClientBuilder.newClient();
 		int statusCode = 0;
 
-		while (statusCode == 200) {
+		while (statusCode != 200) {
 			Response response = client.target(uri).request().get();
 			statusCode = response.getStatus();
 		}
