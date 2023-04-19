@@ -9,7 +9,7 @@
         <groupId>org.unigrid</groupId>
         <artifactId>bootstrap</artifactId>
         <name>Unigrid Janus Bootstrap</name>
-        <version>1.0.10</version>
+        <version>1.0.11</version>
         <packaging>jar</packaging>
         <properties>
                 <mainClass>org.unigrid.bootstrap.App</mainClass>
