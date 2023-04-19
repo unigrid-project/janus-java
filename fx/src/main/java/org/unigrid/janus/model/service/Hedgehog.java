@@ -25,10 +25,14 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
+import javafx.application.Platform;
+
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -45,6 +49,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
 import org.unigrid.janus.model.cdi.Eager;
+import org.unigrid.janus.model.signal.HedgehogError;
 import org.unigrid.janus.model.signal.SplashMessage;
 import org.update4j.Configuration;
 import org.update4j.FileMetadata;
@@ -63,6 +68,8 @@ public class Hedgehog {
 
 	@Inject
 	private DebugService debug;
+	@Inject
+	private Event<HedgehogError> hedgehogError;
 	@Inject
 	private Event<SplashMessage> splashMessageEvent;
 
@@ -89,8 +96,15 @@ public class Hedgehog {
 			if (name.contains("hedgehog")) {
 				hedgehogExecName = file.getPath().toString();
 				System.out.println(hedgehogExecName);
-				if (!file.getPath().toFile().canExecute()) {
-					file.getPath().toFile().setExecutable(true);
+
+				if (Files.exists(file.getPath()) && Files.isRegularFile(file.getPath())) {
+					if (!file.getPath().toFile().canExecute()) {
+						file.getPath().toFile().setExecutable(true);
+					}
+				} else {
+					debug.print("hedgehog file not found or not a valid executable file.",
+						Hedgehog.class.getSimpleName());
+					hedgehogError.fire(HedgehogError.NOT_FOUND);
 				}
 			}
 		}
@@ -158,18 +172,20 @@ public class Hedgehog {
 		final AtomicInteger statusCode = new AtomicInteger(-1);
 		WebTarget target = client.target(uri);
 		Callable<Integer> task = () -> {
-			while (statusCode.get() != 200) {
+			int maxRetries = 3; // Limit the number of retries
+			int retries = 0;
+			while (statusCode.get() != 200 && retries < maxRetries) {
+				retries++;
 				Response response;
 				try {
 					response = target.request()
-						.property("javax.xml.ws.client.receiveTimeout", 10000)
-						// 10 second timeout
+						.property("javax.xml.ws.client.receiveTimeout", 5000)
 						.get();
 				} catch (ProcessingException e) {
 					System.err.println("response Error: " + e.getMessage());
 					debug.print("response Error: " + e.getMessage(),
 						Hedgehog.class.getSimpleName());
-					// You may want to wait a bit before retrying
+					TimeUnit.SECONDS.sleep(1); // Wait a second before retrying
 					continue;
 				}
 				statusCode.set(response.getStatus());
@@ -187,9 +203,18 @@ public class Hedgehog {
 		} finally {
 			executor.shutdown(); // Shutdown the executor
 		}
-		debug.print("Status Code: " + statusCode.get(), Hedgehog.class.getSimpleName());
-		splashMessageEvent.fire(
-			SplashMessage.builder().message("Connected to Hedgehog...").build());
+		debug.print("Status Code from hedgehog: " + statusCode.get(), Hedgehog.class.getSimpleName());
+		if (statusCode.get() != 200) {
+			debug.print("Failed to connect to Hedgehog (status code " + statusCode.get() + ")",
+				Hedgehog.class.getSimpleName());
+			hedgehogError.fire(HedgehogError.CONNECTION_FAILED);
+			Platform.runLater(() -> splashMessageEvent.fire(
+				SplashMessage.builder().message("Failed to connect to Hedgehog").build()));
+		} else {
+			Platform.runLater(() -> splashMessageEvent.fire(
+				SplashMessage.builder().message("Connected to Hedgehog").build()));
+		}
+
 		return statusCode.get();
 	}
 
@@ -199,8 +224,15 @@ public class Hedgehog {
 
 	@SneakyThrows
 	public void stopHedgehog() {
-		ProcessBuilder pb = new ProcessBuilder();
-		pb.command(hedgehogExecName, "cli", "stop");
-		pb.start();
+		try {
+			ProcessBuilder pb = new ProcessBuilder();
+			pb.command(hedgehogExecName, "cli", "stop");
+			pb.start();
+		} catch (IOException e) {
+			// Log or print a message indicating that an error occurred
+			System.err.println("Error stopping Hedgehog: " + e.getMessage());
+			debug.print("Error stopping Hedgehog: " + e.getMessage() + ")",
+				Hedgehog.class.getSimpleName());
+		}
 	}
 }
