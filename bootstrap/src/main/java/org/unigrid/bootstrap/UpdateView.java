@@ -16,6 +16,7 @@
 package org.unigrid.bootstrap;
 
 import io.sentry.Sentry;
+import io.sentry.util.FileUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -573,6 +574,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 				file.delete();
 			}
 		}
+	}
+
+	public void removeDepends() {
+		File file = new File(getBaseDirectory());
+		FileUtils.deleteRecursively(file);
+		System.out.println("Remove depends");
 	}
 
 	private String getFileName(String file) {

@@ -100,7 +100,7 @@ public class Daemon {
 		debug.print("starting daemon", Daemon.class.getSimpleName());
 		String testnet = BootstrapModel.isTestnet() ? "-testnet" : "-server";
 		ProcessBuilder pb = new ProcessBuilder(location, testnet);
-		process = Optional.of(pb.start());
+		process = Optional.of(pb.inheritIO().start());
 	}
 
 	private boolean isDaemonRunning() {

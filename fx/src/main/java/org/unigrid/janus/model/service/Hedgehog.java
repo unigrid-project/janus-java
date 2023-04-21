@@ -112,8 +112,7 @@ public class Hedgehog {
 	@SneakyThrows
 	public void startHedgehog() {
 		ProcessBuilder pb = new ProcessBuilder();
-		pb.command(hedgehogExecName, "daemon");
-		p = pb.start();
+		p = pb.command(hedgehogExecName, "daemon").inheritIO().start();
 		debug.print("Connecting to Hedgehog...", Hedgehog.class.getSimpleName());
 		// splashMessageEvent.fire(
 		// SplashMessage.builder().message("Starting Hedgehog").build());
