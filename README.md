@@ -1,6 +1,6 @@
 The Janus Wallet © The Unigrid Foundation
 =========================================
-<img align="right" alt="Janus cryptocurrency wallet" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Meyers_b9_s0153_b1.png" width="300"/>
+<img align="right" width="300px" height="auto" src="documentation/janus-logo.png" alt="Janus">
 
 [![Janus build status](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml/badge.svg)](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml)
 
