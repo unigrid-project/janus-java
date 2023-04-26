@@ -20,6 +20,9 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -30,6 +33,7 @@ import javafx.application.Platform;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -60,6 +64,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
+import org.unigrid.janus.model.ExternalVersion;
 
 @Eager
 @ApplicationScoped
@@ -71,6 +76,8 @@ public class Hedgehog {
 	private Event<HedgehogError> hedgehogError;
 	@Inject
 	private Event<SplashMessage> splashMessageEvent;
+	@Inject
+	private ExternalVersion externalVersion;
 
 	private Configuration config = null;
 
@@ -131,6 +138,54 @@ public class Hedgehog {
 				SplashMessage.builder().message("Connected to Hedgehog").build());
 		} else {
 			debug.print("Failed to connect to Hedgehog (status code " + statusCode + ")",
+				Hedgehog.class.getSimpleName());
+		}
+	}
+
+	public void getHedgehogVersion() {
+		String uri = "https://127.0.0.1:52884/version";
+
+		// Trust all certificates
+		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+			public X509Certificate[] getAcceptedIssuers() {
+				return new X509Certificate[0];
+			}
+
+			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			}
+
+			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			}
+		}
+		};
+
+		SSLContext sc = null;
+		try {
+			sc = SSLContext.getInstance("SSL");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		} catch (Exception e) {
+			// Handle the exception
+		}
+
+		// Disable hostname verification
+		HostnameVerifier allHostsValid = (hostname, session) -> true;
+		Client client = ClientBuilder.newBuilder().sslContext(sc)
+			.hostnameVerifier(allHostsValid).build();
+
+		WebTarget target = client.target(uri);
+		Response response;
+		try {
+			response = target.request()
+				.property("javax.xml.ws.client.receiveTimeout", 5000)
+				.get();
+			String json = response.readEntity(String.class);
+			JsonReader reader = Json.createReader(new StringReader(json));
+			JsonObject object = reader.readObject();
+			externalVersion.setHedgehogVersion(object.getString("version"));
+		} catch (ProcessingException e) {
+			System.err.println("version Error: " + e.getMessage());
+			debug.print("version Error: " + e.getMessage(),
 				Hedgehog.class.getSimpleName());
 		}
 	}

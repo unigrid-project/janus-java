@@ -57,7 +57,9 @@ import javafx.scene.layout.CornerRadii;
 import javafx.stage.Stage;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.DataDirectory;
+import org.unigrid.janus.model.ExternalVersion;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.service.DebugService;
@@ -87,6 +89,8 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@Inject private JanusModel janusModel;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
+	private BootstrapModel bootStrap;
+	@Inject private ExternalVersion externalVersion;
 
 	@Inject private Event<Navigate> navigateEvent;
 	@Inject private Event<OverlayRequest> overlayRequest;
@@ -120,6 +124,10 @@ public class SettingsController implements Initializable, PropertyChangeListener
 	@FXML private Label txtPassWarningTwo;
 	@FXML private Label txtErrorMessage;
 	@FXML private CheckBox chkNotifications;
+	@FXML private Label txtFxVersion;
+	@FXML private Label txtBootstrapVersion;
+	@FXML private Label txtDaemonVersion;
+	@FXML private Label txtHedgehogVersion;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -128,6 +136,10 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		lstDebug.setPrefHeight(500); //TODO: Put these constants in a model perhaps?
 		lstDebug.scrollTo(debugItems.size());
 		verLbl.setText("version: ".concat(janusModel.getVersion()));
+		txtFxVersion.setText(janusModel.getVersion());
+		txtBootstrapVersion.setText(bootStrap.getInstance().getBootstrapVer());
+		txtHedgehogVersion.setText(externalVersion.getHedgehogVersion());
+		txtDaemonVersion.setText(externalVersion.getDaemonVersion());
 
 		wallet.addPropertyChangeListener(this);
 		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));

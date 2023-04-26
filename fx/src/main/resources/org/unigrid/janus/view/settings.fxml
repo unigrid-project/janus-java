@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
+<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
    <children>
       <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
@@ -305,6 +305,56 @@
                         <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
                      </padding>
                   </ToggleButton>
+                  <VBox alignment="BOTTOM_CENTER" prefHeight="333.0" prefWidth="99.0">
+                     <children>
+                        <Label prefHeight="17.0" prefWidth="95.0" stylesheets="@main.css" text="Janus Ver:" textFill="#b5b5b5">
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <padding>
+                              <Insets left="1.0" right="1.0" />
+                           </padding>
+                        </Label>
+                        <Label fx:id="txtFxVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <padding>
+                              <Insets left="1.0" right="1.0" />
+                           </padding>
+                        </Label>
+                        <Label prefHeight="17.0" prefWidth="95.0" text="Installer Ver:" textFill="#b5b5b5">
+                           <padding>
+                              <Insets left="1.0" right="1.0" />
+                           </padding>
+                        </Label>
+                        <Label fx:id="txtBootstrapVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                           <padding>
+                              <Insets left="1.0" right="1.0" />
+                           </padding>
+                        </Label>
+                        <Label prefHeight="17.0" prefWidth="95.0" text="Daemon Ver:" textFill="#b5b5b5">
+                           <padding>
+                              <Insets left="1.0" right="1.0" />
+                           </padding>
+                        </Label>
+                        <Label fx:id="txtDaemonVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                           <padding>
+                              <Insets left="1.0" right="1.0" />
+                           </padding>
+                        </Label>
+                        <Label prefHeight="17.0" prefWidth="95.0" text="Hedgehog Ver:" textFill="#b5b5b5">
+                           <padding>
+                              <Insets left="1.0" right="1.0" />
+                           </padding>
+                        </Label>
+                        <Label fx:id="txtHedgehogVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                           <padding>
+                              <Insets left="1.0" right="1.0" />
+                           </padding>
+                        </Label>
+                     </children>
+                  </VBox>
                </children>
                <padding>
                   <Insets right="-1.0" />
