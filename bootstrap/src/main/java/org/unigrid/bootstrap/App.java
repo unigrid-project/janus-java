@@ -13,6 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.bootstrap;
 
 import javafx.application.Application;
@@ -42,6 +43,10 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,16 +65,22 @@ public class App extends Application implements Delegate {
 	private static Map<String, String> inputArgs = new HashMap<String, String>();
 	private HostServices hostServices = getHostServices();
 	private Stage classStage;
-	
+	final static AtomicBoolean keyPressed = new AtomicBoolean();
+	public static state startupState;
+
+	public enum state {
+		NORMAL, DEBUG, WAIT;
+	}
+
 	public static void preStart() throws IOException {
-		final AtomicBoolean keyPressed = new AtomicBoolean();
+		startupState = state.WAIT;
 		Stage debugStage = new Stage();
 		Scene debugView;
-		
+
 		debugStage.centerOnScreen();
 		debugStage.setResizable(false);
 		debugStage.initStyle(StageStyle.UNDECORATED);
-		
+
 		try {
 			debugView = new Scene(loadFXML("debugView"));
 		} catch (IOException ex) {
@@ -82,38 +93,26 @@ public class App extends Application implements Delegate {
 			@Override
 			public void handle(KeyEvent key) {
 				System.out.println("What is happening");
-				if (key.getCode() == KeyCode.ESCAPE) {
+				if (key.getCode() == KeyCode.F12) {
 					//open window
 					System.out.println("Key event triggerd!!!!");
+					startupState = state.DEBUG;
 
-					keyPressed.set(true);
+					System.out.println("KeyEvent handler thread = " + Thread.currentThread().getName());
+					debugStage.show();
 				}
 			}
 		});
-
-		for (int i = 0; i < 500; i++) {
-			try {
-				System.out.println("lSEEPPPPPPPPPP");
-				Thread.sleep(5);
-			} catch (InterruptedException ex) {
-				//On purpose
-			}	
-		}
-
-		if (keyPressed.get()) {
-			System.out.println("SHOW ME THE MONEY");
-			debugStage.showAndWait();
-		}
 		System.out.println("DONNNNEEEEEEEEEEEEE");
 	}
 
 	@Override
-	public void start(Stage stage) throws IOException {
+	public void start(Stage stage) throws IOException, InterruptedException, ExecutionException {
 		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		//root.setLevel(Level.ALL);
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
-		
+
 		scene = new Scene(loadFXML("updateView"));
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.centerOnScreen();
@@ -122,11 +121,12 @@ public class App extends Application implements Delegate {
 		stage.show();
 		classStage = stage;
 
-		//preStart(stage);
-		
+		preStart();
+		postStart();
+
 	}
-	
-	public void postStart() throws IOException {
+
+	public void postStart() throws IOException, InterruptedException, ExecutionException {
 		URL configUrl = null;
 		OS os = OS.CURRENT;
 		if (!inputArgs.containsKey("URL")) {
@@ -173,33 +173,8 @@ public class App extends Application implements Delegate {
 		}
 
 		config.sync();
-
 		UpdateView.getInstance().setConfig(config, classStage, inputArgs, hostServices);
 	}
-
-	/*@Override
-	public void keyPressed(KeyEvent e) {
-		System.out.println("What is happening");
-		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			//open window
-			Scene debugView;
-			System.out.println("Key event triggerd!!!!");
-			try {
-				debugView = new Scene(loadFXML("debugView"));
-			} catch (IOException ex) {
-				System.out.println(ex.getMessage());
-				return;
-			}
-
-			UpdateView.getInstance().removeDepends();
-			Stage debugStage = new Stage();
-			debugStage.centerOnScreen();
-			debugStage.setResizable(false);
-			debugStage.initStyle(StageStyle.UNDECORATED);
-			debugStage.setScene(debugView);
-			debugStage.show();
-		}
-	}*/
 
 	static void setRoot(String fxml) throws IOException {
 		scene.setRoot(loadFXML(fxml));
@@ -223,12 +198,6 @@ public class App extends Application implements Delegate {
 			}
 		}
 		launch();
-		try {
-			preStart();
-			//postStart();
-		} catch (IOException ex) {
-			//Empty on purpose
-		}
 	}
 
 	@Override

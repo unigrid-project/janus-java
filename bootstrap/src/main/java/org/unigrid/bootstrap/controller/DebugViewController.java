@@ -23,6 +23,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import org.unigrid.bootstrap.App;
+import static org.unigrid.bootstrap.App.startupState;
 import org.unigrid.bootstrap.UpdateView;
 
 public class DebugViewController implements Initializable {
@@ -36,6 +38,7 @@ public class DebugViewController implements Initializable {
 	@FXML
 	public void onCLose(ActionEvent event) {
 		Stage stage = (Stage) closeButton.getScene().getWindow();
+		startupState = App.state.NORMAL;
 		stage.close();
 	}
 

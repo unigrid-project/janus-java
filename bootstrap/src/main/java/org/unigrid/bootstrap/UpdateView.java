@@ -33,6 +33,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javafx.animation.FadeTransition;
@@ -50,6 +56,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import static org.unigrid.bootstrap.App.startupState;
 import org.update4j.Archive;
 import org.update4j.Configuration;
 import org.update4j.FileMetadata;
@@ -150,7 +157,32 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		update();
 	}
 
+	public Future<String> asyncDebugView() throws InterruptedException {
+		CompletableFuture<String> completableFuture = new CompletableFuture<>();
+
+		Executors.newCachedThreadPool().submit(() -> {
+			int counter = 0;
+			System.out.println("Async Debug thread = " + Thread.currentThread().getName());
+			while (startupState == App.state.WAIT || startupState == App.state.DEBUG) {
+				try {
+					if (counter == 50 && startupState != App.state.DEBUG) {
+						startupState = App.state.NORMAL;
+					}
+					Thread.sleep(5);
+					counter++;
+				} catch (InterruptedException ex) {
+					//On purpose
+				}
+			}
+			completableFuture.complete("Hello");
+			return null; 
+		});
+
+		return completableFuture;
+	}
+
 	void update() {
+
 		List<FileMetadata> files = config.getFiles();
 
 		for (FileMetadata file : files) {
@@ -164,6 +196,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			return;
 		}
 
+		System.out.println("Update thread = " + Thread.currentThread().getName());
+
 		System.out.println("the application is not running");
 		running.set(true);
 		status.setText("Checking for updates...");
@@ -171,17 +205,33 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		final Object launchTrigger = new Object();
 
 		checkUpdates.setOnSucceeded(evt -> {
-			if (!checkUpdates.getValue()) {
-				if(!daemonDirExists()) {
-					extractDaemon();
-				}
-				progress.setProgress(1);
-				status.setText("No updates found");
-				running.set(false);
-			} else {
-				Task<Void> doUpdate = new Task<>() {
-					@Override
-					protected Void call() throws Exception {
+
+			Task<Void> doUpdate = new Task<>() {
+				@Override
+				protected Void call() throws Exception {
+					System.out.println("Update call thread = " + Thread.currentThread().getName());
+					asyncDebugView().get();
+					if (!config.requiresUpdate()) {
+						System.out.println("No update reqierd thread = " + Thread.currentThread().getName());
+						if (!daemonDirExists()) {
+							extractDaemon();
+						}
+						setProgress(1.0);
+						setStatusText("No updates found");
+						running.set(false);
+						synchronized (launchTrigger) {
+							launchTrigger.notifyAll();
+						}
+					} else {
+						System.out.println("DoUpdate thread = " + Thread.currentThread().getName());
+
+						/*try {
+							asyncDebugView().get();
+						} catch (ExecutionException ex) {
+							System.out.println("Faild to wait for debug. contiue");
+						} catch (InterruptedException ex) {
+							System.out.println("Faild to wait for debug. contiue");
+						}*/
 						System.out.println("calling the zip");
 						Path zip = Paths.get(getBaseDirectory(), "zip");
 
@@ -195,7 +245,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 							System.out.println("Do the install");
 							Archive.read(zip).install(true);
 							System.out.println("Install done!!");
-							if(!daemonDirExists()) {
+							if (!daemonDirExists()) {
 								extractDaemon();
 							}
 							synchronized (launchTrigger) {
@@ -216,23 +266,23 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 								launchTrigger.notifyAll();
 							}
 						}
-
-						return null;
 					}
 
-				};
+					return null;
+				}
 
-				run(doUpdate);
+			};
 
-				synchronized (launchTrigger) {
-					try {
-						launchTrigger.wait();
-					} catch (InterruptedException ex) {
-						/* Empty on purpose */
-					}
+			run(doUpdate);
+
+			synchronized (launchTrigger) {
+				try {
+					launchTrigger.wait();
+				} catch (InterruptedException ex) {
+					/* Empty on purpose */
 				}
 			}
-
+			System.out.println("Launch fx!!!");
 			launch();
 		});
 
@@ -412,7 +462,6 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		System.out.println(untarName);
 		Path source = Paths.get(startLoacation + "/lib/" + untarName);
 		Path target = Paths.get(startLoacation + "/bin/");
-		
 
 		try {
 			unzipFolder(source, target);
@@ -506,12 +555,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 		if (!depenendencies.exists()) {
 			depenendencies.mkdirs();
-			if(OS.CURRENT == OS.WINDOWS) {
+			if (OS.CURRENT == OS.WINDOWS) {
 				setPermissions(depenendencies);
 			}
 		}
 		if (!file.exists()) {
-			if(OS.CURRENT == OS.WINDOWS) {
+			if (OS.CURRENT == OS.WINDOWS) {
 				file.mkdirs();
 				setPermissions(file);
 			}
@@ -519,11 +568,23 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 		return blockRoot;
 	}
-	
+
 	public static void setPermissions(File file) {
 		file.setExecutable(true);
 		file.setReadable(true);
 		file.setWritable(true);
+	}
+
+	public void setStatusText(String text) {
+		Platform.runLater(() -> {
+			status.setText(text);
+		});
+	}
+
+	public void setProgress(double d) {
+		Platform.runLater(() -> {
+			progress.setProgress(d);
+		});
 	}
 
 	@Override
