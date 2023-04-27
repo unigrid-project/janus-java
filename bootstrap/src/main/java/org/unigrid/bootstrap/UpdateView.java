@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -152,20 +153,27 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		});
 
-		System.out.println("before update");
-		removeOldJars(config);
-		update();
+		Task<Void> doUpdate = new Task<>() {
+			@Override
+			protected Void call() throws Exception {
+				System.out.println("before update");
+				removeOldJars(config);
+				update();
+				return null;
+			}
+		};
+		run(doUpdate);
+
 	}
 
 	public Future<String> asyncDebugView() throws InterruptedException {
 		CompletableFuture<String> completableFuture = new CompletableFuture<>();
-
 		Executors.newCachedThreadPool().submit(() -> {
 			int counter = 0;
 			System.out.println("Async Debug thread = " + Thread.currentThread().getName());
 			while (startupState == App.state.WAIT || startupState == App.state.DEBUG) {
 				try {
-					if (counter == 50 && startupState != App.state.DEBUG) {
+					if (counter == 500 && startupState != App.state.DEBUG) {
 						startupState = App.state.NORMAL;
 					}
 					Thread.sleep(5);
@@ -175,9 +183,10 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 				}
 			}
 			completableFuture.complete("Hello");
-			return null; 
+			return null;
 		});
 
+		System.out.println("Return future");
 		return completableFuture;
 	}
 
@@ -200,7 +209,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 		System.out.println("the application is not running");
 		running.set(true);
-		status.setText("Checking for updates...");
+		setStatusText("Checking for updates...");
 		Task<Boolean> checkUpdates = checkUpdates();
 		final Object launchTrigger = new Object();
 

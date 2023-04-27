@@ -84,7 +84,7 @@ public class App extends Application implements Delegate {
 		try {
 			debugView = new Scene(loadFXML("debugView"));
 		} catch (IOException ex) {
-			System.out.println(ex.getMessage());
+			System.out.println(ex.getMessage()); 
 			return;
 		}
 		System.out.println("DEBUGVIEW");
@@ -93,7 +93,7 @@ public class App extends Application implements Delegate {
 			@Override
 			public void handle(KeyEvent key) {
 				System.out.println("What is happening");
-				if (key.getCode() == KeyCode.F12) {
+				if (key.getCode() == KeyCode.F5 || key.getCode() == KeyCode.F12) {
 					//open window
 					System.out.println("Key event triggerd!!!!");
 					startupState = state.DEBUG;
