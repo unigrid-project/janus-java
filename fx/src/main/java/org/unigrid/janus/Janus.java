@@ -231,17 +231,16 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	public void setExternalVersion() {
 		Info info = rpc.call(new Info.Request(), Info.class);
 		String version = String.valueOf(info.getResult().getVersion());
-		Pattern p = Pattern.compile("[.][..][..]");
-		Matcher m = p.matcher(String.valueOf(info.getResult().getVersion()));
-		m.group(1);
-		m.group(2);
-		m.group(3);
+		Pattern p = Pattern.compile("^(.)(..)(..)");
+		Matcher m = p.matcher(version);
+		m.find();
 		int major = Integer.valueOf(m.group(1));
 		int minor = Integer.valueOf(m.group(2));
 		int revision = Integer.valueOf(m.group(3));
 		String delimiter = ".";
 		version = major + delimiter + minor + delimiter + revision;
 		externalVersion.setDaemonVersion(version);
+		hedgehog.getHedgehogVersion();
 	}
 
 	private void startMainWindow() {

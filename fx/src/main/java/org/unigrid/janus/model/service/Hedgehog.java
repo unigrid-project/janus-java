@@ -179,10 +179,15 @@ public class Hedgehog {
 			response = target.request()
 				.property("javax.xml.ws.client.receiveTimeout", 5000)
 				.get();
+			if(response.getStatus() != 200) {
+				response.close();
+				return;
+			}
 			String json = response.readEntity(String.class);
 			JsonReader reader = Json.createReader(new StringReader(json));
 			JsonObject object = reader.readObject();
 			externalVersion.setHedgehogVersion(object.getString("version"));
+			response.close();
 		} catch (ProcessingException e) {
 			System.err.println("version Error: " + e.getMessage());
 			debug.print("version Error: " + e.getMessage(),
