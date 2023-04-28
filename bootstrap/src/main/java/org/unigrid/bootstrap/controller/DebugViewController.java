@@ -22,6 +22,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.unigrid.bootstrap.App;
 import static org.unigrid.bootstrap.App.startupState;
@@ -30,6 +31,9 @@ import org.unigrid.bootstrap.UpdateView;
 public class DebugViewController implements Initializable {
 
 	@FXML private Button closeButton;
+	@FXML private Label txtRemoveDepndsDone;
+	@FXML private Label txtRemoveDebug;
+	@FXML private Label txtRemoveBlockChainData;
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		// Empty on purpuse
@@ -44,6 +48,25 @@ public class DebugViewController implements Initializable {
 
 	@FXML
 	public void onResetDepends(ActionEvent event) {
-		UpdateView.getInstance().removeDepends();
+		if (UpdateView.getInstance().removeDepends()) {
+			txtRemoveDepndsDone.setText("\u2713");
+			txtRemoveDepndsDone.setVisible(true);
+		}
+	}
+
+	@FXML
+	public void onRemoveDebug(ActionEvent event) {
+		if (UpdateView.getInstance().removeDebug()) {
+			txtRemoveDebug.setText("\u2713");
+			txtRemoveDebug.setVisible(true);
+		}
+	}
+
+	@FXML
+	public void onRemoveBlockChainData(ActionEvent event) {
+		if (UpdateView.getInstance().removeBlockChainData()) {
+			txtRemoveBlockChainData.setText("\u2713");
+			txtRemoveBlockChainData.setVisible(true);
+		}
 	}
 }

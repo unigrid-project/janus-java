@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -14,18 +15,21 @@
 
 <AnchorPane maxHeight="625.0" maxWidth="714.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="516.0" prefWidth="714.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" stylesheets="@updateview.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.bootstrap.controller.DebugViewController">
    <children>
-      <FlowPane alignment="TOP_CENTER" layoutY="2.0" prefHeight="523.0" prefWidth="657.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="33.0" AnchorPane.topAnchor="0.0">
+      <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" layoutY="2.0" orientation="VERTICAL" prefHeight="523.0" prefWidth="657.0" rowValignment="TOP" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
          <children>
             <Label prefHeight="35.0" prefWidth="82.0" stylesheets="@updateview.css" text="Debug" textAlignment="CENTER" textFill="WHITE">
                <font>
                   <Font size="24.0" />
                </font>
+               <padding>
+                  <Insets bottom="5.0" top="2.0" />
+               </padding>
             </Label>
-            <Accordion prefHeight="436.0" prefWidth="637.0" stylesheets="@updateview.css">
+            <Accordion prefHeight="404.0" prefWidth="685.0" stylesheets="@updateview.css">
               <panes>
-                <TitledPane animated="false" contentDisplay="BOTTOM" expanded="false" prefWidth="637.0" text="untitled 1">
-                     <graphic>
-                      <AnchorPane prefHeight="356.0" prefWidth="618.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@updateview.css">
+                <TitledPane animated="false" text="untitled 1">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="track-background" stylesheets="@updateview.css">
                            <children>
                               <GridPane prefHeight="355.0" prefWidth="653.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <columnConstraints>
@@ -41,21 +45,28 @@
                                  <children>
                                     <Button mnemonicParsing="false" onAction="#onResetDepends" text="Reset depends" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
                                     <Label text="Remove the depends folder and everything in it!" textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.valignment="CENTER" />
+                                    <Label fx:id="txtRemoveDepndsDone" textFill="#0ba400" visible="false" GridPane.columnIndex="2" />
+                                    <Button mnemonicParsing="false" onAction="#onRemoveDebug" text="Remove debug.log" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                                    <Label text="Remove debug.log" textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Label fx:id="txtRemoveDebug" textFill="#0ba400" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                    <Button fx:id="onRemoveBlockChainData" mnemonicParsing="false" onAction="#onRemoveBlockChainData" text="Remove blockchain" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                                    <Label text="Remove blockchain data" textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <Label fx:id="txtRemoveBlockChainData" textFill="#0ba400" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                  </children>
                               </GridPane>
-                              <ScrollBar orientation="VERTICAL" prefHeight="354.0" prefWidth="12.0" AnchorPane.bottomAnchor="1.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0" />
+                              <ScrollBar orientation="VERTICAL" prefHeight="354.0" prefWidth="12.0" visible="false" AnchorPane.bottomAnchor="1.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0" />
                            </children>
                         </AnchorPane>
-                     </graphic>
+                  </content>
                 </TitledPane>
                 <TitledPane animated="false" text="untitled 2">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@updateview.css" />
                   </content>
                 </TitledPane>
                 <TitledPane animated="false" text="untitled 3">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" />
                   </content>
                 </TitledPane>
               </panes>
@@ -64,6 +75,9 @@
                <font>
                   <Font size="18.0" />
                </font>
+               <FlowPane.margin>
+                  <Insets bottom="5.0" top="5.0" />
+               </FlowPane.margin>
             </Button>
          </children>
       </FlowPane>

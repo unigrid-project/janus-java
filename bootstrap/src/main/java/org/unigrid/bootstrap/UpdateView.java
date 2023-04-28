@@ -165,7 +165,6 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		CompletableFuture<String> completableFuture = new CompletableFuture<>();
 		Executors.newCachedThreadPool().submit(() -> {
 			int counter = 0;
-			System.out.println("Async Debug thread = " + Thread.currentThread().getName());
 			while (startupState == App.state.WAIT || startupState == App.state.DEBUG) {
 				try {
 					if (counter == 500 && startupState != App.state.DEBUG) {
@@ -194,9 +193,6 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			return;
 		}
 
-		System.out.println("Update thread = " + Thread.currentThread().getName());
-
-		System.out.println("the application is not running");
 		running.set(true);
 		setStatusText("Checking for updates...");
 		final Object launchTrigger = new Object();
@@ -204,10 +200,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Task<Void> doUpdate = new Task<>() {
 			@Override
 			protected Void call() throws Exception {
-				System.out.println("Update call thread = " + Thread.currentThread().getName());
 				asyncDebugView().get();
 				if (!config.requiresUpdate()) {
-					System.out.println("No update reqierd thread = " + Thread.currentThread().getName());
 					if (!daemonDirExists()) {
 						extractDaemon();
 					}
@@ -277,7 +271,6 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 				/* Empty on purpose */
 			}
 		}
-		System.out.println("Launch fx!!!");
 		launch();
 	}
 
@@ -521,7 +514,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	public void launchApp() {
-		System.out.println("Are we Starting??");
+		setStatusText("Preparing application start");
 		config.launch(inject);
 		Platform.runLater(() -> {
 			Stage stage = getStage();
@@ -533,6 +526,23 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Thread runner = new Thread(runnable);
 		runner.setDaemon(true);
 		runner.start();
+	}
+	
+	public static String getUnigridHome() {
+		final String blockRoot = System.getProperty("user.home").concat(
+			switch (OS.CURRENT) {
+			case LINUX ->
+				"/.unigrid/";
+			case WINDOWS ->
+				"/AppData/Roaming/UNIGRID/";
+			case MAC ->
+				"/Library/Application Support/UNIGRID/";
+			default ->
+				"/UNIGRID/";
+		}
+		);
+
+		return blockRoot;
 	}
 
 	public static String getBaseDirectory() {
@@ -636,13 +646,48 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		}
 	}
 
-	public void removeDepends() {
+	public boolean removeDepends() {
 		File file = new File(getBaseDirectory());
 		boolean deleted = deleteDirectory(file);
 		System.out.println("Remove depends = " + deleted);
+		return deleted;
+	}
+	
+	public boolean removeDebug() {
+		File file = new File(getUnigridHome() + "/debug.log");
+		boolean deleted = deleteDirectory(file);
+		System.out.println("Remove debug = " + deleted);
+		return deleted;
 	}
 
-	boolean deleteDirectory(File directoryToBeDeleted) {
+	public boolean removeBlockChainData() {
+		File file = new File(getUnigridHome() + "/blocks");
+		boolean deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/chainstate");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/database");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/sporks");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/zerocoin");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/budget.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/fee_estimates.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/gnpayments.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/gncache.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/peers.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/supplycache.dat");
+		deleted = deleteDirectory(file);
+		System.out.println("Remove debug = " + deleted);
+		return deleted;
+	}
+
+	private boolean deleteDirectory(File directoryToBeDeleted) {
 		File[] allContents = directoryToBeDeleted.listFiles();
 		if (allContents != null) {
 			for (File file : allContents) {

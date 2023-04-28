@@ -179,7 +179,7 @@ public class Hedgehog {
 			response = target.request()
 				.property("javax.xml.ws.client.receiveTimeout", 5000)
 				.get();
-			if(response.getStatus() != 200) {
+			if (response.getStatus() != 200) {
 				response.close();
 				return;
 			}

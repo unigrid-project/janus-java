@@ -87,23 +87,19 @@ public class App extends Application implements Delegate {
 			System.out.println(ex.getMessage()); 
 			return;
 		}
-		System.out.println("DEBUGVIEW");
 		debugStage.setScene(debugView);
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent key) {
-				System.out.println("What is happening");
 				if (key.getCode() == KeyCode.F5 || key.getCode() == KeyCode.F12) {
 					//open window
 					System.out.println("Key event triggerd!!!!");
 					startupState = state.DEBUG;
 
-					System.out.println("KeyEvent handler thread = " + Thread.currentThread().getName());
 					debugStage.show();
 				}
 			}
 		});
-		System.out.println("DONNNNEEEEEEEEEEEEE");
 	}
 
 	@Override
