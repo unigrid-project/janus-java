@@ -23,6 +23,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.unigrid.bootstrap.App;
 import static org.unigrid.bootstrap.App.startupState;
@@ -34,6 +35,7 @@ public class DebugViewController implements Initializable {
 	@FXML private Label txtRemoveDepndsDone;
 	@FXML private Label txtRemoveDebug;
 	@FXML private Label txtRemoveBlockChainData;
+	@FXML private TextField txtConfigURL;
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		// Empty on purpuse
@@ -42,6 +44,10 @@ public class DebugViewController implements Initializable {
 	@FXML
 	public void onCLose(ActionEvent event) {
 		Stage stage = (Stage) closeButton.getScene().getWindow();
+		String configURL = txtConfigURL.getText();
+		if (!configURL.equals("")) {
+			UpdateView.getInstance().setConfigURL(configURL);
+		}
 		startupState = App.state.NORMAL;
 		stage.close();
 	}

@@ -13,6 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.bootstrap;
 
 import io.sentry.Sentry;
@@ -21,7 +22,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,6 +39,8 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javafx.animation.FadeTransition;
@@ -527,7 +533,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		runner.setDaemon(true);
 		runner.start();
 	}
-	
+
 	public static String getUnigridHome() {
 		final String blockRoot = System.getProperty("user.home").concat(
 			switch (OS.CURRENT) {
@@ -652,7 +658,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		System.out.println("Remove depends = " + deleted);
 		return deleted;
 	}
-	
+
 	public boolean removeDebug() {
 		File file = new File(getUnigridHome() + "/debug.log");
 		boolean deleted = deleteDirectory(file);
@@ -695,6 +701,24 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		}
 		return directoryToBeDeleted.delete();
+	}
+
+	public void setConfigURL(String url) {
+		try {
+			System.out.println("configURL textField contains = " + url);
+			URL configUrl = new URL(url);
+			Configuration config = null;
+			try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+				config = Configuration.read(in);
+				config.sync();
+				this.config = config;
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				Sentry.captureException(e);
+			}
+		} catch (MalformedURLException ex) {
+			Logger.getLogger(UpdateView.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 	private String getFileName(String file) {
