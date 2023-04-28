@@ -16,7 +16,6 @@
 package org.unigrid.bootstrap;
 
 import io.sentry.Sentry;
-import io.sentry.util.FileUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,13 +32,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javafx.animation.FadeTransition;
@@ -192,12 +187,6 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	void update() {
 
-		List<FileMetadata> files = config.getFiles();
-
-		for (FileMetadata file : files) {
-			System.out.println(file.getUri());
-		}
-
 		if (running.get()) {
 			abort = true;
 			System.out.println("the application is running");
@@ -210,92 +199,86 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		System.out.println("the application is not running");
 		running.set(true);
 		setStatusText("Checking for updates...");
-		Task<Boolean> checkUpdates = checkUpdates();
 		final Object launchTrigger = new Object();
 
-		checkUpdates.setOnSucceeded(evt -> {
+		Task<Void> doUpdate = new Task<>() {
+			@Override
+			protected Void call() throws Exception {
+				System.out.println("Update call thread = " + Thread.currentThread().getName());
+				asyncDebugView().get();
+				if (!config.requiresUpdate()) {
+					System.out.println("No update reqierd thread = " + Thread.currentThread().getName());
+					if (!daemonDirExists()) {
+						extractDaemon();
+					}
+					setProgress(1.0);
+					setStatusText("No updates found");
+					running.set(false);
+					synchronized (launchTrigger) {
+						launchTrigger.notifyAll();
+					}
+				} else {
+					System.out.println("DoUpdate thread = " + Thread.currentThread().getName());
 
-			Task<Void> doUpdate = new Task<>() {
-				@Override
-				protected Void call() throws Exception {
-					System.out.println("Update call thread = " + Thread.currentThread().getName());
-					asyncDebugView().get();
-					if (!config.requiresUpdate()) {
-						System.out.println("No update reqierd thread = " + Thread.currentThread().getName());
-						if (!daemonDirExists()) {
-							extractDaemon();
-						}
-						setProgress(1.0);
-						setStatusText("No updates found");
-						running.set(false);
-						synchronized (launchTrigger) {
-							launchTrigger.notifyAll();
-						}
-					} else {
-						System.out.println("DoUpdate thread = " + Thread.currentThread().getName());
-
-						/*try {
+					/*try {
 							asyncDebugView().get();
 						} catch (ExecutionException ex) {
 							System.out.println("Faild to wait for debug. contiue");
 						} catch (InterruptedException ex) {
 							System.out.println("Faild to wait for debug. contiue");
 						}*/
-						System.out.println("calling the zip");
-						Path zip = Paths.get(getBaseDirectory(), "zip");
+					System.out.println("calling the zip");
+					Path zip = Paths.get(getBaseDirectory(), "zip");
 
-						System.out.println("zip location: " + zip.toString());
-						System.out.println("depenendencies location: " + getBaseDirectory());
+					System.out.println("zip location: " + zip.toString());
+					System.out.println("depenendencies location: " + getBaseDirectory());
 
-						Throwable s = config.update(UpdateOptions.archive(zip)
-							.updateHandler(UpdateView.this)).getException();
+					Throwable s = config.update(UpdateOptions.archive(zip)
+						.updateHandler(UpdateView.this)).getException();
 
-						if (Objects.isNull(s)) {
-							System.out.println("Do the install");
-							Archive.read(zip).install(true);
-							System.out.println("Install done!!");
-							if (!daemonDirExists()) {
-								extractDaemon();
+					if (Objects.isNull(s)) {
+						System.out.println("Do the install");
+						Archive.read(zip).install(true);
+						System.out.println("Install done!!");
+						if (!daemonDirExists()) {
+							extractDaemon();
+						}
+						synchronized (launchTrigger) {
+							launchTrigger.notifyAll();
+						}
+					} else {
+						Sentry.captureException(s);
+						System.out.println(s);
+						System.out.println("updatehandler = null");
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								status.setText("No updates found");
 							}
-							synchronized (launchTrigger) {
-								launchTrigger.notifyAll();
-							}
-						} else {
-							Sentry.captureException(s);
-							System.out.println(s);
-							System.out.println("updatehandler = null");
-							Platform.runLater(new Runnable() {
-								@Override
-								public void run() {
-									status.setText("No updates found");
-								}
-							});
+						});
 
-							synchronized (launchTrigger) {
-								launchTrigger.notifyAll();
-							}
+						synchronized (launchTrigger) {
+							launchTrigger.notifyAll();
 						}
 					}
-
-					return null;
 				}
 
-			};
-
-			run(doUpdate);
-
-			synchronized (launchTrigger) {
-				try {
-					launchTrigger.wait();
-				} catch (InterruptedException ex) {
-					/* Empty on purpose */
-				}
+				return null;
 			}
-			System.out.println("Launch fx!!!");
-			launch();
-		});
 
-		run(checkUpdates);
+		};
+
+		run(doUpdate);
+
+		synchronized (launchTrigger) {
+			try {
+				launchTrigger.wait();
+			} catch (InterruptedException ex) {
+				/* Empty on purpose */
+			}
+		}
+		System.out.println("Launch fx!!!");
+		launch();
 	}
 
 	private Task<Boolean> checkUpdates() {
@@ -338,8 +321,10 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	private void launch() {
+		System.out.println("Launch");
 		Stage stage = getStage();
-		stage.hide();
+		System.out.println("Getting stage");
+
 		launchApp();
 		//launch.setDisable(false);
 	}
@@ -536,7 +521,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	public void launchApp() {
+		System.out.println("Are we Starting??");
 		config.launch(inject);
+		Platform.runLater(() -> {
+			Stage stage = getStage();
+			stage.hide();
+		});
 	}
 
 	private void run(Runnable runnable) {
@@ -648,8 +638,18 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	public void removeDepends() {
 		File file = new File(getBaseDirectory());
-		FileUtils.deleteRecursively(file);
-		System.out.println("Remove depends");
+		boolean deleted = deleteDirectory(file);
+		System.out.println("Remove depends = " + deleted);
+	}
+
+	boolean deleteDirectory(File directoryToBeDeleted) {
+		File[] allContents = directoryToBeDeleted.listFiles();
+		if (allContents != null) {
+			for (File file : allContents) {
+				deleteDirectory(file);
+			}
+		}
+		return directoryToBeDeleted.delete();
 	}
 
 	private String getFileName(String file) {
