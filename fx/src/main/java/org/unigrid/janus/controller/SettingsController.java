@@ -131,6 +131,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
+		System.out.println("Initilize settingsController!!!");
 		lstDebug.setItems(debugItems);
 		lstDebug.setPrefWidth(500);
 		lstDebug.setPrefHeight(500); //TODO: Put these constants in a model perhaps?
@@ -139,7 +140,6 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		txtFxVersion.setText(janusModel.getVersion());
 		txtBootstrapVersion.setText(bootStrap.getInstance().getBootstrapVer());
 		txtHedgehogVersion.setText(externalVersion.getHedgehogVersion());
-		txtDaemonVersion.setText(externalVersion.getDaemonVersion());
 
 		wallet.addPropertyChangeListener(this);
 		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));
@@ -437,6 +437,15 @@ public class SettingsController implements Initializable, PropertyChangeListener
 				if (Objects.nonNull(lstDebug)) {
 					lstDebug.scrollTo(debugItems.size());
 				}
+			}
+		});
+	}
+
+	public void eventDaemonVersion(@Observes ExternalVersion externalVersion) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				txtDaemonVersion.setText(externalVersion.getDaemonVersion());
 			}
 		});
 	}

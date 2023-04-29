@@ -39,6 +39,7 @@ import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.LockWallet;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.ExternalVersion;
 import org.unigrid.janus.model.signal.Navigate;
 import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
@@ -48,6 +49,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@Inject private DebugService debug;
 	@Inject private RPCService rpc;
 	@Inject private Wallet wallet;
+	@Inject private ExternalVersion externalVersion;
+	@Inject private Event<ExternalVersion> versionEvent;
 
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
@@ -133,6 +136,10 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 
 	@FXML
 	private void onSettingsTap(MouseEvent event) {
+		if (externalVersion.getDaemonVersion().equals("")) {
+			externalVersion.callRPCForDaemonVersion();
+			versionEvent.fire(externalVersion);
+		}
 		select(pnlSettings, btnSettings);
 	}
 
