@@ -20,9 +20,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -33,7 +30,6 @@ import javafx.application.Platform;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -65,6 +61,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
 import org.unigrid.janus.model.ExternalVersion;
+import org.unigrid.janus.model.rest.entity.HedgehogVersion;
 
 @Eager
 @ApplicationScoped
@@ -144,6 +141,7 @@ public class Hedgehog {
 
 	public void getHedgehogVersion() {
 		String uri = "https://127.0.0.1:52884/version";
+		System.out.println("Request!");
 
 		// Trust all certificates
 		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
@@ -158,6 +156,7 @@ public class Hedgehog {
 			}
 		}
 		};
+		System.out.println("Request!");
 
 		SSLContext sc = null;
 		try {
@@ -167,26 +166,28 @@ public class Hedgehog {
 		} catch (Exception e) {
 			// Handle the exception
 		}
+		System.out.println("Request!");
 
 		// Disable hostname verification
 		HostnameVerifier allHostsValid = (hostname, session) -> true;
 		Client client = ClientBuilder.newBuilder().sslContext(sc)
 			.hostnameVerifier(allHostsValid).build();
+		System.out.println("Request!");
 
 		WebTarget target = client.target(uri);
 		Response response;
 		try {
+			System.out.println("Request!");
 			response = target.request()
 				.property("javax.xml.ws.client.receiveTimeout", 5000)
 				.get();
-			if (response.getStatus() != 200) {
+			if (response.getStatus() != 202) {
 				response.close();
 				return;
 			}
-			String json = response.readEntity(String.class);
-			JsonReader reader = Json.createReader(new StringReader(json));
-			JsonObject object = reader.readObject();
-			externalVersion.setHedgehogVersion(object.getString("version"));
+			System.out.println("Request!");
+			HedgehogVersion hedgehogVersion = response.readEntity(HedgehogVersion.class);
+			externalVersion.setHedgehogVersion(hedgehogVersion.getVersion());
 			response.close();
 		} catch (ProcessingException e) {
 			System.err.println("version Error: " + e.getMessage());

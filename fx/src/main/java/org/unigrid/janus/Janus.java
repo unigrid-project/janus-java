@@ -32,8 +32,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -66,8 +64,6 @@ import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
-import org.unigrid.janus.model.rpc.entity.Info;
-//import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.service.Hedgehog;
 import org.unigrid.janus.view.AlertDialog;
 //import org.unigrid.janus.model.service.TrayService;
@@ -166,31 +162,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		// tray.initTrayService(stage);
 		HostServicesProducer.setHostServices(hostServices);
 
-		startSplashScreen();
-		startDaemon();
-		ready.addListener(new ChangeListener<Boolean>() {
-			@Override
-			public void changed(ObservableValue<? extends Boolean> ov, Boolean t,
-				Boolean t1) {
-				if (t1) {
-					ready.setValue(Boolean.FALSE);
-
-					Platform.runLater(new Runnable() {
-						public void run() {
-							debug.print("run poll", Janus.class.getSimpleName());
-							// rpc.stopPolling();
-							wallet.setOffline(Boolean.FALSE);
-							startMainWindow();
-							rpc.pollForInfo(10 * 1000);
-							janusModel.setAppState(JanusModel.AppState.LOADED);
-							preloader.stopSpinner();
-							preloader.hide();
-						}
-					});
-				}
-			}
-		});
-
+		startupSequence();
 	}
 
 	public void startFromBootstrap(Stage stage) throws Exception {
@@ -198,10 +170,12 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		// tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
+		startupSequence();
+	}
 
+	public void startupSequence() {
 		startSplashScreen();
 		startDaemon();
-
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> ov, Boolean t,
@@ -214,7 +188,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							debug.print("run poll", Janus.class.getSimpleName());
 							// rpc.stopPolling();
 							wallet.setOffline(Boolean.FALSE);
-
 							startMainWindow();
 							rpc.pollForInfo(10 * 1000);
 							janusModel.setAppState(JanusModel.AppState.LOADED);
@@ -225,21 +198,9 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 				}
 			}
 		});
-
 	}
 
 	public void setExternalVersion() {
-		Info info = rpc.call(new Info.Request(), Info.class);
-		String version = String.valueOf(info.getResult().getVersion());
-		Pattern p = Pattern.compile("^(.)(..)(..)");
-		Matcher m = p.matcher(version);
-		m.find();
-		int major = Integer.valueOf(m.group(1));
-		int minor = Integer.valueOf(m.group(2));
-		int revision = Integer.valueOf(m.group(3));
-		String delimiter = ".";
-		version = major + delimiter + minor + delimiter + revision;
-		externalVersion.setDaemonVersion(version);
 		hedgehog.getHedgehogVersion();
 	}
 
