@@ -10,14 +10,14 @@
 	<parent>
 		<groupId>org.unigrid.janus</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.0.11</version>
+		<version>1.0.12</version>
 	</parent>
-	<version>1.0.14</version>
+	<version>1.0.15</version>
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<release.tag>1.0.14</release.tag>
-		<current.tag>1.0.14</current.tag>
+		<release.tag>1.0.15</release.tag>
+		<current.tag>1.0.15</current.tag>
 		<config.opens>
 			fx=jakarta.xml.bind/jakarta.xml.bind-api@jakarta.xml.bind
 		</config.opens>
