@@ -41,7 +41,12 @@ public class ExternalVersion {
 
 	public void callRPCForDaemonVersion() {
 		System.out.println("Getting daemon version");
-		Info info = rpc.call(new Info.Request(), Info.class);
+		Info info = new Info();
+		try {
+			info = rpc.call(new Info.Request(), Info.class);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 		System.out.println("Getting daemon version");
 		String version = String.valueOf(info.getResult().getVersion());
 		System.out.println("Getting daemon version");
