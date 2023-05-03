@@ -27,15 +27,20 @@ import lombok.RequiredArgsConstructor;
 public class Package {
 
 	@Getter(AccessLevel.PROTECTED)
-	@XmlAttribute(name = "package")
+	//@XmlAttribute
 	private String groupId;
 
 	@Getter(AccessLevel.PROTECTED)
 	@XmlAttribute
 	private String target;
+	
+	@Getter(AccessLevel.PROTECTED)
+	@XmlAttribute(name = "package")
+	private String modulePackage;
 
-	public Package(String groupId, String target) {
+	public Package(String groupId, String target, String modulePackage) {
 		this.groupId = groupId;
 		this.target = target;
+		this.modulePackage = modulePackage;
 	}
 }
