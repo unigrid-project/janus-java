@@ -13,6 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.bootstrap;
 
 import io.sentry.Sentry;
@@ -21,7 +22,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,6 +36,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javafx.animation.FadeTransition;
@@ -49,6 +58,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import static org.unigrid.bootstrap.App.startupState;
 import org.update4j.Archive;
 import org.update4j.Configuration;
 import org.update4j.FileMetadata;
@@ -63,6 +73,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	private Configuration config;
 	private DoubleProperty primaryPercent;
 	private DoubleProperty secondaryPercent;
+	private HostServices services;
 
 	private BooleanProperty running;
 	private boolean abort;
@@ -99,7 +110,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		this.config = config;
 		this.primaryStage = primaryStage;
 		final Properties properties = new Properties();
-
+		services = hostServices;
 		try {
 			properties.load(getClass().getResourceAsStream("application.properties"));
 			bootstrapVersion = Objects.requireNonNull(properties.getProperty("proj.ver"));
@@ -144,17 +155,43 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			}
 		});
 
-		System.out.println("before update");
-		removeOldJars(config);
-		update();
+		Task<Void> doUpdate = new Task<>() {
+			@Override
+			protected Void call() throws Exception {
+				System.out.println("before update");
+				removeOldJars(config);
+				update();
+				return null;
+			}
+		};
+		run(doUpdate);
+
+	}
+
+	public Future<String> asyncDebugView() throws InterruptedException {
+		CompletableFuture<String> completableFuture = new CompletableFuture<>();
+		Executors.newCachedThreadPool().submit(() -> {
+			int counter = 0;
+			while (startupState == App.state.WAIT || startupState == App.state.DEBUG) {
+				try {
+					if (counter == 500 && startupState != App.state.DEBUG) {
+						startupState = App.state.NORMAL;
+					}
+					Thread.sleep(5);
+					counter++;
+				} catch (InterruptedException ex) {
+					//On purpose
+				}
+			}
+			completableFuture.complete("Hello");
+			return null;
+		});
+
+		System.out.println("Return future");
+		return completableFuture;
 	}
 
 	void update() {
-		List<FileMetadata> files = config.getFiles();
-
-		for (FileMetadata file : files) {
-			System.out.println(file.getUri());
-		}
 
 		if (running.get()) {
 			abort = true;
@@ -163,79 +200,85 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			return;
 		}
 
-		System.out.println("the application is not running");
 		running.set(true);
-		status.setText("Checking for updates...");
-		Task<Boolean> checkUpdates = checkUpdates();
+		setStatusText("Checking for updates...");
 		final Object launchTrigger = new Object();
 
-		checkUpdates.setOnSucceeded(evt -> {
-			if (!checkUpdates.getValue()) {
-				if(!daemonDirExists()) {
-					extractDaemon();
-				}
-				progress.setProgress(1);
-				status.setText("No updates found");
-				running.set(false);
-			} else {
-				Task<Void> doUpdate = new Task<>() {
-					@Override
-					protected Void call() throws Exception {
-						System.out.println("calling the zip");
-						Path zip = Paths.get(getBaseDirectory(), "zip");
+		Task<Void> doUpdate = new Task<>() {
+			@Override
+			protected Void call() throws Exception {
+				asyncDebugView().get();
+				if (!config.requiresUpdate()) {
+					if (!daemonDirExists()) {
+						extractDaemon();
+					}
+					setProgress(1.0);
+					setStatusText("No updates found");
+					running.set(false);
+					synchronized (launchTrigger) {
+						launchTrigger.notifyAll();
+					}
+				} else {
+					System.out.println("DoUpdate thread = " + Thread.currentThread().getName());
 
-						System.out.println("zip location: " + zip.toString());
-						System.out.println("depenendencies location: " + getBaseDirectory());
+					/*try {
+							asyncDebugView().get();
+						} catch (ExecutionException ex) {
+							System.out.println("Faild to wait for debug. contiue");
+						} catch (InterruptedException ex) {
+							System.out.println("Faild to wait for debug. contiue");
+						}*/
+					System.out.println("calling the zip");
+					Path zip = Paths.get(getBaseDirectory(), "zip");
 
-						Throwable s = config.update(UpdateOptions.archive(zip)
-							.updateHandler(UpdateView.this)).getException();
+					System.out.println("zip location: " + zip.toString());
+					System.out.println("depenendencies location: " + getBaseDirectory());
 
-						if (Objects.isNull(s)) {
-							System.out.println("Do the install");
-							Archive.read(zip).install(true);
-							System.out.println("Install done!!");
-							if(!daemonDirExists()) {
-								extractDaemon();
-							}
-							synchronized (launchTrigger) {
-								launchTrigger.notifyAll();
-							}
-						} else {
-							Sentry.captureException(s);
-							System.out.println(s);
-							System.out.println("updatehandler = null");
-							Platform.runLater(new Runnable() {
-								@Override
-								public void run() {
-									status.setText("No updates found");
-								}
-							});
+					Throwable s = config.update(UpdateOptions.archive(zip)
+						.updateHandler(UpdateView.this)).getException();
 
-							synchronized (launchTrigger) {
-								launchTrigger.notifyAll();
-							}
+					if (Objects.isNull(s)) {
+						System.out.println("Do the install");
+						Archive.read(zip).install(true);
+						System.out.println("Install done!!");
+						if (!daemonDirExists()) {
+							extractDaemon();
 						}
+						synchronized (launchTrigger) {
+							launchTrigger.notifyAll();
+						}
+					} else {
+						Sentry.captureException(s);
+						System.out.println(s);
+						System.out.println("updatehandler = null");
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								status.setText("No updates found");
+							}
+						});
 
-						return null;
-					}
-
-				};
-
-				run(doUpdate);
-
-				synchronized (launchTrigger) {
-					try {
-						launchTrigger.wait();
-					} catch (InterruptedException ex) {
-						/* Empty on purpose */
+						synchronized (launchTrigger) {
+							launchTrigger.notifyAll();
+						}
 					}
 				}
+
+				return null;
 			}
 
-			launch();
-		});
+		};
 
-		run(checkUpdates);
+		run(doUpdate);
+
+		synchronized (launchTrigger) {
+			try {
+				launchTrigger.wait();
+			} catch (InterruptedException ex) {
+				/* Empty on purpose */
+			}
+		}
+		launch();
 	}
 
 	private Task<Boolean> checkUpdates() {
@@ -278,8 +321,10 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	private void launch() {
-		Stage stage = getStage();
-		stage.hide();
+		System.out.println("Launch");
+		//Stage stage = getStage();
+		System.out.println("Getting stage");
+
 		launchApp();
 		//launch.setDisable(false);
 	}
@@ -411,7 +456,6 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		System.out.println(untarName);
 		Path source = Paths.get(startLoacation + "/lib/" + untarName);
 		Path target = Paths.get(startLoacation + "/bin/");
-		
 
 		try {
 			unzipFolder(source, target);
@@ -477,13 +521,39 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	public void launchApp() {
-		config.launch(inject);
+		setStatusText("Preparing application start");
+		try {
+			config.launch(inject);
+		} catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		Platform.runLater(() -> {
+			Stage stage = getStage();
+			stage.hide();
+		});
 	}
 
 	private void run(Runnable runnable) {
 		Thread runner = new Thread(runnable);
 		runner.setDaemon(true);
 		runner.start();
+	}
+
+	public static String getUnigridHome() {
+		final String blockRoot = System.getProperty("user.home").concat(
+			switch (OS.CURRENT) {
+			case LINUX ->
+				"/.unigrid/";
+			case WINDOWS ->
+				"/AppData/Roaming/UNIGRID/";
+			case MAC ->
+				"/Library/Application Support/UNIGRID/";
+			default ->
+				"/UNIGRID/";
+		}
+		);
+
+		return blockRoot;
 	}
 
 	public static String getBaseDirectory() {
@@ -505,12 +575,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 		if (!depenendencies.exists()) {
 			depenendencies.mkdirs();
-			if(OS.CURRENT == OS.WINDOWS) {
+			if (OS.CURRENT == OS.WINDOWS) {
 				setPermissions(depenendencies);
 			}
 		}
 		if (!file.exists()) {
-			if(OS.CURRENT == OS.WINDOWS) {
+			if (OS.CURRENT == OS.WINDOWS) {
 				file.mkdirs();
 				setPermissions(file);
 			}
@@ -518,11 +588,23 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 		return blockRoot;
 	}
-	
+
 	public static void setPermissions(File file) {
 		file.setExecutable(true);
 		file.setReadable(true);
 		file.setWritable(true);
+	}
+
+	public void setStatusText(String text) {
+		Platform.runLater(() -> {
+			status.setText(text);
+		});
+	}
+
+	public void setProgress(double d) {
+		Platform.runLater(() -> {
+			progress.setProgress(d);
+		});
 	}
 
 	@Override
@@ -573,6 +655,79 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 				file.delete();
 			}
 		}
+	}
+
+	public boolean removeDepends() {
+		File file = new File(getBaseDirectory());
+		boolean deleted = deleteDirectory(file);
+		System.out.println("Remove depends = " + deleted);
+		return deleted;
+	}
+
+	public boolean removeDebug() {
+		File file = new File(getUnigridHome() + "/debug.log");
+		boolean deleted = deleteDirectory(file);
+		System.out.println("Remove debug = " + deleted);
+		return deleted;
+	}
+
+	public boolean removeBlockChainData() {
+		File file = new File(getUnigridHome() + "/blocks");
+		boolean deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/chainstate");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/database");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/sporks");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/zerocoin");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/budget.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/fee_estimates.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/gnpayments.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/gncache.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/peers.dat");
+		deleted = deleteDirectory(file);
+		file = new File(getUnigridHome() + "/supplycache.dat");
+		deleted = deleteDirectory(file);
+		System.out.println("Remove debug = " + deleted);
+		return deleted;
+	}
+
+	private boolean deleteDirectory(File directoryToBeDeleted) {
+		File[] allContents = directoryToBeDeleted.listFiles();
+		if (allContents != null) {
+			for (File file : allContents) {
+				deleteDirectory(file);
+			}
+		}
+		return directoryToBeDeleted.delete();
+	}
+
+	public void setConfigURL(String url) {
+		try {
+			System.out.println("configURL textField contains = " + url);
+			URL configUrl = new URL(url);
+			Configuration config = null;
+			try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+				config = Configuration.read(in);
+				config.sync();
+				this.config = config;
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				Sentry.captureException(e);
+			}
+		} catch (MalformedURLException ex) {
+			Logger.getLogger(UpdateView.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+	
+	public HostServices getHostServices() {
+		return services;
 	}
 
 	private String getFileName(String file) {

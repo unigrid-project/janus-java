@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
+<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
    <children>
       <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
@@ -268,7 +268,7 @@
             </AnchorPane>
          </center>
          <left>
-            <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="100.0" styleClass="sidebar" BorderPane.alignment="TOP_RIGHT">
+            <VBox alignment="TOP_RIGHT" styleClass="sidebar" BorderPane.alignment="TOP_RIGHT">
                <children>
                   <ToggleButton fx:id="btnSetGeneral" alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetGeneralTap" prefWidth="100.0" selected="true" style="-fx-cursor: hand;" text="General">
                      <toggleGroup>
@@ -305,6 +305,87 @@
                         <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
                      </padding>
                   </ToggleButton>
+                  <AnchorPane VBox.vgrow="ALWAYS">
+                     <children>
+                        <VBox alignment="BOTTOM_CENTER" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0">
+                           <children>
+                              <Label prefHeight="17.0" prefWidth="95.0" stylesheets="@main.css" text="Janus Ver:" textFill="#b5b5b5">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="txtFxVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label prefHeight="17.0" prefWidth="95.0" text="Installer Ver:" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="txtBootstrapVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label prefHeight="17.0" prefWidth="95.0" text="Daemon Ver:" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="txtDaemonVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label prefHeight="17.0" prefWidth="95.0" text="Hedgehog Ver:" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="txtHedgehogVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <padding>
+                              <Insets right="-1.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
                </children>
                <padding>
                   <Insets right="-1.0" />

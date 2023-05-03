@@ -152,14 +152,16 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 			element.trim();
 			if (!element.isEmpty()) {
 				String[] elementSplitStrings = element.split("=");
-				String target = elementSplitStrings[0];
+				String target = elementSplitStrings[0].trim();
 				String dependency[] = elementSplitStrings[1].split("/");
 				String groupId = dependency[0];
-				String artifactId = dependency[1];
+				String arr[] = dependency[1].split("@");
+				String artifactId = arr[0];
+				String moduelPackage = arr[1];
 
 				if (file.getGroupId().equals(groupId) && file.getArtifactId().equals(artifactId)) {
 					packages = new ArrayList<Package>();
-					packages.add(new Package(groupId, target));
+					packages.add(new Package(groupId, target, moduelPackage));
 				}
 			}
 		}

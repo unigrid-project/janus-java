@@ -60,6 +60,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
+import org.unigrid.janus.model.ExternalVersion;
+import org.unigrid.janus.model.rest.entity.HedgehogVersion;
 
 @Eager
 @ApplicationScoped
@@ -71,6 +73,8 @@ public class Hedgehog {
 	private Event<HedgehogError> hedgehogError;
 	@Inject
 	private Event<SplashMessage> splashMessageEvent;
+	@Inject
+	private ExternalVersion externalVersion;
 
 	private Configuration config = null;
 
@@ -112,8 +116,7 @@ public class Hedgehog {
 	@SneakyThrows
 	public void startHedgehog() {
 		ProcessBuilder pb = new ProcessBuilder();
-		pb.command(hedgehogExecName, "daemon");
-		p = pb.start();
+		p = pb.command(hedgehogExecName, "daemon").inheritIO().start();
 		debug.print("Connecting to Hedgehog...", Hedgehog.class.getSimpleName());
 		// splashMessageEvent.fire(
 		// SplashMessage.builder().message("Starting Hedgehog").build());
@@ -132,6 +135,63 @@ public class Hedgehog {
 				SplashMessage.builder().message("Connected to Hedgehog").build());
 		} else {
 			debug.print("Failed to connect to Hedgehog (status code " + statusCode + ")",
+				Hedgehog.class.getSimpleName());
+		}
+	}
+
+	public void getHedgehogVersion() {
+		String uri = "https://127.0.0.1:52884/version";
+		System.out.println("Request!");
+
+		// Trust all certificates
+		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+			public X509Certificate[] getAcceptedIssuers() {
+				return new X509Certificate[0];
+			}
+
+			public void checkClientTrusted(X509Certificate[] certs, String authType) {
+			}
+
+			public void checkServerTrusted(X509Certificate[] certs, String authType) {
+			}
+		}
+		};
+		System.out.println("Request!");
+
+		SSLContext sc = null;
+		try {
+			sc = SSLContext.getInstance("SSL");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		} catch (Exception e) {
+			// Handle the exception
+		}
+		System.out.println("Request!");
+
+		// Disable hostname verification
+		HostnameVerifier allHostsValid = (hostname, session) -> true;
+		Client client = ClientBuilder.newBuilder().sslContext(sc)
+			.hostnameVerifier(allHostsValid).build();
+		System.out.println("Request!");
+
+		WebTarget target = client.target(uri);
+		Response response;
+		try {
+			System.out.println("Request!");
+			response = target.request()
+				.property("javax.xml.ws.client.receiveTimeout", 5000)
+				.get();
+			if (response.getStatus() != 202) {
+				response.close();
+				return;
+			}
+			System.out.println("Request!");
+			HedgehogVersion hedgehogVersion = response.readEntity(HedgehogVersion.class);
+			externalVersion.setHedgehogVersion(hedgehogVersion.getVersion());
+			response.close();
+		} catch (ProcessingException e) {
+			System.err.println("version Error: " + e.getMessage());
+			debug.print("version Error: " + e.getMessage(),
 				Hedgehog.class.getSimpleName());
 		}
 	}

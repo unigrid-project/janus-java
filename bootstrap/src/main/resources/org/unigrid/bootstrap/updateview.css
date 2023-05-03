@@ -28,3 +28,34 @@
 .button:hover {
 	-fx-background-color: #ccc5;
 }
+
+.scroll-bar:vertical,
+.scroll-bar:vertical .track,
+.scroll-bar:vertical .track-background,
+.scroll-bar:horizontal,
+.scroll-bar:horizontal .track,
+.scroll-bar:horizontal .track-background {
+        -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+        -fx-opacity: 0;
+        -fx-padding: 2;
+}
+
+.scroll-bar:vertical .thumb{
+        -fx-background-color:  #e72; /*linear-gradient(to bottom, #1dbbdd44, #93f9b944);*/
+}
+
+.accordion {
+    -fx-background-color: transparent;
+    -fx-border-color: null;
+    
+}
+
+.titled-pane > .title {
+    -fx-background-color: "#FD7304";
+    -fx-border-color: null;
+    -fx-text-fill: #000000;
+}

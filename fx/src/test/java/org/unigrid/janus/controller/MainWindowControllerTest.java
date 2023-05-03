@@ -51,6 +51,7 @@ import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
 import org.unigrid.janus.model.service.DaemonMockUp;
 import org.unigrid.janus.model.DataDirectoryMockup;
+import org.unigrid.janus.model.rpc.entity.Info;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
@@ -98,6 +99,11 @@ public class MainWindowControllerTest extends BaseFxTest {
 							GetWalletInfo.Result.class, () -> isLocked
 								? "get_wallet_info_locked.json"
 								: "get_wallet_info_unlocked.json");
+					}
+					if (clazz.equals(Info.class)) {
+						return (T) JaxrsResponseHandler.handle(Info.class,
+							Info.Result.class,
+							() -> "get_info.json");
 					}
 					if (clazz.equals(GetUnlockState.class)) {
 						return (T) JaxrsResponseHandler.handle(GetUnlockState.class,

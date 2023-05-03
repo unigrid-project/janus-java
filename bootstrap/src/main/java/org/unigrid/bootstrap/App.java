@@ -37,11 +37,23 @@ import org.update4j.service.Delegate;
 import org.update4j.OS;
 import javafx.stage.StageStyle;
 import io.sentry.Sentry;
+//import java.awt.event.KeyEvent;
+//import java.awt.event.KeyListener;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.HostServices;
+import javafx.event.EventHandler;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 //import ch.qos.logback.classic.Level;
 //import ch.qos.logback.classic.Logger;
 //import org.slf4j.LoggerFactory;
@@ -52,15 +64,65 @@ public class App extends Application implements Delegate {
 	private static FXMLLoader loader;
 	private static Map<String, String> inputArgs = new HashMap<String, String>();
 	private HostServices hostServices = getHostServices();
+	private Stage classStage;
+	final static AtomicBoolean keyPressed = new AtomicBoolean();
+	public static state startupState;
+
+	public enum state {
+		NORMAL, DEBUG, WAIT;
+	}
+
+	public static void preStart() throws IOException {
+		startupState = state.WAIT;
+		Stage debugStage = new Stage();
+		Scene debugView;
+
+		debugStage.centerOnScreen();
+		debugStage.setResizable(false);
+		debugStage.initStyle(StageStyle.UNDECORATED);
+
+		try {
+			debugView = new Scene(loadFXML("debugView"));
+		} catch (IOException ex) {
+			System.out.println(ex.getMessage()); 
+			return;
+		}
+		debugStage.setScene(debugView);
+		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent key) {
+				if (key.getCode() == KeyCode.F5 || key.getCode() == KeyCode.F12) {
+					//open window
+					System.out.println("Key event triggerd!!!!");
+					startupState = state.DEBUG;
+
+					debugStage.show();
+				}
+			}
+		});
+	}
 
 	@Override
-	public void start(Stage stage) throws IOException {
-
+	public void start(Stage stage) throws IOException, InterruptedException, ExecutionException {
 		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		//root.setLevel(Level.ALL);
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
 
+		scene = new Scene(loadFXML("updateView"));
+		stage.initStyle(StageStyle.UNDECORATED);
+		stage.centerOnScreen();
+		stage.setResizable(false);
+		stage.setScene(scene);
+		stage.show();
+		classStage = stage;
+
+		preStart();
+		postStart();
+
+	}
+
+	public void postStart() throws IOException, InterruptedException, ExecutionException {
 		URL configUrl = null;
 		OS os = OS.CURRENT;
 		if (!inputArgs.containsKey("URL")) {
@@ -107,15 +169,7 @@ public class App extends Application implements Delegate {
 		}
 
 		config.sync();
-		scene = new Scene(loadFXML("updateView"));
-		stage.initStyle(StageStyle.UNDECORATED);
-		stage.centerOnScreen();
-		stage.setResizable(false);
-		stage.setScene(scene);
-		stage.show();
-
-		UpdateView.getInstance().setConfig(config, stage, inputArgs, hostServices);
-
+		UpdateView.getInstance().setConfig(config, classStage, inputArgs, hostServices);
 	}
 
 	static void setRoot(String fxml) throws IOException {
@@ -179,4 +233,14 @@ public class App extends Application implements Delegate {
 		System.arraycopy(byteArray2, 0, result, byteArray1.length, byteArray2.length);
 		return result;
 	}
+
+	/*@Override
+	public void keyTyped(KeyEvent e) {
+		//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}*/
 }
