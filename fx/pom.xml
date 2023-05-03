@@ -19,9 +19,17 @@
 		<release.tag>1.0.14</release.tag>
 		<current.tag>1.0.14</current.tag>
 		<config.opens>
-			fx=jakarta.xml.bind/jakarta.xml.bind-api
+			fx=jakarta.xml.bind/jakarta.xml.bind-api@jakarta.xml.bind
 		</config.opens>
 		<config.exports>
+                        <!--fx=jakarta.json/jakarta.json-api
+                        fx=com.fasterxml.jackson.core/jackson-core-->
+                        <!--org.glassfish.java.json=jakarta.json/jakarta.json.spi-->
+                        <!--jakarta.json=org.glassfish.java.json/org.glassfish.json-->
+                        <!--org.glassfish.json=jakarta.json/jakarta.json-api-->
+                        <!--org.glassfish.json=jakarta.json.bind/jakarta.json.bind-api-->
+                        jakarta.json=org.glassfish/jakarta.json@org.glassfish.json
+
 		</config.exports>
 	</properties>
 	<dependencies>

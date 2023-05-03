@@ -321,7 +321,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	private void launch() {
 		System.out.println("Launch");
-		Stage stage = getStage();
+		//Stage stage = getStage();
 		System.out.println("Getting stage");
 
 		launchApp();
@@ -521,7 +521,11 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	public void launchApp() {
 		setStatusText("Preparing application start");
-		config.launch(inject);
+		try {
+			config.launch(inject);
+		} catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
 		Platform.runLater(() -> {
 			Stage stage = getStage();
 			stage.hide();
