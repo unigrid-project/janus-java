@@ -40,32 +40,21 @@ public class ExternalVersion {
 	@Inject private RPCService rpc;
 
 	public void callRPCForDaemonVersion() {
-		System.out.println("Getting daemon version");
 		Info info = new Info();
 		try {
 			info = rpc.call(new Info.Request(), Info.class);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-		System.out.println("Getting daemon version");
 		String version = String.valueOf(info.getResult().getVersion());
-		System.out.println("Getting daemon version");
 		Pattern p = Pattern.compile("^(.)(..)(..)");
-		System.out.println("Getting daemon version");
 		Matcher m = p.matcher(version);
-		System.out.println("Getting daemon version");
 		m.find();
-		System.out.println("Getting daemon version");
 		int major = Integer.valueOf(m.group(1));
-		System.out.println("Getting daemon version");
 		int minor = Integer.valueOf(m.group(2));
-		System.out.println("Getting daemon version");
 		int revision = Integer.valueOf(m.group(3));
-		System.out.println("Getting daemon version");
 		String delimiter = ".";
-		System.out.println("Getting daemon version");
 		version = major + delimiter + minor + delimiter + revision;
-		System.out.println("Getting daemon version");
 		daemonVersion = version;
 	}
 }
