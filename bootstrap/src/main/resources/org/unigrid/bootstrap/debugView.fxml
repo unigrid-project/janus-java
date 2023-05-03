@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="625.0" maxWidth="714.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="516.0" prefWidth="714.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" stylesheets="@updateview.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.bootstrap.controller.DebugViewController">
+<AnchorPane maxHeight="625.0" maxWidth="714.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="516.0" prefWidth="714.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" stylesheets="@updateview.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.bootstrap.controller.DebugViewController">
    <children>
       <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" layoutY="2.0" orientation="VERTICAL" prefHeight="523.0" prefWidth="657.0" rowValignment="TOP" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
          <children>
@@ -42,6 +42,7 @@
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
                                     <Button mnemonicParsing="false" onAction="#onResetDepends" text="Reset depends" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
@@ -53,6 +54,9 @@
                                     <Button fx:id="onRemoveBlockChainData" mnemonicParsing="false" onAction="#onRemoveBlockChainData" text="Remove blockchain" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                                     <Label text="Remove blockchain data" textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                     <Label fx:id="txtRemoveBlockChainData" textFill="#0ba400" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                    <Button fx:id="btnOpenDebug" mnemonicParsing="false" onAction="#onOpenDebug" text="Open debug.log" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+                                    <Label fx:id="txtRemoveDebug1" text="Open Debug.log" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Label fx:id="txtOpenDebugStatus" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                  </children>
                               </GridPane>
                               <ScrollBar orientation="VERTICAL" prefHeight="354.0" prefWidth="12.0" visible="false" AnchorPane.bottomAnchor="1.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0" />

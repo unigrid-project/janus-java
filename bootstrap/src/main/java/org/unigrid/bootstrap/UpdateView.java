@@ -73,6 +73,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	private Configuration config;
 	private DoubleProperty primaryPercent;
 	private DoubleProperty secondaryPercent;
+	private HostServices services;
 
 	private BooleanProperty running;
 	private boolean abort;
@@ -109,7 +110,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		this.config = config;
 		this.primaryStage = primaryStage;
 		final Properties properties = new Properties();
-
+		services = hostServices;
 		try {
 			properties.load(getClass().getResourceAsStream("application.properties"));
 			bootstrapVersion = Objects.requireNonNull(properties.getProperty("proj.ver"));
@@ -723,6 +724,10 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		} catch (MalformedURLException ex) {
 			Logger.getLogger(UpdateView.class.getName()).log(Level.SEVERE, null, ex);
 		}
+	}
+	
+	public HostServices getHostServices() {
+		return services;
 	}
 
 	private String getFileName(String file) {
