@@ -18,7 +18,7 @@
 <?import javafx.stage.Stage?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<Stage height="220.0" title="Unigrid Janus Splash Screen" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SplashScreenController">
+<Stage height="220.0" title="Unigrid Janus Splash Screen" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SplashScreenController">
     <scene>
         <Scene>
             <root>
@@ -61,9 +61,14 @@
                               </Label>
                            </children>
                         </FlowPane>
-                        <FlowPane alignment="CENTER" columnHalignment="CENTER" prefHeight="20.0" prefWidth="90.0" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                        <FlowPane alignment="CENTER" columnHalignment="CENTER" orientation="VERTICAL" prefHeight="20.0" prefWidth="90.0" GridPane.columnIndex="2" GridPane.rowIndex="4">
                            <children>
                               <Label fx:id="verLbl" text="version:" textAlignment="CENTER" textFill="#ababab">
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="lblBootstrapVersion" text="version:" textAlignment="CENTER" textFill="#ababab">
                                  <font>
                                     <Font size="9.0" />
                                  </font>

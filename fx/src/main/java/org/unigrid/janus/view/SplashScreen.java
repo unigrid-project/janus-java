@@ -49,6 +49,7 @@ import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.controller.SplashScreenController;
+import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.cdi.Eager;
@@ -80,6 +81,7 @@ public class SplashScreen implements Window {
 	private Label text;
 	private Label status;
 	private Label lbl;
+	private Label lblBootstrapVersion;
 	private FileAlterationMonitor monitor = new FileAlterationMonitor(2000);
 
 	@PostConstruct
@@ -93,6 +95,8 @@ public class SplashScreen implements Window {
 	public void show() {
 		lbl = (Label) stageSplash.getScene().lookup("#verLbl");
 		lbl.setText("version: ".concat(janusModel.getVersion()));
+		lblBootstrapVersion = (Label) stageSplash.getScene().lookup("#lblBootstrapVersion");
+		lblBootstrapVersion.setText("installer: ".concat(BootstrapModel.getBootstrapVer()));
 
 		try {
 			stageSplash.show();
