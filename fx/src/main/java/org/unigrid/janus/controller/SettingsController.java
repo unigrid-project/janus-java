@@ -386,6 +386,10 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Walet file", "*.dat"));
 		fileChooser.setInitialFileName("wallet.dat");
 		File file = fileChooser.showSaveDialog(stage);
+		if (file == null) {
+			debug.log("No file was choosen");
+			return;
+		}
 		debug.log(String.format("File chosen: %s", file.getAbsolutePath()));
 		// debug.log(rpc.callToJson(new BackupWallet.Request(file.getAbsolutePath())));
 
