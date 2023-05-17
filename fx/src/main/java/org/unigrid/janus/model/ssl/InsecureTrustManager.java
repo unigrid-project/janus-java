@@ -7,15 +7,17 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class InsecureTrustManager {
-	private static final TrustManager tm = new X509TrustManager() {
+	private static final TrustManager TM = new X509TrustManager() {
 		@Override
 		public void checkClientTrusted(X509Certificate[] chain, String s) {
-			log.debug("Accepting a client certificate: " + chain[0].getSubjectX500Principal());
+			log.debug("Accepting a client certificate: "
+					+ chain[0].getSubjectX500Principal());
 		}
 
 		@Override
 		public void checkServerTrusted(X509Certificate[] chain, String s) {
-			log.debug("Accepting a server certificate: " + chain[0].getSubjectX500Principal());
+			log.debug("Accepting a server certificate: "
+					+ chain[0].getSubjectX500Principal());
 		}
 
 		@Override
@@ -25,6 +27,6 @@ public class InsecureTrustManager {
 	};
 
 	public static TrustManager[] create() {
-		return new TrustManager[] { tm };
+		return new TrustManager[] {TM};
 	}
 }

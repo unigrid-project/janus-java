@@ -58,7 +58,6 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import org.unigrid.janus.model.ExternalVersion;
-import org.unigrid.janus.model.rest.entity.HedgehogVersion;
 import org.unigrid.janus.model.ssl.InsecureTrustManager;
 
 @Eager
