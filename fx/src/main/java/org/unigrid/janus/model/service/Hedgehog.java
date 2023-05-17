@@ -57,11 +57,9 @@ import org.update4j.OS;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.security.cert.X509Certificate;
 import org.unigrid.janus.model.ExternalVersion;
 import org.unigrid.janus.model.rest.entity.HedgehogVersion;
+import org.unigrid.janus.model.ssl.InsecureTrustManager;
 
 @Eager
 @ApplicationScoped
@@ -141,27 +139,11 @@ public class Hedgehog {
 
 	public void getHedgehogVersion() {
 		String uri = "https://127.0.0.1:52884/version";
-		System.out.println("Request!");
-
-		// Trust all certificates
-		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-			public X509Certificate[] getAcceptedIssuers() {
-				return new X509Certificate[0];
-			}
-
-			public void checkClientTrusted(X509Certificate[] certs, String authType) {
-			}
-
-			public void checkServerTrusted(X509Certificate[] certs, String authType) {
-			}
-		}
-		};
-		System.out.println("Request!");
-
 		SSLContext sc = null;
+
 		try {
 			sc = SSLContext.getInstance("SSL");
-			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			sc.init(null, InsecureTrustManager.create(), new java.security.SecureRandom());
 			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		} catch (Exception e) {
 			// Handle the exception
@@ -176,6 +158,7 @@ public class Hedgehog {
 
 		WebTarget target = client.target(uri);
 		Response response;
+
 		try {
 			System.out.println("Request!");
 			response = target.request()
@@ -196,28 +179,13 @@ public class Hedgehog {
 		}
 	}
 
-	public int connectToHedgehog()
-		throws InterruptedException, ExecutionException, TimeoutException {
+	public int connectToHedgehog() throws InterruptedException, ExecutionException, TimeoutException {
 		String uri = "https://127.0.0.1:52884/gridspork";
-
-		// Trust all certificates
-		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-			public X509Certificate[] getAcceptedIssuers() {
-				return new X509Certificate[0];
-			}
-
-			public void checkClientTrusted(X509Certificate[] certs, String authType) {
-			}
-
-			public void checkServerTrusted(X509Certificate[] certs, String authType) {
-			}
-		}
-		};
-
 		SSLContext sc = null;
+
 		try {
 			sc = SSLContext.getInstance("SSL");
-			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			sc.init(null, InsecureTrustManager.create(), new java.security.SecureRandom());
 			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		} catch (Exception e) {
 			// Handle the exception
