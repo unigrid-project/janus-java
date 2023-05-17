@@ -30,10 +30,9 @@ import net.jqwik.api.lifecycle.BeforeContainer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.endsWith;
-//import org.unigrid.janus.controller.SettingsController;
 import org.unigrid.janus.jqwik.fx.BaseFxTest;
 import org.unigrid.janus.jqwik.fx.FxResource;
-import org.unigrid.janus.model.DataDirectoryMockup;
+import org.unigrid.janus.model.FileBasedConfigurationMockup;
 import org.unigrid.janus.model.external.ResponseMockUp;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
 import org.unigrid.janus.model.service.external.WebTargetMockUp;
@@ -62,7 +61,7 @@ public class DebugServiceTest extends BaseFxTest {
 	public static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
-		new DataDirectoryMockup();
+		new FileBasedConfigurationMockup();
 		new DaemonMockUp();
 
 		new ResponseMockUp() {
