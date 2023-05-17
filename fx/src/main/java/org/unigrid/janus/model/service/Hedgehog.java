@@ -137,7 +137,8 @@ public class Hedgehog {
 		}
 	}
 
-	public void getHedgehogVersion() {
+	//TODO: Re-enable?
+	/*public void getHedgehogVersion() {
 		String uri = "https://127.0.0.1:52884/version";
 		SSLContext sc = null;
 
@@ -177,7 +178,7 @@ public class Hedgehog {
 			debug.print("version Error: " + e.getMessage(),
 				Hedgehog.class.getSimpleName());
 		}
-	}
+	}*/
 
 	public int connectToHedgehog() throws InterruptedException, ExecutionException, TimeoutException {
 		String uri = "https://127.0.0.1:52884/gridspork";
