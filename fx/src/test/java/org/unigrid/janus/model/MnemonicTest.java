@@ -24,7 +24,7 @@ import org.unigrid.janus.jqwik.BaseMockedWeldTest;
 import org.unigrid.janus.jqwik.WeldSetup;
 import net.jqwik.api.Example;
 import mockit.Mock;
-import mockit.MockUp;
+//import mockit.MockUp;
 import org.apache.commons.lang3.SystemUtils;
 
 @WeldSetup(DeprecatedUpdateWalletModel.class)
@@ -68,7 +68,7 @@ public class MnemonicTest extends BaseMockedWeldTest {
 				return Paths.get(head, tail).toString();
 			}
 		};
-			
+
 		String mnemonic = mnemonic.generateWallet("123456", true);
 
 		System.out.println(mnemonic);
