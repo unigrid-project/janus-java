@@ -24,6 +24,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.unigrid.janus.model.rpc.entity.Info;
+import org.unigrid.janus.model.service.Hedgehog;
 import org.unigrid.janus.model.service.RPCService;
 
 @Data
@@ -33,11 +34,20 @@ public class ExternalVersion {
 	@Getter
 	@Setter
 	private String daemonVersion = "";
-	@Getter
+
 	@Setter
 	private String hedgehogVersion = "";
 
 	@Inject private RPCService rpc;
+	@Inject private Hedgehog hedgehog;
+
+	public String getHedgehogVersion() {
+		if (hedgehogVersion.equals("")) {
+			System.out.println("Setting a new hedgehog version");
+			hedgehog.getHedgehogVersion();
+		}
+		return hedgehogVersion;
+	}
 
 	public void callRPCForDaemonVersion() {
 		Info info = new Info();

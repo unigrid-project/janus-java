@@ -58,6 +58,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import org.unigrid.janus.model.ExternalVersion;
+import org.unigrid.janus.model.rest.entity.HedgehogVersion;
 import org.unigrid.janus.model.ssl.InsecureTrustManager;
 
 @Eager
@@ -137,7 +138,7 @@ public class Hedgehog {
 	}
 
 	//TODO: Re-enable?
-	/*public void getHedgehogVersion() {
+	public void getHedgehogVersion() {
 		String uri = "https://127.0.0.1:52884/version";
 		SSLContext sc = null;
 
@@ -177,7 +178,7 @@ public class Hedgehog {
 			debug.print("version Error: " + e.getMessage(),
 				Hedgehog.class.getSimpleName());
 		}
-	}*/
+	}
 
 	public int connectToHedgehog() throws InterruptedException, ExecutionException, TimeoutException {
 		String uri = "https://127.0.0.1:52884/gridspork";
