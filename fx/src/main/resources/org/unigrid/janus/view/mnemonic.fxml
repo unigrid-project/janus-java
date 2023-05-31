@@ -5,7 +5,6 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.view.WalletSetupController">
    <children>
       <Label fx:id="lblMenmonic" alignment="TOP_CENTER" layoutX="18.0" layoutY="64.0" prefHeight="136.0" prefWidth="564.0" style="-fx-text-fill: orange;" text="Label" wrapText="true" AnchorPane.leftAnchor="18.0" AnchorPane.rightAnchor="18.0">
@@ -13,9 +12,9 @@
             <Font size="20.0" />
          </font>
       </Label>
-      <Button fx:id="btnByHand" layoutX="83.0" layoutY="324.0" mnemonicParsing="false" text="Write by hand" />
-      <Button fx:id="btnPrint" layoutX="274.0" layoutY="324.0" mnemonicParsing="false" text="Print" />
-      <Button fx:id="btnHardwareWallet" layoutX="371.0" layoutY="324.0" mnemonicParsing="false" text="Save to hardware wallet" />
+      <Button fx:id="btnByHand" layoutX="83.0" layoutY="324.0" mnemonicParsing="false" onAction="#onWriteByHand" text="Write by hand" />
+      <Button fx:id="btnPrint" layoutX="274.0" layoutY="324.0" mnemonicParsing="false" onAction="#onPrint" text="Print" />
+      <Button fx:id="btnHardwareWallet" layoutX="371.0" layoutY="324.0" mnemonicParsing="false" onAction="#onHardwareWallet" text="Save to hardware wallet" />
       <Label layoutX="140.0" layoutY="277.0" style="-fx-text-fill: orange;" text="Choose atleast one option below before proceding" />
    </children>
 </AnchorPane>
