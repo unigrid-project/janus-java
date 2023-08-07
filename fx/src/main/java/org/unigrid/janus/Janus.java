@@ -200,13 +200,16 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		});
 	}
 
-	public void setExternalVersion() {
+	/*public void setExternalVersion() {
+		//TODO: Re-enable?
+		// this is being called after mainWindow.show()
 		hedgehog.getHedgehogVersion();
-	}
+	}*/
 
 	private void startMainWindow() {
 		try {
-			setExternalVersion();
+			//TODO: Re-enable?
+			//setExternalVersion();
 			mainWindow.show();
 		} catch (Exception e) {
 			System.out.print("error: " + e.getMessage());

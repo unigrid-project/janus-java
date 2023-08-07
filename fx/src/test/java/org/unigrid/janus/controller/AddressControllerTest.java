@@ -41,7 +41,7 @@ import org.unigrid.janus.model.external.ResponseMockUp;
 import org.unigrid.janus.model.rpc.entity.GetNewAddress;
 import org.unigrid.janus.model.rpc.entity.ListAddressBalances;
 import org.unigrid.janus.model.service.DaemonMockUp;
-import org.unigrid.janus.model.DataDirectoryMockup;
+import org.unigrid.janus.model.FileBasedConfigurationMockup;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.external.JerseyInvocationMockUp;
 import org.unigrid.janus.model.service.external.WebTargetMockUp;
@@ -59,7 +59,7 @@ public class AddressControllerTest extends BaseFxTest {
 	private static void before() {
 		new JerseyInvocationMockUp();
 		new WebTargetMockUp();
-		new DataDirectoryMockup();
+		new FileBasedConfigurationMockup();
 		new DaemonMockUp();
 		new ResponseMockUp() {
 			@Mock

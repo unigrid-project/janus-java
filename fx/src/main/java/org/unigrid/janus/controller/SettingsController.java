@@ -139,8 +139,6 @@ public class SettingsController implements Initializable, PropertyChangeListener
 		verLbl.setText("version: ".concat(janusModel.getVersion()));
 		txtFxVersion.setText(janusModel.getVersion());
 		txtBootstrapVersion.setText(bootStrap.getInstance().getBootstrapVer());
-		txtHedgehogVersion.setText(externalVersion.getHedgehogVersion());
-
 		wallet.addPropertyChangeListener(this);
 		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));
 	}
@@ -450,6 +448,7 @@ public class SettingsController implements Initializable, PropertyChangeListener
 			@Override
 			public void run() {
 				txtDaemonVersion.setText(externalVersion.getDaemonVersion());
+				txtHedgehogVersion.setText(externalVersion.getHedgehogVersion());
 			}
 		});
 	}

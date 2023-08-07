@@ -16,20 +16,17 @@
 
 package org.unigrid.janus.model;
 
-import org.apache.commons.configuration2.Configuration;
-import org.mockito.Mockito;
 import mockit.Mock;
 import mockit.MockUp;
+import org.apache.commons.configuration2.FileBasedConfiguration;
 
-public class DataDirectoryMockup extends MockUp<DataDirectory> {
+public class FileBasedConfigurationMockup extends MockUp<FileBasedConfiguration> {
 	@Mock
-	public static Configuration getConfig(boolean blocking) {
-		// create a mock Configuration object
-		Configuration mockConfig = Mockito.mock(Configuration.class);
-
-		Mockito.when(mockConfig.getString("rpcuser")).thenReturn("user");
-		Mockito.when(mockConfig.getString("rpcpassword")).thenReturn("password");
-
-		return mockConfig;
+	public String getString(String key) {
+		return switch (key) {
+			case "rpcuser" -> "user";
+			case "rpcpassword" -> "password";
+			default -> "unknown";
+		};
 	}
 }

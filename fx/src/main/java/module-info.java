@@ -75,6 +75,7 @@ module fx {
 	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson;
 	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2;//, javafx.swing;
 	opens org.unigrid.janus.model.entity to jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
+	opens org.unigrid.janus.model.rest.entity to weld.core.impl, org.eclipse.yasson, jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
 
 	exports org.unigrid.janus;
 	
