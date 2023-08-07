@@ -30,7 +30,6 @@
                         <!--org.glassfish.json=jakarta.json/jakarta.json-api-->
                         <!--org.glassfish.json=jakarta.json.bind/jakarta.json.bind-api-->
                         jakarta.json=org.glassfish/jakarta.json@org.glassfish.json
-
 		</config.exports>
 	</properties>
 	<dependencies>
