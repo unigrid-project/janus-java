@@ -17,7 +17,7 @@
         <Scene stylesheets="@main.css">
             <AnchorPane prefHeight="400.0" prefWidth="600.0">
             <children>
-               <BorderPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <BorderPane fx:id="centerView" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                   <top>
                      <Label style="-fx-text-fill: orange;" text="Create new unigrid wallet" BorderPane.alignment="CENTER">
                         <padding>
@@ -55,7 +55,7 @@
                      </GridPane>
                   </bottom>
                   <center>
-                     <AnchorPane fx:id="centerView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                     <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
                   </center>
                </BorderPane>
             </children></AnchorPane>

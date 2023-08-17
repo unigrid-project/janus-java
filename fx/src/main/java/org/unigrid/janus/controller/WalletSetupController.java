@@ -18,16 +18,18 @@ package org.unigrid.janus.controller;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.io.IOException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import lombok.NoArgsConstructor;
 import org.unigrid.janus.model.cdi.Eager;
 
 @Eager
 @ApplicationScoped
+@NoArgsConstructor
 public class WalletSetupController {
 
 	public enum Window {
@@ -40,7 +42,7 @@ public class WalletSetupController {
 	@FXML
 	private Stage createWallet;
 	@FXML
-	private AnchorPane centerView;
+	private BorderPane centerView;
 	private AnchorPane mnemonic;
 	private AnchorPane password;
 	private AnchorPane promtMnemonic;
@@ -52,20 +54,27 @@ public class WalletSetupController {
 	public void init() {
 		try {
 			createWallet = FXMLLoader
-				.load(getClass().getResource("/org/unigrid/janus/view/createnewwallet.fxml"));
-			System.out.println("wallet setup init");
+				.load(this.getClass().getResource("/org/unigrid/janus/view/createnewwallet.fxml"));
+			//System.out.println("wallet setup init");
 			mnemonic = (AnchorPane) FXMLLoader
-				.load(getClass().getResource("/org/unigrid/janus/view/mnemonic.fxml"));
+				.load(this.getClass().getResource("/org/unigrid/janus/view/mnemonic.fxml"));
 			password = (AnchorPane) FXMLLoader
-				.load(getClass().getResource("/org/unigrid/janus/view/password.fxml"));
+				.load(this.getClass().getResource("/org/unigrid/janus/view/password.fxml"));
 			promtMnemonic = (AnchorPane) FXMLLoader
-				.load(getClass().getResource("/org/unigrid/janus/view/promtMnemonic.fxml"));
+				.load(this.getClass().getResource("/org/unigrid/janus/view/promtMnemonic.fxml"));
 			shuffleMnemonic = (AnchorPane) FXMLLoader
-				.load(getClass().getResource("/org/unigrid/janus//view/shuffleMnemonic.fxml"));
+				.load(this.getClass().getResource("/org/unigrid/janus/view/shuffleMnemonic.fxml"));
+			System.out.println("wallet setup initialize");
+
+			if (centerView == null) {
+				centerView = (BorderPane) createWallet.getScene().lookup("#centerView");
+			}
+			mnemonic.setVisible(false);
+			promtMnemonic.setVisible(false);
+			shuffleMnemonic.setVisible(false);
 			centerView.getChildren().addAll(mnemonic, password, promtMnemonic, shuffleMnemonic);
 			password.setVisible(true);
-			System.out.println("wallet setup initialize");
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			System.out.println("ERROR: " + ex.getMessage());
 			ex.printStackTrace();
 		}
@@ -104,6 +113,10 @@ public class WalletSetupController {
 		}
 	}
 
+	public void show() {
+		createWallet.show();
+	}
+
 	@FXML
 	public void onWriteByHand(ActionEvent ev) {
 		//
@@ -117,9 +130,5 @@ public class WalletSetupController {
 	@FXML
 	public void onHardwareWallet(ActionEvent ev) {
 		//
-	}
-
-	public void show() {
-		createWallet.show();
 	}
 }
