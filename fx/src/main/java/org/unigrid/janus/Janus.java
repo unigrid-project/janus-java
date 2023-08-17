@@ -57,6 +57,7 @@ import org.unigrid.janus.view.MainWindow;
 import org.update4j.OS;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
+import org.unigrid.janus.controller.WalletSetupController;
 import org.unigrid.janus.model.ExternalVersion;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.UpdateWallet;
@@ -99,6 +100,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	// @Inject private TrayService tray;
 	@Inject
 	private ExternalVersion externalVersion;
+	@Inject
+	private WalletSetupController walletSetupController;
 
 	private BooleanProperty ready = new SimpleBooleanProperty(false);
 	private int block = -1;
@@ -175,6 +178,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	public void startupSequence() {
 		startSplashScreen();
+		walletSetupController.show();
 		startDaemon();
 		ready.addListener(new ChangeListener<Boolean>() {
 			@Override
