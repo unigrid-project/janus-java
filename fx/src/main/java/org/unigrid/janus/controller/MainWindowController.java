@@ -65,12 +65,14 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML private ToggleButton btnAddress;
 	@FXML private ToggleButton btnDocs;
 	@FXML private ToggleButton btnSettings;
+	@FXML private ToggleButton btnVote;
 	@FXML private VBox pnlWallet;
 	@FXML private VBox pnlTransactions;
 	@FXML private VBox pnlNodes;
 	@FXML private VBox pnlAddress;
 	@FXML private VBox pnlSettings;
 	@FXML private VBox pnlDocs;
+	@FXML private VBox pnlVote;
 	@FXML private AnchorPane pnlOverlay;
 	@FXML private AnchorPane pnlWarning;
 	@FXML private FontIcon lockBtn;
@@ -142,7 +144,12 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		}
 		select(pnlSettings, btnSettings);
 	}
-
+	
+	@FXML
+	private void onVoteClicked(MouseEvent event) {
+		select(pnlVote, btnVote);
+	}
+	
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
