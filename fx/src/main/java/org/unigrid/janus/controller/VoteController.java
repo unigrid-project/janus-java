@@ -17,26 +17,63 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.AnchorPane;
+import org.unigrid.janus.model.rpc.entity.BudgetGetVote;
+import org.unigrid.janus.model.rpc.entity.BudgetVote;
+import org.unigrid.janus.model.service.RPCService;
+import org.unigrid.janus.model.signal.NewBlock;
 
 @ApplicationScoped
 public class VoteController {
 
+	@Inject private RPCService rpc;
+	
 	@FXML Label lblTitle;
 	@FXML Label lblSummary;
 	@FXML Button btnYes;
 	@FXML Button btnNo;
+	@FXML Button btnAbstain;
+	@FXML Label lblYeas;
+	@FXML Label lblNays;
+	@FXML ProgressBar pgbRatio;
+	@FXML AnchorPane pnlCastVote;
 
 	@FXML
 	public void OnVoteNo(ActionEvent e) {
-		
+		rpc.call(new BudgetVote.Request(new Object[]{"vote-many", "no"}), BudgetVote.class);
 	}
 
 	@FXML
 	public void OnVoteYes(ActionEvent e) {
-		
+		rpc.call(new BudgetVote.Request(new Object[]{"vote-many", "yes"}), BudgetVote.class);
+	}
+
+	@FXML
+	public void OnVoteAbstain(ActionEvent e) {
+		rpc.call(new BudgetVote.Request(new Object[]{"vote-many", "abstain"}), BudgetVote.class);
+	}
+
+	private void onMessage(@Observes NewBlock update) {
+		BudgetGetVote budgetInfo = rpc.call(new BudgetGetVote.Request(new Object[]{"show"}), BudgetGetVote.class);
+
+		if(budgetInfo.getResult() == null) {
+			System.out.println("result was not null");
+			lblTitle.setText(budgetInfo.getResult().getName());
+			lblSummary.setText(budgetInfo.getResult().getUrl());
+			int yes = budgetInfo.getResult().getYeas();
+			int no = budgetInfo.getResult().getNays();
+			lblYeas.setText(Integer.toString(yes));
+			lblNays.setText(Integer.toString(no));
+			float progress = 0.0f;
+			progress = (yes / (yes + no));
+			pgbRatio.setProgress(progress);
+		}
 	}
 }

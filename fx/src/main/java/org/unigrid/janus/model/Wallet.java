@@ -17,6 +17,7 @@
 package org.unigrid.janus.model;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -32,6 +33,7 @@ import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.rpc.entity.StakingStatus;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.signal.NewBlock;
 
 @Eager
 @ApplicationScoped
@@ -77,6 +79,7 @@ public class Wallet {
 
 	@Inject private DebugService debug;
 
+	@Inject private Event<NewBlock> newBlockEvent;
 	@AllArgsConstructor
 	public enum LockState {
 		UNLOCKED("unlocked"),
@@ -189,6 +192,8 @@ public class Wallet {
 		this.blocks = newValue;
 		//System.out.println("setting blocks: " + this.blocks);
 		this.pcs.firePropertyChange(this.BLOCKS_PROPERTY, oldValue, newValue);
+		newBlockEvent.fire(NewBlock.builder().blockCount(newValue).build());
+		
 	}
 
 	public int getConnections() {
