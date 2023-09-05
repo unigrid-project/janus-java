@@ -205,6 +205,20 @@
 	-fx-text-fill: #33d;
 }
 
+.vote-progress-bar > .track {
+        -fx-background-color: "#F74230", "#F74230";
+	-fx-background-radius:0;
+	-fx-background-insets: 0, 1;
+}
+
+.vote-progress-bar > .bar {
+        -fx-padding: 1px; 
+	-fx-accent: "#14B839";
+	-fx-background-insets: 0; 
+	-fx-background-radius: 2;
+	-fx-padding: 0.75em;
+}
+
 .my-progress-bar > .track {
 	-fx-background-color: "#05233d", "#05233d";
 	-fx-background-radius:0;
