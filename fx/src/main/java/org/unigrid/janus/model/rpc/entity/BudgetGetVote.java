@@ -16,14 +16,15 @@
 
 package org.unigrid.janus.model.rpc.entity;
 
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.unigrid.janus.model.BudgetInfo;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class BudgetGetVote extends BaseResult<BudgetGetVote.Result> {
-	private static final String METHOD = " gnbudget";
+public class BudgetGetVote extends BaseResult<List<BudgetGetVote.Result>> {
+	private static final String METHOD = "gnbudget";
 
 	public static class Request extends BaseRequest{
 		public Request(Object[] args) {

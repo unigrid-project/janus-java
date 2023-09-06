@@ -22,7 +22,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class BudgetVote {
-	private static final String METHOD = " gnbudget";
+	private static final String METHOD = "gnbudget";
 
 	public static class Request extends BaseRequest{
 		public Request(Object[] args) {
