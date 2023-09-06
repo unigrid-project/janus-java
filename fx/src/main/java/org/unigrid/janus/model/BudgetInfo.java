@@ -16,27 +16,34 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.json.bind.annotation.JsonbProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 public class BudgetInfo {
+	@JsonbProperty("Name")
 	private String name;
+	@JsonbProperty("URL")
 	private String url;
+	@JsonbProperty("Hash")
 	private String hash;
-	private String feeHash;
-	private int blockStart;
-	private int blockEnd;
-	private int totalPaymentCount;
-	private int remainingPaymentCount;
-	private String paymentAddress;
-	private float ratio;
+	//private String feeHash;
+	//private int blockStart;
+	//private int blockEnd;
+	//private int totalPaymentCount;
+	//private int remainingPaymentCount;
+	//private String paymentAddress;
+	//private double ratio;
+	@JsonbProperty("Yeas")
 	private int yeas;
+	@JsonbProperty("Nays")
 	private int nays;
-	private int abstains;
-	private int totalPayment;
-	private int monthlyPayment;
-	private boolean isEstablished;
-	private boolean isValid;
-	private String isValidReason;
-	private boolean fValid;
+	//private int abstains;
+	//private int totalPayment;
+	//private int monthlyPayment;
+	//private boolean isEstablished;
+	//private boolean isValid;
+	//private String isValidReason;
+	//private boolean fValid;
 }

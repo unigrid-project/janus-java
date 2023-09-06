@@ -182,7 +182,7 @@
                                           </FontIcon>
                                        </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnVote" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onVoteClicked" prefWidth="150.0" style="-fx-cursor: hand;" text="Vote">
+                                    <ToggleButton fx:id="btnGovernace" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onGovernaceClicked" prefWidth="150.0" style="-fx-cursor: hand;" text="Governace">
                                        <toggleGroup>
                                           <ToggleGroup fx:id="sidepane121" />
                                        </toggleGroup>
@@ -370,7 +370,7 @@
                               		<fx:include source="settings.fxml" VBox.vgrow="ALWAYS" />
                               	</children>
                               </VBox>
-                              <VBox fx:id="pnlVote" alignment="CENTER" layoutX="10.0" layoutY="10.0" styleClass="settings" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <VBox fx:id="pnlGovernace" layoutX="10.0" layoutY="10.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
                                     <fx:include source="vote.fxml" />
                                  </children>

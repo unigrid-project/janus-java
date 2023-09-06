@@ -65,14 +65,14 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML private ToggleButton btnAddress;
 	@FXML private ToggleButton btnDocs;
 	@FXML private ToggleButton btnSettings;
-	@FXML private ToggleButton btnVote;
+	@FXML private ToggleButton btnGovernace;
 	@FXML private VBox pnlWallet;
 	@FXML private VBox pnlTransactions;
 	@FXML private VBox pnlNodes;
 	@FXML private VBox pnlAddress;
 	@FXML private VBox pnlSettings;
 	@FXML private VBox pnlDocs;
-	@FXML private VBox pnlVote;
+	@FXML private VBox pnlGovernace;
 	@FXML private AnchorPane pnlOverlay;
 	@FXML private AnchorPane pnlWarning;
 	@FXML private FontIcon lockBtn;
@@ -106,6 +106,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		btnAddress.setSelected(false);
 		btnDocs.setSelected(false);
 		pnlDocs.setVisible(false);
+		pnlGovernace.setVisible(false);
+		btnGovernace.setSelected(false);
 
 		panel.setVisible(true);
 		button.setSelected(true);
@@ -146,8 +148,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	}
 	
 	@FXML
-	private void onVoteClicked(MouseEvent event) {
-		select(pnlVote, btnVote);
+	private void onGovernaceClicked(MouseEvent event) {
+		select(pnlGovernace, btnGovernace);
 	}
 	
 	@Override

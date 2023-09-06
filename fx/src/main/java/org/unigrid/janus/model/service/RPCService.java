@@ -43,6 +43,7 @@ import java.util.Timer;
 import lombok.Getter;
 import lombok.Setter;
 import org.unigrid.janus.model.cdi.Eager;
+import org.unigrid.janus.model.rpc.entity.BudgetGetVote;
 
 @Eager
 @ApplicationScoped
@@ -135,8 +136,8 @@ public class RPCService {
 	}
 
 	public <R, T> T call(R request, Class<T> clazz) {
-		//debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
-		return target.request().post(Entity.json(request)).readEntity(clazz);
+			//debug.print("RPC call ".concat(request.toString()), RPCService.class.getSimpleName());
+			return target.request().post(Entity.json(request)).readEntity(clazz);
 	}
 
 	public <R> String callToJson(R request) {
