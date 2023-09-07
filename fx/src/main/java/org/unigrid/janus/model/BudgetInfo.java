@@ -34,12 +34,14 @@ public class BudgetInfo {
 	//private int totalPaymentCount;
 	//private int remainingPaymentCount;
 	//private String paymentAddress;
-	//private double ratio;
+	@JsonbProperty("Ratio")
+	private double ratio;
 	@JsonbProperty("Yeas")
 	private int yeas;
 	@JsonbProperty("Nays")
 	private int nays;
-	//private int abstains;
+	@JsonbProperty("Abstains")
+	private int abstains;
 	//private int totalPayment;
 	//private int monthlyPayment;
 	//private boolean isEstablished;

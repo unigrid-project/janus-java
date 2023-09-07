@@ -370,7 +370,7 @@
                               		<fx:include source="settings.fxml" VBox.vgrow="ALWAYS" />
                               	</children>
                               </VBox>
-                              <VBox fx:id="pnlGovernace" layoutX="10.0" layoutY="10.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <VBox fx:id="pnlGovernace" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
                                     <fx:include source="vote.fxml" />
                                  </children>
