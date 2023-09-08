@@ -18,7 +18,6 @@ package org.unigrid.janus.model;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
 public class BudgetInfo {

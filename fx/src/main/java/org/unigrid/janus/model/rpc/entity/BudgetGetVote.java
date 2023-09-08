@@ -26,14 +26,14 @@ import org.unigrid.janus.model.BudgetInfo;
 public class BudgetGetVote extends BaseResult<List<BudgetGetVote.Result>> {
 	private static final String METHOD = "gnbudget";
 
-	public static class Request extends BaseRequest{
+	public static class Request extends BaseRequest {
 		public Request(Object[] args) {
 			super(METHOD);
 			this.setParams(args);
 		}
 	}
 
-	public static class Result extends BudgetInfo{
+	public static class Result extends BudgetInfo {
 		/* Empty on purpose */
 	}
 }

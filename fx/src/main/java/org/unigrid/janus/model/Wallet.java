@@ -80,6 +80,7 @@ public class Wallet {
 	@Inject private DebugService debug;
 
 	@Inject private Event<NewBlock> newBlockEvent;
+
 	@AllArgsConstructor
 	public enum LockState {
 		UNLOCKED("unlocked"),
@@ -193,7 +194,6 @@ public class Wallet {
 		//System.out.println("setting blocks: " + this.blocks);
 		this.pcs.firePropertyChange(this.BLOCKS_PROPERTY, oldValue, newValue);
 		newBlockEvent.fire(NewBlock.builder().blockCount(newValue).build());
-		
 	}
 
 	public int getConnections() {

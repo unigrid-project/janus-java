@@ -24,7 +24,7 @@ import lombok.EqualsAndHashCode;
 public class BudgetVote {
 	private static final String METHOD = "gnbudget";
 
-	public static class Request extends BaseRequest{
+	public static class Request extends BaseRequest {
 		public Request(Object[] args) {
 			super(METHOD);
 			this.setParams(args);
@@ -32,6 +32,6 @@ public class BudgetVote {
 	}
 
 	public static class Result {
-		
+		/* Empty on purpose */
 	}
 }

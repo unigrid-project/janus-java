@@ -25,10 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -39,52 +38,58 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.Callback;
 import org.unigrid.janus.model.rpc.entity.BudgetGetVote;
 import org.unigrid.janus.model.rpc.entity.BudgetVote;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.signal.NewBlock;
-import org.unigrid.janus.model.BudgetInfo;
 import org.unigrid.janus.model.service.BrowserService;
 
 @ApplicationScoped
-public class VoteController implements Initializable{
+public class VoteController implements Initializable {
 
 	@Inject private RPCService rpc;
 	@Inject private BrowserService browser;
-	
-	@FXML Label lblTitle;
-	@FXML Label lblSummary;
-	@FXML Button btnYes;
-	@FXML Button btnNo;
-	@FXML Button btnAbstain;
-	@FXML Label lblYeas;
-	@FXML Label lblNays;
-	@FXML ProgressBar pgbRatio;
-	@FXML AnchorPane pnlCastVote;
-	@FXML TableView tblGoveData;
-	@FXML TableColumn tbcProposal;
-	@FXML TableColumn tbcVotes;
-	@FXML TableColumn tbcYes;
-	@FXML TableColumn tbcNo;
-	@FXML TableColumn tbcAbstain;
+
+	@FXML private Label lblTitle;
+	@FXML private Label lblSummary;
+	@FXML private Button btnYes;
+	@FXML private Button btnNo;
+	@FXML private Button btnAbstain;
+	@FXML private Label lblYeas;
+	@FXML private Label lblNays;
+	@FXML private ProgressBar pgbRatio;
+	@FXML private AnchorPane pnlCastVote;
+	@FXML private TableView tblGoveData;
+	@FXML private TableColumn colProposal;
+	@FXML private TableColumn colVotes;
+	@FXML private TableColumn colYes;
+	@FXML private TableColumn colNo;
+	@FXML private TableColumn colAbstain;
+	@FXML private TableColumn colNumVotes;
+	@FXML private Label lblNoVotes;
 
 	private ObservableList<BudgetGetVote.Result> tableList;
-	private List<BudgetGetVote.Result> listBudgetInfo = new ArrayList<>();;
-	
+	private List<BudgetGetVote.Result> listBudgetInfo = new ArrayList<>();
+
 	@PostConstruct
-	private void testmethod() {
+	private void postConstruct() {
 		tableList = FXCollections.observableList(listBudgetInfo);
 	}
-	
+
 	@Override
 	public void initialize(URL u, ResourceBundle rb) {
-		//URL cssPath = VoteController.class.getResource("resources/main.css");
+		String cssPath = VoteController.class.getResource("/org/unigrid/janus/view/main.css").toExternalForm();
+		String style = "-fx-background-radius: 50;"
+			+ "-fx-border-color: #e72;"
+			+ "-fx-border-radius: 50;"
+			+ "-fx-border-width: 2;"
+			+ "-fx-cursor: hand;";
 		//tblGoveData.setItems(tableList);
-		tbcProposal.prefWidthProperty().bind(tblGoveData.widthProperty().multiply(0.25));
-		tbcVotes.prefWidthProperty().bind(tblGoveData.widthProperty().multiply(0.3));
-		tbcVotes.setStyle("-fx-alignment: CENTER;");
-		tbcProposal.setCellValueFactory(cell -> {
+		colProposal.prefWidthProperty().bind(tblGoveData.widthProperty().multiply(0.25));
+		colVotes.prefWidthProperty().bind(tblGoveData.widthProperty().multiply(0.3));
+		colAbstain.prefWidthProperty().bind(tblGoveData.widthProperty().multiply(0.15));
+		colVotes.setStyle("-fx-alignment: CENTER;");
+		colProposal.setCellValueFactory(cell -> {
 			System.out.println("Name");
 			String name = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, String>) cell).getValue()
 				.getName();
@@ -102,7 +107,18 @@ public class VoteController implements Initializable{
 			return new ReadOnlyObjectWrapper<Hyperlink>(link);
 		});
 
-		tbcVotes.setCellValueFactory(cell -> {
+		colNumVotes.setCellValueFactory(cell -> {
+			int yes = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell).getValue()
+				.getYeas();
+			int no = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell).getValue()
+				.getNays();
+			int abstain = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell).getValue()
+				.getAbstains();
+			String output = yes + "/" + no + "/" + abstain;
+			return new ReadOnlyStringWrapper(output);
+		});
+
+		colVotes.setCellValueFactory(cell -> {
 			System.out.println("Doing a progbar");
 			ProgressBar bar = new ProgressBar();
 			double progress = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell).getValue()
@@ -117,14 +133,14 @@ public class VoteController implements Initializable{
 			//progress = (yes / (yes + no));
 			bar.setProgress(progress);
 			bar.setPrefWidth(tblGoveData.widthProperty().multiply(0.3).doubleValue());
-			//bar.getStylesheets().add(cssPath.toString());
-			
-			//bar.getStyleClass().add("vote-progress-bar");
+			bar.getStylesheets().addAll(cssPath);
+
+			bar.getStyleClass().add("vote-progress-bar");
 
 			return new ReadOnlyObjectWrapper<ProgressBar>(bar);
 		});
-		
-		tbcYes.setCellValueFactory(cell -> {
+
+		colYes.setCellValueFactory(cell -> {
 			Button button = new Button("Yes");
 			String hash = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell).getValue()
 				.getHash();
@@ -132,11 +148,12 @@ public class VoteController implements Initializable{
 				rpc.call(new BudgetVote.Request(new Object[]{"vote-many", hash, "yes"}),
 					BudgetVote.class);
 			});
-			
+			button.getStylesheets().addAll(cssPath);
+			button.setStyle(style);
 			return new ReadOnlyObjectWrapper<Button>(button);
 		});
-		
-		tbcNo.setCellValueFactory(cell -> {
+
+		colNo.setCellValueFactory(cell -> {
 			Button button = new Button("No");
 			String hash = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell).getValue()
 				.getHash();
@@ -144,10 +161,12 @@ public class VoteController implements Initializable{
 				rpc.call(new BudgetVote.Request(new Object[]{"vote-many", hash, "no"}),
 					BudgetVote.class);
 			});
+			button.getStylesheets().addAll(cssPath);
+			button.setStyle(style);
 			return new ReadOnlyObjectWrapper<Button>(button);
 		});
-		
-		tbcAbstain.setCellValueFactory(cell -> {
+
+		colAbstain.setCellValueFactory(cell -> {
 			Button button = new Button("Abstain");
 			String hash = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell).getValue()
 				.getHash();
@@ -155,22 +174,32 @@ public class VoteController implements Initializable{
 				rpc.call(new BudgetVote.Request(new Object[]{"vote-many", hash, "abstain"}),
 					BudgetVote.class);
 			});
+			button.getStylesheets().addAll(cssPath);
+			button.setStyle(style);
 			return new ReadOnlyObjectWrapper<Button>(button);
 		});
 	}
 
 	private void onMessage(@Observes NewBlock update) {
 		BudgetGetVote budgetInfo = rpc.call(new BudgetGetVote.Request(new Object[]{"show"}), BudgetGetVote.class);
-
-		listBudgetInfo.clear();
-		listBudgetInfo.addAll(budgetInfo.getResult());
-		tblGoveData.setItems(tableList);
-		
-
+		int index = 0;
 		for (int i = 0; i < budgetInfo.getResult().size(); i++) {
-			
-			lblTitle.setText(budgetInfo.getResult().get(i).getName());
-			pgbRatio.setProgress(budgetInfo.getResult().get(i).getRatio());
+			if (budgetInfo.getResult().get(i).getName().equals("Pickle-DAO")) {
+				index = i;
+			}
+		}
+
+		if (listBudgetInfo.size() == 0) {
+			tblGoveData.setVisible(false);
+			lblNoVotes.setVisible(true);
+		} else {
+			tblGoveData.setVisible(true);
+			lblNoVotes.setVisible(false);
+			budgetInfo.getResult().remove(index);
+			listBudgetInfo.clear();
+			listBudgetInfo.addAll(budgetInfo.getResult());
+			tblGoveData.setItems(tableList);
+
 		}
 	}
 }
