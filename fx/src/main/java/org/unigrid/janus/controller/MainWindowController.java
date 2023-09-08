@@ -146,12 +146,12 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		}
 		select(pnlSettings, btnSettings);
 	}
-	
+
 	@FXML
 	private void onGovernaceClicked(MouseEvent event) {
 		select(pnlGovernace, btnGovernace);
 	}
-	
+
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getPropertyName().equals(wallet.BLOCKS_PROPERTY)) {
