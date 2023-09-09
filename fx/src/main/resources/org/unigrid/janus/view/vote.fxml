@@ -1,47 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.VoteController">
+<AnchorPane style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.VoteController">
    <children>
       <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <top>
-            <Label style="-fx-text-fill: orange;" text="Unigrid Vote" textFill="#ee7722" textOverrun="CLIP" BorderPane.alignment="CENTER">
+            <Label style="-fx-text-fill: orange;" text="Unigrid Governance" textFill="#ee7722" textOverrun="CLIP" BorderPane.alignment="CENTER">
                <font>
                   <Font size="36.0" />
                </font>
+               <BorderPane.margin>
+                  <Insets top="20.0" />
+               </BorderPane.margin>
             </Label>
          </top>
          <bottom>
             <HBox prefHeight="48.0" prefWidth="450.0" BorderPane.alignment="CENTER" />
          </bottom>
-         <center>
-            <AnchorPane BorderPane.alignment="CENTER">
-               <children>
-                  <Label fx:id="lblNoVotes" text="There are no Unigrid proposals at this time" textFill="#ee7722">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                  </Label>
-                  <TableView fx:id="tblGoveData" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <columns>
-                      <TableColumn fx:id="colProposal" prefWidth="75.0" text="Proposal" />
-                      <TableColumn fx:id="colNumVotes" prefWidth="75.0" text="Yes/No/Abstain" />
-                        <TableColumn fx:id="colVotes" prefWidth="75.0" text="Votes" />
-                        <TableColumn fx:id="colYes" prefWidth="75.0" />
-                        <TableColumn fx:id="colNo" prefWidth="75.0" />
-                        <TableColumn fx:id="colAbstain" prefWidth="75.0" />
-                    </columns>
-                  </TableView>
-               </children>
-            </AnchorPane>
-         </center>
       </BorderPane>
+      <StackPane prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label fx:id="lblNoVotes" alignment="CENTER" contentDisplay="CENTER" text="There are no Unigrid proposals at this time" textFill="#ee7722">
+               <font>
+                  <Font size="24.0" />
+               </font>
+               <padding>
+                  <Insets left="20.0" right="20.0" top="30.0" />
+               </padding>
+            </Label>
+            <TableView fx:id="tblGoveData" visible="false">
+              <columns>
+                <TableColumn fx:id="colProposal" prefWidth="75.0" text="Proposal" />
+                <TableColumn fx:id="colNumVotes" prefWidth="75.0" text="Yes/No/Abstain" />
+                  <TableColumn fx:id="colVotes" prefWidth="75.0" text="Votes" />
+                  <TableColumn fx:id="colYes" prefWidth="75.0" />
+                  <TableColumn fx:id="colNo" prefWidth="75.0" />
+                  <TableColumn fx:id="colAbstain" prefWidth="75.0" />
+              </columns>
+               <padding>
+                  <Insets top="70.0" />
+               </padding>
+            </TableView>
+         </children>
+      </StackPane>
    </children>
 </AnchorPane>

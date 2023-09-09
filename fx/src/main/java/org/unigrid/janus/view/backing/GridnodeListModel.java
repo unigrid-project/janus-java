@@ -35,8 +35,10 @@ public class GridnodeListModel {
 	public void setGridnodes(GridnodeList list) {
 		gridnodes.clear();
 
-		for (Gridnode g : list.getResult()) {
-			gridnodes.add(g);
+		if (list != null && list.getResult() != null) {
+			for (Gridnode g : list.getResult()) {
+				gridnodes.add(g);
+			}
 		}
 	}
 }
