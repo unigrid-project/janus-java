@@ -102,9 +102,9 @@ public class VoteController implements Initializable {
 	@Override
 	public void initialize(URL u, ResourceBundle rb) {
 		String cssPath = VoteController.class
-				.getResource("/org/unigrid/janus/view/main.css").toExternalForm();
+			.getResource("/org/unigrid/janus/view/main.css").toExternalForm();
 		String style = "-fx-background-radius: 50;" + "-fx-border-color: #e72;"
-				+ "-fx-border-radius: 50;" + "-fx-border-width: 2;" + "-fx-cursor: hand;";
+			+ "-fx-border-radius: 50;" + "-fx-border-width: 2;" + "-fx-cursor: hand;";
 		// tblGoveData.setItems(tableList);
 		colProposal.prefWidthProperty().bind(tblGoveData.widthProperty().multiply(0.25));
 		colVotes.prefWidthProperty().bind(tblGoveData.widthProperty().multiply(0.3));
@@ -113,9 +113,9 @@ public class VoteController implements Initializable {
 		colProposal.setCellValueFactory(cell -> {
 			System.out.println("Name");
 			String name = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, String>) cell)
-					.getValue().getName();
+				.getValue().getName();
 			String url = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, String>) cell)
-					.getValue().getUrl();
+				.getValue().getUrl();
 			Hyperlink link = new Hyperlink();
 			System.out.println(link.toString());
 
@@ -130,11 +130,11 @@ public class VoteController implements Initializable {
 
 		colNumVotes.setCellValueFactory(cell -> {
 			int yes = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell)
-					.getValue().getYeas();
+				.getValue().getYeas();
 			int no = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell)
-					.getValue().getNays();
+				.getValue().getNays();
 			int abstain = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell)
-					.getValue().getAbstains();
+				.getValue().getAbstains();
 			String output = yes + "/" + no + "/" + abstain;
 			return new ReadOnlyStringWrapper(output);
 		});
@@ -143,11 +143,11 @@ public class VoteController implements Initializable {
 			System.out.println("Doing a progbar");
 			ProgressBar bar = new ProgressBar();
 			double progress = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell)
-					.getValue().getRatio();
+				.getValue().getRatio();
 			int no = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell)
-					.getValue().getNays();
+				.getValue().getNays();
 			int yes = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell)
-					.getValue().getYeas();
+				.getValue().getYeas();
 			String toolTip = "Yes = " + yes + "         No = " + no;
 			bar.setTooltip(new Tooltip(toolTip));
 			// float progress = 0.0f;
@@ -164,11 +164,11 @@ public class VoteController implements Initializable {
 		colYes.setCellValueFactory(cell -> {
 			Button button = new Button("Yes");
 			String hash = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell)
-					.getValue().getHash();
+				.getValue().getHash();
 			button.setOnAction(e -> {
 				rpc.call(
-						new BudgetVote.Request(new Object[] { "vote-many", hash, "yes" }),
-						BudgetVote.class);
+					new BudgetVote.Request(new Object[]{"vote-many", hash, "yes"}),
+					BudgetVote.class);
 			});
 			button.getStylesheets().addAll(cssPath);
 			button.setStyle(style);
@@ -178,10 +178,10 @@ public class VoteController implements Initializable {
 		colNo.setCellValueFactory(cell -> {
 			Button button = new Button("No");
 			String hash = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell)
-					.getValue().getHash();
+				.getValue().getHash();
 			button.setOnAction(e -> {
-				rpc.call(new BudgetVote.Request(new Object[] { "vote-many", hash, "no" }),
-						BudgetVote.class);
+				rpc.call(new BudgetVote.Request(new Object[]{"vote-many", hash, "no"}),
+					BudgetVote.class);
 			});
 			button.getStylesheets().addAll(cssPath);
 			button.setStyle(style);
@@ -191,12 +191,12 @@ public class VoteController implements Initializable {
 		colAbstain.setCellValueFactory(cell -> {
 			Button button = new Button("Abstain");
 			String hash = ((TableColumn.CellDataFeatures<BudgetGetVote.Result, Integer>) cell)
-					.getValue().getHash();
+				.getValue().getHash();
 			button.setOnAction(e -> {
 				rpc.call(
-						new BudgetVote.Request(
-								new Object[] { "vote-many", hash, "abstain" }),
-						BudgetVote.class);
+					new BudgetVote.Request(
+						new Object[]{"vote-many", hash, "abstain"}),
+					BudgetVote.class);
 			});
 			button.getStylesheets().addAll(cssPath);
 			button.setStyle(style);
@@ -206,7 +206,7 @@ public class VoteController implements Initializable {
 
 	private void onMessage(@Observes NewBlock update) {
 		BudgetGetVote budgetInfo = rpc.call(
-				new BudgetGetVote.Request(new Object[] { "show" }), BudgetGetVote.class);
+			new BudgetGetVote.Request(new Object[]{"show"}), BudgetGetVote.class);
 		List<BudgetGetVote.Result> result = budgetInfo.getResult();
 
 		if (result == null) {
@@ -218,8 +218,8 @@ public class VoteController implements Initializable {
 		listBudgetInfo.addAll(result);
 		// Filter out "Pickle-DAO" using Java Streams
 		listBudgetInfo = result.stream()
-				.filter(item -> !item.getName().equals("Pickle-DAO"))
-				.collect(Collectors.toList());
+			.filter(item -> !item.getName().equals("Pickle-DAO"))
+			.collect(Collectors.toList());
 
 		if (listBudgetInfo.isEmpty()) {
 			tblGoveData.setVisible(false);

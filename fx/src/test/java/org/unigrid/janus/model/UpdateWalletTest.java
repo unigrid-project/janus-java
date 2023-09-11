@@ -78,7 +78,7 @@ public class UpdateWalletTest extends BaseMockedWeldTest {
 			@Mock
 			public void run(Invocation invocation) {
 				System.out.println(invocation);
-				if (Invoke.invoke("checkUpdate", invocation)) {
+				if ((boolean) Invoke.invoke("checkUpdate", invocation)) {
 					testUpdateTrue = true;
 					System.out.println("Testing testing");
 				}

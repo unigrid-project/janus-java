@@ -199,7 +199,7 @@ public class MainWindowControllerTest extends BaseFxTest {
 	@Example
 	public void shouldShowIsStaking() {
 		isStaking = true;
-		rpc.pollForInfo(100000);
+		rpc.pollForInfo(200000);
 
 		await().until(() -> wallet != null && wallet.getStakingStatus() != null
 			&& wallet.getStakingStatus().equals(true));
@@ -210,7 +210,7 @@ public class MainWindowControllerTest extends BaseFxTest {
 	@Example
 	public void shouldShowIsNotStaking() {
 		isStaking = false;
-		rpc.pollForInfo(100000);
+		rpc.pollForInfo(200000);
 
 		await().until(() -> wallet != null && wallet.getStakingStatus() != null
 			&& wallet.getStakingStatus().equals(false));
@@ -221,7 +221,7 @@ public class MainWindowControllerTest extends BaseFxTest {
 	@Example
 	public void shouldUnlock() {
 		isLocked = true;
-		rpc.pollForInfo(100000);
+		rpc.pollForInfo(200000);
 
 		await().until(() -> wallet != null && wallet.getLocked() != null && wallet.getLocked());
 
@@ -242,7 +242,7 @@ public class MainWindowControllerTest extends BaseFxTest {
 	@Example
 	public void shouldLock() {
 		isLocked = false;
-		rpc.pollForInfo(100000);
+		rpc.pollForInfo(200000);
 		await().until(() -> wallet != null && wallet.getLocked() != null && !wallet.getLocked());
 
 		verifyThat("#unlockedBtn", n -> n.isVisible());

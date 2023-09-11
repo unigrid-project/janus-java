@@ -23,7 +23,7 @@ import mockit.Invocation;
 
 public class Invoke {
 
-	public static <T, R> R invoke(String name, Invocation invocation, Object... args) {
+	public static <T, R> boolean invoke(String name, Invocation invocation, Object... args) {
 		try {
 			final List<Class> paramterTypes = new ArrayList<>();
 			for (Object arg : args) {
@@ -33,10 +33,10 @@ public class Invoke {
 			final Method method = invocation.getInvokedInstance().getClass()
 				.getDeclaredMethod(name, paramterTypes.toArray(new Class[0]));
 			method.setAccessible(true);
-			return (R) method.invoke(invocationInstance, args);
+			return (boolean) method.invoke(invocationInstance, args);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			return null;
+			return (Boolean) null;
 		}
 	}
 }
