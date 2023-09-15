@@ -6,60 +6,84 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox styleClass="bg-dark-blue" fx:id="container" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.ProposalController">
+<VBox fx:id="container" minHeight="120.0" prefHeight="120.0" prefWidth="700.0" styleClass="vote-box" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.ProposalController">
 	<children>
-		<Hyperlink fx:id="proposalTitle" minHeight="48.0" stylesheets="@../main.css" text="Proposal 1" VBox.vgrow="ALWAYS">
-			<font>
-				<Font size="15.0" />
-			</font>
+		<HBox prefHeight="20.0" prefWidth="200.0">
+			<children>
+				<Hyperlink fx:id="proposalTitle" alignment="CENTER" minHeight="30.0" stylesheets="@../main.css" text="Proposal 1">
+					<font>
+						<Font size="15.0" />
+					</font>
+					<opaqueInsets>
+						<Insets left="5.0" />
+					</opaqueInsets>
+					<HBox.margin>
+						<Insets />
+					</HBox.margin>
+				</Hyperlink>
+			</children>
 			<VBox.margin>
-				<Insets bottom="8.0" />
+				<Insets left="26.0" top="5.0" />
 			</VBox.margin>
-		</Hyperlink>
+		</HBox>
 		<HBox stylesheets="@../main.css" VBox.vgrow="ALWAYS">
-			<ProgressBar fx:id="voteProgress" nodeOrientation="LEFT_TO_RIGHT" prefHeight="8.0" prefWidth="332.0" progress="0.48" styleClass="vote-progress-bar" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+			<padding>
+				<Insets left="5.0" right="5.0" />
+			</padding>
+			<ProgressBar fx:id="voteProgress" minHeight="5.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="5.0" prefWidth="1000.0" progress="0.48" styleClass="vote-progress-bar" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
 				<HBox.margin>
-					<Insets />
+					<Insets left="20.0" right="20.0" />
 				</HBox.margin>
 			</ProgressBar>
 			<VBox.margin>
-				<Insets bottom="8.0" />
+				<Insets bottom="3.0" />
 			</VBox.margin>
 		</HBox>
-		<HBox prefHeight="26.0" VBox.vgrow="ALWAYS">
+
+		<HBox alignment="CENTER" prefHeight="26.0" VBox.vgrow="ALWAYS">
 			<children>
 				<Label fx:id="lblYes" style="-fx-text-fill: white;" text="Label">
 					<HBox.margin>
-						<Insets right="16.0" />
+						<Insets left="30.0" />
 					</HBox.margin>
 					<font>
 						<Font name="System Italic" size="15.0" />
 					</font>
+					<opaqueInsets>
+						<Insets />
+					</opaqueInsets>
 				</Label>
+        
+				<!-- Add this Region before lblNo -->
+				<Region HBox.hgrow="ALWAYS" />
+        
+				<!-- Add this Region after lblNo -->
+				<Region HBox.hgrow="ALWAYS" />
+
 				<Label fx:id="lblNo" style="-fx-text-fill: white;" text="Label">
+					<font>
+						<Font name="System Italic" size="15.0" />
+					</font>
 					<HBox.margin>
-						<Insets right="16.0" />
+						<Insets right="30.0" />
 					</HBox.margin>
-					<font>
-						<Font name="System Italic" size="15.0" />
-					</font>
-				</Label>
-				<Label fx:id="lblAbstain" style="-fx-text-fill: white;" text="Label">
-					<font>
-						<Font name="System Italic" size="15.0" />
-					</font>
 				</Label>
 			</children>
 			<VBox.margin>
-				<Insets bottom="12.0" />
+				<Insets bottom="12.0" top="5.0" />
 			</VBox.margin>
+			<opaqueInsets>
+				<Insets left="5.0" right="5.0" />
+			</opaqueInsets>
 		</HBox>
-		<HBox prefHeight="30.0" stylesheets="@../main.css" VBox.vgrow="ALWAYS">
+
+		<HBox alignment="BOTTOM_RIGHT" prefHeight="30.0" stylesheets="@../main.css" VBox.vgrow="ALWAYS">
 			<children>
-				<Button fx:id="btnYes" mnemonicParsing="false" onAction="#onYes" prefHeight="30.0" prefWidth="100.0" stylesheets="@../main.css" text="Yes">
+				<Button fx:id="btnYes" mnemonicParsing="false" onAction="#onYes" prefHeight="30.0" prefWidth="100.0" style="-fx-cursor: hand;" stylesheets="@../main.css" text="Yes">
 					<HBox.margin>
 						<Insets right="16.0" />
 					</HBox.margin>
@@ -67,20 +91,21 @@
 						<Font size="15.0" />
 					</font>
 				</Button>
-				<Button fx:id="btnNo" mnemonicParsing="false" onAction="#onNo" prefHeight="30.0" prefWidth="100.0" stylesheets="@../main.css" text="No">
+				<Button fx:id="btnNo" mnemonicParsing="false" onAction="#onNo" prefHeight="30.0" prefWidth="100.0" style="-fx-cursor: hand;" stylesheets="@../main.css" text="No">
 					<HBox.margin>
-						<Insets right="16.0" />
+						<Insets />
 					</HBox.margin>
-					<font>
-						<Font size="15.0" />
-					</font>
-				</Button>
-				<Button fx:id="btnAbstain" mnemonicParsing="false" onAction="#onAbstain" prefHeight="30.0" prefWidth="100.0" stylesheets="@../main.css" text="Abstain">
 					<font>
 						<Font size="15.0" />
 					</font>
 				</Button>
 			</children>
+			<opaqueInsets>
+				<Insets />
+			</opaqueInsets>
+			<VBox.margin>
+				<Insets bottom="10.0" right="25.0" />
+			</VBox.margin>
 		</HBox>
 	</children>
 </VBox>

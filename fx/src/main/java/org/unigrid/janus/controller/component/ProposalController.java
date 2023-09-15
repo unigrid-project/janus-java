@@ -16,9 +16,11 @@
 
 package org.unigrid.janus.controller.component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -30,8 +32,10 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
+import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.rpc.entity.BudgetVote;
 import org.unigrid.janus.model.service.BrowserService;
+import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.signal.ProposalEntry;
 import org.unigrid.janus.view.FxUtils;
@@ -40,6 +44,7 @@ import org.unigrid.janus.view.FxUtils;
 public class ProposalController implements Initializable {
 	@Inject private BrowserService browser;
 	@Inject private RPCService rpc;
+	@Inject private DebugService debug;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -49,28 +54,71 @@ public class ProposalController implements Initializable {
 	@FXML
 	public void onNo(ActionEvent e) {
 		FxUtils.executeParentById("container", (Node) e.getSource(), node -> {
-			rpc.call(
-				new BudgetVote.Request(new Object[]{"vote-many", (String) node.getUserData(), "no"}),
-				BudgetVote.class);
+			BudgetVote.Request voteRequest = new BudgetVote.Request(new Object[]{"vote-many",
+				(String) node.getUserData(), "no"});
+
+			String rawResponse = rpc.callToJson(voteRequest);
+			System.out.println("Raw RPC Response: " + rawResponse);
+
+			BudgetVote.Result voteResult = rpc.call(voteRequest, BudgetVote.Result.class);
+
+			if (voteResult != null) {
+				// Log the response for debugging
+				System.out.println("Received response: " + voteResult.toString());
+
+				// Access the "overall" field using the getOverall method
+				System.out.println("Overall: " + voteResult.getOverall());
+
+				// Further processing of the response
+				Notifications.create().title("Vote Results:").text(voteResult.getOverall())
+					.showInformation();
+				debug.print("no: " + voteResult.getOverall(),
+					ProposalController.class.getSimpleName());
+			} else {
+				// Log an error if the response is null
+				System.err.println("Received null response from RPC.");
+			}
 		});
 	}
 
 	@FXML
 	public void onYes(ActionEvent e) {
 		FxUtils.executeParentById("container", (Node) e.getSource(), node -> {
-			rpc.call(
-				new BudgetVote.Request(new Object[]{"vote-many", (String) node.getUserData(), "yes"}),
-				BudgetVote.class);
+			BudgetVote.Request voteRequest = new BudgetVote.Request(new Object[]{"vote-many",
+				(String) node.getUserData(), "yes"});
+
+			String rawResponse = rpc.callToJson(voteRequest);
+			System.out.println("Raw RPC Response: " + rawResponse);
+
+			BudgetVote.Result voteResult = rpc.call(voteRequest, BudgetVote.Result.class);
+
+			if (voteResult != null) {
+				System.out.println("Received response: " + voteResult.toString());
+
+				System.out.println("Overall: " + voteResult.getOverall());
+
+				Notifications.create().title("Vote Results:").text(voteResult.getOverall())
+					.showInformation();
+				debug.print("yes: " + voteResult.getOverall(),
+					ProposalController.class.getSimpleName());
+			} else {
+				// Log an error if the response is null
+				System.err.println("Received null response from RPC.");
+			}
 		});
 	}
 
-	@FXML
-	public void onAbstain(ActionEvent e) {
-		FxUtils.executeParentById("container", (Node) e.getSource(), node -> {
-			rpc.call(
-				new BudgetVote.Request(new Object[]{"vote-many", (String) node.getUserData(), "abstain"}),
-				BudgetVote.class);
-		});
+	private <T> T deserialize(String json, Class<T> clazz) {
+		// You would use your JSON library's methods here.
+		// For instance, using Jackson:
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			return objectMapper.readValue(json, clazz);
+		} catch (IOException e) {
+			// Handle deserialization errors
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	private void onEntry(@Observes ProposalEntry item) {
@@ -79,11 +127,10 @@ public class ProposalController implements Initializable {
 
 		Label lblYes = (Label) container.lookup("#lblYes");
 		Label lblNo = (Label) container.lookup("#lblNo");
-		Label lblAbstain = (Label) container.lookup("#lblAbstain");
 		Hyperlink proposalTitle = (Hyperlink) container.lookup("#proposalTitle");
 		ProgressBar voteProgress = (ProgressBar) container.lookup("#voteProgress");
 
-		proposalTitle.setText(item.getData().getName());
+		proposalTitle.setText("Proposal: " + item.getData().getName());
 		proposalTitle.setOnAction(e -> {
 			System.out.println(item.getData().getUrl());
 			browser.navigate(item.getData().getUrl());
@@ -91,7 +138,6 @@ public class ProposalController implements Initializable {
 
 		lblYes.setText("Yes: " + item.getData().getYeas());
 		lblNo.setText("No: " + item.getData().getNays());
-		lblAbstain.setText("Abstain: " + item.getData().getAbstains());
 		voteProgress.setProgress(item.getData().getRatio());
 
 		final String toolTip = "Yes = " + item.getData().getYeas() + "    No = " + item.getData().getNays();

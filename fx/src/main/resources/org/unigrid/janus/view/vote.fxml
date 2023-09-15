@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane styleClass="bg-dark-blue" stylesheets="@main.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.VoteController">
+<AnchorPane styleClass="bg-dark-blue" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.VoteController">
 	<children>
 		<BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<top>
@@ -18,12 +18,15 @@
 						<Font size="36.0" />
 					</font>
 					<BorderPane.margin>
-						<Insets top="20.0" />
+						<Insets bottom="20.0" top="20.0" />
 					</BorderPane.margin>
 				</Label>
 			</top>
 			<center>
-				<ListView fx:id="dataList" nodeOrientation="LEFT_TO_RIGHT" style="-fx-control-inner-background: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="vote-list" stylesheets="@main.css" BorderPane.alignment="CENTER" />
+				<ListView fx:id="dataList" nodeOrientation="LEFT_TO_RIGHT" style="-fx-control-inner-background: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="vote-list" stylesheets="@main.css" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin></ListView>
 			</center>
 			<bottom>
 				<HBox minHeight="35.0" BorderPane.alignment="CENTER" />

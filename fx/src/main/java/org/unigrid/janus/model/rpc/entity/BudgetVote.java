@@ -16,13 +16,15 @@
 
 package org.unigrid.janus.model.rpc.entity;
 
+import jakarta.json.bind.annotation.JsonbProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class BudgetVote {
+public class BudgetVote extends BaseResult<BudgetVote.Result> {
 	private static final String METHOD = "gnbudget";
+	private Result result;
 
 	public static class Request extends BaseRequest {
 		public Request(Object[] args) {
@@ -31,7 +33,22 @@ public class BudgetVote {
 		}
 	}
 
+	@Data
 	public static class Result {
-		/* Empty on purpose */
+		@JsonbProperty("result")
+		private Response response;
+
+		public String getOverall() {
+			if (response != null) {
+				return response.getOverall();
+			}
+			return null;
+		}
+	}
+
+	@Data
+	public static class Response {
+		@JsonbProperty("overall")
+		private String overall;
 	}
 }
