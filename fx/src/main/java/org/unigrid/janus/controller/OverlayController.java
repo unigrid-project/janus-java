@@ -39,6 +39,7 @@ import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
+import org.unigrid.janus.model.signal.MergeInputsRequest;
 import org.unigrid.janus.model.signal.NodeRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.State;
@@ -48,20 +49,34 @@ import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
 public class OverlayController implements Initializable {
-	@Inject private DebugService debug;
-	@Inject private RPCService rpc;
-	@Inject private Wallet wallet;
+	@Inject
+	private DebugService debug;
+	@Inject
+	private RPCService rpc;
+	@Inject
+	private Wallet wallet;
 
-	@Inject private Event<NodeRequest> nodeRequestEvent;
-	@Inject private Event<WalletRequest> walletRequestEvent;
-	@Inject private Event<State> stateEvent;
-
-	@FXML private GridPane pnlUnlock;
-	@FXML private PasswordField passphraseInput;
-	@FXML private Text errorTxt;
-	@FXML private ImageView spinnerIcon;
-	@FXML private Button submitBtn;
-	@FXML private Text unlockCopy;
+	@Inject
+	private Event<NodeRequest> nodeRequestEvent;
+	@Inject
+	private Event<WalletRequest> walletRequestEvent;
+	@Inject
+	private Event<State> stateEvent;
+	@Inject
+	private Event<MergeInputsRequest> mergeInputsEvent;
+	@FXML
+	private GridPane pnlUnlock;
+	@FXML
+	private PasswordField passphraseInput;
+	@FXML
+	private Text errorTxt;
+	@FXML
+	private ImageView spinnerIcon;
+	@FXML
+	private Button submitBtn;
+	@FXML
+	private Text unlockCopy;
+	private UnlockRequest currentUnlockRequest; // Instance variable to store the current UnlockRequest
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -69,14 +84,15 @@ public class OverlayController implements Initializable {
 	}
 
 	private void eventUnlockRequest(@Observes UnlockRequest unlockRequest) {
-		debug.log("Unlock request fired");
+		debug.print("Unlock request fired", OverlayController.class.getSimpleName());
 
 		submitBtn.setText(unlockRequest.getType().getAction());
-		wallet.setUnlockState(unlockRequest.getType().getState());
+		//wallet.setUnlockState(unlockRequest.getType().getState());
 		unlockCopy.setText(unlockRequest.getType().getDescription());
 		pnlUnlock.setVisible(true);
 
 		Platform.runLater(() -> passphraseInput.requestFocus());
+		currentUnlockRequest = unlockRequest;
 	}
 
 	@FXML
@@ -104,18 +120,19 @@ public class OverlayController implements Initializable {
 		long stakingStartTime = wallet.getStakingStartTime();
 		stateEvent.fire(State.builder().working(true).build());
 
-		// TODO: What exactly do these numbers mean ? Please change this to an enum and explain it.
-		switch (wallet.getUnlockState()) {
-			case 1:
+		UnlockRequest.Type unlockType = currentUnlockRequest.getType();
+		switch (unlockType) {
+			case FOR_STAKING:
 				sendArgs = new Object[]{passphraseInput.getText(), stakingStartTime, true};
 				break;
-			case 2:
+			case ORDINARY:
+			case FOR_MERGING:
 				sendArgs = new Object[]{passphraseInput.getText(), 0};
 				break;
-			case 3:
-			case 4:
-			case 5:
-				// unlock for 30 seconds only
+			case FOR_SEND:
+			case FOR_GRIDNODE:
+			case FOR_DUMP:
+				// Unlock for 30 seconds only
 				sendArgs = new Object[]{passphraseInput.getText(), 30};
 				break;
 			default:
@@ -128,7 +145,8 @@ public class OverlayController implements Initializable {
 			stateEvent.fire(State.builder().working(false).build());
 		} else {
 			try {
-				final UnlockWallet call = rpc.call(new UnlockWallet.Request(sendArgs), UnlockWallet.class);
+				final UnlockWallet call = rpc.call(new UnlockWallet.Request(sendArgs),
+					UnlockWallet.class);
 				Jsonb jsonb = JsonbBuilder.create();
 
 				if (call.getError() != null) {
@@ -140,21 +158,30 @@ public class OverlayController implements Initializable {
 						passphraseInput.setText("");
 
 						debug.print("Error unlocking wallet: ".concat(result),
-							OverlayController.class.getSimpleName()
-						);
+							OverlayController.class.getSimpleName());
 					}
 				} else {
 					errorTxt.setText("Wallet unlocked!");
-					debug.print("Successfuly unlocked wallet", OverlayController.class.getSimpleName());
+					debug.print("Successfuly unlocked wallet",
+						OverlayController.class.getSimpleName());
 					passphraseInput.setText("");
 
-					//TODO: Get rid of these numbers and use an enum instead!
+					// TODO: Get rid of these numbers and use an enum instead!
 					if (wallet.getUnlockState() == 3) {
 						walletRequestEvent.fire(WalletRequest.SEND_TRANSACTION);
 					} else if (wallet.getUnlockState() == 4) {
 						nodeRequestEvent.fire(NodeRequest.START_MISSING);
 					} else if (wallet.getUnlockState() == 5) {
 						walletRequestEvent.fire(WalletRequest.DUMP_KEYS);
+					}
+
+					if (currentUnlockRequest.getType() == UnlockRequest.Type.FOR_MERGING) {
+						mergeInputsEvent.fire(MergeInputsRequest.builder()
+							.type(MergeInputsRequest.Type.MERGE)
+							.address(currentUnlockRequest.getAddress())
+							.amount(currentUnlockRequest.getAmount())
+							.utxos(currentUnlockRequest.getUtxos())
+							.build());
 					}
 
 					if (wallet.getUnlockState() != 1) {

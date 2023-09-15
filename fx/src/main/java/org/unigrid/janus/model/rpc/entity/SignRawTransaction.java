@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+	Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -18,26 +18,22 @@ package org.unigrid.janus.model.rpc.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.unigrid.janus.model.Address;
-import org.unigrid.janus.model.Recipent;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SendTransaction extends BaseResult<String> {
-	private static final String METHOD = "sendtoaddress";
+public class SignRawTransaction extends BaseResult<SignRawTransaction.Result> {
+	private static final String METHOD = "signrawtransaction";
 
 	public static class Request extends BaseRequest {
-		// TODO: Start using category and recipent
-		/* sendtoaddress "DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1 "category" "recipent" */
-		public Request(Address address, String category, Recipent recipent) {
+		public Request(Object[] args) {
 			super(METHOD);
-			setParams(new Object[]{address.getAddress(), address.getAmount(), category, recipent});
+			this.setParams(args);
 		}
+	}
 
-		/* sendtoaddress "DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1 */
-		public Request(Address address) {
-			super(METHOD);
-			setParams(new Object[]{address.getAddress(), address.getAmount()});
-		}
+	@Data
+	public static class Result {
+		private String hex;
+		private boolean complete;
 	}
 }
