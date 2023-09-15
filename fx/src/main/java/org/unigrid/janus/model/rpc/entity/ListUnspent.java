@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+	Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -16,28 +16,32 @@
 
 package org.unigrid.janus.model.rpc.entity;
 
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.unigrid.janus.model.Address;
-import org.unigrid.janus.model.Recipent;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SendTransaction extends BaseResult<String> {
-	private static final String METHOD = "sendtoaddress";
+public class ListUnspent extends BaseResult<List<ListUnspent.Result>> {
+	private static final String METHOD = "listunspent";
+	// final ListUnspent listUnspent = rpc.call(new ListUnspent.Request(),
+	// ListUnspent.class);
+	// List<ListUnspent.Result> utxos = listUnspent.getResult();
 
 	public static class Request extends BaseRequest {
-		// TODO: Start using category and recipent
-		/* sendtoaddress "DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1 "category" "recipent" */
-		public Request(Address address, String category, Recipent recipent) {
+		public Request() {
 			super(METHOD);
-			setParams(new Object[]{address.getAddress(), address.getAmount(), category, recipent});
 		}
+	}
 
-		/* sendtoaddress "DMJRSsuU9zfyrvxVaAEFQqK4MxZg6vgeS6" 0.1 */
-		public Request(Address address) {
-			super(METHOD);
-			setParams(new Object[]{address.getAddress(), address.getAmount()});
-		}
+	@Data
+	public static class Result extends BaseResult {
+		private String txid;
+		private int vout;
+		private String address;
+		private String scriptPubKey;
+		private double amount;
+		private int confirmations;
+		private boolean spendable;
 	}
 }

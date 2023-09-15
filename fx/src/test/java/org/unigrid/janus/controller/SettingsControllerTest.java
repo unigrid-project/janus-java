@@ -149,6 +149,9 @@ public class SettingsControllerTest extends BaseFxTest {
 		robot.clickOn("#btnSetDebug");
 		verifyThat("#pnlSetDebug", isVisible());
 
+		robot.clickOn("#btnSetMaintenance");
+		verifyThat("#pnlSetMaintenance", isVisible());
+
 		robot.clickOn("#btnSetExport");
 		verifyThat("#btnSetExport", isVisible());
 

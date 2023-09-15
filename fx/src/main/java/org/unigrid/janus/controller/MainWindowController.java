@@ -41,6 +41,8 @@ import org.unigrid.janus.model.rpc.entity.LockWallet;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ExternalVersion;
 import org.unigrid.janus.model.signal.Navigate;
+import org.unigrid.janus.model.signal.OverlayRequest;
+
 import static org.unigrid.janus.model.signal.Navigate.Location.*;
 import org.unigrid.janus.model.signal.UnlockRequest;
 
@@ -51,7 +53,8 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@Inject private Wallet wallet;
 	@Inject private ExternalVersion externalVersion;
 	@Inject private Event<ExternalVersion> versionEvent;
-
+	@Inject
+	private Event<OverlayRequest> overlayRequest;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 
 	// @FXML private Label lblBlockCount;
@@ -266,7 +269,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		}
 
 		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.ORDINARY).build());
-		pnlOverlay.setVisible(true);
+		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
 	@FXML
@@ -289,13 +292,15 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		}
 
 		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.FOR_STAKING).build());
-		pnlOverlay.setVisible(true);
+		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
 	private void eventNavigate(@Observes Navigate navigate) {
 		switch (navigate.getLocation()) {
-			case ADDRESS_TAB -> select(pnlAddress, btnAddress);
-			case WALLET_TAB -> select(pnlWallet, btnWallet);
+			case ADDRESS_TAB ->
+				select(pnlAddress, btnAddress);
+			case WALLET_TAB ->
+				select(pnlWallet, btnWallet);
 		}
 	}
 
