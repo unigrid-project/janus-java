@@ -21,474 +21,381 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="450.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
-	<children>
-		<BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-			<center>
-				<AnchorPane>
-					<children>
-						<VBox fx:id="pnlSetGeneral" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-							<children>
-								<FlowPane alignment="TOP_RIGHT" prefHeight="10.0" prefWidth="200.0" rowValignment="TOP">
-									<children>
-										<Label fx:id="verLbl" text="version:" textFill="#b5b5b5">
-											<font>
-												<Font size="9.0" />
-											</font>
-										</Label>
-									</children>
-								</FlowPane>
-								<AnchorPane>
-									<children>
-										<Label text="Configuration file" textFill="#ee7722">
-											<font>
-												<Font size="18.0" />
-											</font>
-										</Label>
-										<Label layoutY="27.0" text="Edit settings for your wallet (after saving the wallet must be restarted)." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-											<padding>
-												<Insets bottom="10.0" />
-											</padding>
-										</Label>
-										<HBox layoutY="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-											<children>
-												<Button fx:id="btnSetGeneralConf" mnemonicParsing="false" onMouseClicked="#onOpenConf" style="-fx-cursor: hand;" text="OPEN">
-													<HBox.margin>
-														<Insets bottom="8.0" />
-													</HBox.margin>
-												</Button>
-											</children>
-											<padding>
-												<Insets top="15.0" />
-											</padding>
-										</HBox>
-									</children>
-									<VBox.margin>
-										<Insets />
-									</VBox.margin>
-									<padding>
-										<Insets bottom="15.0" />
-									</padding>
-								</AnchorPane>
-								<AnchorPane>
-									<children>
-										<Label text="Gridnode file" textFill="#ee7722">
-											<font>
-												<Font size="18.0" />
-											</font>
-										</Label>
-										<Label layoutY="27.0" text="Add / Edit gridnodes (after saving the wallet must be restarted)." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-											<opaqueInsets>
-												<Insets bottom="10.0" />
-											</opaqueInsets>
-										</Label>
-										<HBox layoutY="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-									</children>
-									<opaqueInsets>
-										<Insets />
-									</opaqueInsets>
-									<VBox.margin>
-										<Insets />
-									</VBox.margin>
-									<padding>
-										<Insets bottom="15.0" />
-									</padding>
-								</AnchorPane>
-								<Button fx:id="btnSetGeneralGridnode" mnemonicParsing="false" onMouseClicked="#onOpenGridnode" style="-fx-cursor: hand;" text="OPEN">
-									<opaqueInsets>
-										<Insets top="20.0" />
-									</opaqueInsets>
-									<VBox.margin>
-										<Insets bottom="20.0" />
-									</VBox.margin>
-								</Button>
-								<AnchorPane>
-									<children>
-										<Label text="Blockchain data" textFill="#ee7722">
-											<font>
-												<Font size="18.0" />
-											</font>
-										</Label>
-										<Label layoutY="27.0" text="This will open the directory of your locally stored blockchain where your wallet.dat, logs, and configuration files are stored." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-											<padding>
-												<Insets bottom="10.0" />
-											</padding>
-										</Label>
-										<HBox layoutY="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-											<children>
-												<Button fx:id="btnSetGeneralUnigrid" mnemonicParsing="false" onMouseClicked="#onOpenUnigrid" style="-fx-cursor: hand;" text="OPEN">
-													<HBox.margin>
-														<Insets bottom="8.0" />
-													</HBox.margin>
-												</Button>
-											</children>
-											<padding>
-												<Insets top="15.0" />
-											</padding>
-										</HBox>
-									</children>
-									<padding>
-										<Insets bottom="15.0" />
-									</padding>
-									<VBox.margin>
-										<Insets top="10.0" />
-									</VBox.margin>
-								</AnchorPane>
-								<CheckBox fx:id="chkNotifications" mnemonicParsing="false" onMouseClicked="#onNotificationsShown" selected="true" style="-fx-cursor: hand;" stylesheets="@main.css" text="Show app notifications" textFill="#ee7722">
-									<font>
-										<Font size="18.0" />
-									</font>
-								</CheckBox>
-							</children>
-							<padding>
-								<Insets left="10.0" right="10.0" top="10.0" />
-							</padding>
-						</VBox>
-						<VBox fx:id="pnlSetDisplay" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-							<children>
-								<Label text="Display" textFill="#ee7722">
-									<font>
-										<Font name="System Bold" size="24.0" />
-									</font>
-								</Label>
-							</children>
-						</VBox>
-						<VBox fx:id="pnlSetPassphrase" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-							<children>
-								<Label fx:id="txtPassWarningOne" layoutX="26.0" layoutY="18.0" text="Warning! This will encrypt your wallet with a passphrase. Write down your passphrase and keep it safe." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
-									<VBox.margin>
-										<Insets bottom="8.0" />
-									</VBox.margin>
-								</Label>
-								<Label fx:id="txtPassWarningTwo" text="If you have not backed up your wallet yet please do so first. An automatic wallet restart will also be performed." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
-									<VBox.margin>
-										<Insets bottom="8.0" />
-									</VBox.margin>
-								</Label>
-								<AnchorPane>
-									<children>
-										<Label fx:id="txtPassphraseOne" alignment="CENTER" contentDisplay="RIGHT" graphicTextGap="8.0" text="Passphrase" textFill="#ee7722" AnchorPane.leftAnchor="0.0">
-											<font>
-												<Font size="14.0" />
-											</font>
-										</Label>
-										<ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="0.0">
-											<image>
-												<Image url="@images/settings_icon.png" />
-											</image>
-										</ImageView>
-									</children>
-								</AnchorPane>
-								<PasswordField fx:id="taPassphrase" prefHeight="35.0" />
-								<Label fx:id="txtPassphraseTwo" text="Repeat passphrase" textFill="#ee7722">
-									<font>
-										<Font size="14.0" />
-									</font>
-								</Label>
-								<PasswordField fx:id="taRepeatPassphrase" onKeyTyped="#onRepeatPassphraseChange" prefHeight="35.0" />
-								<HBox alignment="TOP_CENTER">
-									<VBox.margin>
-										<Insets top="8.0" />
-									</VBox.margin>
-									<children>
-										<Button fx:id="btnUpdatePassphrase" disable="true" mnemonicParsing="false" onMouseClicked="#onLock" style="-fx-cursor: hand;" text="Encrypt">
-											<HBox.margin>
-												<Insets right="8.0" />
-											</HBox.margin>
-										</Button>
-									</children>
-								</HBox>
-							</children>
-							<padding>
-								<Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
-							</padding>
-						</VBox>
-						<VBox fx:id="pnlSetExport" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-							<children>
-								<AnchorPane>
-									<children>
-										<Label text="Import Keys" textFill="#ee7722">
-											<font>
-												<Font size="18.0" />
-											</font>
-										</Label>
-										<Label layoutY="27.0" text="Import keys and recover from certain disaster." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-										<HBox layoutY="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-											<children>
-												<Button fx:id="btnSetExportImport" mnemonicParsing="false" onMouseClicked="#onImportWallet" style="-fx-cursor: hand;" text="Import">
-													<HBox.margin>
-														<Insets bottom="8.0" />
-													</HBox.margin>
-												</Button>
-											</children>
-										</HBox>
-									</children>
-								</AnchorPane>
-								<AnchorPane>
-									<children>
-										<Label text="Export keys" textFill="#ee7722">
-											<font>
-												<Font size="18.0" />
-											</font>
-										</Label>
-										<Label layoutY="27.0" text="Create an export of your keys and keep in a safe place in case you forget your passphrase." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-										<HBox layoutY="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-											<children>
-												<Button fx:id="btnSetExportExport" mnemonicParsing="false" onMouseClicked="#onDumpWallet" style="-fx-cursor: hand;" text="Export">
-													<HBox.margin>
-														<Insets bottom="8.0" />
-													</HBox.margin>
-												</Button>
-											</children>
-										</HBox>
-									</children>
-								</AnchorPane>
-								<AnchorPane>
-									<children>
-										<Label text="Backup Wallet" textFill="#ee7722">
-											<font>
-												<Font size="18.0" />
-											</font>
-										</Label>
-										<Label layoutY="27.0" text="Create a backup of your wallet to store in case your computer breaks down or is lost." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-										<HBox layoutY="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-											<children>
-												<Button fx:id="btnSetExportBackup" mnemonicParsing="false" onMouseClicked="#onBackupWallet" text="Backup" />
-											</children>
-										</HBox>
-									</children>
-								</AnchorPane>
-							</children>
-							<padding>
-								<Insets bottom="8.0" left="10.0" right="8.0" top="8.0" />
-							</padding>
-						</VBox>
-						<StackPane fx:id="maintenanceStack" prefHeight="150.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-							<children>
-								<VBox fx:id="pnlSetMaintenance" prefHeight="200.0" prefWidth="100.0">
-									<children>
-										<AnchorPane>
-											<children>
-												<Label text="Wallet Maintenance" textFill="#ee7722">
-													<font>
-														<Font size="18.0" />
-													</font>
-												</Label>
-												<Label layoutY="27.0" text="List the unspent coins in your wallet" textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-												<HBox layoutY="48.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="48.0">
-													<children>
-														<Button fx:id="btnListUnspent" mnemonicParsing="false" onMouseClicked="#fetchAndDisplayUnspent" style="-fx-cursor: hand;" text="List Unspent">
-															<HBox.margin>
-																<Insets bottom="8.0" left="20.0" />
-															</HBox.margin>
-														</Button>
-													</children>
-													<padding>
-														<Insets top="10.0" />
-													</padding>
-												</HBox>
-											</children>
-										</AnchorPane>
-										<AnchorPane>
-											<children>
-												<TableView fx:id="unspentTable" prefHeight="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-													<columns>
-														<TableColumn fx:id="txidColumn" prefWidth="200.0" text="Transaction ID" />
-														<TableColumn fx:id="voutColumn" prefWidth="40.0" text="Vout" />
-														<TableColumn fx:id="addressColumn" prefWidth="200.0" text="Address" />
-														<TableColumn fx:id="scriptPubKeyColumn" prefWidth="5.0" text="Script Pub Key" />
-														<TableColumn fx:id="amountColumn" prefWidth="150.0" text="Amount" />
-														<TableColumn fx:id="confirmationsColumn" prefWidth="100.0" text="Confirmations" />
-													</columns>
-												</TableView>
-											</children>
-										</AnchorPane>
-										<AnchorPane prefHeight="150.0">
-											<children>
-												<VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-													<!-- HBox containing the Label -->
-													<HBox>
-														<children>
-															<Label text="Merge multiple small UTXO inputs in one go. Choose an address in your wallet and select an amount for the total merge. The default setting is 200 for consolidating numerous tiny inputs. Adjust this value as needed to continue merging and optimize your wallet's organization. (A small transaction fee will be added to each merge)" textFill="#ccccff" wrapText="true" />
-														</children>
-													</HBox>
-            
-													<!-- HBox containing the TextField and Button -->
-													<HBox>
-														<children>
-															<TextField fx:id="txtAddress" prefWidth="350.0">
-																<HBox.margin>
-																	<Insets right="10.0" />
-																</HBox.margin>
-															</TextField>
-														</children>
-													</HBox>
-                                       <HBox>
-                                          <children>
-                                             <TextField fx:id="txtMergeAmount" prefWidth="350.0" promptText="Amount" text="200">
-                                                <HBox.margin>
-                                                   <Insets right="10.0" />
-                                                </HBox.margin>
-                                             </TextField>
-                                             <Button fx:id="btnMerge" mnemonicParsing="false" onMouseClicked="#mergeUnspentTokens" style="-fx-cursor: hand;" text="Merge">
-                                                <HBox.margin>
-                                                   <Insets bottom="8.0" />
-                                                </HBox.margin>
-                                             </Button>
-                                          </children>
-                                       </HBox>
-                                       <padding>
-                                          <Insets top="10.0" />
-                                       </padding>
-												</VBox>
-											</children>
-										</AnchorPane>
-									</children>
-									<padding>
-										<Insets bottom="8.0" left="10.0" right="8.0" top="8.0" />
-									</padding>
-								</VBox>
-								<VBox fx:id="mergeInputsOverlay" prefHeight="200.0" prefWidth="100.0" visible="false" />
-							</children>
-						</StackPane>
-						<VBox fx:id="pnlSetDebug" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-							<children>
-								<ListView fx:id="lstDebug" VBox.vgrow="ALWAYS" />
-							</children>
-						</VBox>
-					</children>
-				</AnchorPane>
-			</center>
-			<left>
-				<VBox alignment="TOP_RIGHT" styleClass="sidebar" BorderPane.alignment="TOP_RIGHT">
-					<children>
-						<ToggleButton fx:id="btnSetGeneral" alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetGeneralTap" prefWidth="100.0" selected="true" style="-fx-cursor: hand;" text="General">
-							<toggleGroup>
-								<ToggleGroup fx:id="settings" />
-							</toggleGroup>
-							<VBox.margin>
-								<Insets bottom="4.0" />
-							</VBox.margin>
-							<padding>
-								<Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
-							</padding>
-						</ToggleButton>
-						<ToggleButton fx:id="btnSetPassphrase" alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetPassphraseTap" prefWidth="100.0" style="-fx-cursor: hand;" text="Passphrase" toggleGroup="$settings">
-							<VBox.margin>
-								<Insets bottom="4.0" />
-							</VBox.margin>
-							<padding>
-								<Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
-							</padding>
-						</ToggleButton>
-						<ToggleButton fx:id="btnSetExport" alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetExportTap" prefWidth="100.0" style="-fx-cursor: hand;" text="Import/Export" toggleGroup="$settings">
-							<VBox.margin>
-								<Insets bottom="4.0" />
-							</VBox.margin>
-							<padding>
-								<Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
-							</padding>
-						</ToggleButton>
-						<ToggleButton fx:id="btnSetDebug" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onMouseClicked="#onSetDebugTap" prefWidth="100.0" style="-fx-cursor: hand;" text="Debug" toggleGroup="$settings">
-							<VBox.margin>
-								<Insets bottom="4.0" />
-							</VBox.margin>
-							<padding>
-								<Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
-							</padding>
-						</ToggleButton>
-						<ToggleButton fx:id="btnSetMaintenance" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onMouseClicked="#onSetMaintenanceTap" prefWidth="100.0" style="-fx-cursor: hand;" text="Maintenance" toggleGroup="$settings">
-							<padding>
-								<Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
-							</padding>
-						</ToggleButton>
-						<AnchorPane VBox.vgrow="ALWAYS">
-							<children>
-								<VBox alignment="BOTTOM_CENTER" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0">
-									<children>
-										<Label prefHeight="17.0" prefWidth="95.0" stylesheets="@main.css" text="Janus Ver:" textFill="#b5b5b5">
-											<VBox.margin>
-												<Insets />
-											</VBox.margin>
-											<padding>
-												<Insets left="1.0" right="1.0" />
-											</padding>
-											<font>
-												<Font size="9.0" />
-											</font>
-										</Label>
-										<Label fx:id="txtFxVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
-											<VBox.margin>
-												<Insets />
-											</VBox.margin>
-											<padding>
-												<Insets left="1.0" right="1.0" />
-											</padding>
-											<font>
-												<Font size="9.0" />
-											</font>
-										</Label>
-										<Label prefHeight="17.0" prefWidth="95.0" text="Installer Ver:" textFill="#b5b5b5">
-											<padding>
-												<Insets left="1.0" right="1.0" />
-											</padding>
-											<font>
-												<Font size="9.0" />
-											</font>
-										</Label>
-										<Label fx:id="txtBootstrapVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
-											<padding>
-												<Insets left="1.0" right="1.0" />
-											</padding>
-											<font>
-												<Font size="9.0" />
-											</font>
-										</Label>
-										<Label prefHeight="17.0" prefWidth="95.0" text="Daemon Ver:" textFill="#b5b5b5">
-											<padding>
-												<Insets left="1.0" right="1.0" />
-											</padding>
-											<font>
-												<Font size="9.0" />
-											</font>
-										</Label>
-										<Label fx:id="txtDaemonVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
-											<padding>
-												<Insets left="1.0" right="1.0" />
-											</padding>
-											<font>
-												<Font size="9.0" />
-											</font>
-										</Label>
-										<Label prefHeight="17.0" prefWidth="95.0" text="Hedgehog Ver:" textFill="#b5b5b5">
-											<padding>
-												<Insets left="1.0" right="1.0" />
-											</padding>
-											<font>
-												<Font size="9.0" />
-											</font>
-										</Label>
-										<Label fx:id="txtHedgehogVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
-											<padding>
-												<Insets left="1.0" right="1.0" />
-											</padding>
-											<font>
-												<Font size="9.0" />
-											</font>
-										</Label>
-									</children>
-									<padding>
-										<Insets right="-1.0" />
-									</padding>
-								</VBox>
-							</children>
-						</AnchorPane>
-					</children>
-					<padding>
-						<Insets right="-1.0" />
-					</padding>
-				</VBox>
-			</left>
-		</BorderPane>
-	</children>
+<AnchorPane prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
+   <children>
+      <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <center>
+            <AnchorPane>
+               <children>
+                  <VBox fx:id="pnlSetGeneral" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <FlowPane alignment="TOP_RIGHT" prefHeight="10.0" prefWidth="200.0" rowValignment="TOP">
+                           <children>
+                              <Label fx:id="verLbl" text="version:" textFill="#b5b5b5">
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </FlowPane>
+                        <AnchorPane>
+                           <children>
+                              <Label text="Configuration file" textFill="#ee7722">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutY="27.0" text="Edit settings for your wallet (after saving the wallet must be restarted)." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <padding>
+                                    <Insets bottom="10.0" />
+                                 </padding>
+                              </Label>
+                              <HBox layoutY="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <children>
+                                    <Button fx:id="btnSetGeneralConf" mnemonicParsing="false" onMouseClicked="#onOpenConf" style="-fx-cursor: hand;" text="OPEN">
+                                       <HBox.margin>
+                                          <Insets bottom="8.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                                 <padding>
+                                    <Insets top="15.0" />
+                                 </padding>
+                              </HBox>
+                           </children>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <padding>
+                              <Insets bottom="15.0" />
+                           </padding>
+                        </AnchorPane>
+                        <AnchorPane>
+                           <children>
+                              <Label text="Gridnode file" textFill="#ee7722">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutY="27.0" text="Add / Edit gridnodes (after saving the wallet must be restarted)." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <opaqueInsets>
+                                    <Insets bottom="10.0" />
+                                 </opaqueInsets>
+                              </Label>
+                              <HBox layoutY="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                           </children>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <padding>
+                              <Insets bottom="15.0" />
+                           </padding>
+                        </AnchorPane>
+                        <Button fx:id="btnSetGeneralGridnode" mnemonicParsing="false" onMouseClicked="#onOpenGridnode" style="-fx-cursor: hand;" text="OPEN">
+                           <opaqueInsets>
+                              <Insets top="20.0" />
+                           </opaqueInsets>
+                           <VBox.margin>
+                              <Insets bottom="20.0" />
+                           </VBox.margin>
+                        </Button>
+                        <AnchorPane>
+                           <children>
+                              <Label text="Blockchain data" textFill="#ee7722">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutY="27.0" text="This will open the directory of your locally stored blockchain where your wallet.dat, logs, and configuration files are stored." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <padding>
+                                    <Insets bottom="10.0" />
+                                 </padding>
+                              </Label>
+                              <HBox layoutY="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <children>
+                                    <Button fx:id="btnSetGeneralUnigrid" mnemonicParsing="false" onMouseClicked="#onOpenUnigrid" style="-fx-cursor: hand;" text="OPEN">
+                                       <HBox.margin>
+                                          <Insets bottom="8.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                                 <padding>
+                                    <Insets top="15.0" />
+                                 </padding>
+                              </HBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="15.0" />
+                           </padding>
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </AnchorPane>
+                        <CheckBox fx:id="chkNotifications" mnemonicParsing="false" onMouseClicked="#onNotificationsShown" selected="true" style="-fx-cursor: hand;" stylesheets="@main.css" text="Show app notifications" textFill="#ee7722">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </CheckBox>
+                     </children>
+                     <padding>
+                        <Insets left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </VBox>
+                  <VBox fx:id="pnlSetDisplay" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Label text="Display" textFill="#ee7722">
+                           <font>
+                              <Font name="System Bold" size="24.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <VBox fx:id="pnlSetPassphrase" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Label fx:id="txtPassWarningOne" layoutX="26.0" layoutY="18.0" text="Warning! This will encrypt your wallet with a passphrase. Write down your passphrase and keep it safe." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
+                           <VBox.margin>
+                              <Insets bottom="8.0" />
+                           </VBox.margin>
+                        </Label>
+                        <Label fx:id="txtPassWarningTwo" text="If you have not backed up your wallet yet please do so first. An automatic wallet restart will also be performed." textAlignment="JUSTIFY" textFill="#ccccff" wrapText="true">
+                           <VBox.margin>
+                              <Insets bottom="8.0" />
+                           </VBox.margin>
+                        </Label>
+                        <AnchorPane>
+                           <children>
+                              <Label fx:id="txtPassphraseOne" alignment="CENTER" contentDisplay="RIGHT" graphicTextGap="8.0" text="Passphrase" textFill="#ee7722" AnchorPane.leftAnchor="0.0">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="0.0">
+                                 <image>
+                                    <Image url="@images/settings_icon.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </AnchorPane>
+                        <PasswordField fx:id="taPassphrase" prefHeight="35.0" />
+                        <Label fx:id="txtPassphraseTwo" text="Repeat passphrase" textFill="#ee7722">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <PasswordField fx:id="taRepeatPassphrase" onKeyTyped="#onRepeatPassphraseChange" prefHeight="35.0" />
+                        <HBox alignment="TOP_CENTER">
+                           <VBox.margin>
+                              <Insets top="8.0" />
+                           </VBox.margin>
+                           <children>
+                              <Button fx:id="btnUpdatePassphrase" disable="true" mnemonicParsing="false" onMouseClicked="#onLock" style="-fx-cursor: hand;" text="Encrypt">
+                                 <HBox.margin>
+                                    <Insets right="8.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
+                     </padding>
+                  </VBox>
+                  <VBox fx:id="pnlSetExport" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <AnchorPane>
+                           <children>
+                              <Label text="Import Keys" textFill="#ee7722">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutY="27.0" text="Import keys and recover from certain disaster." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                              <HBox layoutY="48.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <children>
+                                    <Button fx:id="btnSetExportImport" mnemonicParsing="false" onMouseClicked="#onImportWallet" style="-fx-cursor: hand;" text="Import">
+                                       <HBox.margin>
+                                          <Insets bottom="8.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane>
+                           <children>
+                              <Label text="Export keys" textFill="#ee7722">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutY="27.0" text="Create an export of your keys and keep in a safe place in case you forget your passphrase." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                              <HBox layoutY="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <children>
+                                    <Button fx:id="btnSetExportExport" mnemonicParsing="false" onMouseClicked="#onDumpWallet" style="-fx-cursor: hand;" text="Export">
+                                       <HBox.margin>
+                                          <Insets bottom="8.0" />
+                                       </HBox.margin>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane>
+                           <children>
+                              <Label text="Backup Wallet" textFill="#ee7722">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutY="27.0" text="Create a backup of your wallet to store in case your computer breaks down or is lost." textFill="#ccccff" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                              <HBox layoutY="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                 <children>
+                                    <Button fx:id="btnSetExportBackup" mnemonicParsing="false" onMouseClicked="#onBackupWallet" text="Backup" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                     <padding>
+                        <Insets bottom="8.0" left="10.0" right="8.0" top="8.0" />
+                     </padding>
+                  </VBox>
+                  <VBox fx:id="pnlSetDebug" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <ListView fx:id="lstDebug" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+         </center>
+         <left>
+            <VBox alignment="TOP_RIGHT" styleClass="sidebar" BorderPane.alignment="TOP_RIGHT">
+               <children>
+                  <ToggleButton fx:id="btnSetGeneral" alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetGeneralTap" prefWidth="100.0" selected="true" style="-fx-cursor: hand;" text="General">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="settings" />
+                     </toggleGroup>
+                     <VBox.margin>
+                        <Insets bottom="4.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                     </padding>
+                  </ToggleButton>
+                  <ToggleButton fx:id="btnSetPassphrase" alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetPassphraseTap" prefWidth="100.0" style="-fx-cursor: hand;" text="Passphrase" toggleGroup="$settings">
+                     <VBox.margin>
+                        <Insets bottom="4.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                     </padding>
+                  </ToggleButton>
+                  <ToggleButton fx:id="btnSetExport" alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onSetExportTap" prefWidth="100.0" style="-fx-cursor: hand;" text="Import/Export" toggleGroup="$settings">
+                     <VBox.margin>
+                        <Insets bottom="4.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                     </padding>
+                  </ToggleButton>
+                  <ToggleButton fx:id="btnSetDebug" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onMouseClicked="#onSetDebugTap" prefWidth="100.0" style="-fx-cursor: hand;" text="Debug" toggleGroup="$settings">
+                     <VBox.margin>
+                        <Insets bottom="4.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="3.0" left="8.0" right="8.0" top="3.0" />
+                     </padding>
+                  </ToggleButton>
+                  <AnchorPane VBox.vgrow="ALWAYS">
+                     <children>
+                        <VBox alignment="BOTTOM_CENTER" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0">
+                           <children>
+                              <Label prefHeight="17.0" prefWidth="95.0" stylesheets="@main.css" text="Janus Ver:" textFill="#b5b5b5">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="txtFxVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label prefHeight="17.0" prefWidth="95.0" text="Installer Ver:" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="txtBootstrapVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label prefHeight="17.0" prefWidth="95.0" text="Daemon Ver:" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="txtDaemonVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label prefHeight="17.0" prefWidth="95.0" text="Hedgehog Ver:" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="txtHedgehogVersion" prefHeight="17.0" prefWidth="95.0" textFill="#b5b5b5">
+                                 <padding>
+                                    <Insets left="1.0" right="1.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <padding>
+                              <Insets right="-1.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+               </children>
+               <padding>
+                  <Insets right="-1.0" />
+               </padding>
+            </VBox>
+         </left>
+      </BorderPane>
+   </children>
 </AnchorPane>
