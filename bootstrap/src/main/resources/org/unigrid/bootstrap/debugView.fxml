@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="625.0" maxWidth="714.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="516.0" prefWidth="714.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" stylesheets="@updateview.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.bootstrap.controller.DebugViewController">
+<AnchorPane maxHeight="625.0" maxWidth="714.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="516.0" prefWidth="714.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" stylesheets="@updateview.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.bootstrap.controller.DebugViewController">
    <children>
       <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" layoutY="2.0" orientation="VERTICAL" prefHeight="523.0" prefWidth="657.0" rowValignment="TOP" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
          <children>

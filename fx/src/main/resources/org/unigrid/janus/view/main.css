@@ -206,16 +206,16 @@
 }
 
 .vote-progress-bar > .track {
-        -fx-background-color: "#F74230", "#F74230";
-	-fx-background-radius:0;
-	-fx-background-insets: 0, 1;
+    -fx-background-color: "#F74230", "#F74230";
+    -fx-background-radius: 2.5;
+    -fx-background-insets: 0, 1;
 }
 
 .vote-progress-bar > .bar {
-	-fx-accent: "#14B839";
-	-fx-background-insets: 0;
-	-fx-background-radius: 2;
-	-fx-padding: 0.75em;
+    -fx-accent: "#14B839";
+    -fx-background-insets: 0;
+    -fx-background-radius: 2.5;
+    -fx-padding: 0.75em;
 }
 
 .my-progress-bar > .track {
@@ -256,9 +256,14 @@
 	-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);
 }
 
+.vote-box {
+	-fx-background-color: #0e1011; 
+	-fx-background-radius: 15;
+}
+
 .vote-list {
 	-fx-background-insets: 0;
-	-fx-padding: 0;
+	-fx-padding: 5px 0px 5px 0px;
 }
 
 .vote-list .list-cell:filled:selected:focused,
