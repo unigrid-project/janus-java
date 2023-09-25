@@ -28,9 +28,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.rpc.entity.BudgetVote;
@@ -129,6 +131,9 @@ public class ProposalController implements Initializable {
 		Label lblNo = (Label) container.lookup("#lblNo");
 		Hyperlink proposalTitle = (Hyperlink) container.lookup("#proposalTitle");
 		ProgressBar voteProgress = (ProgressBar) container.lookup("#voteProgress");
+		Button btnYes = (Button) container.lookup("#btnYes");
+		Button btnNo = (Button) container.lookup("#btnNo");
+		Label resultLbl = (Label) container.lookup("#resultLbl");
 
 		proposalTitle.setText("Proposal: " + item.getData().getName());
 		proposalTitle.setOnAction(e -> {
@@ -142,5 +147,15 @@ public class ProposalController implements Initializable {
 
 		final String toolTip = "Yes = " + item.getData().getYeas() + "    No = " + item.getData().getNays();
 		voteProgress.setTooltip(new Tooltip(toolTip));
-	}
+
+
+		if ("Unigrid DAO".equals(item.getData().getName())) {
+			btnYes.setVisible(false);
+			btnNo.setVisible(false);
+			resultLbl.setVisible(true);
+			resultLbl.setText("Results: PASSED");
+			resultLbl.setStyle("-fx-text-fill: green;");
+		}
+}
+
 }
