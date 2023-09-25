@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="container" minHeight="120.0" prefHeight="120.0" prefWidth="700.0" styleClass="vote-box" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.ProposalController">
+<VBox fx:id="container" minHeight="120.0" prefHeight="120.0" prefWidth="700.0" styleClass="vote-box" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.component.ProposalController">
 	<children>
 		<HBox prefHeight="20.0" prefWidth="200.0">
 			<children>
