@@ -33,7 +33,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tooltip;
-import org.controlsfx.control.Notifications;
+// import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.rpc.entity.BudgetVote;
 import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.model.service.DebugService;

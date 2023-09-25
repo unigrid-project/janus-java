@@ -24,6 +24,7 @@ import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -96,6 +97,7 @@ public class VoteController implements Initializable {
 			// method
 			return;
 		}
+		Collections.reverse(result);
 		listBudgetInfo.clear();
 		listBudgetInfo.addAll(result);
 		// Filter out "Pickle-DAO" using Java Streams
