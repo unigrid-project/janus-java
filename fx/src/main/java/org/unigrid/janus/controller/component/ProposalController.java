@@ -32,7 +32,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.rpc.entity.BudgetVote;
@@ -148,7 +147,6 @@ public class ProposalController implements Initializable {
 		final String toolTip = "Yes = " + item.getData().getYeas() + "    No = " + item.getData().getNays();
 		voteProgress.setTooltip(new Tooltip(toolTip));
 
-
 		if ("Unigrid DAO".equals(item.getData().getName())) {
 			btnYes.setVisible(false);
 			btnNo.setVisible(false);
@@ -156,6 +154,6 @@ public class ProposalController implements Initializable {
 			resultLbl.setText("Results: PASSED");
 			resultLbl.setStyle("-fx-text-fill: green;");
 		}
-}
+	}
 
 }

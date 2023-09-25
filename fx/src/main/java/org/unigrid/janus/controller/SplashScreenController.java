@@ -31,11 +31,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.DebugService;
@@ -50,13 +50,13 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	@Inject private HostServices hostServices;
 
 	@FXML private ProgressBar progBar;
-	@FXML private FontIcon spinnerPreLoad;
 	@FXML private Label lblText;
 	@FXML private Label lblStatus;
 	@FXML private Label verLbl;
 	@FXML private TextArea debugTxt;
 	@FXML private GridPane splashGrid;
 	@FXML private Tooltip bugTooltip;
+	@FXML private ProgressIndicator progIndicator;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -89,7 +89,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	public void showProgressBar() {
-		spinnerPreLoad.setVisible(false);
+		progIndicator.setVisible(false);
 		progBar.setVisible(true);
 	}
 
@@ -102,7 +102,7 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 	}
 
 	public void showSpinner() {
-		spinnerPreLoad.setVisible(true);
+		progIndicator.setVisible(true);
 	}
 
 	public void setDebugText(String value) {

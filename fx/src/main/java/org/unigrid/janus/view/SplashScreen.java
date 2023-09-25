@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.Animation;
-import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
@@ -47,7 +46,6 @@ import lombok.SneakyThrows;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.BootstrapModel;
 import org.unigrid.janus.model.DataDirectory;
@@ -76,7 +74,6 @@ public class SplashScreen implements Window {
 	@Inject
 	private BrowserService window;
 
-	private FontIcon spinnerPreLoad;
 	private RotateTransition rt;
 	private Label text;
 	private Label status;
@@ -100,7 +97,6 @@ public class SplashScreen implements Window {
 
 		try {
 			stageSplash.show();
-			startSpinner();
 		} catch (Exception e) {
 			AlertDialog.open(Alert.AlertType.ERROR, e.getMessage());
 		}
@@ -110,25 +106,6 @@ public class SplashScreen implements Window {
 	public void hide() {
 		// stopMonitor();
 		stageSplash.close();
-	}
-
-	public void startSpinner() {
-		spinnerPreLoad = (FontIcon) stageSplash.getScene().lookup("#spinnerPreLoad");
-		spinnerPreLoad.setVisible(true);
-
-		rt = new RotateTransition(Duration.millis(50000), spinnerPreLoad);
-		// rt.setRate(1.0);
-		rt.setByAngle(20000);
-		rt.setCycleCount(Animation.INDEFINITE);
-		rt.setAutoReverse(true);
-		rt.setInterpolator(Interpolator.LINEAR);
-
-		rt.play();
-	}
-
-	public void stopSpinner() {
-		rt.stop();
-		// spinnerPreLoad.setVisible(false);
 	}
 
 	private void onClose(@Observes Event<CloseJanus> closeJanus) {

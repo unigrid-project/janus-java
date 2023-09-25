@@ -60,10 +60,10 @@ public class JanusPreloader {
 	}
 
 	public void startSpinner() {
-		splashScreen.startSpinner();
+		// TODO this call should be removed from bootstrap
 	}
 
 	public void stopSpinner() {
-		splashScreen.stopSpinner();
+		// TODO this call should be removed from bootstrap
 	}
 }
