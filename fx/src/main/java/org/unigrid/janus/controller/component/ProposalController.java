@@ -71,8 +71,9 @@ public class ProposalController implements Initializable {
 				System.out.println("Overall: " + voteResult.getOverall());
 
 				// Further processing of the response
-				Notifications.create().title("Vote Results:").text(voteResult.getOverall())
-					.showInformation();
+				// TODO FIX RESPONSE FROM DAEMON
+				// Notifications.create().title("Vote Results:").text(voteResult.getOverall())
+				// 	.showInformation();
 				debug.print("no: " + voteResult.getOverall(),
 					ProposalController.class.getSimpleName());
 			} else {
@@ -97,9 +98,9 @@ public class ProposalController implements Initializable {
 				System.out.println("Received response: " + voteResult.toString());
 
 				System.out.println("Overall: " + voteResult.getOverall());
-
-				Notifications.create().title("Vote Results:").text(voteResult.getOverall())
-					.showInformation();
+				// TODO FIX RESPONSE FROM DAEMON
+				// Notifications.create().title("Vote Results:").text(voteResult.getOverall())
+				// 	.showInformation();
 				debug.print("yes: " + voteResult.getOverall(),
 					ProposalController.class.getSimpleName());
 			} else {
