@@ -32,6 +32,8 @@ import java.io.PrintStream;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -70,6 +72,7 @@ import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.model.signal.NodeRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
+import org.unigrid.janus.model.signal.StartEnabled;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import org.unigrid.janus.view.backing.GridnodeListModel;
@@ -86,6 +89,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@Inject private Event<State> stateEvent;
 	@Inject private Event<UnlockRequest> unlockRequestEvent;
 	@Inject private Event<OverlayRequest> overlayRequest;
+	@Inject private Event<StartEnabled> startEnabled;
 
 	private static GridnodeListModel nodes = new GridnodeListModel();
 	private static GridnodeTxidList txList = new GridnodeTxidList();
@@ -108,6 +112,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	@FXML private TableColumn colNodeTxhash;
 	@FXML private HBox newGridnodeDisplay;
 	@FXML private Text gridnodeDisplay;
+	@FXML private Button btnNodeStart;
 
 	private String serverResponse;
 
@@ -421,8 +426,35 @@ public class NodesController implements Initializable, PropertyChangeListener {
 	}
 
 	private void eventNodeRequest(@Observes NodeRequest nodeRequest) {
-		rpc.callToJson(new GridnodeEntity.Request(new Object[]{"start-missing", "0"}));
 		getNodeList();
+		startNodes();
 		debug.log("Attempting to start nodes");
+	}
+	
+	private void startNodes() {
+		new Thread(() -> {
+			startEnabled.fire(StartEnabled.INVISABLE);
+			for(Gridnode gridNode: nodes.getGridnodes()) {
+				rpc.callToJson(new GridnodeEntity.Request(new Object[]{"alias", "0", gridNode.getAlias()}));
+				try {
+					System.out.println("sleep");
+					Thread.sleep(5000);
+				} catch (InterruptedException ex) {
+					System.out.println(ex.getMessage());
+					Logger.getLogger(NodesController.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+			startEnabled.fire(StartEnabled.VISABEL);
+		}).start();
+	}
+	
+	private void eventStartEnabled(@Observes StartEnabled startEnabled) {
+		if(startEnabled == StartEnabled.INVISABLE) {
+			System.out.println("Set button invisable");
+			btnNodeStart.setDisable(true);
+		} else if (startEnabled == StartEnabled.VISABEL) {
+			System.out.println("Set button visable");
+			btnNodeStart.setDisable(false);
+		}
 	}
 }
