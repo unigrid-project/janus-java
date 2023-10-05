@@ -37,16 +37,18 @@ import org.update4j.service.Delegate;
 import org.update4j.OS;
 import javafx.stage.StageStyle;
 import io.sentry.Sentry;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
 //import java.awt.event.KeyEvent;
 //import java.awt.event.KeyListener;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -143,10 +145,11 @@ public class App extends Application implements Delegate {
 		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
 			System.out.println("are we getting here??????");
 			config = Configuration.read(in);
+			updateLocalConfigFile(config.toString());
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			Sentry.captureException(e);
-			try ( Reader in = Files.newBufferedReader(Paths.get(System.getProperty("user.home"), "/work/janus-java/config/target/config.xml"))) {
+			try ( Reader in = Files.newBufferedReader(Paths.get(localPath() + "/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
@@ -170,6 +173,35 @@ public class App extends Application implements Delegate {
 
 		config.sync();
 		UpdateView.getInstance().setConfig(config, classStage, inputArgs, hostServices);
+	}
+	
+	static String localPath() {
+		final String s = System.getProperty("user.home").concat(
+			switch (OS.CURRENT) {
+				case LINUX ->
+					"/.unigrid/dependencies";
+				case WINDOWS ->
+					"/AppData/Roaming/UNIGRID/dependencies";
+				case MAC ->
+					"/Library/Application Support/UNIGRID/dependencies";
+				default ->
+					"/UNIGRID/dependencies";
+			}
+		);
+		return s;
+	}
+	
+	static void updateLocalConfigFile(String in) {
+		try {
+			File targetFile = new File(localPath() + "/config.xml");
+			targetFile.createNewFile();
+			
+			Writer targetFileWriter = new FileWriter(targetFile);
+			targetFileWriter.write(in);
+			targetFileWriter.close();
+		} catch (IOException ex) {
+			Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 	static void setRoot(String fxml) throws IOException {

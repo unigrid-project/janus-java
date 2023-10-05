@@ -24,7 +24,7 @@
 <?import org.kordamp.ikonli.javafx.StackedFontIcon?>
 <?import org.unigrid.janus.view.component.WindowBarButton?>
 
-<Stage minHeight="400.0" minWidth="600.0" title="Unigrid Janus Wallet" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.MainWindowController">
+<Stage minHeight="400.0" minWidth="600.0" title="Unigrid Janus Wallet" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.MainWindowController">
    <scene>
       <Scene fill="#000024" stylesheets="@main.css">
          <root>
