@@ -89,7 +89,7 @@ public class VoteController implements Initializable {
 
 	private void onMessage(@Observes NewBlock update) {
 		BudgetGetVote budgetInfo = rpc.call(
-			new BudgetGetVote.Request(new Object[]{"show"}), BudgetGetVote.class);
+		new BudgetGetVote.Request(new Object[]{"show"}), BudgetGetVote.class);
 		List<BudgetGetVote.Result> result = budgetInfo.getResult();
 
 		if (result == null) {
