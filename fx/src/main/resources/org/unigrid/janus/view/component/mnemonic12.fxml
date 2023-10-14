@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="bg-dark-blue" stylesheets="@../main.css"
+   xmlns="http://javafx.com/javafx/"
+   xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.MnemonicController">
+   <children>
+      <VBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+      <GridPane fx:id="mnemonic12Grid" alignment="CENTER" hgap="10" layoutX="10.0" layoutY="10.0" vgap="10" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+         <children>
+            <TextField fx:id="wordTwelveOne" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <TextField fx:id="wordTwelveTwo" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <TextField fx:id="wordTwelveThree" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+            <TextField fx:id="wordTwelveFour" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <TextField fx:id="wordTwelveFive" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <TextField fx:id="wordTwelveSix" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <TextField fx:id="wordTwelveSeven" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <TextField fx:id="wordTwelveEight" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextField fx:id="wordTwelveNine" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <TextField fx:id="wordTwelveTen" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <TextField fx:id="wordTwelveEleven" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <TextField fx:id="wordTwelveTwelve" onMouseClicked="#handleTextFieldClick12" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+         </children>
+      </GridPane>
+   </children>
+</AnchorPane>

@@ -36,9 +36,12 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+
+import org.bitcoinj.wallet.UnreadableWalletException;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.utils.MnemonicToPrivateKey;
 import org.unigrid.janus.model.service.BrowserService;
 
 @Eager
@@ -65,6 +68,15 @@ public class SplashScreenController implements Initializable, PropertyChangeList
 			// Font font = Font.loadFont("fonts/PressStart2P-vaV7.ttf", 10);
 			// lblText.setFont(font);
 			// lblStatus.setFont(font);
+			try {
+				MnemonicToPrivateKey.main(null);
+			} catch (UnreadableWalletException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			debugTxt.textProperty().addListener(new ChangeListener() {
 				public void changed(ObservableValue ov, Object oldValue, Object newValue) {
 					try {

@@ -1,18 +1,16 @@
 /*
-    The Janus Wallet
-    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
-
-    This program is free software: you can redistribute it and/or modify it under the terms of the
-    addended GNU Affero General Public License as published by the Free Software Foundation, version 3
-    of the License (see COPYING and COPYING.addendum).
-
-    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
-
-    You should have received an addended copy of the GNU Affero General Public License with this program.
-    If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ * The Janus Wallet Copyright © 2021-2022 The Unigrid Foundation, UGD Software
+ * AB This program is free software: you can redistribute it and/or modify it
+ * under the terms of the addended GNU Affero General Public License as
+ * published by the Free Software Foundation, version 3 of the License (see
+ * COPYING and COPYING.addendum). This program is distributed in the hope that
+ * it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details. You should have received an
+ * addended copy of the GNU Affero General Public License with this program. If
+ * not, see <http://www.gnu.org/licenses/> and
+ * <https://github.com/unigrid-project/janus-java>.
+ */
 
 module fx {
 	requires static lombok;
@@ -54,34 +52,49 @@ module fx {
 	requires org.slf4j;
 	requires ch.qos.logback.core;
 	requires ch.qos.logback.classic;
-	//requires FXTrayIcon;
-	//requires javafx.swing;
+	// requires FXTrayIcon;
+	// requires javafx.swing;
 	requires j8fu;
+	requires org.bitcoinj.core;
+	requires sdk;
+	requires org.bouncycastle.provider;
+	requires com.google.common;
+	requires org.json;
+	requires crypto;	
+ 	requires org.apache.commons.codec;
+	requires java.net.http;
 
 	uses org.update4j.service.Launcher;
+
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
 
 	opens org.unigrid.janus.view.backing to weld.core.impl;
-	opens org.unigrid.janus to weld.core.impl, org.update4j;//, javafx.swing;
-	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base, javafx.controls, org.update4j, javafx.graphics,
-		weld.core.impl;
-	opens org.unigrid.janus.controller to javafx.fxml, weld.core.impl, javafx.base, javafx.controls, org.update4j,
-		javafx.graphics;
+	opens org.unigrid.janus to weld.core.impl, org.update4j;// , javafx.swing;
+	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base,
+			javafx.controls, org.update4j, javafx.graphics, weld.core.impl;
+	opens org.unigrid.janus.controller to javafx.fxml, weld.core.impl, javafx.base,
+			javafx.controls, org.update4j, javafx.graphics;
 	opens org.unigrid.janus.view to weld.core.impl;
-	opens org.unigrid.janus.view.component to weld.core.impl, javafx.fxml, javafx.base, javafx.controls;
-	opens org.unigrid.janus.model to weld.core.impl, javafx.base , jakarta.xml.bind, jakarta.ws.rs, com.fasterxml.jackson.databind,
-		jersey.media.jaxb;
-	opens org.unigrid.janus.model.rpc.entity to weld.core.impl, org.eclipse.yasson, javafx.base;
-	opens org.unigrid.janus.model.service to weld.core.impl, org.update4j, org.apache.commons.configuration2;//, javafx.swing;
-	opens org.unigrid.janus.model.entity to jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
-	opens org.unigrid.janus.model.rest.entity to weld.core.impl, org.eclipse.yasson, jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
+	opens org.unigrid.janus.view.component
+			to weld.core.impl, javafx.fxml, javafx.base, javafx.controls;
+	opens org.unigrid.janus.model to weld.core.impl, javafx.base, jakarta.xml.bind,
+			jakarta.ws.rs, com.fasterxml.jackson.databind, jersey.media.jaxb;
+	opens org.unigrid.janus.model.rpc.entity
+			to weld.core.impl, org.eclipse.yasson, javafx.base;
+	opens org.unigrid.janus.model.service
+			to weld.core.impl, org.update4j, org.apache.commons.configuration2;// ,
+																				// javafx.swing;
+	opens org.unigrid.janus.model.entity
+			to jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
+	opens org.unigrid.janus.model.rest.entity to weld.core.impl, org.eclipse.yasson,
+			jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
 
 	exports org.unigrid.janus;
-	
-	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml, javafx.base,
-		javafx.controls, org.update4j, javafx.graphics;
-	exports org.unigrid.janus.controller to weld.core.impl ,javafx.fxml, javafx.base, javafx.controls,
-		org.update4j, javafx.graphics;
+
+	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml,
+			javafx.base, javafx.controls, org.update4j, javafx.graphics;
+	exports org.unigrid.janus.controller to weld.core.impl, javafx.fxml, javafx.base,
+			javafx.controls, org.update4j, javafx.graphics;
 	exports org.unigrid.janus.model.signal to weld.core.impl;
 	exports org.unigrid.janus.model.producer to weld.core.impl;
 	exports org.unigrid.janus.model.setup to weld.core.impl;

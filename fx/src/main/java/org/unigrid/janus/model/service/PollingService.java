@@ -20,6 +20,8 @@ package org.unigrid.janus.model.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.Timer;
+import java.util.TimerTask;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.unigrid.janus.model.UpdateWallet;
@@ -31,6 +33,7 @@ public class PollingService {
 	private Timer updateTimer;
 	private Timer syncTimer;
 	private Timer longSyncTimer;
+	private Timer timer;
 
 	@Getter @Setter private Boolean syncTimerRunning = false;
 	@Getter @Setter private Boolean longSyncTimerRunning = false;
@@ -49,6 +52,22 @@ public class PollingService {
 		syncTimer = new Timer(true);
 		updateTimer = new Timer(true);
 	}*/
+
+	// Convert all polls to this one where you can pass in the task to be executed
+	// pollingService.startPolling(new LongPollingTask(), 1000, "polling", new Timer());
+	public void startPolling(TimerTask task, int interval, String timerName, Timer timer) {
+		debug.print(timerName + " started", PollingService.class.getSimpleName());
+		timer.scheduleAtFixedRate(task, 0, interval);
+	}
+
+	// pollingService.stopPolling(pollingTimer, "polling");
+	public void stopPole(Timer timer, String timerName) {
+		if (timer != null) {
+			timer.cancel();
+			timer.purge();
+			debug.print(timerName + " stopped", PollingService.class.getSimpleName());
+		}
+	}
 
 	public void poll(int interval) {
 		debug.print("poll started", PollingService.class.getSimpleName());

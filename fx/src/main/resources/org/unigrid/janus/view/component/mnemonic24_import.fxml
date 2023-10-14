@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.MnemonicController">
+   <children>
+      <VBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <GridPane fx:id="mnemonic24ImportGrid" alignment="CENTER" hgap="10" vgap="10">
+               <columnConstraints>
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
+               <children>
+                  <TextField fx:id="wordTwentyFourImportOne" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <TextField fx:id="wordTwentyFourImportTwo" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  <TextField fx:id="wordTwentyFourImportThree" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                  <TextField fx:id="wordTwentyFourImportFour" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <TextField fx:id="wordTwentyFourImportFive" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="wordTwentyFourImportSix" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="wordTwentyFourImportSeven" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                  <TextField fx:id="wordTwentyFourImportEight" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <TextField fx:id="wordTwentyFourImportNine" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <TextField fx:id="wordTwentyFourImportTen" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                  <TextField fx:id="wordTwentyFourImportEleven" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextField fx:id="wordTwentyFourImportTwelve" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                  <TextField fx:id="wordTwentyFourImportThirteen" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                  <TextField fx:id="wordTwentyFourImportFourteen" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <TextField fx:id="wordTwentyFourImportFifteen" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                  <TextField fx:id="wordTwentyFourImportSixteen" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                  <TextField fx:id="wordTwentyFourImportSeventeen" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <TextField fx:id="wordTwentyFourImportEighteen" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                  <TextField fx:id="wordTwentyFourImportNineteen" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                  <TextField fx:id="wordTwentyFourImportTwenty" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <TextField fx:id="wordTwentyFourImportTwentyOne" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                  <TextField fx:id="wordTwentyFourImportTwentyTwo" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                  <TextField fx:id="wordTwentyFourImportTwentyThree" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                  <TextField fx:id="wordTwentyFourImportTwentyFour" onMouseClicked="#handleTextFieldClick24Import" styleClass="mnemonic-field" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+               </children>
+            </GridPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

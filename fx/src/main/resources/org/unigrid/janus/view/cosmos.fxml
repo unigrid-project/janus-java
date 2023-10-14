@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="700.0" styleClass="bg-dark-blue" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
+   <children>
+      <StackPane fx:id="cosmosMainPane" prefHeight="150.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <BorderPane prefHeight="850.0" prefWidth="650.0">
+            <center>
+               <fx:include source="component/dashboard.fxml" />
+            </center>
+         </BorderPane>
+      </StackPane>
+      <StackPane fx:id="cosmosWizardPane" layoutX="10.0" layoutY="10.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <VBox fx:id="wizard" alignment="CENTER" spacing="20">
+               <!-- Title or message indicating no local account found -->
+               <Label style="-fx-font-size: 30;" text="Setup Wizard" textFill="#8d8d8d">
+                  <font>
+                     <Font size="21.0" />
+                  </font>
+               </Label>
+
+               <!-- HBox for titles above buttons -->
+               <HBox alignment="CENTER" spacing="50">
+                  <Label fx:id="importLabel" style="-fx-font-size: 18;" text="Import Existing Account" textFill="#8d8d8d" />
+                  <Label fx:id="generateLabel" style="-fx-font-size: 18;" text="Generate New Account" textFill="#8d8d8d" />
+               </HBox>
+
+               <!-- HBox for the two buttons -->
+               <HBox alignment="CENTER" spacing="50">
+                  <Button fx:id="importButton" onAction="#handleImportAction" prefWidth="220.0" style="-fx-cursor: hand;" text="Import">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font size="26.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="generateButton" onAction="#handleGenerateAction" prefWidth="220.0" style="-fx-cursor: hand;" text="Generate">
+                     <font>
+                        <Font size="26.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Button>
+               </HBox>
+            </VBox>
+         </children>
+      </StackPane>
+      <StackPane fx:id="importPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <TabPane fx:id="importTabPane">
+            <tabs>
+               <Tab fx:id="mnemonic12Tab" closable="false" text="12-Word Mnemonic">
+                  <content>
+                     <VBox alignment="CENTER" spacing="20">
+                        <!-- Title and Instructions -->
+                        <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="Import Existing Wallet" textFill="WHITE" />
+                        <Label alignment="CENTER" text="• Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase." textFill="WHITE" wrapText="true" />
+                        <Label alignment="CENTER" text="• Enter the phrase in the right order without capitalization, punctuation symbols, or spaces." textFill="WHITE" wrapText="true" />
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                           <center>
+                              <fx:include source="component/mnemonic12.fxml" />
+                           </center>
+                        </BorderPane>
+
+                        <!-- Import Button -->
+                        <Button onAction="#importMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import" />
+
+                        <padding>
+                           <Insets left="50.0" right="50.0" top="10.0" />
+                        </padding>
+                     </VBox>
+                  </content>
+               </Tab>
+               <Tab fx:id="mnemonic24Tab" closable="false" text="24-Word Mnemonic">
+                  <content>
+                     <VBox alignment="CENTER" spacing="20">
+
+                        <!-- Title and Instructions -->
+                        <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="Import Existing Wallet" textFill="WHITE" />
+                        <Label alignment="CENTER" text="• Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase." textFill="WHITE" wrapText="true" />
+                        <Label alignment="CENTER" text="• Enter the phrase in the right order without capitalization, punctuation symbols, or spaces." textFill="WHITE" wrapText="true" />
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                           <center>
+                              <fx:include source="component/mnemonic24_import.fxml" />
+                           </center>
+                        </BorderPane>
+
+                        <!-- Import Button -->
+                        <Button onAction="#importMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import" />
+
+                        <padding>
+                           <Insets left="50.0" right="50.0" top="10.0" />
+                        </padding>
+                     </VBox>
+                  </content>
+               </Tab>
+               <Tab fx:id="privateKeyTab" closable="false" text="Private Key">
+                  <content>
+                     <VBox alignment="CENTER" spacing="20">
+                        <!-- Title and Instructions -->
+                        <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="Import Existing Wallet" textFill="WHITE" />
+                        <Label alignment="CENTER" text="• Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase." textFill="WHITE" wrapText="true" />
+                        <Label alignment="CENTER" text="• Enter the phrase in the right order without capitalization, punctuation symbols, or spaces." textFill="WHITE" wrapText="true" />
+                        <!-- Content for private key import -->
+                        <!-- Import Button -->
+                        <Button style="-fx-font-size: 20; -fx-cursor: hand;" text="Import" />
+                        <padding>
+                           <Insets left="50.0" right="50.0" top="10.0" />
+                        </padding>
+                     </VBox>
+                  </content>
+               </Tab>
+            </tabs>
+         </TabPane>
+      </StackPane>
+      <StackPane fx:id="passwordPane" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <VBox alignment="CENTER" spacing="20">
+               <HBox alignment="CENTER">
+                  <children>
+                     <Label text="Address:" textFill="WHITE">
+                        <font>
+                           <Font size="18.0" />
+                        </font>
+                     </Label>
+                     <TextField fx:id="addressFieldPassword" editable="false" prefWidth="400.0" styleClass="mnemonic-field">
+                        <HBox.margin>
+                           <Insets left="20.0" />
+                        </HBox.margin>
+                     </TextField>
+                  </children>
+               </HBox>
+               <Label text="Enter a password to Encrypt your wallet:" textFill="WHITE">
+                  <font>
+                     <Font size="18.0" />
+                  </font>
+               </Label>
+               <PasswordField fx:id="passwordField1" maxWidth="300.0" promptText="Enter password" styleClass="mnemonic-field" />
+               <PasswordField fx:id="passwordField2" maxWidth="300.0" promptText="Confirm password" styleClass="mnemonic-field" />
+               <Label text="Name for this account:" textFill="WHITE">
+                  <font>
+                     <Font size="18.0" />
+                  </font>
+               </Label>
+               <TextField fx:id="accountNameField" maxWidth="300.0" promptText="Account Name" styleClass="mnemonic-field" />
+               <Button fx:id="encryptAndSaveButton" onAction="#encryptKeys" style="-fx-cursor: hand;" text="Encrypt &amp; Save">
+                  <font>
+                     <Font size="24.0" />
+                  </font>
+               </Button>
+               <padding>
+                  <Insets left="50.0" right="50.0" />
+               </padding>
+            </VBox>
+         </children>
+      </StackPane>
+      <StackPane fx:id="generatePane" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <VBox alignment="CENTER" spacing="20" xmlns:fx="http://javafx.com/fxml">
+               <!-- Label explaining the importance of the seed phrase -->
+               <Label maxWidth="440.0" text="IMPORTANT: This is your seed phrase. Please back it up, keep it safe, and never share it. If you lose this seed phrase, your wallet and tokens may be unrecoverable." textFill="WHITE" wrapText="true">
+                  <font>
+                     <Font size="15.0" />
+                  </font>
+               </Label>
+               <TextArea fx:id="seedPhraseTextArea" editable="false" maxWidth="500.0" prefHeight="200.0" promptText="generaated seed phrase" style="-fx-background-color: rgba(0, 0, 0, 0.2);" styleClass="mnemonic-area" stylesheets="@main.css" wrapText="true" />
+
+               <!-- Continue button -->
+               <Button fx:id="continueButton" onAction="#handleContinue" style="-fx-cursor: hand;" text="Continue">
+                  <font>
+                     <Font size="24.0" />
+                  </font>
+               </Button>
+            </VBox>
+         </children>
+      </StackPane>
+      <StackPane fx:id="confirmMnemonic" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <VBox alignment="CENTER" spacing="20">
+            <Label maxWidth="480.0" text="Please enter your mnemonic that was generated to assure you have backed everything up correctly." textAlignment="CENTER" textFill="WHITE" wrapText="true">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+
+            <BorderPane prefHeight="200.0" prefWidth="200.0">
+               <center>
+                  <fx:include source="component/mnemonic24.fxml" />
+               </center>
+            </BorderPane>
+
+            <Button onAction="#handleMnemonicVerification" style="-fx-cursor: hand;" text="Verify Mnemonic">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Button>
+         </VBox>
+      </StackPane>
+   </children>
+</AnchorPane>

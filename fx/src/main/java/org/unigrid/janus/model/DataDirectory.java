@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+    Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -19,6 +19,9 @@ package org.unigrid.janus.model;
 import com.sun.jna.platform.win32.KnownFolders;
 import com.sun.jna.platform.win32.Shell32Util;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import org.apache.commons.configuration2.Configuration;
@@ -33,6 +36,10 @@ public class DataDirectory {
 	private static final String APPLICATION_NAME = "UNIGRID";
 	public static final String CONFIG_FILE = "unigrid.conf";
 	public static final String GRIDNODE_FILE = "gridnode.conf";
+	public static final String KEYRING_DIRECTORY = "/keyring";
+	public static final String COSMOS_ADDRESSES = "addresses.json";
+	public static final String ACCOUNTS_FILE = "accounts.json";
+	public static final String ENCRYPTED_KEYS_FILENAME = "accounts.json";
 	public static final String DEBUG_LOG = "debug.log";
 	private static final String OSX_SUPPORT_DIR = "Library/Application Support";
 
@@ -120,5 +127,28 @@ public class DataDirectory {
 
 	public static File getWalletLog() {
 		return Paths.get(get(), "wallet.log").toFile();
+	}
+
+	public static File getEncryptedKeys() {
+		return Paths.get(get(), KEYRING_DIRECTORY.concat("/").concat(ENCRYPTED_KEYS_FILENAME)).toFile();
+	}
+
+	public static String getEncryptedKeysPath() {
+		return Paths.get(get(), KEYRING_DIRECTORY).toString();
+	}
+
+	public static File getCosmosAddresses() {
+		return Paths.get(get(), KEYRING_DIRECTORY.concat("/").concat(COSMOS_ADDRESSES)).toFile();
+	}
+
+	public static File getAccountsFile() {
+		return Paths.get(get(), KEYRING_DIRECTORY.concat("/").concat(ACCOUNTS_FILE)).toFile();
+	}
+
+	public static void ensureDirectoryExists(String directory) throws IOException {
+		Path directoryPath = Paths.get(get(), directory);
+		if (!Files.exists(directoryPath)) {
+			Files.createDirectories(directoryPath);
+		}
 	}
 }

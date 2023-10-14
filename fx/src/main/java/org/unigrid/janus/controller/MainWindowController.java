@@ -66,6 +66,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML private ToggleButton btnTransactions;
 	@FXML private ToggleButton btnNodes;
 	@FXML private ToggleButton btnAddress;
+	@FXML private ToggleButton btnCosmos;
 	@FXML private ToggleButton btnDocs;
 	@FXML private ToggleButton btnSettings;
 	@FXML private ToggleButton btnGovernace;
@@ -76,6 +77,7 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML private VBox pnlSettings;
 	@FXML private VBox pnlDocs;
 	@FXML private VBox pnlGovernace;
+	@FXML private VBox pnlCosmos;
 	@FXML private AnchorPane pnlOverlay;
 	@FXML private AnchorPane pnlWarning;
 	@FXML private FontIcon lockBtn;
@@ -107,9 +109,11 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 		pnlSettings.setVisible(false);
 		pnlAddress.setVisible(false);
 		btnAddress.setSelected(false);
+		btnCosmos.setSelected(false);
 		btnDocs.setSelected(false);
 		pnlDocs.setVisible(false);
 		pnlGovernace.setVisible(false);
+		pnlCosmos.setVisible(false);
 		btnGovernace.setSelected(false);
 
 		panel.setVisible(true);
@@ -129,6 +133,11 @@ public class MainWindowController implements Initializable, PropertyChangeListen
 	@FXML
 	private void onNodesTap(MouseEvent event) {
 		select(pnlNodes, btnNodes);
+	}
+
+	@FXML
+	private void onComosClicked(MouseEvent event) {
+		select(pnlCosmos, btnCosmos);
 	}
 
 	@FXML
