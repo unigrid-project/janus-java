@@ -435,7 +435,7 @@ public class NodesController implements Initializable, PropertyChangeListener {
 		new Thread(() -> {
 			startEnabled.fire(StartEnabled.INVISABLE);
 			for (Gridnode gridNode: nodes.getGridnodes()) {
-				rpc.callToJson(new GridnodeEntity.Request(new Object[]{"alias", "0", gridNode.getAlias()}));
+				rpc.callToJson(new GridnodeEntity.Request(new Object[]{"start-alias", "0", gridNode.getAlias()}));
 				try {
 					System.out.println("sleep");
 					Thread.sleep(5000);
