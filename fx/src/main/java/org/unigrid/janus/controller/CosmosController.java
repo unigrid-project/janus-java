@@ -43,6 +43,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -88,6 +89,7 @@ import org.unigrid.janus.model.service.AccountsService;
 import org.unigrid.janus.model.service.AddressCosmosService;
 import org.unigrid.janus.model.service.CosmosRestClient;
 import org.unigrid.janus.model.signal.MnemonicState;
+import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
 import org.unigrid.janus.view.backing.CosmosTxList;
 
@@ -109,6 +111,8 @@ public class CosmosController implements Initializable {
 	private MnemonicModel mnemonicModel;
 	@Inject
 	private CosmosTxList cosmosTxList;
+	@Inject
+	private Event<ResetTextFieldsSignal> resetTextFieldsEvent;
 	private Account currentSelectedAccount;
 	@FXML
 	private Label addressLabel;
@@ -501,19 +505,28 @@ public class CosmosController implements Initializable {
 		return privateKeyBytes;
 	}
 
-	/* IMPORT VIEW */
 	@FXML
-	private void cancelImport(ActionEvent event) {
+	private void cancelAccountGeneration(ActionEvent event) {
 		try {
 			System.out.println("show main pane");
 			showPane(cosmosMainPane);
 			importTabPane.getSelectionModel().select(mnemonic12Tab);
+			mnemonic12Tab.setDisable(false);
+			accountModel.setMnemonic(null);
+			accountModel.setAddress(null);
+			accountModel.setPrivateKey(null);
+			accountModel.setPublicKey(null);
+			accountModel.setEncryptedMnemonic(null);
+			accountModel.setName(null);
+			resetTextFieldsEvent.fire(ResetTextFieldsSignal.builder().build());
+
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
 				ex);
 		}
 	}
 
+	/* IMPORT VIEW */
 	@FXML
 	private void importPrivateKey(ActionEvent event) {
 		System.out.println("Import private key");

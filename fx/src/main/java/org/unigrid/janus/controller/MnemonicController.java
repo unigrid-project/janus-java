@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,7 @@ import javafx.scene.input.MouseEvent;
 
 import org.unigrid.janus.model.MnemonicModel;
 import org.unigrid.janus.model.signal.ParentRequestSignal;
+import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
 
 @ApplicationScoped
@@ -317,4 +319,22 @@ public class MnemonicController implements Initializable {
 		}
 	}
 
+	private void handleResetTextFields(@Observes ResetTextFieldsSignal signal) {
+		resetTextFields();
+	}
+
+	private void resetTextFields() {
+		for (TextField textField : textFields12List) {
+			textField.setText("");
+		}
+
+		for (TextField textField : textFields24List) {
+			textField.setText("");
+		}
+
+		for (TextField textField : textFields24ImportList) {
+			textField.setText("");
+		}
+		mnemonicWordList.clear();
+	}
 }

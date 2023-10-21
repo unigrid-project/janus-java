@@ -59,7 +59,7 @@
                      </HBox.margin>
                   </Button>
                </HBox>
-               <Button onAction="#cancelImport" prefWidth="220.0" style="-fx-cursor: hand;" text="Cancel">
+               <Button onAction="#cancelAccountGeneration" prefWidth="220.0" style="-fx-cursor: hand;" text="Cancel">
                   <font>
                      <Font size="26.0" />
                   </font>
@@ -91,7 +91,7 @@
                                     <Insets right="50.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button onAction="#cancelImport" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
+                              <Button onAction="#cancelAccountGeneration" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
                            </children>
                         </HBox>
 
@@ -121,7 +121,7 @@
                                     <Insets right="50.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button onAction="#cancelImport" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
+                              <Button onAction="#cancelAccountGeneration" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
                            </children>
                         </HBox>
 
@@ -145,7 +145,7 @@
                                     <Insets right="50.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button onAction="#cancelImport" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
+                              <Button onAction="#cancelAccountGeneration" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
                            </children>
                         </HBox>
                         <padding>
@@ -220,7 +220,7 @@
                            <Insets right="50.0" />
                         </HBox.margin>
                      </Button>
-                     <Button onAction="#cancelImport" prefWidth="150.0" style="-fx-cursor: hand;" text="Cancel">
+                     <Button onAction="#cancelAccountGeneration" prefWidth="150.0" style="-fx-cursor: hand;" text="Cancel">
                         <font>
                            <Font size="24.0" />
                         </font>
