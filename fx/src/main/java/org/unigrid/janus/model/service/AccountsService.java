@@ -48,6 +48,10 @@ public class AccountsService {
 	}
 
 	public Optional<Account> findAccountByName(String accountName) {
+		if (accountName == null) {
+			return Optional.empty();
+		}
+
 		return accountsData.getAccounts().stream()
 			.filter(account -> accountName.equals(account.getName()))
 			.findFirst();

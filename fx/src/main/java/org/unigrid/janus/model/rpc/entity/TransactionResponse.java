@@ -19,30 +19,23 @@ package org.unigrid.janus.model.rpc.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import jakarta.enterprise.context.ApplicationScoped;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
+import jakarta.inject.Named;
 
 import java.util.List;
 
 @Data
 @ApplicationScoped
-public class TransactionResponse {
+@Named("transactionResponse")
+public class TransactionResponse extends BaseResult<List<TransactionResponse.TxResponse>> {
 
 	@JsonProperty("txs")
 	private List<Transaction> transactions;
 	@JsonProperty("tx_responses")
-	private ObservableList<TxResponse> txResponses = FXCollections.observableArrayList();
+	private List<TxResponse> txResponsesList;
 
-	public void setupListener() {
-		txResponses.addListener(new ListChangeListener<TxResponse>() {
-			@Override
-			public void onChanged(Change<? extends TxResponse> change) {
-				while (change.next()) {
-					System.out.println("TxResponse Change: " + change);
-				}
-			}
-		});
+	@Data
+	public static class Result extends TransactionResponse {
+		// empty for now
 	}
 
 	@Data

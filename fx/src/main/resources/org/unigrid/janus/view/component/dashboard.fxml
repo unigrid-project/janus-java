@@ -71,7 +71,8 @@
                         <Font size="15.0" />
                     </font>
                 </Label>
-            <ListView fx:id="transactionListView" />
+            <ListView fx:id="transactionListView" prefHeight="100.0" />
+            <ListView fx:id="testListView" prefHeight="200.0" prefWidth="200.0" />
             </VBox>
 
             <!-- Staking Rewards -->
@@ -99,6 +100,7 @@
             <VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.columnIndex="2" GridPane.rowIndex="3">
                 <Button contentDisplay="CENTER" onAction="#createNewAccount" prefWidth="125.0" style="-fx-cursor: hand;" text="Create Account" />
                  <Button alignment="CENTER" onAction="#delegateTokens" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
+            <Button alignment="CENTER" onAction="#decryptKeys" prefWidth="125.0" style="-fx-cursor: hand;" text="Test" />
 
                 <!-- More delegation entries can be added here -->
             </VBox>

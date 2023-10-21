@@ -20,6 +20,7 @@ import com.jeongen.cosmos.util.AddressUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
@@ -38,6 +39,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 import lombok.Data;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.ECKey.ECDSASignature;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.SignatureDecodeException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.unigrid.janus.model.service.DebugService;
 
@@ -180,6 +184,71 @@ public class CryptoUtils {
 			sb.append(String.format("%02x", b));
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Derives a set of keys based on a private key and an index range.
+	 *
+	 * @param privateKey the private key in hexadecimal format.
+	 * @param indexes the number of indexes to use for key derivation.
+	 * @return an array of derived key pairs.
+	 * @throws Exception if there is an error during key derivation.
+	 */
+	public ECKey[] deriveKeys(String privateKey, int indexes) throws Exception {
+		ECKey[] derivedKeys = new ECKey[indexes];
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+		for (int i = 0; i < indexes; i++) {
+			// Concatenate the private key with the index
+			String input = privateKey + i;
+
+			// Hash the concatenated value
+			byte[] hash = digest.digest(input.getBytes());
+
+			// Create a new private key from the hash
+			ECKey derivedKey = ECKey.fromPrivate(hash);
+
+			// Store the derived key in the array
+			derivedKeys[i] = derivedKey;
+		}
+
+		return derivedKeys;
+	}
+
+	public void printKeys(ECKey[] keys) {
+		for (int i = 0; i < keys.length; i++) {
+			ECKey key = keys[i];
+			// Get the private key in hexadecimal format
+			String privateKeyHex = key.getPrivateKeyAsHex();
+			// Get the public key in hexadecimal format
+			String publicKeyHex = key.getPublicKeyAsHex();
+
+			System.out.println("Key " + i + ":");
+			System.out.println("Private Key: " + privateKeyHex);
+			System.out.println("Public Key: " + publicKeyHex);
+		}
+	}
+
+	public boolean verifySignature(byte[] message, byte[] signatureBytes, ECKey[] publicKeys)
+		throws SignatureDecodeException {
+
+		// Decode the signature bytes
+		ECDSASignature signature = ECDSASignature.decodeFromDER(signatureBytes);
+
+		// Hash the message (assuming SHA-256 is used)
+		Sha256Hash messageHash = Sha256Hash.of(message);
+
+		// Check each public key to see if it verifies the signature
+		for (ECKey publicKey : publicKeys) {
+			System.out.println("publicKey: " + publicKey);
+			if (publicKey.verify(messageHash, signature)) {
+				// Signature is valid for this public key
+				return true;
+			}
+		}
+
+		// No keys verified the signature
+		return false;
 	}
 
 }

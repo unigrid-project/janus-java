@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="700.0" styleClass="bg-dark-blue" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
+<AnchorPane prefHeight="600.0" prefWidth="700.0" styleClass="bg-dark-blue" stylesheets="@main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
    <children>
       <StackPane fx:id="cosmosMainPane" prefHeight="150.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <BorderPane prefHeight="850.0" prefWidth="650.0">
@@ -59,10 +59,15 @@
                      </HBox.margin>
                   </Button>
                </HBox>
+               <Button onAction="#cancelImport" prefWidth="220.0" style="-fx-cursor: hand;" text="Cancel">
+                  <font>
+                     <Font size="26.0" />
+                  </font>
+               </Button>
             </VBox>
          </children>
       </StackPane>
-      <StackPane fx:id="importPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="importPane" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <TabPane fx:id="importTabPane">
             <tabs>
                <Tab fx:id="mnemonic12Tab" closable="false" text="12-Word Mnemonic">
@@ -77,9 +82,18 @@
                               <fx:include source="component/mnemonic12.fxml" />
                            </center>
                         </BorderPane>
-
-                        <!-- Import Button -->
-                        <Button onAction="#importMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import" />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                           <children>
+      
+                              <!-- Import Button -->
+                              <Button onAction="#importMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import">
+                                 <HBox.margin>
+                                    <Insets right="50.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button onAction="#cancelImport" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
+                           </children>
+                        </HBox>
 
                         <padding>
                            <Insets left="50.0" right="50.0" top="10.0" />
@@ -100,9 +114,16 @@
                               <fx:include source="component/mnemonic24_import.fxml" />
                            </center>
                         </BorderPane>
-
-                        <!-- Import Button -->
-                        <Button onAction="#importMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import" />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Button onAction="#importMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import">
+                                 <HBox.margin>
+                                    <Insets right="50.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button onAction="#cancelImport" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
+                           </children>
+                        </HBox>
 
                         <padding>
                            <Insets left="50.0" right="50.0" top="10.0" />
@@ -117,9 +138,16 @@
                         <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="Import Existing Wallet" textFill="WHITE" />
                         <Label alignment="CENTER" text="• Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase." textFill="WHITE" wrapText="true" />
                         <Label alignment="CENTER" text="• Enter the phrase in the right order without capitalization, punctuation symbols, or spaces." textFill="WHITE" wrapText="true" />
-                        <!-- Content for private key import -->
-                        <!-- Import Button -->
-                        <Button style="-fx-font-size: 20; -fx-cursor: hand;" text="Import" />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Button onAction="#importPrivateKey" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import">
+                                 <HBox.margin>
+                                    <Insets right="50.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button onAction="#cancelImport" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
+                           </children>
+                        </HBox>
                         <padding>
                            <Insets left="50.0" right="50.0" top="10.0" />
                         </padding>
@@ -180,17 +208,29 @@
                   </font>
                </Label>
                <TextArea fx:id="seedPhraseTextArea" editable="false" maxWidth="500.0" prefHeight="200.0" promptText="generaated seed phrase" style="-fx-background-color: rgba(0, 0, 0, 0.2);" styleClass="mnemonic-area" stylesheets="@main.css" wrapText="true" />
-
-               <!-- Continue button -->
-               <Button fx:id="continueButton" onAction="#handleContinue" style="-fx-cursor: hand;" text="Continue">
-                  <font>
-                     <Font size="24.0" />
-                  </font>
-               </Button>
+               <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                  <children>
+      
+                     <!-- Continue button -->
+                     <Button fx:id="continueButton" onAction="#handleContinue" prefWidth="150.0" style="-fx-cursor: hand;" text="Continue">
+                        <font>
+                           <Font size="24.0" />
+                        </font>
+                        <HBox.margin>
+                           <Insets right="50.0" />
+                        </HBox.margin>
+                     </Button>
+                     <Button onAction="#cancelImport" prefWidth="150.0" style="-fx-cursor: hand;" text="Cancel">
+                        <font>
+                           <Font size="24.0" />
+                        </font>
+                     </Button>
+                  </children>
+               </HBox>
             </VBox>
          </children>
       </StackPane>
-      <StackPane fx:id="confirmMnemonic" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="confirmMnemonic" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <VBox alignment="CENTER" spacing="20">
             <Label maxWidth="480.0" text="Please enter your mnemonic that was generated to assure you have backed everything up correctly." textAlignment="CENTER" textFill="WHITE" wrapText="true">
                <font>
@@ -203,12 +243,24 @@
                   <fx:include source="component/mnemonic24.fxml" />
                </center>
             </BorderPane>
-
-            <Button onAction="#handleMnemonicVerification" style="-fx-cursor: hand;" text="Verify Mnemonic">
-               <font>
-                  <Font size="24.0" />
-               </font>
-            </Button>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+               <children>
+      
+                  <Button onAction="#handleMnemonicVerification" prefWidth="150.0" style="-fx-cursor: hand;" text="Verify">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets right="50.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button onAction="#verifyBackPress" prefWidth="150.0" style="-fx-cursor: hand;" text="Back">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
          </VBox>
       </StackPane>
    </children>
