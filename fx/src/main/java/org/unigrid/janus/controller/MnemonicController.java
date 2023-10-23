@@ -224,54 +224,58 @@ public class MnemonicController implements Initializable {
 		if (clipboard.hasString()) {
 			String mnemonic = clipboard.getString().trim();  // Trim to remove leading/trailing whitespaces
 			String[] words = mnemonic.split("\\s+"); // Split by whitespace
+			mnemonicWordList.clear();
+			mnemonicWordList.addAll(Arrays.asList(words));
+			mnemonicModel.setMnemonicWordList(mnemonicWordList);
 
 			if (mnemonicModel.getCurrentPane().equals("importPane")) {
 				if (words.length == 24) {
-					TabRequestSignal signal = TabRequestSignal.builder()
-						.action("select")
-						.wordListLength(words.length)
-						.build();
-					signal.setCallback(shouldProceed -> {
-						if (shouldProceed) {
-							mnemonicWordList.clear();
-							mnemonicWordList.addAll(Arrays.asList(words));
-							mnemonicModel.setMnemonicWordList(mnemonicWordList);
-							clearTextFields(textFields12List);
-							setPlaceholderText(textFields24ImportList);
-						}
-					});
-					tabRequestEvent.fire(signal);
+					handleTabSwitch("select", words);
 				} else if (words.length == 12) {
-					TabRequestSignal signal = TabRequestSignal.builder()
-						.action("select12")
-						.wordListLength(words.length)
-						.build();
-					signal.setCallback(shouldProceed -> {
-						if (shouldProceed) {
-							mnemonicWordList.clear();
-							mnemonicWordList.addAll(Arrays.asList(words));
-							mnemonicModel.setMnemonicWordList(mnemonicWordList);
-							setPlaceholderText(textFields12List);
-						}
-					});
-					tabRequestEvent.fire(signal);
+					handleTabSwitch("select12", words);
+				} else {
+					showErrorMessage("Invalid number of words. Please enter either 12 or 24 words.");
 				}
-			} else if (mnemonicModel.getCurrentPane().equals("confirmMnemonic")) {
-				if (words.length == 24) {
-					mnemonicWordList.clear();
-					mnemonicWordList.addAll(Arrays.asList(words));
-					mnemonicModel.setMnemonicWordList(mnemonicWordList);
-					setPlaceholderText(textFields24Confirm);
-				}
+			} else if (mnemonicModel.getCurrentPane().equals("confirmMnemonic") && words.length == 24) {
+				setPlaceholderText(textFields24Confirm);
+			} else {
+				showErrorMessage("Invalid operation. Please check your input and try again.");
 			}
 		}
+	}
+
+	private void handleTabSwitch(String action, String[] words) {
+		TabRequestSignal signal = TabRequestSignal.builder()
+			.action(action)
+			.wordListLength(words.length)
+			.build();
+		signal.setCallback(shouldProceed -> {
+			if (shouldProceed) {
+				mnemonicWordList.clear();
+				mnemonicWordList.addAll(Arrays.asList(words));
+				mnemonicModel.setMnemonicWordList(mnemonicWordList);
+
+				if ("select".equals(action)) {
+					clearTextFields(textFields12List);
+					setPlaceholderText(textFields24ImportList);
+				} else if ("select12".equals(action)) {
+					clearTextFields(textFields24ImportList);
+					setPlaceholderText(textFields12List);
+				}
+			}
+		});
+		tabRequestEvent.fire(signal);
+	}
+
+	private void showErrorMessage(String message) {
+		// Implement this method to show an error message to the user
+		System.err.println(message);
 	}
 
 	private void setPlaceholderText(TextField[] textFields) {
 		for (int i = 0; i < textFields.length; i++) {
 			if (textFields[i] != null) {
-				textFields[i].setPromptText(placeholderText);
-				textFields[i].setText("");  // Ensure the actual text is cleared
+				textFields[i].setText(placeholderText);
 			}
 		}
 	}
@@ -280,6 +284,7 @@ public class MnemonicController implements Initializable {
 		for (TextField textField : textFields) {
 			if (textField != null) {
 				textField.setText("");
+				textField.setPromptText("");
 			}
 		}
 	}
@@ -306,22 +311,15 @@ public class MnemonicController implements Initializable {
 		}
 
 		TextField clickedField = (TextField) event.getSource();
+		int index = Arrays.asList(currentList).indexOf(clickedField);
 
-		int index = -1;
-		for (int i = 0; i < currentList.length; i++) {
-			if (currentList[i] == clickedField) {
-				index = i;
-				break;
-			}
-		}
+		System.out.println("Clicked field index: " + index);
+		System.out.println("Mnemonic word list: " + mnemonicWordList);
 
 		if (index != -1 && index < mnemonicWordList.size()) {
-			System.out.println("mnemonicWordList.get(index): " + mnemonicWordList.get(index));
-			clickedField.setPromptText("•••••");
 			clickedField.setText(mnemonicWordList.get(index));
 		} else {
-			System.out.println("Invalid index or mnemonic word list is not properly initialized.");
-			clickedField.setText("");
+			clickedField.clear();
 		}
 	}
 
@@ -362,15 +360,13 @@ public class MnemonicController implements Initializable {
 			isHandlingFocus = true;
 
 			if (newValue) { // if focus is gained
-				textField.setText(mnemonicWordList.get(idx));
+				System.out.println("Focus gained. Text: " + textField.getText());
+				if (textField.getText().equals(placeholderText)) {
+					textField.clear();
+				}
 			} else { // if focus is lost
-				if (!textField.getText().equals(placeholderText)) {
-					mnemonicWordList.set(idx, textField.getText());
-				}
-				if (textField.getText().isEmpty() || textField.getText()
-					.equals(mnemonicWordList.get(idx))) {
-					textField.setText(placeholderText);
-				}
+				System.out.println("Focus lost. Text: " + textField.getText());
+				textField.setText(placeholderText);
 			}
 			isHandlingFocus = false;
 		});
