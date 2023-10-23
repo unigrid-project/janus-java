@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <AnchorPane prefHeight="600.0" prefWidth="700.0" styleClass="bg-dark-blue" stylesheets="@main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
    <children>
@@ -67,7 +68,7 @@
             </VBox>
          </children>
       </StackPane>
-      <StackPane fx:id="importPane" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="importPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <TabPane fx:id="importTabPane">
             <tabs>
                <Tab fx:id="mnemonic12Tab" closable="false" text="12-Word Mnemonic">
@@ -82,6 +83,7 @@
                               <fx:include source="component/mnemonic12.fxml" />
                            </center>
                         </BorderPane>
+                        <Text fx:id="sendWarnMsg" fill="#db8d2c" strokeType="OUTSIDE" strokeWidth="0.0" />
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                            <children>
       
@@ -230,7 +232,7 @@
             </VBox>
          </children>
       </StackPane>
-      <StackPane fx:id="confirmMnemonic" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="confirmMnemonic" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <VBox alignment="CENTER" spacing="20">
             <Label maxWidth="480.0" text="Please enter your mnemonic that was generated to assure you have backed everything up correctly." textAlignment="CENTER" textFill="WHITE" wrapText="true">
                <font>
@@ -240,7 +242,7 @@
 
             <BorderPane prefHeight="200.0" prefWidth="200.0">
                <center>
-                  <fx:include source="component/mnemonic24.fxml" />
+                  <fx:include source="component/mnemonic24_confirm.fxml" />
                </center>
             </BorderPane>
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">

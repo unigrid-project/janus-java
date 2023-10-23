@@ -36,4 +36,13 @@ public class AccountModel {
 	private byte[] privateKey;
 	@Setter @Getter
 	private byte[] publicKey;
+
+	public void reset() {
+		name = null;
+		mnemonic = null;
+		encryptedMnemonic = null;
+		address = null;
+		privateKey = null;
+		publicKey = null;
+	}
 }

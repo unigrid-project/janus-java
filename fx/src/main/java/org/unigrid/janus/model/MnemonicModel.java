@@ -27,4 +27,8 @@ import java.util.List;
 public class MnemonicModel {
 	private List<String> mnemonicWordList = new ArrayList<>();
 	private String currentPane;
+
+	public void reset() {
+		mnemonicWordList.clear();
+	}
 }

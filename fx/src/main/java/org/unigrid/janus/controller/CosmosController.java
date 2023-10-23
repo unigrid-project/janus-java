@@ -58,6 +58,8 @@ import java.util.logging.Logger;
 import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.Optional;
+
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -73,6 +75,10 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.util.Duration;
+
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.ECKey.ECDSASignature;
 import org.bitcoinj.core.Sha256Hash;
@@ -170,6 +176,8 @@ public class CosmosController implements Initializable {
 	private PasswordField passwordField2;
 	@FXML
 	private Button encryptAndSaveButton;
+	@FXML
+	private Text sendWarnMsg;
 
 	@FXML
 	@Named("transactionResponse")
@@ -195,7 +203,7 @@ public class CosmosController implements Initializable {
 		paneMap.put("cosmosWizardPane", cosmosWizardPane);
 		paneMap.put("generatePane", generatePane);
 		paneMap.put("passwordPane", passwordPane);
-		paneMap.put("passwordPane", confirmMnemonic);
+		paneMap.put("confirmMnemonic", confirmMnemonic);
 		ObservableList<String> testList = FXCollections.observableArrayList("Test 1", "Test 2", "Test 3");
 		testListView.setItems(testList);
 		ObservableList<TxResponse> observableList = FXCollections
@@ -284,14 +292,25 @@ public class CosmosController implements Initializable {
 			}
 
 			// clear out any private keys from memory
-			accountModel.setMnemonic("");
-			accountModel.setPrivateKey(null);
 			mnemonic = "";
+			// clear the model and reset the text fields
+			resetTextFieldsEvent.fire(ResetTextFieldsSignal.builder().build());
 			showPane(cosmosMainPane);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
 				ex);
 		}
+	}
+
+	private void resetTextFields(@Observes ResetTextFieldsSignal signal) {
+		System.out.println("Resetting text fields");
+		passwordField1.setText("");
+		passwordField2.setText("");
+		accountNameField.setText("");
+		importTabPane.getSelectionModel().select(mnemonic12Tab);
+		mnemonic12Tab.setDisable(false);
+		mnemonic24Tab.setDisable(false);
+		accountModel.reset();
 	}
 
 	@FXML
@@ -510,14 +529,7 @@ public class CosmosController implements Initializable {
 		try {
 			System.out.println("show main pane");
 			showPane(cosmosMainPane);
-			importTabPane.getSelectionModel().select(mnemonic12Tab);
-			mnemonic12Tab.setDisable(false);
-			accountModel.setMnemonic(null);
-			accountModel.setAddress(null);
-			accountModel.setPrivateKey(null);
-			accountModel.setPublicKey(null);
-			accountModel.setEncryptedMnemonic(null);
-			accountModel.setName(null);
+
 			resetTextFieldsEvent.fire(ResetTextFieldsSignal.builder().build());
 
 		} catch (Exception ex) {
@@ -585,6 +597,21 @@ public class CosmosController implements Initializable {
 		addressFieldPassword.setText(accountModel.getAddress());
 
 		showPane(passwordPane);
+	}
+
+	private void onErrorMessage(String message) {
+		sendWarnMsg.setFill(Color.RED);
+		sendWarnMsg.setText(message);
+		sendWarnMsg.setVisible(true);
+
+		PauseTransition pause = new PauseTransition(Duration.seconds(3));
+
+		pause.setOnFinished(e -> {
+			sendWarnMsg.setVisible(false);
+			sendWarnMsg.setText("");
+		});
+
+		pause.play();
 	}
 
 	/* MAIN VIEW */
@@ -689,10 +716,21 @@ public class CosmosController implements Initializable {
 	}
 
 	private void handleTabRequest(@Observes TabRequestSignal request) {
+		Tab selectedTab = importTabPane.getSelectionModel().getSelectedItem();
+		boolean shouldProceed = true;
+
 		if ("select".equals(request.getAction())) {
-			mnemonic12Tab.setDisable(true);
-			importTabPane.getSelectionModel().select(mnemonic24Tab);
-			// Handle other actions as needed
+			if (selectedTab == mnemonic12Tab && request.getWordListLength() == 24) {
+				onErrorMessage("Invalid number of words. Please enter 12 words.");
+				shouldProceed = false;
+			} else if (selectedTab == mnemonic24Tab && request.getWordListLength() == 12) {
+				onErrorMessage("Invalid number of words. Please enter 24 words.");
+				shouldProceed = false;
+			}
+		}
+
+		if (request.getCallback() != null) {
+			request.getCallback().onResult(shouldProceed);
 		}
 	}
 

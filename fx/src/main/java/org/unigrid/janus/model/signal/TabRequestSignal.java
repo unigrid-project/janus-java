@@ -21,5 +21,20 @@ import lombok.Data;
 
 @Data @Builder
 public class TabRequestSignal {
-	private String action; // e.g., "select", "close", etc.
+	private String action;
+	private int wordListLength;
+	private TabRequestCallback callback;
+
+	public void setCallback(TabRequestCallback callback) {
+		this.callback = callback;
+	}
+
+	public TabRequestCallback getCallback() {
+		return callback;
+	}
+
+	public interface TabRequestCallback {
+		void onResult(boolean shouldProceed);
+	}
+
 }

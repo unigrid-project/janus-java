@@ -55,21 +55,7 @@ public class MnemonicController implements Initializable {
 	@FXML
 	private TextField wordTwelveSeven, wordTwelveEight, wordTwelveNine, wordTwelveTen,
 		wordTwelveEleven, wordTwelveTwelve;
-	@FXML
-	private TextField wordTwentyFourOne, wordTwentyFourTwo, wordTwentyFourThree,
-		wordTwentyFourFour, wordTwentyFourFive;
-	@FXML
-	private TextField wordTwentyFourSix, wordTwentyFourSeven, wordTwentyFourEight,
-		wordTwentyFourNine, wordTwentyFourTen;
-	@FXML
-	private TextField wordTwentyFourEleven, wordTwentyFourTwelve, wordTwentyFourThirteen,
-		wordTwentyFourFourteen, wordTwentyFourFifteen;
-	@FXML
-	private TextField wordTwentyFourSixteen, wordTwentyFourSeventeen,
-		wordTwentyFourEighteen, wordTwentyFourNineteen, wordTwentyFourTwenty;
-	@FXML
-	private TextField wordTwentyFourTwentyOne, wordTwentyFourTwentyTwo,
-		wordTwentyFourTwentyThree, wordTwentyFourTwentyFour;
+
 	@FXML
 	private TextField wordTwentyFourImportOne, wordTwentyFourImportTwo, wordTwentyFourImportThree,
 		wordTwentyFourImportFour, wordTwentyFourImportFive;
@@ -85,10 +71,25 @@ public class MnemonicController implements Initializable {
 	@FXML
 	private TextField wordTwentyFourImportTwentyOne, wordTwentyFourImportTwentyTwo,
 		wordTwentyFourImportTwentyThree, wordTwentyFourImportTwentyFour;
+	@FXML
+	private TextField wordTwentyFourConfirmOne, wordTwentyFourConfirmTwo, wordTwentyFourConfirmThree,
+		wordTwentyFourConfirmFour, wordTwentyFourConfirmFive;
+	@FXML
+	private TextField wordTwentyFourConfirmSix, wordTwentyFourConfirmSeven, wordTwentyFourConfirmEight,
+		wordTwentyFourConfirmNine, wordTwentyFourConfirmTen;
+	@FXML
+	private TextField wordTwentyFourConfirmEleven, wordTwentyFourConfirmTwelve, wordTwentyFourConfirmThirteen,
+		wordTwentyFourConfirmFourteen, wordTwentyFourConfirmFifteen;
+	@FXML
+	private TextField wordTwentyFourConfirmSixteen, wordTwentyFourConfirmSeventeen, wordTwentyFourConfirmEighteen,
+		wordTwentyFourConfirmNineteen, wordTwentyFourConfirmTwenty;
+	@FXML
+	private TextField wordTwentyFourConfirmTwentyOne, wordTwentyFourConfirmTwentyTwo,
+		wordTwentyFourConfirmTwentyThree, wordTwentyFourConfirmTwentyFour;
 
 	private TextField[] textFields12List;
-	private TextField[] textFields24List;
 	private TextField[] textFields24ImportList;
+	private TextField[] textFields24Confirm;
 	private List<String> mnemonicWordList = new ArrayList<>();
 	private final String placeholderText = "•••••";
 	private boolean isHandlingFocus = false;
@@ -97,131 +98,28 @@ public class MnemonicController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 
 		Platform.runLater(() -> {
+			System.out.println("Platform.runLater");
+			initializeTextFields12();
+			//initializeTextFields24();
+			initializeTextFields24Import();
+			initializeTextFields24Confirm();
 			wordTwelveOne.setOnKeyPressed(this::handlePasteEvent);
 
-			textFields12List = new TextField[]{wordTwelveOne, wordTwelveTwo,
-				wordTwelveThree, wordTwelveFour, wordTwelveFive, wordTwelveSix,
-				wordTwelveSeven, wordTwelveEight, wordTwelveNine, wordTwelveTen,
-				wordTwelveEleven, wordTwelveTwelve};
-			wordTwentyFourOne.setOnKeyPressed(this::handlePasteEvent);
-
-			textFields24List = new TextField[]{wordTwentyFourOne, wordTwentyFourTwo,
-				wordTwentyFourThree, wordTwentyFourFour, wordTwentyFourFive,
-				wordTwentyFourSix, wordTwentyFourSeven, wordTwentyFourEight,
-				wordTwentyFourNine, wordTwentyFourTen, wordTwentyFourEleven,
-				wordTwentyFourTwelve, wordTwentyFourThirteen, wordTwentyFourFourteen,
-				wordTwentyFourFifteen, wordTwentyFourSixteen, wordTwentyFourSeventeen,
-				wordTwentyFourEighteen, wordTwentyFourNineteen, wordTwentyFourTwenty,
-				wordTwentyFourTwentyOne, wordTwentyFourTwentyTwo,
-				wordTwentyFourTwentyThree, wordTwentyFourTwentyFour};
-
+			//wordTwentyFourOne.setOnKeyPressed(this::handlePasteEvent);
 			wordTwentyFourImportOne.setOnKeyPressed(this::handlePasteEvent);
-			textFields24ImportList = new TextField[]{
-				wordTwentyFourImportOne, wordTwentyFourImportTwo, wordTwentyFourImportThree,
-				wordTwentyFourImportFour, wordTwentyFourImportFive, wordTwentyFourImportSix,
-				wordTwentyFourImportSeven, wordTwentyFourImportEight, wordTwentyFourImportNine,
-				wordTwentyFourImportTen, wordTwentyFourImportEleven, wordTwentyFourImportTwelve,
-				wordTwentyFourImportThirteen, wordTwentyFourImportFourteen, wordTwentyFourImportFifteen,
-				wordTwentyFourImportSixteen, wordTwentyFourImportSeventeen, wordTwentyFourImportEighteen,
-				wordTwentyFourImportNineteen, wordTwentyFourImportTwenty, wordTwentyFourImportTwentyOne,
-				wordTwentyFourImportTwentyTwo, wordTwentyFourImportTwentyThree,
-				wordTwentyFourImportTwentyFour
-			};
+
+			wordTwentyFourConfirmOne.setOnKeyPressed(this::handlePasteEvent);
 
 			for (TextField textField : textFields12List) {
-				textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-					System.out.println("observable: " + observable);
-					System.out.println("oldValue: " + oldValue);
-					System.out.println("newValue: " + newValue);
-					System.out.println("THIS SHOULD NOT BE TRIGGERED textFields12List: "
-						+ mnemonicWordList.get(0));
-					if (isHandlingFocus) {
-						return;
-					}
-					isHandlingFocus = true;
-
-					int idx = Arrays.asList(textFields12List).indexOf(textField);
-					if (newValue) { // if focus is gained
-						// Only set the text if the mnemonicWordList size is 12
-						if (idx != -1 && idx < mnemonicWordList.size()
-							&& mnemonicWordList.size() == 12) {
-							textField.setText(mnemonicWordList.get(idx));
-						}
-					} else { // if focus is lost
-						if (idx != -1 && idx < mnemonicWordList.size()) {
-							if (!textField.getText().equals(placeholderText)) {
-								mnemonicWordList.set(idx, textField.getText());
-							}
-						}
-						if (textField.getText().isEmpty() || textField.getText()
-							.equals(mnemonicWordList.get(idx))) {
-							textField.setText(placeholderText);
-						}
-					}
-					isHandlingFocus = false;
-				});
-			}
-
-			for (TextField textField : textFields24List) {
-				textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-					System.out.println("THIS SHOULD NOT BE TRIGGERED textFields24List: "
-						+ mnemonicWordList.get(0));
-					if (isHandlingFocus) {
-						return;
-					}
-					isHandlingFocus = true;
-					int idx = Arrays.asList(textFields24List).indexOf(textField);
-					if (newValue) { // if focus is gained
-						if (idx != -1 && idx < mnemonicWordList.size()) {
-							textField.setText(mnemonicWordList.get(idx));
-						}
-					} else { // if focus is lost
-						if (idx != -1 && idx < mnemonicWordList.size()) {
-							if (!textField.getText().equals(placeholderText)) {
-								mnemonicWordList.set(idx, textField.getText());
-							}
-						}
-						if (textField.getText().isEmpty() || textField.getText()
-							.equals(mnemonicWordList.get(idx))) {
-							if (idx != 0 || !textField.getText().isEmpty()) {
-								textField.setText(placeholderText);
-							}
-						}
-					}
-					isHandlingFocus = false;
-				});
+				handleFocusEventFor12WordMnemonic(textField);
 			}
 
 			for (TextField textField : textFields24ImportList) {
-				textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-					System.out.println("mnemonicWordList.get(0): "
-						+ mnemonicWordList.get(0));
-					if (isHandlingFocus) {
-						return;
-					}
-					isHandlingFocus = true;
+				handleFocusEventFor24WordMnemonicImport(textField);
+			}
 
-					int idx = Arrays.asList(textFields24ImportList).indexOf(textField);
-					if (newValue) { // if focus is gained
-
-						if (idx != -1 && idx < mnemonicWordList.size()) {
-							textField.setText(mnemonicWordList.get(idx));
-						}
-					} else { // if focus is lost
-						if (idx != -1 && idx < mnemonicWordList.size()) {
-							if (!textField.getText().equals(placeholderText)) {
-								mnemonicWordList.set(idx, textField.getText());
-							}
-						}
-						if (textField.getText().isEmpty() || textField.getText()
-							.equals(mnemonicWordList.get(idx))) {
-							if (idx != 0 || !textField.getText().isEmpty()) {
-								textField.setText(placeholderText);
-							}
-						}
-					}
-					isHandlingFocus = false;
-				});
+			for (TextField textField : textFields24Confirm) {
+				handleFocusEventFor24WordMnemonicConfirm(textField);
 			}
 
 		}
@@ -229,8 +127,51 @@ public class MnemonicController implements Initializable {
 
 	}
 
+	private void initializeTextFields12() {
+		textFields12List = new TextField[]{wordTwelveOne, wordTwelveTwo,
+			wordTwelveThree, wordTwelveFour, wordTwelveFive, wordTwelveSix,
+			wordTwelveSeven, wordTwelveEight, wordTwelveNine, wordTwelveTen,
+			wordTwelveEleven, wordTwelveTwelve};
+		//setTextFieldEventHandlers(textFields12List);
+		System.out.println("initializeTextFields12 " + textFields12List);
+	}
+
+	private void initializeTextFields24Import() {
+
+		textFields24ImportList = new TextField[]{
+			wordTwentyFourImportOne, wordTwentyFourImportTwo, wordTwentyFourImportThree,
+			wordTwentyFourImportFour, wordTwentyFourImportFive, wordTwentyFourImportSix,
+			wordTwentyFourImportSeven, wordTwentyFourImportEight, wordTwentyFourImportNine,
+			wordTwentyFourImportTen, wordTwentyFourImportEleven, wordTwentyFourImportTwelve,
+			wordTwentyFourImportThirteen, wordTwentyFourImportFourteen, wordTwentyFourImportFifteen,
+			wordTwentyFourImportSixteen, wordTwentyFourImportSeventeen, wordTwentyFourImportEighteen,
+			wordTwentyFourImportNineteen, wordTwentyFourImportTwenty, wordTwentyFourImportTwentyOne,
+			wordTwentyFourImportTwentyTwo, wordTwentyFourImportTwentyThree,
+			wordTwentyFourImportTwentyFour
+		};
+		System.out.println("initializeTextFields24Import " + textFields24ImportList);
+		//setTextFieldEventHandlers(textFields24ImportList);
+	}
+
+	private void initializeTextFields24Confirm() {
+
+		textFields24Confirm = new TextField[]{
+			wordTwentyFourConfirmOne, wordTwentyFourConfirmTwo, wordTwentyFourConfirmThree,
+			wordTwentyFourConfirmFour, wordTwentyFourConfirmFive, wordTwentyFourConfirmSix,
+			wordTwentyFourConfirmSeven, wordTwentyFourConfirmEight, wordTwentyFourConfirmNine,
+			wordTwentyFourConfirmTen, wordTwentyFourConfirmEleven, wordTwentyFourConfirmTwelve,
+			wordTwentyFourConfirmThirteen, wordTwentyFourConfirmFourteen, wordTwentyFourConfirmFifteen,
+			wordTwentyFourConfirmSixteen, wordTwentyFourConfirmSeventeen, wordTwentyFourConfirmEighteen,
+			wordTwentyFourConfirmNineteen, wordTwentyFourConfirmTwenty, wordTwentyFourConfirmTwentyOne,
+			wordTwentyFourConfirmTwentyTwo, wordTwentyFourConfirmTwentyThree,
+			wordTwentyFourConfirmTwentyFour
+		};
+		System.out.println("initializeTextFields24Confirm " + textFields24Confirm);
+	}
+
 	private void handlePasteEvent(KeyEvent event) {
-		if (event.getSource() != textFields12List[0] && event.getSource() != textFields24ImportList[0]) {
+		if (event.getSource() != textFields12List[0] && event.getSource()
+			!= textFields24ImportList[0] && event.getSource() != textFields24Confirm[0]) {
 			return; // Exit if the source is not the first text field
 		}
 		if (event.isControlDown() && event.getCode() == KeyCode.V) {
@@ -239,50 +180,106 @@ public class MnemonicController implements Initializable {
 		}
 	}
 
+//	private void handlePaste() {
+//		System.out.println("handlePaste");
+//		final Clipboard clipboard = Clipboard.getSystemClipboard();
+//		if (clipboard.hasString()) {
+//			String mnemonic = clipboard.getString().trim();  // Trim to remove leading/trailing whitespaces
+//			String[] words = mnemonic.split("\\s+"); // Split by whitespace
+//			mnemonicWordList.clear();
+//			mnemonicWordList.addAll(Arrays.asList(words));
+//			mnemonicModel.setMnemonicWordList(mnemonicWordList);
+//			System.out.println("Words array: " + Arrays.toString(words));
+//			System.out.println("mnemonicWordList after paste: " + mnemonicWordList);
+//
+//			if (mnemonicModel.getCurrentPane().equals("importPane")) {
+//				TabRequestSignal signal = TabRequestSignal.builder()
+//					.action("select")
+//					.wordListLength(mnemonicWordList.size())
+//					.build();
+//				signal.setCallback(success -> {
+//					if (success) {
+//						if (words.length == 24) {
+//							clearTextFields(textFields12List);
+//							setPlaceholderText(textFields24ImportList);
+//						} else if (words.length == 12) {
+//							setPlaceholderText(textFields12List);
+//						}
+//					} else {
+//						wordTwelveOne.setText("");
+//						wordTwentyFourImportOne.setText("");
+//					}
+//				});
+//				tabRequestEvent.fire(signal);
+//			} else if (mnemonicModel.getCurrentPane().equals("confirmMnemonic")) {
+//				if (words.length == 24) {
+//					setPlaceholderText(textFields24Confirm);
+//				}
+//			}
+//		}
+//	}
 	private void handlePaste() {
+		System.out.println("handlePaste");
 		final Clipboard clipboard = Clipboard.getSystemClipboard();
 		if (clipboard.hasString()) {
-			String mnemonic = clipboard.getString();
+			String mnemonic = clipboard.getString().trim();  // Trim to remove leading/trailing whitespaces
 			String[] words = mnemonic.split("\\s+"); // Split by whitespace
-			mnemonicWordList.clear();
-			mnemonicWordList.addAll(Arrays.asList(words));
-			mnemonicModel.setMnemonicWordList(mnemonicWordList);
-			System.out.println("Words array: " + Arrays.toString(words));
-			System.out.println("mnemonicWordList after paste: " + mnemonicWordList);
+
 			if (mnemonicModel.getCurrentPane().equals("importPane")) {
-				tabRequestEvent.fire(TabRequestSignal.builder()
-					.action("select").build());
+				if (words.length == 24) {
+					TabRequestSignal signal = TabRequestSignal.builder()
+						.action("select")
+						.wordListLength(words.length)
+						.build();
+					signal.setCallback(shouldProceed -> {
+						if (shouldProceed) {
+							mnemonicWordList.clear();
+							mnemonicWordList.addAll(Arrays.asList(words));
+							mnemonicModel.setMnemonicWordList(mnemonicWordList);
+							clearTextFields(textFields12List);
+							setPlaceholderText(textFields24ImportList);
+						}
+					});
+					tabRequestEvent.fire(signal);
+				} else if (words.length == 12) {
+					TabRequestSignal signal = TabRequestSignal.builder()
+						.action("select12")
+						.wordListLength(words.length)
+						.build();
+					signal.setCallback(shouldProceed -> {
+						if (shouldProceed) {
+							mnemonicWordList.clear();
+							mnemonicWordList.addAll(Arrays.asList(words));
+							mnemonicModel.setMnemonicWordList(mnemonicWordList);
+							setPlaceholderText(textFields12List);
+						}
+					});
+					tabRequestEvent.fire(signal);
+				}
+			} else if (mnemonicModel.getCurrentPane().equals("confirmMnemonic")) {
+				if (words.length == 24) {
+					mnemonicWordList.clear();
+					mnemonicWordList.addAll(Arrays.asList(words));
+					mnemonicModel.setMnemonicWordList(mnemonicWordList);
+					setPlaceholderText(textFields24Confirm);
+				}
 			}
+		}
+	}
 
-			if (words.length == 12) {
-				// Remove focus from the first text field
-				for (int i = 0; i < words.length; i++) {
-					if (textFields12List[i] != null) {
-						textFields12List[i].setText(placeholderText);
-					}
-				}
-			} else if (words.length == 24) {
-				if (mnemonicModel.getCurrentPane().equals("importPane")) {
+	private void setPlaceholderText(TextField[] textFields) {
+		for (int i = 0; i < textFields.length; i++) {
+			if (textFields[i] != null) {
+				textFields[i].setPromptText(placeholderText);
+				textFields[i].setText("");  // Ensure the actual text is cleared
+			}
+		}
+	}
 
-					for (TextField textField : textFields12List) {
-						textField.setText("");
-					}
-
-					for (int i = 0; i < words.length; i++) {
-						if (textFields24ImportList[i] != null) {
-							textFields24ImportList[i].setText(placeholderText);
-							System.out.println("mnemonicWordList.get(i): "
-								+ mnemonicWordList.get(i));
-
-						}
-					}
-				} else {
-					for (int i = 0; i < words.length; i++) {
-						if (textFields24List[i] != null) {
-							textFields24List[i].setText(placeholderText);
-						}
-					}
-				}
+	private void clearTextFields(TextField[] textFields) {
+		for (TextField textField : textFields) {
+			if (textField != null) {
+				textField.setText("");
 			}
 		}
 	}
@@ -293,16 +290,21 @@ public class MnemonicController implements Initializable {
 	}
 
 	@FXML
-	private void handleTextFieldClick24(MouseEvent event) {
-		handleTextFieldClickCommon(event, textFields24List);
-	}
-
-	@FXML
 	private void handleTextFieldClick24Import(MouseEvent event) {
 		handleTextFieldClickCommon(event, textFields24ImportList);
 	}
 
+	@FXML
+	private void handleTextFieldClick24Confirm(MouseEvent event) {
+		handleTextFieldClickCommon(event, textFields24Confirm);
+	}
+
 	private void handleTextFieldClickCommon(MouseEvent event, TextField[] currentList) {
+		if (mnemonicWordList.isEmpty()) {
+			System.out.println("Mnemonic word list is empty. Ignoring click event.");
+			return;
+		}
+
 		TextField clickedField = (TextField) event.getSource();
 
 		int index = -1;
@@ -314,27 +316,85 @@ public class MnemonicController implements Initializable {
 		}
 
 		if (index != -1 && index < mnemonicWordList.size()) {
+			System.out.println("mnemonicWordList.get(index): " + mnemonicWordList.get(index));
 			clickedField.setPromptText("•••••");
 			clickedField.setText(mnemonicWordList.get(index));
+		} else {
+			System.out.println("Invalid index or mnemonic word list is not properly initialized.");
+			clickedField.setText("");
 		}
 	}
 
 	private void handleResetTextFields(@Observes ResetTextFieldsSignal signal) {
-		resetTextFields();
+		reset();
 	}
 
-	private void resetTextFields() {
-		for (TextField textField : textFields12List) {
-			textField.setText("");
-		}
+	/* HANDLE FOCUS */
+	private void handleFocusEventFor12WordMnemonic(TextField textField) {
+		System.out.println("Entering 12-word Mnemonic block");
+		handleFocusEventCommon(textField, Arrays.asList(textFields12List), placeholderText);
+		System.out.println("Exiting 12-word Mnemonic block");
+	}
 
-		for (TextField textField : textFields24List) {
-			textField.setText("");
+	private void handleFocusEventFor24WordMnemonicImport(TextField textField) {
+		System.out.println("Entering 24-word Mnemonic Import block");
+		handleFocusEventCommon(textField, Arrays.asList(textFields24ImportList), placeholderText);
+		System.out.println("Exiting 24-word Mnemonic Import block");
+	}
+
+	private void handleFocusEventFor24WordMnemonicConfirm(TextField textField) {
+		System.out.println("Entering 24-word Mnemonic Confirm block");
+		handleFocusEventCommon(textField, Arrays.asList(textFields24Confirm), placeholderText);
+		System.out.println("Exiting 24-word Mnemonic Confirm block");
+	}
+
+	private void handleFocusEventCommon(TextField textField, List<TextField> textFieldList, String placeholderText) {
+		textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+			int idx = textFieldList.indexOf(textField);
+			if (idx == -1 || idx >= mnemonicWordList.size()) {
+				System.err.println("Index out of bounds. Exiting focus event handling.");
+				return;
+			}
+
+			if (isHandlingFocus) {
+				return;
+			}
+			isHandlingFocus = true;
+
+			if (newValue) { // if focus is gained
+				textField.setText(mnemonicWordList.get(idx));
+			} else { // if focus is lost
+				if (!textField.getText().equals(placeholderText)) {
+					mnemonicWordList.set(idx, textField.getText());
+				}
+				if (textField.getText().isEmpty() || textField.getText()
+					.equals(mnemonicWordList.get(idx))) {
+					textField.setText(placeholderText);
+				}
+			}
+			isHandlingFocus = false;
+		});
+	}
+
+	public void reset() {
+		// Clear all text fields
+		for (TextField textField : textFields12List) {
+			textField.clear();
+			//clickedField.setPromptText("•••••");
 		}
 
 		for (TextField textField : textFields24ImportList) {
-			textField.setText("");
+			textField.clear();
 		}
+		for (TextField textField : textFields24Confirm) {
+			textField.clear();
+		}
+
+		// Clear the mnemonic word list
 		mnemonicWordList.clear();
+
+		// Reset the models
+		mnemonicModel.reset();  // Assuming you have a reset method in your model class
 	}
+
 }
