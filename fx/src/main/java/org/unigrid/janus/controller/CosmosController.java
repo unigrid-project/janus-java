@@ -177,7 +177,9 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Button encryptAndSaveButton;
 	@FXML
-	private Text sendWarnMsg;
+	private Text sendWarnMsg12;
+	@FXML
+	private Text sendWarnMsg24;
 
 	@FXML
 	@Named("transactionResponse")
@@ -599,8 +601,13 @@ public class CosmosController implements Initializable {
 		showPane(passwordPane);
 	}
 
-	private void onErrorMessage(String message) {
-		sendWarnMsg.setFill(Color.RED);
+	private void showError(String message, Tab tab) {
+		Text errorMsg = (tab == mnemonic12Tab) ? sendWarnMsg12 : sendWarnMsg24;
+		onErrorMessage(message, errorMsg);
+	}
+
+	private void onErrorMessage(String message, Text sendWarnMsg) {
+		sendWarnMsg.setFill(Color.web("#f28407"));
 		sendWarnMsg.setText(message);
 		sendWarnMsg.setVisible(true);
 
@@ -719,31 +726,47 @@ public class CosmosController implements Initializable {
 		Tab selectedTab = importTabPane.getSelectionModel().getSelectedItem();
 		boolean shouldProceed = false;
 
+		System.out.println("Selected Tab: " + selectedTab.getText());
+		System.out.println("Word List Length: " + request.getWordListLength());
+
 		if ("select".equals(request.getAction()) || "select12".equals(request.getAction())) {
-			if (selectedTab == mnemonic12Tab && request.getWordListLength() == 12) {
-				// Correct number of words for 12-word mnemonic
-				mnemonic24Tab.setDisable(true);
-				shouldProceed = true;
-			} else if (selectedTab == mnemonic24Tab && request.getWordListLength() == 24) {
-				// Correct number of words for 24-word mnemonic
-				mnemonic12Tab.setDisable(true);
-				shouldProceed = true;
-			} else if (selectedTab == mnemonic12Tab && request.getWordListLength() == 24) {
-				// Switch to 24-word mnemonic tab
-				mnemonic12Tab.setDisable(true);
-				mnemonic24Tab.setDisable(false);
-				importTabPane.getSelectionModel().select(mnemonic24Tab);
-				shouldProceed = true;
-			} else if (selectedTab == mnemonic24Tab && request.getWordListLength() == 12) {
-				// Switch to 12-word mnemonic tab
-				mnemonic24Tab.setDisable(true);
-				mnemonic12Tab.setDisable(false);
-				importTabPane.getSelectionModel().select(mnemonic12Tab);
-				shouldProceed = true;
-			} else {
-				onErrorMessage("Invalid number of words. Please enter the correct amount.");
+			if (selectedTab == mnemonic12Tab) {
+				if (request.getWordListLength() == 12) {
+					System.out.println("Correct number of words for 12-word mnemonic");
+					mnemonic24Tab.setDisable(true);
+					shouldProceed = true;
+				} else if (request.getWordListLength() == 24) {
+					System.out.println("Switching to 24-word mnemonic tab");
+					mnemonic12Tab.setDisable(true);
+					mnemonic24Tab.setDisable(false);
+					importTabPane.getSelectionModel().select(mnemonic24Tab);
+					shouldProceed = true;
+
+				} else {
+					System.out.println("Invalid number of words for 12-word mnemonic");
+					showError("Invalid number of words. Please enter 12 words.", selectedTab);
+				}
+			} else if (selectedTab == mnemonic24Tab) {
+				if (request.getWordListLength() == 24) {
+					System.out.println("Correct number of words for 24-word mnemonic");
+					mnemonic12Tab.setDisable(true);
+					shouldProceed = true;
+				} else if (request.getWordListLength() == 12) {
+					System.out.println("Switching to 12-word mnemonic tab");
+					mnemonic24Tab.setDisable(true);
+					mnemonic12Tab.setDisable(false);
+					importTabPane.getSelectionModel().select(mnemonic12Tab);
+					shouldProceed = true;
+				} else {
+					System.out.println("Invalid number of words for 24-word mnemonic");
+					showError("Invalid number of words. Please enter 24 words.", selectedTab);
+				}
 			}
+		} else {
+			showError("Invalid mnemonic length. Please enter either a 12 or 24 word mnemonic.", selectedTab);
 		}
+
+		System.out.println("Should Proceed: " + shouldProceed);
 
 		if (request.getCallback() != null) {
 			request.getCallback().onResult(shouldProceed);

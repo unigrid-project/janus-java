@@ -172,6 +172,7 @@ public class MnemonicController implements Initializable {
 	private void handlePasteEvent(KeyEvent event) {
 		if (event.getSource() != textFields12List[0] && event.getSource()
 			!= textFields24ImportList[0] && event.getSource() != textFields24Confirm[0]) {
+			reset();
 			return; // Exit if the source is not the first text field
 		}
 		if (event.isControlDown() && event.getCode() == KeyCode.V) {
@@ -180,67 +181,42 @@ public class MnemonicController implements Initializable {
 		}
 	}
 
-//	private void handlePaste() {
-//		System.out.println("handlePaste");
-//		final Clipboard clipboard = Clipboard.getSystemClipboard();
-//		if (clipboard.hasString()) {
-//			String mnemonic = clipboard.getString().trim();  // Trim to remove leading/trailing whitespaces
-//			String[] words = mnemonic.split("\\s+"); // Split by whitespace
-//			mnemonicWordList.clear();
-//			mnemonicWordList.addAll(Arrays.asList(words));
-//			mnemonicModel.setMnemonicWordList(mnemonicWordList);
-//			System.out.println("Words array: " + Arrays.toString(words));
-//			System.out.println("mnemonicWordList after paste: " + mnemonicWordList);
-//
-//			if (mnemonicModel.getCurrentPane().equals("importPane")) {
-//				TabRequestSignal signal = TabRequestSignal.builder()
-//					.action("select")
-//					.wordListLength(mnemonicWordList.size())
-//					.build();
-//				signal.setCallback(success -> {
-//					if (success) {
-//						if (words.length == 24) {
-//							clearTextFields(textFields12List);
-//							setPlaceholderText(textFields24ImportList);
-//						} else if (words.length == 12) {
-//							setPlaceholderText(textFields12List);
-//						}
-//					} else {
-//						wordTwelveOne.setText("");
-//						wordTwentyFourImportOne.setText("");
-//					}
-//				});
-//				tabRequestEvent.fire(signal);
-//			} else if (mnemonicModel.getCurrentPane().equals("confirmMnemonic")) {
-//				if (words.length == 24) {
-//					setPlaceholderText(textFields24Confirm);
-//				}
-//			}
-//		}
-//	}
 	private void handlePaste() {
 		System.out.println("handlePaste");
 		final Clipboard clipboard = Clipboard.getSystemClipboard();
 		if (clipboard.hasString()) {
 			String mnemonic = clipboard.getString().trim();  // Trim to remove leading/trailing whitespaces
 			String[] words = mnemonic.split("\\s+"); // Split by whitespace
-			mnemonicWordList.clear();
-			mnemonicWordList.addAll(Arrays.asList(words));
-			mnemonicModel.setMnemonicWordList(mnemonicWordList);
 
-			if (mnemonicModel.getCurrentPane().equals("importPane")) {
+			if (mnemonicModel.getCurrentPane().equals("confirmMnemonic")) {
 				if (words.length == 24) {
-					handleTabSwitch("select", words);
-				} else if (words.length == 12) {
-					handleTabSwitch("select12", words);
+					mnemonicWordList.clear();
+					mnemonicWordList.addAll(Arrays.asList(words));
+					mnemonicModel.setMnemonicWordList(mnemonicWordList);
+					setPlaceholderText(textFields24Confirm);
 				} else {
-					showErrorMessage("Invalid number of words. Please enter either 12 or 24 words.");
+					showErrorMessage("Invalid number of words. "
+						+ "Please enter 24 words for confirmation.");
 				}
-			} else if (mnemonicModel.getCurrentPane().equals("confirmMnemonic") && words.length == 24) {
-				setPlaceholderText(textFields24Confirm);
 			} else {
-				showErrorMessage("Invalid operation. Please check your input and try again.");
+				if (words.length != 12 && words.length != 24) {
+					TabRequestSignal signal = TabRequestSignal.builder()
+						.action("invalid")
+						.wordListLength(words.length)
+						.build();
+					tabRequestEvent.fire(signal);
+					reset();
+					return;
+				} else {
+					mnemonicWordList.clear();
+					mnemonicWordList.addAll(Arrays.asList(words));
+					mnemonicModel.setMnemonicWordList(mnemonicWordList);
+					String action = words.length == 12 ? "select12" : "select";
+					handleTabSwitch(action, words);
+				}
 			}
+		} else {
+			showErrorMessage("Clipboard is empty. Please copy your mnemonic phrase first.");
 		}
 	}
 

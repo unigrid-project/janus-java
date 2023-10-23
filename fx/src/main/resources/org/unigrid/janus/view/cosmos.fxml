@@ -83,7 +83,7 @@
                               <fx:include source="component/mnemonic12.fxml" />
                            </center>
                         </BorderPane>
-                        <Text fx:id="sendWarnMsg" fill="#db8d2c" strokeType="OUTSIDE" strokeWidth="0.0" />
+                        <Text fx:id="sendWarnMsg12" fill="#db8d2c" strokeType="OUTSIDE" strokeWidth="0.0" />
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                            <children>
       
@@ -116,7 +116,8 @@
                               <fx:include source="component/mnemonic24_import.fxml" />
                            </center>
                         </BorderPane>
-                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                        <Text fx:id="sendWarnMsg24" fill="#f28407" strokeType="OUTSIDE" strokeWidth="0.0" />
+                        <HBox alignment="CENTER" prefWidth="200.0">
                            <children>
                               <Button onAction="#importMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import">
                                  <HBox.margin>
