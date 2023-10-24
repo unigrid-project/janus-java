@@ -66,7 +66,7 @@ public class CryptoUtils {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-	public String encrypt(String dataToEncrypt, String password) throws Exception {
+	public String encrypt(byte[] dataToEncrypt, String password) throws Exception {
 		if (accountModel == null) {
 			throw new IllegalStateException("accountModel is not injected! CryptoUtils");
 		}
@@ -84,7 +84,7 @@ public class CryptoUtils {
 		GCMParameterSpec specGCM = new GCMParameterSpec(128, salt); // using salt as IV
 		cipher.init(Cipher.ENCRYPT_MODE, secret, specGCM);
 
-		byte[] encryptedData = cipher.doFinal(dataToEncrypt.getBytes());
+		byte[] encryptedData = cipher.doFinal(dataToEncrypt);
 
 		// Combining salt and encrypted data
 		byte[] combinedData = new byte[salt.length + encryptedData.length];
@@ -94,13 +94,13 @@ public class CryptoUtils {
 
 		DataDirectory.ensureDirectoryExists(DataDirectory.KEYRING_DIRECTORY);
 		String encryptedBase64 = Base64.getEncoder().encodeToString(combinedData);
-		accountModel.setEncryptedMnemonic(encryptedBase64);
+		accountModel.setEncryptedPrivateKey(encryptedBase64);
 		accountManager.createAccountFile(accountModel);
 		System.out.println("accountModel: " + accountModel);
 		return encryptedBase64;
 	}
 
-	public String decrypt(String dataToDecrypt, String password) throws Exception {
+	public byte[] decrypt(String dataToDecrypt, String password) throws Exception {
 		byte[] decodedData = Base64.getDecoder().decode(dataToDecrypt);
 
 		byte[] salt = Arrays.copyOfRange(decodedData, 0, SALT_SIZE);
@@ -118,7 +118,7 @@ public class CryptoUtils {
 		byte[] decryptedData = cipher.doFinal(encryptedData);
 		System.out.println("decrypt: " + new String(decryptedData));
 
-		return new String(decryptedData);
+		return decryptedData;
 	}
 
 	public String getAddressFromPrivateKey(String privateKey)

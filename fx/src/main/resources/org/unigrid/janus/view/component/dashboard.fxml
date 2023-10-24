@@ -31,37 +31,37 @@
                             </font>
                         </Label>
                         <Region HBox.hgrow="ALWAYS" />
-                        
+
                         <ComboBox fx:id="accountsDropdown" prefWidth="250.0" promptText="Switch Account" styleClass="combo-box" />
                     </children>
                 </HBox>
-            <HBox>
-               <children>
-                      <Label text="Address:" textFill="#ababab">
-                     <HBox.margin>
-                        <Insets right="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <Label fx:id="addressLabel" prefWidth="375.0" textFill="#ababab" />
-               </children>
-            </HBox>
-            <HBox>
-               <children>
-                      <Label text="Balance:" textFill="#ababab">
-                          <font>
-                              <Font size="16.0" />
-                          </font>
-                     <HBox.margin>
-                        <Insets right="10.0" />
-                     </HBox.margin>
-                      </Label>
-                  <Label fx:id="balanceLabel" text="0.00 UGD" textFill="#ababab">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
-                  </Label>
-               </children>
-            </HBox>
+                <HBox>
+                    <children>
+                        <Label text="Address:" textFill="#ababab">
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </Label>
+                        <Label fx:id="addressLabel" prefWidth="375.0" textFill="#ababab" />
+                    </children>
+                </HBox>
+                <HBox>
+                    <children>
+                        <Label text="Balance:" textFill="#ababab">
+                            <font>
+                                <Font size="16.0" />
+                            </font>
+                            <HBox.margin>
+                                <Insets right="10.0" />
+                            </HBox.margin>
+                        </Label>
+                        <Label fx:id="balanceLabel" text="0.00 UGD" textFill="#ababab">
+                            <font>
+                                <Font size="16.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </HBox>
             </VBox>
 
             <!-- Latest Transactions -->
@@ -71,8 +71,8 @@
                         <Font size="15.0" />
                     </font>
                 </Label>
-            <ListView fx:id="transactionListView" prefHeight="100.0" />
-            <ListView fx:id="testListView" prefHeight="200.0" prefWidth="200.0" />
+                <ListView fx:id="transactionListView" prefHeight="100.0" />
+                <ListView fx:id="testListView" prefHeight="200.0" prefWidth="200.0" />
             </VBox>
 
             <!-- Staking Rewards -->
@@ -99,8 +99,8 @@
             </VBox>
             <VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.columnIndex="2" GridPane.rowIndex="3">
                 <Button contentDisplay="CENTER" onAction="#createNewAccount" prefWidth="125.0" style="-fx-cursor: hand;" text="Create Account" />
-                 <Button alignment="CENTER" onAction="#delegateTokens" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
-            <Button alignment="CENTER" onAction="#decryptKeys" prefWidth="125.0" style="-fx-cursor: hand;" text="Test" />
+                <Button alignment="CENTER" onAction="#generateKeys" prefWidth="125.0" style="-fx-cursor: hand;" text="Generate Keys" />
+                <Button alignment="CENTER" onAction="#decryptPrivateKey" prefWidth="125.0" style="-fx-cursor: hand;" text="Test Decrypt" />
 
                 <!-- More delegation entries can be added here -->
             </VBox>

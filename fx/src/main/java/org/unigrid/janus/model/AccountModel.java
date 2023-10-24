@@ -29,7 +29,7 @@ public class AccountModel {
 	@Setter @Getter
 	private String mnemonic;
 	@Setter @Getter
-	private String encryptedMnemonic;
+	private String encryptedPrivateKey;
 	@Setter @Getter
 	private String address;
 	@Setter @Getter
@@ -40,7 +40,7 @@ public class AccountModel {
 	public void reset() {
 		name = null;
 		mnemonic = null;
-		encryptedMnemonic = null;
+		encryptedPrivateKey = null;
 		address = null;
 		privateKey = null;
 		publicKey = null;

@@ -32,7 +32,7 @@ public class AccountsData {
 	public static class Account {
 		private String name;
 		private String address;
-		private String encryptedMnemonic;
+		private String encryptedPrivateKey;
 		private String publicKey;
 	}
 }

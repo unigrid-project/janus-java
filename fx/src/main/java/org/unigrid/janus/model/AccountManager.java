@@ -40,7 +40,7 @@ public class AccountManager {
 		account.setName(accountModel.getName());
 		account.setAddress(accountModel.getAddress());
 		account.setPublicKey(cryptoUtils.bytesToHex(accountModel.getPublicKey()));
-		account.setEncryptedMnemonic(accountModel.getEncryptedMnemonic());
+		account.setEncryptedPrivateKey(accountModel.getEncryptedPrivateKey());
 		// Load existing accounts or initialize a new list
 		List<Account> accounts;
 		File accountsFile = DataDirectory.getAccountsFile();

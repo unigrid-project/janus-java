@@ -17,7 +17,6 @@
 package org.unigrid.janus.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -50,8 +49,6 @@ import jakarta.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -82,6 +79,7 @@ import javafx.util.Duration;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.ECKey.ECDSASignature;
 import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.SignatureDecodeException;
 
 import org.unigrid.janus.model.AccountModel;
 import org.unigrid.janus.model.AccountsData;
@@ -206,10 +204,11 @@ public class CosmosController implements Initializable {
 		paneMap.put("generatePane", generatePane);
 		paneMap.put("passwordPane", passwordPane);
 		paneMap.put("confirmMnemonic", confirmMnemonic);
-		ObservableList<String> testList = FXCollections.observableArrayList("Test 1", "Test 2", "Test 3");
+		ObservableList<String> testList = FXCollections.observableArrayList("Test 1",
+				"Test 2", "Test 3");
 		testListView.setItems(testList);
 		ObservableList<TxResponse> observableList = FXCollections
-			.observableArrayList(cosmosTxList.getTxResponsesList());
+				.observableArrayList(cosmosTxList.getTxResponsesList());
 		transactionListView.setItems(observableList);
 
 		Platform.runLater(() -> {
@@ -228,32 +227,38 @@ public class CosmosController implements Initializable {
 				showPane(cosmosMainPane);
 			}
 			// check whether the word changed in order to reset the value
-			transactionListView.setCellFactory(param -> new ListCell<TransactionResponse.TxResponse>() {
+			transactionListView.setCellFactory(
+					param -> new ListCell<TransactionResponse.TxResponse>() {
+						@Override
+						protected void updateItem(
+								TransactionResponse.TxResponse txResponse,
+								boolean empty) {
+							System.out.println(
+									"Cell factory called for item: " + txResponse);
+							System.out.println("Number of transactions: "
+									+ cosmosTxList.getTxResponsesList().size());
 
-				@Override
-				protected void updateItem(TransactionResponse.TxResponse txResponse, boolean empty) {
-					System.out.println("Cell factory called for item: " + txResponse);
-					System.out.println("Number of transactions: "
-						+ cosmosTxList.getTxResponsesList().size());
-
-					super.updateItem(txResponse, empty);
-					if (empty || txResponse == null) {
-						setText(null);
-					} else {
-						setText(txResponse.getTxhash() + " - " + txResponse.getTimestamp());
-						System.out.println("txResponse getHeight(): " + txResponse.getHeight());
-					}
-				}
-			});
+							super.updateItem(txResponse, empty);
+							if (empty || txResponse == null) {
+								setText(null);
+							} else {
+								setText(txResponse.getTxhash() + " - "
+										+ txResponse.getTimestamp());
+								System.out.println("txResponse getHeight(): "
+										+ txResponse.getHeight());
+							}
+						}
+					});
 		});
 	}
 
 	@FXML
 	private void testBtn(ActionEvent event) {
-		//System.out.println("Transaction Response: " + cosmosTxList.getTxResponse());
-		//System.out.println("Transaction loadTransactions: " + cosmosTxList.loadTransactions(10));
+		// System.out.println("Transaction Response: " + cosmosTxList.getTxResponse());
+		// System.out.println("Transaction loadTransactions: " +
+		// cosmosTxList.loadTransactions(10));
 
-		//System.out.println("txModel.getTxResponses: " + txModel.getNewTxResponses());
+		// System.out.println("txModel.getTxResponses: " + txModel.getNewTxResponses());
 		System.out.println("txModel.getResult: " + txModel.getResult());
 	}
 
@@ -263,12 +268,10 @@ public class CosmosController implements Initializable {
 			String password1 = passwordField1.getText();
 			String password2 = passwordField2.getText();
 			if (!password1.equals(password2)) {
-				// Passwords do not match
 				System.out.println("Passwords do not match!");
 				return;
 			}
 
-			// Ensure the password is not empty
 			if (password1.isEmpty()) {
 				System.out.println("Password cannot be empty!");
 				return;
@@ -279,28 +282,27 @@ public class CosmosController implements Initializable {
 				return;
 			}
 			accountModel.setName(accountNameField.getText());
-			String mnemonic = accountModel.getMnemonic();
 
-			// Encrypt the mnemonic
-			String encryptedMnemonic = cryptoUtils.encrypt(mnemonic, password1);
-			// Set the encrypted mnemonic to the accountModel
-			accountModel.setEncryptedMnemonic(encryptedMnemonic);
-			System.out.println("encryptedMnemonic: " + encryptedMnemonic);
-
-			if (accountModel.getEncryptedMnemonic() == null
-				|| accountModel.getEncryptedMnemonic().isEmpty()) {
-				System.out.println("Encrypted mnemonic is either null or empty!");
+			byte[] privateKey = accountModel.getPrivateKey();
+			if (privateKey == null || privateKey.length == 0) {
+				System.out.println("Private key is either null or empty!");
 				return;
 			}
 
-			// clear out any private keys from memory
-			mnemonic = "";
-			// clear the model and reset the text fields
+			// Encrypt the private key
+			String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
+			accountModel.setEncryptedPrivateKey(encryptedPrivateKey);
+			System.out.println("Encrypted Private Key: " + encryptedPrivateKey);
+
+			// Clear out any private keys from memory
+			Arrays.fill(privateKey, (byte) 0);
+
+			// Clear the model and reset the text fields
 			resetTextFieldsEvent.fire(ResetTextFieldsSignal.builder().build());
 			showPane(cosmosMainPane);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
 
@@ -315,119 +317,155 @@ public class CosmosController implements Initializable {
 		accountModel.reset();
 	}
 
+	// @FXML
+	// private void encryptTest(ActionEvent event) {
+	// try {
+	// String mnemonic = encryptField.getText();
+	//
+	// cryptoUtils.encrypt(mnemonic, "pickles");
+	// String addressFromPrivateKey =
+	// cryptoUtils.getAddressFromPrivateKey(mnemonic);
+	// addressField.setText(addressFromPrivateKey);
+	// // Show the cosmosMainPane after successful encryption and saving
+	// showPane(cosmosMainPane);
+	// } catch (Exception ex) {
+	// Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+	// ex);
+	// }
+	// }
 	@FXML
-	private void encryptTest(ActionEvent event) {
+	private void decryptPrivateKey(ActionEvent event) {
 		try {
-			String mnemonic = encryptField.getText();
+			Account selectedAccount = accountsData.getSelectedAccount();
+			if (selectedAccount == null) {
+				System.out.println("No account selected!");
+				return;
+			}
 
-			cryptoUtils.encrypt(mnemonic, "pickles");
-			String addressFromPrivateKey = cryptoUtils.getAddressFromPrivateKey(mnemonic);
-			addressField.setText(addressFromPrivateKey);
-			// Show the cosmosMainPane after successful encryption and saving
-			showPane(cosmosMainPane);
+			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
+
+			// Prompt the user to enter the password
+			String password = getPasswordFromUser();
+			if (password == null) {
+				System.out.println("Password input cancelled!");
+				return;
+			}
+
+			// Decrypt the private key. The returned value should be the original private
+			// key bytes.
+			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+			System.out.println(
+					"Decrypted Private Key (Bytes): " + Arrays.toString(privateKeyBytes));
+
+			// Convert the private key bytes to a HEX string
+			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
+			System.out.println("Private Key in HEX: " + privateKeyHex);
+			System.out.println("Address from priv key: " + cryptoUtils.getAddressFromPrivateKey(privateKeyHex));
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
 
+	private String getPasswordFromUser() {
+		// just use this default for testing right now
+		return "pickles";
+	}
+
 	@FXML
-	private void decryptKeys(ActionEvent event) {
+	private void generateKeys(ActionEvent event) {
 		try {
-			File encryptedKeysFile = DataDirectory.getEncryptedKeys();
-			String jsonContent = new String(
-				Files.readAllBytes(encryptedKeysFile.toPath()),
-				StandardCharsets.UTF_8);
+			Account selectedAccount = accountsData.getSelectedAccount();
+			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
 
-			// Parse the JSON content
-			ObjectMapper objectMapper = new ObjectMapper();
-			JsonNode rootNode = objectMapper.readTree(jsonContent);
-			JsonNode accountsNode = rootNode.get("accounts");
-			if (accountsNode.isArray() && accountsNode.size() > 0) {
-				JsonNode firstAccountNode = accountsNode.get(0); // only one account for
-				// now
-				String encryptedMnemonic = firstAccountNode.get("encryptedMnemonic")
-					.asText();
+			// Prompt the user to enter the password
+			String password = getPasswordFromUser();
+			if (password == null) {
+				System.out.println("Password input cancelled!");
+				return;
+			}
 
-				// Decrypt the mnemonic
-				System.out.println("encryptedMnemonic: " + encryptedMnemonic);
-				String keys = cryptoUtils.decrypt(encryptedMnemonic, "pickles");
+			// Decrypt the private key
+			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+			System.out.println("Decrypted Private Key: "
+					+ org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes));
 
-				System.out.println(keys);
-				byte[] privKey = derivePrivateKeyFromMnemonic(keys, 0);
-				System.out.println("private key from menmonic: "
-					+ org.bitcoinj.core.Utils.HEX.encode(privKey));
-				System.out.println("address: " + cryptoUtils
-					.getAddressFromPrivateKey(org.bitcoinj.core.Utils.HEX.encode(privKey)));
+			// Derive keys
+			ECKey[] derivedKeys = cryptoUtils
+					.deriveKeys(org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes), 5);
+			cryptoUtils.printKeys(derivedKeys);
 
-				ECKey[] derivedKeys = cryptoUtils
-					.deriveKeys(org.bitcoinj.core.Utils.HEX.encode(privKey), 100);
-				cryptoUtils.printKeys(derivedKeys);
+			// Now iterate through the allKeys array, signing and verifying a message with
+			// each key
+			String messageStr = "Start gridnode message";
+			byte[] messageBytes = messageStr.getBytes();
 
-				// Now iterate through the allKeys array, signing and verifying a message with each key
-				String messageStr = "Start gridnode message.";
-				byte[] messageBytes = messageStr.getBytes();
-
-				for (int i = 0; i < derivedKeys.length; i++) {
-					// Sign the message with the current derived key
-					System.out.println("derivedKeys[i]: " + derivedKeys[i]);
-					// this uses the private key of the ECKey that was generated
-					ECDSASignature signature = derivedKeys[i].sign(Sha256Hash.of(messageBytes));
-					byte[] signatureBytes = signature.encodeToDER();
-
-					// Create a single-key array for verification
-					ECKey[] singleKeyArray = {derivedKeys[i]};
-
-					// Verify the signature
-					boolean isVerified = cryptoUtils.verifySignature(messageBytes,
-						signatureBytes, singleKeyArray);
-					System.out.println("Verification for key " + i + ": "
-						+ (isVerified ? "Succeeded" : "Failed"));
-				}
-				// Choose a key from derivedKeys for signing
-				ECKey signingKey = derivedKeys[0];
-				// Create an array of bad keys
-				ECKey[] badKeys = {
-					ECKey.fromPrivate(new BigInteger("deadbeefdeadbeefdeadbeefdeadbeef", 16)),
-					ECKey.fromPrivate(new BigInteger("badbadbadbadbadbadbadbadbadbadbad", 16)),
-					ECKey.fromPrivate(new BigInteger("facefacefacefacefacefacefaceface", 16))
-				};
-
-				// Sign the message with the wrong key
-				ECDSASignature signature = signingKey.sign(Sha256Hash.of(messageBytes));
+			for (int i = 0; i < derivedKeys.length; i++) {
+				// Sign the message with the current derived key
+				System.out.println("derivedKeys[i]: " + derivedKeys[i]);
+				ECDSASignature signature = derivedKeys[i]
+						.sign(Sha256Hash.of(messageBytes));
 				byte[] signatureBytes = signature.encodeToDER();
 
-				for (int i = 0; i < badKeys.length; i++) {
-					// Create a single-key array for verification
-					ECKey[] singleKeyArray = {badKeys[i]};
+				// Create a single-key array for verification
+				ECKey[] singleKeyArray = {
+					derivedKeys[i]
+				};
 
-					// Verify the signature
-					boolean isVerified = cryptoUtils.verifySignature(messageBytes,
+				// Verify the signature
+				boolean isVerified = cryptoUtils.verifySignature(messageBytes,
 						signatureBytes, singleKeyArray);
-					System.out.println("Verification for bad key " + i + ": "
+				System.out.println("Verification for key " + i + ": "
 						+ (isVerified ? "Succeeded" : "Failed"));
-				}
 			}
-		} catch (Exception ex) {
-			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
-		}
-	}
 
-	@FXML
-	private void decrypTest(ActionEvent event) {
-		try {
-
-			// Decrypt the mnemonic
-			System.out.println("encryptedMnemonic: " + keytoDecrypt.getText());
-			String keys = cryptoUtils.decrypt(keytoDecrypt.getText(), "pickles");
-			decryptField.setText(keys);
+			// Example of using bad keys for verification
+			verifyWithBadKeys(messageBytes, derivedKeys[0]);
 
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
+
+	private void verifyWithBadKeys(byte[] messageBytes, ECKey signingKey)
+			throws SignatureDecodeException {
+		ECDSASignature signature = signingKey.sign(Sha256Hash.of(messageBytes));
+		byte[] signatureBytes = signature.encodeToDER();
+
+		ECKey[] badKeys = {
+				ECKey.fromPrivate(new BigInteger("deadbeefdeadbeefdeadbeefdeadbeef", 16)),
+				ECKey.fromPrivate(
+						new BigInteger("badbadbadbadbadbadbadbadbadbadbad", 16)),
+				ECKey.fromPrivate(
+						new BigInteger("facefacefacefacefacefacefaceface", 16)) };
+
+		for (int i = 0; i < badKeys.length; i++) {
+			ECKey[] singleKeyArray = {
+				badKeys[i]
+			};
+			boolean isVerified = cryptoUtils.verifySignature(messageBytes, signatureBytes,
+					singleKeyArray);
+			System.out.println("Verification for bad key " + i + ": "
+					+ (isVerified ? "Succeeded" : "Failed"));
+		}
+	}
+
+	// @FXML
+	// private void decrypTest(ActionEvent event) {
+	// try {
+	//
+	// // Decrypt the mnemonic
+	// System.out.println("encryptedPrivateKey: " + keytoDecrypt.getText());
+	// String keys = cryptoUtils.decrypt(keytoDecrypt.getText(), "pickles");
+	// decryptField.setText(keys);
+	//
+	// } catch (Exception ex) {
+	// Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+	// ex);
+	// }
+	// }
 
 	public void handleSaveAddress(AddressCosmos newAddress) {
 		try {
@@ -441,10 +479,10 @@ public class CosmosController implements Initializable {
 	private void showPane(StackPane paneToShow) {
 		// List of all panes
 		String paneName = paneMap.entrySet().stream()
-			.filter(entry -> entry.getValue() == paneToShow).map(Map.Entry::getKey)
-			.findFirst().orElse(null);
+				.filter(entry -> entry.getValue() == paneToShow).map(Map.Entry::getKey)
+				.findFirst().orElse(null);
 		List<StackPane> allPanes = Arrays.asList(importPane, cosmosWizardPane,
-			cosmosMainPane, generatePane, passwordPane, confirmMnemonic);
+				cosmosMainPane, generatePane, passwordPane, confirmMnemonic);
 		mnemonicModel.setCurrentPane(paneName);
 		// Loop through all panes and set visibility
 		for (StackPane pane : allPanes) {
@@ -460,7 +498,7 @@ public class CosmosController implements Initializable {
 				loadAccounts();
 			} catch (IOException ex) {
 				Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-					ex);
+						ex);
 			}
 		}
 	}
@@ -487,14 +525,14 @@ public class CosmosController implements Initializable {
 		}
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		List<AddressCosmos> addresses
-			= objectMapper.readValue(file, new TypeReference<List<AddressCosmos>>() {
-			});
+		List<AddressCosmos> addresses = objectMapper.readValue(file,
+				new TypeReference<List<AddressCosmos>>() {
+				});
 		return addresses.size();
 	}
 
 	public static byte[] derivePrivateKeyFromMnemonic(String mnemonic, int index)
-		throws Exception {
+			throws Exception {
 		// Convert mnemonic to seed
 		List<String> mnemonicWords = Arrays.asList(mnemonic.split(" "));
 
@@ -505,15 +543,15 @@ public class CosmosController implements Initializable {
 
 		// Derive the key step by step following the path "M/44'/118'/0'/0/0"
 		DeterministicKey level1 = HDKeyDerivation.deriveChildKey(masterKey,
-			new ChildNumber(44, true));
+				new ChildNumber(44, true));
 		DeterministicKey level2 = HDKeyDerivation.deriveChildKey(level1,
-			new ChildNumber(118, true));
+				new ChildNumber(118, true));
 		DeterministicKey level3 = HDKeyDerivation.deriveChildKey(level2,
-			new ChildNumber(0, true));
+				new ChildNumber(0, true));
 		DeterministicKey level4 = HDKeyDerivation.deriveChildKey(level3,
-			new ChildNumber(0, false));
+				new ChildNumber(0, false));
 		DeterministicKey key = HDKeyDerivation.deriveChildKey(level4,
-			new ChildNumber(index, false));
+				new ChildNumber(index, false));
 
 		// Optionally print the address (requires additional logic for accurate Cosmos
 		// address computation)
@@ -536,7 +574,7 @@ public class CosmosController implements Initializable {
 
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
 
@@ -563,18 +601,17 @@ public class CosmosController implements Initializable {
 
 		// Encrypt the mnemonic before setting it to the accountModel
 		String password1 = passwordField1.getText();
-		String encryptedMnemonic = cryptoUtils.encrypt(mnemonic, password1);
-		accountModel.setMnemonic(encryptedMnemonic);
+		byte[] privateKey = derivePrivateKeyFromMnemonic(mnemonic, index);
+		String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
+		accountModel.setMnemonic(encryptedPrivateKey);
 		System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
 
-		// Utilize the derivePrivateKeyFromMnemonic method and CosmosCredentials block
-		byte[] privateKey = derivePrivateKeyFromMnemonic(mnemonic, index);
 		System.out.println(
-			"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
+				"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
 		String path = String.format("m/44'/118'/0'/0/%d", index);
 		CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
-			"unigrid");
+				"unigrid");
 
 		System.out.println("Address from creds: " + creds.getAddress());
 		System.out.println("EcKey from creds: " + creds.getEcKey());
@@ -627,7 +664,7 @@ public class CosmosController implements Initializable {
 			accountsService.loadAccountsFromJson();
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 
 		// Clear the existing items from the ComboBox
@@ -649,7 +686,7 @@ public class CosmosController implements Initializable {
 			String defaultAccountName = (String) accountsDropdown.getValue();
 			if (defaultAccountName != null) {
 				Optional<Account> defaultAccount = accountsService
-					.findAccountByName(defaultAccountName);
+						.findAccountByName(defaultAccountName);
 				if (defaultAccount.isPresent()) {
 					accountsData.setSelectedAccount(defaultAccount.get());
 				}
@@ -659,24 +696,25 @@ public class CosmosController implements Initializable {
 		// Set up an action listener for the ComboBox
 		accountsDropdown.setOnAction(event -> {
 			String selectedAccountName = (String) accountsDropdown.getValue();
-			Optional<Account> selectedAccount = accountsService.findAccountByName(selectedAccountName);
+			Optional<Account> selectedAccount = accountsService
+					.findAccountByName(selectedAccountName);
 			if (selectedAccount.isPresent()) {
 				accountsData.setSelectedAccount(selectedAccount.get());
-				System.out.println("Selected Account:" + accountsData.getSelectedAccount());
+				System.out
+						.println("Selected Account:" + accountsData.getSelectedAccount());
 				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
-
 				// Create a background task for the network call
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
 					protected Void call() throws Exception {
-						String accountQuery = restClient
-							.checkBalanceForAddress(selectedAccount.get().getAddress());
+						String accountQuery = restClient.checkBalanceForAddress(
+								selectedAccount.get().getAddress());
 						Platform.runLater(() -> {
 							balanceLabel.setText(accountQuery);
 						});
 						cosmosTxList.loadTransactions(10);
 						System.out.println("cosmosTxList.getTxResponse(): "
-							+ cosmosTxList.getTxResponsesList());
+								+ cosmosTxList.getTxResponsesList());
 						return null;
 					}
 				};
@@ -684,8 +722,8 @@ public class CosmosController implements Initializable {
 				// Handle exceptions
 				fetchDataTask.setOnFailed(e -> {
 					Throwable exception = fetchDataTask.getException();
-					Logger.getLogger(CosmosController.class.getName())
-						.log(Level.SEVERE, null, exception);
+					Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE,
+							null, exception);
 					// Optionally show an error message to the user
 				});
 
@@ -702,7 +740,7 @@ public class CosmosController implements Initializable {
 			showPane(cosmosWizardPane);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
 
@@ -710,15 +748,15 @@ public class CosmosController implements Initializable {
 	private void checkBalance(ActionEvent event) {
 		try {
 			CosmosRestApiClient unigridApiService = new CosmosRestApiClient(
-				"http://localhost:1317", "cosmosdaemon", "ugd");
+					"http://localhost:1317", "cosmosdaemon", "ugd");
 			BigDecimal balance = unigridApiService
-				.getBalanceInAtom(addressField.getText());
+					.getBalanceInAtom(addressField.getText());
 			DecimalFormat formatter = new DecimalFormat("0.00000000");
 			String formattedBalance = formatter.format(balance);
 			balanceField.setText(formattedBalance);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
 
@@ -729,7 +767,8 @@ public class CosmosController implements Initializable {
 		System.out.println("Selected Tab: " + selectedTab.getText());
 		System.out.println("Word List Length: " + request.getWordListLength());
 
-		if ("select".equals(request.getAction()) || "select12".equals(request.getAction())) {
+		if ("select".equals(request.getAction())
+				|| "select12".equals(request.getAction())) {
 			if (selectedTab == mnemonic12Tab) {
 				if (request.getWordListLength() == 12) {
 					System.out.println("Correct number of words for 12-word mnemonic");
@@ -744,7 +783,8 @@ public class CosmosController implements Initializable {
 
 				} else {
 					System.out.println("Invalid number of words for 12-word mnemonic");
-					showError("Invalid number of words. Please enter 12 words.", selectedTab);
+					showError("Invalid number of words. Please enter 12 words.",
+							selectedTab);
 				}
 			} else if (selectedTab == mnemonic24Tab) {
 				if (request.getWordListLength() == 24) {
@@ -759,11 +799,14 @@ public class CosmosController implements Initializable {
 					shouldProceed = true;
 				} else {
 					System.out.println("Invalid number of words for 24-word mnemonic");
-					showError("Invalid number of words. Please enter 24 words.", selectedTab);
+					showError("Invalid number of words. Please enter 24 words.",
+							selectedTab);
 				}
 			}
 		} else {
-			showError("Invalid mnemonic length. Please enter either a 12 or 24 word mnemonic.", selectedTab);
+			showError(
+					"Invalid mnemonic length. Please enter either a 12 or 24 word mnemonic.",
+					selectedTab);
 		}
 
 		System.out.println("Should Proceed: " + shouldProceed);
@@ -772,7 +815,6 @@ public class CosmosController implements Initializable {
 			request.getCallback().onResult(shouldProceed);
 		}
 	}
-
 
 	/* GENERATE SECTION */
 	@FXML
@@ -843,24 +885,24 @@ public class CosmosController implements Initializable {
 		// Step 1: Generate a new 12-word mnemonic
 		SecureRandom secureRandom = new SecureRandom();
 		List<String> mnemonicWords = MnemonicCode.INSTANCE
-			.toMnemonic(secureRandom.generateSeed(32));
+				.toMnemonic(secureRandom.generateSeed(32));
 		String mnemonic = String.join(" ", mnemonicWords);
 		// this.mnemonicArea.setText(mnemonic);
 
 		// // Encrypt the mnemonic before setting it to the accountModel
 		// String password1 = passwordField1.getText();
-		// String encryptedMnemonic = cryptoUtils.encrypt(mnemonic, password1);
+		// String encryptedPrivateKey = cryptoUtils.encrypt(mnemonic, password1);
 		// System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
 		accountModel.setMnemonic(mnemonic);
 
 		// Utilize the derivePrivateKeyFromMnemonic method and CosmosCredentials block
 		byte[] privateKey = derivePrivateKeyFromMnemonic(mnemonic, index);
 		System.out.println(
-			"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
+				"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
 		String path = String.format("m/44'/118'/0'/0/%d", index);
 		CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
-			"unigrid");
+				"unigrid");
 
 		System.out.println("Address from creds: " + creds.getAddress());
 		System.out.println("EcKey from creds: " + creds.getEcKey());
@@ -876,7 +918,7 @@ public class CosmosController implements Initializable {
 
 		// Update UI fields
 		seedPhraseTextArea.setStyle(
-			"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
+				"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
 		seedPhraseTextArea.setText(accountModel.getMnemonic());
 
 		addressFieldPassword.setText(accountModel.getAddress());
