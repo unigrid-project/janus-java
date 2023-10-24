@@ -53,6 +53,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -80,6 +81,8 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.ECKey.ECDSASignature;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.SignatureDecodeException;
+import org.bitcoinj.wallet.DeterministicKeyChain;
+import org.bitcoinj.wallet.DeterministicSeed;
 
 import org.unigrid.janus.model.AccountModel;
 import org.unigrid.janus.model.AccountsData;
@@ -361,7 +364,8 @@ public class CosmosController implements Initializable {
 			// Convert the private key bytes to a HEX string
 			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
 			System.out.println("Private Key in HEX: " + privateKeyHex);
-			System.out.println("Address from priv key: " + cryptoUtils.getAddressFromPrivateKey(privateKeyHex));
+			System.out.println("Address from priv key: "
+					+ cryptoUtils.getAddressFromPrivateKey(privateKeyHex));
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
 					ex);
@@ -376,8 +380,30 @@ public class CosmosController implements Initializable {
 	@FXML
 	private void generateKeys(ActionEvent event) {
 		try {
+			int keysToCreate = 100;
 			Account selectedAccount = accountsData.getSelectedAccount();
-			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+			String account = selectedAccount.getAddress();
+			byte[] seed = Sha256Hash.hash(account.getBytes());
+			System.out.println("account: " + account);
+			System.out.println("seed: " + seed);
+
+			// Current time in milliseconds since epoch
+			long creationTimeSeconds = System.currentTimeMillis() / 1000L;
+
+			// Generate the HD wallet from the seed
+			DeterministicSeed deterministicSeed = new DeterministicSeed(seed, "",
+					creationTimeSeconds);
+			DeterministicKeyChain chain = DeterministicKeyChain.builder()
+					.seed(deterministicSeed).build();
+
+			// Derive child keys
+			List<ECKey> derivedKeysList = new ArrayList<>();
+			DeterministicKey parentKey = chain.getWatchingKey();
+			for (int i = 0; i < keysToCreate; i++) {
+				DeterministicKey childKey = HDKeyDerivation.deriveChildKey(parentKey,
+						new ChildNumber(i));
+				derivedKeysList.add(ECKey.fromPrivate(childKey.getPrivKey()));
+			}
 
 			// Prompt the user to enter the password
 			String password = getPasswordFromUser();
@@ -386,14 +412,8 @@ public class CosmosController implements Initializable {
 				return;
 			}
 
-			// Decrypt the private key
-			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
-			System.out.println("Decrypted Private Key: "
-					+ org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes));
+			ECKey[] derivedKeys = derivedKeysList.toArray(new ECKey[0]);
 
-			// Derive keys
-			ECKey[] derivedKeys = cryptoUtils
-					.deriveKeys(org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes), 5);
 			cryptoUtils.printKeys(derivedKeys);
 
 			// Now iterate through the allKeys array, signing and verifying a message with

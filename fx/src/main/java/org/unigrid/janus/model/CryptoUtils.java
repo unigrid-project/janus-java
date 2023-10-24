@@ -75,7 +75,7 @@ public class CryptoUtils {
 		byte[] salt = new byte[SALT_SIZE];
 		sr.nextBytes(salt);
 
-		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
 		PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
 		SecretKey secretKey = factory.generateSecret(spec);
 		SecretKeySpec secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
@@ -106,7 +106,7 @@ public class CryptoUtils {
 		byte[] salt = Arrays.copyOfRange(decodedData, 0, SALT_SIZE);
 		byte[] encryptedData = Arrays.copyOfRange(decodedData, SALT_SIZE, decodedData.length);
 
-		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
 		PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
 		SecretKey secretKey = factory.generateSecret(spec);
 		SecretKeySpec secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
