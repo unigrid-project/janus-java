@@ -68,7 +68,7 @@
             </VBox>
          </children>
       </StackPane>
-      <StackPane fx:id="importPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="importPane" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <TabPane fx:id="importTabPane">
             <tabs>
                <Tab fx:id="mnemonic12Tab" closable="false" text="12-Word Mnemonic">
@@ -139,8 +139,8 @@
                      <VBox alignment="CENTER" spacing="20">
                         <!-- Title and Instructions -->
                         <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="Import Existing Wallet" textFill="WHITE" />
-                        <Label alignment="CENTER" text="• Enter your recovery phrase here to restore your wallet. Or click on any blank and paste the entire phrase." textFill="WHITE" wrapText="true" />
-                        <Label alignment="CENTER" text="• Enter the phrase in the right order without capitalization, punctuation symbols, or spaces." textFill="WHITE" wrapText="true" />
+                        <Label alignment="CENTER" text="• Enter your private key here to restore your wallet." textFill="WHITE" wrapText="true" />
+                        <TextField fx:id="importPassword" maxWidth="600.0" styleClass="mnemonic-field" />
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                            <children>
                               <Button onAction="#importPrivateKey" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import">
@@ -160,7 +160,7 @@
             </tabs>
          </TabPane>
       </StackPane>
-      <StackPane fx:id="passwordPane" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <StackPane fx:id="passwordPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <VBox alignment="CENTER" spacing="20">
                <HBox alignment="CENTER">
@@ -190,6 +190,7 @@
                   </font>
                </Label>
                <TextField fx:id="accountNameField" maxWidth="300.0" promptText="Account Name" styleClass="mnemonic-field" />
+               <Text fx:id="sendWarnPassword" fill="#f28407" strokeType="OUTSIDE" strokeWidth="0.0" />
                <Button fx:id="encryptAndSaveButton" onAction="#encryptKeys" style="-fx-cursor: hand;" text="Encrypt &amp; Save">
                   <font>
                      <Font size="24.0" />

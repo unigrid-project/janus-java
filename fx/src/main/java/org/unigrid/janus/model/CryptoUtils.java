@@ -83,7 +83,8 @@ public class CryptoUtils {
 		sr.nextBytes(salt);
 
 		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-		PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
+		PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT,
+				KEY_LENGTH);
 		SecretKey secretKey = factory.generateSecret(spec);
 		SecretKeySpec secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
 
@@ -97,7 +98,8 @@ public class CryptoUtils {
 		byte[] combinedData = new byte[salt.length + encryptedData.length];
 		System.arraycopy(salt, 0, combinedData, 0, SALT_SIZE);
 		System.arraycopy(encryptedData, 0, combinedData, SALT_SIZE, encryptedData.length);
-		System.out.println("encrypt: " + Base64.getEncoder().encodeToString(combinedData));
+		System.out
+				.println("encrypt: " + Base64.getEncoder().encodeToString(combinedData));
 
 		DataDirectory.ensureDirectoryExists(DataDirectory.KEYRING_DIRECTORY);
 		String encryptedBase64 = Base64.getEncoder().encodeToString(combinedData);
@@ -111,10 +113,12 @@ public class CryptoUtils {
 		byte[] decodedData = Base64.getDecoder().decode(dataToDecrypt);
 
 		byte[] salt = Arrays.copyOfRange(decodedData, 0, SALT_SIZE);
-		byte[] encryptedData = Arrays.copyOfRange(decodedData, SALT_SIZE, decodedData.length);
+		byte[] encryptedData = Arrays.copyOfRange(decodedData, SALT_SIZE,
+				decodedData.length);
 
 		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-		PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT, KEY_LENGTH);
+		PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATION_COUNT,
+				KEY_LENGTH);
 		SecretKey secretKey = factory.generateSecret(spec);
 		SecretKeySpec secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
 
@@ -129,10 +133,9 @@ public class CryptoUtils {
 	}
 
 	public String getAddressFromPrivateKey(String privateKey)
-		throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
-		byte[] privateKeyBytes = hexStringToByteArray(privateKey);
-		ECKey ecKey = ECKey.fromPrivate(privateKeyBytes);
-		byte[] publicKeyBytes = ecKey.getPubKey();
+			throws NoSuchAlgorithmException, NoSuchProviderException,
+			InvalidKeySpecException {
+		byte[] publicKeyBytes = getPublicKeyBytes(privateKey);
 		System.out.println("publicKey: " + bytesToHex(publicKeyBytes));
 
 		String address = AddressUtil.publicKeyToAddress(publicKeyBytes, "unigrid");
@@ -141,17 +144,41 @@ public class CryptoUtils {
 		return address;
 	}
 
+	public byte[] getPublicKeyFromPrivateKey(String privateKey)
+			throws NoSuchAlgorithmException, NoSuchProviderException,
+			InvalidKeySpecException {
+
+		byte[] publicKeyBytes = getPublicKeyBytes(privateKey);
+		System.out.println("getPublicKeyFromPrivateKey: " + bytesToHex(publicKeyBytes));
+
+		return publicKeyBytes;
+	}
+
+	public byte[] getPublicKeyBytes(String privateKey) {
+		byte[] privateKeyBytes = hexStringToByteArray(privateKey);
+		ECKey ecKey = ECKey.fromPrivate(privateKeyBytes);
+		byte[] publicKeyBytes = ecKey.getPubKey();
+		return publicKeyBytes;
+	}
+
+	public byte[] getPrivateKeyBytes(String privateKey) {
+		byte[] privateKeyBytes = hexStringToByteArray(privateKey);
+		return privateKeyBytes;
+
+	}
+
 	public static byte[] hexStringToByteArray(String s) {
 		int len = s.length();
 		byte[] data = new byte[len / 2];
 		for (int i = 0; i < len; i += 2) {
 			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-				+ Character.digit(s.charAt(i + 1), 16));
+					+ Character.digit(s.charAt(i + 1), 16));
 		}
 		return data;
 	}
 
-	private static byte[] convertBits(byte[] data, int fromBits, int toBits, boolean pad) {
+	private static byte[] convertBits(byte[] data, int fromBits, int toBits,
+			boolean pad) {
 		int acc = 0;
 		int bits = 0;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -159,9 +186,8 @@ public class CryptoUtils {
 		for (int i = 0; i < data.length; i++) {
 			int value = data[i] & 0xff;
 			if ((value >>> fromBits) != 0) {
-				throw new RuntimeException(
-					"ERR_BAD_FORMAT invalid data range: data[" + i + "]=" + value
-					+ " (fromBits=" + fromBits + ")");
+				throw new RuntimeException("ERR_BAD_FORMAT invalid data range: data[" + i
+						+ "]=" + value + " (fromBits=" + fromBits + ")");
 			}
 			acc = (acc << fromBits) | value;
 			bits += fromBits;
@@ -197,7 +223,7 @@ public class CryptoUtils {
 	 * Derives a set of keys based on a private key and an index range.
 	 *
 	 * @param privateKey the private key in hexadecimal format.
-	 * @param indexes the number of indexes to use for key derivation.
+	 * @param indexes    the number of indexes to use for key derivation.
 	 * @return an array of derived key pairs.
 	 * @throws Exception if there is an error during key derivation.
 	 */
@@ -236,8 +262,8 @@ public class CryptoUtils {
 		}
 	}
 
-	public boolean verifySignature(byte[] message, byte[] signatureBytes, ECKey[] publicKeys)
-		throws SignatureDecodeException {
+	public boolean verifySignature(byte[] message, byte[] signatureBytes,
+			ECKey[] publicKeys) throws SignatureDecodeException {
 
 		// Decode the signature bytes
 		ECDSASignature signature = ECDSASignature.decodeFromDER(signatureBytes);
@@ -258,8 +284,9 @@ public class CryptoUtils {
 		return false;
 	}
 
-	public boolean verifySignatureKeys(byte[] message, byte[] signatureBytes, ECKey[] publicKeys,
-		int keysToCreate, String pubKey) throws SignatureDecodeException {
+	public boolean verifySignatureKeys(byte[] message, byte[] signatureBytes,
+			ECKey[] publicKeys, int keysToCreate, String pubKey)
+			throws SignatureDecodeException {
 		System.out.println(Arrays.toString(signatureBytes));
 
 		// Decode the signature bytes
@@ -271,30 +298,33 @@ public class CryptoUtils {
 		System.out.println("messageHash: " + messageHash);
 		String recoveredPublicKeyHex = null;
 		ECKey publicKey = null;
-		for (int recId = 0; recId < 4; recId++) {  // Loop through the possible recId values
+		for (int recId = 0; recId < 4; recId++) { // Loop through the possible recId
+													// values
 			publicKey = ECKey.recoverFromSignature(recId, signature, messageHash, false);
 			if (publicKey != null) {
-				byte[] compressedPublicKeyBytes = publicKey.getPubKeyPoint().getEncoded(true);
+				byte[] compressedPublicKeyBytes = publicKey.getPubKeyPoint()
+						.getEncoded(true);
 				recoveredPublicKeyHex = bytesToHex(compressedPublicKeyBytes);
 				if (recoveredPublicKeyHex.equals(pubKey)) {
-					break;  // Exit the loop if the recovered public key matches the provided pubKey
+					break; // Exit the loop if the recovered public key matches the
+							// provided pubKey
 				}
-				publicKey = null;  // Reset publicKey to null if no match is found
+				publicKey = null; // Reset publicKey to null if no match is found
 			}
 		}
 
 		if (publicKey == null) {
 			System.out.println("Failed to recover matching public key");
-			return false;  // Return false if no matching public key is found
+			return false; // Return false if no matching public key is found
 		}
 
 		// Assuming uncompressed public key. Adjust as necessary.
-//		if (publicKey == null) {
-//			return false; // Failed to recover public key
-//		}
+		// if (publicKey == null) {
+		// return false; // Failed to recover public key
+		// }
 		// Generate a list of keys from the public key
-		List<ECKey> generatedKeys
-			= generateKeysFromCompressedPublicKey(recoveredPublicKeyHex, keysToCreate);
+		List<ECKey> generatedKeys = generateKeysFromCompressedPublicKey(
+				recoveredPublicKeyHex, keysToCreate);
 
 		// Compare the generated keys with the keys passed in
 		if (generatedKeys.size() != publicKeys.length) {
@@ -304,10 +334,12 @@ public class CryptoUtils {
 		}
 
 		for (int i = 0; i < generatedKeys.size(); i++) {
-			System.out.println("publicKeys[i].getPubKey()" + bytesToHex(publicKeys[i].getPubKey()));
-			System.out.println("generatedKeys[i].getPubKey()"
-				+ bytesToHex(generatedKeys.get(i).getPubKey()));
-			if (!Arrays.equals(generatedKeys.get(i).getPubKey(), publicKeys[i].getPubKey())) {
+//			System.out.println(
+//					"publicKeys[i].getPubKey()" + bytesToHex(publicKeys[i].getPubKey()));
+//			System.out.println("generatedKeys[i].getPubKey()"
+//					+ bytesToHex(generatedKeys.get(i).getPubKey()));
+			if (!Arrays.equals(generatedKeys.get(i).getPubKey(),
+					publicKeys[i].getPubKey())) {
 
 				return false; // The keys do not match
 			}
@@ -327,7 +359,8 @@ public class CryptoUtils {
 		return address;
 	}
 
-	public List<ECKey> generateKeysFromCompressedPublicKey(String compressedPublicKeyHex, int keysToCreate) {
+	public List<ECKey> generateKeysFromCompressedPublicKey(String compressedPublicKeyHex,
+			int keysToCreate) {
 		System.out.println("Key being used in test: " + compressedPublicKeyHex);
 
 		// Hash the compressed public key bytes to generate the seed
@@ -337,14 +370,17 @@ public class CryptoUtils {
 		long creationTimeSeconds = System.currentTimeMillis() / 1000L;
 
 		// Generate the HD wallet from the seed
-		DeterministicSeed deterministicSeed = new DeterministicSeed(seed, "", creationTimeSeconds);
-		DeterministicKeyChain chain = DeterministicKeyChain.builder().seed(deterministicSeed).build();
+		DeterministicSeed deterministicSeed = new DeterministicSeed(seed, "",
+				creationTimeSeconds);
+		DeterministicKeyChain chain = DeterministicKeyChain.builder()
+				.seed(deterministicSeed).build();
 
 		// Derive child keys
 		List<ECKey> derivedKeysList = new ArrayList<>();
 		DeterministicKey parentKey = chain.getWatchingKey();
 		for (int i = 0; i < keysToCreate; i++) {
-			DeterministicKey childKey = HDKeyDerivation.deriveChildKey(parentKey, new ChildNumber(i));
+			DeterministicKey childKey = HDKeyDerivation.deriveChildKey(parentKey,
+					new ChildNumber(i));
 			derivedKeysList.add(ECKey.fromPrivate(childKey.getPrivKey()));
 		}
 
@@ -356,7 +392,5 @@ public class CryptoUtils {
 		ECDSASignature signature = key.sign(Sha256Hash.of(messageBytes));
 		return signature.encodeToDER();
 	}
-
-	
 
 }

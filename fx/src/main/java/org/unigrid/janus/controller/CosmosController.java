@@ -20,7 +20,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -181,7 +184,10 @@ public class CosmosController implements Initializable {
 	private Text sendWarnMsg12;
 	@FXML
 	private Text sendWarnMsg24;
-
+	@FXML
+	private TextField importPassword;
+	@FXML
+	private Text sendWarnPassword;
 	@FXML
 	@Named("transactionResponse")
 	private ListView<TransactionResponse.TxResponse> transactionListView;
@@ -271,17 +277,21 @@ public class CosmosController implements Initializable {
 			String password1 = passwordField1.getText();
 			String password2 = passwordField2.getText();
 			if (!password1.equals(password2)) {
+
 				System.out.println("Passwords do not match!");
+				onErrorMessage("Passwords do not match!", sendWarnPassword);
 				return;
 			}
 
 			if (password1.isEmpty()) {
 				System.out.println("Password cannot be empty!");
+				onErrorMessage("Password cannot be empty!", sendWarnPassword);
 				return;
 			}
 
 			if (accountNameField.getText().isEmpty()) {
 				System.out.println("Account name cannot be empty!");
+				onErrorMessage("Account name cannot be empty!", sendWarnPassword);
 				return;
 			}
 			accountModel.setName(accountNameField.getText());
@@ -317,6 +327,7 @@ public class CosmosController implements Initializable {
 		importTabPane.getSelectionModel().select(mnemonic12Tab);
 		mnemonic12Tab.setDisable(false);
 		mnemonic24Tab.setDisable(false);
+		importPassword.setText("");
 		accountModel.reset();
 	}
 
@@ -360,7 +371,8 @@ public class CosmosController implements Initializable {
 			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
 			System.out.println(
 					"Decrypted Private Key (Bytes): " + Arrays.toString(privateKeyBytes));
-
+			System.out.println(
+					"Decrypted Private Key (HEX): " + cryptoUtils.bytesToHex(privateKeyBytes));
 			// Convert the private key bytes to a HEX string
 			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
 			System.out.println("Private Key in HEX: " + privateKeyHex);
@@ -380,7 +392,7 @@ public class CosmosController implements Initializable {
 	@FXML
 	private void generateKeys(ActionEvent event) {
 		try {
-			int keysToCreate = 10;
+			int keysToCreate = 1000;
 			Account selectedAccount = accountsData.getSelectedAccount();
 			String pubKey = selectedAccount.getPublicKey();
 			byte[] seed = Sha256Hash.hash(pubKey.getBytes());
@@ -507,7 +519,6 @@ public class CosmosController implements Initializable {
 	// ex);
 	// }
 	// }
-
 	public void handleSaveAddress(AddressCosmos newAddress) {
 		try {
 			addressService.saveAddress(newAddress);
@@ -622,7 +633,20 @@ public class CosmosController implements Initializable {
 	/* IMPORT VIEW */
 	@FXML
 	private void importPrivateKey(ActionEvent event) {
-		System.out.println("Import private key");
+		System.out.println("Import private key: " + importPassword.getText());
+		try {
+			accountModel.setAddress(cryptoUtils.getAddressFromPrivateKey(importPassword.getText()));
+			accountModel.setPublicKey(cryptoUtils.getPublicKeyBytes(importPassword.getText()));
+			accountModel.setPrivateKey(cryptoUtils.getPrivateKeyBytes(importPassword.getText()));
+			System.out.println("Address from private key: "	+ accountModel.getAddress());
+			addressFieldPassword.setText(accountModel.getAddress());
+		} catch (NoSuchAlgorithmException | NoSuchProviderException
+				| InvalidKeySpecException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		showPane(passwordPane);
 	}
 
 	@FXML
@@ -639,14 +663,12 @@ public class CosmosController implements Initializable {
 		String mnemonic = String.join(" ", mnemonicModel.getMnemonicWordList());
 		System.out.println("mnemonic: " + mnemonic);
 		// this.mnemonicArea.setText(mnemonic);
-
-		// Encrypt the mnemonic before setting it to the accountModel
-		String password1 = passwordField1.getText();
 		byte[] privateKey = derivePrivateKeyFromMnemonic(mnemonic, index);
-		String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
-		accountModel.setMnemonic(encryptedPrivateKey);
-		System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
-
+		// Encrypt the mnemonic before setting it to the accountModel
+		//String password1 = passwordField1.getText();
+		//String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
+		//accountModel.setMnemonic(encryptedPrivateKey);
+		//System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
 		System.out.println(
 				"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
@@ -657,13 +679,6 @@ public class CosmosController implements Initializable {
 		System.out.println("Address from creds: " + creds.getAddress());
 		System.out.println("EcKey from creds: " + creds.getEcKey());
 
-		// Update UI fields
-		// addressCosmos.setAddress(creds.getAddress());
-		// addressCosmos.setPublicKey(
-		// org.bitcoinj.core.Utils.HEX.encode(creds.getEcKey().getPubKey()));
-		// addressCosmos.setName("pickles_" + index);
-		// addressCosmos.setKeyIndex(index);
-		// handleSaveAddress(addressCosmos);
 		// Populate the AccountModel
 		accountModel.setMnemonic(mnemonic);
 		System.out.println("Set mnemonic: " + accountModel.getMnemonic());
