@@ -380,11 +380,11 @@ public class CosmosController implements Initializable {
 	@FXML
 	private void generateKeys(ActionEvent event) {
 		try {
-			int keysToCreate = 100;
+			int keysToCreate = 10;
 			Account selectedAccount = accountsData.getSelectedAccount();
-			String account = selectedAccount.getAddress();
-			byte[] seed = Sha256Hash.hash(account.getBytes());
-			System.out.println("account: " + account);
+			String pubKey = selectedAccount.getPublicKey();
+			byte[] seed = Sha256Hash.hash(pubKey.getBytes());
+			System.out.println("pubKey: " + pubKey);
 			System.out.println("seed: " + seed);
 
 			// Current time in milliseconds since epoch
@@ -405,6 +405,17 @@ public class CosmosController implements Initializable {
 				derivedKeysList.add(ECKey.fromPrivate(childKey.getPrivKey()));
 			}
 
+			ECKey[] derivedKeys = derivedKeysList.toArray(new ECKey[0]);
+
+			// cryptoUtils.printKeys(derivedKeys);
+			// Now iterate through the allKeys array, signing and verifying a message with
+			// each key
+			String messageStr = "Start gridnode message";
+			byte[] messageBytes = messageStr.getBytes();
+			// get private key to sign with
+			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
+
 			// Prompt the user to enter the password
 			String password = getPasswordFromUser();
 			if (password == null) {
@@ -412,37 +423,47 @@ public class CosmosController implements Initializable {
 				return;
 			}
 
-			ECKey[] derivedKeys = derivedKeysList.toArray(new ECKey[0]);
+			// Decrypt the private key. The returned value should be the original private
+			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+			byte[] signedMessage = cryptoUtils.signMessage(messageBytes, privateKeyBytes);
 
-			cryptoUtils.printKeys(derivedKeys);
+			// Verify the signature and the derived keys
+			ECKey publicKey = ECKey.fromPrivate(privateKeyBytes);
+			List<ECKey> publicKeysToVerify = derivedKeysList;
+			System.out.println("publicKey.getPubKey(): " + publicKey.getPubKey());
 
-			// Now iterate through the allKeys array, signing and verifying a message with
-			// each key
-			String messageStr = "Start gridnode message";
-			byte[] messageBytes = messageStr.getBytes();
+			long startTime = System.currentTimeMillis(); // Capture the start time
 
-			for (int i = 0; i < derivedKeys.length; i++) {
-				// Sign the message with the current derived key
-				System.out.println("derivedKeys[i]: " + derivedKeys[i]);
-				ECDSASignature signature = derivedKeys[i]
-						.sign(Sha256Hash.of(messageBytes));
-				byte[] signatureBytes = signature.encodeToDER();
+			boolean areKeysVerified = cryptoUtils.verifySignatureKeys(messageBytes,
+					signedMessage, derivedKeys, keysToCreate, pubKey);
 
-				// Create a single-key array for verification
-				ECKey[] singleKeyArray = {
-					derivedKeys[i]
-				};
+			long endTime = System.currentTimeMillis(); // Capture the end time
 
-				// Verify the signature
-				boolean isVerified = cryptoUtils.verifySignature(messageBytes,
-						signatureBytes, singleKeyArray);
-				System.out.println("Verification for key " + i + ": "
-						+ (isVerified ? "Succeeded" : "Failed"));
-			}
+			long elapsedTime = endTime - startTime; // Calculate the elapsed time
 
+			System.out.println("Are keys verified: " + (areKeysVerified ? "Yes" : "No"));
+			System.out.println("Verification time: " + elapsedTime + " milliseconds");
+
+			// for (int i = 0; i < derivedKeys.length; i++) {
+			// // Sign the message with the current derived key
+			// System.out.println("derivedKeys[i]: " + derivedKeys[i]);
+			// ECDSASignature signature = derivedKeys[i]
+			// .sign(Sha256Hash.of(messageBytes));
+			// byte[] signatureBytes = signature.encodeToDER();
+			//
+			// // Create a single-key array for verification
+			// ECKey[] singleKeyArray = {
+			// derivedKeys[i]
+			// };
+			//
+			// // Verify the signature
+			// boolean isVerified = cryptoUtils.verifySignature(messageBytes,
+			// signatureBytes, singleKeyArray);
+			// System.out.println("Verification for key " + i + ": "
+			// + (isVerified ? "Succeeded" : "Failed"));
+			// }
 			// Example of using bad keys for verification
-			verifyWithBadKeys(messageBytes, derivedKeys[0]);
-
+			// verifyWithBadKeys(messageBytes, derivedKeys[0]);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
 					ex);

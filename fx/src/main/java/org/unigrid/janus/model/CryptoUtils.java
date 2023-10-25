@@ -27,8 +27,10 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import javax.crypto.Cipher;
 
 import javax.crypto.SecretKey;
@@ -42,6 +44,11 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.ECKey.ECDSASignature;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.SignatureDecodeException;
+import org.bitcoinj.crypto.ChildNumber;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDKeyDerivation;
+import org.bitcoinj.wallet.DeterministicKeyChain;
+import org.bitcoinj.wallet.DeterministicSeed;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.unigrid.janus.model.service.DebugService;
 
@@ -250,5 +257,106 @@ public class CryptoUtils {
 		// No keys verified the signature
 		return false;
 	}
+
+	public boolean verifySignatureKeys(byte[] message, byte[] signatureBytes, ECKey[] publicKeys,
+		int keysToCreate, String pubKey) throws SignatureDecodeException {
+		System.out.println(Arrays.toString(signatureBytes));
+
+		// Decode the signature bytes
+		ECDSASignature signature = ECDSASignature.decodeFromDER(signatureBytes);
+		System.out.println("signature: " + signature);
+
+		// Hash the message (assuming SHA-256 is used)
+		Sha256Hash messageHash = Sha256Hash.of(message);
+		System.out.println("messageHash: " + messageHash);
+		String recoveredPublicKeyHex = null;
+		ECKey publicKey = null;
+		for (int recId = 0; recId < 4; recId++) {  // Loop through the possible recId values
+			publicKey = ECKey.recoverFromSignature(recId, signature, messageHash, false);
+			if (publicKey != null) {
+				byte[] compressedPublicKeyBytes = publicKey.getPubKeyPoint().getEncoded(true);
+				recoveredPublicKeyHex = bytesToHex(compressedPublicKeyBytes);
+				if (recoveredPublicKeyHex.equals(pubKey)) {
+					break;  // Exit the loop if the recovered public key matches the provided pubKey
+				}
+				publicKey = null;  // Reset publicKey to null if no match is found
+			}
+		}
+
+		if (publicKey == null) {
+			System.out.println("Failed to recover matching public key");
+			return false;  // Return false if no matching public key is found
+		}
+
+		// Assuming uncompressed public key. Adjust as necessary.
+//		if (publicKey == null) {
+//			return false; // Failed to recover public key
+//		}
+		// Generate a list of keys from the public key
+		List<ECKey> generatedKeys
+			= generateKeysFromCompressedPublicKey(recoveredPublicKeyHex, keysToCreate);
+
+		// Compare the generated keys with the keys passed in
+		if (generatedKeys.size() != publicKeys.length) {
+			System.out.println("Lenghts dont match of keys");
+
+			return false; // The number of keys do not match
+		}
+
+		for (int i = 0; i < generatedKeys.size(); i++) {
+			System.out.println("publicKeys[i].getPubKey()" + bytesToHex(publicKeys[i].getPubKey()));
+			System.out.println("generatedKeys[i].getPubKey()"
+				+ bytesToHex(generatedKeys.get(i).getPubKey()));
+			if (!Arrays.equals(generatedKeys.get(i).getPubKey(), publicKeys[i].getPubKey())) {
+
+				return false; // The keys do not match
+			}
+		}
+		System.out.println("All keys match this account!");
+
+		return true;
+	}
+
+	public String getAddressFromKey(ECKey ecKey) {
+		byte[] publicKeyBytes = ecKey.getPubKey();
+		System.out.println("publicKey: " + bytesToHex(publicKeyBytes));
+
+		String address = AddressUtil.publicKeyToAddress(publicKeyBytes, "unigrid");
+
+		System.out.println("getAddressFromKey: " + address);
+		return address;
+	}
+
+	public List<ECKey> generateKeysFromCompressedPublicKey(String compressedPublicKeyHex, int keysToCreate) {
+		System.out.println("Key being used in test: " + compressedPublicKeyHex);
+
+		// Hash the compressed public key bytes to generate the seed
+		byte[] seed = Sha256Hash.hash(compressedPublicKeyHex.getBytes());
+
+		// Current time in milliseconds since epoch
+		long creationTimeSeconds = System.currentTimeMillis() / 1000L;
+
+		// Generate the HD wallet from the seed
+		DeterministicSeed deterministicSeed = new DeterministicSeed(seed, "", creationTimeSeconds);
+		DeterministicKeyChain chain = DeterministicKeyChain.builder().seed(deterministicSeed).build();
+
+		// Derive child keys
+		List<ECKey> derivedKeysList = new ArrayList<>();
+		DeterministicKey parentKey = chain.getWatchingKey();
+		for (int i = 0; i < keysToCreate; i++) {
+			DeterministicKey childKey = HDKeyDerivation.deriveChildKey(parentKey, new ChildNumber(i));
+			derivedKeysList.add(ECKey.fromPrivate(childKey.getPrivKey()));
+		}
+
+		return derivedKeysList;
+	}
+
+	public byte[] signMessage(byte[] messageBytes, byte[] privateKeyBytes) {
+		ECKey key = ECKey.fromPrivate(privateKeyBytes);
+		ECDSASignature signature = key.sign(Sha256Hash.of(messageBytes));
+		return signature.encodeToDER();
+	}
+
+	
 
 }
