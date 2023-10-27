@@ -69,7 +69,6 @@ public class CosmosTxList {
 //		// }
 //	}
 	public LoadReport loadTransactions(int count) {
-		System.out.println("wtf?? " + count);
 		LoadReport result = new LoadReport(txResponsesList.size());
 
 		// Log the transaction count before loading new ones

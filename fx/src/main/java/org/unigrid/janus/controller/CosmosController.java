@@ -35,6 +35,7 @@ import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.unigrid.janus.model.CryptoUtils;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.RestService;
 
 import com.jeongen.cosmos.CosmosRestApiClient;
 import com.jeongen.cosmos.crypro.CosmosCredentials;
@@ -93,11 +94,18 @@ import org.unigrid.janus.model.AccountsData.Account;
 import org.unigrid.janus.model.AddressCosmos;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.MnemonicModel;
+import org.unigrid.janus.model.rest.entity.DelegationsRequest;
+import org.unigrid.janus.model.rest.entity.GridnodeDelegationAmount;
+import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
+import org.unigrid.janus.model.rest.entity.RewardsRequest;
+import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
+import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
 import org.unigrid.janus.model.service.AccountsService;
 import org.unigrid.janus.model.service.AddressCosmosService;
 import org.unigrid.janus.model.service.CosmosRestClient;
+import org.unigrid.janus.model.service.RestCommand;
 import org.unigrid.janus.model.signal.MnemonicState;
 import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
@@ -304,7 +312,7 @@ public class CosmosController implements Initializable {
 
 			// Encrypt the private key
 			String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
-			accountModel.setEncryptedPrivateKey(encryptedPrivateKey);
+			// accountModel.setEncryptedPrivateKey(encryptedPrivateKey);
 			System.out.println("Encrypted Private Key: " + encryptedPrivateKey);
 
 			// Clear out any private keys from memory
@@ -371,8 +379,8 @@ public class CosmosController implements Initializable {
 			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
 			System.out.println(
 					"Decrypted Private Key (Bytes): " + Arrays.toString(privateKeyBytes));
-			System.out.println(
-					"Decrypted Private Key (HEX): " + cryptoUtils.bytesToHex(privateKeyBytes));
+			System.out.println("Decrypted Private Key (HEX): "
+					+ cryptoUtils.bytesToHex(privateKeyBytes));
 			// Convert the private key bytes to a HEX string
 			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
 			System.out.println("Private Key in HEX: " + privateKeyHex);
@@ -456,26 +464,6 @@ public class CosmosController implements Initializable {
 			System.out.println("Are keys verified: " + (areKeysVerified ? "Yes" : "No"));
 			System.out.println("Verification time: " + elapsedTime + " milliseconds");
 
-			// for (int i = 0; i < derivedKeys.length; i++) {
-			// // Sign the message with the current derived key
-			// System.out.println("derivedKeys[i]: " + derivedKeys[i]);
-			// ECDSASignature signature = derivedKeys[i]
-			// .sign(Sha256Hash.of(messageBytes));
-			// byte[] signatureBytes = signature.encodeToDER();
-			//
-			// // Create a single-key array for verification
-			// ECKey[] singleKeyArray = {
-			// derivedKeys[i]
-			// };
-			//
-			// // Verify the signature
-			// boolean isVerified = cryptoUtils.verifySignature(messageBytes,
-			// signatureBytes, singleKeyArray);
-			// System.out.println("Verification for key " + i + ": "
-			// + (isVerified ? "Succeeded" : "Failed"));
-			// }
-			// Example of using bad keys for verification
-			// verifyWithBadKeys(messageBytes, derivedKeys[0]);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
 					ex);
@@ -494,15 +482,14 @@ public class CosmosController implements Initializable {
 				ECKey.fromPrivate(
 						new BigInteger("facefacefacefacefacefacefaceface", 16)) };
 
-		for (int i = 0; i < badKeys.length; i++) {
-			ECKey[] singleKeyArray = {
-				badKeys[i]
-			};
-			boolean isVerified = cryptoUtils.verifySignature(messageBytes, signatureBytes,
-					singleKeyArray);
-			System.out.println("Verification for bad key " + i + ": "
-					+ (isVerified ? "Succeeded" : "Failed"));
-		}
+		// for (int i = 0; i < badKeys.length; i++) {
+		// ECKey[] singleKeyArray = { badKeys[i] };
+		// boolean isVerified = cryptoUtils.verifySignature(messageBytes,
+		// signatureBytes,
+		// singleKeyArray);
+		// System.out.println("Verification for bad key " + i + ": "
+		// + (isVerified ? "Succeeded" : "Failed"));
+		// }
 	}
 
 	// @FXML
@@ -635,10 +622,13 @@ public class CosmosController implements Initializable {
 	private void importPrivateKey(ActionEvent event) {
 		System.out.println("Import private key: " + importPassword.getText());
 		try {
-			accountModel.setAddress(cryptoUtils.getAddressFromPrivateKey(importPassword.getText()));
-			accountModel.setPublicKey(cryptoUtils.getPublicKeyBytes(importPassword.getText()));
-			accountModel.setPrivateKey(cryptoUtils.getPrivateKeyBytes(importPassword.getText()));
-			System.out.println("Address from private key: "	+ accountModel.getAddress());
+			accountModel.setAddress(
+					cryptoUtils.getAddressFromPrivateKey(importPassword.getText()));
+			accountModel.setPublicKey(
+					cryptoUtils.getPublicKeyBytes(importPassword.getText()));
+			accountModel.setPrivateKey(
+					cryptoUtils.getPrivateKeyBytes(importPassword.getText()));
+			System.out.println("Address from private key: " + accountModel.getAddress());
 			addressFieldPassword.setText(accountModel.getAddress());
 		} catch (NoSuchAlgorithmException | NoSuchProviderException
 				| InvalidKeySpecException e) {
@@ -665,10 +655,10 @@ public class CosmosController implements Initializable {
 		// this.mnemonicArea.setText(mnemonic);
 		byte[] privateKey = derivePrivateKeyFromMnemonic(mnemonic, index);
 		// Encrypt the mnemonic before setting it to the accountModel
-		//String password1 = passwordField1.getText();
-		//String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
-		//accountModel.setMnemonic(encryptedPrivateKey);
-		//System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
+		// String password1 = passwordField1.getText();
+		// String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
+		// accountModel.setMnemonic(encryptedPrivateKey);
+		// System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
 		System.out.println(
 				"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
@@ -759,6 +749,7 @@ public class CosmosController implements Initializable {
 				System.out
 						.println("Selected Account:" + accountsData.getSelectedAccount());
 				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
+
 				// Create a background task for the network call
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
@@ -771,6 +762,7 @@ public class CosmosController implements Initializable {
 						cosmosTxList.loadTransactions(10);
 						System.out.println("cosmosTxList.getTxResponse(): "
 								+ cosmosTxList.getTxResponsesList());
+						loadAccountData(accountsData.getSelectedAccount().getAddress());
 						return null;
 					}
 				};
@@ -788,6 +780,53 @@ public class CosmosController implements Initializable {
 			}
 		});
 
+	}
+
+	private void loadAccountData(String account) {
+		RestService restService = new RestService();
+
+		try {
+			// Delegations
+			DelegationsRequest delegationsRequest = new DelegationsRequest(account);
+			DelegationsRequest.Response delegationsResponse = new RestCommand<>(
+					delegationsRequest, restService).execute();
+			System.out.println(delegationsResponse);
+
+			// Rewards
+			RewardsRequest rewardsRequest = new RewardsRequest(account);
+			RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
+					restService).execute();
+			System.out.println(rewardsResponse);
+
+			// Unbonding Delegations
+			UnbondingDelegationsRequest unbondingDelegationsRequest = new UnbondingDelegationsRequest(
+					account);
+			UnbondingDelegationsRequest.Response unbondingDelegationsResponse = new RestCommand<>(
+					unbondingDelegationsRequest, restService).execute();
+			System.out.println(unbondingDelegationsResponse);
+
+			// Redelegations
+			RedelegationsRequest redelegationsRequest = new RedelegationsRequest(account);
+			RedelegationsRequest.Response redelegationsResponse = new RestCommand<>(
+					redelegationsRequest, restService).execute();
+			System.out.println(redelegationsResponse);
+
+			// Withdraw Address
+			WithdrawAddressRequest withdrawAddressRequest = new WithdrawAddressRequest(
+					account);
+			WithdrawAddressRequest.Response withdrawAddressResponse = new RestCommand<>(
+					withdrawAddressRequest, restService).execute();
+			System.out.println(withdrawAddressResponse);
+
+			GridnodeDelegationAmount gridnodeDelegationRequest = new GridnodeDelegationAmount(
+					account);
+			GridnodeDelegationAmount.Response gridnodeDelegationResponse = new RestCommand<>(
+					gridnodeDelegationRequest, restService).execute();
+			System.out.println(gridnodeDelegationResponse);
+
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@FXML

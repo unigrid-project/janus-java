@@ -32,7 +32,7 @@
                         </Label>
                         <Region HBox.hgrow="ALWAYS" />
 
-                        <ComboBox fx:id="accountsDropdown" prefWidth="250.0" promptText="Switch Account" styleClass="combo-box" />
+                        <ComboBox fx:id="accountsDropdown" prefWidth="250.0" promptText="Switch Account" style="-fx-cursor: hand;" styleClass="combo-box" />
                     </children>
                 </HBox>
                 <HBox>

@@ -38,11 +38,11 @@ public class AccountModel {
 	private byte[] publicKey;
 
 	public void reset() {
-		name = null;
+		//name = null;
 		mnemonic = null;
-		encryptedPrivateKey = null;
-		address = null;
+		//encryptedPrivateKey = null;
+		//address = null;
 		privateKey = null;
-		publicKey = null;
+		//publicKey = null;
 	}
 }

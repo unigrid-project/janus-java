@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
+	Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -14,34 +14,11 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.rest.entity;
+package org.unigrid.janus.model;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
-public abstract class BaseRequest<T> {
-	private String method;
-	private String url;
-	private T params;
-
-	// Constructor for RPC calls
-	protected BaseRequest(String method) {
-		this.method = method;
-	}
-
-	// Constructor for REST calls
-	public BaseRequest(String method, String url) {
-		this.method = method;
-		this.url = url;
-	}
-
-	// Constructor for REST calls with parameters
-	public BaseRequest(String method, String url, T params) {
-		this.method = method;
-		this.url = url;
-		this.params = params;
-	}
-
-	public abstract T convertResponse(String responseBody);
-
+public class ApiConfig {
+	@Getter
+	private static final String BASE_URL = "https://rest-testnet.unigrid.org/";
 }

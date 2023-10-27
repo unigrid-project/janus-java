@@ -39,7 +39,6 @@ public class DataDirectory {
 	public static final String KEYRING_DIRECTORY = "/keyring";
 	public static final String COSMOS_ADDRESSES = "addresses.json";
 	public static final String ACCOUNTS_FILE = "accounts.json";
-	public static final String ENCRYPTED_KEYS_FILENAME = "accounts.json";
 	public static final String DEBUG_LOG = "debug.log";
 	private static final String OSX_SUPPORT_DIR = "Library/Application Support";
 
@@ -127,10 +126,6 @@ public class DataDirectory {
 
 	public static File getWalletLog() {
 		return Paths.get(get(), "wallet.log").toFile();
-	}
-
-	public static File getEncryptedKeys() {
-		return Paths.get(get(), KEYRING_DIRECTORY.concat("/").concat(ENCRYPTED_KEYS_FILENAME)).toFile();
 	}
 
 	public static String getEncryptedKeysPath() {
