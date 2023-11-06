@@ -235,11 +235,11 @@
 			<artifactId>sdk</artifactId>
 			<version>0.0.5</version>
 		</dependency>
-		<dependency>
-			<groupId>com.google.protobuf</groupId>
-			<artifactId>protobuf-java</artifactId>
-			<version>3.21.12</version>
-		</dependency>
+		 <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.20.3</version>
+        </dependency>
 		<!-- https://mvnrepository.com/artifact/org.bitcoinj/bitcoinj-core -->
 		<dependency>
 			<groupId>org.bitcoinj</groupId>
@@ -261,6 +261,16 @@
 			<artifactId>sdk</artifactId>
 			<version>0.0.5</version>
 		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-protobuf</artifactId>
+			<version>1.59.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>3.24.4</version>			<!-- use the latest version available -->
+		</dependency>
 		<!--<dependency>
 		    <groupId>com.dustinredmond.fxtrayicon</groupId>
 		    <artifactId>FXTrayIcon</artifactId>
@@ -273,6 +283,27 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
+			<!-- <plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>0.6.1</version>
+				<configuration>
+					<protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
+					<includeDirectories>
+						<include>${user.home}/go/pkg/mod/github.com/cosmos/cosmos-sdk@v0.47.4/proto</include>
+						<include>${user.home}/go/pkg/mod/github.com/cosmos/cosmos-proto@v1.0.0-beta.2/proto</include>
+					</includeDirectories>
+					<outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>test-compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin> -->
 			<!-- Uncomment tentackle to build module jars for fx to make a new config.xml for update.
 			Comment to speed up the build process for testing -->
 			<!--<plugin>
@@ -295,6 +326,13 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>checkstyle.xml</configLocation>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
+					<sourceDirectories>
+						<sourceDirectory>src/main/java</sourceDirectory>
+					</sourceDirectories>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>pl.gdela</groupId>

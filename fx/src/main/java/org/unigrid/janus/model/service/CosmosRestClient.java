@@ -28,7 +28,10 @@ import java.security.Signature;
 import java.util.Base64;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jeongen.cosmos.CosmosRestApiClient;
+import com.jeongen.cosmos.crypro.CosmosCredentials;
+
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -39,15 +42,26 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.unigrid.janus.model.AccountModel;
+import org.unigrid.janus.model.CryptoUtils;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 
 import org.unigrid.janus.model.transaction.GridnodeTransaction;
 //import org.unigrid.janus.utils.MnemonicToPrivateKey;
 
 @ApplicationScoped
-public class CosmosRestClient {
+public class CosmosRestClient extends CosmosRestApiClient {
 
+	@Inject
+	private AccountModel accountModel;
+
+	@Inject
+	private CryptoUtils cryptoUtils;
 	private String apiUrl;
+
+	public CosmosRestClient(String baseUrl, String chainId, String token) {
+		super(baseUrl, chainId, token);
+	}
 
 	// public CosmosRestClient(String apiUrl) {
 	// this.apiUrl = apiUrl;
@@ -138,9 +152,74 @@ public class CosmosRestClient {
 				TransactionResponse.class);
 			return txResponse;
 		} catch (URISyntaxException ex) {
-			Logger.getLogger(CosmosRestClient.class.getName()).log(Level.SEVERE, null,
-				ex);
+			Logger.getLogger(CosmosRestClient.class.getName()).log(Level.SEVERE, null, ex);
 			return null;
 		}
 	}
+
+	public void delegateTokens(String delegatorAddress, String validatorAddress,
+		BigDecimal amountInAtom, CosmosCredentials credentials) throws Exception {
+		// // Step 1: Create MsgDelegate message
+		// Coin delegateAmount = Coin.newBuilder()
+		// .setDenom("ugd")
+		// .setAmount(ATOMUnitUtil.atomToMicroAtom(amountInAtom).toPlainString())
+		// .build();
+		// MsgDelegate msgDelegate = MsgDelegate.newBuilder()
+		// .setDelegatorAddress(delegatorAddress)
+		// .setValidatorAddress(validatorAddress)
+		// .setAmount(delegateAmount)
+		// .build();
+		//
+		// // Step 2: Create TxBody object
+		// TxBody txBody = TxBody.newBuilder()
+		// .addMessages(Any.pack(msgDelegate, "/"))
+		// .build();
+		//
+		// // ... rest of the steps
+		// // Step 6: Broadcast Tx object to the network
+		// ServiceOuterClass.BroadcastTxRequest broadcastTxRequest =
+		// ServiceOuterClass.BroadcastTxRequest.newBuilder()
+		// .setTxBytes(tx.toByteString())
+		// .setMode(ServiceOuterClass.BroadcastMode.BROADCAST_MODE_SYNC)
+		// .build();
+		// ServiceOuterClass.BroadcastTxResponse broadcastTxResponse =
+		// broadcastTx(broadcastTxRequest);
+
+		// Check for errors and handle response...
+	}
+
+//	public String sendTokens(String recipientAddress, String amount, String denom,
+//		String password) throws Exception {
+//
+//		try {
+//			// Decrypt the private key using the encryptedPrivateKey from AccountModel and
+//			// password
+//			byte[] decryptedPrivateKey = cryptoUtils
+//				.decrypt(accountModel.getEncryptedPrivateKey(), password);
+//
+//			// Convert the decrypted private key to CosmosCredentials
+//			CosmosCredentials credentials = CosmosCredentials.create(decryptedPrivateKey,
+//				"unigrid");
+//
+//			CosmosRestApiClient unigridCosmosService = new CosmosRestApiClient(
+//				"https://rest-testnet.unigrid.org/", "unigrid-testnet-1", "ugd");
+//
+//			System.out.println("address:" + credentials.getAddress());
+//			List<SendInfo> sendList = new ArrayList<>();
+//			sendList.add(
+//				SendInfo.builder().credentials(credentials).toAddress(recipientAddress)
+//					.amountInAtom(new BigDecimal(amount)).build());
+//			Abci.TxResponse txResponse = unigridCosmosService.sendMultiTx(credentials,
+//				sendList, new BigDecimal("0.000001"), 200000);
+//			//System.out.println(txResponse);
+//
+//			ServiceOuterClass.GetTxsEventResponse txsEventByHeight = unigridCosmosService
+//				.getTxsEventByHeight(10099441L, "");
+//			//System.out.println(txsEventByHeight);
+//
+//			return "complete";
+//		} catch (Exception e) {
+//			throw new Exception("An unexpected error occurred while sending tokens.", e);
+//		}
+//	}
 }

@@ -124,7 +124,7 @@ public class CosmosController implements Initializable {
 	@Inject
 	private AccountsData accountsData;
 	@Inject
-	private CosmosRestClient restClient;
+	private CosmosRestClient cosmosClient;
 	@Inject
 	private MnemonicModel mnemonicModel;
 	@Inject
@@ -182,6 +182,10 @@ public class CosmosController implements Initializable {
 	private Tab mnemonic24Tab;
 	@FXML
 	private TextField addressFieldPassword;
+	@FXML
+	private TextField toAddress;
+	@FXML
+	private TextField sendAmount;
 	@FXML
 	private PasswordField passwordField1;
 	@FXML
@@ -754,7 +758,7 @@ public class CosmosController implements Initializable {
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
 					protected Void call() throws Exception {
-						String accountQuery = restClient.checkBalanceForAddress(
+						String accountQuery = cosmosClient.checkBalanceForAddress(
 								selectedAccount.get().getAddress());
 						Platform.runLater(() -> {
 							balanceLabel.setText(accountQuery);
@@ -849,6 +853,24 @@ public class CosmosController implements Initializable {
 			DecimalFormat formatter = new DecimalFormat("0.00000000");
 			String formattedBalance = formatter.format(balance);
 			balanceField.setText(formattedBalance);
+		} catch (Exception ex) {
+			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+					ex);
+		}
+	}
+
+	@FXML
+	private void sendTokens(ActionEvent event) {
+		try {
+			String toAddress = this.toAddress.getText();
+			String sendAmount = this.sendAmount.getText();
+			String password = "pickles"; // TODO change to user input
+
+			String response = "crap";
+			// cosmosClient.sendTokens(toAddress, sendAmount,
+										// "ugd", password);
+
+			System.out.println("Response: " + response);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
 					ex);

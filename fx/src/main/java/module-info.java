@@ -60,8 +60,8 @@ module fx {
 	requires org.bouncycastle.provider;
 	requires com.google.common;
 	requires org.json;
-	requires crypto;	
- 	requires org.apache.commons.codec;
+	requires crypto;
+	requires org.apache.commons.codec;
 	requires java.net.http;
 
 	uses org.update4j.service.Launcher;

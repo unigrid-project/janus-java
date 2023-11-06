@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -62,6 +63,33 @@
                         </Label>
                     </children>
                 </HBox>
+            <HBox alignment="CENTER">
+               <children>
+                  <Label text="To Address:" textFill="#ababab">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField fx:id="toAddress" prefWidth="300.0" />
+                  <Label fx:id="balanceLabel1" text="Amount:" textFill="#ababab">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                     <padding>
+                        <Insets left="5.0" right="5.0" />
+                     </padding>
+                  </Label>
+                  <TextField fx:id="sendAmountr" prefWidth="150.0">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Button contentDisplay="CENTER" onAction="#createNewAccount" prefWidth="125.0" style="-fx-cursor: hand;" text="Send" />
+               </children>
+            </HBox>
             </VBox>
 
             <!-- Latest Transactions -->
