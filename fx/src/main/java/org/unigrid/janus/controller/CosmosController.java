@@ -753,7 +753,8 @@ public class CosmosController implements Initializable {
 				System.out
 						.println("Selected Account:" + accountsData.getSelectedAccount());
 				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
-
+				System.out.println("getEncryptedPrivateKey: "
+					+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
 				// Create a background task for the network call
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
@@ -867,8 +868,7 @@ public class CosmosController implements Initializable {
 			String password = "pickles"; // TODO change to user input
 
 			String response = "crap";
-			// cosmosClient.sendTokens(toAddress, sendAmount,
-										// "ugd", password);
+			cosmosClient.sendTokens(toAddress, sendAmount, "ugd", password);
 
 			System.out.println("Response: " + response);
 		} catch (Exception ex) {

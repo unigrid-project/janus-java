@@ -82,12 +82,12 @@
                         <Insets left="5.0" right="5.0" />
                      </padding>
                   </Label>
-                  <TextField fx:id="sendAmountr" prefWidth="150.0">
+                  <TextField fx:id="sendAmount" prefWidth="150.0">
                      <HBox.margin>
                         <Insets right="10.0" />
                      </HBox.margin>
                   </TextField>
-                  <Button contentDisplay="CENTER" onAction="#createNewAccount" prefWidth="125.0" style="-fx-cursor: hand;" text="Send" />
+                  <Button contentDisplay="CENTER" onAction="#sendTokens" prefWidth="125.0" style="-fx-cursor: hand;" text="Send" />
                </children>
             </HBox>
             </VBox>

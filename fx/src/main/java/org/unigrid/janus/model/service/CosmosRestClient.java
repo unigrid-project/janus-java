@@ -29,7 +29,8 @@ import java.util.Base64;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jeongen.cosmos.CosmosRestApiClient;
 import com.jeongen.cosmos.crypro.CosmosCredentials;
-
+import com.jeongen.cosmos.vo.SendInfo;
+import cosmos.base.abci.v1beta1.Abci;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -40,28 +41,29 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.unigrid.janus.model.AccountModel;
+import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.CryptoUtils;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 
 import org.unigrid.janus.model.transaction.GridnodeTransaction;
-//import org.unigrid.janus.utils.MnemonicToPrivateKey;
 
 @ApplicationScoped
-public class CosmosRestClient extends CosmosRestApiClient {
+public class CosmosRestClient {
 
 	@Inject
-	private AccountModel accountModel;
+	private AccountsData accountData;
 
 	@Inject
 	private CryptoUtils cryptoUtils;
 	private String apiUrl;
 
-	public CosmosRestClient(String baseUrl, String chainId, String token) {
-		super(baseUrl, chainId, token);
-	}
+//	public CosmosRestClient(String baseUrl, String chainId, String token) {
+//		super(baseUrl, chainId, token);
+//	}
 
 	// public CosmosRestClient(String apiUrl) {
 	// this.apiUrl = apiUrl;
@@ -188,38 +190,40 @@ public class CosmosRestClient extends CosmosRestApiClient {
 		// Check for errors and handle response...
 	}
 
-//	public String sendTokens(String recipientAddress, String amount, String denom,
-//		String password) throws Exception {
-//
-//		try {
-//			// Decrypt the private key using the encryptedPrivateKey from AccountModel and
-//			// password
-//			byte[] decryptedPrivateKey = cryptoUtils
-//				.decrypt(accountModel.getEncryptedPrivateKey(), password);
-//
-//			// Convert the decrypted private key to CosmosCredentials
-//			CosmosCredentials credentials = CosmosCredentials.create(decryptedPrivateKey,
-//				"unigrid");
-//
-//			CosmosRestApiClient unigridCosmosService = new CosmosRestApiClient(
-//				"https://rest-testnet.unigrid.org/", "unigrid-testnet-1", "ugd");
-//
-//			System.out.println("address:" + credentials.getAddress());
-//			List<SendInfo> sendList = new ArrayList<>();
-//			sendList.add(
-//				SendInfo.builder().credentials(credentials).toAddress(recipientAddress)
-//					.amountInAtom(new BigDecimal(amount)).build());
-//			Abci.TxResponse txResponse = unigridCosmosService.sendMultiTx(credentials,
-//				sendList, new BigDecimal("0.000001"), 200000);
-//			//System.out.println(txResponse);
+	public String sendTokens(String recipientAddress, String amount, String denom,
+		String password) throws Exception {
+
+		try {
+			// Decrypt the private key using the encryptedPrivateKey from AccountModel and
+			// password
+			System.out.println("getEncryptedPrivateKey: "
+				+ accountData.getSelectedAccount().getEncryptedPrivateKey());
+			byte[] decryptedPrivateKey = cryptoUtils
+				.decrypt(accountData.getSelectedAccount().getEncryptedPrivateKey(), password);
+
+			// Convert the decrypted private key to CosmosCredentials
+			CosmosCredentials credentials = CosmosCredentials.create(decryptedPrivateKey,
+				"unigrid");
+
+			CosmosRestApiClient unigridCosmosService = new CosmosRestApiClient(
+				"https://rest-testnet.unigrid.org/", "unigrid-testnet-1", "ugd");
+
+			System.out.println("address:" + credentials.getAddress());
+			List<SendInfo> sendList = new ArrayList<>();
+			sendList.add(
+				SendInfo.builder().credentials(credentials).toAddress(recipientAddress)
+					.amountInAtom(new BigDecimal(amount)).build());
+			Abci.TxResponse txResponse = unigridCosmosService.sendMultiTx(credentials,
+				sendList, new BigDecimal("0.000001"), 200000);
+			//System.out.println(txResponse);
 //
 //			ServiceOuterClass.GetTxsEventResponse txsEventByHeight = unigridCosmosService
 //				.getTxsEventByHeight(10099441L, "");
-//			//System.out.println(txsEventByHeight);
-//
-//			return "complete";
-//		} catch (Exception e) {
-//			throw new Exception("An unexpected error occurred while sending tokens.", e);
-//		}
-//	}
+			//System.out.println(txsEventByHeight);
+
+			return "complete";
+		} catch (Exception e) {
+			throw new Exception("An unexpected error occurred while sending tokens.", e);
+		}
+	}
 }
