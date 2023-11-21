@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.model.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -27,8 +28,8 @@ import org.unigrid.janus.model.ApiConfig;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class GridnodeDelegationAmount extends BaseRequest<GridnodeDelegationAmount.Response> {
-	//TODO rename this endpoint in the COSMOS SDK
-	private static final String ENDPOINT = "unigrid-project/cosmos-sdk-gridnode/gridnode/delegated-amount/";
+
+	private static final String ENDPOINT = "gridnode/delegated-amount/";
 
 	public GridnodeDelegationAmount(String delegatorAddress) {
 		super("GET", buildUrl(delegatorAddress));
@@ -43,14 +44,24 @@ public class GridnodeDelegationAmount extends BaseRequest<GridnodeDelegationAmou
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			return objectMapper.readValue(responseBody, Response.class);
-		} catch (IOException | NumberFormatException e) {
+		} catch (IOException e) {
 			throw new RuntimeException("Failed to convert response", e);
 		}
 	}
 
 	@Data
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Response {
 		@JsonProperty("amount")
 		private BigDecimal amount;
+		@JsonProperty("code")
+		private Integer code;
+		@JsonProperty("message")
+		private String message;
+
+		// handle null or absent amount values
+		public BigDecimal getAmount() {
+			return amount == null ? BigDecimal.ZERO : amount; // Default to zero if amount is null
+		}
 	}
 }

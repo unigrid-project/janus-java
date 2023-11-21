@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.model.rpc.entity.GetBlockCount;
+import org.unigrid.janus.model.setup.AppConfig;
 import org.unigrid.janus.view.AlertDialog;
 import org.update4j.OS;
 import org.unigrid.janus.model.BootstrapModel;
@@ -41,6 +42,8 @@ import org.unigrid.janus.model.BootstrapModel;
 @Eager
 @ApplicationScoped
 public class Daemon {
+	@Inject
+	private AppConfig appConfig;
 	private static final String PROPERTY_LOCATION_KEY = "janus.daemon.location";
 	private static final String DEFAULT_PATH_TO_DAEMON_KEY = "path.to.daemon";
 	private static File file = new File(System.getProperty("user.dir") + "/bin/");
@@ -99,7 +102,8 @@ public class Daemon {
 	private void runDaemon() throws IOException {
 		debug.print("starting daemon", Daemon.class.getSimpleName());
 		String testnet = BootstrapModel.isTestnet() ? "-testnet" : "-server";
-		ProcessBuilder pb = new ProcessBuilder(location, testnet);
+		String hPort = "-hport=" + appConfig.getPort();
+		ProcessBuilder pb = new ProcessBuilder(location, testnet, hPort);
 		process = Optional.of(pb.inheritIO().start());
 	}
 

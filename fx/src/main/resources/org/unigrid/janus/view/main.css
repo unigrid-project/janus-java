@@ -441,3 +441,17 @@
 .list-cell:even {
   -fx-background-color: #bbc1;
 }
+
+.list-view .cosmos-list-cell {
+  -fx-text-fill: white; /* For white font color */
+  /* Or use light grey color */
+  /* -fx-text-fill: #D3D3D3; */
+}
+
+.list-view .cosmos-list-cell:selected {
+  -fx-text-fill: white; /* For white font color */
+  /* Or use light grey color */
+  /* -fx-text-fill: #D3D3D3; */
+  -fx-background-color: -fx-selection-bar; /* For default selection background */
+}
+

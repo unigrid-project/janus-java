@@ -188,7 +188,7 @@
                                           </FontIcon>
                                        </graphic>
                                     </ToggleButton>
-                                    <ToggleButton fx:id="btnGovernace" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onGovernaceClicked" prefWidth="150.0" style="-fx-cursor: hand;" text="Governace">
+                                    <ToggleButton fx:id="btnGovernace" alignment="CENTER_LEFT" mnemonicParsing="false" onMouseClicked="#onGovernaceClicked" prefWidth="150.0" style="-fx-cursor: hand;" text="Governance">
                                        <toggleGroup>
                                           <ToggleGroup fx:id="sidepane121" />
                                        </toggleGroup>

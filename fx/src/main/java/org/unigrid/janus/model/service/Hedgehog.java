@@ -25,14 +25,17 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.MediaType;
 import javafx.application.Platform;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -58,7 +61,9 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import org.unigrid.janus.model.ExternalVersion;
+import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.HedgehogVersion;
+import org.unigrid.janus.model.setup.AppConfig;
 import org.unigrid.janus.model.ssl.InsecureTrustManager;
 
 @Eager
@@ -73,6 +78,10 @@ public class Hedgehog {
 	private Event<SplashMessage> splashMessageEvent;
 	@Inject
 	private ExternalVersion externalVersion;
+	@Inject
+	private AppConfig appConfig;
+	@Inject
+	private CollateralRequired collateralRequired;
 
 	private Configuration config = null;
 
@@ -137,14 +146,15 @@ public class Hedgehog {
 		}
 	}
 
-	//TODO: Re-enable?
+	// TODO: Re-enable?
 	public void getHedgehogVersion() {
-		String uri = "https://127.0.0.1:52884/version";
 		SSLContext sc = null;
+		String versionUri = appConfig.getHedgehogVersionUri();
 
 		try {
 			sc = SSLContext.getInstance("SSL");
-			sc.init(null, InsecureTrustManager.create(), new java.security.SecureRandom());
+			sc.init(null, InsecureTrustManager.create(),
+				new java.security.SecureRandom());
 			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		} catch (Exception e) {
 			// Handle the exception
@@ -157,14 +167,13 @@ public class Hedgehog {
 			.hostnameVerifier(allHostsValid).build();
 		System.out.println("Request!");
 
-		WebTarget target = client.target(uri);
+		WebTarget target = client.target(versionUri);
 		Response response;
 
 		try {
 			System.out.println("Request!");
 			response = target.request()
-				.property("javax.xml.ws.client.receiveTimeout", 5000)
-				.get();
+				.property("javax.xml.ws.client.receiveTimeout", 5000).get();
 			if (response.getStatus() != 202) {
 				response.close();
 				return;
@@ -180,13 +189,47 @@ public class Hedgehog {
 		}
 	}
 
-	public int connectToHedgehog() throws InterruptedException, ExecutionException, TimeoutException {
-		String uri = "https://127.0.0.1:52884/gridspork";
+	public boolean fetchCollateralRequired() {
+		SSLContext sc;
+		try {
+			sc = SSLContext.getInstance("SSL");
+			sc.init(null, InsecureTrustManager.create(), new SecureRandom());
+		} catch (Exception e) {
+			// Log the exception
+			return false;
+		}
+
+		HostnameVerifier allHostsValid = (hostname, session) -> true;
+		Client client = ClientBuilder.newBuilder().sslContext(sc)
+			.hostnameVerifier(allHostsValid).build();
+
+		try {
+			String collateralUri = appConfig.getCollateralRequiredUri();
+			Response response = client.target(URI.create(collateralUri))
+				.request(MediaType.APPLICATION_JSON).get();
+
+			if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+				double amount = response.readEntity(Double.class);
+				collateralRequired.setAmount((int) amount);
+				return true;
+			}
+		} catch (Exception e) {
+			// Log the exception
+		} finally {
+			client.close();
+		}
+		return false;
+	}
+
+	public int connectToHedgehog()
+		throws InterruptedException, ExecutionException, TimeoutException {
+		String gridsporkUri = appConfig.getGridsporkUri();
 		SSLContext sc = null;
 
 		try {
 			sc = SSLContext.getInstance("SSL");
-			sc.init(null, InsecureTrustManager.create(), new java.security.SecureRandom());
+			sc.init(null, InsecureTrustManager.create(),
+				new java.security.SecureRandom());
 			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 		} catch (Exception e) {
 			// Handle the exception
@@ -198,7 +241,7 @@ public class Hedgehog {
 			.hostnameVerifier(allHostsValid).build();
 
 		final AtomicInteger statusCode = new AtomicInteger(-1);
-		WebTarget target = client.target(uri);
+		WebTarget target = client.target(gridsporkUri);
 		Callable<Integer> task = () -> {
 			int maxRetries = 10; // Limit the number of retries
 			int retries = 0;
@@ -207,8 +250,7 @@ public class Hedgehog {
 				Response response;
 				try {
 					response = target.request()
-						.property("javax.xml.ws.client.receiveTimeout", 5000)
-						.get();
+						.property("javax.xml.ws.client.receiveTimeout", 5000).get();
 				} catch (ProcessingException e) {
 					System.err.println("response Error: " + e.getMessage());
 					debug.print("response Error: " + e.getMessage(),
@@ -231,13 +273,14 @@ public class Hedgehog {
 		} finally {
 			executor.shutdown(); // Shutdown the executor
 		}
-		debug.print("Status Code from hedgehog: " + statusCode.get(), Hedgehog.class.getSimpleName());
+		debug.print("Status Code from hedgehog: " + statusCode.get(),
+			Hedgehog.class.getSimpleName());
 		if (statusCode.get() != 200) {
-			debug.print("Failed to connect to Hedgehog (status code " + statusCode.get() + ")",
-				Hedgehog.class.getSimpleName());
+			debug.print("Failed to connect to Hedgehog (status code " + statusCode.get()
+				+ ")", Hedgehog.class.getSimpleName());
 			hedgehogError.fire(HedgehogError.CONNECTION_FAILED);
-			Platform.runLater(() -> splashMessageEvent.fire(
-				SplashMessage.builder().message("Failed to connect to Hedgehog").build()));
+			Platform.runLater(() -> splashMessageEvent.fire(SplashMessage.builder()
+				.message("Failed to connect to Hedgehog").build()));
 		} else {
 			Platform.runLater(() -> splashMessageEvent.fire(
 				SplashMessage.builder().message("Connected to Hedgehog").build()));

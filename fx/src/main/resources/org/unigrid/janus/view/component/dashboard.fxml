@@ -17,7 +17,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="850.0" styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
     <children>
-        <GridPane alignment="CENTER" hgap="10" prefWidth="850.0" vgap="10" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns:fx="http://javafx.com/fxml/1">
+        <GridPane alignment="CENTER" hgap="10" prefWidth="850.0" vgap="10" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns:fx="http://javafx.com/fxml/">
 
             <!-- Cosmos SDK Chain Dashboard Title -->
             <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Unigrid Dashboard" textFill="#ababab" GridPane.columnIndex="0" GridPane.columnSpan="3" />
@@ -90,6 +90,23 @@
                   <Button contentDisplay="CENTER" onAction="#sendTokens" prefWidth="125.0" style="-fx-cursor: hand;" text="Send" />
                </children>
             </HBox>
+            <HBox>
+               <children>
+                  <Label text="Gridnode Delegation:" textFill="#ababab">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <Label fx:id="delegationAmountLabel" text="0.00 UGD" textFill="#ababab">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
             </VBox>
 
             <!-- Latest Transactions -->
@@ -100,18 +117,16 @@
                     </font>
                 </Label>
                 <ListView fx:id="transactionListView" prefHeight="100.0" />
-                <ListView fx:id="testListView" prefHeight="200.0" prefWidth="200.0" />
             </VBox>
 
             <!-- Staking Rewards -->
-            <VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.rowIndex="3">
+            <VBox fx:id="rewardsContainer" spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.rowIndex="3">
                 <Label style="-fx-font-weight: bold;" text="Staking Rewards" textFill="#ababab">
                     <font>
                         <Font size="15.0" />
                     </font>
                 </Label>
-                <Label text="Total Rewards: 100 UGD" textFill="#ababab" />
-                <Label text="Recent (7 days): 5 UGD" textFill="#ababab" />
+            <ListView fx:id="totalsListView" prefHeight="200.0" prefWidth="200.0" styleClass="cosmos-list-cell" />
             </VBox>
 
             <!-- Delegations -->
@@ -121,8 +136,7 @@
                         <Font size="15.0" />
                     </font>
                 </Label>
-                <Label text="Validator A: 50 UGD" textFill="#ababab" />
-                <Label text="Validator B: 70 UGD" textFill="#ababab" />
+            <ListView fx:id="delegationsListView" prefHeight="200.0" prefWidth="200.0" />
                 <!-- More delegation entries can be added here -->
             </VBox>
             <VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.columnIndex="2" GridPane.rowIndex="3">
@@ -142,9 +156,9 @@
             </padding>
             <rowConstraints>
                 <RowConstraints />
-                <RowConstraints maxHeight="346.0" minHeight="148.0" prefHeight="155.0" />
-                <RowConstraints maxHeight="321.0" minHeight="123.0" prefHeight="280.0" />
-                <RowConstraints maxHeight="125.0" minHeight="97.0" prefHeight="125.0" />
+                <RowConstraints maxHeight="346.0" minHeight="148.0" prefHeight="191.0" />
+                <RowConstraints maxHeight="321.0" minHeight="123.0" prefHeight="222.0" />
+                <RowConstraints maxHeight="214.0" minHeight="97.0" prefHeight="147.0" />
             </rowConstraints>
         </GridPane>
     </children>

@@ -35,6 +35,8 @@ import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.unigrid.janus.model.CryptoUtils;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.GridnodeDelegationService;
+import org.unigrid.janus.model.service.Hedgehog;
 import org.unigrid.janus.model.service.RestService;
 
 import com.jeongen.cosmos.CosmosRestApiClient;
@@ -53,6 +55,7 @@ import jakarta.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,12 +97,14 @@ import org.unigrid.janus.model.AccountsData.Account;
 import org.unigrid.janus.model.AddressCosmos;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.MnemonicModel;
+import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.DelegationsRequest;
 import org.unigrid.janus.model.rest.entity.GridnodeDelegationAmount;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
 import org.unigrid.janus.model.rest.entity.RewardsRequest;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
 import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
+import org.unigrid.janus.model.rest.entity.RewardsRequest.Balance;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
 import org.unigrid.janus.model.service.AccountsService;
@@ -131,6 +136,13 @@ public class CosmosController implements Initializable {
 	private CosmosTxList cosmosTxList;
 	@Inject
 	private Event<ResetTextFieldsSignal> resetTextFieldsEvent;
+	@Inject
+	private Hedgehog hedgehog;
+	@Inject
+	private CollateralRequired collateral;
+	@Inject
+	private GridnodeDelegationService gridnodeDelegationService;
+
 	private Account currentSelectedAccount;
 	@FXML
 	private Label addressLabel;
@@ -201,13 +213,19 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Text sendWarnPassword;
 	@FXML
+	private Label totalRewards;
+	@FXML
+	private Label delegationAmountLabel;
+	@FXML
+	private ListView<Balance> totalsListView;
+	@FXML
+	private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
+	@FXML
 	@Named("transactionResponse")
 	private ListView<TransactionResponse.TxResponse> transactionListView;
 	@Inject
 	@Named("transactionResponse")
 	private TransactionResponse txModel;
-	@FXML
-	private ListView<String> testListView;
 
 	@FXML
 	private ComboBox accountsDropdown;
@@ -215,6 +233,7 @@ public class CosmosController implements Initializable {
 	// List to store the actual mnemonic words
 	private AddressCosmosService addressService = new AddressCosmosService();
 	private AddressCosmos addressCosmos = new AddressCosmos();
+	private BigDecimal scaleFactor = new BigDecimal("100000000");
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -225,9 +244,7 @@ public class CosmosController implements Initializable {
 		paneMap.put("generatePane", generatePane);
 		paneMap.put("passwordPane", passwordPane);
 		paneMap.put("confirmMnemonic", confirmMnemonic);
-		ObservableList<String> testList = FXCollections.observableArrayList("Test 1",
-				"Test 2", "Test 3");
-		testListView.setItems(testList);
+
 		ObservableList<TxResponse> observableList = FXCollections
 				.observableArrayList(cosmosTxList.getTxResponsesList());
 		transactionListView.setItems(observableList);
@@ -267,6 +284,40 @@ public class CosmosController implements Initializable {
 										+ txResponse.getTimestamp());
 								System.out.println("txResponse getHeight(): "
 										+ txResponse.getHeight());
+							}
+						}
+					});
+			totalsListView.setCellFactory(lv -> new ListCell<Balance>() {
+				@Override
+				protected void updateItem(Balance item, boolean empty) {
+					super.updateItem(item, empty);
+					if (empty || item == null) {
+						setText(null);
+					} else {
+						setText(item.getAmount() + " " + item.getDenom());
+					}
+				}
+			});
+			delegationsListView.setCellFactory(
+					listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
+						@Override
+						protected void updateItem(
+								DelegationsRequest.DelegationResponse item,
+								boolean empty) {
+							super.updateItem(item, empty);
+							if (empty || item == null) {
+								setText(null);
+							} else {
+
+								BigDecimal amount = new BigDecimal(
+										item.getBalance().getAmount());
+								BigDecimal displayAmount = amount.divide(scaleFactor);
+								String text = String.format(
+										"Validator: %s, Amount: %s %s",
+										item.getDelegation().getValidatorAddress(),
+										displayAmount.toPlainString(),
+										item.getBalance().getDenom());
+								setText(text);
 							}
 						}
 					});
@@ -404,7 +455,15 @@ public class CosmosController implements Initializable {
 	@FXML
 	private void generateKeys(ActionEvent event) {
 		try {
-			int keysToCreate = 1000;
+
+			BigDecimal currentDelegationAmount = gridnodeDelegationService
+					.getCurrentDelegationAmount();
+			BigDecimal collateralAmount = BigDecimal.valueOf(collateral.getAmount());
+			BigDecimal numberOfNodes = currentDelegationAmount.divide(collateralAmount, 0,
+					RoundingMode.DOWN);
+			int numberOfNodesInt = numberOfNodes.intValue();
+			System.out.println("Nodes we can run: " + numberOfNodesInt);
+			int keysToCreate = numberOfNodesInt;
 			Account selectedAccount = accountsData.getSelectedAccount();
 			String pubKey = selectedAccount.getPublicKey();
 			byte[] seed = Sha256Hash.hash(pubKey.getBytes());
@@ -754,7 +813,7 @@ public class CosmosController implements Initializable {
 						.println("Selected Account:" + accountsData.getSelectedAccount());
 				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
 				System.out.println("getEncryptedPrivateKey: "
-					+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
+						+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
 				// Create a background task for the network call
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
@@ -795,12 +854,14 @@ public class CosmosController implements Initializable {
 			DelegationsRequest delegationsRequest = new DelegationsRequest(account);
 			DelegationsRequest.Response delegationsResponse = new RestCommand<>(
 					delegationsRequest, restService).execute();
+			setDelegations(delegationsResponse.getDelegationResponses());
 			System.out.println(delegationsResponse);
 
 			// Rewards
 			RewardsRequest rewardsRequest = new RewardsRequest(account);
 			RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
 					restService).execute();
+			stakingRewardsValue(rewardsResponse.getTotal());
 			System.out.println(rewardsResponse);
 
 			// Unbonding Delegations
@@ -823,14 +884,63 @@ public class CosmosController implements Initializable {
 					withdrawAddressRequest, restService).execute();
 			System.out.println(withdrawAddressResponse);
 
-			GridnodeDelegationAmount gridnodeDelegationRequest = new GridnodeDelegationAmount(
-					account);
-			GridnodeDelegationAmount.Response gridnodeDelegationResponse = new RestCommand<>(
-					gridnodeDelegationRequest, restService).execute();
-			System.out.println(gridnodeDelegationResponse);
+			gridnodeDelegationService.fetchDelegationAmount(account);
+			setDelegationAmount();
+
+			updateCollateralDisplay();
 
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void updateCollateralDisplay() {
+		if (hedgehog.fetchCollateralRequired()) {
+			System.out.println("Collateral Required: " + collateral.getAmount());
+		} else {
+			System.out.println("Error fetching collateral");
+		}
+	}
+
+	/* DELEGATION LIST VIEW */
+	public void setDelegations(List<DelegationsRequest.DelegationResponse> delegations) {
+		Platform.runLater(() -> {
+			delegationsListView.getItems().setAll(delegations);
+		});
+	}
+
+	/* REWARDS LIST VIEW */
+	public void stakingRewardsValue(List<Balance> totals) {
+		ObservableList<Balance> items = FXCollections.observableArrayList(totals);
+
+		Platform.runLater(() -> {
+			totalsListView.getItems().clear();
+			totalsListView.setCellFactory(listView -> new ListCell<Balance>() {
+				@Override
+				protected void updateItem(Balance item, boolean empty) {
+					super.updateItem(item, empty);
+					if (empty || item == null) {
+						setText(null);
+					} else {
+						BigDecimal amount = new BigDecimal(item.getAmount());
+						BigDecimal displayAmount = amount.divide(scaleFactor);
+						setText(displayAmount.toPlainString() + " " + item.getDenom());
+					}
+				}
+			});
+			totalsListView.getItems().addAll(items);
+		});
+	}
+
+	public void setDelegationAmount() {
+		GridnodeDelegationAmount.Response response = gridnodeDelegationService
+				.getCurrentResponse();
+		if (response != null) {
+			Platform.runLater(() -> {
+				BigDecimal amount = response.getAmount();
+				String text = amount.toPlainString() + " UGD";
+				delegationAmountLabel.setText(text);
+			});
 		}
 	}
 
