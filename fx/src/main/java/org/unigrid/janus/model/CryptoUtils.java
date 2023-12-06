@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.model;
 
-import com.jeongen.cosmos.util.AddressUtil;
+import org.unigrid.cosmos.util.AddressUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;

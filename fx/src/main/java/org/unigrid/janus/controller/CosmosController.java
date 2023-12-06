@@ -39,9 +39,9 @@ import org.unigrid.janus.model.service.GridnodeDelegationService;
 import org.unigrid.janus.model.service.Hedgehog;
 import org.unigrid.janus.model.service.RestService;
 
-import com.jeongen.cosmos.CosmosRestApiClient;
-import com.jeongen.cosmos.crypro.CosmosCredentials;
-import com.jeongen.cosmos.util.AddressUtil;
+import org.unigrid.cosmos.CosmosRestApiClient;
+import org.unigrid.cosmos.crypto.CosmosCredentials;
+import org.unigrid.cosmos.util.AddressUtil;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;

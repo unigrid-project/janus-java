@@ -39,10 +39,10 @@ import org.bitcoinj.wallet.UnreadableWalletException;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import com.jeongen.cosmos.util.AddressUtil;
-import com.jeongen.cosmos.CosmosRestApiClient;
-import com.jeongen.cosmos.crypro.CosmosCredentials;
-import com.jeongen.cosmos.vo.SendInfo;
+import org.unigrid.cosmos.util.AddressUtil;
+import org.unigrid.cosmos.CosmosRestApiClient;
+import org.unigrid.cosmos.crypto.CosmosCredentials;
+import org.unigrid.cosmos.vo.SendInfo;
 
 import cosmos.base.abci.v1beta1.Abci;
 import java.security.Security;
