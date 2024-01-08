@@ -43,7 +43,7 @@
 
                <!-- HBox for the two buttons -->
                <HBox alignment="CENTER" spacing="50">
-                  <Button fx:id="importButton" onAction="#handleImportAction" prefWidth="220.0" style="-fx-cursor: hand;" text="Import">
+                  <Button fx:id="importButton" onAction="#onImportAction" prefWidth="220.0" style="-fx-cursor: hand;" text="Import">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -51,7 +51,7 @@
                         <Font size="26.0" />
                      </font>
                   </Button>
-                  <Button fx:id="generateButton" onAction="#handleGenerateAction" prefWidth="220.0" style="-fx-cursor: hand;" text="Generate">
+                  <Button fx:id="generateButton" onAction="#onGenerateAction" prefWidth="220.0" style="-fx-cursor: hand;" text="Generate">
                      <font>
                         <Font size="26.0" />
                      </font>
@@ -60,7 +60,7 @@
                      </HBox.margin>
                   </Button>
                </HBox>
-               <Button onAction="#cancelAccountGeneration" prefWidth="220.0" style="-fx-cursor: hand;" text="Cancel">
+               <Button onAction="#onCancelAccountGeneration" prefWidth="220.0" style="-fx-cursor: hand;" text="Cancel">
                   <font>
                      <Font size="26.0" />
                   </font>
@@ -88,12 +88,12 @@
                            <children>
       
                               <!-- Import Button -->
-                              <Button onAction="#importMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import">
+                              <Button onAction="#onImportMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import">
                                  <HBox.margin>
                                     <Insets right="50.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button onAction="#cancelAccountGeneration" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
+                              <Button onAction="#onCancelAccountGeneration" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
                            </children>
                         </HBox>
 
@@ -124,7 +124,7 @@
                                     <Insets right="50.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button onAction="#cancelAccountGeneration" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
+                              <Button onAction="#onCancelAccountGeneration" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
                            </children>
                         </HBox>
 
@@ -148,7 +148,7 @@
                                     <Insets right="50.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button onAction="#cancelAccountGeneration" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
+                              <Button onAction="#onCancelAccountGeneration" style="-fx-font-size: 20; -fx-cursor: hand;" text="Cancel" />
                            </children>
                         </HBox>
                         <padding>
@@ -191,7 +191,7 @@
                </Label>
                <TextField fx:id="accountNameField" maxWidth="300.0" promptText="Account Name" styleClass="mnemonic-field" />
                <Text fx:id="sendWarnPassword" fill="#f28407" strokeType="OUTSIDE" strokeWidth="0.0" />
-               <Button fx:id="encryptAndSaveButton" onAction="#encryptKeys" style="-fx-cursor: hand;" text="Encrypt &amp; Save">
+               <Button fx:id="encryptAndSaveButton" onAction="#onEncryptKeys" style="-fx-cursor: hand;" text="Encrypt &amp; Save">
                   <font>
                      <Font size="24.0" />
                   </font>
@@ -216,7 +216,7 @@
                   <children>
       
                      <!-- Continue button -->
-                     <Button fx:id="continueButton" onAction="#handleContinue" prefWidth="150.0" style="-fx-cursor: hand;" text="Continue">
+                     <Button fx:id="continueButton" onAction="#onContinue" prefWidth="150.0" style="-fx-cursor: hand;" text="Continue">
                         <font>
                            <Font size="24.0" />
                         </font>
@@ -224,7 +224,7 @@
                            <Insets right="50.0" />
                         </HBox.margin>
                      </Button>
-                     <Button onAction="#cancelAccountGeneration" prefWidth="150.0" style="-fx-cursor: hand;" text="Cancel">
+                     <Button onAction="#onCancelAccountGeneration" prefWidth="150.0" style="-fx-cursor: hand;" text="Cancel">
                         <font>
                            <Font size="24.0" />
                         </font>
@@ -250,7 +250,7 @@
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                <children>
       
-                  <Button onAction="#handleMnemonicVerification" prefWidth="150.0" style="-fx-cursor: hand;" text="Verify">
+                  <Button onAction="#onMnemonicVerification" prefWidth="150.0" style="-fx-cursor: hand;" text="Verify">
                      <font>
                         <Font size="24.0" />
                      </font>
@@ -258,7 +258,7 @@
                         <Insets right="50.0" />
                      </HBox.margin>
                   </Button>
-                  <Button onAction="#verifyBackPress" prefWidth="150.0" style="-fx-cursor: hand;" text="Back">
+                  <Button onAction="#onVerifyBackPress" prefWidth="150.0" style="-fx-cursor: hand;" text="Back">
                      <font>
                         <Font size="24.0" />
                      </font>

@@ -16,12 +16,34 @@
 
 package org.unigrid.janus.model.service;
 
+import jakarta.inject.Inject;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javafx.fxml.FXML;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
+import org.bitcoinj.crypto.ChildNumber;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDKeyDerivation;
+import org.bitcoinj.crypto.MnemonicCode;
+import org.bitcoinj.crypto.MnemonicException;
+import org.unigrid.cosmos.crypto.CosmosCredentials;
+import org.unigrid.cosmos.util.AddressUtil;
+import org.unigrid.janus.model.AccountModel;
+import org.unigrid.janus.model.MnemonicModel;
 
 public class MnemonicService {
+	@FXML
+	private TextArea seedPhraseTextArea;	
+	@FXML
+	private TextField addressFieldPassword;
+	@Inject
+	private AccountModel accountModel;
+	@Inject
+	private MnemonicModel mnemonicModel;
 
 	private final List<String> mnemonicWordList = new ArrayList<>();
 
@@ -37,6 +59,102 @@ public class MnemonicService {
 			mnemonicWordList.clear();
 			mnemonicWordList.addAll(Arrays.asList(words));
 		}
+	}
+	
+	public boolean compareMnemonicWithModel() {
+		// Convert mnemonicWordList to a space-separated string
+		String copiedMnemonic = String.join(" ", mnemonicModel.getMnemonicWordList());
+
+		String modelMnemonic = accountModel.getMnemonic();
+		System.out.println("modelMnemonic: " + modelMnemonic);
+		System.out.println("copiedMnemonic: " + copiedMnemonic);
+
+		// Compare the two mnemonics
+		return copiedMnemonic.equals(modelMnemonic);
+	}
+	
+	public static byte[] derivePrivateKeyFromMnemonic(String mnemonic, int index) {
+		// Convert mnemonic to seed
+		List<String> mnemonicWords = Arrays.asList(mnemonic.split(" "));
+
+		byte[] seed = MnemonicCode.toSeed(mnemonicWords, "");
+
+		// Create master key from seed
+		DeterministicKey masterKey = HDKeyDerivation.createMasterPrivateKey(seed);
+
+		// Derive the key step by step following the path "M/44'/118'/0'/0/0"
+		DeterministicKey level1 = HDKeyDerivation.deriveChildKey(masterKey,
+			new ChildNumber(44, true));
+		DeterministicKey level2 = HDKeyDerivation.deriveChildKey(level1,
+			new ChildNumber(118, true));
+		DeterministicKey level3 = HDKeyDerivation.deriveChildKey(level2,
+			new ChildNumber(0, true));
+		DeterministicKey level4 = HDKeyDerivation.deriveChildKey(level3,
+			new ChildNumber(0, false));
+		DeterministicKey key = HDKeyDerivation.deriveChildKey(level4,
+			new ChildNumber(index, false));
+
+		// Optionally print the address (requires additional logic for accurate Cosmos
+		// address computation)
+		// byte[] publicKey = key.getPubKey();
+		// byte[] address = computeAddress(publicKey);
+		// System.out.println("Address: " + Base64.encodeBase64String(address)); //
+		// Replace with correct encoding
+		// Return private key bytes
+		byte[] privateKeyBytes = key.getPrivKeyBytes();
+		return privateKeyBytes;
+	}
+	
+	public void generateMnemonicAddress() throws MnemonicException.MnemonicLengthException {
+		// TODO find a better way to handle multiple accounts
+		// and addresses
+		int index = 0;
+
+		// Step 1: Generate a new 12-word mnemonic
+		SecureRandom secureRandom = new SecureRandom();
+		List<String> mnemonicWords = MnemonicCode.INSTANCE
+			.toMnemonic(secureRandom.generateSeed(32));
+		String mnemonic = String.join(" ", mnemonicWords);
+		// this.mnemonicArea.setText(mnemonic);
+
+		// // Encrypt the mnemonic before setting it to the accountModel
+		// String password1 = passwordField1.getText();
+		// String encryptedPrivateKey = cryptoUtils.encrypt(mnemonic, password1);
+		// System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
+		accountModel.setMnemonic(mnemonic);
+
+		// Utilize the derivePrivateKeyFromMnemonic method and CosmosCredentials block
+		byte[] privateKey = derivePrivateKeyFromMnemonic(mnemonic, index);
+		System.out.println(
+			"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
+
+		String path = String.format("m/44'/118'/0'/0/%d", index);
+		CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
+			"unigrid");
+
+		System.out.println("Address from creds: " + creds.getAddress());
+		System.out.println("EcKey from creds: " + creds.getEcKey());
+		// Populate the AccountModel
+		accountModel.setMnemonic(mnemonic);
+		System.out.println("Set mnemonic: " + accountModel.getMnemonic());
+
+		accountModel.setAddress(creds.getAddress());
+		System.out.println("Set address: " + accountModel.getAddress());
+
+		accountModel.setPrivateKey(privateKey);
+		accountModel.setPublicKey(creds.getEcKey().getPubKey());
+
+		// Update UI fields
+		seedPhraseTextArea.setStyle(
+			"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
+		seedPhraseTextArea.setText(accountModel.getMnemonic());
+
+		addressFieldPassword.setText(accountModel.getAddress());
+		// addressCosmos.setAddress(creds.getAddress());
+		// addressCosmos.setPublicKey(org.bitcoinj.core.Utils.HEX.encode(creds.getEcKey().getPubKey()));
+		// addressCosmos.setName("pickles_" + index);
+		// addressCosmos.setKeyIndex(index);
+		// handleSaveAddress(addressCosmos);
 	}
 
 	// Other methods related to mnemonics...
