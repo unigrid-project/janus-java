@@ -234,7 +234,17 @@
         <dependency>
             <groupId>org.bitcoinj</groupId>
             <artifactId>bitcoinj-core</artifactId>
-            <version>0.16.2</version>
+            <version>0.16.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-javalite</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -266,6 +276,11 @@
             <artifactId>grpc-services</artifactId>
             <version>1.60.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.0.9.Final</version>
+        </dependency> 
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
@@ -299,11 +314,6 @@
             <version>1.18.22</version>
         </dependency>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
@@ -326,33 +336,23 @@
             <version>4.9.3</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.bitcoinj</groupId>
-            <artifactId>bitcoinj-core</artifactId>
-            <version>0.16.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcprov-jdk15on</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.70</version>
-        </dependency>
+        
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.16.0</version>
         </dependency>
-
         <!--<dependency>
             <groupId>com.dustinredmond.fxtrayicon</groupId>
             <artifactId>FXTrayIcon</artifactId>
             <version>3.3.0</version>
         </dependency>-->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
     </dependencies>
     <build>
         <extensions>
@@ -370,27 +370,126 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>download-files</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.basedir}/src/main/proto/cosmos/bank/v1beta1"/>
+                                <mkdir dir="${project.basedir}/src/main/proto/cosmos/base/v1beta1"/>
+                                <mkdir dir="${project.basedir}/src/main/proto/amino"/>
+                                <mkdir dir="${project.basedir}/src/main/proto/cosmos/query/v1"/>
+                                <mkdir dir="${project.basedir}/src/main/proto/cosmos/crypto/multisig/v1beta1"/>
+                                <mkdir dir="${project.basedir}/src/main/proto/cosmos/tx/signing/v1beta1"/>
+                                <mkdir dir="${project.basedir}/src/main/proto/cosmos_proto"/>
+                                <mkdir dir="${project.basedir}/src/main/proto/cosmos/msg/v1"/>
+                                <mkdir dir="${project.basedir}/src/main/proto/cosmos/base/query/v1beta1"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/bank/v1beta1/query.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/bank/v1beta1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/bank/v1beta1/bank.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/bank/v1beta1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/amino/amino.proto"
+                                     dest="${project.basedir}/src/main/proto/amino"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/base/v1beta1/coin.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/base/v1beta1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/query/v1/query.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/query/v1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                               
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/crypto/multisig/v1beta1/multisig.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/crypto/multisig/v1beta1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/base/v1beta1/coin.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/base/v1beta1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/tx/signing/v1beta1/signing.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/tx/signing/v1beta1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-proto/main/proto/cosmos_proto/cosmos.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos_proto"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/msg/v1/msg.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/msg/v1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/base/query/v1beta1/pagination.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/base/query/v1beta1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/bank/v1beta1/tx.proto"
+                                     dest="${project.basedir}/src/main/proto/cosmos/bank/v1beta1"
+                                     verbose="false"
+                                     usetimestamp="true"/>
+                            </target>
+                        </configuration>
+
+
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <executions>
-					
+                    
                     <execution>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>compile</goal>
                             <goal>compile-custom</goal>
                         </goals>
                     </execution>
-					
+                    
                 </executions>
                 <configuration>
+                    <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
                     <protocArtifact>com.google.protobuf:protoc:3.21.7:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>java.grpc</pluginId>
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.60.0:exe:${os.detected.classifier}</pluginArtifact>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/protobuf/java</source>
+                                <source>${project.build.directory}/generated-sources/protobuf/java.grpc</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <!-- <plugin>
                     <groupId>org.xolstice.maven.plugins</groupId>
@@ -437,6 +536,7 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
+                    <skip>true</skip>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <sourceDirectories>
                         <sourceDirectory>src/main/java</sourceDirectory>

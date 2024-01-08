@@ -16,7 +16,6 @@
 
 package org.unigrid.janus.model;
 
-import org.unigrid.cosmos.util.AddressUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
@@ -51,6 +50,7 @@ import org.bitcoinj.wallet.DeterministicKeyChain;
 import org.bitcoinj.wallet.DeterministicSeed;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.utils.AddressUtil;
 
 @Data
 @ApplicationScoped
@@ -139,8 +139,9 @@ public class CryptoUtils {
 		System.out.println("publicKey: " + bytesToHex(publicKeyBytes));
 
 		String address = AddressUtil.publicKeyToAddress(publicKeyBytes, "unigrid");
+		
 
-		System.out.println("getAddressFromPrivateKey: " + address);
+		System.out.println("getAddressFromPrivateKey: " /*uncomment + address*/);
 		return address;
 	}
 

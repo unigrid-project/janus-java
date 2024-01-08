@@ -17,6 +17,9 @@ package org.unigrid.janus.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cosmos.bank.v1beta1.QueryGrpc;
+import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
+import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -26,20 +29,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
-
 import org.unigrid.janus.model.CryptoUtils;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.GridnodeDelegationService;
 import org.unigrid.janus.model.service.Hedgehog;
-
-import org.unigrid.cosmos.CosmosRestApiClient;
-import org.unigrid.cosmos.crypto.CosmosCredentials;
-import org.unigrid.cosmos.util.AddressUtil;
-
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
@@ -72,7 +68,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-
 import org.unigrid.janus.model.AccountModel;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.AccountsData.Account;
@@ -87,10 +82,13 @@ import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
 import org.unigrid.janus.model.service.AccountsService;
 import org.unigrid.janus.model.service.AddressCosmosService;
 import org.unigrid.janus.model.service.CosmosRestClient;
+import org.unigrid.janus.model.service.GrpcService;
 import org.unigrid.janus.model.service.MnemonicService;
 import org.unigrid.janus.model.signal.MnemonicState;
 import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
+import org.unigrid.janus.utils.AddressUtil;
+import org.unigrid.janus.utils.CosmosCredentials;
 import org.unigrid.janus.view.backing.CosmosTxList;
 
 @ApplicationScoped
@@ -122,6 +120,8 @@ public class CosmosController implements Initializable {
 	private GridnodeDelegationService gridnodeDelegationService;
 	@Inject
 	private MnemonicService mnemonicService;
+	@Inject
+	private GrpcService grpcService;
 
 	private Account currentSelectedAccount;
 	@FXML
@@ -403,7 +403,8 @@ public class CosmosController implements Initializable {
 			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
 
 			// Prompt the user to enter the password
-			String password = getPasswordFromUser();
+			String password = "";
+			//take care of this= getPasswordFromUser();
 			if (password == null) {
 				System.out.println("Password input cancelled!");
 				return;
@@ -426,6 +427,7 @@ public class CosmosController implements Initializable {
 				ex);
 		}
 	}
+
 	// @FXML
 	// private void decrypTest(ActionEvent event) {
 	// try {
@@ -544,7 +546,7 @@ public class CosmosController implements Initializable {
 		String mnemonic = String.join(" ", mnemonicModel.getMnemonicWordList());
 		System.out.println("mnemonic: " + mnemonic);
 		// this.mnemonicArea.setText(mnemonic);
-		byte[] privateKey = MnemonicService.derivePrivateKeyFromMnemonic(mnemonic, index);
+		byte[] privateKey = mnemonicService.derivePrivateKeyFromMnemonic(mnemonic, index);
 		// Encrypt the mnemonic before setting it to the accountModel
 		// String password1 = passwordField1.getText();
 		// String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
@@ -637,18 +639,28 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	private void checkBalance(ActionEvent event) {
-		try {
-			CosmosRestApiClient unigridApiService = new CosmosRestApiClient(
-				"http://localhost:1317", "cosmosdaemon", "ugd");
-			BigDecimal balance = unigridApiService
-				.getBalanceInAtom(addressField.getText());
-			DecimalFormat formatter = new DecimalFormat("0.00000000");
-			String formattedBalance = formatter.format(balance);
-			balanceField.setText(formattedBalance);
-		} catch (Exception ex) {
-			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
-		}
+		QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
+			.setAddress(addressField.getText())
+			.setDenom("ugd")
+			.build();
+
+		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
+		QueryBalanceResponse response = stub.balance(request);
+		balanceField.setText(response.getBalance().getAmount());
+
+
+//uncomment all		try {
+//			CosmosRestApiClient unigridApiService = new CosmosRestApiClient(
+//				"http://localhost:1317", "cosmosdaemon", "ugd");
+//			BigDecimal balance = unigridApiService
+//				.getBalanceInAtom(addressField.getText());
+//			DecimalFormat formatter = new DecimalFormat("0.00000000");
+//			String formattedBalance = formatter.format(balance);
+//			balanceField.setText(formattedBalance);
+//		} catch (Exception ex) {
+//			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+//				ex);
+//		}
 	}
 
 	@FXML

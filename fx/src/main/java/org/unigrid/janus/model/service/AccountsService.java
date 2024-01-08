@@ -55,6 +55,8 @@ public class AccountsService {
 	private Hedgehog hedgehog;
 	@Inject
 	private CollateralRequired collateral;
+	@Inject
+	private GrpcService grpcService;
 
 	@FXML
 	private ComboBox accountsDropdown;
@@ -93,7 +95,7 @@ public class AccountsService {
 			.filter(account -> accountName.equals(account.getName()))
 			.findFirst();
 	}
-	
+
 	public boolean isAccountsJsonEmpty() {
 		File accountsFile = DataDirectory.getAccountsFile();
 		return !accountsFile.exists() || accountsFile.length() == 0;
@@ -150,17 +152,27 @@ public class AccountsService {
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
 					protected Void call() throws Exception {
-						String accountQuery = cosmosClient.checkBalanceForAddress(
-							selectedAccount.get().getAddress());
+						// Prepare the gRPC request
+						QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
+							.setAddress(selectedAccount.get().getAddress())
+							// You may need to set other fields depending on your proto definition
+							.build();
+
+						// Execute the gRPC request
+						QueryBalanceResponse response = grpcService.getStub().balance(request);
+
 						Platform.runLater(() -> {
-							balanceLabel.setText(accountQuery);
+							// Update UI with the balance received from the response
+							balanceLabel.setText(response.getBalance());
 						});
+
+						// Load transactions and other account data (assuming these methods are adapted for gRPC)
 						cosmosTxList.loadTransactions(10);
-						System.out.println("cosmosTxList.getTxResponse(): "
-							+ cosmosTxList.getTxResponsesList());
 						loadAccountData(accountsData.getSelectedAccount().getAddress());
+
 						return null;
 					}
+
 				};
 
 				// Handle exceptions
@@ -179,46 +191,46 @@ public class AccountsService {
 	}
 
 	private void loadAccountData(String account) throws IOException, InterruptedException {
-		RestService restService = new RestService();
-
-		// Delegations
-		DelegationsRequest delegationsRequest = new DelegationsRequest(account);
-		DelegationsRequest.Response delegationsResponse = new RestCommand<>(
-			delegationsRequest, restService).execute();
-		setDelegations(delegationsResponse.getDelegationResponses());
-		System.out.println(delegationsResponse);
-
-		// Rewards
-		RewardsRequest rewardsRequest = new RewardsRequest(account);
-		RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
-			restService).execute();
-		stakingRewardsValue(rewardsResponse.getTotal());
-		System.out.println(rewardsResponse);
-
-		// Unbonding Delegations
-		UnbondingDelegationsRequest unbondingDelegationsRequest = new UnbondingDelegationsRequest(
-			account);
-		UnbondingDelegationsRequest.Response unbondingDelegationsResponse = new RestCommand<>(
-			unbondingDelegationsRequest, restService).execute();
-		System.out.println(unbondingDelegationsResponse);
-
-		// Redelegations
-		RedelegationsRequest redelegationsRequest = new RedelegationsRequest(account);
-		RedelegationsRequest.Response redelegationsResponse = new RestCommand<>(
-			redelegationsRequest, restService).execute();
-		System.out.println(redelegationsResponse);
-
-		// Withdraw Address
-		WithdrawAddressRequest withdrawAddressRequest = new WithdrawAddressRequest(
-			account);
-		WithdrawAddressRequest.Response withdrawAddressResponse = new RestCommand<>(
-			withdrawAddressRequest, restService).execute();
-		System.out.println(withdrawAddressResponse);
-
-		gridnodeDelegationService.fetchDelegationAmount(account);
-		setDelegationAmount();
-
-		updateCollateralDisplay();
+//uncomment all		RestService restService = new RestService();
+//
+//		// Delegations
+//		DelegationsRequest delegationsRequest = new DelegationsRequest(account);
+//		DelegationsRequest.Response delegationsResponse = new RestCommand<>(
+//			delegationsRequest, restService).execute();
+//		setDelegations(delegationsResponse.getDelegationResponses());
+//		System.out.println(delegationsResponse);
+//
+//		// Rewards
+//		RewardsRequest rewardsRequest = new RewardsRequest(account);
+//		RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
+//			restService).execute();
+//		stakingRewardsValue(rewardsResponse.getTotal());
+//		System.out.println(rewardsResponse);
+//
+//		// Unbonding Delegations
+//		UnbondingDelegationsRequest unbondingDelegationsRequest = new UnbondingDelegationsRequest(
+//			account);
+//		UnbondingDelegationsRequest.Response unbondingDelegationsResponse = new RestCommand<>(
+//			unbondingDelegationsRequest, restService).execute();
+//		System.out.println(unbondingDelegationsResponse);
+//
+//		// Redelegations
+//		RedelegationsRequest redelegationsRequest = new RedelegationsRequest(account);
+//		RedelegationsRequest.Response redelegationsResponse = new RestCommand<>(
+//			redelegationsRequest, restService).execute();
+//		System.out.println(redelegationsResponse);
+//
+//		// Withdraw Address
+//		WithdrawAddressRequest withdrawAddressRequest = new WithdrawAddressRequest(
+//			account);
+//		WithdrawAddressRequest.Response withdrawAddressResponse = new RestCommand<>(
+//			withdrawAddressRequest, restService).execute();
+//		System.out.println(withdrawAddressResponse);
+//
+//		gridnodeDelegationService.fetchDelegationAmount(account);
+//		setDelegationAmount();
+//
+//		updateCollateralDisplay();
 
 	}
 

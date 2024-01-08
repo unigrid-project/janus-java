@@ -16,6 +16,8 @@
 
 package org.unigrid.janus.model.service;
 
+import com.evolvedbinary.j8fu.function.TriConsumer;
+import com.evolvedbinary.j8fu.function.TriFunction;
 import jakarta.inject.Inject;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -30,10 +32,10 @@ import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
-import org.unigrid.cosmos.crypto.CosmosCredentials;
-import org.unigrid.cosmos.util.AddressUtil;
 import org.unigrid.janus.model.AccountModel;
 import org.unigrid.janus.model.MnemonicModel;
+import org.unigrid.janus.utils.AddressUtil;
+import org.unigrid.janus.utils.CosmosCredentials;
 
 public class MnemonicService {
 	@FXML
@@ -72,37 +74,24 @@ public class MnemonicService {
 		// Compare the two mnemonics
 		return copiedMnemonic.equals(modelMnemonic);
 	}
-	
-	public static byte[] derivePrivateKeyFromMnemonic(String mnemonic, int index) {
-		// Convert mnemonic to seed
-		List<String> mnemonicWords = Arrays.asList(mnemonic.split(" "));
 
-		byte[] seed = MnemonicCode.toSeed(mnemonicWords, "");
+	final TriFunction<DeterministicKey, Integer, Boolean, DeterministicKey> deriveKey = (key, child, hardened) -> {
+		return HDKeyDerivation.deriveChildKey(key, new ChildNumber(child, hardened));
+	};
 
-		// Create master key from seed
-		DeterministicKey masterKey = HDKeyDerivation.createMasterPrivateKey(seed);
+	public byte[] derivePrivateKeyFromMnemonic(String mnemonic, int index) {
+		final List<String> mnemonicWords = Arrays.asList(mnemonic.split(" "));
+		final byte[] seed = MnemonicCode.toSeed(mnemonicWords, "");
 
 		// Derive the key step by step following the path "M/44'/118'/0'/0/0"
-		DeterministicKey level1 = HDKeyDerivation.deriveChildKey(masterKey,
-			new ChildNumber(44, true));
-		DeterministicKey level2 = HDKeyDerivation.deriveChildKey(level1,
-			new ChildNumber(118, true));
-		DeterministicKey level3 = HDKeyDerivation.deriveChildKey(level2,
-			new ChildNumber(0, true));
-		DeterministicKey level4 = HDKeyDerivation.deriveChildKey(level3,
-			new ChildNumber(0, false));
-		DeterministicKey key = HDKeyDerivation.deriveChildKey(level4,
-			new ChildNumber(index, false));
+		final DeterministicKey masterKey = HDKeyDerivation.createMasterPrivateKey(seed);
+		final DeterministicKey level1 = deriveKey.apply(masterKey, 44, true);
+		final DeterministicKey level2 = deriveKey.apply(level1, 118, true);
+		final DeterministicKey level3 = deriveKey.apply(level2, 0, true);
+		final DeterministicKey level4 = deriveKey.apply(level3, 0, false);
+		final DeterministicKey key = deriveKey.apply(level4, index, false);
 
-		// Optionally print the address (requires additional logic for accurate Cosmos
-		// address computation)
-		// byte[] publicKey = key.getPubKey();
-		// byte[] address = computeAddress(publicKey);
-		// System.out.println("Address: " + Base64.encodeBase64String(address)); //
-		// Replace with correct encoding
-		// Return private key bytes
-		byte[] privateKeyBytes = key.getPrivKeyBytes();
-		return privateKeyBytes;
+		return key.getPrivKeyBytes();
 	}
 	
 	public void generateMnemonicAddress() throws MnemonicException.MnemonicLengthException {

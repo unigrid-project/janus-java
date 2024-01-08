@@ -27,6 +27,8 @@ import org.unigrid.janus.model.CryptoUtils;
 public class DecryptCosmosService {
 	@Inject
 	private CryptoUtils cryptoUtils;
+	@Inject
+	private AccountsData accountsData;
 
 	@FXML
 	private void decryptPrivateKey(ActionEvent event) {

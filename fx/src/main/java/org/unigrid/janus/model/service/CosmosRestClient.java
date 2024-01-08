@@ -27,10 +27,10 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.Base64;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.unigrid.cosmos.CosmosRestApiClient;
-import org.unigrid.cosmos.crypto.CosmosCredentials;
-import org.unigrid.cosmos.vo.SendInfo;
-import cosmos.base.abci.v1beta1.Abci;
+//import org.unigrid.cosmos.CosmosRestApiClient;
+//import org.unigrid.cosmos.crypto.CosmosCredentials;
+//import org.unigrid.cosmos.vo.SendInfo;
+//import cosmos.base.abci.v1beta1.Abci;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -117,20 +117,20 @@ public class CosmosRestClient {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.writeValueAsString(object);
 	}
-
-	public String checkBalanceForAddress(String address) {
-		try {
-			CosmosRestApiClient unigridApiService = new CosmosRestApiClient(
-				"https://rest-testnet.unigrid.org/", "unigrid-testnet-1", "ugd");
-			BigDecimal balance = unigridApiService.getBalanceInAtom(address);
-			DecimalFormat formatter = new DecimalFormat("0.00000000");
-			String formattedBalance = formatter.format(balance);
-			return formattedBalance;
-		} catch (Exception ex) {
-			System.out.println(ex);
-			return null;
-		}
-	}
+//
+//	public String checkBalanceForAddress(String address) {
+//		try {
+//			CosmosRestApiClient unigridApiService = new CosmosRestApiClient(
+//				"https://rest-testnet.unigrid.org/", "unigrid-testnet-1", "ugd");
+//			BigDecimal balance = unigridApiService.getBalanceInAtom(address);
+//			DecimalFormat formatter = new DecimalFormat("0.00000000");
+//			String formattedBalance = formatter.format(balance);
+//			return formattedBalance;
+//		} catch (Exception ex) {
+//			System.out.println(ex);
+//			return null;
+//		}
+//	}
 
 	public TransactionResponse txResponse(String address)
 		throws IOException, InterruptedException {
@@ -159,8 +159,8 @@ public class CosmosRestClient {
 		}
 	}
 
-	public void delegateTokens(String delegatorAddress, String validatorAddress,
-		BigDecimal amountInAtom, CosmosCredentials credentials) throws Exception {
+	//public void delegateTokens(String delegatorAddress, String validatorAddress,
+	//was not commented	BigDecimal amountInAtom, CosmosCredentials credentials) throws Exception {
 		// // Step 1: Create MsgDelegate message
 		// Coin delegateAmount = Coin.newBuilder()
 		// .setDenom("ugd")
@@ -188,38 +188,38 @@ public class CosmosRestClient {
 		// broadcastTx(broadcastTxRequest);
 
 		// Check for errors and handle response...
-	}
+	//}
 
 	public String sendTokens(String recipientAddress, String amount, String denom,
 		String password) throws Exception {
 
 		try {
-			// Decrypt the private key using the encryptedPrivateKey from AccountModel and
+		// Decrypt the private key using the encryptedPrivateKey from AccountModel and
 			// password
-			System.out.println("getEncryptedPrivateKey: "
-				+ accountData.getSelectedAccount().getEncryptedPrivateKey());
-			byte[] decryptedPrivateKey = cryptoUtils
-				.decrypt(accountData.getSelectedAccount().getEncryptedPrivateKey(), password);
-
-			// Convert the decrypted private key to CosmosCredentials
-			CosmosCredentials credentials = CosmosCredentials.create(decryptedPrivateKey,
-				"unigrid");
-
-			CosmosRestApiClient unigridCosmosService = new CosmosRestApiClient(
-				"https://rest-testnet.unigrid.org/", "unigrid-testnet-1", "ugd");
-
-			System.out.println("address:" + credentials.getAddress());
-			List<SendInfo> sendList = new ArrayList<>();
-			sendList.add(
-				SendInfo.builder().credentials(credentials).toAddress(recipientAddress)
-					.amountInAtom(new BigDecimal(amount)).build());
-			Abci.TxResponse txResponse = unigridCosmosService.sendMultiTx(credentials,
-				sendList, new BigDecimal("0.000001"), 200000);
-			//System.out.println(txResponse);
+//uncommentall			System.out.println("getEncryptedPrivateKey: "
+//				+ accountData.getSelectedAccount().getEncryptedPrivateKey());
+//			byte[] decryptedPrivateKey = cryptoUtils
+//				.decrypt(accountData.getSelectedAccount().getEncryptedPrivateKey(), password);
+//
+//			// Convert the decrypted private key to CosmosCredentials
+//			CosmosCredentials credentials = CosmosCredentials.create(decryptedPrivateKey,
+//				"unigrid");
+//
+//			CosmosRestApiClient unigridCosmosService = new CosmosRestApiClient(
+//				"https://rest-testnet.unigrid.org/", "unigrid-testnet-1", "ugd");
+//
+//			System.out.println("address:" + credentials.getAddress());
+//			List<SendInfo> sendList = new ArrayList<>();
+//			sendList.add(
+//				SendInfo.builder().credentials(credentials).toAddress(recipientAddress)
+//					.amountInAtom(new BigDecimal(amount)).build());
+//			Abci.TxResponse txResponse = unigridCosmosService.sendMultiTx(credentials,
+//				sendList, new BigDecimal("0.000001"), 200000);
+//			System.out.println(txResponse);
 //
 //			ServiceOuterClass.GetTxsEventResponse txsEventByHeight = unigridCosmosService
 //				.getTxsEventByHeight(10099441L, "");
-			//System.out.println(txsEventByHeight);
+//			System.out.println(txsEventByHeight);
 
 			return "complete";
 		} catch (Exception e) {

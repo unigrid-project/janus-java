@@ -39,12 +39,12 @@ import org.bitcoinj.wallet.UnreadableWalletException;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import org.unigrid.cosmos.util.AddressUtil;
-import org.unigrid.cosmos.CosmosRestApiClient;
-import org.unigrid.cosmos.crypto.CosmosCredentials;
-import org.unigrid.cosmos.vo.SendInfo;
-
-import cosmos.base.abci.v1beta1.Abci;
+//import org.unigrid.cosmos.util.AddressUtil;
+//import org.unigrid.cosmos.CosmosRestApiClient;
+//import org.unigrid.cosmos.crypto.CosmosCredentials;
+//import org.unigrid.cosmos.vo.SendInfo;
+//
+//import cosmos.base.abci.v1beta1.Abci;
 import java.security.Security;
 import org.bitcoinj.crypto.HDKeyDerivation;
 
@@ -249,30 +249,30 @@ public class MnemonicToPrivateKey {
 	}
 
 	public static void testSendMultiTx(byte[] key) throws Exception {
-		CosmosRestApiClient unigridApiService = new CosmosRestApiClient("http://localhost:1317",
-			"cosmosdaemon", "ugd");
-
-		CosmosCredentials credentials = CosmosCredentials.create(key, "unigrid");
-		// generate address
-		System.out.println("address:" + credentials.getAddress());
-		List<SendInfo> sendList = new ArrayList<>();
-		// add a send message
-		SendInfo sendMsg1 = SendInfo.builder()
-			.credentials(credentials)
-			.toAddress("unigrid16d3mfh60csakuld5dc7pgj28wk0kda4s5eeqhs")
-			.amountInAtom(new BigDecimal("0.0001"))
-			.build();
-		sendList.add(sendMsg1);
-		// add a send message
-		SendInfo sendMsg2 = SendInfo.builder()
-			.credentials(credentials)
-			.toAddress("unigrid16d3mfh60csakuld5dc7pgj28wk0kda4s5eeqhs")
-			.amountInAtom(new BigDecimal("0.0001"))
-			.build();
-		sendList.add(sendMsg2);
-		// build、sign、broadcast transactions
-		Abci.TxResponse txResponse = unigridApiService.sendMultiTx(credentials,
-			sendList, new BigDecimal("0.000001"), 200000);
+//uncomment all		CosmosRestApiClient unigridApiService = new CosmosRestApiClient("http://localhost:1317",
+//			"cosmosdaemon", "ugd");
+//
+//		CosmosCredentials credentials = CosmosCredentials.create(key, "unigrid");
+//		// generate address
+//		System.out.println("address:" + credentials.getAddress());
+//		List<SendInfo> sendList = new ArrayList<>();
+//		// add a send message
+//		SendInfo sendMsg1 = SendInfo.builder()
+//			.credentials(credentials)
+//			.toAddress("unigrid16d3mfh60csakuld5dc7pgj28wk0kda4s5eeqhs")
+//			.amountInAtom(new BigDecimal("0.0001"))
+//			.build();
+//		sendList.add(sendMsg1);
+//		// add a send message
+//		SendInfo sendMsg2 = SendInfo.builder()
+//			.credentials(credentials)
+//			.toAddress("unigrid16d3mfh60csakuld5dc7pgj28wk0kda4s5eeqhs")
+//			.amountInAtom(new BigDecimal("0.0001"))
+//			.build();
+//		sendList.add(sendMsg2);
+//		// build、sign、broadcast transactions
+//		Abci.TxResponse txResponse = unigridApiService.sendMultiTx(credentials,
+//			sendList, new BigDecimal("0.000001"), 200000);
 		//System.out.println(txResponse.toString());
 		System.out.println("transactions sent");
 		// query send tx by height

@@ -58,7 +58,7 @@ public class KeysCosmosService {
 	private CryptoUtils cryptoUtils;
 
 	@FXML
-	private void generateKeys(ActionEvent event) throws SignatureDecodeException {
+	private void generateKeys(ActionEvent event) throws SignatureDecodeException, Exception {
 
 		BigDecimal currentDelegationAmount = gridnodeDelegationService
 			.getCurrentDelegationAmount();
