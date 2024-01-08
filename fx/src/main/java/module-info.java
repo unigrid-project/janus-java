@@ -56,13 +56,16 @@ module fx {
 	// requires javafx.swing;
 	requires j8fu;
 	requires org.bitcoinj.core;
-	requires sdk;
 	requires org.bouncycastle.provider;
 	requires com.google.common;
 	requires org.json;
 	requires crypto;
 	requires org.apache.commons.codec;
 	requires java.net.http;
+	requires com.google.protobuf;
+	requires io.grpc;
+	requires io.grpc.stub;
+	requires io.grpc.protobuf;
 
 	uses org.update4j.service.Launcher;
 
