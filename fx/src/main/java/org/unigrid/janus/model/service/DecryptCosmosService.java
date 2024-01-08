@@ -31,7 +31,7 @@ public class DecryptCosmosService {
 	private AccountsData accountsData;
 
 	@FXML
-	private void decryptPrivateKey(ActionEvent event) {
+	private void decryptPrivateKey(ActionEvent event) throws Exception {
 		AccountsData.Account selectedAccount = accountsData.getSelectedAccount();
 		if (selectedAccount == null) {
 			System.out.println("No account selected!");
@@ -40,7 +40,7 @@ public class DecryptCosmosService {
 		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
 		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
 		// Prompt the user to enter the password
-		String password = getPasswordFromUser();
+		String password = "pickles";
 		if (password == null) {
 			System.out.println("Password input cancelled!");
 			return;

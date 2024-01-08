@@ -65,6 +65,8 @@ module fx {
 	requires io.grpc;
 	requires io.grpc.stub;
 	requires io.grpc.protobuf;
+	requires com.google.errorprone.annotations;
+	requires proto.google.common.protos;
 
 	uses org.update4j.service.Launcher;
 

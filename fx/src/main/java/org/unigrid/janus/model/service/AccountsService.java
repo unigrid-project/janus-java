@@ -16,6 +16,8 @@
 package org.unigrid.janus.model.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
+import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.File;
