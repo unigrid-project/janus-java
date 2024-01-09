@@ -9,7 +9,6 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
     - name: Mark and close stale issues
       uses: actions/stale@v4
       with:
@@ -19,3 +18,4 @@ jobs:
         days-before-close: 7 # Close stale issues after 7 days of being marked as stale
         stale-issue-label: 'stale'
         close-issue-message: 'This issue has been closed due to inactivity.'
+
