@@ -16,6 +16,7 @@
 package org.unigrid.janus.model.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cosmos.bank.v1beta1.QueryGrpc;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -159,13 +160,13 @@ public class AccountsService {
 							.setAddress(selectedAccount.get().getAddress())
 							// You may need to set other fields depending on your proto definition
 							.build();
-
+						QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 						// Execute the gRPC request
-						QueryBalanceResponse response = grpcService.getStub().balance(request);
+						QueryBalanceResponse response = stub.balance(request);
 
 						Platform.runLater(() -> {
 							// Update UI with the balance received from the response
-							balanceLabel.setText(response.getBalance());
+							balanceLabel.setText(response.getBalance().toString());
 						});
 
 						// Load transactions and other account data (assuming these methods are adapted for gRPC)
