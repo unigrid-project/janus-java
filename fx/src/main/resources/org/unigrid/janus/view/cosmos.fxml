@@ -119,7 +119,7 @@
                         <Text fx:id="sendWarnMsg24" fill="#f28407" strokeType="OUTSIDE" strokeWidth="0.0" />
                         <HBox alignment="CENTER" prefWidth="200.0">
                            <children>
-                              <Button onAction="#importMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import">
+                              <Button onAction="#onImportMnemonicAddress" style="-fx-font-size: 20; -fx-cursor: hand;" text="Import">
                                  <HBox.margin>
                                     <Insets right="50.0" />
                                  </HBox.margin>

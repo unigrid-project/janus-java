@@ -43,17 +43,22 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Map;
+import java.util.Optional;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -68,6 +73,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.SignatureDecodeException;
+import org.bitcoinj.crypto.ChildNumber;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDKeyDerivation;
+import org.bitcoinj.wallet.DeterministicKeyChain;
+import org.bitcoinj.wallet.DeterministicSeed;
 import org.unigrid.janus.model.AccountModel;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.AccountsData.Account;
@@ -76,7 +89,12 @@ import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.MnemonicModel;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.DelegationsRequest;
+import org.unigrid.janus.model.rest.entity.GridnodeDelegationAmount;
+import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
+import org.unigrid.janus.model.rest.entity.RewardsRequest;
 import org.unigrid.janus.model.rest.entity.RewardsRequest.Balance;
+import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
+import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
 import org.unigrid.janus.model.service.AccountsService;
@@ -84,6 +102,8 @@ import org.unigrid.janus.model.service.AddressCosmosService;
 import org.unigrid.janus.model.service.CosmosRestClient;
 import org.unigrid.janus.model.service.GrpcService;
 import org.unigrid.janus.model.service.MnemonicService;
+import org.unigrid.janus.model.service.RestCommand;
+import org.unigrid.janus.model.service.RestService;
 import org.unigrid.janus.model.signal.MnemonicState;
 import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
@@ -391,6 +411,109 @@ public class CosmosController implements Initializable {
 	// }
 	// }
 	@FXML
+	private void generateKeys(ActionEvent event) throws SignatureDecodeException, Exception {
+
+		BigDecimal currentDelegationAmount = gridnodeDelegationService
+			.getCurrentDelegationAmount();
+		BigDecimal collateralAmount = BigDecimal.valueOf(collateral.getAmount());
+		BigDecimal numberOfNodes = currentDelegationAmount.divide(collateralAmount, 0,
+			RoundingMode.DOWN);
+		int numberOfNodesInt = numberOfNodes.intValue();
+		System.out.println("Nodes we can run: " + numberOfNodesInt);
+		int keysToCreate = numberOfNodesInt;
+		Account selectedAccount = accountsData.getSelectedAccount();
+		String pubKey = selectedAccount.getPublicKey();
+		byte[] seed = Sha256Hash.hash(pubKey.getBytes());
+		System.out.println("pubKey: " + pubKey);
+		System.out.println("seed: " + seed);
+
+		// Current time in milliseconds since epoch
+		long creationTimeSeconds = System.currentTimeMillis() / 1000L;
+
+		// Generate the HD wallet from the seed
+		DeterministicSeed deterministicSeed = new DeterministicSeed(seed, "",
+			creationTimeSeconds);
+		DeterministicKeyChain chain = DeterministicKeyChain.builder()
+			.seed(deterministicSeed).build();
+
+		// Derive child keys
+		List<ECKey> derivedKeysList = new ArrayList<>();
+		DeterministicKey parentKey = chain.getWatchingKey();
+		for (int i = 0; i < keysToCreate; i++) {
+			DeterministicKey childKey = HDKeyDerivation.deriveChildKey(parentKey,
+				new ChildNumber(i));
+			derivedKeysList.add(ECKey.fromPrivate(childKey.getPrivKey()));
+		}
+
+		ECKey[] derivedKeys = derivedKeysList.toArray(new ECKey[0]);
+
+		// cryptoUtils.printKeys(derivedKeys);
+		// Now iterate through the allKeys array, signing and verifying a message with
+		// each key
+		String messageStr = "Start gridnode message";
+		byte[] messageBytes = messageStr.getBytes();
+		// get private key to sign with
+		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
+
+		// Prompt the user to enter the password
+		String password = getPasswordFromUser();
+		if (password == null) {
+			System.out.println("Password input cancelled!");
+			return;
+		}
+
+		// Decrypt the private key. The returned value should be the original private
+		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+		byte[] signedMessage = cryptoUtils.signMessage(messageBytes, privateKeyBytes);
+
+		// Verify the signature and the derived keys
+		ECKey publicKey = ECKey.fromPrivate(privateKeyBytes);
+		List<ECKey> publicKeysToVerify = derivedKeysList;
+		System.out.println("publicKey.getPubKey(): " + publicKey.getPubKey());
+
+		long startTime = System.currentTimeMillis(); // Capture the start time
+
+		boolean areKeysVerified = cryptoUtils.verifySignatureKeys(messageBytes,
+			signedMessage, derivedKeys, keysToCreate, pubKey);
+
+		long endTime = System.currentTimeMillis(); // Capture the end time
+
+		long elapsedTime = endTime - startTime; // Calculate the elapsed time
+
+		System.out.println("Are keys verified: " + (areKeysVerified ? "Yes" : "No"));
+		System.out.println("Verification time: " + elapsedTime + " milliseconds");
+
+	}
+
+	private void verifyWithBadKeys(byte[] messageBytes, ECKey signingKey)
+		throws SignatureDecodeException {
+		ECKey.ECDSASignature signature = signingKey.sign(Sha256Hash.of(messageBytes));
+		byte[] signatureBytes = signature.encodeToDER();
+
+		ECKey[] badKeys = {
+			ECKey.fromPrivate(new BigInteger("deadbeefdeadbeefdeadbeefdeadbeef", 16)),
+			ECKey.fromPrivate(
+			new BigInteger("badbadbadbadbadbadbadbadbadbadbad", 16)),
+			ECKey.fromPrivate(
+			new BigInteger("facefacefacefacefacefacefaceface", 16))};
+
+		// for (int i = 0; i < badKeys.length; i++) {
+		// ECKey[] singleKeyArray = { badKeys[i] };
+		// boolean isVerified = cryptoUtils.verifySignature(messageBytes,
+		// signatureBytes,
+		// singleKeyArray);
+		// System.out.println("Verification for bad key " + i + ": "
+		// + (isVerified ? "Succeeded" : "Failed"));
+		// }
+	}
+
+	private String getPasswordFromUser() {
+		// just use this default for testing right now
+		return "pickles";
+	}
+
+	@FXML
 	private void decryptPrivateKey(ActionEvent event) {
 		try {
 			Account selectedAccount = accountsData.getSelectedAccount();
@@ -469,7 +592,7 @@ public class CosmosController implements Initializable {
 		}
 		if (paneToShow == cosmosMainPane) {
 			// load the accounts json
-			accountsService.loadAccounts();
+			loadAccounts();
 		}
 	}
 
@@ -646,8 +769,10 @@ public class CosmosController implements Initializable {
 
 		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 		QueryBalanceResponse response = stub.balance(request);
+		System.out.println("like balance field: " + response.getBalance().getAmount());
+		System.out.println("balance getBalance: " + response.getBalance());
+		System.out.println("balance to string: " + response.toString());
 		balanceField.setText(response.getBalance().getAmount());
-
 
 //uncomment all		try {
 //			CosmosRestApiClient unigridApiService = new CosmosRestApiClient(
@@ -801,5 +926,163 @@ public class CosmosController implements Initializable {
 			throw new RuntimeException("ERR_BAD_FORMAT illegal zero padding");
 		}
 		return extractedBits.toByteArray();
+	}
+
+	/* MAIN VIEW */
+	public void loadAccounts() {
+		try {
+			accountsService.loadAccountsFromJson();
+		} catch (Exception ex) {
+			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+				ex);
+		}
+
+		// Clear the existing items from the ComboBox
+		accountsDropdown.getItems().clear();
+
+		// Populate the ComboBox with account names
+		for (AccountsData.Account account : accountsData.getAccounts()) {
+			if (account.getName() != null) {
+				accountsDropdown.getItems().add(account.getName());
+			} else {
+				System.out.println("Account name is null");
+			}
+
+		}
+
+		// Set the first account as the default selection
+		if (!accountsDropdown.getItems().isEmpty()) {
+			accountsDropdown.getSelectionModel().selectFirst();
+			String defaultAccountName = (String) accountsDropdown.getValue();
+			if (defaultAccountName != null) {
+				Optional<Account> defaultAccount = accountsService
+					.findAccountByName(defaultAccountName);
+				if (defaultAccount.isPresent()) {
+					accountsData.setSelectedAccount(defaultAccount.get());
+				}
+			}
+		}
+
+		// Set up an action listener for the ComboBox
+		accountsDropdown.setOnAction(event -> {
+			String selectedAccountName = (String) accountsDropdown.getValue();
+			Optional<Account> selectedAccount = accountsService
+				.findAccountByName(selectedAccountName);
+			if (selectedAccount.isPresent()) {
+				accountsData.setSelectedAccount(selectedAccount.get());
+				System.out
+					.println("Selected Account:" + accountsData.getSelectedAccount());
+				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
+				System.out.println("getEncryptedPrivateKey: "
+					+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
+				// Create a background task for the network call
+				Task<Void> fetchDataTask = new Task<Void>() {
+					@Override
+					protected Void call() throws Exception {
+
+						// Prepare the gRPC request
+						QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
+							.setAddress(selectedAccount.get().getAddress())
+							.setDenom("ugd") // Add this line to set the denomination
+							.build();
+
+						QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
+						// Execute the gRPC request
+						QueryBalanceResponse response = stub.balance(request);
+						System.out.println("like balance field: " + response.getBalance().getAmount());
+						System.out.println("balance getBalance: " + response.getBalance());
+						System.out.println("balance to string: " + response.toString());
+
+						Platform.runLater(() -> {
+							// Update UI with the balance received from the response
+							balanceLabel.setText(response.getBalance().getAmount() + " ugd");
+						});
+
+						// Load transactions and other account data (assuming these methods are adapted for gRPC)
+						cosmosTxList.loadTransactions(10);
+						loadAccountData(accountsData.getSelectedAccount().getAddress());
+
+						return null;
+					}
+
+				};
+
+				// Handle exceptions
+				fetchDataTask.setOnFailed(e -> {
+					Throwable exception = fetchDataTask.getException();
+					Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE,
+						null, exception);
+					// Optionally show an error message to the user
+				});
+
+				// Start the task in a new thread
+				new Thread(fetchDataTask).start();
+			}
+		});
+
+	}
+
+	private void loadAccountData(String account) throws IOException, InterruptedException {
+		RestService restService = new RestService();
+
+		// Delegations
+		DelegationsRequest delegationsRequest = new DelegationsRequest(account);
+		DelegationsRequest.Response delegationsResponse = new RestCommand<>(
+			delegationsRequest, restService).execute();
+		setDelegations(delegationsResponse.getDelegationResponses());
+		System.out.println(delegationsResponse);
+
+		// Rewards
+		RewardsRequest rewardsRequest = new RewardsRequest(account);
+		RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
+			restService).execute();
+		stakingRewardsValue(rewardsResponse.getTotal());
+		System.out.println(rewardsResponse);
+
+		// Unbonding Delegations
+		UnbondingDelegationsRequest unbondingDelegationsRequest = new UnbondingDelegationsRequest(
+			account);
+		UnbondingDelegationsRequest.Response unbondingDelegationsResponse = new RestCommand<>(
+			unbondingDelegationsRequest, restService).execute();
+		System.out.println(unbondingDelegationsResponse);
+
+		// Redelegations
+		RedelegationsRequest redelegationsRequest = new RedelegationsRequest(account);
+		RedelegationsRequest.Response redelegationsResponse = new RestCommand<>(
+			redelegationsRequest, restService).execute();
+		System.out.println(redelegationsResponse);
+
+		// Withdraw Address
+		WithdrawAddressRequest withdrawAddressRequest = new WithdrawAddressRequest(
+			account);
+		WithdrawAddressRequest.Response withdrawAddressResponse = new RestCommand<>(
+			withdrawAddressRequest, restService).execute();
+		System.out.println(withdrawAddressResponse);
+
+		gridnodeDelegationService.fetchDelegationAmount(account);
+		setDelegationAmount();
+
+		updateCollateralDisplay();
+
+	}
+
+	public void setDelegationAmount() {
+		GridnodeDelegationAmount.Response response = gridnodeDelegationService
+			.getCurrentResponse();
+		if (response != null) {
+			Platform.runLater(() -> {
+				BigDecimal amount = response.getAmount();
+				String text = amount.toPlainString() + " UGD";
+				delegationAmountLabel.setText(text);
+			});
+		}
+	}
+
+	private void updateCollateralDisplay() {
+		if (hedgehog.fetchCollateralRequired()) {
+			System.out.println("Collateral Required: " + collateral.getAmount());
+		} else {
+			System.out.println("Error fetching collateral");
+		}
 	}
 }

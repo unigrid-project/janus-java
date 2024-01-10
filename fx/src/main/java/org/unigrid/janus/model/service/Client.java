@@ -47,6 +47,7 @@ public class Client {
 		try {
 			QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 			QueryBalanceResponse response = stub.balance(request);
+			System.out.println("Responce balance: " + response.toString());
 			return response.toString();
 		} catch (StatusRuntimeException e) {
 			System.out.println("Exception: " + e);

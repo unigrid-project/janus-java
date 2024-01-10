@@ -18,6 +18,7 @@ package org.unigrid.janus.model.service;
 
 import com.evolvedbinary.j8fu.function.TriConsumer;
 import com.evolvedbinary.j8fu.function.TriFunction;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import org.unigrid.janus.model.MnemonicModel;
 import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.utils.CosmosCredentials;
 
+@ApplicationScoped
 public class MnemonicService {
 	@FXML
 	private TextArea seedPhraseTextArea;	
