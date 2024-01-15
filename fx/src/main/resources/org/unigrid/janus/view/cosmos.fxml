@@ -211,7 +211,7 @@
                      <Font size="15.0" />
                   </font>
                </Label>
-               <TextArea fx:id="seedPhraseTextArea" editable="false" maxWidth="500.0" prefHeight="200.0" promptText="generaated seed phrase" style="-fx-background-color: rgba(0, 0, 0, 0.2);" styleClass="mnemonic-area" stylesheets="@main.css" wrapText="true" />
+               <TextArea fx:id="seedPhraseTextArea" editable="false" maxWidth="500.0" prefHeight="200.0" promptText="generated seed phrase" style="-fx-background-color: rgba(0, 0, 0, 0.2);" styleClass="mnemonic-area" stylesheets="@main.css" wrapText="true" />
                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                   <children>
       

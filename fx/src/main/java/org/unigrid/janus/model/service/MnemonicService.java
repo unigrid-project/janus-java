@@ -135,12 +135,7 @@ public class MnemonicService {
 		accountModel.setPrivateKey(privateKey);
 		accountModel.setPublicKey(creds.getEcKey().getPubKey());
 
-		// Update UI fields
-		seedPhraseTextArea.setStyle(
-			"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
-		seedPhraseTextArea.setText(accountModel.getMnemonic());
 
-		addressFieldPassword.setText(accountModel.getAddress());
 		// addressCosmos.setAddress(creds.getAddress());
 		// addressCosmos.setPublicKey(org.bitcoinj.core.Utils.HEX.encode(creds.getEcKey().getPubKey()));
 		// addressCosmos.setName("pickles_" + index);

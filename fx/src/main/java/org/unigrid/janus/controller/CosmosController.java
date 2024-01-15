@@ -868,6 +868,13 @@ public class CosmosController implements Initializable {
 		try {
 			mnemonicState.setViewState(MnemonicState.ViewState.GENERATE);
 			mnemonicService.generateMnemonicAddress();
+
+			// Update UI fields
+			seedPhraseTextArea.setStyle(
+				"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
+			seedPhraseTextArea.setText(accountModel.getMnemonic());
+			addressFieldPassword.setText(accountModel.getAddress());
+
 			showPane(generatePane);
 
 		} catch (Exception e) {
