@@ -17,9 +17,43 @@ package org.unigrid.janus.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.ByteString;
 import cosmos.bank.v1beta1.QueryGrpc;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
+import cosmos.base.v1beta1.CoinOuterClass.Coin;
+import cosmos.staking.v1beta1.Tx.MsgDelegate;
+import cosmos.tx.v1beta1.ServiceGrpc;
+import cosmos.tx.v1beta1.ServiceGrpc.ServiceBlockingStub;
+import cosmos.tx.v1beta1.ServiceOuterClass.BroadcastTxResponse;
+import cosmos.tx.v1beta1.TxOuterClass.SignDoc;
+import cosmos.tx.v1beta1.TxOuterClass.TxBody;
+import cosmos.base.v1beta1.CoinOuterClass.Coin;
+import cosmos.tx.v1beta1.ServiceGrpc.ServiceBlockingStub;
+import cosmos.tx.v1beta1.TxOuterClass.Tx;
+import cosmos.tx.v1beta1.TxOuterClass.TxBody;
+import cosmos.tx.v1beta1.TxOuterClass.SignDoc;
+import cosmos.tx.signing.v1beta1.Signing;
+import cosmos.tx.v1beta1.ServiceOuterClass.BroadcastMode;
+import cosmos.tx.v1beta1.ServiceOuterClass.BroadcastTxRequest;
+import cosmos.tx.v1beta1.TxOuterClass.AuthInfo;
+import cosmos.tx.v1beta1.TxOuterClass.Fee;
+import cosmos.base.v1beta1.CoinOuterClass.Coin;
+import cosmos.tx.v1beta1.TxOuterClass.SignerInfo;
+import cosmos.crypto.secp256k1.Keys.PubKey;
+import cosmos.tx.signing.v1beta1.Signing.SignMode;
+import cosmos.tx.v1beta1.TxOuterClass.ModeInfo;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import com.google.protobuf.Any;
+import cosmos.auth.v1beta1.Auth.BaseAccount;
+import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountRequest;
+import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountResponse;
+import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
+import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
+import cosmos.vesting.v1beta1.Vesting.PeriodicVestingAccount;
+
 import java.math.BigDecimal;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -41,10 +75,14 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,6 +119,9 @@ import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.wallet.DeterministicKeyChain;
 import org.bitcoinj.wallet.DeterministicSeed;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.unigrid.janus.model.AccountModel;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.AccountsData.Account;
@@ -110,6 +151,7 @@ import org.unigrid.janus.model.signal.TabRequestSignal;
 import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.utils.CosmosCredentials;
 import org.unigrid.janus.view.backing.CosmosTxList;
+import pax.gridnode.Tx.MsgGridnodeDelegate;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -148,6 +190,8 @@ public class CosmosController implements Initializable {
 	private Label addressLabel;
 	@FXML
 	private Label balanceLabel;
+	@FXML
+	private TextField delegateAmountTextField;
 	@FXML
 	private TextArea mnemonicArea;
 	@FXML
@@ -526,8 +570,7 @@ public class CosmosController implements Initializable {
 			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
 
 			// Prompt the user to enter the password
-			String password = "";
-			//take care of this= getPasswordFromUser();
+			String password = getPasswordFromUser();
 			if (password == null) {
 				System.out.println("Password input cancelled!");
 				return;
@@ -761,34 +804,6 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
-	private void checkBalance(ActionEvent event) {
-		QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
-			.setAddress(addressField.getText())
-			.setDenom("ugd")
-			.build();
-
-		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
-		QueryBalanceResponse response = stub.balance(request);
-		System.out.println("like balance field: " + response.getBalance().getAmount());
-		System.out.println("balance getBalance: " + response.getBalance());
-		System.out.println("balance to string: " + response.toString());
-		balanceField.setText(response.getBalance().getAmount());
-
-//uncomment all		try {
-//			CosmosRestApiClient unigridApiService = new CosmosRestApiClient(
-//				"http://localhost:1317", "cosmosdaemon", "ugd");
-//			BigDecimal balance = unigridApiService
-//				.getBalanceInAtom(addressField.getText());
-//			DecimalFormat formatter = new DecimalFormat("0.00000000");
-//			String formattedBalance = formatter.format(balance);
-//			balanceField.setText(formattedBalance);
-//		} catch (Exception ex) {
-//			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-//				ex);
-//		}
-	}
-
-	@FXML
 	private void sendTokens(ActionEvent event) {
 		try {
 			String toAddress = this.toAddress.getText();
@@ -890,11 +905,218 @@ public class CosmosController implements Initializable {
 	private void verifyBack(ActionEvent event) {
 		showPane(generatePane);
 	}
+	
+	public String getPrivateKeyHex() {
+		try {
+			Account selectedAccount = accountsData.getSelectedAccount();
+			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
 
-	@FXML
-	private void delegateTokens(ActionEvent event) {
-		// do something
-		System.out.println("delegate pressed");
+			String password = getPasswordFromUser();
+			if (password == null) {
+				System.out.println("Password is null SOMETHING IT WRONG!");  //TODO
+
+			}
+			System.out.println("1");
+			// Decrypt the private key. The returned value should be the original private key bytes.
+			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+			System.out.println("2");
+			// Convert the private key bytes to a HEX string
+			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
+			System.out.println("3");
+			// Optionally, you can print the decrypted private key
+			System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
+
+			return privateKeyHex;
+		} catch (Exception e) {
+			System.err.println("Error while decrypting private key: " + e.getMessage());
+			return null;
+		}
+	}
+
+
+	public static byte[] hexStringToByteArray(String hexString) {
+		int len = hexString.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+				+ Character.digit(hexString.charAt(i + 1), 16));
+		}
+		return data;
+	}
+
+	private PrivateKey getECPrivateKeyFromHex(String privateKeyHex) throws GeneralSecurityException {
+		System.out.println("privateKeyHex: " + privateKeyHex);
+		Security.addProvider(new BouncyCastleProvider());
+		BigInteger s = new BigInteger(privateKeyHex, 16);
+
+		ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
+		ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(s, spec);
+		KeyFactory kf = KeyFactory.getInstance("EC", new BouncyCastleProvider());
+
+		return kf.generatePrivate(ecPrivateKeySpec);
+	}
+
+	private AuthInfo createAuthInfo(String publicKeyHex, long sequence) {
+		// Convert hex-encoded public key string to a byte array
+		byte[] publicKey = hexStringToByteArray(publicKeyHex);
+
+		// Construct the PubKey object
+		PubKey pubKey = PubKey.newBuilder()
+			.setKey(ByteString.copyFrom(publicKey))
+			.build();
+
+		// Wrap the PubKey in an Any type
+		Any packedPubKey = Any.pack(pubKey);
+
+		// Construct the ModeInfo object for SIGN_MODE_DIRECT
+		ModeInfo modeInfo = ModeInfo.newBuilder()
+			.setSingle(ModeInfo.Single.newBuilder().setMode(SignMode.SIGN_MODE_DIRECT))
+			.build();
+
+		// Construct the SignerInfo
+		SignerInfo signerInfo = SignerInfo.newBuilder()
+			.setPublicKey(packedPubKey)
+			.setModeInfo(modeInfo)
+			.setSequence(sequence)
+			.build();
+
+		// Construct the fee
+		Fee fee = Fee.newBuilder()
+			.addAmount(Coin.newBuilder().setDenom("ugd").setAmount("2000").build()) // Fee of 2000 ugd
+			.setGasLimit(200000) // Gas limit of 200000
+			.build();
+
+		// Construct the AuthInfo
+		return AuthInfo.newBuilder()
+			.addSignerInfos(signerInfo)
+			.setFee(fee)
+			.build();
+	}
+
+	private long getSequence(String address) {
+		// Set up the auth query client
+		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+
+		// Prepare the account query request
+		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder()
+			.setAddress(address)
+			.build();
+
+		try {
+			// Query the account information
+			QueryAccountResponse response = authQueryClient.account(accountRequest);
+
+			Any accountAny = response.getAccount();
+			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
+			// Process baseAccount as needed
+			return baseAccount.getSequence();
+
+		} catch (Exception e) {
+			// Handle exceptions (e.g., account not found, gRPC errors, unpacking errors)
+			e.printStackTrace();
+			return -1; // or handle it as per your application's requirement
+		}
+
+	}
+
+	public static byte[] longToBytes(long value) {
+		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+		buffer.putLong(value);
+		return buffer.array();
+	}
+
+	public byte[] prepareSigningInput(byte[] txBodyBytes, byte[] authInfoBytes, String chainId, long accountNumber, long sequence) throws IOException {
+		ByteArrayOutputStream signingInput = new ByteArrayOutputStream();
+		signingInput.write(txBodyBytes);
+		signingInput.write(authInfoBytes);
+		signingInput.write(chainId.getBytes(StandardCharsets.UTF_8));
+		signingInput.write(longToBytes(accountNumber));
+		signingInput.write(longToBytes(sequence));
+		return signingInput.toByteArray();
+	}
+
+	private long getAccountNumber(String address) {
+		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder().setAddress(address).build();
+
+		try {
+			QueryAccountResponse response = authQueryClient.account(accountRequest);
+			Any accountAny = response.getAccount();
+			System.out.println("Type URL in getAccountNumber: " + accountAny.getTypeUrl());
+			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
+			// Process baseAccount as needed
+			return baseAccount.getSequence();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return -1; // Handle this as per your application's requirement
+		}
+	}
+
+	public void delegateToGridnode() {
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = getAccountNumber(selectedAccount.getAddress());
+		String chainId = "unigrid-testnet-3";
+
+		try {
+			// Step 1: Create the MsgGridnodeDelegate request
+			MsgGridnodeDelegate delegateRequest = MsgGridnodeDelegate.newBuilder()
+				.setDelegatorAddress(selectedAccount.getAddress())
+				.setAmount(Long.parseLong(delegateAmountTextField.getText()))
+				// Add other necessary fields
+				.build();
+
+			// Step 2: Wrap in a transaction body (TxBody)
+			Any anyDelegateRequest = Any.pack(delegateRequest);
+			TxBody txBody = TxBody.newBuilder().addMessages(anyDelegateRequest).build();
+
+			// Step 3: Create AuthInfo with signer info and fee
+			AuthInfo authInfo = createAuthInfo(selectedAccount.getPublicKey(), sequence);
+
+			// Step 4: Serialize TxBody and AuthInfo
+			byte[] txBodyBytes = txBody.toByteArray();
+			byte[] authInfoBytes = authInfo.toByteArray();
+
+			// Step 5: Prepare signing input
+			byte[] signingInput = prepareSigningInput(txBodyBytes, authInfoBytes, chainId, accountNumber, sequence);
+
+			// Step 6: Sign the transaction
+			PrivateKey privateKey = getECPrivateKeyFromHex(getPrivateKeyHex());
+			byte[] signature = generateSignature(privateKey, signingInput);
+
+			// Step 7: Construct the signed transaction
+			Tx signedTx = Tx.newBuilder()
+				.setBody(txBody)
+				.setAuthInfo(authInfo)
+				.addSignatures(ByteString.copyFrom(signature))
+				.build();
+
+			// Step 8: Broadcast the transaction
+			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
+				.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
+				.setMode(BroadcastMode.BROADCAST_MODE_SYNC) // Choose the appropriate mode
+				.build();
+			BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
+
+			// Step 9: Handle the response
+			System.out.println("Transaction Hash: " + broadcastResponse.getTxResponse().getTxhash());
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Error delegating to gridnode: " + e.getMessage());
+		}
+	}
+
+	private byte[] generateSignature(PrivateKey privateKeyObj, byte[] txBytes) throws GeneralSecurityException {
+
+		Signature signatureObj = Signature.getInstance("SHA256withECDSA", "BC");
+		signatureObj.initSign(privateKeyObj);
+
+		signatureObj.update(txBytes); // Use the serialized transaction bytes
+
+		return signatureObj.sign();
+
 	}
 
 	@FXML
@@ -993,9 +1215,11 @@ public class CosmosController implements Initializable {
 						System.out.println("balance getBalance: " + response.getBalance());
 						System.out.println("balance to string: " + response.toString());
 
+						//	long delegated = cosmosDelSer.findDelegatedAmount(selectedAccount.get().getAddress());
 						Platform.runLater(() -> {
 							// Update UI with the balance received from the response
 							balanceLabel.setText(response.getBalance().getAmount() + " ugd");
+							//delegationAmountLabel.setText(Long.toString(delegated));
 						});
 
 						// Load transactions and other account data (assuming these methods are adapted for gRPC)
