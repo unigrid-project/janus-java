@@ -105,20 +105,6 @@
                         <Font size="16.0" />
                      </font>
                   </Label>
-		  <Label fx:id="delegateLabel1" text="Amount:" textFill="#ababab">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
-                     <padding>
-                        <Insets left="5.0" right="5.0" />
-                     </padding>
-                  </Label>
-                  <TextField fx:id="delegateAmountTextField" prefWidth="150.0">
-                     <HBox.margin>
-                        <Insets right="10.0" />
-                     </HBox.margin>
-                  </TextField>
-                  <Button contentDisplay="CENTER" onAction="#delegateToGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
                </children>
             </HBox>
             </VBox>
