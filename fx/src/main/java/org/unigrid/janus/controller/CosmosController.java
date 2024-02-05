@@ -21,19 +21,13 @@ import com.google.protobuf.ByteString;
 import cosmos.bank.v1beta1.QueryGrpc;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
-import cosmos.base.v1beta1.CoinOuterClass.Coin;
-import cosmos.staking.v1beta1.Tx.MsgDelegate;
-import cosmos.tx.v1beta1.ServiceGrpc;
-import cosmos.tx.v1beta1.ServiceGrpc.ServiceBlockingStub;
+
 import cosmos.tx.v1beta1.ServiceOuterClass.BroadcastTxResponse;
-import cosmos.tx.v1beta1.TxOuterClass.SignDoc;
-import cosmos.tx.v1beta1.TxOuterClass.TxBody;
-import cosmos.base.v1beta1.CoinOuterClass.Coin;
+
 import cosmos.tx.v1beta1.ServiceGrpc.ServiceBlockingStub;
 import cosmos.tx.v1beta1.TxOuterClass.Tx;
 import cosmos.tx.v1beta1.TxOuterClass.TxBody;
-import cosmos.tx.v1beta1.TxOuterClass.SignDoc;
-import cosmos.tx.signing.v1beta1.Signing;
+
 import cosmos.tx.v1beta1.ServiceOuterClass.BroadcastMode;
 import cosmos.tx.v1beta1.ServiceOuterClass.BroadcastTxRequest;
 import cosmos.tx.v1beta1.TxOuterClass.AuthInfo;
@@ -44,24 +38,18 @@ import cosmos.crypto.secp256k1.Keys.PubKey;
 import cosmos.tx.signing.v1beta1.Signing.SignMode;
 import cosmos.tx.v1beta1.TxOuterClass.ModeInfo;
 import java.security.*;
-import java.security.spec.PKCS8EncodedKeySpec;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+
+import java.security.Security;
+
 import com.google.protobuf.Any;
 import cosmos.auth.v1beta1.Auth.BaseAccount;
 import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountRequest;
 import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountResponse;
-import cosmos.base.abci.v1beta1.Abci;
-import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
-import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
-import cosmos.vesting.v1beta1.Vesting.PeriodicVestingAccount;
 import cosmos.tx.v1beta1.ServiceGrpc;
-import cosmos.tx.v1beta1.ServiceOuterClass.GetTxRequest;
-import cosmos.tx.v1beta1.ServiceOuterClass.GetTxResponse;
+
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
-import org.bouncycastle.crypto.signers.Ed25519Signer;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -95,7 +83,6 @@ import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.BitSet;
@@ -166,1213 +153,1229 @@ import pax.gridnode.Tx.MsgGridnodeDelegate;
 @ApplicationScoped
 public class CosmosController implements Initializable {
 
-    @Inject
-    private DebugService debug;
-    @Inject
-    private AccountModel accountModel;
-    @Inject
-    private MnemonicState mnemonicState;
-    @Inject
-    private AccountsService accountsService;
-    @Inject
-    private AccountsData accountsData;
-    @Inject
-    private CosmosRestClient cosmosClient;
-    @Inject
-    private MnemonicModel mnemonicModel;
-    @Inject
-    private CosmosTxList cosmosTxList;
-    @Inject
-    private Event<ResetTextFieldsSignal> resetTextFieldsEvent;
-    @Inject
-    private Hedgehog hedgehog;
-    @Inject
-    private CollateralRequired collateral;
-    @Inject
-    private GridnodeDelegationService gridnodeDelegationService;
-    @Inject
-    private MnemonicService mnemonicService;
-    @Inject
-    private GrpcService grpcService;
-
-    private Account currentSelectedAccount;
-    @FXML
-    private Label addressLabel;
-    @FXML
-    private Label balanceLabel;
-    @FXML
-    private TextArea mnemonicArea;
-    @FXML
-    private TextArea seedPhraseTextArea;
-    @FXML
-    private TextField addressField;
-    @FXML
-    private TextField balanceField;
-    @FXML
-    private TextField encryptField;
-    @FXML
-    private TextField keytoDecrypt;
-    @Inject
-    private CryptoUtils cryptoUtils;
-    @FXML
-    private TextField decryptField;
-    @FXML
-    private TextField accountNameField;
-    @FXML
-    private Label importLabel;
-    @FXML
-    private Label generateLabel;
-    @FXML
-    private Button importButton;
-    @FXML
-    private Button generateButton;
-    @FXML
-    private StackPane importPane;
-    @FXML
-    private StackPane cosmosWizardPane;
-    @FXML
-    private StackPane cosmosMainPane;
-    @FXML
-    private StackPane generatePane;
-    @FXML
-    private StackPane passwordPane;
-    @FXML
-    private StackPane confirmMnemonic;
-    @FXML
-    private TabPane importTabPane;
-    @FXML
-    private Tab mnemonic12Tab;
-    @FXML
-    private Tab mnemonic24Tab;
-    @FXML
-    private TextField addressFieldPassword;
-    @FXML
-    private TextField toAddress;
-    @FXML
-    private TextField sendAmount;
-    @FXML
-    private PasswordField passwordField1;
-    @FXML
-    private PasswordField passwordField2;
-    @FXML
-    private Button encryptAndSaveButton;
-    @FXML
-    private Text sendWarnMsg12;
-    @FXML
-    private Text sendWarnMsg24;
-    @FXML
-    private TextField importPassword;
-    @FXML
-    private Text sendWarnPassword;
-    @FXML
-    private Label totalRewards;
-    @FXML
-    private Label delegationAmountLabel;
-    @FXML
-    private TextField delegateAmountTextField;
-    @FXML
-    private ListView<Balance> totalsListView;
-    @FXML
-    private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
-    @FXML
-    @Named("transactionResponse")
-    private ListView<TransactionResponse.TxResponse> transactionListView;
-    @Inject
-    @Named("transactionResponse")
-    private TransactionResponse txModel;
-
-    @FXML
-    private ComboBox accountsDropdown;
-    private Map<String, StackPane> paneMap = new HashMap<>();
-    // List to store the actual mnemonic words
-    private AddressCosmosService addressService = new AddressCosmosService();
-    private AddressCosmos addressCosmos = new AddressCosmos();
-    private BigDecimal scaleFactor = new BigDecimal("100000000");
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        paneMap.put("importPane", importPane);
-        paneMap.put("cosmosWizardPane", cosmosWizardPane);
-        paneMap.put("cosmosMainPane", cosmosMainPane);
-        paneMap.put("cosmosWizardPane", cosmosWizardPane);
-        paneMap.put("generatePane", generatePane);
-        paneMap.put("passwordPane", passwordPane);
-        paneMap.put("confirmMnemonic", confirmMnemonic);
-
-        ObservableList<TxResponse> observableList = FXCollections
-                .observableArrayList(cosmosTxList.getTxResponsesList());
-        transactionListView.setItems(observableList);
-
-        Platform.runLater(() -> {
-
-            System.out.println("Is on FX thread: " + Platform.isFxApplicationThread());
-
-            System.out.println("run later method called");
-            // Bind the width of the labels to the width of the buttons
-            importLabel.prefWidthProperty().bind(importButton.widthProperty());
-            generateLabel.prefWidthProperty().bind(generateButton.widthProperty());
-            // Add a listener to the first TextField for the paste event
-
-            if (accountsService.isAccountsJsonEmpty()) {
-                showPane(cosmosWizardPane);
-            } else {
-                showPane(cosmosMainPane);
-            }
-            // check whether the word changed in order to reset the value
-            transactionListView.setCellFactory(
-                    param -> new ListCell<TransactionResponse.TxResponse>() {
-                @Override
-                protected void updateItem(
-                        TransactionResponse.TxResponse txResponse,
-                        boolean empty) {
-                    System.out.println(
-                            "Cell factory called for item: " + txResponse);
-                    System.out.println("Number of transactions: "
-                            + cosmosTxList.getTxResponsesList().size());
-
-                    super.updateItem(txResponse, empty);
-                    if (empty || txResponse == null) {
-                        setText(null);
-                    } else {
-                        setText(txResponse.getTxhash() + " - "
-                                + txResponse.getTimestamp());
-                        System.out.println("txResponse getHeight(): "
-                                + txResponse.getHeight());
-                    }
-                }
-            });
-            totalsListView.setCellFactory(lv -> new ListCell<Balance>() {
-                @Override
-                protected void updateItem(Balance item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setText(null);
-                    } else {
-                        setText(item.getAmount() + " " + item.getDenom());
-                    }
-                }
-            });
-            delegationsListView.setCellFactory(
-                    listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
-                @Override
-                protected void updateItem(
-                        DelegationsRequest.DelegationResponse item,
-                        boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setText(null);
-                    } else {
-
-                        BigDecimal amount = new BigDecimal(
-                                item.getBalance().getAmount());
-                        BigDecimal displayAmount = amount.divide(scaleFactor);
-                        String text = String.format(
-                                "Validator: %s, Amount: %s %s",
-                                item.getDelegation().getValidatorAddress(),
-                                displayAmount.toPlainString(),
-                                item.getBalance().getDenom());
-                        setText(text);
-                    }
-                }
-            });
-        });
-    }
-
-    @FXML
-    private void testBtn(ActionEvent event) {
-        // System.out.println("Transaction Response: " + cosmosTxList.getTxResponse());
-        // System.out.println("Transaction loadTransactions: " +
-        // cosmosTxList.loadTransactions(10));
-
-        // System.out.println("txModel.getTxResponses: " + txModel.getNewTxResponses());
-        System.out.println("txModel.getResult: " + txModel.getResult());
-    }
-
-    @FXML
-    private void onEncryptKeys(ActionEvent event) {
-        try {
-            String password1 = passwordField1.getText();
-            String password2 = passwordField2.getText();
-            if (!password1.equals(password2)) {
-
-                System.out.println("Passwords do not match!");
-                onErrorMessage("Passwords do not match!", sendWarnPassword);
-                return;
-            }
-
-            if (password1.isEmpty()) {
-                System.out.println("Password cannot be empty!");
-                onErrorMessage("Password cannot be empty!", sendWarnPassword);
-                return;
-            }
-
-            if (accountNameField.getText().isEmpty()) {
-                System.out.println("Account name cannot be empty!");
-                onErrorMessage("Account name cannot be empty!", sendWarnPassword);
-                return;
-            }
-            accountModel.setName(accountNameField.getText());
-
-            byte[] privateKey = accountModel.getPrivateKey();
-            if (privateKey == null || privateKey.length == 0) {
-                System.out.println("Private key is either null or empty!");
-                return;
-            }
-
-            // Encrypt the private key
-            String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
-            // accountModel.setEncryptedPrivateKey(encryptedPrivateKey);
-            System.out.println("Encrypted Private Key: " + encryptedPrivateKey);
-
-            // Clear out any private keys from memory
-            Arrays.fill(privateKey, (byte) 0);
-
-            // Clear the model and reset the text fields
-            resetTextFieldsEvent.fire(ResetTextFieldsSignal.builder().build());
-            showPane(cosmosMainPane);
-        } catch (Exception ex) {
-            Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-                    ex);
-        }
-    }
-
-    private void resetTextFields(@Observes ResetTextFieldsSignal signal) {
-        System.out.println("Resetting text fields");
-        passwordField1.setText("");
-        passwordField2.setText("");
-        accountNameField.setText("");
-        importTabPane.getSelectionModel().select(mnemonic12Tab);
-        mnemonic12Tab.setDisable(false);
-        mnemonic24Tab.setDisable(false);
-        importPassword.setText("");
-        accountModel.reset();
-    }
-
-    // @FXML
-    // private void encryptTest(ActionEvent event) {
-    // try {
-    // String mnemonic = encryptField.getText();
-    //
-    // cryptoUtils.encrypt(mnemonic, "pickles");
-    // String addressFromPrivateKey =
-    // cryptoUtils.getAddressFromPrivateKey(mnemonic);
-    // addressField.setText(addressFromPrivateKey);
-    // // Show the cosmosMainPane after successful encryption and saving
-    // showPane(cosmosMainPane);
-    // } catch (Exception ex) {
-    // Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-    // ex);
-    // }
-    // }
-    @FXML
-    private void generateKeys(ActionEvent event) throws SignatureDecodeException, Exception {
-
-        BigDecimal currentDelegationAmount = gridnodeDelegationService
-                .getCurrentDelegationAmount();
-        BigDecimal collateralAmount = BigDecimal.valueOf(collateral.getAmount());
-        BigDecimal numberOfNodes = currentDelegationAmount.divide(collateralAmount, 0,
-                RoundingMode.DOWN);
-        int numberOfNodesInt = numberOfNodes.intValue();
-        System.out.println("Nodes we can run: " + numberOfNodesInt);
-        int keysToCreate = numberOfNodesInt;
-        Account selectedAccount = accountsData.getSelectedAccount();
-        String pubKey = selectedAccount.getPublicKey();
-        byte[] seed = Sha256Hash.hash(pubKey.getBytes());
-        System.out.println("pubKey: " + pubKey);
-        System.out.println("seed: " + seed);
-
-        // Current time in milliseconds since epoch
-        long creationTimeSeconds = System.currentTimeMillis() / 1000L;
-
-        // Generate the HD wallet from the seed
-        DeterministicSeed deterministicSeed = new DeterministicSeed(seed, "",
-                creationTimeSeconds);
-        DeterministicKeyChain chain = DeterministicKeyChain.builder()
-                .seed(deterministicSeed).build();
-
-        // Derive child keys
-        List<ECKey> derivedKeysList = new ArrayList<>();
-        DeterministicKey parentKey = chain.getWatchingKey();
-        for (int i = 0; i < keysToCreate; i++) {
-            DeterministicKey childKey = HDKeyDerivation.deriveChildKey(parentKey,
-                    new ChildNumber(i));
-            derivedKeysList.add(ECKey.fromPrivate(childKey.getPrivKey()));
-        }
-
-        ECKey[] derivedKeys = derivedKeysList.toArray(new ECKey[0]);
-
-        // cryptoUtils.printKeys(derivedKeys);
-        // Now iterate through the allKeys array, signing and verifying a message with
-        // each key
-        String messageStr = "Start gridnode message";
-        byte[] messageBytes = messageStr.getBytes();
-        // get private key to sign with
-        String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
-        System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
-
-        // Prompt the user to enter the password
-        String password = getPasswordFromUser();
-        if (password == null) {
-            System.out.println("Password input cancelled!");
-            return;
-        }
-
-        // Decrypt the private key. The returned value should be the original private
-        byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
-        byte[] signedMessage = cryptoUtils.signMessage(messageBytes, privateKeyBytes);
-
-        // Verify the signature and the derived keys
-        ECKey publicKey = ECKey.fromPrivate(privateKeyBytes);
-        List<ECKey> publicKeysToVerify = derivedKeysList;
-        System.out.println("publicKey.getPubKey(): " + publicKey.getPubKey());
-
-        long startTime = System.currentTimeMillis(); // Capture the start time
-
-        boolean areKeysVerified = cryptoUtils.verifySignatureKeys(messageBytes,
-                signedMessage, derivedKeys, keysToCreate, pubKey);
-
-        long endTime = System.currentTimeMillis(); // Capture the end time
-
-        long elapsedTime = endTime - startTime; // Calculate the elapsed time
-
-        System.out.println("Are keys verified: " + (areKeysVerified ? "Yes" : "No"));
-        System.out.println("Verification time: " + elapsedTime + " milliseconds");
-
-    }
-
-    private void verifyWithBadKeys(byte[] messageBytes, ECKey signingKey)
-            throws SignatureDecodeException {
-        ECKey.ECDSASignature signature = signingKey.sign(Sha256Hash.of(messageBytes));
-        byte[] signatureBytes = signature.encodeToDER();
-
-        ECKey[] badKeys = {
-            ECKey.fromPrivate(new BigInteger("deadbeefdeadbeefdeadbeefdeadbeef", 16)),
-            ECKey.fromPrivate(
-            new BigInteger("badbadbadbadbadbadbadbadbadbadbad", 16)),
-            ECKey.fromPrivate(
-            new BigInteger("facefacefacefacefacefacefaceface", 16))};
-
-        // for (int i = 0; i < badKeys.length; i++) {
-        // ECKey[] singleKeyArray = { badKeys[i] };
-        // boolean isVerified = cryptoUtils.verifySignature(messageBytes,
-        // signatureBytes,
-        // singleKeyArray);
-        // System.out.println("Verification for bad key " + i + ": "
-        // + (isVerified ? "Succeeded" : "Failed"));
-        // }
-    }
-
-    private String getPasswordFromUser() {
-        // just use this default for testing right now
-        return "pickles";
-    }
-
-    @FXML
-    private void decryptPrivateKey(ActionEvent event) {
-        try {
-            Account selectedAccount = accountsData.getSelectedAccount();
-            if (selectedAccount == null) {
-                System.out.println("No account selected!");
-                return;
-            }
-
-            String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
-            System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
-
-            // Prompt the user to enter the password
-            String password = "";
-            //take care of this= getPasswordFromUser();
-            if (password == null) {
-                System.out.println("Password input cancelled!");
-                return;
-            }
-
-            // Decrypt the private key. The returned value should be the original private
-            // key bytes.
-            byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
-            System.out.println(
-                    "Decrypted Private Key (Bytes): " + Arrays.toString(privateKeyBytes));
-            System.out.println("Decrypted Private Key (HEX): "
-                    + cryptoUtils.bytesToHex(privateKeyBytes));
-            // Convert the private key bytes to a HEX string
-            String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
-            System.out.println("Private Key in HEX: " + privateKeyHex);
-            System.out.println("Address from priv key: "
-                    + cryptoUtils.getAddressFromPrivateKey(privateKeyHex));
-        } catch (Exception ex) {
-            Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-                    ex);
-        }
-    }
-
-    // @FXML
-    // private void decrypTest(ActionEvent event) {
-    // try {
-    //
-    // // Decrypt the mnemonic
-    // System.out.println("encryptedPrivateKey: " + keytoDecrypt.getText());
-    // String keys = cryptoUtils.decrypt(keytoDecrypt.getText(), "pickles");
-    // decryptField.setText(keys);
-    //
-    // } catch (Exception ex) {
-    // Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-    // ex);
-    // }
-    // }
-    public void handleSaveAddress(AddressCosmos newAddress) {
-        try {
-            addressService.saveAddress(newAddress);
-            // Handle success, update UI, etc.
-        } catch (IOException e) {
-            debug.print(e.getMessage(), CosmosController.class.getSimpleName());
-        }
-    }
-
-    private void showPane(StackPane paneToShow) {
-        // List of all panes
-        String paneName = paneMap.entrySet().stream()
-                .filter(entry -> entry.getValue() == paneToShow).map(Map.Entry::getKey)
-                .findFirst().orElse(null);
-        List<StackPane> allPanes = Arrays.asList(importPane, cosmosWizardPane,
-                cosmosMainPane, generatePane, passwordPane, confirmMnemonic);
-        mnemonicModel.setCurrentPane(paneName);
-        // Loop through all panes and set visibility
-        for (StackPane pane : allPanes) {
-            if (pane == paneToShow) {
-                pane.setVisible(true);
-            } else {
-                pane.setVisible(false);
-            }
-        }
-        if (paneToShow == cosmosMainPane) {
-            // load the accounts json
-            loadAccounts();
-        }
-    }
-
-    private void revealContent(TextField tf) {
-        tf.setPromptText(tf.getText());
-        tf.setText("");
-    }
-
-    private void hideContent(TextField tf) {
-        tf.setText(tf.getPromptText());
-        tf.setPromptText("");
-    }
-
-    private int getNextIndex() throws IOException {
-        File file = DataDirectory.getCosmosAddresses();
-        if (!file.exists() || file.length() == 0) {
-            return 0;
-        }
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<AddressCosmos> addresses = objectMapper.readValue(file,
-                new TypeReference<List<AddressCosmos>>() {
-        });
-        return addresses.size();
-    }
-
-    @FXML
-    private void onCancelAccountGeneration(ActionEvent event) {
-        try {
-            System.out.println("show main pane");
-            showPane(cosmosMainPane);
-
-            resetTextFieldsEvent.fire(ResetTextFieldsSignal.builder().build());
-
-        } catch (Exception ex) {
-            Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-                    ex);
-        }
-    }
-
-    /* IMPORT VIEW */
-    @FXML
-    private void importPrivateKey(ActionEvent event) {
-        System.out.println("Import private key: " + importPassword.getText());
-        try {
-            accountModel.setAddress(
-                    cryptoUtils.getAddressFromPrivateKey(importPassword.getText()));
-            accountModel.setPublicKey(
-                    cryptoUtils.getPublicKeyBytes(importPassword.getText()));
-            accountModel.setPrivateKey(
-                    cryptoUtils.getPrivateKeyBytes(importPassword.getText()));
-            System.out.println("Address from private key: " + accountModel.getAddress());
-            addressFieldPassword.setText(accountModel.getAddress());
-        } catch (NoSuchAlgorithmException | NoSuchProviderException
-                | InvalidKeySpecException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        showPane(passwordPane);
-    }
-
-    @FXML
-    public void onImportAction(ActionEvent event) {
-        mnemonicState.setViewState(MnemonicState.ViewState.IMPORT);
-        showPane(importPane);
-    }
-
-    @FXML
-    public void onImportMnemonicAddress(ActionEvent event) throws Exception {
-
-        int index = 0;
-
-        String mnemonic = String.join(" ", mnemonicModel.getMnemonicWordList());
-        System.out.println("mnemonic: " + mnemonic);
-        // this.mnemonicArea.setText(mnemonic);
-        byte[] privateKey = mnemonicService.derivePrivateKeyFromMnemonic(mnemonic, index);
-        // Encrypt the mnemonic before setting it to the accountModel
-        // String password1 = passwordField1.getText();
-        // String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
-        // accountModel.setMnemonic(encryptedPrivateKey);
-        // System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
-        System.out.println(
-                "Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
-
-        String path = String.format("m/44'/118'/0'/0/%d", index);
-        CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
-                "unigrid");
-
-        System.out.println("Address from creds: " + creds.getAddress());
-        System.out.println("EcKey from creds: " + creds.getEcKey());
-
-        // Populate the AccountModel
-        accountModel.setMnemonic(mnemonic);
-        System.out.println("Set mnemonic: " + accountModel.getMnemonic());
-
-        accountModel.setAddress(creds.getAddress());
-        System.out.println("Set address: " + accountModel.getAddress());
-
-        accountModel.setPrivateKey(privateKey);
-        accountModel.setPublicKey(creds.getEcKey().getPubKey());
-
-        addressFieldPassword.setText(accountModel.getAddress());
-
-        showPane(passwordPane);
-    }
-
-    private void showError(String message, Tab tab) {
-        Text errorMsg = (tab == mnemonic12Tab) ? sendWarnMsg12 : sendWarnMsg24;
-        onErrorMessage(message, errorMsg);
-    }
-
-    private void onErrorMessage(String message, Text sendWarnMsg) {
-        sendWarnMsg.setFill(Color.web("#f28407"));
-        sendWarnMsg.setText(message);
-        sendWarnMsg.setVisible(true);
-
-        PauseTransition pause = new PauseTransition(Duration.seconds(3));
-
-        pause.setOnFinished(e -> {
-            sendWarnMsg.setVisible(false);
-            sendWarnMsg.setText("");
-        });
-
-        pause.play();
-    }
-
-    /* DELEGATION LIST VIEW */
-    public void setDelegations(List<DelegationsRequest.DelegationResponse> delegations) {
-        Platform.runLater(() -> {
-            delegationsListView.getItems().setAll(delegations);
-        });
-    }
-
-    /* REWARDS LIST VIEW */
-    public void stakingRewardsValue(List<Balance> totals) {
-        ObservableList<Balance> items = FXCollections.observableArrayList(totals);
-
-        Platform.runLater(() -> {
-            totalsListView.getItems().clear();
-            totalsListView.setCellFactory(listView -> new ListCell<Balance>() {
-                @Override
-                protected void updateItem(Balance item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setText(null);
-                    } else {
-                        BigDecimal amount = new BigDecimal(item.getAmount());
-                        BigDecimal displayAmount = amount.divide(scaleFactor);
-                        setText(displayAmount.toPlainString() + " " + item.getDenom());
-                    }
-                }
-            });
-            totalsListView.getItems().addAll(items);
-        });
-    }
-
-    @FXML
-    private void createNewAccount(ActionEvent event) {
-        try {
-            showPane(cosmosWizardPane);
-        } catch (Exception ex) {
-            Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-                    ex);
-        }
-    }
-
-    public String getPrivateKeyHex() {
-        try {
-            Account selectedAccount = accountsData.getSelectedAccount();
-            String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
-
-            String password = getPasswordFromUser();
-            if (password == null) {
-                System.out.println("Password is null! Error in getPasswordFromUser method.");
-                return null;
-            }
-            System.out.println("encryptedPrivateKey: " + encryptedPrivateKey + " password: " + password);
-            // Decrypt the private key
-            byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
-            if (privateKeyBytes == null) {
-                System.out.println("Decryption returned null! Check decryption method.");
-                return null;
-            }
-
-            // Convert the private key bytes to a HEX string
-            String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
-            System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
-
-            return privateKeyHex;
-        } catch (Exception e) {
-            System.err.println("Error while decrypting private key: " + e.getMessage());
-            e.printStackTrace(); // Print the full stack trace for detailed error information
-            return null;
-        }
-    }
-
-    public static byte[] hexStringToByteArray(String hexString) {
-        int len = hexString.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
-                    + Character.digit(hexString.charAt(i + 1), 16));
-        }
-        return data;
-    }
-
-    private PrivateKey getECPrivateKeyFromHex(String privateKeyHex) throws GeneralSecurityException {
-        System.out.println("privateKeyHex: " + privateKeyHex);
-        Security.addProvider(new BouncyCastleProvider());
-        BigInteger s = new BigInteger(privateKeyHex, 16);
-
-        ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
-        ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(s, spec);
-        KeyFactory kf = KeyFactory.getInstance("EC", new BouncyCastleProvider());
-
-        return kf.generatePrivate(ecPrivateKeySpec);
-    }
-
-    private AuthInfo createAuthInfo(String publicKeyHex, long sequence) {
-        // Convert hex-encoded public key string to a byte array
-        byte[] publicKey = hexStringToByteArray(publicKeyHex);
-
-        // Construct the PubKey object
-        PubKey pubKey = PubKey.newBuilder()
-                .setKey(ByteString.copyFrom(publicKey))
-                .build();
-
-        // Wrap the PubKey in an Any type
-        Any packedPubKey = Any.pack(pubKey);
-        packedPubKey = Any.newBuilder()
-                .setTypeUrl("/cosmos.crypto.secp256k1.PubKey") // Set type_url manually
-                .setValue(pubKey.toByteString()) // Set the serialized message
-                .build();
-
-        // Construct the ModeInfo object for SIGN_MODE_DIRECT
-        ModeInfo modeInfo = ModeInfo.newBuilder()
-                .setSingle(ModeInfo.Single.newBuilder().setMode(SignMode.SIGN_MODE_DIRECT))
-                .build();
-
-        // Construct the SignerInfo
-        SignerInfo signerInfo = SignerInfo.newBuilder()
-                .setPublicKey(packedPubKey)
-                .setModeInfo(modeInfo)
-                .setSequence(sequence)
-                .build();
-
-        // Construct the fee
-        Fee fee = Fee.newBuilder()
-                .addAmount(Coin.newBuilder().setDenom("ugd").setAmount("3").build()) // Fee of 2000 ugd
-                .setGasLimit(200000) // Gas limit of 200000
-                .build();
-
-        System.out.println("gas limit: " + fee.getGasLimit());
-
-        // Construct the AuthInfo
-        return AuthInfo.newBuilder()
-                .addSignerInfos(signerInfo)
-                .setFee(fee)
-                .build();
-    }
-
-    private long getSequence(String address) {
-        // Set up the auth query client
-        cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-
-        // Prepare the account query request
-        QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder()
-                .setAddress(address)
-                .build();
-
-        try {
-            // Query the account information
-            QueryAccountResponse response = authQueryClient.account(accountRequest);
-
-            Any accountAny = response.getAccount();
-            BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
-            // Process baseAccount as needed
-            return baseAccount.getSequence();
-
-        } catch (Exception e) {
-            // Handle exceptions (e.g., account not found, gRPC errors, unpacking errors)
-            e.printStackTrace();
-            return -1; // or handle it as per your application's requirement
-        }
-
-    }
-
-    public static byte[] longToBytes(long value) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(value);
-        return buffer.array();
-    }
-
-    public byte[] prepareSigningInput(byte[] txBodyBytes, byte[] authInfoBytes, String chainId, long accountNumber, long sequence) throws IOException {
-        ByteArrayOutputStream signingInput = new ByteArrayOutputStream();
-        signingInput.write(txBodyBytes);
-        signingInput.write(authInfoBytes);
-        signingInput.write(chainId.getBytes(StandardCharsets.UTF_8));
-        signingInput.write(longToBytes(accountNumber));
-        signingInput.write(longToBytes(sequence));
-        return signingInput.toByteArray();
-    }
-
-    private long getAccountNumber(String address) {
-        cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-        QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder().setAddress(address).build();
-
-        try {
-            QueryAccountResponse response = authQueryClient.account(accountRequest);
-            Any accountAny = response.getAccount();
-            System.out.println("Type URL in getAccountNumber: " + accountAny.getTypeUrl());
-            BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
-            // Process baseAccount as needed
-            return baseAccount.getSequence();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1; // Handle this as per your application's requirement
-        }
-    }
-
-    public void delegateToGridnode() {
-        Account selectedAccount = accountsData.getSelectedAccount();
-        long sequence = getSequence(selectedAccount.getAddress());
-        long accountNumber = getAccountNumber(selectedAccount.getAddress());
-        String chainId = "unigrid-devnet-1";
-
-        try {
-            // Step 1: Create the MsgGridnodeDelegate request
-            MsgGridnodeDelegate delegateRequest = MsgGridnodeDelegate.newBuilder()
-                    .setDelegatorAddress(selectedAccount.getAddress())
-                    .setAmount(Long.parseLong(delegateAmountTextField.getText()))
-                    // Add other necessary fields
-                    .build();
-
-            // Step 2: Wrap in a transaction body (TxBody)
-            //Any anyDelegateRequest = Any.pack(delegateRequest);
-            Any anyDelegateRequest = Any.newBuilder()
-                    .setTypeUrl("/pax.gridnode.MsgGridnodeDelegate") // Set type_url manually
-                    .setValue(delegateRequest.toByteString()) // Set the serialized message
-                    .build();
-            TxBody txBody = TxBody.newBuilder().addMessages(anyDelegateRequest).build();
-
-            // Step 3: Create AuthInfo with signer info and fee
-            AuthInfo authInfo = createAuthInfo(selectedAccount.getPublicKey(), sequence);
-
-            // Step 4: Serialize TxBody and AuthInfo
-            byte[] txBodyBytes = txBody.toByteArray();
-            byte[] authInfoBytes = authInfo.toByteArray();
-
-            // Step 5: Prepare signing input
-            byte[] signingInput = prepareSigningInput(txBodyBytes, authInfoBytes, chainId, accountNumber, sequence);
-
-            // Step 6: Sign the transaction
-            //PrivateKey privateKey = getECPrivateKeyFromHex(getPrivateKeyHex());
-            //byte[] signature = generateSignature(privateKey, signingInput);
-            byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
-
-            // Step 7: Construct the signed transaction
-            Tx signedTx = Tx.newBuilder()
-                    .setBody(txBody)
-                    .setAuthInfo(authInfo)
-                    .addSignatures(ByteString.copyFrom(signature))
-                    .build();
-            byte[] signedTxBytes = signedTx.toByteArray();
-            String base64EncodedTx = Base64.getEncoder().encodeToString(signedTxBytes);
-            System.out.println("signed transaction: " + signedTx);
-            System.out.println("signed transaction encoded: " + base64EncodedTx);
-
-            // Step 8: Broadcast the transaction
-//			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
-//			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
-//				.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
-//				.setMode(BroadcastMode.BROADCAST_MODE_SYNC) // Choose the appropriate mode
-//				.build();
-//			BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
-            // Step 8: Broadcast the transaction
-            ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
-            BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
-                    .setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
-                    .setMode(BroadcastMode.BROADCAST_MODE_SYNC) // Choose the appropriate mode
-                    .build();
-            BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
-
-            // Step 9: Handle the response
-            System.out.println("Transaction Hash: " + broadcastResponse.getTxResponse().getTxhash());
-            System.out.println("BroadcastTxResponse: " + broadcastResponse.toString());
-
-            // Step 9: Handle the response
-            System.out.println("Transaction Hash: " + broadcastResponse.getTxResponse().getTxhash());
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error delegating to gridnode: " + e.getMessage());
-        }
-    }
-
-//	private byte[] generateSignature(PrivateKey privateKeyObj, byte[] txBytes) throws GeneralSecurityException {
-//
-//		Signature signatureObj = Signature.getInstance("SHA256withECDSA", "BC");
-//		signatureObj.initSign(privateKeyObj);
-//
-//		signatureObj.update(txBytes); // Use the serialized transaction bytes
-//
-//		return signatureObj.sign();
-//
-//	}
-    private byte[] generateSignature(String privateKeyHex, byte[] txBytes) throws GeneralSecurityException {
-        Security.addProvider(new BouncyCastleProvider());
-
-        // Convert the hex string to a byte array
-        byte[] privateKeyBytes = Hex.decode(privateKeyHex);
-
-        // Create Ed25519PrivateKeyParameters from the private key bytes
-        Ed25519PrivateKeyParameters privateKeyParams = new Ed25519PrivateKeyParameters(privateKeyBytes, 0);
-
-        // Initialize the signer with the private key parameters
-        Ed25519Signer signer = new Ed25519Signer();
-        signer.init(true, privateKeyParams);
-
-        // Update the signer with the transaction bytes and generate the signature
-        signer.update(txBytes, 0, txBytes.length);
-        return signer.generateSignature();
-    }
-
-    @FXML
-    private void sendTokens(ActionEvent event) {
-        try {
-            String toAddress = this.toAddress.getText();
-            String sendAmount = this.sendAmount.getText();
-            String password = "pickles"; // TODO change to user input
-
-            String response = "crap";
-            cosmosClient.sendTokens(toAddress, sendAmount, "ugd", password);
-
-            System.out.println("Response: " + response);
-        } catch (Exception ex) {
-            Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-                    ex);
-        }
-    }
-
-    private void handleTabRequest(@Observes TabRequestSignal request) {
-        Tab selectedTab = importTabPane.getSelectionModel().getSelectedItem();
-        boolean shouldProceed = false;
-
-        System.out.println("Selected Tab: " + selectedTab.getText());
-        System.out.println("Word List Length: " + request.getWordListLength());
-
-        if ("select".equals(request.getAction())
-                || "select12".equals(request.getAction())) {
-            if (selectedTab == mnemonic12Tab) {
-                if (request.getWordListLength() == 12) {
-                    System.out.println("Correct number of words for 12-word mnemonic");
-                    mnemonic24Tab.setDisable(true);
-                    shouldProceed = true;
-                } else if (request.getWordListLength() == 24) {
-                    System.out.println("Switching to 24-word mnemonic tab");
-                    mnemonic12Tab.setDisable(true);
-                    mnemonic24Tab.setDisable(false);
-                    importTabPane.getSelectionModel().select(mnemonic24Tab);
-                    shouldProceed = true;
-
-                } else {
-                    System.out.println("Invalid number of words for 12-word mnemonic");
-                    showError("Invalid number of words. Please enter 12 words.",
-                            selectedTab);
-                }
-            } else if (selectedTab == mnemonic24Tab) {
-                if (request.getWordListLength() == 24) {
-                    System.out.println("Correct number of words for 24-word mnemonic");
-                    mnemonic12Tab.setDisable(true);
-                    shouldProceed = true;
-                } else if (request.getWordListLength() == 12) {
-                    System.out.println("Switching to 12-word mnemonic tab");
-                    mnemonic24Tab.setDisable(true);
-                    mnemonic12Tab.setDisable(false);
-                    importTabPane.getSelectionModel().select(mnemonic12Tab);
-                    shouldProceed = true;
-                } else {
-                    System.out.println("Invalid number of words for 24-word mnemonic");
-                    showError("Invalid number of words. Please enter 24 words.",
-                            selectedTab);
-                }
-            }
-        } else {
-            showError(
-                    "Invalid mnemonic length. Please enter either a 12 or 24 word mnemonic.",
-                    selectedTab);
-        }
-
-        System.out.println("Should Proceed: " + shouldProceed);
-
-        if (request.getCallback() != null) {
-            request.getCallback().onResult(shouldProceed);
-        }
-    }
-
-    /* GENERATE SECTION */
-    @FXML
-    public void onGenerateAction(ActionEvent event) {
-        // generate a new mnemonic
-        try {
-            mnemonicState.setViewState(MnemonicState.ViewState.GENERATE);
-            mnemonicService.generateMnemonicAddress();
-
-            // Update UI fields
-            seedPhraseTextArea.setStyle(
-                    "-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
-            seedPhraseTextArea.setText(accountModel.getMnemonic());
-            addressFieldPassword.setText(accountModel.getAddress());
-
-            showPane(generatePane);
-
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onVerifyBackPress(ActionEvent event) {
-        showPane(generatePane);
-    }
-
-    @FXML
-    private void onContinue(ActionEvent event) {
-        showPane(confirmMnemonic);
-    }
-
-    @FXML
-    private void verifyBack(ActionEvent event) {
-        showPane(generatePane);
-    }
-
-    @FXML
-    private void delegateTokens(ActionEvent event) {
-        // do something
-        System.out.println("delegate pressed");
-    }
-
-    @FXML
-    private void onMnemonicVerification(ActionEvent event) {
-        // do check
-
-        if (mnemonicService.compareMnemonicWithModel()) {
-            // Mnemonics match
-            showPane(passwordPane);
-        } else {
-            // Mnemonics do not match
-            System.out.println("mnemonic does not match");
-        }
-    }
-
-    private static byte[] getBits(byte[] data, int fromBits, int toBits, boolean pad) {
-        final BitSet bits = BitSet.valueOf(data);
-        BitSet extractedBits = bits.get(fromBits, toBits);
-
-        int extractedBitLength = toBits - fromBits;
-        int remainder = extractedBitLength % 8;
-
-        if (pad && remainder != 0) {
-            int paddingLength = 8 - remainder;
-            // Increase the size of extractedBits to accommodate padding
-            extractedBits.set(extractedBitLength, extractedBitLength + paddingLength, false); // Set padding bits to 0
-        } else if (!pad && remainder != 0) {
-            // Throw an error if padding is not allowed but is required
-            throw new RuntimeException("ERR_BAD_FORMAT illegal zero padding");
-        }
-        return extractedBits.toByteArray();
-    }
-
-    /* MAIN VIEW */
-    public void loadAccounts() {
-        try {
-            accountsService.loadAccountsFromJson();
-        } catch (Exception ex) {
-            Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-                    ex);
-        }
-
-        // Clear the existing items from the ComboBox
-        accountsDropdown.getItems().clear();
-
-        // Populate the ComboBox with account names
-        for (AccountsData.Account account : accountsData.getAccounts()) {
-            if (account.getName() != null) {
-                accountsDropdown.getItems().add(account.getName());
-            } else {
-                System.out.println("Account name is null");
-            }
-
-        }
-
-        // Set the first account as the default selection
-        if (!accountsDropdown.getItems().isEmpty()) {
-            accountsDropdown.getSelectionModel().selectFirst();
-            String defaultAccountName = (String) accountsDropdown.getValue();
-            if (defaultAccountName != null) {
-                Optional<Account> defaultAccount = accountsService
-                        .findAccountByName(defaultAccountName);
-                if (defaultAccount.isPresent()) {
-                    accountsData.setSelectedAccount(defaultAccount.get());
-                }
-            }
-        }
-
-        // Set up an action listener for the ComboBox
-        accountsDropdown.setOnAction(event -> {
-            String selectedAccountName = (String) accountsDropdown.getValue();
-            Optional<Account> selectedAccount = accountsService
-                    .findAccountByName(selectedAccountName);
-            if (selectedAccount.isPresent()) {
-                accountsData.setSelectedAccount(selectedAccount.get());
-                System.out
-                        .println("Selected Account:" + accountsData.getSelectedAccount());
-                addressLabel.setText(accountsData.getSelectedAccount().getAddress());
-                System.out.println("getEncryptedPrivateKey: "
-                        + accountsData.getSelectedAccount().getEncryptedPrivateKey());
-                // Create a background task for the network call
-                Task<Void> fetchDataTask = new Task<Void>() {
-                    @Override
-                    protected Void call() throws Exception {
-
-                        // Prepare the gRPC request
-                        QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
-                                .setAddress(selectedAccount.get().getAddress())
-                                .setDenom("ugd") // Add this line to set the denomination
-                                .build();
-
-                        QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
-                        // Execute the gRPC request
-                        QueryBalanceResponse response = stub.balance(request);
-                        System.out.println("like balance field: " + response.getBalance().getAmount());
-                        System.out.println("balance getBalance: " + response.getBalance());
-                        System.out.println("balance to string: " + response.toString());
-
-                        Platform.runLater(() -> {
-                            // Update UI with the balance received from the response
-                            balanceLabel.setText(response.getBalance().getAmount() + " ugd");
-                        });
-
-                        // Load transactions and other account data (assuming these methods are adapted for gRPC)
-                        cosmosTxList.loadTransactions(10);
-                        loadAccountData(accountsData.getSelectedAccount().getAddress());
-
-                        return null;
-                    }
-
-                };
-
-                // Handle exceptions
-                fetchDataTask.setOnFailed(e -> {
-                    Throwable exception = fetchDataTask.getException();
-                    Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE,
-                            null, exception);
-                    // Optionally show an error message to the user
-                });
-
-                // Start the task in a new thread
-                new Thread(fetchDataTask).start();
-            }
-        });
-
-    }
-
-    private void loadAccountData(String account) throws IOException, InterruptedException {
-        RestService restService = new RestService();
-
-        // Delegations
-        DelegationsRequest delegationsRequest = new DelegationsRequest(account);
-        DelegationsRequest.Response delegationsResponse = new RestCommand<>(
-                delegationsRequest, restService).execute();
-        setDelegations(delegationsResponse.getDelegationResponses());
-        System.out.println(delegationsResponse);
-
-        // Rewards
-        RewardsRequest rewardsRequest = new RewardsRequest(account);
-        RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
-                restService).execute();
-        stakingRewardsValue(rewardsResponse.getTotal());
-        System.out.println(rewardsResponse);
-
-        // Unbonding Delegations
-        UnbondingDelegationsRequest unbondingDelegationsRequest = new UnbondingDelegationsRequest(
-                account);
-        UnbondingDelegationsRequest.Response unbondingDelegationsResponse = new RestCommand<>(
-                unbondingDelegationsRequest, restService).execute();
-        System.out.println(unbondingDelegationsResponse);
-
-        // Redelegations
-        RedelegationsRequest redelegationsRequest = new RedelegationsRequest(account);
-        RedelegationsRequest.Response redelegationsResponse = new RestCommand<>(
-                redelegationsRequest, restService).execute();
-        System.out.println(redelegationsResponse);
-
-        // Withdraw Address
-        WithdrawAddressRequest withdrawAddressRequest = new WithdrawAddressRequest(
-                account);
-        WithdrawAddressRequest.Response withdrawAddressResponse = new RestCommand<>(
-                withdrawAddressRequest, restService).execute();
-        System.out.println(withdrawAddressResponse);
-
-        gridnodeDelegationService.fetchDelegationAmount(account);
-        setDelegationAmount();
-
-        updateCollateralDisplay();
-
-    }
-
-    public void setDelegationAmount() {
-        GridnodeDelegationAmount.Response response = gridnodeDelegationService
-                .getCurrentResponse();
-        if (response != null) {
-            Platform.runLater(() -> {
-                BigDecimal amount = response.getAmount();
-                String text = amount.toPlainString() + " UGD";
-                delegationAmountLabel.setText(text);
-            });
-        }
-    }
-
-    private void updateCollateralDisplay() {
-        if (hedgehog.fetchCollateralRequired()) {
-            System.out.println("Collateral Required: " + collateral.getAmount());
-        } else {
-            System.out.println("Error fetching collateral");
-        }
-    }
+	@Inject
+	private DebugService debug;
+	@Inject
+	private AccountModel accountModel;
+	@Inject
+	private MnemonicState mnemonicState;
+	@Inject
+	private AccountsService accountsService;
+	@Inject
+	private AccountsData accountsData;
+	@Inject
+	private CosmosRestClient cosmosClient;
+	@Inject
+	private MnemonicModel mnemonicModel;
+	@Inject
+	private CosmosTxList cosmosTxList;
+	@Inject
+	private Event<ResetTextFieldsSignal> resetTextFieldsEvent;
+	@Inject
+	private Hedgehog hedgehog;
+	@Inject
+	private CollateralRequired collateral;
+	@Inject
+	private GridnodeDelegationService gridnodeDelegationService;
+	@Inject
+	private MnemonicService mnemonicService;
+	@Inject
+	private GrpcService grpcService;
+
+	private Account currentSelectedAccount;
+	@FXML
+	private Label addressLabel;
+	@FXML
+	private Label balanceLabel;
+	@FXML
+	private TextArea mnemonicArea;
+	@FXML
+	private TextArea seedPhraseTextArea;
+	@FXML
+	private TextField addressField;
+	@FXML
+	private TextField balanceField;
+	@FXML
+	private TextField encryptField;
+	@FXML
+	private TextField keytoDecrypt;
+	@Inject
+	private CryptoUtils cryptoUtils;
+	@FXML
+	private TextField decryptField;
+	@FXML
+	private TextField accountNameField;
+	@FXML
+	private Label importLabel;
+	@FXML
+	private Label generateLabel;
+	@FXML
+	private Button importButton;
+	@FXML
+	private Button generateButton;
+	@FXML
+	private StackPane importPane;
+	@FXML
+	private StackPane cosmosWizardPane;
+	@FXML
+	private StackPane cosmosMainPane;
+	@FXML
+	private StackPane generatePane;
+	@FXML
+	private StackPane passwordPane;
+	@FXML
+	private StackPane confirmMnemonic;
+	@FXML
+	private TabPane importTabPane;
+	@FXML
+	private Tab mnemonic12Tab;
+	@FXML
+	private Tab mnemonic24Tab;
+	@FXML
+	private TextField addressFieldPassword;
+	@FXML
+	private TextField toAddress;
+	@FXML
+	private TextField sendAmount;
+	@FXML
+	private PasswordField passwordField1;
+	@FXML
+	private PasswordField passwordField2;
+	@FXML
+	private Button encryptAndSaveButton;
+	@FXML
+	private Text sendWarnMsg12;
+	@FXML
+	private Text sendWarnMsg24;
+	@FXML
+	private TextField importPassword;
+	@FXML
+	private Text sendWarnPassword;
+	@FXML
+	private Label totalRewards;
+	@FXML
+	private Label delegationAmountLabel;
+	@FXML
+	private TextField delegateAmountTextField;
+	@FXML
+	private ListView<Balance> totalsListView;
+	@FXML
+	private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
+	@FXML
+	@Named("transactionResponse")
+	private ListView<TransactionResponse.TxResponse> transactionListView;
+	@Inject
+	@Named("transactionResponse")
+	private TransactionResponse txModel;
+
+	@FXML
+	private ComboBox accountsDropdown;
+	private Map<String, StackPane> paneMap = new HashMap<>();
+	// List to store the actual mnemonic words
+	private AddressCosmosService addressService = new AddressCosmosService();
+	private AddressCosmos addressCosmos = new AddressCosmos();
+	private BigDecimal scaleFactor = new BigDecimal("100000000");
+
+	@Override
+	public void initialize(URL url, ResourceBundle rb) {
+		paneMap.put("importPane", importPane);
+		paneMap.put("cosmosWizardPane", cosmosWizardPane);
+		paneMap.put("cosmosMainPane", cosmosMainPane);
+		paneMap.put("cosmosWizardPane", cosmosWizardPane);
+		paneMap.put("generatePane", generatePane);
+		paneMap.put("passwordPane", passwordPane);
+		paneMap.put("confirmMnemonic", confirmMnemonic);
+
+		ObservableList<TxResponse> observableList = FXCollections
+				.observableArrayList(cosmosTxList.getTxResponsesList());
+		transactionListView.setItems(observableList);
+
+		Platform.runLater(() -> {
+
+			System.out.println("Is on FX thread: " + Platform.isFxApplicationThread());
+
+			System.out.println("run later method called");
+			// Bind the width of the labels to the width of the buttons
+			importLabel.prefWidthProperty().bind(importButton.widthProperty());
+			generateLabel.prefWidthProperty().bind(generateButton.widthProperty());
+			// Add a listener to the first TextField for the paste event
+
+			if (accountsService.isAccountsJsonEmpty()) {
+				showPane(cosmosWizardPane);
+			} else {
+				showPane(cosmosMainPane);
+			}
+			// check whether the word changed in order to reset the value
+			transactionListView.setCellFactory(
+					param -> new ListCell<TransactionResponse.TxResponse>() {
+						@Override
+						protected void updateItem(
+								TransactionResponse.TxResponse txResponse,
+								boolean empty) {
+							System.out.println(
+									"Cell factory called for item: " + txResponse);
+							System.out.println("Number of transactions: "
+									+ cosmosTxList.getTxResponsesList().size());
+
+							super.updateItem(txResponse, empty);
+							if (empty || txResponse == null) {
+								setText(null);
+							} else {
+								setText(txResponse.getTxhash() + " - "
+										+ txResponse.getTimestamp());
+								System.out.println("txResponse getHeight(): "
+										+ txResponse.getHeight());
+							}
+						}
+					});
+			totalsListView.setCellFactory(lv -> new ListCell<Balance>() {
+				@Override
+				protected void updateItem(Balance item, boolean empty) {
+					super.updateItem(item, empty);
+					if (empty || item == null) {
+						setText(null);
+					} else {
+						setText(item.getAmount() + " " + item.getDenom());
+					}
+				}
+			});
+			delegationsListView.setCellFactory(
+					listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
+						@Override
+						protected void updateItem(
+								DelegationsRequest.DelegationResponse item,
+								boolean empty) {
+							super.updateItem(item, empty);
+							if (empty || item == null) {
+								setText(null);
+							} else {
+
+								BigDecimal amount = new BigDecimal(
+										item.getBalance().getAmount());
+								BigDecimal displayAmount = amount.divide(scaleFactor);
+								String text = String.format(
+										"Validator: %s, Amount: %s %s",
+										item.getDelegation().getValidatorAddress(),
+										displayAmount.toPlainString(),
+										item.getBalance().getDenom());
+								setText(text);
+							}
+						}
+					});
+		});
+	}
+
+	@FXML
+	private void testBtn(ActionEvent event) {
+		// System.out.println("Transaction Response: " + cosmosTxList.getTxResponse());
+		// System.out.println("Transaction loadTransactions: " +
+		// cosmosTxList.loadTransactions(10));
+
+		// System.out.println("txModel.getTxResponses: " + txModel.getNewTxResponses());
+		System.out.println("txModel.getResult: " + txModel.getResult());
+	}
+
+	@FXML
+	private void onEncryptKeys(ActionEvent event) {
+		try {
+			String password1 = passwordField1.getText();
+			String password2 = passwordField2.getText();
+			if (!password1.equals(password2)) {
+
+				System.out.println("Passwords do not match!");
+				onErrorMessage("Passwords do not match!", sendWarnPassword);
+				return;
+			}
+
+			if (password1.isEmpty()) {
+				System.out.println("Password cannot be empty!");
+				onErrorMessage("Password cannot be empty!", sendWarnPassword);
+				return;
+			}
+
+			if (accountNameField.getText().isEmpty()) {
+				System.out.println("Account name cannot be empty!");
+				onErrorMessage("Account name cannot be empty!", sendWarnPassword);
+				return;
+			}
+			accountModel.setName(accountNameField.getText());
+
+			byte[] privateKey = accountModel.getPrivateKey();
+			if (privateKey == null || privateKey.length == 0) {
+				System.out.println("Private key is either null or empty!");
+				return;
+			}
+
+			// Encrypt the private key
+			String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
+			// accountModel.setEncryptedPrivateKey(encryptedPrivateKey);
+			System.out.println("Encrypted Private Key: " + encryptedPrivateKey);
+
+			// Clear out any private keys from memory
+			Arrays.fill(privateKey, (byte) 0);
+
+			// Clear the model and reset the text fields
+			resetTextFieldsEvent.fire(ResetTextFieldsSignal.builder().build());
+			showPane(cosmosMainPane);
+		} catch (Exception ex) {
+			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+					ex);
+		}
+	}
+
+	private void resetTextFields(@Observes ResetTextFieldsSignal signal) {
+		System.out.println("Resetting text fields");
+		passwordField1.setText("");
+		passwordField2.setText("");
+		accountNameField.setText("");
+		importTabPane.getSelectionModel().select(mnemonic12Tab);
+		mnemonic12Tab.setDisable(false);
+		mnemonic24Tab.setDisable(false);
+		importPassword.setText("");
+		accountModel.reset();
+	}
+
+	// @FXML
+	// private void encryptTest(ActionEvent event) {
+	// try {
+	// String mnemonic = encryptField.getText();
+	//
+	// cryptoUtils.encrypt(mnemonic, "pickles");
+	// String addressFromPrivateKey =
+	// cryptoUtils.getAddressFromPrivateKey(mnemonic);
+	// addressField.setText(addressFromPrivateKey);
+	// // Show the cosmosMainPane after successful encryption and saving
+	// showPane(cosmosMainPane);
+	// } catch (Exception ex) {
+	// Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+	// ex);
+	// }
+	// }
+	@FXML
+	private void generateKeys(ActionEvent event) throws SignatureDecodeException, Exception {
+
+		BigDecimal currentDelegationAmount = gridnodeDelegationService
+				.getCurrentDelegationAmount();
+		BigDecimal collateralAmount = BigDecimal.valueOf(collateral.getAmount());
+		BigDecimal numberOfNodes = currentDelegationAmount.divide(collateralAmount, 0,
+				RoundingMode.DOWN);
+		int numberOfNodesInt = numberOfNodes.intValue();
+		System.out.println("Nodes we can run: " + numberOfNodesInt);
+		int keysToCreate = numberOfNodesInt;
+		Account selectedAccount = accountsData.getSelectedAccount();
+		String pubKey = selectedAccount.getPublicKey();
+		byte[] seed = Sha256Hash.hash(pubKey.getBytes());
+		System.out.println("pubKey: " + pubKey);
+		System.out.println("seed: " + seed);
+
+		// Current time in milliseconds since epoch
+		long creationTimeSeconds = System.currentTimeMillis() / 1000L;
+
+		// Generate the HD wallet from the seed
+		DeterministicSeed deterministicSeed = new DeterministicSeed(seed, "",
+				creationTimeSeconds);
+		DeterministicKeyChain chain = DeterministicKeyChain.builder()
+				.seed(deterministicSeed).build();
+
+		// Derive child keys
+		List<ECKey> derivedKeysList = new ArrayList<>();
+		DeterministicKey parentKey = chain.getWatchingKey();
+		for (int i = 0; i < keysToCreate; i++) {
+			DeterministicKey childKey = HDKeyDerivation.deriveChildKey(parentKey,
+					new ChildNumber(i));
+			derivedKeysList.add(ECKey.fromPrivate(childKey.getPrivKey()));
+		}
+
+		ECKey[] derivedKeys = derivedKeysList.toArray(new ECKey[0]);
+
+		// cryptoUtils.printKeys(derivedKeys);
+		// Now iterate through the allKeys array, signing and verifying a message with
+		// each key
+		String messageStr = "Start gridnode message";
+		byte[] messageBytes = messageStr.getBytes();
+		// get private key to sign with
+		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
+
+		// Prompt the user to enter the password
+		String password = getPasswordFromUser();
+		if (password == null) {
+			System.out.println("Password input cancelled!");
+			return;
+		}
+
+		// Decrypt the private key. The returned value should be the original private
+		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+		byte[] signedMessage = cryptoUtils.signMessage(messageBytes, privateKeyBytes);
+
+		// Verify the signature and the derived keys
+		ECKey publicKey = ECKey.fromPrivate(privateKeyBytes);
+		List<ECKey> publicKeysToVerify = derivedKeysList;
+		System.out.println("publicKey.getPubKey(): " + publicKey.getPubKey());
+
+		long startTime = System.currentTimeMillis(); // Capture the start time
+
+		boolean areKeysVerified = cryptoUtils.verifySignatureKeys(messageBytes,
+				signedMessage, derivedKeys, keysToCreate, pubKey);
+
+		long endTime = System.currentTimeMillis(); // Capture the end time
+
+		long elapsedTime = endTime - startTime; // Calculate the elapsed time
+
+		System.out.println("Are keys verified: " + (areKeysVerified ? "Yes" : "No"));
+		System.out.println("Verification time: " + elapsedTime + " milliseconds");
+
+	}
+
+	private void verifyWithBadKeys(byte[] messageBytes, ECKey signingKey)
+			throws SignatureDecodeException {
+		ECKey.ECDSASignature signature = signingKey.sign(Sha256Hash.of(messageBytes));
+		byte[] signatureBytes = signature.encodeToDER();
+
+		ECKey[] badKeys = {
+				ECKey.fromPrivate(new BigInteger("deadbeefdeadbeefdeadbeefdeadbeef", 16)),
+				ECKey.fromPrivate(
+						new BigInteger("badbadbadbadbadbadbadbadbadbadbad", 16)),
+				ECKey.fromPrivate(
+						new BigInteger("facefacefacefacefacefacefaceface", 16)) };
+
+		// for (int i = 0; i < badKeys.length; i++) {
+		// ECKey[] singleKeyArray = { badKeys[i] };
+		// boolean isVerified = cryptoUtils.verifySignature(messageBytes,
+		// signatureBytes,
+		// singleKeyArray);
+		// System.out.println("Verification for bad key " + i + ": "
+		// + (isVerified ? "Succeeded" : "Failed"));
+		// }
+	}
+
+	private String getPasswordFromUser() {
+		// just use this default for testing right now
+		return "pickles";
+	}
+
+	@FXML
+	private void decryptPrivateKey(ActionEvent event) {
+		try {
+			Account selectedAccount = accountsData.getSelectedAccount();
+			if (selectedAccount == null) {
+				System.out.println("No account selected!");
+				return;
+			}
+
+			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
+
+			// Prompt the user to enter the password
+			String password = "";
+			// take care of this= getPasswordFromUser();
+			if (password == null) {
+				System.out.println("Password input cancelled!");
+				return;
+			}
+
+			// Decrypt the private key. The returned value should be the original private
+			// key bytes.
+			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+			System.out.println(
+					"Decrypted Private Key (Bytes): " + Arrays.toString(privateKeyBytes));
+			System.out.println("Decrypted Private Key (HEX): "
+					+ cryptoUtils.bytesToHex(privateKeyBytes));
+			// Convert the private key bytes to a HEX string
+			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
+			System.out.println("Private Key in HEX: " + privateKeyHex);
+			System.out.println("Address from priv key: "
+					+ cryptoUtils.getAddressFromPrivateKey(privateKeyHex));
+		} catch (Exception ex) {
+			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+					ex);
+		}
+	}
+
+	// @FXML
+	// private void decrypTest(ActionEvent event) {
+	// try {
+	//
+	// // Decrypt the mnemonic
+	// System.out.println("encryptedPrivateKey: " + keytoDecrypt.getText());
+	// String keys = cryptoUtils.decrypt(keytoDecrypt.getText(), "pickles");
+	// decryptField.setText(keys);
+	//
+	// } catch (Exception ex) {
+	// Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+	// ex);
+	// }
+	// }
+	public void handleSaveAddress(AddressCosmos newAddress) {
+		try {
+			addressService.saveAddress(newAddress);
+			// Handle success, update UI, etc.
+		} catch (IOException e) {
+			debug.print(e.getMessage(), CosmosController.class.getSimpleName());
+		}
+	}
+
+	private void showPane(StackPane paneToShow) {
+		// List of all panes
+		String paneName = paneMap.entrySet().stream()
+				.filter(entry -> entry.getValue() == paneToShow).map(Map.Entry::getKey)
+				.findFirst().orElse(null);
+		List<StackPane> allPanes = Arrays.asList(importPane, cosmosWizardPane,
+				cosmosMainPane, generatePane, passwordPane, confirmMnemonic);
+		mnemonicModel.setCurrentPane(paneName);
+		// Loop through all panes and set visibility
+		for (StackPane pane : allPanes) {
+			if (pane == paneToShow) {
+				pane.setVisible(true);
+			} else {
+				pane.setVisible(false);
+			}
+		}
+		if (paneToShow == cosmosMainPane) {
+			// load the accounts json
+			loadAccounts();
+		}
+	}
+
+	private void revealContent(TextField tf) {
+		tf.setPromptText(tf.getText());
+		tf.setText("");
+	}
+
+	private void hideContent(TextField tf) {
+		tf.setText(tf.getPromptText());
+		tf.setPromptText("");
+	}
+
+	private int getNextIndex() throws IOException {
+		File file = DataDirectory.getCosmosAddresses();
+		if (!file.exists() || file.length() == 0) {
+			return 0;
+		}
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		List<AddressCosmos> addresses = objectMapper.readValue(file,
+				new TypeReference<List<AddressCosmos>>() {
+				});
+		return addresses.size();
+	}
+
+	@FXML
+	private void onCancelAccountGeneration(ActionEvent event) {
+		try {
+			System.out.println("show main pane");
+			showPane(cosmosMainPane);
+
+			resetTextFieldsEvent.fire(ResetTextFieldsSignal.builder().build());
+
+		} catch (Exception ex) {
+			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+					ex);
+		}
+	}
+
+	/* IMPORT VIEW */
+	@FXML
+	private void importPrivateKey(ActionEvent event) {
+		System.out.println("Import private key: " + importPassword.getText());
+		try {
+			accountModel.setAddress(
+					cryptoUtils.getAddressFromPrivateKey(importPassword.getText()));
+			accountModel.setPublicKey(
+					cryptoUtils.getPublicKeyBytes(importPassword.getText()));
+			accountModel.setPrivateKey(
+					cryptoUtils.getPrivateKeyBytes(importPassword.getText()));
+			System.out.println("Address from private key: " + accountModel.getAddress());
+			addressFieldPassword.setText(accountModel.getAddress());
+		} catch (NoSuchAlgorithmException | NoSuchProviderException
+				| InvalidKeySpecException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		showPane(passwordPane);
+	}
+
+	@FXML
+	public void onImportAction(ActionEvent event) {
+		mnemonicState.setViewState(MnemonicState.ViewState.IMPORT);
+		showPane(importPane);
+	}
+
+	@FXML
+	public void onImportMnemonicAddress(ActionEvent event) throws Exception {
+
+		int index = 0;
+
+		String mnemonic = String.join(" ", mnemonicModel.getMnemonicWordList());
+		System.out.println("mnemonic: " + mnemonic);
+		// this.mnemonicArea.setText(mnemonic);
+		byte[] privateKey = mnemonicService.derivePrivateKeyFromMnemonic(mnemonic, index);
+		// Encrypt the mnemonic before setting it to the accountModel
+		// String password1 = passwordField1.getText();
+		// String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
+		// accountModel.setMnemonic(encryptedPrivateKey);
+		// System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
+		System.out.println(
+				"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
+
+		String path = String.format("m/44'/118'/0'/0/%d", index);
+		CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
+				"unigrid");
+
+		System.out.println("Address from creds: " + creds.getAddress());
+		System.out.println("EcKey from creds: " + creds.getEcKey());
+
+		// Populate the AccountModel
+		accountModel.setMnemonic(mnemonic);
+		System.out.println("Set mnemonic: " + accountModel.getMnemonic());
+
+		accountModel.setAddress(creds.getAddress());
+		System.out.println("Set address: " + accountModel.getAddress());
+
+		accountModel.setPrivateKey(privateKey);
+		accountModel.setPublicKey(creds.getEcKey().getPubKey());
+
+		addressFieldPassword.setText(accountModel.getAddress());
+
+		showPane(passwordPane);
+	}
+
+	private void showError(String message, Tab tab) {
+		Text errorMsg = (tab == mnemonic12Tab) ? sendWarnMsg12 : sendWarnMsg24;
+		onErrorMessage(message, errorMsg);
+	}
+
+	private void onErrorMessage(String message, Text sendWarnMsg) {
+		sendWarnMsg.setFill(Color.web("#f28407"));
+		sendWarnMsg.setText(message);
+		sendWarnMsg.setVisible(true);
+
+		PauseTransition pause = new PauseTransition(Duration.seconds(3));
+
+		pause.setOnFinished(e -> {
+			sendWarnMsg.setVisible(false);
+			sendWarnMsg.setText("");
+		});
+
+		pause.play();
+	}
+
+	/* DELEGATION LIST VIEW */
+	public void setDelegations(List<DelegationsRequest.DelegationResponse> delegations) {
+		Platform.runLater(() -> {
+			delegationsListView.getItems().setAll(delegations);
+		});
+	}
+
+	/* REWARDS LIST VIEW */
+	public void stakingRewardsValue(List<Balance> totals) {
+		ObservableList<Balance> items = FXCollections.observableArrayList(totals);
+
+		Platform.runLater(() -> {
+			totalsListView.getItems().clear();
+			totalsListView.setCellFactory(listView -> new ListCell<Balance>() {
+				@Override
+				protected void updateItem(Balance item, boolean empty) {
+					super.updateItem(item, empty);
+					if (empty || item == null) {
+						setText(null);
+					} else {
+						BigDecimal amount = new BigDecimal(item.getAmount());
+						BigDecimal displayAmount = amount.divide(scaleFactor);
+						setText(displayAmount.toPlainString() + " " + item.getDenom());
+					}
+				}
+			});
+			totalsListView.getItems().addAll(items);
+		});
+	}
+
+	@FXML
+	private void createNewAccount(ActionEvent event) {
+		try {
+			showPane(cosmosWizardPane);
+		} catch (Exception ex) {
+			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+					ex);
+		}
+	}
+
+	public String getPrivateKeyHex() {
+		try {
+			Account selectedAccount = accountsData.getSelectedAccount();
+			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+
+			String password = getPasswordFromUser();
+			if (password == null) {
+				System.out.println("Password is null! Error in getPasswordFromUser method.");
+				return null;
+			}
+			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey + " password: " + password);
+			// Decrypt the private key
+			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+			if (privateKeyBytes == null) {
+				System.out.println("Decryption returned null! Check decryption method.");
+				return null;
+			}
+
+			// Convert the private key bytes to a HEX string
+			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
+			System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
+
+			return privateKeyHex;
+		} catch (Exception e) {
+			System.err.println("Error while decrypting private key: " + e.getMessage());
+			e.printStackTrace(); // Print the full stack trace for detailed error information
+			return null;
+		}
+	}
+
+	public static byte[] hexStringToByteArray(String hexString) {
+		int len = hexString.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+					+ Character.digit(hexString.charAt(i + 1), 16));
+		}
+		return data;
+	}
+
+	private PrivateKey getECPrivateKeyFromHex(String privateKeyHex) throws GeneralSecurityException {
+		System.out.println("privateKeyHex: " + privateKeyHex);
+		Security.addProvider(new BouncyCastleProvider());
+		BigInteger s = new BigInteger(privateKeyHex, 16);
+
+		ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
+		ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(s, spec);
+		KeyFactory kf = KeyFactory.getInstance("EC", new BouncyCastleProvider());
+
+		return kf.generatePrivate(ecPrivateKeySpec);
+	}
+
+	private AuthInfo createAuthInfo(String publicKeyHex, long sequence) {
+		// Convert hex-encoded public key string to a byte array
+		byte[] publicKey = hexStringToByteArray(publicKeyHex);
+		System.out.println("publicKey: " + publicKeyHex);
+		// Construct the PubKey object
+		PubKey pubKey = PubKey.newBuilder()
+				.setKey(ByteString.copyFrom(publicKey))
+				.build();
+
+		// Wrap the PubKey in an Any type
+		Any packedPubKey = Any.pack(pubKey);
+		packedPubKey = Any.newBuilder()
+				.setTypeUrl("/cosmos.crypto.secp256k1.PubKey") // Set type_url manually
+				.setValue(pubKey.toByteString()) // Set the serialized message
+				.build();
+
+		// Construct the ModeInfo object for SIGN_MODE_DIRECT
+		ModeInfo modeInfo = ModeInfo.newBuilder()
+				.setSingle(ModeInfo.Single.newBuilder().setMode(SignMode.SIGN_MODE_DIRECT))
+				.build();
+
+		// Construct the SignerInfo
+		SignerInfo signerInfo = SignerInfo.newBuilder()
+				.setPublicKey(packedPubKey)
+				.setModeInfo(modeInfo)
+				.setSequence(sequence)
+				.build();
+
+		// Construct the fee
+		Fee fee = Fee.newBuilder()
+				.addAmount(Coin.newBuilder().setDenom("ugd").setAmount("3").build()) // Fee of 2000 ugd
+				.setGasLimit(200000) // Gas limit of 200000
+				.build();
+
+		System.out.println("gas limit: " + fee.getGasLimit());
+
+		// Construct the AuthInfo
+		return AuthInfo.newBuilder()
+				.addSignerInfos(signerInfo)
+				.setFee(fee)
+				.build();
+	}
+
+	private long getSequence(String address) {
+		// Set up the auth query client
+		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
+				.newBlockingStub(grpcService.getChannel());
+
+		// Prepare the account query request
+		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder()
+				.setAddress(address)
+				.build();
+
+		try {
+			// Query the account information
+			QueryAccountResponse response = authQueryClient.account(accountRequest);
+
+			Any accountAny = response.getAccount();
+			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
+			// Process baseAccount as needed
+			return baseAccount.getSequence();
+
+		} catch (Exception e) {
+			// Handle exceptions (e.g., account not found, gRPC errors, unpacking errors)
+			e.printStackTrace();
+			return -1; // or handle it as per your application's requirement
+		}
+
+	}
+
+	public static byte[] longToBytes(long value) {
+		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+		buffer.putLong(value);
+		return buffer.array();
+	}
+
+	public byte[] prepareSigningInput(byte[] txBodyBytes, byte[] authInfoBytes, String chainId, long accountNumber,
+			long sequence) throws IOException {
+		ByteArrayOutputStream signingInput = new ByteArrayOutputStream();
+		signingInput.write(txBodyBytes);
+		signingInput.write(authInfoBytes);
+		signingInput.write(chainId.getBytes(StandardCharsets.UTF_8));
+		signingInput.write(longToBytes(accountNumber));
+		signingInput.write(longToBytes(sequence));
+		return signingInput.toByteArray();
+	}
+
+	private long getAccountNumber(String address) {
+		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
+				.newBlockingStub(grpcService.getChannel());
+		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder().setAddress(address).build();
+
+		try {
+			QueryAccountResponse response = authQueryClient.account(accountRequest);
+			Any accountAny = response.getAccount();
+			System.out.println("Type URL in getAccountNumber: " + accountAny.getTypeUrl());
+			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
+			System.out.println("baseAccount.getPubKey(): " + baseAccount.getPubKey());
+
+			// Process baseAccount as needed
+			// we need the account number and not the sequence here
+			return baseAccount.getAccountNumber();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return -1; // Handle this as per your application's requirement
+		}
+	}
+
+
+	public void delegateToGridnode() {
+		Account selectedAccount = accountsData.getSelectedAccount();
+		// sequence and account should be accessed from a model
+		// we are making two redundant calls to the grpc server here
+		long sequence = getSequence(selectedAccount.getAddress());
+		System.out.println("sequence: " + sequence);
+		long accountNumber = getAccountNumber(selectedAccount.getAddress());
+		System.out.println("accountNumber: " + accountNumber);
+		String chainId = "unigrid-devnet-1";
+
+		try {
+			// Step 1: Create the MsgGridnodeDelegate request
+			MsgGridnodeDelegate delegateRequest = MsgGridnodeDelegate.newBuilder()
+					.setDelegatorAddress(selectedAccount.getAddress())
+					.setAmount(Long.parseLong(delegateAmountTextField.getText()))
+					// Add other necessary fields
+					.build();
+
+			// Step 2: Wrap in a transaction body (TxBody)
+			// Any anyDelegateRequest = Any.pack(delegateRequest);
+			Any anyDelegateRequest = Any.newBuilder()
+					.setTypeUrl("/pax.gridnode.MsgGridnodeDelegate") // Set type_url manually
+					.setValue(delegateRequest.toByteString()) // Set the serialized message
+					.build();
+			TxBody txBody = TxBody.newBuilder().addMessages(anyDelegateRequest).build();
+
+			// Step 3: Create AuthInfo with signer info and fee
+			AuthInfo authInfo = createAuthInfo(selectedAccount.getPublicKey(), sequence);
+
+			//AuthInfo authInfo = createAuthInfo(			getPublicKey(selectedAccount.getAddress())			, sequence);
+
+			// Step 4: Serialize TxBody and AuthInfo
+			byte[] txBodyBytes = txBody.toByteArray();
+			byte[] authInfoBytes = authInfo.toByteArray();
+
+			// Step 5: Prepare signing input
+			byte[] signingInput = prepareSigningInput(txBodyBytes, authInfoBytes, chainId, accountNumber, sequence);
+
+			// Step 6: Sign the transaction
+			// PrivateKey privateKey = getECPrivateKeyFromHex(getPrivateKeyHex());
+			byte[] signature = generateSignature(getPrivateKeyHex(), signingInput);
+			// byte[] signature =
+			// generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8",
+			// signingInput);
+
+			// Step 7: Construct the signed transaction
+			Tx signedTx = Tx.newBuilder()
+					.setBody(txBody)
+					.setAuthInfo(authInfo)
+					.addSignatures(ByteString.copyFrom(signature))
+					.build();
+			byte[] signedTxBytes = signedTx.toByteArray();
+			String base64EncodedTx = Base64.getEncoder().encodeToString(signedTxBytes);
+			System.out.println("signed transaction: " + signedTx);
+			System.out.println("signed transaction encoded: " + base64EncodedTx);
+
+			// Step 8: Broadcast the transaction
+			// ServiceBlockingStub stub =
+			// ServiceGrpc.newBlockingStub(grpcService.getChannel());
+			// BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
+			// .setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
+			// .setMode(BroadcastMode.BROADCAST_MODE_SYNC) // Choose the appropriate mode
+			// .build();
+			// BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
+			// Step 8: Broadcast the transaction
+			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
+					.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
+					.setMode(BroadcastMode.BROADCAST_MODE_SYNC) // Choose the appropriate mode
+					.build();
+			BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
+
+			// Step 9: Handle the response
+			System.out.println("Transaction Hash: " + broadcastResponse.getTxResponse().getTxhash());
+			System.out.println("BroadcastTxResponse: " + broadcastResponse.toString());
+
+			// Step 9: Handle the response
+			System.out.println("Transaction Hash: " + broadcastResponse.getTxResponse().getTxhash());
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Error delegating to gridnode: " + e.getMessage());
+		}
+	}
+
+	// private byte[] generateSignature(PrivateKey privateKeyObj, byte[] txBytes)
+	// throws GeneralSecurityException {
+	//
+	// Signature signatureObj = Signature.getInstance("SHA256withECDSA", "BC");
+	// signatureObj.initSign(privateKeyObj);
+	//
+	// signatureObj.update(txBytes); // Use the serialized transaction bytes
+	//
+	// return signatureObj.sign();
+	//
+	// }
+	private byte[] generateSignature(String privateKeyHex, byte[] txBytes) throws GeneralSecurityException {
+		// Convert the private key hex string to a PrivateKey object
+		PrivateKey privateKeyObj = getECPrivateKeyFromHex(privateKeyHex);
+
+		// Initialize the signature object with the ECDSA algorithm
+		Signature signatureObj = Signature.getInstance("SHA256withECDSA", "BC");
+		signatureObj.initSign(privateKeyObj);
+
+		// Update the signature object with the transaction bytes
+		signatureObj.update(txBytes);
+
+		// Sign the transaction bytes and return the signature
+		return signatureObj.sign();
+	}
+
+
+	@FXML
+	private void sendTokens(ActionEvent event) {
+		try {
+			String toAddress = this.toAddress.getText();
+			String sendAmount = this.sendAmount.getText();
+			String password = "pickles"; // TODO change to user input
+
+			String response = "crap";
+			cosmosClient.sendTokens(toAddress, sendAmount, "ugd", password);
+
+			System.out.println("Response: " + response);
+		} catch (Exception ex) {
+			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+					ex);
+		}
+	}
+
+	private void handleTabRequest(@Observes TabRequestSignal request) {
+		Tab selectedTab = importTabPane.getSelectionModel().getSelectedItem();
+		boolean shouldProceed = false;
+
+		System.out.println("Selected Tab: " + selectedTab.getText());
+		System.out.println("Word List Length: " + request.getWordListLength());
+
+		if ("select".equals(request.getAction())
+				|| "select12".equals(request.getAction())) {
+			if (selectedTab == mnemonic12Tab) {
+				if (request.getWordListLength() == 12) {
+					System.out.println("Correct number of words for 12-word mnemonic");
+					mnemonic24Tab.setDisable(true);
+					shouldProceed = true;
+				} else if (request.getWordListLength() == 24) {
+					System.out.println("Switching to 24-word mnemonic tab");
+					mnemonic12Tab.setDisable(true);
+					mnemonic24Tab.setDisable(false);
+					importTabPane.getSelectionModel().select(mnemonic24Tab);
+					shouldProceed = true;
+
+				} else {
+					System.out.println("Invalid number of words for 12-word mnemonic");
+					showError("Invalid number of words. Please enter 12 words.",
+							selectedTab);
+				}
+			} else if (selectedTab == mnemonic24Tab) {
+				if (request.getWordListLength() == 24) {
+					System.out.println("Correct number of words for 24-word mnemonic");
+					mnemonic12Tab.setDisable(true);
+					shouldProceed = true;
+				} else if (request.getWordListLength() == 12) {
+					System.out.println("Switching to 12-word mnemonic tab");
+					mnemonic24Tab.setDisable(true);
+					mnemonic12Tab.setDisable(false);
+					importTabPane.getSelectionModel().select(mnemonic12Tab);
+					shouldProceed = true;
+				} else {
+					System.out.println("Invalid number of words for 24-word mnemonic");
+					showError("Invalid number of words. Please enter 24 words.",
+							selectedTab);
+				}
+			}
+		} else {
+			showError(
+					"Invalid mnemonic length. Please enter either a 12 or 24 word mnemonic.",
+					selectedTab);
+		}
+
+		System.out.println("Should Proceed: " + shouldProceed);
+
+		if (request.getCallback() != null) {
+			request.getCallback().onResult(shouldProceed);
+		}
+	}
+
+	/* GENERATE SECTION */
+	@FXML
+	public void onGenerateAction(ActionEvent event) {
+		// generate a new mnemonic
+		try {
+			mnemonicState.setViewState(MnemonicState.ViewState.GENERATE);
+			mnemonicService.generateMnemonicAddress();
+
+			// Update UI fields
+			seedPhraseTextArea.setStyle(
+					"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
+			seedPhraseTextArea.setText(accountModel.getMnemonic());
+			addressFieldPassword.setText(accountModel.getAddress());
+
+			showPane(generatePane);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@FXML
+	private void onVerifyBackPress(ActionEvent event) {
+		showPane(generatePane);
+	}
+
+	@FXML
+	private void onContinue(ActionEvent event) {
+		showPane(confirmMnemonic);
+	}
+
+	@FXML
+	private void verifyBack(ActionEvent event) {
+		showPane(generatePane);
+	}
+
+	@FXML
+	private void delegateTokens(ActionEvent event) {
+		// do something
+		System.out.println("delegate pressed");
+	}
+
+	@FXML
+	private void onMnemonicVerification(ActionEvent event) {
+		// do check
+
+		if (mnemonicService.compareMnemonicWithModel()) {
+			// Mnemonics match
+			showPane(passwordPane);
+		} else {
+			// Mnemonics do not match
+			System.out.println("mnemonic does not match");
+		}
+	}
+
+	private static byte[] getBits(byte[] data, int fromBits, int toBits, boolean pad) {
+		final BitSet bits = BitSet.valueOf(data);
+		BitSet extractedBits = bits.get(fromBits, toBits);
+
+		int extractedBitLength = toBits - fromBits;
+		int remainder = extractedBitLength % 8;
+
+		if (pad && remainder != 0) {
+			int paddingLength = 8 - remainder;
+			// Increase the size of extractedBits to accommodate padding
+			extractedBits.set(extractedBitLength, extractedBitLength + paddingLength, false); // Set padding bits to 0
+		} else if (!pad && remainder != 0) {
+			// Throw an error if padding is not allowed but is required
+			throw new RuntimeException("ERR_BAD_FORMAT illegal zero padding");
+		}
+		return extractedBits.toByteArray();
+	}
+
+	/* MAIN VIEW */
+	public void loadAccounts() {
+		try {
+			accountsService.loadAccountsFromJson();
+		} catch (Exception ex) {
+			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+					ex);
+		}
+
+		// Clear the existing items from the ComboBox
+		accountsDropdown.getItems().clear();
+
+		// Populate the ComboBox with account names
+		for (AccountsData.Account account : accountsData.getAccounts()) {
+			if (account.getName() != null) {
+				accountsDropdown.getItems().add(account.getName());
+			} else {
+				System.out.println("Account name is null");
+			}
+
+		}
+
+		// Set the first account as the default selection
+		if (!accountsDropdown.getItems().isEmpty()) {
+			accountsDropdown.getSelectionModel().selectFirst();
+			String defaultAccountName = (String) accountsDropdown.getValue();
+			if (defaultAccountName != null) {
+				Optional<Account> defaultAccount = accountsService
+						.findAccountByName(defaultAccountName);
+				if (defaultAccount.isPresent()) {
+					accountsData.setSelectedAccount(defaultAccount.get());
+				}
+			}
+		}
+
+		// Set up an action listener for the ComboBox
+		accountsDropdown.setOnAction(event -> {
+			String selectedAccountName = (String) accountsDropdown.getValue();
+			Optional<Account> selectedAccount = accountsService
+					.findAccountByName(selectedAccountName);
+			if (selectedAccount.isPresent()) {
+				accountsData.setSelectedAccount(selectedAccount.get());
+				System.out
+						.println("Selected Account:" + accountsData.getSelectedAccount());
+				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
+				System.out.println("getEncryptedPrivateKey: "
+						+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
+				// Create a background task for the network call
+				Task<Void> fetchDataTask = new Task<Void>() {
+					@Override
+					protected Void call() throws Exception {
+
+						// Prepare the gRPC request
+						QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
+								.setAddress(selectedAccount.get().getAddress())
+								.setDenom("ugd") // Add this line to set the denomination
+								.build();
+
+						QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
+						// Execute the gRPC request
+						QueryBalanceResponse response = stub.balance(request);
+						System.out.println("like balance field: " + response.getBalance().getAmount());
+						System.out.println("balance getBalance: " + response.getBalance());
+						System.out.println("balance to string: " + response.toString());
+
+						Platform.runLater(() -> {
+							// Update UI with the balance received from the response
+							balanceLabel.setText(response.getBalance().getAmount() + " ugd");
+						});
+
+						// Load transactions and other account data (assuming these methods are adapted
+						// for gRPC)
+						cosmosTxList.loadTransactions(10);
+						loadAccountData(accountsData.getSelectedAccount().getAddress());
+
+						return null;
+					}
+
+				};
+
+				// Handle exceptions
+				fetchDataTask.setOnFailed(e -> {
+					Throwable exception = fetchDataTask.getException();
+					Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE,
+							null, exception);
+					// Optionally show an error message to the user
+				});
+
+				// Start the task in a new thread
+				new Thread(fetchDataTask).start();
+			}
+		});
+
+	}
+
+	private void loadAccountData(String account) throws IOException, InterruptedException {
+		RestService restService = new RestService();
+
+		// Delegations
+		DelegationsRequest delegationsRequest = new DelegationsRequest(account);
+		DelegationsRequest.Response delegationsResponse = new RestCommand<>(
+				delegationsRequest, restService).execute();
+		setDelegations(delegationsResponse.getDelegationResponses());
+		System.out.println(delegationsResponse);
+
+		// Rewards
+		RewardsRequest rewardsRequest = new RewardsRequest(account);
+		RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
+				restService).execute();
+		stakingRewardsValue(rewardsResponse.getTotal());
+		System.out.println(rewardsResponse);
+
+		// Unbonding Delegations
+		UnbondingDelegationsRequest unbondingDelegationsRequest = new UnbondingDelegationsRequest(
+				account);
+		UnbondingDelegationsRequest.Response unbondingDelegationsResponse = new RestCommand<>(
+				unbondingDelegationsRequest, restService).execute();
+		System.out.println(unbondingDelegationsResponse);
+
+		// Redelegations
+		RedelegationsRequest redelegationsRequest = new RedelegationsRequest(account);
+		RedelegationsRequest.Response redelegationsResponse = new RestCommand<>(
+				redelegationsRequest, restService).execute();
+		System.out.println(redelegationsResponse);
+
+		// Withdraw Address
+		WithdrawAddressRequest withdrawAddressRequest = new WithdrawAddressRequest(
+				account);
+		WithdrawAddressRequest.Response withdrawAddressResponse = new RestCommand<>(
+				withdrawAddressRequest, restService).execute();
+		System.out.println(withdrawAddressResponse);
+
+		gridnodeDelegationService.fetchDelegationAmount(account);
+		setDelegationAmount();
+
+		updateCollateralDisplay();
+
+	}
+
+	public void setDelegationAmount() {
+		GridnodeDelegationAmount.Response response = gridnodeDelegationService
+				.getCurrentResponse();
+		if (response != null) {
+			Platform.runLater(() -> {
+				BigDecimal amount = response.getAmount();
+				String text = amount.toPlainString() + " UGD";
+				delegationAmountLabel.setText(text);
+			});
+		}
+	}
+
+	private void updateCollateralDisplay() {
+		if (hedgehog.fetchCollateralRequired()) {
+			System.out.println("Collateral Required: " + collateral.getAmount());
+		} else {
+			System.out.println("Error fetching collateral");
+		}
+	}
 }
