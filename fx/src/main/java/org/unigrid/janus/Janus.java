@@ -13,7 +13,6 @@
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus;
 
 //import com.dustinredmond.fxtrayicon.FXTrayIcon;
@@ -50,22 +49,26 @@ import lombok.SneakyThrows;
 import org.unigrid.janus.model.service.Daemon;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.signal.HedgehogError;
-import org.unigrid.janus.model.signal.SplashMessage;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.BrowserService;
 import org.unigrid.janus.view.MainWindow;
 import org.update4j.OS;
 import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
+import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.ExternalVersion;
 import org.unigrid.janus.model.JanusModel;
+import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.Wallet;
+import org.unigrid.janus.model.cdi.CDIUtil;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.service.Hedgehog;
+import org.unigrid.janus.model.signal.PromptRequest;
 import org.unigrid.janus.view.AlertDialog;
+import org.unigrid.janus.view.PromptScreen;
 //import org.unigrid.janus.model.service.TrayService;
 
 @Eager
@@ -75,7 +78,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	@Inject
 	private Daemon daemon;
 	@Inject
-	private Event<SplashMessage> splashMessageEvent;
+	private Event<PromptRequest> promptRequestEvent;
 	@Inject
 	private Hedgehog hedgehog;
 	@Inject
@@ -86,6 +89,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private BrowserService window;
 	@Inject
 	private MainWindow mainWindow;
+	@Inject
+	private PromptScreen promptScreen;
 	@Inject
 	private JanusPreloader preloader;
 	@Inject
@@ -162,7 +167,9 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		// tray.initTrayService(stage);
 		HostServicesProducer.setHostServices(hostServices);
 
-		startupSequence();
+		CDIUtil.instantiate(promptScreen);
+//		showChooseChain();
+		checkStartupState();
 	}
 
 	public void startFromBootstrap(Stage stage) throws Exception {
@@ -170,7 +177,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		// tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
-		startupSequence();
+//		showChooseChain();
+		checkStartupState();
 	}
 
 	public void startupSequence() {
@@ -189,6 +197,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 							// rpc.stopPolling();
 							wallet.setOffline(Boolean.FALSE);
 							startMainWindow();
+							showSwapTokens();
 							rpc.pollForInfo(10 * 1000);
 							janusModel.setAppState(JanusModel.AppState.LOADED);
 							preloader.stopSpinner();
@@ -200,12 +209,20 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		});
 	}
 
+	public void checkStartupState() {
+		final String chain = Preferences.get().get("chooseChain", null);
+		if (chain.equalsIgnoreCase("mainnet")) {
+			showSwapTokens();
+		} else {
+			showChooseChain();
+		}
+	}
+
 	/*public void setExternalVersion() {
 		//TODO: Re-enable?
 		// this is being called after mainWindow.show()
 		hedgehog.getHedgehogVersion();
 	}*/
-
 	private void startMainWindow() {
 		try {
 			//TODO: Re-enable?
@@ -363,7 +380,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		new Thread(task).start();
 	}
 
-	public void restartDaemon(Boolean shoulHideMain) {
+	public void restartDaemon(Boolean shouldHideMain) {
 		startDaemon();
 		try {
 			// need to wait a few seconds for the daemon to start
@@ -374,7 +391,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		}
 
 		ready.setValue(Boolean.FALSE);
-		if (shoulHideMain) {
+		if (shouldHideMain) {
 			startSplashScreen();
 			mainWindow.hide();
 		}
@@ -382,6 +399,93 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		janusModel.addPropertyChangeListener(this);
 	}
 
+	private void showChooseChain() {
+		debug.print("opening Choose chain screen...", Janus.class.getSimpleName());
+
+		promptRequestEvent.fire(PromptRequest.builder()
+			.type(PromptRequest.Type.CHAIN)
+			.onPrimary(() -> {
+				Preferences.get().put("chooseChain", "legacy");
+				promptScreen.hide();
+				startupSequence();
+			})
+			.onSecondary(() -> {
+				Preferences.get().put("chooseChain", "mainnet");
+				showSwapTokens();
+			})
+			.build());
+	}
+
+	private void showSwapTokens() {
+		debug.print("opening Swap tokens screen...", Janus.class.getSimpleName());
+
+		promptRequestEvent.fire(PromptRequest.builder()
+			.type(PromptRequest.Type.SWAP)
+			.onPrimary(() -> {
+				Preferences.get().put("swapTokens", String.valueOf(true));
+				showPortalUrl();
+			})
+			.onSecondary(() -> {
+				Preferences.get().put("swapTokens", String.valueOf(false));
+				showRemoveOldData();
+			})
+			.build());
+	}
+
+	private void showRemoveOldData() {
+		debug.print("opening Remove old data screen...", Janus.class.getSimpleName());
+
+		promptRequestEvent.fire(PromptRequest.builder()
+			.type(PromptRequest.Type.OLD_DATA)
+			.onPrimary(() -> {
+				Preferences.get().put("removeLegacyData", String.valueOf(true));
+				removeOldData();
+				promptScreen.hide();
+			})
+			.onSecondary(() -> {
+				Preferences.get().put("removeLegacyData", String.valueOf(false));
+				promptScreen.hide();
+			})
+			.build());
+	}
+
+	private void showPortalUrl() {
+		debug.print("opening Portal screen...", Janus.class.getSimpleName());
+
+		promptRequestEvent.fire(PromptRequest.builder()
+			.type(PromptRequest.Type.PORTAL)
+			.onPrimary(() -> {
+				promptScreen.hide();
+			})
+			.onSecondary(() -> {
+				promptScreen.hide();
+			})
+			.build());
+	}
+
+	private void removeOldData() {
+		String[] legacyFiles = {"legacy1.conf", "legacy2.conf"};
+		boolean hasBeenDeleted = DataDirectory.deleteLegacyChainData(legacyFiles);
+		if (hasBeenDeleted) {
+			System.out.println("Has been deleted");
+		} else {
+			System.out.println("Has Not been deleted");
+		}
+	}
+
+//	private void goToPortal() {
+//		if (Desktop.isDesktopSupported()) {
+//			try {
+//				Desktop desktop = Desktop.getDesktop();
+//				URI uri = new URI("http://www.google.com");
+//				desktop.browse(uri);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		} else {
+//			System.out.println("Desktop is not supported");
+//		}
+//	}
 	private void onError(@Observes HedgehogError hedgehogError) {
 		Platform.runLater(() -> {
 			System.out.println("onError called: " + hedgehogError);

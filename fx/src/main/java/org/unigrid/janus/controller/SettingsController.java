@@ -13,7 +13,6 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -192,6 +191,8 @@ public class SettingsController
 	@FXML
 	private CheckBox chkNotifications;
 	@FXML
+	private CheckBox chkLegacyChain;
+	@FXML
 	private Label txtFxVersion;
 	@FXML
 	private Label txtBootstrapVersion;
@@ -253,6 +254,8 @@ public class SettingsController
 		txtBootstrapVersion.setText(bootStrap.getInstance().getBootstrapVer());
 		wallet.addPropertyChangeListener(this);
 		chkNotifications.setSelected(Preferences.get().getBoolean("notifications", true));
+		chkLegacyChain.setSelected(Preferences.get().get("chooseChain", null)
+			.equalsIgnoreCase("legacy"));
 
 		txidColumn.setCellValueFactory(new PropertyValueFactory<>("txid"));
 		voutColumn.setCellValueFactory(new PropertyValueFactory<>("vout"));
@@ -535,6 +538,15 @@ public class SettingsController
 	private void onNotificationsShown(MouseEvent event) {
 		Preferences.get().put("notifications",
 			String.valueOf(chkNotifications.isSelected()));
+	}
+
+	@FXML
+	private void onLegacyChainUsed(MouseEvent event) {
+		if (chkLegacyChain.isSelected()) {
+			Preferences.get().put("chooseChain", "legacy");
+		} else {
+			Preferences.get().put("chooseChain", "mainnet");
+		}
 	}
 
 	@Override

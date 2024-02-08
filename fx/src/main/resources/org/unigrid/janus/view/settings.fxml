@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="450.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
+<AnchorPane prefHeight="450.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="settings" stylesheets="@main.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.SettingsController">
 	<children>
 		<BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<center>
@@ -138,6 +138,14 @@
 									<font>
 										<Font size="18.0" />
 									</font>
+								</CheckBox>
+								<CheckBox fx:id="chkLegacyChain" mnemonicParsing="false" onMouseClicked="#onLegacyChainUsed" selected="false" style="-fx-cursor: hand;" stylesheets="@main.css" text="Use Legacy chain" textFill="#ee7722">
+									<font>
+										<Font size="18.0" />
+									</font>
+									<VBox.margin>
+										<Insets top="10.0" />
+									</VBox.margin>
 								</CheckBox>
 							</children>
 							<padding>
@@ -323,23 +331,23 @@
 															</TextField>
 														</children>
 													</HBox>
-                                       <HBox>
-                                          <children>
-                                             <TextField fx:id="txtMergeAmount" prefWidth="350.0" promptText="Amount" text="200">
-                                                <HBox.margin>
-                                                   <Insets right="10.0" />
-                                                </HBox.margin>
-                                             </TextField>
-                                             <Button fx:id="btnMerge" mnemonicParsing="false" onMouseClicked="#mergeUnspentTokens" style="-fx-cursor: hand;" text="Merge">
-                                                <HBox.margin>
-                                                   <Insets bottom="8.0" />
-                                                </HBox.margin>
-                                             </Button>
-                                          </children>
-                                       </HBox>
-                                       <padding>
-                                          <Insets top="10.0" />
-                                       </padding>
+													<HBox>
+														<children>
+															<TextField fx:id="txtMergeAmount" prefWidth="350.0" promptText="Amount" text="200">
+																<HBox.margin>
+																	<Insets right="10.0" />
+																</HBox.margin>
+															</TextField>
+															<Button fx:id="btnMerge" mnemonicParsing="false" onMouseClicked="#mergeUnspentTokens" style="-fx-cursor: hand;" text="Merge">
+																<HBox.margin>
+																	<Insets bottom="8.0" />
+																</HBox.margin>
+															</Button>
+														</children>
+													</HBox>
+													<padding>
+														<Insets top="10.0" />
+													</padding>
 												</VBox>
 											</children>
 										</AnchorPane>
