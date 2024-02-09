@@ -17,7 +17,6 @@ package org.unigrid.janus.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.ByteString;
 import cosmos.bank.v1beta1.QueryGrpc;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
@@ -34,11 +33,9 @@ import cosmos.tx.v1beta1.TxOuterClass.AuthInfo;
 import cosmos.tx.v1beta1.TxOuterClass.Fee;
 import cosmos.base.v1beta1.CoinOuterClass.Coin;
 import cosmos.tx.v1beta1.TxOuterClass.SignerInfo;
-import cosmos.crypto.secp256k1.Keys.PubKey;
 import cosmos.tx.signing.v1beta1.Signing.SignMode;
 import cosmos.tx.v1beta1.TxOuterClass.ModeInfo;
 import java.security.*;
-
 
 import java.security.Security;
 
@@ -46,10 +43,8 @@ import com.google.protobuf.Any;
 import cosmos.auth.v1beta1.Auth.BaseAccount;
 import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountRequest;
 import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountResponse;
+import cosmos.bank.v1beta1.Tx.MsgSend;
 import cosmos.tx.v1beta1.ServiceGrpc;
-
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -75,10 +70,8 @@ import jakarta.inject.Named;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -116,9 +109,6 @@ import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.wallet.DeterministicKeyChain;
 import org.bitcoinj.wallet.DeterministicSeed;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.unigrid.janus.model.AccountModel;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.AccountsData.Account;
@@ -149,6 +139,14 @@ import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.utils.CosmosCredentials;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import pax.gridnode.Tx.MsgGridnodeDelegate;
+import java.math.BigInteger;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+import com.google.protobuf.ByteString;
+import cosmos.crypto.secp256k1.Keys.PubKey;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -287,7 +285,7 @@ public class CosmosController implements Initializable {
 		paneMap.put("confirmMnemonic", confirmMnemonic);
 
 		ObservableList<TxResponse> observableList = FXCollections
-				.observableArrayList(cosmosTxList.getTxResponsesList());
+			.observableArrayList(cosmosTxList.getTxResponsesList());
 		transactionListView.setItems(observableList);
 
 		Platform.runLater(() -> {
@@ -307,27 +305,27 @@ public class CosmosController implements Initializable {
 			}
 			// check whether the word changed in order to reset the value
 			transactionListView.setCellFactory(
-					param -> new ListCell<TransactionResponse.TxResponse>() {
-						@Override
-						protected void updateItem(
-								TransactionResponse.TxResponse txResponse,
-								boolean empty) {
-							System.out.println(
-									"Cell factory called for item: " + txResponse);
-							System.out.println("Number of transactions: "
-									+ cosmosTxList.getTxResponsesList().size());
+				param -> new ListCell<TransactionResponse.TxResponse>() {
+				@Override
+				protected void updateItem(
+					TransactionResponse.TxResponse txResponse,
+					boolean empty) {
+					System.out.println(
+						"Cell factory called for item: " + txResponse);
+					System.out.println("Number of transactions: "
+						+ cosmosTxList.getTxResponsesList().size());
 
-							super.updateItem(txResponse, empty);
-							if (empty || txResponse == null) {
-								setText(null);
-							} else {
-								setText(txResponse.getTxhash() + " - "
-										+ txResponse.getTimestamp());
-								System.out.println("txResponse getHeight(): "
-										+ txResponse.getHeight());
-							}
-						}
-					});
+					super.updateItem(txResponse, empty);
+					if (empty || txResponse == null) {
+						setText(null);
+					} else {
+						setText(txResponse.getTxhash() + " - "
+							+ txResponse.getTimestamp());
+						System.out.println("txResponse getHeight(): "
+							+ txResponse.getHeight());
+					}
+				}
+			});
 			totalsListView.setCellFactory(lv -> new ListCell<Balance>() {
 				@Override
 				protected void updateItem(Balance item, boolean empty) {
@@ -340,28 +338,28 @@ public class CosmosController implements Initializable {
 				}
 			});
 			delegationsListView.setCellFactory(
-					listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
-						@Override
-						protected void updateItem(
-								DelegationsRequest.DelegationResponse item,
-								boolean empty) {
-							super.updateItem(item, empty);
-							if (empty || item == null) {
-								setText(null);
-							} else {
+				listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
+				@Override
+				protected void updateItem(
+					DelegationsRequest.DelegationResponse item,
+					boolean empty) {
+					super.updateItem(item, empty);
+					if (empty || item == null) {
+						setText(null);
+					} else {
 
-								BigDecimal amount = new BigDecimal(
-										item.getBalance().getAmount());
-								BigDecimal displayAmount = amount.divide(scaleFactor);
-								String text = String.format(
-										"Validator: %s, Amount: %s %s",
-										item.getDelegation().getValidatorAddress(),
-										displayAmount.toPlainString(),
-										item.getBalance().getDenom());
-								setText(text);
-							}
-						}
-					});
+						BigDecimal amount = new BigDecimal(
+							item.getBalance().getAmount());
+						BigDecimal displayAmount = amount.divide(scaleFactor);
+						String text = String.format(
+							"Validator: %s, Amount: %s %s",
+							item.getDelegation().getValidatorAddress(),
+							displayAmount.toPlainString(),
+							item.getBalance().getDenom());
+						setText(text);
+					}
+				}
+			});
 		});
 	}
 
@@ -419,7 +417,7 @@ public class CosmosController implements Initializable {
 			showPane(cosmosMainPane);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-					ex);
+				ex);
 		}
 	}
 
@@ -455,10 +453,10 @@ public class CosmosController implements Initializable {
 	private void generateKeys(ActionEvent event) throws SignatureDecodeException, Exception {
 
 		BigDecimal currentDelegationAmount = gridnodeDelegationService
-				.getCurrentDelegationAmount();
+			.getCurrentDelegationAmount();
 		BigDecimal collateralAmount = BigDecimal.valueOf(collateral.getAmount());
 		BigDecimal numberOfNodes = currentDelegationAmount.divide(collateralAmount, 0,
-				RoundingMode.DOWN);
+			RoundingMode.DOWN);
 		int numberOfNodesInt = numberOfNodes.intValue();
 		System.out.println("Nodes we can run: " + numberOfNodesInt);
 		int keysToCreate = numberOfNodesInt;
@@ -473,16 +471,16 @@ public class CosmosController implements Initializable {
 
 		// Generate the HD wallet from the seed
 		DeterministicSeed deterministicSeed = new DeterministicSeed(seed, "",
-				creationTimeSeconds);
+			creationTimeSeconds);
 		DeterministicKeyChain chain = DeterministicKeyChain.builder()
-				.seed(deterministicSeed).build();
+			.seed(deterministicSeed).build();
 
 		// Derive child keys
 		List<ECKey> derivedKeysList = new ArrayList<>();
 		DeterministicKey parentKey = chain.getWatchingKey();
 		for (int i = 0; i < keysToCreate; i++) {
 			DeterministicKey childKey = HDKeyDerivation.deriveChildKey(parentKey,
-					new ChildNumber(i));
+				new ChildNumber(i));
 			derivedKeysList.add(ECKey.fromPrivate(childKey.getPrivKey()));
 		}
 
@@ -516,7 +514,7 @@ public class CosmosController implements Initializable {
 		long startTime = System.currentTimeMillis(); // Capture the start time
 
 		boolean areKeysVerified = cryptoUtils.verifySignatureKeys(messageBytes,
-				signedMessage, derivedKeys, keysToCreate, pubKey);
+			signedMessage, derivedKeys, keysToCreate, pubKey);
 
 		long endTime = System.currentTimeMillis(); // Capture the end time
 
@@ -528,16 +526,16 @@ public class CosmosController implements Initializable {
 	}
 
 	private void verifyWithBadKeys(byte[] messageBytes, ECKey signingKey)
-			throws SignatureDecodeException {
+		throws SignatureDecodeException {
 		ECKey.ECDSASignature signature = signingKey.sign(Sha256Hash.of(messageBytes));
 		byte[] signatureBytes = signature.encodeToDER();
 
 		ECKey[] badKeys = {
-				ECKey.fromPrivate(new BigInteger("deadbeefdeadbeefdeadbeefdeadbeef", 16)),
-				ECKey.fromPrivate(
-						new BigInteger("badbadbadbadbadbadbadbadbadbadbad", 16)),
-				ECKey.fromPrivate(
-						new BigInteger("facefacefacefacefacefacefaceface", 16)) };
+			ECKey.fromPrivate(new BigInteger("deadbeefdeadbeefdeadbeefdeadbeef", 16)),
+			ECKey.fromPrivate(
+			new BigInteger("badbadbadbadbadbadbadbadbadbadbad", 16)),
+			ECKey.fromPrivate(
+			new BigInteger("facefacefacefacefacefacefaceface", 16))};
 
 		// for (int i = 0; i < badKeys.length; i++) {
 		// ECKey[] singleKeyArray = { badKeys[i] };
@@ -551,6 +549,7 @@ public class CosmosController implements Initializable {
 
 	private String getPasswordFromUser() {
 		// just use this default for testing right now
+
 		return "pickles";
 	}
 
@@ -578,17 +577,17 @@ public class CosmosController implements Initializable {
 			// key bytes.
 			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
 			System.out.println(
-					"Decrypted Private Key (Bytes): " + Arrays.toString(privateKeyBytes));
+				"Decrypted Private Key (Bytes): " + Arrays.toString(privateKeyBytes));
 			System.out.println("Decrypted Private Key (HEX): "
-					+ cryptoUtils.bytesToHex(privateKeyBytes));
+				+ cryptoUtils.bytesToHex(privateKeyBytes));
 			// Convert the private key bytes to a HEX string
 			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
 			System.out.println("Private Key in HEX: " + privateKeyHex);
 			System.out.println("Address from priv key: "
-					+ cryptoUtils.getAddressFromPrivateKey(privateKeyHex));
+				+ cryptoUtils.getAddressFromPrivateKey(privateKeyHex));
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-					ex);
+				ex);
 		}
 	}
 
@@ -618,10 +617,10 @@ public class CosmosController implements Initializable {
 	private void showPane(StackPane paneToShow) {
 		// List of all panes
 		String paneName = paneMap.entrySet().stream()
-				.filter(entry -> entry.getValue() == paneToShow).map(Map.Entry::getKey)
-				.findFirst().orElse(null);
+			.filter(entry -> entry.getValue() == paneToShow).map(Map.Entry::getKey)
+			.findFirst().orElse(null);
 		List<StackPane> allPanes = Arrays.asList(importPane, cosmosWizardPane,
-				cosmosMainPane, generatePane, passwordPane, confirmMnemonic);
+			cosmosMainPane, generatePane, passwordPane, confirmMnemonic);
 		mnemonicModel.setCurrentPane(paneName);
 		// Loop through all panes and set visibility
 		for (StackPane pane : allPanes) {
@@ -655,8 +654,8 @@ public class CosmosController implements Initializable {
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		List<AddressCosmos> addresses = objectMapper.readValue(file,
-				new TypeReference<List<AddressCosmos>>() {
-				});
+			new TypeReference<List<AddressCosmos>>() {
+		});
 		return addresses.size();
 	}
 
@@ -670,7 +669,7 @@ public class CosmosController implements Initializable {
 
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-					ex);
+				ex);
 		}
 	}
 
@@ -680,15 +679,15 @@ public class CosmosController implements Initializable {
 		System.out.println("Import private key: " + importPassword.getText());
 		try {
 			accountModel.setAddress(
-					cryptoUtils.getAddressFromPrivateKey(importPassword.getText()));
+				cryptoUtils.getAddressFromPrivateKey(importPassword.getText()));
 			accountModel.setPublicKey(
-					cryptoUtils.getPublicKeyBytes(importPassword.getText()));
+				cryptoUtils.getPublicKeyBytes(importPassword.getText()));
 			accountModel.setPrivateKey(
-					cryptoUtils.getPrivateKeyBytes(importPassword.getText()));
+				cryptoUtils.getPrivateKeyBytes(importPassword.getText()));
 			System.out.println("Address from private key: " + accountModel.getAddress());
 			addressFieldPassword.setText(accountModel.getAddress());
 		} catch (NoSuchAlgorithmException | NoSuchProviderException
-				| InvalidKeySpecException e) {
+			| InvalidKeySpecException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -717,11 +716,11 @@ public class CosmosController implements Initializable {
 		// accountModel.setMnemonic(encryptedPrivateKey);
 		// System.out.println("Set encrypted mnemonic: " + accountModel.getMnemonic());
 		System.out.println(
-				"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
+			"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
 		String path = String.format("m/44'/118'/0'/0/%d", index);
 		CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
-				"unigrid");
+			"unigrid");
 
 		System.out.println("Address from creds: " + creds.getAddress());
 		System.out.println("EcKey from creds: " + creds.getEcKey());
@@ -797,7 +796,7 @@ public class CosmosController implements Initializable {
 			showPane(cosmosWizardPane);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-					ex);
+				ex);
 		}
 	}
 
@@ -836,7 +835,7 @@ public class CosmosController implements Initializable {
 		byte[] data = new byte[len / 2];
 		for (int i = 0; i < len; i += 2) {
 			data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
-					+ Character.digit(hexString.charAt(i + 1), 16));
+				+ Character.digit(hexString.charAt(i + 1), 16));
 		}
 		return data;
 	}
@@ -848,7 +847,7 @@ public class CosmosController implements Initializable {
 
 		ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
 		ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(s, spec);
-		KeyFactory kf = KeyFactory.getInstance("EC", new BouncyCastleProvider());
+		KeyFactory kf = KeyFactory.getInstance("EC", "BC"); // Use "BC" for BouncyCastleProvider
 
 		return kf.generatePrivate(ecPrivateKeySpec);
 	}
@@ -858,53 +857,51 @@ public class CosmosController implements Initializable {
 		byte[] publicKey = hexStringToByteArray(publicKeyHex);
 		System.out.println("publicKey: " + publicKeyHex);
 		// Construct the PubKey object
-		PubKey pubKey = PubKey.newBuilder()
-				.setKey(ByteString.copyFrom(publicKey))
-				.build();
 
-		// Wrap the PubKey in an Any type
-		Any packedPubKey = Any.pack(pubKey);
-		packedPubKey = Any.newBuilder()
-				.setTypeUrl("/cosmos.crypto.secp256k1.PubKey") // Set type_url manually
-				.setValue(pubKey.toByteString()) // Set the serialized message
-				.build();
+		PubKey pubKey = PubKey.newBuilder()
+			.setKey(ByteString.copyFrom(publicKey))
+			.build();
+		Any packedPubKey = Any.newBuilder()
+			.setTypeUrl("/cosmos.crypto.secp256k1.PubKey") // Make sure this matches the Protobuf definition
+			.setValue(pubKey.toByteString())
+			.build();
 
 		// Construct the ModeInfo object for SIGN_MODE_DIRECT
 		ModeInfo modeInfo = ModeInfo.newBuilder()
-				.setSingle(ModeInfo.Single.newBuilder().setMode(SignMode.SIGN_MODE_DIRECT))
-				.build();
+			.setSingle(ModeInfo.Single.newBuilder().setMode(SignMode.SIGN_MODE_DIRECT))
+			.build();
 
 		// Construct the SignerInfo
 		SignerInfo signerInfo = SignerInfo.newBuilder()
-				.setPublicKey(packedPubKey)
-				.setModeInfo(modeInfo)
-				.setSequence(sequence)
-				.build();
+			.setPublicKey(packedPubKey)
+			.setModeInfo(modeInfo)
+			.setSequence(sequence)
+			.build();
 
 		// Construct the fee
 		Fee fee = Fee.newBuilder()
-				.addAmount(Coin.newBuilder().setDenom("ugd").setAmount("3").build()) // Fee of 2000 ugd
-				.setGasLimit(200000) // Gas limit of 200000
-				.build();
+			.addAmount(Coin.newBuilder().setDenom("ugd").setAmount(delegateAmountTextField.getText()).build()) // Fee of 2000 ugd
+			.setGasLimit(200000) // Gas limit of 200000
+			.build();
 
 		System.out.println("gas limit: " + fee.getGasLimit());
 
 		// Construct the AuthInfo
 		return AuthInfo.newBuilder()
-				.addSignerInfos(signerInfo)
-				.setFee(fee)
-				.build();
+			.addSignerInfos(signerInfo)
+			.setFee(fee)
+			.build();
 	}
 
 	private long getSequence(String address) {
 		// Set up the auth query client
 		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
-				.newBlockingStub(grpcService.getChannel());
+			.newBlockingStub(grpcService.getChannel());
 
 		// Prepare the account query request
 		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder()
-				.setAddress(address)
-				.build();
+			.setAddress(address)
+			.build();
 
 		try {
 			// Query the account information
@@ -913,6 +910,7 @@ public class CosmosController implements Initializable {
 			Any accountAny = response.getAccount();
 			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
 			// Process baseAccount as needed
+			System.out.println("SEQUENCE NUMBER: " + baseAccount.getSequence());
 			return baseAccount.getSequence();
 
 		} catch (Exception e) {
@@ -930,19 +928,19 @@ public class CosmosController implements Initializable {
 	}
 
 	public byte[] prepareSigningInput(byte[] txBodyBytes, byte[] authInfoBytes, String chainId, long accountNumber,
-			long sequence) throws IOException {
+		long sequence) throws IOException {
 		ByteArrayOutputStream signingInput = new ByteArrayOutputStream();
 		signingInput.write(txBodyBytes);
-		signingInput.write(authInfoBytes);
-		signingInput.write(chainId.getBytes(StandardCharsets.UTF_8));
-		signingInput.write(longToBytes(accountNumber));
-		signingInput.write(longToBytes(sequence));
+		//signingInput.write(authInfoBytes);
+		//signingInput.write(chainId.getBytes(StandardCharsets.UTF_8));
+		//signingInput.write(longToBytes(accountNumber));
+		//signingInput.write(longToBytes(sequence));
 		return signingInput.toByteArray();
 	}
 
 	private long getAccountNumber(String address) {
 		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
-				.newBlockingStub(grpcService.getChannel());
+			.newBlockingStub(grpcService.getChannel());
 		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder().setAddress(address).build();
 
 		try {
@@ -950,17 +948,18 @@ public class CosmosController implements Initializable {
 			Any accountAny = response.getAccount();
 			System.out.println("Type URL in getAccountNumber: " + accountAny.getTypeUrl());
 			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
-			System.out.println("baseAccount.getPubKey(): " + baseAccount.getPubKey());
+			System.out.println("baseAccount.getPubKey(): " + baseAccount.getPubKey()
+				+ " \naddress :" + baseAccount.getAddress());
 
 			// Process baseAccount as needed
 			// we need the account number and not the sequence here
+			System.out.println("ACCOUNT NUMBER: " + baseAccount.getAccountNumber());
 			return baseAccount.getAccountNumber();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return -1; // Handle this as per your application's requirement
 		}
 	}
-
 
 	public void delegateToGridnode() {
 		Account selectedAccount = accountsData.getSelectedAccount();
@@ -975,24 +974,23 @@ public class CosmosController implements Initializable {
 		try {
 			// Step 1: Create the MsgGridnodeDelegate request
 			MsgGridnodeDelegate delegateRequest = MsgGridnodeDelegate.newBuilder()
-					.setDelegatorAddress(selectedAccount.getAddress())
-					.setAmount(Long.parseLong(delegateAmountTextField.getText()))
-					// Add other necessary fields
-					.build();
+				.setDelegatorAddress(selectedAccount.getAddress())
+				.setAmount(Long.parseLong(delegateAmountTextField.getText()))
+				// Add other necessary fields
+				.build();
 
 			// Step 2: Wrap in a transaction body (TxBody)
 			// Any anyDelegateRequest = Any.pack(delegateRequest);
 			Any anyDelegateRequest = Any.newBuilder()
-					.setTypeUrl("/pax.gridnode.MsgGridnodeDelegate") // Set type_url manually
-					.setValue(delegateRequest.toByteString()) // Set the serialized message
-					.build();
+				.setTypeUrl("/pax.gridnode.MsgGridnodeDelegate") // Set type_url manually
+				.setValue(delegateRequest.toByteString()) // Set the serialized message
+				.build();
 			TxBody txBody = TxBody.newBuilder().addMessages(anyDelegateRequest).build();
 
 			// Step 3: Create AuthInfo with signer info and fee
 			AuthInfo authInfo = createAuthInfo(selectedAccount.getPublicKey(), sequence);
-
-			//AuthInfo authInfo = createAuthInfo(			getPublicKey(selectedAccount.getAddress())			, sequence);
-
+			System.out.println("public key: " + selectedAccount.getPublicKey()
+				+ "\naddress: " + selectedAccount.getAddress());
 			// Step 4: Serialize TxBody and AuthInfo
 			byte[] txBodyBytes = txBody.toByteArray();
 			byte[] authInfoBytes = authInfo.toByteArray();
@@ -1002,17 +1000,15 @@ public class CosmosController implements Initializable {
 
 			// Step 6: Sign the transaction
 			// PrivateKey privateKey = getECPrivateKeyFromHex(getPrivateKeyHex());
-			byte[] signature = generateSignature(getPrivateKeyHex(), signingInput);
-			// byte[] signature =
-			// generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8",
-			// signingInput);
+			//byte[] signature = generateSignature(getPrivateKeyHex(), signingInput);
+			byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
 
 			// Step 7: Construct the signed transaction
 			Tx signedTx = Tx.newBuilder()
-					.setBody(txBody)
-					.setAuthInfo(authInfo)
-					.addSignatures(ByteString.copyFrom(signature))
-					.build();
+				.setBody(txBody)
+				.setAuthInfo(authInfo)
+				.addSignatures(ByteString.copyFrom(signature))
+				.build();
 			byte[] signedTxBytes = signedTx.toByteArray();
 			String base64EncodedTx = Base64.getEncoder().encodeToString(signedTxBytes);
 			System.out.println("signed transaction: " + signedTx);
@@ -1029,9 +1025,9 @@ public class CosmosController implements Initializable {
 			// Step 8: Broadcast the transaction
 			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
 			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
-					.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
-					.setMode(BroadcastMode.BROADCAST_MODE_SYNC) // Choose the appropriate mode
-					.build();
+				.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
+				.setMode(BroadcastMode.BROADCAST_MODE_SYNC) // Choose the appropriate mode
+				.build();
 			BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
 
 			// Step 9: Handle the response
@@ -1046,47 +1042,94 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	// private byte[] generateSignature(PrivateKey privateKeyObj, byte[] txBytes)
-	// throws GeneralSecurityException {
-	//
-	// Signature signatureObj = Signature.getInstance("SHA256withECDSA", "BC");
-	// signatureObj.initSign(privateKeyObj);
-	//
-	// signatureObj.update(txBytes); // Use the serialized transaction bytes
-	//
-	// return signatureObj.sign();
-	//
-	// }
 	private byte[] generateSignature(String privateKeyHex, byte[] txBytes) throws GeneralSecurityException {
-		// Convert the private key hex string to a PrivateKey object
-		PrivateKey privateKeyObj = getECPrivateKeyFromHex(privateKeyHex);
+		//final PrivateKey privateKey = getECPrivateKeyFromHex(privateKeyHex);
+		final ECKey key = ECKey.fromPrivate(Hex.decode(privateKeyHex));
+		final ECKey.ECDSASignature sig = key.sign(Sha256Hash.wrap(Sha256Hash.hash(txBytes)));
 
-		// Initialize the signature object with the ECDSA algorithm
-		Signature signatureObj = Signature.getInstance("SHA256withECDSA", "BC");
-		signatureObj.initSign(privateKeyObj);
-
-		// Update the signature object with the transaction bytes
-		signatureObj.update(txBytes);
-
-		// Sign the transaction bytes and return the signature
-		return signatureObj.sign();
+		// Correct the signature algorithm name
+		//final Signature signature = Signature.getInstance("SHA256withECDSA");
+		//signature.initSign(privateKey);
+		//signature.update(txBytes);
+		return sig.encodeToDER();
 	}
 
-
+//    @FXML
+//    private void sendTokens(ActionEvent event) {
+//        try {
+//            String toAddress = this.toAddress.getText();
+//            String sendAmount = this.sendAmount.getText();
+//            String password = "pickles"; // TODO change to user input
+//
+//            String response = "crap";
+//            cosmosClient.sendTokens(toAddress, sendAmount, "ugd", password);
+//
+//            System.out.println("Response: " + response);
+//        } catch (Exception ex) {
+//            Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+//                    ex);
+//        }
+//    }
 	@FXML
-	private void sendTokens(ActionEvent event) {
+	public void sendTokens() {
+		Account selectedAccount = accountsData.getSelectedAccount();
 		try {
-			String toAddress = this.toAddress.getText();
-			String sendAmount = this.sendAmount.getText();
-			String password = "pickles"; // TODO change to user input
+			// Step 1: Create the MsgSend request
+			MsgSend msgSend = MsgSend.newBuilder()
+				.setFromAddress(selectedAccount.getAddress())
+				.setToAddress(toAddress.getText())
+				.addAmount(Coin.newBuilder().setAmount(sendAmount.getText()).setDenom("ugd").build())
+				.build();
 
-			String response = "crap";
-			cosmosClient.sendTokens(toAddress, sendAmount, "ugd", password);
+			System.out.println("SENDING TOKENS: from-> " + selectedAccount.getAddress()
+				+ " to-> " + toAddress.getText()
+				+ " amount: " + sendAmount.getText());
+			// Step 2: Wrap in a transaction body (TxBody)
+			Any anyMsgSend = Any.newBuilder()
+				.setTypeUrl("/cosmos.bank.v1beta1.MsgSend") // Set type_url manually
+				.setValue(msgSend.toByteString()) // Set the serialized message
+				.build();
+			TxBody txBody = TxBody.newBuilder().addMessages(anyMsgSend).build();
 
-			System.out.println("Response: " + response);
-		} catch (Exception ex) {
-			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-					ex);
+			// Step 3: Create AuthInfo with signer info and fee
+			long sequence = getSequence(selectedAccount.getAddress());
+			long accountNumber = getAccountNumber(selectedAccount.getAddress());
+			AuthInfo authInfo = createAuthInfo(selectedAccount.getPublicKey(), sequence); // Ensure createAuthInfo is adapted for token sending
+
+			// Step 4: Serialize TxBody and AuthInfo for signing
+			byte[] txBodyBytes = txBody.toByteArray();
+			byte[] authInfoBytes = authInfo.toByteArray();
+			String chainId = "unigrid-devnet-1"; // Update with your chain ID
+
+			// Step 5: Prepare signing input
+			byte[] signingInput = prepareSigningInput(txBodyBytes, authInfoBytes, chainId, accountNumber, sequence);
+
+			// Step 6: Sign the transaction
+			//String privateKeyHex = getPrivateKeyHex(); // Ensure this fetches the hex private key correctly
+			byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
+
+			// Step 7: Construct the signed transaction
+			Tx signedTx = Tx.newBuilder()
+				.setBody(txBody)
+				.setAuthInfo(authInfo)
+				.addSignatures(ByteString.copyFrom(signature))
+				.build();
+
+			// Step 8: Broadcast the transaction
+			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
+				.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
+				.setMode(BroadcastMode.BROADCAST_MODE_ASYNC) // Choose the appropriate mode based on your need
+				.build();
+
+			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+			BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
+
+			// Handle the response
+			System.out.println("BroadcastTxResponse: " + broadcastResponse.toString());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Error sending tokens: " + e.getMessage());
 		}
 	}
 
@@ -1098,7 +1141,7 @@ public class CosmosController implements Initializable {
 		System.out.println("Word List Length: " + request.getWordListLength());
 
 		if ("select".equals(request.getAction())
-				|| "select12".equals(request.getAction())) {
+			|| "select12".equals(request.getAction())) {
 			if (selectedTab == mnemonic12Tab) {
 				if (request.getWordListLength() == 12) {
 					System.out.println("Correct number of words for 12-word mnemonic");
@@ -1114,7 +1157,7 @@ public class CosmosController implements Initializable {
 				} else {
 					System.out.println("Invalid number of words for 12-word mnemonic");
 					showError("Invalid number of words. Please enter 12 words.",
-							selectedTab);
+						selectedTab);
 				}
 			} else if (selectedTab == mnemonic24Tab) {
 				if (request.getWordListLength() == 24) {
@@ -1130,13 +1173,13 @@ public class CosmosController implements Initializable {
 				} else {
 					System.out.println("Invalid number of words for 24-word mnemonic");
 					showError("Invalid number of words. Please enter 24 words.",
-							selectedTab);
+						selectedTab);
 				}
 			}
 		} else {
 			showError(
-					"Invalid mnemonic length. Please enter either a 12 or 24 word mnemonic.",
-					selectedTab);
+				"Invalid mnemonic length. Please enter either a 12 or 24 word mnemonic.",
+				selectedTab);
 		}
 
 		System.out.println("Should Proceed: " + shouldProceed);
@@ -1156,7 +1199,7 @@ public class CosmosController implements Initializable {
 
 			// Update UI fields
 			seedPhraseTextArea.setStyle(
-					"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
+				"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
 			seedPhraseTextArea.setText(accountModel.getMnemonic());
 			addressFieldPassword.setText(accountModel.getAddress());
 
@@ -1226,7 +1269,7 @@ public class CosmosController implements Initializable {
 			accountsService.loadAccountsFromJson();
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-					ex);
+				ex);
 		}
 
 		// Clear the existing items from the ComboBox
@@ -1248,7 +1291,7 @@ public class CosmosController implements Initializable {
 			String defaultAccountName = (String) accountsDropdown.getValue();
 			if (defaultAccountName != null) {
 				Optional<Account> defaultAccount = accountsService
-						.findAccountByName(defaultAccountName);
+					.findAccountByName(defaultAccountName);
 				if (defaultAccount.isPresent()) {
 					accountsData.setSelectedAccount(defaultAccount.get());
 				}
@@ -1259,14 +1302,14 @@ public class CosmosController implements Initializable {
 		accountsDropdown.setOnAction(event -> {
 			String selectedAccountName = (String) accountsDropdown.getValue();
 			Optional<Account> selectedAccount = accountsService
-					.findAccountByName(selectedAccountName);
+				.findAccountByName(selectedAccountName);
 			if (selectedAccount.isPresent()) {
 				accountsData.setSelectedAccount(selectedAccount.get());
 				System.out
-						.println("Selected Account:" + accountsData.getSelectedAccount());
+					.println("Selected Account:" + accountsData.getSelectedAccount());
 				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
 				System.out.println("getEncryptedPrivateKey: "
-						+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
+					+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
 				// Create a background task for the network call
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
@@ -1274,9 +1317,9 @@ public class CosmosController implements Initializable {
 
 						// Prepare the gRPC request
 						QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
-								.setAddress(selectedAccount.get().getAddress())
-								.setDenom("ugd") // Add this line to set the denomination
-								.build();
+							.setAddress(selectedAccount.get().getAddress())
+							.setDenom("ugd") // Add this line to set the denomination
+							.build();
 
 						QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 						// Execute the gRPC request
@@ -1304,7 +1347,7 @@ public class CosmosController implements Initializable {
 				fetchDataTask.setOnFailed(e -> {
 					Throwable exception = fetchDataTask.getException();
 					Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE,
-							null, exception);
+						null, exception);
 					// Optionally show an error message to the user
 				});
 
@@ -1321,35 +1364,35 @@ public class CosmosController implements Initializable {
 		// Delegations
 		DelegationsRequest delegationsRequest = new DelegationsRequest(account);
 		DelegationsRequest.Response delegationsResponse = new RestCommand<>(
-				delegationsRequest, restService).execute();
+			delegationsRequest, restService).execute();
 		setDelegations(delegationsResponse.getDelegationResponses());
 		System.out.println(delegationsResponse);
 
 		// Rewards
 		RewardsRequest rewardsRequest = new RewardsRequest(account);
 		RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
-				restService).execute();
+			restService).execute();
 		stakingRewardsValue(rewardsResponse.getTotal());
 		System.out.println(rewardsResponse);
 
 		// Unbonding Delegations
 		UnbondingDelegationsRequest unbondingDelegationsRequest = new UnbondingDelegationsRequest(
-				account);
+			account);
 		UnbondingDelegationsRequest.Response unbondingDelegationsResponse = new RestCommand<>(
-				unbondingDelegationsRequest, restService).execute();
+			unbondingDelegationsRequest, restService).execute();
 		System.out.println(unbondingDelegationsResponse);
 
 		// Redelegations
 		RedelegationsRequest redelegationsRequest = new RedelegationsRequest(account);
 		RedelegationsRequest.Response redelegationsResponse = new RestCommand<>(
-				redelegationsRequest, restService).execute();
+			redelegationsRequest, restService).execute();
 		System.out.println(redelegationsResponse);
 
 		// Withdraw Address
 		WithdrawAddressRequest withdrawAddressRequest = new WithdrawAddressRequest(
-				account);
+			account);
 		WithdrawAddressRequest.Response withdrawAddressResponse = new RestCommand<>(
-				withdrawAddressRequest, restService).execute();
+			withdrawAddressRequest, restService).execute();
 		System.out.println(withdrawAddressResponse);
 
 		gridnodeDelegationService.fetchDelegationAmount(account);
@@ -1361,7 +1404,7 @@ public class CosmosController implements Initializable {
 
 	public void setDelegationAmount() {
 		GridnodeDelegationAmount.Response response = gridnodeDelegationService
-				.getCurrentResponse();
+			.getCurrentResponse();
 		if (response != null) {
 			Platform.runLater(() -> {
 				BigDecimal amount = response.getAmount();
