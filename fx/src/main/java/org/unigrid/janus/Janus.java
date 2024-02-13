@@ -13,6 +13,7 @@
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus;
 
 //import com.dustinredmond.fxtrayicon.FXTrayIcon;
@@ -74,7 +75,8 @@ import org.unigrid.janus.view.PromptScreen;
 @Eager
 @ApplicationScoped
 public class Janus extends BaseApplication implements PropertyChangeListener {
-
+	@Inject
+	private BrowserService browser;
 	@Inject
 	private Daemon daemon;
 	@Inject
@@ -168,8 +170,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		HostServicesProducer.setHostServices(hostServices);
 
 		CDIUtil.instantiate(promptScreen);
-//		showChooseChain();
-		checkStartupState();
+		showChooseChain();
+//		checkStartupState();
 	}
 
 	public void startFromBootstrap(Stage stage) throws Exception {
@@ -177,8 +179,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		// tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
-//		showChooseChain();
-		checkStartupState();
+		showChooseChain();
+//		checkStartupState();
 	}
 
 	public void startupSequence() {
@@ -455,6 +457,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		promptRequestEvent.fire(PromptRequest.builder()
 			.type(PromptRequest.Type.PORTAL)
 			.onPrimary(() -> {
+				browser.navigate("https://www.unigrid.org");
 				promptScreen.hide();
 			})
 			.onSecondary(() -> {
@@ -473,19 +476,6 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		}
 	}
 
-//	private void goToPortal() {
-//		if (Desktop.isDesktopSupported()) {
-//			try {
-//				Desktop desktop = Desktop.getDesktop();
-//				URI uri = new URI("http://www.google.com");
-//				desktop.browse(uri);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		} else {
-//			System.out.println("Desktop is not supported");
-//		}
-//	}
 	private void onError(@Observes HedgehogError hedgehogError) {
 		Platform.runLater(() -> {
 			System.out.println("onError called: " + hedgehogError);
