@@ -67,8 +67,10 @@ import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.unigrid.janus.model.rpc.entity.GetBootstrappingInfo;
 import org.unigrid.janus.model.rpc.entity.GetWalletInfo;
 import org.unigrid.janus.model.service.Hedgehog;
+import org.unigrid.janus.model.signal.DisplaySwapPrompt;
 import org.unigrid.janus.model.signal.PromptRequest;
 import org.unigrid.janus.view.AlertDialog;
+import org.unigrid.janus.view.CosmosWallet;
 import org.unigrid.janus.view.PromptScreen;
 //import org.unigrid.janus.model.service.TrayService;
 
@@ -91,6 +93,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private BrowserService window;
 	@Inject
 	private MainWindow mainWindow;
+	@Inject
+	private CosmosWallet cosmosWallet;
 	@Inject
 	private PromptScreen promptScreen;
 	@Inject
@@ -214,7 +218,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	public void checkStartupState() {
 		final String chain = Preferences.get().get("chooseChain", null);
 		if (chain.equalsIgnoreCase("mainnet")) {
-			showSwapTokens();
+			startCosmosWallet();
 		} else {
 			showChooseChain();
 		}
@@ -239,6 +243,26 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 			AlertDialog.open(AlertType.ERROR, e.getMessage());
 		}
+	}
+
+	private void startCosmosWallet() {
+		try {
+			cosmosWallet.show();
+		} catch (Exception e) {
+			System.out.print("error: " + e.getMessage());
+
+			if (Objects.nonNull(e.getCause())) {
+				System.err.print("error: " + e.getCause().toString());
+			}
+
+			AlertDialog.open(AlertType.ERROR, e.getMessage());
+		}
+	}
+
+	private void onDisplay(@Observes DisplaySwapPrompt event) {
+		Platform.runLater(() -> {
+			showSwapTokens();
+		});
 	}
 
 	@SneakyThrows
@@ -413,7 +437,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 			})
 			.onSecondary(() -> {
 				Preferences.get().put("chooseChain", "mainnet");
-				showSwapTokens();
+				promptScreen.hide();
+				startCosmosWallet();
 			})
 			.build());
 	}

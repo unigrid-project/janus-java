@@ -163,6 +163,11 @@
   -fx-text-fill: white;
 }
 
+.prompt-text {
+  -fx-control-inner-background: transparent;
+  -fx-background-color: transparent;
+}
+
 .dialog-pane {
   -fx-background-color: linear-gradient(
     from 75px 75px to 200px 150px,

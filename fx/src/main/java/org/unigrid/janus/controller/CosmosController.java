@@ -48,7 +48,6 @@ import java.math.RoundingMode;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Map;
@@ -104,6 +103,7 @@ import org.unigrid.janus.model.service.GrpcService;
 import org.unigrid.janus.model.service.MnemonicService;
 import org.unigrid.janus.model.service.RestCommand;
 import org.unigrid.janus.model.service.RestService;
+import org.unigrid.janus.model.signal.DisplaySwapPrompt;
 import org.unigrid.janus.model.signal.MnemonicState;
 import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
@@ -132,6 +132,8 @@ public class CosmosController implements Initializable {
 	private CosmosTxList cosmosTxList;
 	@Inject
 	private Event<ResetTextFieldsSignal> resetTextFieldsEvent;
+	@Inject
+	private Event<DisplaySwapPrompt> displaySwapEvent;
 	@Inject
 	private Hedgehog hedgehog;
 	@Inject
@@ -264,6 +266,9 @@ public class CosmosController implements Initializable {
 			} else {
 				showPane(cosmosMainPane);
 			}
+
+			displaySwapEvent.fire(DisplaySwapPrompt.builder().build());
+
 			// check whether the word changed in order to reset the value
 			transactionListView.setCellFactory(
 				param -> new ListCell<TransactionResponse.TxResponse>() {

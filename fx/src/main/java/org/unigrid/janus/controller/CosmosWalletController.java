@@ -17,40 +17,35 @@
 package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
-import javafx.scene.input.MouseEvent;
-import org.unigrid.janus.model.cdi.Eager;
+import javafx.fxml.Initializable;
+import javafx.scene.layout.VBox;
+import org.unigrid.janus.model.service.RPCService;
+import org.unigrid.janus.model.Wallet;
 
-import org.unigrid.janus.model.signal.PromptRequest;
-import org.unigrid.janus.view.PromptScreen;
-
-@Eager
 @ApplicationScoped
-public class PromptScreenController {
-	@Inject private PromptScreen promptScreen;
+public class CosmosWalletController implements Initializable {
+	@Inject private RPCService rpc;
 
-	@FXML private TextArea textArea;
+	@FXML private VBox pnlCosmos;
 
-	private PromptRequest currentPromptRequest;
+	private boolean isActive;
 
-	public void setText(String s) {
-		textArea.setText(s);
+	@Override
+	public void initialize(URL url, ResourceBundle rb) {
+		pnlCosmos.setVisible(true);
+		isActive = true;
 	}
 
-	private void onPromptRequest(@Observes PromptRequest request) {
-		textArea.setText(request.getType().getLabelText());
-		currentPromptRequest = request;
-		promptScreen.show();
+	public boolean isActive() {
+		return isActive;
 	}
 
-	public void onBtnPrimaryClicked(MouseEvent event) {
-		currentPromptRequest.getOnPrimary().run();
-	}
-
-	public void onBtnSecondaryClicked(MouseEvent event) {
-		currentPromptRequest.getOnSecondary().run();
+	public void showSplashScreen() {		
+		rpc.stopPolling();
+		System.exit(0);
 	}
 }

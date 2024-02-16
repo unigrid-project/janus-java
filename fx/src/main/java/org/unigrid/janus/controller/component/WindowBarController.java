@@ -46,6 +46,7 @@ import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.controller.CosmosWalletController;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.signal.State;
@@ -71,6 +72,7 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@Inject private UpdateWallet update;
 	@Inject private Wallet wallet;
 	@Inject private MainWindowController mainWindow;
+	@Inject private CosmosWalletController cosmosWallet;
 	@Inject private Hedgehog hedgehog;
 	// @Inject private TrayService tray;
 
@@ -109,7 +111,11 @@ public class WindowBarController implements Decoratable, Initializable, Property
 	@FXML
 	private void onExit(MouseEvent event) throws Exception {
 		// TODO setting splash screen to visible is too slow
-		mainWindow.showSplashScreen();
+		if (cosmosWallet.isActive() == true) {
+			cosmosWallet.showSplashScreen();
+		} else {
+			mainWindow.showSplashScreen();
+		}
 
 		((Node) event.getSource()).getScene().getWindow().hide();
 
