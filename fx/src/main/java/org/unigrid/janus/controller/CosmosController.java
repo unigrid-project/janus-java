@@ -136,7 +136,6 @@ import org.unigrid.janus.model.signal.MnemonicState;
 import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
 import org.unigrid.janus.utils.AddressUtil;
-import org.unigrid.janus.utils.CosmosCredentials;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import pax.gridnode.Tx.MsgGridnodeDelegate;
 import java.math.BigInteger;
@@ -146,7 +145,16 @@ import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors;
+import cosmos.bank.v1beta1.QueryOuterClass;
+import cosmos.base.abci.v1beta1.Abci;
 import cosmos.crypto.secp256k1.Keys.PubKey;
+import cosmos.tx.v1beta1.TxOuterClass.SignDoc;
+import cosmos.tx.v1beta1.TxOuterClass.TxRaw;
+import java.nio.charset.StandardCharsets;
+import java.security.spec.PKCS8EncodedKeySpec;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Sequence;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -719,7 +727,7 @@ public class CosmosController implements Initializable {
 			"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
 		String path = String.format("m/44'/118'/0'/0/%d", index);
-		CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
+		org.unigrid.janus.utils.CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
 			"unigrid");
 
 		System.out.println("Address from creds: " + creds.getAddress());
@@ -840,18 +848,6 @@ public class CosmosController implements Initializable {
 		return data;
 	}
 
-	private PrivateKey getECPrivateKeyFromHex(String privateKeyHex) throws GeneralSecurityException {
-		System.out.println("privateKeyHex: " + privateKeyHex);
-		Security.addProvider(new BouncyCastleProvider());
-		BigInteger s = new BigInteger(privateKeyHex, 16);
-
-		ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
-		ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(s, spec);
-		KeyFactory kf = KeyFactory.getInstance("EC", "BC"); // Use "BC" for BouncyCastleProvider
-
-		return kf.generatePrivate(ecPrivateKeySpec);
-	}
-
 	private AuthInfo createAuthInfo(String publicKeyHex, long sequence) {
 		// Convert hex-encoded public key string to a byte array
 		byte[] publicKey = hexStringToByteArray(publicKeyHex);
@@ -927,15 +923,21 @@ public class CosmosController implements Initializable {
 		return buffer.array();
 	}
 
-	public byte[] prepareSigningInput(byte[] txBodyBytes, byte[] authInfoBytes, String chainId, long accountNumber,
-		long sequence) throws IOException {
-		ByteArrayOutputStream signingInput = new ByteArrayOutputStream();
-		signingInput.write(txBodyBytes);
-		//signingInput.write(authInfoBytes);
-		//signingInput.write(chainId.getBytes(StandardCharsets.UTF_8));
-		//signingInput.write(longToBytes(accountNumber));
-		//signingInput.write(longToBytes(sequence));
-		return signingInput.toByteArray();
+	public byte[] prepareSigningInput(byte[] txBodyBytes, byte[] authInfoBytes, String chainId, long accountNumber, long sequence)
+		throws IOException {
+		SignDoc signDoc = SignDoc.newBuilder()
+			.setBodyBytes(ByteString.copyFrom(txBodyBytes))
+			.setAuthInfoBytes(ByteString.copyFrom(authInfoBytes))
+			.setChainId(chainId)
+			.setAccountNumber(accountNumber)
+			.build();
+
+		byte[] byteArray = signDoc.toByteArray();
+		String text = new String(byteArray, StandardCharsets.UTF_8);
+		System.out.println("SignDoc: " + text + "\n//////////////////////\n");
+
+		// Serialize the SignDoc to bytes
+		return signDoc.toByteArray();
 	}
 
 	private long getAccountNumber(String address) {
@@ -1002,26 +1004,21 @@ public class CosmosController implements Initializable {
 			// PrivateKey privateKey = getECPrivateKeyFromHex(getPrivateKeyHex());
 			//byte[] signature = generateSignature(getPrivateKeyHex(), signingInput);
 			byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
+			String hexSignature = signTransaction(txBodyBytes, "9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8"); // Your method to get the hex string of the signature
 
-			// Step 7: Construct the signed transaction
+			// Convert the hexadecimal string signature back to a byte array
+			byte[] signatureBytes = Hex.decode(hexSignature);
+			// Step 7: Construct the signed transaction			
 			Tx signedTx = Tx.newBuilder()
 				.setBody(txBody)
 				.setAuthInfo(authInfo)
-				.addSignatures(ByteString.copyFrom(signature))
+				.addSignatures(ByteString.copyFrom(signatureBytes)) // Use copyFrom for byte[]
 				.build();
 			byte[] signedTxBytes = signedTx.toByteArray();
 			String base64EncodedTx = Base64.getEncoder().encodeToString(signedTxBytes);
 			System.out.println("signed transaction: " + signedTx);
 			System.out.println("signed transaction encoded: " + base64EncodedTx);
 
-			// Step 8: Broadcast the transaction
-			// ServiceBlockingStub stub =
-			// ServiceGrpc.newBlockingStub(grpcService.getChannel());
-			// BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
-			// .setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
-			// .setMode(BroadcastMode.BROADCAST_MODE_SYNC) // Choose the appropriate mode
-			// .build();
-			// BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
 			// Step 8: Broadcast the transaction
 			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
 			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
@@ -1034,8 +1031,6 @@ public class CosmosController implements Initializable {
 			System.out.println("Transaction Hash: " + broadcastResponse.getTxResponse().getTxhash());
 			System.out.println("BroadcastTxResponse: " + broadcastResponse.toString());
 
-			// Step 9: Handle the response
-			System.out.println("Transaction Hash: " + broadcastResponse.getTxResponse().getTxhash());
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("Error delegating to gridnode: " + e.getMessage());
@@ -1043,15 +1038,46 @@ public class CosmosController implements Initializable {
 	}
 
 	private byte[] generateSignature(String privateKeyHex, byte[] txBytes) throws GeneralSecurityException {
-		//final PrivateKey privateKey = getECPrivateKeyFromHex(privateKeyHex);
-		final ECKey key = ECKey.fromPrivate(Hex.decode(privateKeyHex));
-		final ECKey.ECDSASignature sig = key.sign(Sha256Hash.wrap(Sha256Hash.hash(txBytes)));
+		Security.addProvider(new BouncyCastleProvider());
 
-		// Correct the signature algorithm name
-		//final Signature signature = Signature.getInstance("SHA256withECDSA");
-		//signature.initSign(privateKey);
-		//signature.update(txBytes);
-		return sig.encodeToDER();
+		// Convert the HEX string private key into a PrivateKey object
+		BigInteger privateKeyInt = new BigInteger(privateKeyHex, 16);
+		ECPrivateKeySpec privateKey = new ECPrivateKeySpec(privateKeyInt, ECNamedCurveTable.getParameterSpec("secp256k1"));
+		KeyFactory factory = KeyFactory.getInstance("ECDSA", "BC");
+		PrivateKey key = factory.generatePrivate(privateKey);
+
+		// Initialize the signature using BouncyCastle as the security provider
+		Signature signature = Signature.getInstance("SHA256withECDSA", "BC");
+		signature.initSign(key);
+		signature.update(txBytes);
+		// Generate the signature
+		byte[] signatureBytes = signature.sign();
+		System.out.println("Printed signature: " + Base64.getEncoder().encodeToString(signatureBytes));
+
+		return signatureBytes;
+	}
+
+	public static String signTransaction(byte[] transactionBytes, String hexPrivateKey) {
+		// Convert the hexadecimal private key to byte array
+		byte[] privateKeyBytes = Hex.decode(hexPrivateKey);
+
+		// Create an ECKey instance from the private key bytes
+		ECKey key = ECKey.fromPrivate(privateKeyBytes);
+
+		// Hash the transaction bytes
+		Sha256Hash hash = Sha256Hash.wrap(Sha256Hash.hash(transactionBytes));
+
+		// Create the signature
+		ECKey.ECDSASignature signature = key.sign(hash);
+		byte[] derSignature = signature.encodeToDER();
+
+		// Optionally, you can also append the public key to the signature
+		byte[] sigWithPubKey = new byte[derSignature.length + key.getPubKey().length];
+		System.arraycopy(derSignature, 0, sigWithPubKey, 0, derSignature.length);
+		System.arraycopy(key.getPubKey(), 0, sigWithPubKey, derSignature.length, key.getPubKey().length);
+
+		// Return the hexadecimal string of the signature (and optionally the public key)
+		return Hex.toHexString(sigWithPubKey);
 	}
 
 //    @FXML
@@ -1071,66 +1097,97 @@ public class CosmosController implements Initializable {
 //        }
 //    }
 	@FXML
-	public void sendTokens() {
-		Account selectedAccount = accountsData.getSelectedAccount();
-		try {
-			// Step 1: Create the MsgSend request
-			MsgSend msgSend = MsgSend.newBuilder()
-				.setFromAddress(selectedAccount.getAddress())
-				.setToAddress(toAddress.getText())
-				.addAmount(Coin.newBuilder().setAmount(sendAmount.getText()).setDenom("ugd").build())
-				.build();
+	public void sendTokens() throws Exception {
 
-			System.out.println("SENDING TOKENS: from-> " + selectedAccount.getAddress()
-				+ " to-> " + toAddress.getText()
-				+ " amount: " + sendAmount.getText());
-			// Step 2: Wrap in a transaction body (TxBody)
-			Any anyMsgSend = Any.newBuilder()
-				.setTypeUrl("/cosmos.bank.v1beta1.MsgSend") // Set type_url manually
-				.setValue(msgSend.toByteString()) // Set the serialized message
-				.build();
-			TxBody txBody = TxBody.newBuilder().addMessages(anyMsgSend).build();
+		QueryGrpc.QueryBlockingStub queryBlockingStub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 
-			// Step 3: Create AuthInfo with signer info and fee
-			long sequence = getSequence(selectedAccount.getAddress());
-			long accountNumber = getAccountNumber(selectedAccount.getAddress());
-			AuthInfo authInfo = createAuthInfo(selectedAccount.getPublicKey(), sequence); // Ensure createAuthInfo is adapted for token sending
+		// query the balance
+		QueryOuterClass.QueryAllBalancesResponse balance = queryBlockingStub.allBalances(QueryOuterClass.QueryAllBalancesRequest.newBuilder().setAddress("unigrid1y675w05f6t55s4xatlezmpw2jq0ml256fgg7yz").build());
+		System.out.println(balance.getBalances(0).getAmount());
+		byte[] privateKey = Hex.decode("68f4f58ce703f1e998c395086bf77a59f7fff07232ca1cc831a20926ab93c014");
+		System.out.println("privateKeyHex from send: " + getPrivateKeyHex());
+		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+		
+		SignUtil gaiaApiService = new SignUtil("https://127.0.0.1", "unigrid-devnet-1", "ugd");
+		
+		System.out.println("address:" + credentials.getAddress());
+		List<SendInfo> sendList = new ArrayList<>();
+		SendInfo sendMsg1 = SendInfo.builder()
+			.credentials(credentials)
+			.toAddress("unigrid16q4lc749jz7eewg2rxlcjhs0sqfrre8gj0zjtk")
+			.amountInAtom(new BigDecimal("3"))
+			.build();
+		sendList.add(sendMsg1);
 
-			// Step 4: Serialize TxBody and AuthInfo for signing
-			byte[] txBodyBytes = txBody.toByteArray();
-			byte[] authInfoBytes = authInfo.toByteArray();
-			String chainId = "unigrid-devnet-1"; // Update with your chain ID
+		SendInfo sendMsg2 = SendInfo.builder()
+			.credentials(credentials)
+			.toAddress("unigrid16q4lc749jz7eewg2rxlcjhs0sqfrre8gj0zjtk")
+			.amountInAtom(new BigDecimal("2"))
+			.build();
+		sendList.add(sendMsg2);
 
-			// Step 5: Prepare signing input
-			byte[] signingInput = prepareSigningInput(txBodyBytes, authInfoBytes, chainId, accountNumber, sequence);
+		Abci.TxResponse txResponse = gaiaApiService.sendMultiTx(credentials, sendList, new BigDecimal("0.000001"), 200000);
+		System.out.println(txResponse);
 
-			// Step 6: Sign the transaction
-			//String privateKeyHex = getPrivateKeyHex(); // Ensure this fetches the hex private key correctly
-			byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
-
-			// Step 7: Construct the signed transaction
-			Tx signedTx = Tx.newBuilder()
-				.setBody(txBody)
-				.setAuthInfo(authInfo)
-				.addSignatures(ByteString.copyFrom(signature))
-				.build();
-
-			// Step 8: Broadcast the transaction
-			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
-				.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
-				.setMode(BroadcastMode.BROADCAST_MODE_ASYNC) // Choose the appropriate mode based on your need
-				.build();
-
-			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
-			BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
-
-			// Handle the response
-			System.out.println("BroadcastTxResponse: " + broadcastResponse.toString());
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Error sending tokens: " + e.getMessage());
-		}
+//		Account selectedAccount = accountsData.getSelectedAccount();
+		//		try {
+		//			// Step 1: Create the MsgSend request
+		//			MsgSend msgSend = MsgSend.newBuilder()
+		//				.setFromAddress(selectedAccount.getAddress())
+		//				.setToAddress(toAddress.getText())
+		//				.addAmount(Coin.newBuilder().setAmount(sendAmount.getText()).setDenom("ugd").build())
+		//				.build();
+		//
+		//			System.out.println("SENDING TOKENS: from-> " + selectedAccount.getAddress()
+		//				+ " to-> " + toAddress.getText()
+		//				+ " amount: " + sendAmount.getText());
+		//			// Step 2: Wrap in a transaction body (TxBody)
+		//			Any anyMsgSend = Any.newBuilder()
+		//				.setTypeUrl("/cosmos.bank.v1beta1.MsgSend") // Set type_url manually
+		//				.setValue(msgSend.toByteString()) // Set the serialized message
+		//				.build();
+		//			TxBody txBody = TxBody.newBuilder().addMessages(anyMsgSend).build();
+		//
+		//			// Step 3: Create AuthInfo with signer info and fee
+		//			long sequence = getSequence(selectedAccount.getAddress());
+		//			long accountNumber = getAccountNumber(selectedAccount.getAddress());
+		//			AuthInfo authInfo = createAuthInfo(selectedAccount.getPublicKey(), sequence); // Ensure createAuthInfo is adapted for token sending
+		//
+		//			// Step 4: Serialize TxBody and AuthInfo for signing
+		//			byte[] txBodyBytes = txBody.toByteArray();
+		//			byte[] authInfoBytes = authInfo.toByteArray();
+		//			String chainId = "unigrid-devnet-1"; // Update with your chain ID
+		//
+		//			// Step 5: Prepare signing input
+		//			byte[] signingInput = prepareSigningInput(txBodyBytes, authInfoBytes, chainId, accountNumber, sequence);
+		//
+		//			// Step 6: Sign the transaction
+		//			//String privateKeyHex = getPrivateKeyHex(); // Ensure this fetches the hex private key correctly
+		//			byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
+		//
+		//			// Step 7: Construct the signed transaction
+		//			Tx signedTx = Tx.newBuilder()
+		//				.setBody(txBody)
+		//				.setAuthInfo(authInfo)
+		//				.addSignatures(ByteString.copyFrom(signature))
+		//				.build();
+		//
+		//			// Step 8: Broadcast the transaction
+		//			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
+		//				.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
+		//				.setMode(BroadcastMode.BROADCAST_MODE_ASYNC) // Choose the appropriate mode based on your need
+		//				.build();
+		//
+		//			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+		//			BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
+		//
+		//			// Handle the response
+		//			System.out.println("BroadcastTxResponse: " + broadcastResponse.toString());
+		//
+		//		} catch (Exception e) {
+		//			e.printStackTrace();
+		//			System.out.println("Error sending tokens: " + e.getMessage());
+		//		}
 	}
 
 	private void handleTabRequest(@Observes TabRequestSignal request) {

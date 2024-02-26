@@ -1,769 +1,877 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>org.unigrid.janus</groupId>
-    <artifactId>fx</artifactId>
-    <packaging>jar</packaging>
-    <name>Unigrid Janus FX Frontend</name>
-    <parent>
-        <groupId>org.unigrid.janus</groupId>
-        <artifactId>parent</artifactId>
-        <version>1.0.12</version>
-    </parent>
-    <version>1.0.20</version>
-    <properties>
-        <mainClass>org.unigrid.janus.Janus</mainClass>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <release.tag>1.0.20</release.tag>
-        <current.tag>1.0.20</current.tag>
-        <config.opens> fx=jakarta.xml.bind/jakarta.xml.bind-api@jakarta.xml.bind fx=org.eclipse/yasson@org.eclipse.yasson
-        </config.opens>
-        <config.exports>
-            <!--fx=jakarta.json/jakarta.json-api fx=com.fasterxml.jackson.core/jackson-core-->
-            <!--org.glassfish.java.json=jakarta.json/jakarta.json.spi-->
-            <!--jakarta.json=org.glassfish.java.json/org.glassfish.json-->
-            <!--org.glassfish.json=jakarta.json/jakarta.json-api-->
-            <!--org.glassfish.json=jakarta.json.bind/jakarta.json.bind-api--> jakarta.json=org.glassfish/jakarta.json@org.glassfish.json
-        </config.exports>
-        <maven.test.skip>true</maven.test.skip>
-    </properties>
-    <dependencies>
-        <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.55</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>17-ea+7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>17-ea+7</version>
-        </dependency>
-        <!--<dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId>
-            <version>17-ea+7</version>
-        </dependency>-->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>17-ea+7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-media</artifactId>
-            <version>17-ea+7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.8.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-configuration2</artifactId>
-            <version>2.7</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.9.4</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>3.0.2</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.fastinfoset</groupId>
-            <artifactId>FastInfoset</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.kordamp.jipsy</groupId>
-            <artifactId>jipsy-annotations</artifactId>
-            <version>1.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.update4j</groupId>
-            <artifactId>update4j</artifactId>
-            <version>1.5.9</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna-platform</artifactId>
-            <version>5.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>3.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.inject</groupId>
-            <artifactId>jersey-hk2</artifactId>
-            <version>3.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-json-binding</artifactId>
-            <version>3.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-common</artifactId>
-            <version>3.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.weld.se</groupId>
-            <artifactId>weld-se-core</artifactId>
-            <version>4.0.3.Final</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.eclipse/yasson-->
-        <dependency>
-            <groupId>org.eclipse</groupId>
-            <artifactId>yasson</artifactId>
-            <version>2.0.0-M1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.kordamp.ikonli</groupId>
-            <artifactId>ikonli-javafx</artifactId>
-            <version>12.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.kordamp.ikonli</groupId>
-            <artifactId>ikonli-fontawesome5-pack</artifactId>
-            <version>12.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.controlsfx</groupId>
-            <artifactId>controlsfx</artifactId>
-            <version>11.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.13.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.tngtech.archunit</groupId>
-            <artifactId>archunit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-jaxb</artifactId>
-            <version>3.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.evolvedbinary.j8fu</groupId>
-            <artifactId>j8fu</artifactId>
-            <version>1.23.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testfx</groupId>
-            <artifactId>testfx-core</artifactId>
-            <version>4.0.16-alpha</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testfx</groupId>
-            <artifactId>openjfx-monocle</artifactId>
-            <version>jdk-12.0.1+2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <version>1.49</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.jqwik</groupId>
-            <artifactId>jqwik</artifactId>
-            <version>1.6.5</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <version>4.2.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.3.0-alpha16</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.0-alpha7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bitcoinj</groupId>
-            <artifactId>bitcoinj-core</artifactId>
-            <version>0.16.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcprov-jdk15on</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.protobuf</groupId>
-                    <artifactId>protobuf-javalite</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.70</version>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20210307</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty</artifactId>
-            <version>1.60.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-protobuf</artifactId>
-            <version>1.60.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-stub</artifactId>
-            <version>1.60.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-services</artifactId>
-            <version>1.60.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.0.9.Final</version>
-        </dependency> 
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>3.21.7</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java-util</artifactId>
-            <version>3.21.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.web3j</groupId>
-            <artifactId>crypto</artifactId>
-            <version>5.0.0</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.13.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.9.3</version>
-        </dependency>
+	 xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.unigrid.janus</groupId>
+	<artifactId>fx</artifactId>
+	<packaging>jar</packaging>
+	<name>Unigrid Janus FX Frontend</name>
+	<parent>
+		<groupId>org.unigrid.janus</groupId>
+		<artifactId>parent</artifactId>
+		<version>1.0.12</version>
+	</parent>
+	<version>1.0.20</version>
+	<properties>
+		<mainClass>org.unigrid.janus.Janus</mainClass>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<release.tag>1.0.20</release.tag>
+		<current.tag>1.0.20</current.tag>
+		<config.opens> fx=jakarta.xml.bind/jakarta.xml.bind-api@jakarta.xml.bind fx=org.eclipse/yasson@org.eclipse.yasson
+		</config.opens>
+		<config.exports>
+			<!--fx=jakarta.json/jakarta.json-api fx=com.fasterxml.jackson.core/jackson-core-->
+			<!--org.glassfish.java.json=jakarta.json/jakarta.json.spi-->
+			<!--jakarta.json=org.glassfish.java.json/org.glassfish.json-->
+			<!--org.glassfish.json=jakarta.json/jakarta.json-api-->
+			<!--org.glassfish.json=jakarta.json.bind/jakarta.json.bind-api--> jakarta.json=org.glassfish/jakarta.json@org.glassfish.json
+		</config.exports>
+		<maven.test.skip>true</maven.test.skip>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.55</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>17-ea+7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<version>17-ea+7</version>
+		</dependency>
+		<!--<dependency>
+		    <groupId>org.openjfx</groupId>
+		    <artifactId>javafx-swing</artifactId>
+		    <version>17-ea+7</version>
+		</dependency>-->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-fxml</artifactId>
+			<version>17-ea+7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-media</artifactId>
+			<version>17-ea+7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-configuration2</artifactId>
+			<version>2.7</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.4</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>3.0.2</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.fastinfoset</groupId>
+			<artifactId>FastInfoset</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.kordamp.jipsy</groupId>
+			<artifactId>jipsy-annotations</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.update4j</groupId>
+			<artifactId>update4j</artifactId>
+			<version>1.5.9</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna-platform</artifactId>
+			<version>5.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-binding</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-common</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.weld.se</groupId>
+			<artifactId>weld-se-core</artifactId>
+			<version>4.0.3.Final</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse/yasson-->
+		<dependency>
+			<groupId>org.eclipse</groupId>
+			<artifactId>yasson</artifactId>
+			<version>2.0.0-M1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.kordamp.ikonli</groupId>
+			<artifactId>ikonli-javafx</artifactId>
+			<version>12.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.kordamp.ikonli</groupId>
+			<artifactId>ikonli-fontawesome5-pack</artifactId>
+			<version>12.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.controlsfx</groupId>
+			<artifactId>controlsfx</artifactId>
+			<version>11.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.13.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.13.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-jaxb</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.evolvedbinary.j8fu</groupId>
+			<artifactId>j8fu</artifactId>
+			<version>1.23.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testfx</groupId>
+			<artifactId>testfx-core</artifactId>
+			<version>4.0.16-alpha</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testfx</groupId>
+			<artifactId>openjfx-monocle</artifactId>
+			<version>jdk-12.0.1+2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmockit</groupId>
+			<artifactId>jmockit</artifactId>
+			<version>1.49</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.jqwik</groupId>
+			<artifactId>jqwik</artifactId>
+			<version>1.6.5</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>4.2.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.3.0-alpha16</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>2.0.0-alpha7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bitcoinj</groupId>
+			<artifactId>bitcoinj-core</artifactId>
+			<version>0.16.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcprov-jdk15on</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.protobuf</groupId>
+					<artifactId>protobuf-javalite</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.70</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20210307</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-netty</artifactId>
+			<version>1.60.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-protobuf</artifactId>
+			<version>1.60.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-stub</artifactId>
+			<version>1.60.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-services</artifactId>
+			<version>1.60.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>4.0.9.Final</version>
+		</dependency> 
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>3.21.7</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java-util</artifactId>
+			<version>3.21.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.web3j</groupId>
+			<artifactId>crypto</artifactId>
+			<version>5.0.0</version>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.13.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.4</version>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.9.3</version>
+		</dependency>
 
         
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.16.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.api.grpc</groupId>
-            <artifactId>proto-google-common-protos</artifactId>
-            <version>2.30.0</version>
-        </dependency>
-
-        <!--<dependency>
-            <groupId>com.dustinredmond.fxtrayicon</groupId>
-            <artifactId>FXTrayIcon</artifactId>
-            <version>3.3.0</version>
-        </dependency>-->
-    </dependencies>
-    <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.6.2</version>
-            </extension>
-            <extension>
-                <groupId>org.unigrid.janus</groupId>
-                <artifactId>updateconfig</artifactId>
-                <version>1.0-SNAPSHOT</version>
-            </extension>
-        </extensions>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>download-files</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/bank/v1beta1"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/base/v1beta1"/>
-                                <mkdir dir="${project.build.directory}/proto/amino"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/query/v1"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/crypto/multisig/v1beta1"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/tx/signing/v1beta1"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos_proto"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/msg/v1"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/base/query/v1beta1"/>
-                                <mkdir dir="${project.build.directory}/proto/pax/gridnode"/>	
-                                <mkdir dir="${project.build.directory}/proto/gogoproto"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/staking/v1beta1"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/tx/v1beta1"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/base/abci/v1beta1"/>
-                                <mkdir dir="${project.build.directory}/proto/tendermint/crypto"/>
-                                <mkdir dir="${project.build.directory}/proto/tendermint/types"/>
-                                <mkdir dir="${project.build.directory}/proto/tendermint/abci"/>
-                                <mkdir dir="${project.build.directory}/proto/tendermint/version"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/crypto/secp256k1"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/auth/v1beta1"/>
-                                <mkdir dir="${project.build.directory}/proto/cosmos/vesting/v1beta1"/>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.16.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.api.grpc</groupId>
+			<artifactId>proto-google-common-protos</artifactId>
+			<version>2.30.0</version>
+		</dependency>
+	
+		<!--<dependency>
+		    <groupId>com.dustinredmond.fxtrayicon</groupId>
+		    <artifactId>FXTrayIcon</artifactId>
+		    <version>3.3.0</version>
+		</dependency>-->
+	</dependencies>
+	<build>
+		<extensions>
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>1.6.2</version>
+			</extension>
+			<extension>
+				<groupId>org.unigrid.janus</groupId>
+				<artifactId>updateconfig</artifactId>
+				<version>1.0-SNAPSHOT</version>
+			</extension>
+		</extensions>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>download-files</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<mkdir dir="${project.build.directory}/proto/cosmos/bank/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/base/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/amino"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/query/v1"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/crypto/multisig/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/tx/signing/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos_proto"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/msg/v1"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/base/query/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/pax/gridnode"/>	
+								<mkdir dir="${project.build.directory}/proto/gogoproto"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/staking/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/tx/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/base/abci/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/tendermint/crypto"/>
+								<mkdir dir="${project.build.directory}/proto/tendermint/types"/>
+								<mkdir dir="${project.build.directory}/proto/tendermint/abci"/>
+								<mkdir dir="${project.build.directory}/proto/tendermint/version"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/crypto/secp256k1"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/auth/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/vesting/v1beta1"/>
+								<mkdir dir="${project.build.directory}/proto/ibc/core/client/v1/"/>
+								<mkdir dir="${project.build.directory}/proto/ibc/lightclients/solomachine/v1/"/>
+								<mkdir dir="${project.build.directory}/proto/ibc/applications/transfer/v1/"/>
+								<mkdir dir="${project.build.directory}/proto/ibc/core/channel/v1/"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/distribution/v1beta1/"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/tx/v1beta1/"/>
+								<mkdir dir="${project.build.directory}/proto/ibc/lightclients/tendermint/v1/"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/gov/v1beta1/"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/crypto/multisig/"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/upgrade/v1beta1/"/>
+								<mkdir dir="${project.build.directory}/proto/ibc/core/connection/v1/"/>
+								<mkdir dir="${project.build.directory}/proto/ibc/core/commitment/v1/"/>
+								<mkdir dir="${project.build.directory}/proto/cosmos/gov/v1beta1/"/>
 								
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/bank/v1beta1/query.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/bank/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/bank/v1beta1/bank.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/bank/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/amino/amino.proto"
-                                                                     dest="${project.build.directory}/proto/amino"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/base/v1beta1/coin.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/base/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/query/v1/query.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/query/v1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
+								
+								
+							
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/core/client/v1/tx.proto"
+								     dest="${project.build.directory}/proto/ibc/core/client/v1/"
+								     verbose="false"
+								     usetimestamp="true"/>	
+									
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/cosmos/distribution/v1beta1/tx.proto"
+								     dest="${project.build.directory}/proto/cosmos/distribution/v1beta1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+									
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/cosmos/gov/v1beta1/gov.proto"
+								     dest="${project.build.directory}/proto/cosmos/gov/v1beta1/"
+								     verbose="false"
+								     usetimestamp="true"/>	
+							
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/proofs.proto"
+								     dest="${project.build.directory}/proto/"
+								     verbose="false"
+								     usetimestamp="true"/>	
+								
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/core/commitment/v1/commitment.proto"
+								     dest="${project.build.directory}/proto/ibc/core/commitment/v1/"
+								     verbose="false"
+								     usetimestamp="true"/>	
+								
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/core/connection/v1/connection.proto"
+								     dest="${project.build.directory}/proto/ibc/core/connection/v1/"
+								     verbose="false"
+								     usetimestamp="true"/>	
+								
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/core/channel/v1/channel.proto"
+								     dest="${project.build.directory}/proto/ibc/core/channel/v1"
+								     verbose="false"
+								     usetimestamp="true"/>
+																	
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/cosmos/upgrade/v1beta1/upgrade.proto"
+								     dest="${project.build.directory}/proto/cosmos/upgrade/v1beta1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+							
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/cosmos/crypto/multisig/keys.proto"
+								     dest="${project.build.directory}/proto/cosmos/crypto/multisig/"
+								     verbose="false"
+								     usetimestamp="true"/>
+							
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/cosmos/gov/v1beta1/tx.proto"
+								     dest="${project.build.directory}/proto/cosmos/gov/v1beta1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+							
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/lightclients/tendermint/v1/tendermint.proto"
+								     dest="${project.build.directory}/proto/ibc/lightclients/tendermint/v1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+							
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/cosmos/distribution/v1beta1/Tx.java"
+								     dest="${project.build.directory}/proto/cosmos/tx/v1beta1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+								
+								
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/core/client/v1/query.proto"
+								     dest="${project.build.directory}/proto/ibc/core/client/v1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+								
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/core/client/v1/genesis.proto"
+								     dest="${project.build.directory}/proto/ibc/core/client/v1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+								
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/applications/transfer/v1/tx.proto"
+								     dest="${project.build.directory}/proto/ibc/applications/transfer/v1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+								
+								
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/core/channel/v1/tx.proto"
+								     dest="${project.build.directory}/proto/ibc/core/channel/v1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+							
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/lightclients/solomachine/v1/solomachine.proto"
+								     dest="${project.build.directory}/proto/ibc/lightclients/solomachine/v1"
+								     verbose="false"
+								     usetimestamp="true"/>
+								
+							<get src="https://raw.githubusercontent.com/cloverzrg/cosmos-sdk-java/main/src/main/java/proto/ibc/core/client/v1/client.proto"
+								     dest="${project.build.directory}/proto/ibc/core/client/v1/"
+								     verbose="false"
+								     usetimestamp="true"/>
+								
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/bank/v1beta1/query.proto"
+								     dest="${project.build.directory}/proto/cosmos/bank/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/bank/v1beta1/bank.proto"
+								     dest="${project.build.directory}/proto/cosmos/bank/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/amino/amino.proto"
+								     dest="${project.build.directory}/proto/amino"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/base/v1beta1/coin.proto"
+								     dest="${project.build.directory}/proto/cosmos/base/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/query/v1/query.proto"
+								     dest="${project.build.directory}/proto/cosmos/query/v1"
+								     verbose="false"
+								     usetimestamp="true"/>
                                
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/crypto/multisig/v1beta1/multisig.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/crypto/multisig/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/base/v1beta1/coin.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/base/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/tx/signing/v1beta1/signing.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/tx/signing/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-proto/main/proto/cosmos_proto/cosmos.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos_proto"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/msg/v1/msg.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/msg/v1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/base/query/v1beta1/pagination.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/base/query/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/bank/v1beta1/tx.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/bank/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/unigrid-project/cosmos-gridnode/master/proto/pax/gridnode/tx.proto"
-                                                                     dest="${project.build.directory}/proto/pax/gridnode"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/unigrid-project/cosmos-gridnode/master/proto/pax/gridnode/query.proto"
-                                                                     dest="${project.build.directory}/proto/pax/gridnode"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/unigrid-project/cosmos-gridnode/master/proto/pax/gridnode/params.proto"
-                                                                     dest="${project.build.directory}/proto/pax/gridnode"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/gogoproto/main/gogoproto/gogo.proto"
-                                                                     dest="${project.build.directory}/proto/gogoproto"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>								
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/staking/v1beta1/staking.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/staking/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/tx/v1beta1/tx.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/tx/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/tx/v1beta1/service.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/tx/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/base/abci/v1beta1/abci.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/base/abci/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/crypto/keys.proto"
-                                                                     dest="${project.build.directory}/proto/tendermint/crypto"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/crypto/proof.proto"
-                                                                     dest="${project.build.directory}/proto/tendermint/crypto"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/params.proto"
-                                                                     dest="${project.build.directory}/proto/tendermint/types"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/validator.proto"
-                                                                     dest="${project.build.directory}/proto/tendermint/types"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/abci/types.proto"
-                                                                     dest="${project.build.directory}/proto/tendermint/abci"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/block.proto"
-                                                                     dest="${project.build.directory}/proto/tendermint/types"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/types.proto"
-                                                                     dest="${project.build.directory}/proto/tendermint/types"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/version/types.proto"
-                                                                     dest="${project.build.directory}/proto/tendermint/version"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/evidence.proto"
-                                                                     dest="${project.build.directory}/proto/tendermint/types"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/staking/v1beta1/tx.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/staking/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/staking/v1beta1/staking.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/staking/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/crypto/secp256k1/keys.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/crypto/secp256k1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/auth/v1beta1/auth.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/auth/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/auth/v1beta1/query.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/auth/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/staking/v1beta1/query.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/staking/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
-                                <get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/vesting/v1beta1/vesting.proto"
-                                                                     dest="${project.build.directory}/proto/cosmos/vesting/v1beta1"
-                                                                     verbose="false"
-                                                                     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/crypto/multisig/v1beta1/multisig.proto"
+								     dest="${project.build.directory}/proto/cosmos/crypto/multisig/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/base/v1beta1/coin.proto"
+								     dest="${project.build.directory}/proto/cosmos/base/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/tx/signing/v1beta1/signing.proto"
+								     dest="${project.build.directory}/proto/cosmos/tx/signing/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-proto/main/proto/cosmos_proto/cosmos.proto"
+								     dest="${project.build.directory}/proto/cosmos_proto"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/msg/v1/msg.proto"
+								     dest="${project.build.directory}/proto/cosmos/msg/v1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/base/query/v1beta1/pagination.proto"
+								     dest="${project.build.directory}/proto/cosmos/base/query/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/bank/v1beta1/tx.proto"
+								     dest="${project.build.directory}/proto/cosmos/bank/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/unigrid-project/cosmos-gridnode/master/proto/pax/gridnode/tx.proto"
+								     dest="${project.build.directory}/proto/pax/gridnode"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/unigrid-project/cosmos-gridnode/master/proto/pax/gridnode/query.proto"
+								     dest="${project.build.directory}/proto/pax/gridnode"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/unigrid-project/cosmos-gridnode/master/proto/pax/gridnode/params.proto"
+								     dest="${project.build.directory}/proto/pax/gridnode"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/gogoproto/main/gogoproto/gogo.proto"
+								     dest="${project.build.directory}/proto/gogoproto"
+								     verbose="false"
+								     usetimestamp="true"/>								
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/staking/v1beta1/staking.proto"
+								     dest="${project.build.directory}/proto/cosmos/staking/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/tx/v1beta1/tx.proto"
+								     dest="${project.build.directory}/proto/cosmos/tx/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/tx/v1beta1/service.proto"
+								     dest="${project.build.directory}/proto/cosmos/tx/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/base/abci/v1beta1/abci.proto"
+								     dest="${project.build.directory}/proto/cosmos/base/abci/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/crypto/keys.proto"
+								     dest="${project.build.directory}/proto/tendermint/crypto"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/crypto/proof.proto"
+								     dest="${project.build.directory}/proto/tendermint/crypto"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/params.proto"
+								     dest="${project.build.directory}/proto/tendermint/types"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/validator.proto"
+								     dest="${project.build.directory}/proto/tendermint/types"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/abci/types.proto"
+								     dest="${project.build.directory}/proto/tendermint/abci"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/block.proto"
+								     dest="${project.build.directory}/proto/tendermint/types"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/types.proto"
+								     dest="${project.build.directory}/proto/tendermint/types"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/version/types.proto"
+								     dest="${project.build.directory}/proto/tendermint/version"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cometbft/cometbft/main/proto/tendermint/types/evidence.proto"
+								     dest="${project.build.directory}/proto/tendermint/types"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/staking/v1beta1/tx.proto"
+								     dest="${project.build.directory}/proto/cosmos/staking/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/staking/v1beta1/staking.proto"
+								     dest="${project.build.directory}/proto/cosmos/staking/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/crypto/secp256k1/keys.proto"
+								     dest="${project.build.directory}/proto/cosmos/crypto/secp256k1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/auth/v1beta1/auth.proto"
+								     dest="${project.build.directory}/proto/cosmos/auth/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/auth/v1beta1/query.proto"
+								     dest="${project.build.directory}/proto/cosmos/auth/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/staking/v1beta1/query.proto"
+								     dest="${project.build.directory}/proto/cosmos/staking/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
+							<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/vesting/v1beta1/vesting.proto"
+								     dest="${project.build.directory}/proto/cosmos/vesting/v1beta1"
+								     verbose="false"
+								     usetimestamp="true"/>
 
 								
-                            </target>
-                        </configuration>
+						</target>
+						</configuration>
 
 
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <executions>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>0.6.1</version>
+				<executions>
                     
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
-                        </goals>
-                    </execution>
+					<execution>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>compile</goal>
+							<goal>compile-custom</goal>
+						</goals>
+					</execution>
                     
-                </executions>
-                <configuration>
-                    <protoSourceRoot>${project.build.directory}/proto</protoSourceRoot>
-                    <protocArtifact>com.google.protobuf:protoc:3.21.7:exe:${os.detected.classifier}</protocArtifact>
-                    <pluginId>java.grpc</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.60.0:exe:${os.detected.classifier}</pluginArtifact>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>io.github.floverfelt</groupId>
-                <artifactId>find-and-replace-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>exec-protobuf</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>target/proto/gogoproto/</baseDir>
-                            <findRegex>com\.google\.protobuf</findRegex>
-                            <replaceValue>idiots.google.protobuf</replaceValue>
-                            <recursive>true</recursive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>exec</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>find-and-replace</goal>
-                        </goals>
-                        <configuration>
-                            <replacementType>file-contents</replacementType>
-                            <baseDir>target/generated-sources/protobuf/</baseDir>
-                            <findRegex>javax</findRegex>
-                            <replaceValue>jakarta</replaceValue>
-                            <recursive>true</recursive>
-                            <fileMask>.java</fileMask>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.5.0</version>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/protobuf/java</source>
-                                <source>${project.build.directory}/generated-sources/protobuf/java.grpc</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+				</executions>
+				<configuration>
+					<protoSourceRoot>${project.build.directory}/proto</protoSourceRoot>
+					<protocArtifact>com.google.protobuf:protoc:3.21.7:exe:${os.detected.classifier}</protocArtifact>
+					<pluginId>java.grpc</pluginId>
+					<pluginArtifact>io.grpc:protoc-gen-grpc-java:1.60.0:exe:${os.detected.classifier}</pluginArtifact>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>io.github.floverfelt</groupId>
+				<artifactId>find-and-replace-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>exec-protobuf</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>find-and-replace</goal>
+						</goals>
+						<configuration>
+							<replacementType>file-contents</replacementType>
+							<baseDir>target/proto/gogoproto/</baseDir>
+							<findRegex>com\.google\.protobuf</findRegex>
+							<replaceValue>idiots.google.protobuf</replaceValue>
+							<recursive>true</recursive>
+						</configuration>
+					</execution>
+					<execution>
+						<id>exec</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>find-and-replace</goal>
+						</goals>
+						<configuration>
+							<replacementType>file-contents</replacementType>
+							<baseDir>target/generated-sources/protobuf/</baseDir>
+							<findRegex>javax</findRegex>
+							<replaceValue>jakarta</replaceValue>
+							<recursive>true</recursive>
+							<fileMask>.java</fileMask>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/protobuf/java</source>
+								<source>${project.build.directory}/generated-sources/protobuf/java.grpc</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
             
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <!-- <plugin>
-                    <groupId>org.xolstice.maven.plugins</groupId>
-                    <artifactId>protobuf-maven-plugin</artifactId>
-                    <version>0.6.1</version>
-                    <configuration>
-                            <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
-                            <includeDirectories>
-                                    <include>${user.home}/go/pkg/mod/github.com/cosmos/cosmos-sdk@v0.47.4/proto</include>
-                                    <include>${user.home}/go/pkg/mod/github.com/cosmos/cosmos-proto@v1.0.0-beta.2/proto</include>
-                            </includeDirectories>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                    </configuration>
-                    <executions>
-                            <execution>
-                                    <goals>
-                                            <goal>compile</goal>
-                                            <goal>test-compile</goal>
-                                    </goals>
-                            </execution>
-                    </executions>
-            </plugin> -->
-            <!-- Uncomment tentackle to build module jars for fx to make a new config.xml for update.
-            Comment to speed up the build process for testing -->
-            <!--<plugin>
-                    <groupId>org.tentackle</groupId>
-                    <artifactId>tentackle-jlink-maven-plugin</artifactId>
-                    <configuration>
-                            <mainClass>${mainClass}</mainClass>
-                            <stripDebug>true</stripDebug>
-                            <excludeModules>jdk.jfr</excludeModules>
-                    </configuration>
-                    <executions>
-                            <execution>
-                                    <phase>package</phase>
-                                    <goals>
-                                            <goal>jpackage</goal>
-                                    </goals>
-                            </execution>
-                    </executions>
-            </plugin>-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <configuration>
-                    <configLocation>checkstyle.xml</configLocation>
-                    <skip>true</skip>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    <sourceDirectories>
-                        <sourceDirectory>src/main/java</sourceDirectory>
-                    </sourceDirectories>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>pl.gdela</groupId>
-                <artifactId>socomo-maven</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <reuseForks>false</reuseForks>
-                    <argLine>
-                        -javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar -Dcoverage-classes=loaded
-                        --add-modules org.update4j
-                        --add-opens fx/org.unigrid.janus.controller=ALL-UNNAMED
-                        --add-opens fx/org.unigrid.janus.controller.component=ALL-UNNAMED
-                        --add-opens fx/org.unigrid.janus.model=ALL-UNNAMED
-                        --add-opens fx/org.unigrid.janus.model.producer=ALL-UNNAMED
-                        --add-opens fx/org.unigrid.janus.model.service=ALL-UNNAMED
-                        --add-opens fx/org.unigrid.janus.view=ALL-UNNAMED
-                        --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
-                        --add-opens fx/org.unigrid.janus.model.entity=jersey.media.jaxb
-                        --add-opens fx/org.unigrid.janus.model=jersey.media.jaxb
-                        --add-opens fx/org.unigrid.janus.model=jakarta.ws.rs
-                        --add-opens fx/org.unigrid.janus.model.entity=jakarta.ws.rs
-                        --add-opens fx/org.unigrid.janus.model.entity=jakarta.xml.bind
-                        --add-opens fx/org.unigrid.janus.model=jakarta.xml.bind
-                        --add-opens fx/org.unigrid.janus.model=jersey-client
-                        --add-opens fx/org.unigrid.janus.model.entity=jersey-client
-                        --add-opens fx/org.unigrid.janus.view.backing=weld.core.impl
-                        --add-exports fx/org.unigrid.janus.cdi=ALL-UNNAMED
-                        --add-exports fx/org.unigrid.janus.controller.component=ALL-UNNAMED
-                        --add-exports fx/org.unigrid.janus.model=ALL-UNNAMED
-                        --add-exports fx/org.unigrid.janus.model.producer=ALL-UNNAMED
-                        --add-exports fx/org.unigrid.janus.model.service=ALL-UNNAMED
-                        --add-exports fx/org.unigrid.janus.view.backing=ALL-UNNAMED
-                        --add-exports fx/org.unigrid.janus.model.service.external=jersey.client
-                        --add-exports fx/org.unigrid.janus.model.service.external=javafx.graphics
-                        --add-exports fx/org.unigrid.janus.model.external=jersey.common
-                        --add-exports fx/org.unigrid.janus.model.external=org.update4j
-                        --add-exports fx/org.unigrid.janus.model.external=ALL-UNNAMED
-                        --add-exports fx/org.unigrid.janus.jqwik=ALL-UNNAMED
-                        --add-exports fx/org.unigrid.janus.jqwik.fx=ALL-UNNAMED
-                        --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
-                        --add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
-                        --add-exports javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED
-                        --add-reads org.update4j=fx
-                        --add-reads javafx.graphics=fx
-                    </argLine>
-                    <systemPropertyVariables>
-                        <glass.platform>Monocle</glass.platform>
-                        <monocle.platform>Headless</monocle.platform>
-                        <prism.order>sw</prism.order>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.16.0</version>
-                <configuration>
-                    <includeTests>true</includeTests>
-                    <targetJdk>17</targetJdk>
-                    <rulesets>
-                        <ruleset>${project.basedir}/pmd.xml</ruleset>
-                    </rulesets>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
-    <repositories>
-        <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/unigrid-project/cosmos-sdk-java</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<!-- <plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>0.6.1</version>
+				<configuration>
+					<protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
+					<includeDirectories>
+						<include>${user.home}/go/pkg/mod/github.com/cosmos/cosmos-sdk@v0.47.4/proto</include>
+						<include>${user.home}/go/pkg/mod/github.com/cosmos/cosmos-proto@v1.0.0-beta.2/proto</include>
+					</includeDirectories>
+					<outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>test-compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin> -->
+			<!-- Uncomment tentackle to build module jars for fx to make a new config.xml for update.
+			Comment to speed up the build process for testing -->
+			<!--<plugin>
+				<groupId>org.tentackle</groupId>
+				<artifactId>tentackle-jlink-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>${mainClass}</mainClass>
+					<stripDebug>true</stripDebug>
+					<excludeModules>jdk.jfr</excludeModules>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jpackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>checkstyle.xml</configLocation>
+					<skip>true</skip>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
+					<sourceDirectories>
+						<sourceDirectory>src/main/java</sourceDirectory>
+					</sourceDirectories>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>pl.gdela</groupId>
+				<artifactId>socomo-maven</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<reuseForks>false</reuseForks>
+					<argLine>
+						-javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar -Dcoverage-classes=loaded
+						--add-modules org.update4j
+						--add-opens fx/org.unigrid.janus.controller=ALL-UNNAMED
+						--add-opens fx/org.unigrid.janus.controller.component=ALL-UNNAMED
+						--add-opens fx/org.unigrid.janus.model=ALL-UNNAMED
+						--add-opens fx/org.unigrid.janus.model.producer=ALL-UNNAMED
+						--add-opens fx/org.unigrid.janus.model.service=ALL-UNNAMED
+						--add-opens fx/org.unigrid.janus.view=ALL-UNNAMED
+						--add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
+						--add-opens fx/org.unigrid.janus.model.entity=jersey.media.jaxb
+						--add-opens fx/org.unigrid.janus.model=jersey.media.jaxb
+						--add-opens fx/org.unigrid.janus.model=jakarta.ws.rs
+						--add-opens fx/org.unigrid.janus.model.entity=jakarta.ws.rs
+						--add-opens fx/org.unigrid.janus.model.entity=jakarta.xml.bind
+						--add-opens fx/org.unigrid.janus.model=jakarta.xml.bind
+						--add-opens fx/org.unigrid.janus.model=jersey-client
+						--add-opens fx/org.unigrid.janus.model.entity=jersey-client
+						--add-opens fx/org.unigrid.janus.view.backing=weld.core.impl
+						--add-exports fx/org.unigrid.janus.cdi=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.controller.component=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.model=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.model.producer=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.model.service=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.view.backing=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.model.service.external=jersey.client
+						--add-exports fx/org.unigrid.janus.model.service.external=javafx.graphics
+						--add-exports fx/org.unigrid.janus.model.external=jersey.common
+						--add-exports fx/org.unigrid.janus.model.external=org.update4j
+						--add-exports fx/org.unigrid.janus.model.external=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.jqwik=ALL-UNNAMED
+						--add-exports fx/org.unigrid.janus.jqwik.fx=ALL-UNNAMED
+						--add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
+						--add-exports javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
+						--add-exports javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED
+						--add-reads org.update4j=fx
+						--add-reads javafx.graphics=fx
+					</argLine>
+					<systemPropertyVariables>
+						<glass.platform>Monocle</glass.platform>
+						<monocle.platform>Headless</monocle.platform>
+						<prism.order>sw</prism.order>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>3.16.0</version>
+				<configuration>
+					<includeTests>true</includeTests>
+					<targetJdk>17</targetJdk>
+					<rulesets>
+						<ruleset>${project.basedir}/pmd.xml</ruleset>
+					</rulesets>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/unigrid-project/cosmos-sdk-java</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 </project>
