@@ -1080,22 +1080,6 @@ public class CosmosController implements Initializable {
 		return Hex.toHexString(sigWithPubKey);
 	}
 
-//    @FXML
-//    private void sendTokens(ActionEvent event) {
-//        try {
-//            String toAddress = this.toAddress.getText();
-//            String sendAmount = this.sendAmount.getText();
-//            String password = "pickles"; // TODO change to user input
-//
-//            String response = "crap";
-//            cosmosClient.sendTokens(toAddress, sendAmount, "ugd", password);
-//
-//            System.out.println("Response: " + response);
-//        } catch (Exception ex) {
-//            Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-//                    ex);
-//        }
-//    }
 	@FXML
 	public void sendTokens() throws Exception {
 
@@ -1104,90 +1088,28 @@ public class CosmosController implements Initializable {
 		// query the balance
 		QueryOuterClass.QueryAllBalancesResponse balance = queryBlockingStub.allBalances(QueryOuterClass.QueryAllBalancesRequest.newBuilder().setAddress("unigrid1y675w05f6t55s4xatlezmpw2jq0ml256fgg7yz").build());
 		System.out.println(balance.getBalances(0).getAmount());
-		byte[] privateKey = Hex.decode("68f4f58ce703f1e998c395086bf77a59f7fff07232ca1cc831a20926ab93c014");
+
+		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+
 		System.out.println("privateKeyHex from send: " + getPrivateKeyHex());
+
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
 		
-		SignUtil gaiaApiService = new SignUtil("https://127.0.0.1", "unigrid-devnet-1", "ugd");
-		
-		System.out.println("address:" + credentials.getAddress());
-		List<SendInfo> sendList = new ArrayList<>();
-		SendInfo sendMsg1 = SendInfo.builder()
-			.credentials(credentials)
-			.toAddress("unigrid16q4lc749jz7eewg2rxlcjhs0sqfrre8gj0zjtk")
-			.amountInAtom(new BigDecimal("3"))
-			.build();
-		sendList.add(sendMsg1);
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = getAccountNumber(selectedAccount.getAddress());
 
-		SendInfo sendMsg2 = SendInfo.builder()
-			.credentials(credentials)
-			.toAddress("unigrid16q4lc749jz7eewg2rxlcjhs0sqfrre8gj0zjtk")
-			.amountInAtom(new BigDecimal("2"))
-			.build();
-		sendList.add(sendMsg2);
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-devnet-1");
 
-		Abci.TxResponse txResponse = gaiaApiService.sendMultiTx(credentials, sendList, new BigDecimal("0.000001"), 200000);
+		SendInfo sendMsg = SendInfo.builder()
+			.credentials(credentials)
+			.toAddress(toAddress.getText())
+			.amountInAtom(new BigDecimal(sendAmount.getText()))
+			.build();
+
+		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
+		System.out.println("RESPONSE");
 		System.out.println(txResponse);
-
-//		Account selectedAccount = accountsData.getSelectedAccount();
-		//		try {
-		//			// Step 1: Create the MsgSend request
-		//			MsgSend msgSend = MsgSend.newBuilder()
-		//				.setFromAddress(selectedAccount.getAddress())
-		//				.setToAddress(toAddress.getText())
-		//				.addAmount(Coin.newBuilder().setAmount(sendAmount.getText()).setDenom("ugd").build())
-		//				.build();
-		//
-		//			System.out.println("SENDING TOKENS: from-> " + selectedAccount.getAddress()
-		//				+ " to-> " + toAddress.getText()
-		//				+ " amount: " + sendAmount.getText());
-		//			// Step 2: Wrap in a transaction body (TxBody)
-		//			Any anyMsgSend = Any.newBuilder()
-		//				.setTypeUrl("/cosmos.bank.v1beta1.MsgSend") // Set type_url manually
-		//				.setValue(msgSend.toByteString()) // Set the serialized message
-		//				.build();
-		//			TxBody txBody = TxBody.newBuilder().addMessages(anyMsgSend).build();
-		//
-		//			// Step 3: Create AuthInfo with signer info and fee
-		//			long sequence = getSequence(selectedAccount.getAddress());
-		//			long accountNumber = getAccountNumber(selectedAccount.getAddress());
-		//			AuthInfo authInfo = createAuthInfo(selectedAccount.getPublicKey(), sequence); // Ensure createAuthInfo is adapted for token sending
-		//
-		//			// Step 4: Serialize TxBody and AuthInfo for signing
-		//			byte[] txBodyBytes = txBody.toByteArray();
-		//			byte[] authInfoBytes = authInfo.toByteArray();
-		//			String chainId = "unigrid-devnet-1"; // Update with your chain ID
-		//
-		//			// Step 5: Prepare signing input
-		//			byte[] signingInput = prepareSigningInput(txBodyBytes, authInfoBytes, chainId, accountNumber, sequence);
-		//
-		//			// Step 6: Sign the transaction
-		//			//String privateKeyHex = getPrivateKeyHex(); // Ensure this fetches the hex private key correctly
-		//			byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
-		//
-		//			// Step 7: Construct the signed transaction
-		//			Tx signedTx = Tx.newBuilder()
-		//				.setBody(txBody)
-		//				.setAuthInfo(authInfo)
-		//				.addSignatures(ByteString.copyFrom(signature))
-		//				.build();
-		//
-		//			// Step 8: Broadcast the transaction
-		//			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
-		//				.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
-		//				.setMode(BroadcastMode.BROADCAST_MODE_ASYNC) // Choose the appropriate mode based on your need
-		//				.build();
-		//
-		//			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
-		//			BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
-		//
-		//			// Handle the response
-		//			System.out.println("BroadcastTxResponse: " + broadcastResponse.toString());
-		//
-		//		} catch (Exception e) {
-		//			e.printStackTrace();
-		//			System.out.println("Error sending tokens: " + e.getMessage());
-		//		}
 	}
 
 	private void handleTabRequest(@Observes TabRequestSignal request) {

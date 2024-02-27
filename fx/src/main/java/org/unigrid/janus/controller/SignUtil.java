@@ -1,60 +1,74 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+	The Janus Wallet
+	Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
+
+	This program is free software: you can redistribute it and/or modify it under the terms of the
+	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
+	of the License (see COPYING and COPYING.addendum).
+
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received an addended copy of the GNU Affero General Public License with this program.
+	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus.controller;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.util.JsonFormat;
 import cosmos.auth.v1beta1.Auth;
-import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountResponse;
 import cosmos.bank.v1beta1.Tx;
 import cosmos.base.abci.v1beta1.Abci;
 import cosmos.base.v1beta1.CoinOuterClass;
 import cosmos.crypto.secp256k1.Keys;
 import cosmos.tx.signing.v1beta1.Signing;
+import cosmos.tx.v1beta1.ServiceGrpc;
 import cosmos.tx.v1beta1.ServiceOuterClass;
 import cosmos.tx.v1beta1.TxOuterClass;
-import io.netty.util.internal.StringUtil;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;
 import org.bitcoinj.core.Sha256Hash;
+import org.unigrid.janus.model.service.GrpcService;
 
+@ApplicationScoped
 public class SignUtil {
-
-	private final GaiaHttpClient client;
-
+	private final GrpcService grpcService;
+	private final long sequence;
+	private final long accountNumber;
 	private final String token;
-
 	private final String chainId;
 
-	public SignUtil(String baseUrl, String token, String chainId) {
-		this.client = new GaiaHttpClient(baseUrl);
+	public SignUtil(GrpcService grpcService, long sequence, long accountNumber, String token, String chainId) {
+		this.grpcService = grpcService;
+		this.sequence = sequence;
+		this.accountNumber = accountNumber;
 		this.token = token;
 		this.chainId = chainId;
 	}
 	
 	private static final JsonFormat.Printer printer = JsonToProtoObjectUtil.getPrinter();
 
-	public Abci.TxResponse sendMultiTx(CosmosCredentials payerCredentials, List<SendInfo> sendList, BigDecimal feeInAtom, long gasLimit) throws Exception {
-		if (sendList == null || sendList.size() == 0) {
-			throw new Exception("sendList is empty");
-		}
+	public Abci.TxResponse sendTx(CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
+				long gasLimit) throws Exception {
 
-		TxOuterClass.Tx tx = getTxRequest(payerCredentials, sendList, feeInAtom, gasLimit);
-
+		TxOuterClass.Tx tx = getTxRequest(payerCredentials, sendMsg, feeInAtom, gasLimit);
+		
+		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+		
 		ServiceOuterClass.BroadcastTxRequest broadcastTxRequest = ServiceOuterClass.BroadcastTxRequest.newBuilder()
 			.setTxBytes(tx.toByteString())
 			.setMode(ServiceOuterClass.BroadcastMode.BROADCAST_MODE_SYNC)
 			.build();
-
-		ServiceOuterClass.BroadcastTxResponse broadcastTxResponse = broadcastTx(broadcastTxRequest);
+		
+		ServiceOuterClass.BroadcastTxResponse broadcastTxResponse = stub.broadcastTx(broadcastTxRequest);
 
 		if (!broadcastTxResponse.hasTxResponse()) {
 			throw new Exception("broadcastTxResponse no body\n" + printer.print(tx));
@@ -66,13 +80,9 @@ public class SignUtil {
 		return txResponse;
 	}
 
-	public ServiceOuterClass.BroadcastTxResponse broadcastTx(ServiceOuterClass.BroadcastTxRequest req) throws Exception {
-		String reqBody = printer.print(req);
-		ServiceOuterClass.BroadcastTxResponse broadcastTxResponse = client.post("/cosmos/tx/v1beta1/txs", reqBody, ServiceOuterClass.BroadcastTxResponse.class);
-		return broadcastTxResponse;
-	}
+	public TxOuterClass.Tx getTxRequest(CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
+			long gasLimit) throws Exception {
 
-	public TxOuterClass.Tx getTxRequest(CosmosCredentials payerCredentials, List<SendInfo> sendList, BigDecimal feeInAtom, long gasLimit) throws Exception {
 		Map<String, Auth.BaseAccount> baseAccountCache = new HashMap<>();
 		TxOuterClass.TxBody.Builder txBodyBuilder = TxOuterClass.TxBody.newBuilder();
 		TxOuterClass.AuthInfo.Builder authInfoBuilder = TxOuterClass.AuthInfo.newBuilder();
@@ -80,27 +90,25 @@ public class SignUtil {
 		TxOuterClass.Tx.Builder txBuilder = TxOuterClass.Tx.newBuilder();
 		Map<String, Boolean> signerInfoExistMap = new HashMap<>();
 		Map<String, Boolean> signaturesExistMap = new HashMap<>();
-		for (SendInfo sendInfo : sendList) {
-			BigInteger sendAmountInMicroAtom = ATOMUnitUtil.atomToMicroAtomBigInteger(sendInfo.getAmountInAtom());
-			CoinOuterClass.Coin sendCoin = CoinOuterClass.Coin.newBuilder()
-				.setAmount(sendAmountInMicroAtom.toString())
-				.setDenom(this.token)
-				.build();
+		
+		BigInteger sendAmountInMicroAtom = ATOMUnitUtil.atomToMicroAtomBigInteger(sendMsg.getAmountInAtom());
+		CoinOuterClass.Coin sendCoin = CoinOuterClass.Coin.newBuilder()
+			.setAmount(sendAmountInMicroAtom.toString())
+			.setDenom(token)
+			.build();
 
-			Tx.MsgSend message = Tx.MsgSend.newBuilder()
-				.setFromAddress(sendInfo.getCredentials().getAddress())
-				.setToAddress(sendInfo.getToAddress())
-				.addAmount(sendCoin)
-				.build();
+		Tx.MsgSend message = Tx.MsgSend.newBuilder()
+			.setFromAddress(sendMsg.getCredentials().getAddress())
+			.setToAddress(sendMsg.getToAddress())
+			.addAmount(sendCoin)
+			.build();
 
-			txBodyBuilder.addMessages(Any.pack(message, "/"));
+		txBodyBuilder.addMessages(Any.pack(message, "/"));
 
-			if (!signerInfoExistMap.containsKey(sendInfo.getCredentials().getAddress())) {
-				authInfoBuilder.addSignerInfos(getSignInfo(sendInfo.getCredentials(), baseAccountCache));
-				signerInfoExistMap.put(sendInfo.getCredentials().getAddress(), true);
-			}
-
-		}
+		if (!signerInfoExistMap.containsKey(sendMsg.getCredentials().getAddress())) {
+			authInfoBuilder.addSignerInfos(getSignInfo(sendMsg.getCredentials(), baseAccountCache));
+			signerInfoExistMap.put(sendMsg.getCredentials().getAddress(), true);
+		}		
 
 		if (!signerInfoExistMap.containsKey(payerCredentials.getAddress())) {
 			authInfoBuilder.addSignerInfos(getSignInfo(payerCredentials, baseAccountCache));
@@ -109,13 +117,14 @@ public class SignUtil {
 
 		CoinOuterClass.Coin feeCoin = CoinOuterClass.Coin.newBuilder()
 			.setAmount(ATOMUnitUtil.atomToMicroAtom(feeInAtom).toPlainString())
-			.setDenom(this.token)
+			.setDenom(token)
 			.build();
 
 		String payerAddress = payerCredentials.getAddress();
-		if (sendList.get(0).getCredentials().getAddress().equals(payerCredentials.getAddress())) {
+		if (sendMsg.getCredentials().getAddress().equals(payerCredentials.getAddress())) {
 			payerAddress = "";
 		}
+
 		TxOuterClass.Fee fee = TxOuterClass.Fee.newBuilder()
 			.setGasLimit(gasLimit)
 			.setPayer(payerAddress)
@@ -127,13 +136,12 @@ public class SignUtil {
 		TxOuterClass.TxBody txBody = txBodyBuilder.build();
 
 		TxOuterClass.AuthInfo authInfo = authInfoBuilder.build();
-
-		for (SendInfo sendInfo : sendList) {
-			if (!signaturesExistMap.containsKey(sendInfo.getCredentials().getAddress())) {
-				txBuilder.addSignatures(getSignBytes(sendInfo.getCredentials(), txBody, authInfo, baseAccountCache));
-				signaturesExistMap.put(sendInfo.getCredentials().getAddress(), true);
-			}
+		
+		if (!signaturesExistMap.containsKey(sendMsg.getCredentials().getAddress())) {
+			txBuilder.addSignatures(getSignBytes(sendMsg.getCredentials(), txBody, authInfo, baseAccountCache));
+			signaturesExistMap.put(sendMsg.getCredentials().getAddress(), true);
 		}
+		
 		if (!signaturesExistMap.containsKey(payerCredentials.getAddress())) {
 			txBuilder.addSignatures(getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
 			signaturesExistMap.put(payerCredentials.getAddress(), true);
@@ -154,49 +162,27 @@ public class SignUtil {
 			.setMode(Signing.SignMode.SIGN_MODE_DIRECT)
 			.build();
 
-		Auth.BaseAccount baseAccount = queryBaseAccount(credentials.getAddress(), baseAccountCache);
 		TxOuterClass.SignerInfo signerInfo = TxOuterClass.SignerInfo.newBuilder()
 			.setPublicKey(Any.pack(pubKey, "/"))
 			.setModeInfo(TxOuterClass.ModeInfo.newBuilder().setSingle(single))
-			.setSequence(baseAccount.getSequence())
+			.setSequence(sequence)
 			.build();
 		return signerInfo;
 	}
 
-	public Auth.BaseAccount queryBaseAccount(String address, Map<String, Auth.BaseAccount> cacheMap) throws Exception {
-		if (cacheMap.containsKey(address)) {
-			return cacheMap.get(address);
-		}
-		Auth.BaseAccount baseAccount = queryBaseAccount(address);
-		cacheMap.put(address, baseAccount);
-		return baseAccount;
-	}
-
-	public Auth.BaseAccount queryBaseAccount(String address) throws Exception {
-		QueryAccountResponse res = queryAccount(address);
-		if (res.hasAccount() && res.getAccount().is(Auth.BaseAccount.class)) {
-			return res.getAccount().unpack(Auth.BaseAccount.class);
-		}
-		throw new RuntimeException("account not found:" + address);
-	}
-
-	public QueryAccountResponse queryAccount(String address) throws Exception {
-		String path = String.format("/cosmos/auth/v1beta1/accounts/%s", address);
-		return client.get(path, QueryAccountResponse.class);
-	}
-
 	public ByteString getSignBytes(CosmosCredentials credentials, TxOuterClass.TxBody txBody, TxOuterClass.AuthInfo authInfo, Map<String, Auth.BaseAccount> baseAccountCache) throws Exception {
-		Auth.BaseAccount baseAccount = queryBaseAccount(credentials.getAddress(), baseAccountCache);
-		byte[] sigBytes = signDoc(credentials.getEcKey().getPrivKeyBytes(), baseAccount, txBody, authInfo, this.chainId);
+		byte[] sigBytes = signDoc(credentials, credentials.getEcKey().getPrivKeyBytes(), txBody, authInfo);
 		return ByteString.copyFrom(sigBytes);
 	}
 
-	public static byte[] signDoc(byte[] privateKey, Auth.BaseAccount baseAccount, TxOuterClass.TxBody txBody, TxOuterClass.AuthInfo authInfo, String chainId) {
+	public byte[] signDoc(CosmosCredentials credentials, byte[] privateKey, TxOuterClass.TxBody txBody,
+				TxOuterClass.AuthInfo authInfo) {
+
 		ECKeyPair keyPair = ECKeyPair.create(privateKey);
 		TxOuterClass.SignDoc signDoc = TxOuterClass.SignDoc.newBuilder()
 			.setBodyBytes(txBody.toByteString())
 			.setAuthInfoBytes(authInfo.toByteString())
-			.setAccountNumber(baseAccount.getAccountNumber())
+			.setAccountNumber(accountNumber)
 			.setChainId(chainId)
 			.build();
 		byte[] hash = Sha256Hash.hash(signDoc.toByteArray());
