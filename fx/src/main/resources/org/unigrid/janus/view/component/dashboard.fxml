@@ -119,6 +119,7 @@
                      </HBox.margin>
                   </TextField>
                   <Button contentDisplay="CENTER" onAction="#delegateToGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
+		  <Button contentDisplay="CENTER" onAction="#undelegateFromGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
                </children>
             </HBox>
             </VBox>

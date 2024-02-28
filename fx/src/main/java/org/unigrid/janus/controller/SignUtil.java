@@ -18,10 +18,12 @@ package org.unigrid.janus.controller;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.util.JsonFormat;
 import cosmos.auth.v1beta1.Auth;
 import cosmos.bank.v1beta1.Tx;
 import cosmos.base.abci.v1beta1.Abci;
+import cosmos.base.abci.v1beta1.Abci.TxResponse;
 import cosmos.base.v1beta1.CoinOuterClass;
 import cosmos.crypto.secp256k1.Keys;
 import cosmos.tx.signing.v1beta1.Signing;
@@ -37,6 +39,8 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;
 import org.bitcoinj.core.Sha256Hash;
 import org.unigrid.janus.model.service.GrpcService;
+import pax.gridnode.Tx.MsgGridnodeDelegate;
+import pax.gridnode.Tx.MsgGridnodeUndelegate;
 
 @ApplicationScoped
 public class SignUtil {
@@ -55,12 +59,37 @@ public class SignUtil {
 	}
 	
 	private static final JsonFormat.Printer printer = JsonToProtoObjectUtil.getPrinter();
+	
+	public Abci.TxResponse sendDelegateTx(CosmosCredentials payerCredentials, Long amount, BigDecimal feeInAtom,
+			long gasLimit) throws Exception {
+		
+		MsgGridnodeDelegate msg = MsgGridnodeDelegate.newBuilder()
+				.setDelegatorAddress(payerCredentials.getAddress())
+				.setAmount(amount)
+				.build();
+		TxOuterClass.Tx tx = getTxDelegate(msg, payerCredentials, null, amount, feeInAtom, gasLimit);
+		return bradcastTransaction(tx);
+	}
+	
+	public Abci.TxResponse sendUndelegateTx(CosmosCredentials payerCredentials, Long amount, BigDecimal feeInAtom,
+			long gasLimit) throws Exception {
+		
+		MsgGridnodeUndelegate msg = MsgGridnodeUndelegate.newBuilder()
+				.setDelegatorAddress(payerCredentials.getAddress())
+				.setAmount(amount)
+				.build();
+		TxOuterClass.Tx tx = getTxDelegate(msg, payerCredentials, null, amount, feeInAtom, gasLimit);
+		return bradcastTransaction(tx);
+	}
 
 	public Abci.TxResponse sendTx(CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
-				long gasLimit) throws Exception {
+			long gasLimit) throws Exception {
 
 		TxOuterClass.Tx tx = getTxRequest(payerCredentials, sendMsg, feeInAtom, gasLimit);
-		
+		return bradcastTransaction(tx);
+	}
+	
+	public TxResponse bradcastTransaction(TxOuterClass.Tx tx) throws Exception {
 		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
 		
 		ServiceOuterClass.BroadcastTxRequest broadcastTxRequest = ServiceOuterClass.BroadcastTxRequest.newBuilder()
@@ -102,7 +131,7 @@ public class SignUtil {
 			.setToAddress(sendMsg.getToAddress())
 			.addAmount(sendCoin)
 			.build();
-
+		
 		txBodyBuilder.addMessages(Any.pack(message, "/"));
 
 		if (!signerInfoExistMap.containsKey(sendMsg.getCredentials().getAddress())) {
@@ -145,6 +174,65 @@ public class SignUtil {
 		if (!signaturesExistMap.containsKey(payerCredentials.getAddress())) {
 			txBuilder.addSignatures(getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
 			signaturesExistMap.put(payerCredentials.getAddress(), true);
+		}
+
+		txBuilder.setBody(txBody);
+		txBuilder.setAuthInfo(authInfo);
+		TxOuterClass.Tx tx = txBuilder.build();
+		return tx;
+	}
+	
+	public TxOuterClass.Tx getTxDelegate(GeneratedMessageV3 msg, CosmosCredentials payerCredentials, SendInfo sendMsg, long amount, BigDecimal feeInAtom,
+			long gasLimit) throws Exception {
+		
+		Map<String, Auth.BaseAccount> baseAccountCache = new HashMap<>();
+		TxOuterClass.TxBody.Builder txBodyBuilder = TxOuterClass.TxBody.newBuilder();
+		TxOuterClass.AuthInfo.Builder authInfoBuilder = TxOuterClass.AuthInfo.newBuilder();
+		String payerAddress = payerCredentials.getAddress();
+
+		TxOuterClass.Tx.Builder txBuilder = TxOuterClass.Tx.newBuilder();
+		Map<String, Boolean> signerInfoExistMap = new HashMap<>();
+		Map<String, Boolean> signaturesExistMap = new HashMap<>();
+		
+		txBodyBuilder.addMessages(Any.pack(msg, "/"));
+
+		if (!signerInfoExistMap.containsKey(payerAddress)) {
+			authInfoBuilder.addSignerInfos(getSignInfo(payerCredentials, baseAccountCache));
+			signerInfoExistMap.put(payerAddress, true);
+		}		
+
+		if (!signerInfoExistMap.containsKey(payerAddress)) {
+			authInfoBuilder.addSignerInfos(getSignInfo(payerCredentials, baseAccountCache));
+			signerInfoExistMap.put(payerAddress, true);
+		}
+
+		CoinOuterClass.Coin feeCoin = CoinOuterClass.Coin.newBuilder()
+			.setAmount(ATOMUnitUtil.atomToMicroAtom(feeInAtom).toPlainString())
+			.setDenom(token)
+			.build();
+
+		
+
+		TxOuterClass.Fee fee = TxOuterClass.Fee.newBuilder()
+			.setGasLimit(gasLimit)
+			.setPayer(payerAddress)
+			.addAmount(feeCoin)
+			.build();
+
+		authInfoBuilder.setFee(fee);
+
+		TxOuterClass.TxBody txBody = txBodyBuilder.build();
+
+		TxOuterClass.AuthInfo authInfo = authInfoBuilder.build();
+		
+		if (!signaturesExistMap.containsKey(payerAddress)) {
+			txBuilder.addSignatures(getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
+			signaturesExistMap.put(payerAddress, true);
+		}
+		
+		if (!signaturesExistMap.containsKey(payerAddress)) {
+			txBuilder.addSignatures(getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
+			signaturesExistMap.put(payerAddress, true);
 		}
 
 		txBuilder.setBody(txBody);

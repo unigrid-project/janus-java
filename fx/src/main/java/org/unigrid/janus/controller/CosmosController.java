@@ -155,6 +155,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.spec.PKCS8EncodedKeySpec;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
+import pax.gridnode.QueryGrpc.QueryStub;
+import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
+import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -933,6 +936,7 @@ public class CosmosController implements Initializable {
 			.build();
 
 		byte[] byteArray = signDoc.toByteArray();
+		byte[] hash = Sha256Hash.hash(byteArray);
 		String text = new String(byteArray, StandardCharsets.UTF_8);
 		System.out.println("SignDoc: " + text + "\n//////////////////////\n");
 
@@ -963,7 +967,7 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	public void delegateToGridnode() {
+	public void delegateToGridnode2() {
 		Account selectedAccount = accountsData.getSelectedAccount();
 		// sequence and account should be accessed from a model
 		// we are making two redundant calls to the grpc server here
@@ -971,7 +975,7 @@ public class CosmosController implements Initializable {
 		System.out.println("sequence: " + sequence);
 		long accountNumber = getAccountNumber(selectedAccount.getAddress());
 		System.out.println("accountNumber: " + accountNumber);
-		String chainId = "unigrid-devnet-1";
+		String chainId = "unigrid-testnet-4";
 
 		try {
 			// Step 1: Create the MsgGridnodeDelegate request
@@ -984,7 +988,7 @@ public class CosmosController implements Initializable {
 			// Step 2: Wrap in a transaction body (TxBody)
 			// Any anyDelegateRequest = Any.pack(delegateRequest);
 			Any anyDelegateRequest = Any.newBuilder()
-				.setTypeUrl("/pax.gridnode.MsgGridnodeDelegate") // Set type_url manually
+				.setTypeUrl("/gridnode​/delegate-tokens") // Set type_url manually
 				.setValue(delegateRequest.toByteString()) // Set the serialized message
 				.build();
 			TxBody txBody = TxBody.newBuilder().addMessages(anyDelegateRequest).build();
@@ -1002,12 +1006,12 @@ public class CosmosController implements Initializable {
 
 			// Step 6: Sign the transaction
 			// PrivateKey privateKey = getECPrivateKeyFromHex(getPrivateKeyHex());
-			//byte[] signature = generateSignature(getPrivateKeyHex(), signingInput);
-			byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
-			String hexSignature = signTransaction(txBodyBytes, "9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8"); // Your method to get the hex string of the signature
+			byte[] signature = generateSignature(getPrivateKeyHex(), signingInput);
+			//byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
+			//String hexSignature = signTransaction(txBodyBytes, "9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8"); // Your method to get the hex string of the signature
 
 			// Convert the hexadecimal string signature back to a byte array
-			byte[] signatureBytes = Hex.decode(hexSignature);
+			byte[] signatureBytes = Hex.decode(signature);
 			// Step 7: Construct the signed transaction			
 			Tx signedTx = Tx.newBuilder()
 				.setBody(txBody)
@@ -1052,9 +1056,10 @@ public class CosmosController implements Initializable {
 		signature.update(txBytes);
 		// Generate the signature
 		byte[] signatureBytes = signature.sign();
+		byte[] hash = Sha256Hash.hash(signatureBytes);
 		System.out.println("Printed signature: " + Base64.getEncoder().encodeToString(signatureBytes));
 
-		return signatureBytes;
+		return hash;
 	}
 
 	public static String signTransaction(byte[] transactionBytes, String hexPrivateKey) {
@@ -1082,24 +1087,17 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	public void sendTokens() throws Exception {
-
-		QueryGrpc.QueryBlockingStub queryBlockingStub = QueryGrpc.newBlockingStub(grpcService.getChannel());
-
-		// query the balance
-		QueryOuterClass.QueryAllBalancesResponse balance = queryBlockingStub.allBalances(QueryOuterClass.QueryAllBalancesRequest.newBuilder().setAddress("unigrid1y675w05f6t55s4xatlezmpw2jq0ml256fgg7yz").build());
-		System.out.println(balance.getBalances(0).getAmount());
-
 		byte[] privateKey = Hex.decode(getPrivateKeyHex());
 
 		System.out.println("privateKeyHex from send: " + getPrivateKeyHex());
 
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
-		
+
 		Account selectedAccount = accountsData.getSelectedAccount();
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-devnet-1");
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-testnet-4");
 
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
@@ -1110,6 +1108,43 @@ public class CosmosController implements Initializable {
 		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
+	}
+
+	public void delegation(boolean delegate) throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+		System.out.println("privateKeyHex from delegate tokens: " + getPrivateKeyHex());
+
+		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = getAccountNumber(selectedAccount.getAddress());
+
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-testnet-4");
+
+		long amount = Long.parseLong(delegateAmountTextField.getText());
+
+		Abci.TxResponse txResponse = null;
+
+		if (delegate) {
+			txResponse = transactionService.sendDelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+		} else {
+			txResponse = transactionService.sendUndelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+		}
+
+		System.out.println("Response Tx Delegate");
+		System.out.println(txResponse);
+
+	}
+
+	@FXML
+	public void delegateToGridnode() throws Exception {
+		delegation(true);
+	}
+
+	@FXML
+	public void undelegateFromGridnode() throws Exception {
+		delegation(false);
 	}
 
 	private void handleTabRequest(@Observes TabRequestSignal request) {
@@ -1301,6 +1336,12 @@ public class CosmosController implements Initializable {
 							.build();
 
 						QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
+						pax.gridnode.QueryGrpc.QueryBlockingStub delegateStub = pax.gridnode.QueryGrpc.newBlockingStub(grpcService.getChannel());
+
+						QueryDelegatedAmountRequest delegatedAmountRequest = QueryDelegatedAmountRequest.newBuilder()
+							.setDelegatorAddress(selectedAccount.get().getAddress())
+							.build();
+						QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
 						// Execute the gRPC request
 						QueryBalanceResponse response = stub.balance(request);
 						System.out.println("like balance field: " + response.getBalance().getAmount());
@@ -1310,6 +1351,7 @@ public class CosmosController implements Initializable {
 						Platform.runLater(() -> {
 							// Update UI with the balance received from the response
 							balanceLabel.setText(response.getBalance().getAmount() + " ugd");
+							delegationAmountLabel.setText(delegatedAmountResponse.getAmount() + " ugd");
 						});
 
 						// Load transactions and other account data (assuming these methods are adapted
