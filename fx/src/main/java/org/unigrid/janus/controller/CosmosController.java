@@ -267,6 +267,10 @@ public class CosmosController implements Initializable {
 	@FXML
 	private TextField delegateAmountTextField;
 	@FXML
+	private TextField validatorAddressTextField;
+	@FXML
+	private TextField stakeAmountTextField;
+	@FXML
 	private ListView<Balance> totalsListView;
 	@FXML
 	private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
@@ -841,57 +845,6 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	public static byte[] hexStringToByteArray(String hexString) {
-		int len = hexString.length();
-		byte[] data = new byte[len / 2];
-		for (int i = 0; i < len; i += 2) {
-			data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
-				+ Character.digit(hexString.charAt(i + 1), 16));
-		}
-		return data;
-	}
-
-	private AuthInfo createAuthInfo(String publicKeyHex, long sequence) {
-		// Convert hex-encoded public key string to a byte array
-		byte[] publicKey = hexStringToByteArray(publicKeyHex);
-		System.out.println("publicKey: " + publicKeyHex);
-		// Construct the PubKey object
-
-		PubKey pubKey = PubKey.newBuilder()
-			.setKey(ByteString.copyFrom(publicKey))
-			.build();
-		Any packedPubKey = Any.newBuilder()
-			.setTypeUrl("/cosmos.crypto.secp256k1.PubKey") // Make sure this matches the Protobuf definition
-			.setValue(pubKey.toByteString())
-			.build();
-
-		// Construct the ModeInfo object for SIGN_MODE_DIRECT
-		ModeInfo modeInfo = ModeInfo.newBuilder()
-			.setSingle(ModeInfo.Single.newBuilder().setMode(SignMode.SIGN_MODE_DIRECT))
-			.build();
-
-		// Construct the SignerInfo
-		SignerInfo signerInfo = SignerInfo.newBuilder()
-			.setPublicKey(packedPubKey)
-			.setModeInfo(modeInfo)
-			.setSequence(sequence)
-			.build();
-
-		// Construct the fee
-		Fee fee = Fee.newBuilder()
-			.addAmount(Coin.newBuilder().setDenom("ugd").setAmount(delegateAmountTextField.getText()).build()) // Fee of 2000 ugd
-			.setGasLimit(200000) // Gas limit of 200000
-			.build();
-
-		System.out.println("gas limit: " + fee.getGasLimit());
-
-		// Construct the AuthInfo
-		return AuthInfo.newBuilder()
-			.addSignerInfos(signerInfo)
-			.setFee(fee)
-			.build();
-	}
-
 	private long getSequence(String address) {
 		// Set up the auth query client
 		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
@@ -926,24 +879,6 @@ public class CosmosController implements Initializable {
 		return buffer.array();
 	}
 
-	public byte[] prepareSigningInput(byte[] txBodyBytes, byte[] authInfoBytes, String chainId, long accountNumber, long sequence)
-		throws IOException {
-		SignDoc signDoc = SignDoc.newBuilder()
-			.setBodyBytes(ByteString.copyFrom(txBodyBytes))
-			.setAuthInfoBytes(ByteString.copyFrom(authInfoBytes))
-			.setChainId(chainId)
-			.setAccountNumber(accountNumber)
-			.build();
-
-		byte[] byteArray = signDoc.toByteArray();
-		byte[] hash = Sha256Hash.hash(byteArray);
-		String text = new String(byteArray, StandardCharsets.UTF_8);
-		System.out.println("SignDoc: " + text + "\n//////////////////////\n");
-
-		// Serialize the SignDoc to bytes
-		return signDoc.toByteArray();
-	}
-
 	private long getAccountNumber(String address) {
 		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
 			.newBlockingStub(grpcService.getChannel());
@@ -965,124 +900,6 @@ public class CosmosController implements Initializable {
 			e.printStackTrace();
 			return -1; // Handle this as per your application's requirement
 		}
-	}
-
-	public void delegateToGridnode2() {
-		Account selectedAccount = accountsData.getSelectedAccount();
-		// sequence and account should be accessed from a model
-		// we are making two redundant calls to the grpc server here
-		long sequence = getSequence(selectedAccount.getAddress());
-		System.out.println("sequence: " + sequence);
-		long accountNumber = getAccountNumber(selectedAccount.getAddress());
-		System.out.println("accountNumber: " + accountNumber);
-		String chainId = "unigrid-testnet-4";
-
-		try {
-			// Step 1: Create the MsgGridnodeDelegate request
-			MsgGridnodeDelegate delegateRequest = MsgGridnodeDelegate.newBuilder()
-				.setDelegatorAddress(selectedAccount.getAddress())
-				.setAmount(Long.parseLong(delegateAmountTextField.getText()))
-				// Add other necessary fields
-				.build();
-
-			// Step 2: Wrap in a transaction body (TxBody)
-			// Any anyDelegateRequest = Any.pack(delegateRequest);
-			Any anyDelegateRequest = Any.newBuilder()
-				.setTypeUrl("/gridnode​/delegate-tokens") // Set type_url manually
-				.setValue(delegateRequest.toByteString()) // Set the serialized message
-				.build();
-			TxBody txBody = TxBody.newBuilder().addMessages(anyDelegateRequest).build();
-
-			// Step 3: Create AuthInfo with signer info and fee
-			AuthInfo authInfo = createAuthInfo(selectedAccount.getPublicKey(), sequence);
-			System.out.println("public key: " + selectedAccount.getPublicKey()
-				+ "\naddress: " + selectedAccount.getAddress());
-			// Step 4: Serialize TxBody and AuthInfo
-			byte[] txBodyBytes = txBody.toByteArray();
-			byte[] authInfoBytes = authInfo.toByteArray();
-
-			// Step 5: Prepare signing input
-			byte[] signingInput = prepareSigningInput(txBodyBytes, authInfoBytes, chainId, accountNumber, sequence);
-
-			// Step 6: Sign the transaction
-			// PrivateKey privateKey = getECPrivateKeyFromHex(getPrivateKeyHex());
-			byte[] signature = generateSignature(getPrivateKeyHex(), signingInput);
-			//byte[] signature = generateSignature("9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8", signingInput);
-			//String hexSignature = signTransaction(txBodyBytes, "9167e4aff7ab188c0a58ac83fd72990f9277e14359c61a2187e07afd342e93b8"); // Your method to get the hex string of the signature
-
-			// Convert the hexadecimal string signature back to a byte array
-			byte[] signatureBytes = Hex.decode(signature);
-			// Step 7: Construct the signed transaction			
-			Tx signedTx = Tx.newBuilder()
-				.setBody(txBody)
-				.setAuthInfo(authInfo)
-				.addSignatures(ByteString.copyFrom(signatureBytes)) // Use copyFrom for byte[]
-				.build();
-			byte[] signedTxBytes = signedTx.toByteArray();
-			String base64EncodedTx = Base64.getEncoder().encodeToString(signedTxBytes);
-			System.out.println("signed transaction: " + signedTx);
-			System.out.println("signed transaction encoded: " + base64EncodedTx);
-
-			// Step 8: Broadcast the transaction
-			ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
-			BroadcastTxRequest broadcastRequest = BroadcastTxRequest.newBuilder()
-				.setTxBytes(ByteString.copyFrom(signedTx.toByteArray()))
-				.setMode(BroadcastMode.BROADCAST_MODE_SYNC) // Choose the appropriate mode
-				.build();
-			BroadcastTxResponse broadcastResponse = stub.broadcastTx(broadcastRequest);
-
-			// Step 9: Handle the response
-			System.out.println("Transaction Hash: " + broadcastResponse.getTxResponse().getTxhash());
-			System.out.println("BroadcastTxResponse: " + broadcastResponse.toString());
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Error delegating to gridnode: " + e.getMessage());
-		}
-	}
-
-	private byte[] generateSignature(String privateKeyHex, byte[] txBytes) throws GeneralSecurityException {
-		Security.addProvider(new BouncyCastleProvider());
-
-		// Convert the HEX string private key into a PrivateKey object
-		BigInteger privateKeyInt = new BigInteger(privateKeyHex, 16);
-		ECPrivateKeySpec privateKey = new ECPrivateKeySpec(privateKeyInt, ECNamedCurveTable.getParameterSpec("secp256k1"));
-		KeyFactory factory = KeyFactory.getInstance("ECDSA", "BC");
-		PrivateKey key = factory.generatePrivate(privateKey);
-
-		// Initialize the signature using BouncyCastle as the security provider
-		Signature signature = Signature.getInstance("SHA256withECDSA", "BC");
-		signature.initSign(key);
-		signature.update(txBytes);
-		// Generate the signature
-		byte[] signatureBytes = signature.sign();
-		byte[] hash = Sha256Hash.hash(signatureBytes);
-		System.out.println("Printed signature: " + Base64.getEncoder().encodeToString(signatureBytes));
-
-		return hash;
-	}
-
-	public static String signTransaction(byte[] transactionBytes, String hexPrivateKey) {
-		// Convert the hexadecimal private key to byte array
-		byte[] privateKeyBytes = Hex.decode(hexPrivateKey);
-
-		// Create an ECKey instance from the private key bytes
-		ECKey key = ECKey.fromPrivate(privateKeyBytes);
-
-		// Hash the transaction bytes
-		Sha256Hash hash = Sha256Hash.wrap(Sha256Hash.hash(transactionBytes));
-
-		// Create the signature
-		ECKey.ECDSASignature signature = key.sign(hash);
-		byte[] derSignature = signature.encodeToDER();
-
-		// Optionally, you can also append the public key to the signature
-		byte[] sigWithPubKey = new byte[derSignature.length + key.getPubKey().length];
-		System.arraycopy(derSignature, 0, sigWithPubKey, 0, derSignature.length);
-		System.arraycopy(key.getPubKey(), 0, sigWithPubKey, derSignature.length, key.getPubKey().length);
-
-		// Return the hexadecimal string of the signature (and optionally the public key)
-		return Hex.toHexString(sigWithPubKey);
 	}
 
 	@FXML
@@ -1110,7 +927,7 @@ public class CosmosController implements Initializable {
 		System.out.println(txResponse);
 	}
 
-	public void delegation(boolean delegate) throws Exception {
+	public void delegation(boolean delegate, String validatorAddress) throws Exception {
 		byte[] privateKey = Hex.decode(getPrivateKeyHex());
 		System.out.println("privateKeyHex from delegate tokens: " + getPrivateKeyHex());
 
@@ -1122,14 +939,22 @@ public class CosmosController implements Initializable {
 
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-testnet-4");
 
-		long amount = Long.parseLong(delegateAmountTextField.getText());
+		long amount = 0;
+		if (validatorAddress == null) {
+			 amount = Long.parseLong(delegateAmountTextField.getText());
+		} else {
+			 amount = Long.parseLong(stakeAmountTextField.getText());
+		}
 
 		Abci.TxResponse txResponse = null;
 
 		if (delegate) {
 			txResponse = transactionService.sendDelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
-		} else {
+		} else if(!delegate && validatorAddress == null) {
 			txResponse = transactionService.sendUndelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+		}
+		else if(!delegate && validatorAddress != null){
+			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
 		}
 
 		System.out.println("Response Tx Delegate");
@@ -1139,12 +964,17 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	public void delegateToGridnode() throws Exception {
-		delegation(true);
+		delegation(true, null);
 	}
 
 	@FXML
 	public void undelegateFromGridnode() throws Exception {
-		delegation(false);
+		delegation(false, null);
+	}
+
+	@FXML
+	public void delegateForStaking() throws Exception {
+		delegation(false, validatorAddressTextField.getText());
 	}
 
 	private void handleTabRequest(@Observes TabRequestSignal request) {
