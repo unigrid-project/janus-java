@@ -21,30 +21,10 @@ import cosmos.bank.v1beta1.QueryGrpc;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
 
-import cosmos.tx.v1beta1.ServiceOuterClass.BroadcastTxResponse;
-
-import cosmos.tx.v1beta1.ServiceGrpc.ServiceBlockingStub;
-import cosmos.tx.v1beta1.TxOuterClass.Tx;
-import cosmos.tx.v1beta1.TxOuterClass.TxBody;
-
-import cosmos.tx.v1beta1.ServiceOuterClass.BroadcastMode;
-import cosmos.tx.v1beta1.ServiceOuterClass.BroadcastTxRequest;
-import cosmos.tx.v1beta1.TxOuterClass.AuthInfo;
-import cosmos.tx.v1beta1.TxOuterClass.Fee;
-import cosmos.base.v1beta1.CoinOuterClass.Coin;
-import cosmos.tx.v1beta1.TxOuterClass.SignerInfo;
-import cosmos.tx.signing.v1beta1.Signing.SignMode;
-import cosmos.tx.v1beta1.TxOuterClass.ModeInfo;
-import java.security.*;
-
-import java.security.Security;
-
 import com.google.protobuf.Any;
 import cosmos.auth.v1beta1.Auth.BaseAccount;
 import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountRequest;
 import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountResponse;
-import cosmos.bank.v1beta1.Tx.MsgSend;
-import cosmos.tx.v1beta1.ServiceGrpc;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -67,17 +47,14 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
-import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.Optional;
@@ -137,25 +114,12 @@ import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
 import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
-import pax.gridnode.Tx.MsgGridnodeDelegate;
 import java.math.BigInteger;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors;
 import cosmos.bank.v1beta1.QueryOuterClass;
 import cosmos.base.abci.v1beta1.Abci;
-import cosmos.crypto.secp256k1.Keys.PubKey;
-import cosmos.tx.v1beta1.TxOuterClass.SignDoc;
-import cosmos.tx.v1beta1.TxOuterClass.TxRaw;
-import java.nio.charset.StandardCharsets;
-import java.security.spec.PKCS8EncodedKeySpec;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1Sequence;
-import pax.gridnode.QueryGrpc.QueryStub;
+import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
+import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
 
@@ -196,6 +160,8 @@ public class CosmosController implements Initializable {
 	private Label addressLabel;
 	@FXML
 	private Label balanceLabel;
+	@FXML
+	private Label stakingAmountLabel;
 	@FXML
 	private TextArea mnemonicArea;
 	@FXML
@@ -941,19 +907,18 @@ public class CosmosController implements Initializable {
 
 		long amount = 0;
 		if (validatorAddress == null) {
-			 amount = Long.parseLong(delegateAmountTextField.getText());
+			amount = Long.parseLong(delegateAmountTextField.getText());
 		} else {
-			 amount = Long.parseLong(stakeAmountTextField.getText());
+			amount = Long.parseLong(stakeAmountTextField.getText());
 		}
 
 		Abci.TxResponse txResponse = null;
 
 		if (delegate) {
 			txResponse = transactionService.sendDelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
-		} else if(!delegate && validatorAddress == null) {
+		} else if (!delegate && validatorAddress == null) {
 			txResponse = transactionService.sendUndelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
-		}
-		else if(!delegate && validatorAddress != null){
+		} else if (!delegate && validatorAddress != null) {
 			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
 		}
 
@@ -1160,7 +1125,7 @@ public class CosmosController implements Initializable {
 					protected Void call() throws Exception {
 
 						// Prepare the gRPC request
-						QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
+						QueryBalanceRequest balanceRequest = QueryBalanceRequest.newBuilder()
 							.setAddress(selectedAccount.get().getAddress())
 							.setDenom("ugd") // Add this line to set the denomination
 							.build();
@@ -1173,15 +1138,24 @@ public class CosmosController implements Initializable {
 							.build();
 						QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
 						// Execute the gRPC request
-						QueryBalanceResponse response = stub.balance(request);
-						System.out.println("like balance field: " + response.getBalance().getAmount());
-						System.out.println("balance getBalance: " + response.getBalance());
-						System.out.println("balance to string: " + response.toString());
+						QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
+
+						cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+						QueryDelegatorDelegationsRequest stakingRequest=  QueryDelegatorDelegationsRequest.newBuilder()
+							.setDelegatorAddr(selectedAccount.get().getAddress())
+							.build();
+						
+						QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
+
+						long totalStaked = stakingResponse.getDelegationResponsesList().stream()
+							.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
+							.sum();
 
 						Platform.runLater(() -> {
 							// Update UI with the balance received from the response
-							balanceLabel.setText(response.getBalance().getAmount() + " ugd");
+							balanceLabel.setText(balanceResponse.getBalance().getAmount() + " ugd");
 							delegationAmountLabel.setText(delegatedAmountResponse.getAmount() + " ugd");
+							stakingAmountLabel.setText(totalStaked + " ugd");
 						});
 
 						// Load transactions and other account data (assuming these methods are adapted

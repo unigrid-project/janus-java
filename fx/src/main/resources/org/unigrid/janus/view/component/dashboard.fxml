@@ -126,6 +126,19 @@
 						</HBox>
 						<HBox>
 							<children>
+								<Label fx:id="stakingLabel1" text="Staking:" textFill="#ababab">
+									<font>
+										<Font size="16.0" />
+									</font>
+									<padding>
+										<Insets left="5.0" right="5.0" />
+									</padding>
+								</Label>
+								<Label fx:id="stakingAmountLabel" text="0.00 UGD" textFill="#ababab">
+									<font>
+										<Font size="16.0" />
+									</font>
+								</Label>
 						
 								<Label text="Validator Address:" textFill="#ababab">
 									<font>
@@ -136,14 +149,7 @@
 									</HBox.margin>
 								</Label>
 								<TextField fx:id="validatorAddressTextField" prefWidth="300.0" />
-								<Label fx:id="stakingLabel1" text="Amount:" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-									<padding>
-										<Insets left="5.0" right="5.0" />
-									</padding>
-								</Label>
+								
 						
 							</children>
 						</HBox>
