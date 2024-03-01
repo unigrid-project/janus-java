@@ -163,6 +163,8 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Label stakingAmountLabel;
 	@FXML
+	private Label unboundingAmountLabel;
+	@FXML
 	private TextArea mnemonicArea;
 	@FXML
 	private TextArea seedPhraseTextArea;
@@ -1123,39 +1125,12 @@ public class CosmosController implements Initializable {
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
 					protected Void call() throws Exception {
-
-						// Prepare the gRPC request
-						QueryBalanceRequest balanceRequest = QueryBalanceRequest.newBuilder()
-							.setAddress(selectedAccount.get().getAddress())
-							.setDenom("ugd") // Add this line to set the denomination
-							.build();
-
-						QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
-						pax.gridnode.QueryGrpc.QueryBlockingStub delegateStub = pax.gridnode.QueryGrpc.newBlockingStub(grpcService.getChannel());
-
-						QueryDelegatedAmountRequest delegatedAmountRequest = QueryDelegatedAmountRequest.newBuilder()
-							.setDelegatorAddress(selectedAccount.get().getAddress())
-							.build();
-						QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
-						// Execute the gRPC request
-						QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
-
-						cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-						QueryDelegatorDelegationsRequest stakingRequest=  QueryDelegatorDelegationsRequest.newBuilder()
-							.setDelegatorAddr(selectedAccount.get().getAddress())
-							.build();
-						
-						QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
-
-						long totalStaked = stakingResponse.getDelegationResponsesList().stream()
-							.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
-							.sum();
-
 						Platform.runLater(() -> {
 							// Update UI with the balance received from the response
-							balanceLabel.setText(balanceResponse.getBalance().getAmount() + " ugd");
-							delegationAmountLabel.setText(delegatedAmountResponse.getAmount() + " ugd");
-							stakingAmountLabel.setText(totalStaked + " ugd");
+							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
+							delegationAmountLabel.setText(getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
+							unboundingAmountLabel.setText(getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
+							stakingAmountLabel.setText(getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
 						});
 
 						// Load transactions and other account data (assuming these methods are adapted
@@ -1225,6 +1200,56 @@ public class CosmosController implements Initializable {
 
 		updateCollateralDisplay();
 
+	}
+
+	private String getWalletBalance(String address) {
+		QueryBalanceRequest balanceRequest = QueryBalanceRequest.newBuilder()
+			.setAddress(address)
+			.setDenom("ugd") // Add this line to set the denomination
+			.build();
+
+		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
+		QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
+		return balanceResponse.getBalance().getAmount();
+
+	}
+
+	private long getDelegatedBalance(String address) {
+		pax.gridnode.QueryGrpc.QueryBlockingStub delegateStub = pax.gridnode.QueryGrpc.newBlockingStub(grpcService.getChannel());
+
+		QueryDelegatedAmountRequest delegatedAmountRequest = QueryDelegatedAmountRequest.newBuilder()
+			.setDelegatorAddress(address)
+			.build();
+		QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
+		return delegatedAmountResponse.getAmount();
+	}
+
+	private long getStakedBalance(String address) {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		QueryDelegatorDelegationsRequest stakingRequest = QueryDelegatorDelegationsRequest.newBuilder()
+			.setDelegatorAddr(address)
+			.build();
+
+		QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
+
+		long totalStaked = stakingResponse.getDelegationResponsesList().stream()
+			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
+			.sum();
+
+		return totalStaked;
+	}
+
+	private long getUnboundingBalance(String address) {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub unboundingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest unboundingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest.newBuilder()
+			.setDelegatorAddr(address)
+			.build();
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsResponse unboundingResponse = unboundingStub.delegatorUnbondingDelegations(unboundingRequest);
+		long totalUnbondingAmount = unboundingResponse.getUnbondingResponsesList().stream()
+			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
+			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
+			.sum();
+		return totalUnbondingAmount;
 	}
 
 	public void setDelegationAmount() {

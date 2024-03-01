@@ -107,6 +107,11 @@
 										<Font size="16.0" />
 									</font>
 								</Label>
+								<Label fx:id="unboundingAmountLabel" text="0.00 UGD" textFill="#ababab">
+									<font>
+										<Font size="16.0" />
+									</font>
+								</Label>
 								<Label fx:id="delegateLabel1" text="Amount:" textFill="#ababab">
 									<font>
 										<Font size="16.0" />
