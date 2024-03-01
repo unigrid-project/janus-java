@@ -120,6 +120,11 @@ import cosmos.bank.v1beta1.QueryOuterClass;
 import cosmos.base.abci.v1beta1.Abci;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
+import cosmos.tx.v1beta1.ServiceGrpc;
+import cosmos.tx.v1beta1.ServiceOuterClass;
+import cosmos.tx.v1beta1.TxOuterClass;
+import io.grpc.StatusRuntimeException;
+import java.security.MessageDigest;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
 
@@ -1143,6 +1148,9 @@ public class CosmosController implements Initializable {
 
 				};
 
+				// fetch account transactions
+				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
+
 				// Handle exceptions
 				fetchDataTask.setOnFailed(e -> {
 					Throwable exception = fetchDataTask.getException();
@@ -1271,4 +1279,54 @@ public class CosmosController implements Initializable {
 			System.out.println("Error fetching collateral");
 		}
 	}
+
+	public void fetchAccountTransactions(String address) {
+		
+		List<TxOuterClass.Tx> transactions = new ArrayList<>();
+
+		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+		
+		// fetch sender transactions
+		String querySender = "transfer.sender='" + address + "'";		
+		transactions.addAll(fetchTransactions(querySender, stub));
+
+		// fetch recipient transactions
+		String queryRecipient = "transfer.recipient='" + address + "'";
+		transactions.addAll(fetchTransactions(queryRecipient, stub));
+
+		for (TxOuterClass.Tx tx : transactions) {
+			byte[] txBytes = tx.toByteArray();
+			byte[] hashBytes = sha256(txBytes);
+			String transactionHash = bytesToHex(hashBytes);
+			System.out.println("Transaction Hash: " + transactionHash);
+		}
+	}
+
+	private List<TxOuterClass.Tx> fetchTransactions(String query, ServiceGrpc.ServiceBlockingStub stub) {
+		ServiceOuterClass.GetTxsEventRequest request = ServiceOuterClass.GetTxsEventRequest.newBuilder()
+			.setLimit(10)
+			.setQuery(query)
+			.build();
+		
+		return stub.getTxsEvent(request).getTxsList();
+	}
+
+	private static byte[] sha256(byte[] input) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			return digest.digest(input);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private static String bytesToHex(byte[] bytes) {
+		StringBuilder result = new StringBuilder();
+		for (byte b : bytes) {
+			result.append(String.format("%02X", b));
+		}
+		return result.toString();
+	}
+
 }
