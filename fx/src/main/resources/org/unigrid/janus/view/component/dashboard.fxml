@@ -14,18 +14,17 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.control.ScrollPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="850.0" styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
+<AnchorPane styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
 	<children>
-		<GridPane alignment="CENTER" hgap="10" prefWidth="850.0" vgap="10" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns:fx="http://javafx.com/fxml/">
+		<GridPane alignment="CENTER" hgap="10" vgap="10" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns:fx="http://javafx.com/fxml/">
 
 			<!-- Cosmos SDK Chain Dashboard Title -->
 			<Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Unigrid Dashboard" textFill="#ababab" GridPane.columnIndex="0" GridPane.columnSpan="3" />
 
 			
 					<!-- Account Information -->
-					<VBox prefHeight="350.0" prefWidth="358.0" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="1">
+					<VBox fx:id="commandsBox" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="2">
 						<HBox alignment="CENTER_LEFT">
 							<children>
 								<Label style="-fx-font-weight: bold;" text="Account Information" textFill="#ababab">
@@ -65,7 +64,7 @@
 								</Label>
 							</children>
 						</HBox>
-						<HBox alignment="CENTER">
+						<HBox>
 							<children>
 								<Label text="To Address:" textFill="#ababab">
 									<font>
@@ -172,7 +171,7 @@
 					</VBox>
 			
 			<!-- Latest Transactions -->
-			<VBox spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2">
+			<VBox spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" visible="false" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2">
 				<Label style="-fx-font-weight: bold;" text="Latest Transactions" textFill="#ababab">
 					<font>
 						<Font size="15.0" />
