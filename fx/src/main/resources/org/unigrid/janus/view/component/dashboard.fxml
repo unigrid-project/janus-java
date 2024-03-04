@@ -14,6 +14,8 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
 
 <AnchorPane styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
 	<children>
@@ -168,6 +170,12 @@
 						
 							</children>
 						</HBox>
+						
+						<TableView fx:id="tableTransactions" VBox.vgrow="ALWAYS">
+							<columns>
+								<TableColumn fx:id="colTrx" text="Transactons List" prefWidth="550"/>
+							</columns>
+						</TableView>
 					</VBox>
 			
 			<!-- Latest Transactions -->

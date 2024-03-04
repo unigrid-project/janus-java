@@ -125,6 +125,12 @@ import cosmos.tx.v1beta1.ServiceOuterClass;
 import cosmos.tx.v1beta1.TxOuterClass;
 import io.grpc.StatusRuntimeException;
 import java.security.MessageDigest;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.util.Callback;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
 
@@ -246,6 +252,11 @@ public class CosmosController implements Initializable {
 	@FXML
 	private ListView<Balance> totalsListView;
 	@FXML
+	private TableView<String> tableTransactions;
+	@FXML
+	private TableColumn<String, String> colTrx;
+	private ObservableList<String> transactionsOb = FXCollections.observableArrayList();
+	@FXML
 	private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
 	@FXML
 	@Named("transactionResponse")
@@ -348,6 +359,9 @@ public class CosmosController implements Initializable {
 					}
 				}
 			});
+
+			colTrx.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+			fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
 		});
 	}
 
@@ -1148,9 +1162,6 @@ public class CosmosController implements Initializable {
 
 				};
 
-				// fetch account transactions
-				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
-
 				// Handle exceptions
 				fetchDataTask.setOnFailed(e -> {
 					Throwable exception = fetchDataTask.getException();
@@ -1298,8 +1309,9 @@ public class CosmosController implements Initializable {
 			byte[] txBytes = tx.toByteArray();
 			byte[] hashBytes = sha256(txBytes);
 			String transactionHash = bytesToHex(hashBytes);
-			System.out.println("Transaction Hash: " + transactionHash);
+			transactionsOb.add(transactionHash);
 		}
+		tableTransactions.setItems(transactionsOb);
 	}
 
 	private List<TxOuterClass.Tx> fetchTransactions(String query, ServiceGrpc.ServiceBlockingStub stub) {
