@@ -131,6 +131,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
+import org.unigrid.janus.model.ValidatorInfo;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
 
@@ -253,6 +254,8 @@ public class CosmosController implements Initializable {
 	private ListView<Balance> totalsListView;
 	@FXML
 	private TableView<String> tableTransactions;
+	@FXML
+	private ComboBox validatorListComboBox;
 	@FXML
 	private TableColumn<String, String> colTrx;
 	private ObservableList<String> transactionsOb = FXCollections.observableArrayList();
@@ -960,7 +963,19 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	public void delegateForStaking() throws Exception {
-		delegation(false, validatorAddressTextField.getText());
+		ValidatorInfo selectedValidator = (ValidatorInfo) validatorListComboBox.getSelectionModel().getSelectedItem();
+		String operatorAddress = "";
+		if (selectedValidator != null) {
+			operatorAddress = selectedValidator.getOperatorAddress();
+			System.out.println("validator address: " + operatorAddress);
+			// Now you can use the operatorAddress for further processing
+		}
+		if (!"".equals(operatorAddress)) {
+			delegation(false, operatorAddress);
+		} else {
+			System.out.println("ERROR: Validator address is empty");
+		}
+
 	}
 
 	private void handleTabRequest(@Observes TabRequestSignal request) {
@@ -1145,10 +1160,11 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
+							getValidators();
 							// Update UI with the balance received from the response
 							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
 							delegationAmountLabel.setText(getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
-							unboundingAmountLabel.setText(getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
+							unboundingAmountLabel.setText(getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
 							stakingAmountLabel.setText(getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
 						});
 
@@ -1241,6 +1257,35 @@ public class CosmosController implements Initializable {
 			.build();
 		QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
 		return delegatedAmountResponse.getAmount();
+	}
+	
+	public void getValidators() {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest request = cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest.newBuilder()
+			.setStatus("BOND_STATUS_BONDED")
+			.build();
+		try {
+			cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsResponse response = stub.validators(request);
+			System.out.println("Number of validators: " + response.getValidatorsCount());
+			List<ValidatorInfo> validatorInfoList = new ArrayList<>();
+			for (cosmos.staking.v1beta1.Staking.Validator validator : response.getValidatorsList()) {
+				String moniker = validator.getDescription().getMoniker();
+				String operatorAddress = validator.getOperatorAddress();
+
+				BigInteger rate = new BigInteger(validator.getCommission().getCommissionRates().getRate());
+				BigInteger devideDecimals = new BigInteger("10000000000000000");
+				BigInteger commission = rate.divide(devideDecimals);
+				
+				String commissionPercentage = commission.toString() + "%"; 
+
+				validatorInfoList.add(new ValidatorInfo(moniker, operatorAddress, commissionPercentage));
+			}
+
+			validatorListComboBox.getItems().setAll(validatorInfoList);
+		} catch (StatusRuntimeException e) {
+			System.err.println("RPC error: " + e.getStatus());
+		}
+
 	}
 
 	private long getStakedBalance(String address) {

@@ -154,7 +154,7 @@
 										<Insets right="10.0" />
 									</HBox.margin>
 								</Label>
-								<TextField fx:id="validatorAddressTextField" prefWidth="300.0" />
+								<ComboBox fx:id="validatorListComboBox" prefWidth="300.0" />
 								
 						
 							</children>
