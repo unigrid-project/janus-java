@@ -5,6 +5,10 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -14,221 +18,234 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TableColumn?>
 
-<AnchorPane styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
+<AnchorPane styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
 	<children>
-		<GridPane alignment="CENTER" hgap="10" vgap="10" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns:fx="http://javafx.com/fxml/">
-
-			<!-- Cosmos SDK Chain Dashboard Title -->
-			<Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Unigrid Dashboard" textFill="#ababab" GridPane.columnIndex="0" GridPane.columnSpan="3" />
-
-			
-					<!-- Account Information -->
-					<VBox fx:id="commandsBox" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="2">
-						<HBox alignment="CENTER_LEFT">
-							<children>
-								<Label style="-fx-font-weight: bold;" text="Account Information" textFill="#ababab">
-									<font>
-										<Font size="15.0" />
-									</font>
-								</Label>
-								<Region HBox.hgrow="ALWAYS" />
-
-								<ComboBox fx:id="accountsDropdown" prefWidth="250.0" promptText="Switch Account" style="-fx-cursor: hand;" styleClass="combo-box" />
-							</children>
-						</HBox>
-						<HBox>
-							<children>
-								<Label text="Address:" textFill="#ababab">
-									<HBox.margin>
-										<Insets right="10.0" />
-									</HBox.margin>
-								</Label>
-								<Label fx:id="addressLabel" prefWidth="375.0" textFill="#ababab" />
-							</children>
-						</HBox>
-						<HBox>
-							<children>
-								<Label text="Balance:" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-									<HBox.margin>
-										<Insets right="10.0" />
-									</HBox.margin>
-								</Label>
-								<Label fx:id="balanceLabel" text="0.00 UGD" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-								</Label>
-							</children>
-						</HBox>
-						<HBox>
-							<children>
-								<Label text="To Address:" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-									<HBox.margin>
-										<Insets right="10.0" />
-									</HBox.margin>
-								</Label>
-								<TextField fx:id="toAddress" prefWidth="300.0" />
-								<Label fx:id="balanceLabel1" text="Amount:" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-									<padding>
-										<Insets left="5.0" right="5.0" />
-									</padding>
-								</Label>
-								<TextField fx:id="sendAmount" prefWidth="150.0">
-									<HBox.margin>
-										<Insets right="10.0" />
-									</HBox.margin>
-								</TextField>
-								<Button contentDisplay="CENTER" onAction="#sendTokens" prefWidth="125.0" style="-fx-cursor: hand;" text="Send" />
-							</children>
-						</HBox>
-						<HBox>
-							<children>
-								<Label text="Gridnode Delegation:" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-									<HBox.margin>
-										<Insets right="10.0" />
-									</HBox.margin>
-								</Label>
-								<Label fx:id="delegationAmountLabel" text="0.00 UGD" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-								</Label>
-								<Label fx:id="unboundingAmountLabel" text="0.00 UGD" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-								</Label>
-								<Label fx:id="delegateLabel1" text="Amount:" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-									<padding>
-										<Insets left="5.0" right="5.0" />
-									</padding>
-								</Label>
-								<TextField fx:id="delegateAmountTextField" prefWidth="150.0">
-									<HBox.margin>
-										<Insets right="10.0" />
-									</HBox.margin>
-								</TextField>
-								<Button contentDisplay="CENTER" onAction="#delegateToGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
-								<Button contentDisplay="CENTER" onAction="#undelegateFromGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
-							</children>
-						</HBox>
-						<HBox>
-							<children>
-								<Label fx:id="stakingLabel1" text="Staking:" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-									<padding>
-										<Insets left="5.0" right="5.0" />
-									</padding>
-								</Label>
-								<Label fx:id="stakingAmountLabel" text="0.00 UGD" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-								</Label>
-						
-								<Label text="Validator Address:" textFill="#ababab">
-									<font>
-										<Font size="16.0" />
-									</font>
-									<HBox.margin>
-										<Insets right="10.0" />
-									</HBox.margin>
-								</Label>
-								<ComboBox fx:id="validatorListComboBox" prefWidth="300.0" />
-								
-						
-							</children>
-						</HBox>
-						<HBox>
-							<children>
-								<TextField fx:id="stakeAmountTextField" prefWidth="150.0">
-									<HBox.margin>
-										<Insets right="10.0" />
-									</HBox.margin>
-								</TextField>
-								<Button contentDisplay="CENTER" onAction="#delegateForStaking" prefWidth="125.0" style="-fx-cursor: hand;" text="Stake" />
-						
-							</children>
-						</HBox>
-						
-						<TableView fx:id="tableTransactions" VBox.vgrow="ALWAYS">
-							<columns>
-								<TableColumn fx:id="colTrx" text="Transactons List" prefWidth="550"/>
-							</columns>
-						</TableView>
-					</VBox>
-			
-			<!-- Latest Transactions -->
-			<VBox spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" visible="false" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2">
-				<Label style="-fx-font-weight: bold;" text="Latest Transactions" textFill="#ababab">
-					<font>
-						<Font size="15.0" />
-					</font>
-				</Label>
-				<ListView fx:id="transactionListView" prefHeight="100.0" />
-			</VBox>
-
-			<!-- Staking Rewards -->
-			<VBox fx:id="rewardsContainer" spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.rowIndex="3">
-				<Label style="-fx-font-weight: bold;" text="Staking Rewards" textFill="#ababab">
-					<font>
-						<Font size="15.0" />
-					</font>
-				</Label>
-				<ListView fx:id="totalsListView" prefHeight="200.0" prefWidth="200.0" styleClass="cosmos-list-cell" />
-			</VBox>
-
-			<!-- Delegations -->
-			<VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.columnIndex="1" GridPane.rowIndex="3">
-				<Label style="-fx-font-weight: bold;" text="Delegations" textFill="#ababab">
-					<font>
-						<Font size="15.0" />
-					</font>
-				</Label>
-				<ListView fx:id="delegationsListView" prefHeight="200.0" prefWidth="200.0" />
-				<!-- More delegation entries can be added here -->
-			</VBox>
-			<VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.columnIndex="2" GridPane.rowIndex="3">
-				<Button contentDisplay="CENTER" onAction="#createNewAccount" prefWidth="125.0" style="-fx-cursor: hand;" text="Create Account" />
-				<Button alignment="CENTER" onAction="#generateKeys" prefWidth="125.0" style="-fx-cursor: hand;" text="Generate Keys" />
-				<Button alignment="CENTER" onAction="#decryptPrivateKey" prefWidth="125.0" style="-fx-cursor: hand;" text="Test Decrypt" />
-
-				<!-- More delegation entries can be added here -->
-			</VBox>
-			<columnConstraints>
-				<ColumnConstraints percentWidth="33.33" />
-				<ColumnConstraints percentWidth="33.33" />
-				<ColumnConstraints percentWidth="33.33" />
-			</columnConstraints>
-			<padding>
-				<Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
-			</padding>
-			<rowConstraints>
-				<RowConstraints />
-				<RowConstraints maxHeight="346.0" minHeight="148.0" prefHeight="191.0" />
-				<RowConstraints maxHeight="321.0" minHeight="123.0" prefHeight="222.0" />
-				<RowConstraints maxHeight="214.0" minHeight="97.0" prefHeight="147.0" />
-			</rowConstraints>
-		</GridPane>
+      <TabPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <tabs>
+            <Tab closable="false" text="Dashboard">
+               <content>
+            		<GridPane alignment="CENTER" hgap="10" vgap="10">
+            
+            			<!-- Cosmos SDK Chain Dashboard Title -->
+            			<Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Unigrid Dashboard" textFill="#ababab" GridPane.columnIndex="0" GridPane.columnSpan="3" />
+            
+            			
+            					<!-- Account Information -->
+            					<VBox fx:id="commandsBox" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="2">
+            						<HBox alignment="CENTER_LEFT">
+            							<children>
+            								<Label style="-fx-font-weight: bold;" text="Account Information" textFill="#ababab">
+            									<font>
+            										<Font size="15.0" />
+            									</font>
+            								</Label>
+            								<Region HBox.hgrow="ALWAYS" />
+            
+            								<ComboBox fx:id="accountsDropdown" prefWidth="250.0" promptText="Switch Account" style="-fx-cursor: hand;" styleClass="combo-box" />
+            							</children>
+            						</HBox>
+            						<HBox>
+            							<children>
+            								<Label text="Address:" textFill="#ababab">
+            									<HBox.margin>
+            										<Insets right="10.0" />
+            									</HBox.margin>
+            								</Label>
+            								<Label fx:id="addressLabel" prefWidth="375.0" textFill="#ababab" />
+            							</children>
+            						</HBox>
+            						<HBox>
+            							<children>
+            								<Label text="Balance:" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            									<HBox.margin>
+            										<Insets right="10.0" />
+            									</HBox.margin>
+            								</Label>
+            								<Label fx:id="balanceLabel" text="0.00 UGD" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            								</Label>
+            							</children>
+            						</HBox>
+            						<HBox>
+            							<children>
+            								<Label text="To Address:" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            									<HBox.margin>
+            										<Insets right="10.0" />
+            									</HBox.margin>
+            								</Label>
+            								<TextField fx:id="toAddress" prefWidth="300.0" />
+            								<Label fx:id="balanceLabel1" text="Amount:" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            									<padding>
+            										<Insets left="5.0" right="5.0" />
+            									</padding>
+            								</Label>
+            								<TextField fx:id="sendAmount" prefWidth="150.0">
+            									<HBox.margin>
+            										<Insets right="10.0" />
+            									</HBox.margin>
+            								</TextField>
+            								<Button contentDisplay="CENTER" onAction="#sendTokens" prefWidth="125.0" style="-fx-cursor: hand;" text="Send" />
+            							</children>
+            						</HBox>
+            						<HBox>
+            							<children>
+            								<Label text="Gridnode Delegation:" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            									<HBox.margin>
+            										<Insets right="10.0" />
+            									</HBox.margin>
+            								</Label>
+            								<Label fx:id="delegationAmountLabel" text="0.00 UGD" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            								</Label>
+            								<Label fx:id="unboundingAmountLabel" text="0.00 UGD" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            								</Label>
+            								<Label fx:id="delegateLabel1" text="Amount:" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            									<padding>
+            										<Insets left="5.0" right="5.0" />
+            									</padding>
+            								</Label>
+            								<TextField fx:id="delegateAmountTextField" prefWidth="150.0">
+            									<HBox.margin>
+            										<Insets right="10.0" />
+            									</HBox.margin>
+            								</TextField>
+            								<Button contentDisplay="CENTER" onAction="#delegateToGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
+            								<Button contentDisplay="CENTER" onAction="#undelegateFromGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
+            							</children>
+            						</HBox>
+            						<HBox>
+            							<children>
+            								<Label fx:id="stakingLabel1" text="Staking:" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            									<padding>
+            										<Insets left="5.0" right="5.0" />
+            									</padding>
+            								</Label>
+            								<Label fx:id="stakingAmountLabel" text="0.00 UGD" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            								</Label>
+            						
+            								<Label text="Validator Address:" textFill="#ababab">
+            									<font>
+            										<Font size="16.0" />
+            									</font>
+            									<HBox.margin>
+            										<Insets right="10.0" />
+            									</HBox.margin>
+            								</Label>
+            								<ComboBox fx:id="validatorListComboBox" prefWidth="300.0" />
+            								
+            						
+            							</children>
+            						</HBox>
+            						<HBox>
+            							<children>
+            								<TextField fx:id="stakeAmountTextField" prefWidth="150.0">
+            									<HBox.margin>
+            										<Insets right="10.0" />
+            									</HBox.margin>
+            								</TextField>
+            								<Button contentDisplay="CENTER" onAction="#delegateForStaking" prefWidth="125.0" style="-fx-cursor: hand;" text="Stake" />
+            						
+            							</children>
+            						</HBox>
+            					</VBox>
+            			
+            			<!-- Latest Transactions -->
+            			<VBox spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" visible="false" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2">
+            				<Label style="-fx-font-weight: bold;" text="Latest Transactions" textFill="#ababab">
+            					<font>
+            						<Font size="15.0" />
+            					</font>
+            				</Label>
+            				<ListView fx:id="transactionListView" prefHeight="100.0" />
+            			</VBox>
+            
+            			<!-- Staking Rewards -->
+            			<VBox fx:id="rewardsContainer" spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.rowIndex="3">
+            				<Label style="-fx-font-weight: bold;" text="Staking Rewards" textFill="#ababab">
+            					<font>
+            						<Font size="15.0" />
+            					</font>
+            				</Label>
+            				<ListView fx:id="totalsListView" prefHeight="200.0" prefWidth="200.0" styleClass="cosmos-list-cell" />
+            			</VBox>
+            
+            			<!-- Delegations -->
+            			<VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            				<Label style="-fx-font-weight: bold;" text="Delegations" textFill="#ababab">
+            					<font>
+            						<Font size="15.0" />
+            					</font>
+            				</Label>
+            				<ListView fx:id="delegationsListView" prefHeight="200.0" prefWidth="200.0" />
+            				<!-- More delegation entries can be added here -->
+            			</VBox>
+            			<VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" GridPane.columnIndex="2" GridPane.rowIndex="3">
+            				<Button contentDisplay="CENTER" onAction="#createNewAccount" prefWidth="125.0" style="-fx-cursor: hand;" text="Create Account" />
+            				<Button alignment="CENTER" onAction="#generateKeys" prefWidth="125.0" style="-fx-cursor: hand;" text="Generate Keys" />
+            				<Button alignment="CENTER" onAction="#decryptPrivateKey" prefWidth="125.0" style="-fx-cursor: hand;" text="Test Decrypt" />
+            
+            				<!-- More delegation entries can be added here -->
+            			</VBox>
+            			<columnConstraints>
+            				<ColumnConstraints percentWidth="33.33" />
+            				<ColumnConstraints percentWidth="33.33" />
+            				<ColumnConstraints percentWidth="33.33" />
+            			</columnConstraints>
+            			<padding>
+            				<Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+            			</padding>
+            			<rowConstraints>
+            				<RowConstraints />
+            				<RowConstraints maxHeight="346.0" minHeight="148.0" prefHeight="191.0" />
+            				<RowConstraints maxHeight="321.0" minHeight="123.0" prefHeight="222.0" />
+            				<RowConstraints maxHeight="214.0" minHeight="97.0" prefHeight="147.0" />
+            			</rowConstraints>
+            		</GridPane>
+               </content>
+            </Tab>
+            <Tab closable="false" text="Transactions">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="tableTransactions" prefHeight="414.0" prefWidth="832.0">
+                           <columns>
+                              <TableColumn fx:id="colTrx" prefWidth="831.0" text="Transactons List" />
+                           </columns>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+         </tabs>
+      </TabPane>
 	</children>
 </AnchorPane>
