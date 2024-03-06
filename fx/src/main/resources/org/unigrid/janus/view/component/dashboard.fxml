@@ -53,6 +53,7 @@
 											</HBox.margin>
 										</Label>
 										<Label fx:id="addressLabel" prefWidth="375.0" textFill="#ababab" />
+										<Button fx:id="copyBtn" mnemonicParsing="false" text="Copy Address" />
 									</children>
 								</HBox>
 								<HBox>

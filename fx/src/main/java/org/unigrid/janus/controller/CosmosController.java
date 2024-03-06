@@ -116,7 +116,6 @@ import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import java.math.BigInteger;
 import org.bouncycastle.util.encoders.Hex;
-import cosmos.bank.v1beta1.QueryOuterClass;
 import cosmos.base.abci.v1beta1.Abci;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
@@ -125,15 +124,16 @@ import cosmos.tx.v1beta1.ServiceOuterClass;
 import cosmos.tx.v1beta1.TxOuterClass;
 import io.grpc.StatusRuntimeException;
 import java.security.MessageDigest;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.util.Callback;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.paint.Paint;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
@@ -205,6 +205,8 @@ public class CosmosController implements Initializable {
 	private Button importButton;
 	@FXML
 	private Button generateButton;
+	@FXML
+	private Button copyBtn;
 	@FXML
 	private StackPane importPane;
 	@FXML
@@ -377,6 +379,40 @@ public class CosmosController implements Initializable {
 		});
 	}
 	
+	@FXML
+	public void initCopyButton() {
+		
+		FontIcon fontIcon = new FontIcon("fas-clipboard");
+		fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+		copyBtn.setGraphic(fontIcon);
+
+		copyBtn.setOnAction(e -> {
+			final Clipboard cb = Clipboard.getSystemClipboard();
+			final ClipboardContent content1 = new ClipboardContent();
+			
+			Account selectedAccount = accountsData.getSelectedAccount();
+
+			content1.putString(selectedAccount.getAddress());
+			cb.setContent(content1);
+
+			if (SystemUtils.IS_OS_MAC_OSX) {
+				Notifications
+					.create()
+					.title("Address copied to clipboard")
+					.text("")
+					.position(Pos.TOP_RIGHT)
+					.showInformation();
+			} else {
+				Notifications
+					.create()
+					.title("Address copied to clipboard")
+					.text("")
+					.showInformation();
+			}
+		});
+		
+	}
+
 	@FXML
 	private void testBtn(ActionEvent event) {
 		// System.out.println("Transaction Response: " + cosmosTxList.getTxResponse());
@@ -1232,7 +1268,7 @@ public class CosmosController implements Initializable {
 				new Thread(fetchDataTask).start();
 			}
 		});
-
+		initCopyButton();
 	}
 
 	private void loadAccountData(String account) throws IOException, InterruptedException {
