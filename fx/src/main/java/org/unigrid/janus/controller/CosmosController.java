@@ -128,9 +128,12 @@ import java.security.MessageDigest;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
+import org.apache.commons.lang3.SystemUtils;
+import org.controlsfx.control.Notifications;
 import org.unigrid.janus.model.ValidatorInfo;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
 import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
@@ -921,6 +924,23 @@ public class CosmosController implements Initializable {
 		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
+		
+		// send desktop notofication
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.position(Pos.TOP_RIGHT)
+				.showInformation();
+		} else {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.showInformation();
+		}
+		
 	}
 		
 	public void delegation(boolean delegate, String validatorAddress) throws Exception {
@@ -954,6 +974,22 @@ public class CosmosController implements Initializable {
 		
 		System.out.println("Response Tx Delegate");
 		System.out.println(txResponse);
+		
+		// send desktop notofication
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.position(Pos.TOP_RIGHT)
+				.showInformation();
+		} else {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.showInformation();
+		}
 
 	}
 
