@@ -236,11 +236,20 @@
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView fx:id="tableTransactions" prefHeight="414.0" prefWidth="832.0">
+                        <TableView fx:id="tableTransactionsReceived" prefHeight="248.0" prefWidth="870.0">
                            <columns>
-                              <TableColumn fx:id="colTrx" prefWidth="831.0" text="Transactons List" />
+                              <TableColumn fx:id="colTrxReceived" prefWidth="831.0" text="Transactions Sent" />
                            </columns>
                         </TableView>
+                        <StackPane layoutY="296.0">
+                           <children>
+                              <TableView fx:id="tableTransactionsSent" prefHeight="291.0" prefWidth="887.0">
+                                <columns>
+                                  <TableColumn fx:id="colTrxSent" prefWidth="845.0" text="Transactions received" />
+                                </columns>
+                              </TableView>
+                           </children>
+                        </StackPane>
                      </children>
                   </AnchorPane>
               </content>

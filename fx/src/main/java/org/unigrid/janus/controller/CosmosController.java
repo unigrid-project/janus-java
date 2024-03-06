@@ -253,12 +253,17 @@ public class CosmosController implements Initializable {
 	@FXML
 	private ListView<Balance> totalsListView;
 	@FXML
-	private TableView<String> tableTransactions;
+	private TableView<String> tableTransactionsSent;
+	@FXML
+	private TableView<String> tableTransactionsReceived;
 	@FXML
 	private ComboBox validatorListComboBox;
 	@FXML
-	private TableColumn<String, String> colTrx;
-	private ObservableList<String> transactionsOb = FXCollections.observableArrayList();
+	private TableColumn<String, String> colTrxReceived;
+	@FXML
+	private TableColumn<String, String> colTrxSent;
+	private ObservableList<String> transactionsObReceived = FXCollections.observableArrayList();
+	private ObservableList<String> transactionsObSent = FXCollections.observableArrayList();
 	@FXML
 	private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
 	@FXML
@@ -275,7 +280,7 @@ public class CosmosController implements Initializable {
 	private AddressCosmosService addressService = new AddressCosmosService();
 	private AddressCosmos addressCosmos = new AddressCosmos();
 	private BigDecimal scaleFactor = new BigDecimal("100000000");
-
+	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		paneMap.put("importPane", importPane);
@@ -363,11 +368,12 @@ public class CosmosController implements Initializable {
 				}
 			});
 
-			colTrx.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+			colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+			colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 			fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
 		});
 	}
-
+	
 	@FXML
 	private void testBtn(ActionEvent event) {
 		// System.out.println("Transaction Response: " + cosmosTxList.getTxResponse());
@@ -916,7 +922,7 @@ public class CosmosController implements Initializable {
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
 	}
-
+		
 	public void delegation(boolean delegate, String validatorAddress) throws Exception {
 		byte[] privateKey = Hex.decode(getPrivateKeyHex());
 		System.out.println("privateKeyHex from delegate tokens: " + getPrivateKeyHex());
@@ -945,7 +951,7 @@ public class CosmosController implements Initializable {
 		} else if (!delegate && validatorAddress != null) {
 			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
 		}
-
+		
 		System.out.println("Response Tx Delegate");
 		System.out.println(txResponse);
 
@@ -1338,25 +1344,35 @@ public class CosmosController implements Initializable {
 
 	public void fetchAccountTransactions(String address) {
 		
-		List<TxOuterClass.Tx> transactions = new ArrayList<>();
+		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
+		List<TxOuterClass.Tx> transactionsReceived = new ArrayList<>();		
 
 		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
 		
 		// fetch sender transactions
 		String querySender = "transfer.sender='" + address + "'";		
-		transactions.addAll(fetchTransactions(querySender, stub));
+		transactionsSent.addAll(fetchTransactions(querySender, stub));
 
 		// fetch recipient transactions
 		String queryRecipient = "transfer.recipient='" + address + "'";
-		transactions.addAll(fetchTransactions(queryRecipient, stub));
+		transactionsReceived.addAll(fetchTransactions(queryRecipient, stub));
 
-		for (TxOuterClass.Tx tx : transactions) {
+		for (TxOuterClass.Tx tx : transactionsSent) {
 			byte[] txBytes = tx.toByteArray();
 			byte[] hashBytes = sha256(txBytes);
 			String transactionHash = bytesToHex(hashBytes);
-			transactionsOb.add(transactionHash);
+			transactionsObSent.add(transactionHash);
 		}
-		tableTransactions.setItems(transactionsOb);
+
+		for (TxOuterClass.Tx tx : transactionsReceived) {
+			byte[] txBytes = tx.toByteArray();
+			byte[] hashBytes = sha256(txBytes);
+			String transactionHash = bytesToHex(hashBytes);
+			transactionsObReceived.add(transactionHash);
+		}
+
+		tableTransactionsSent.setItems(transactionsObSent);
+		tableTransactionsReceived.setItems(transactionsObReceived);
 	}
 
 	private List<TxOuterClass.Tx> fetchTransactions(String query, ServiceGrpc.ServiceBlockingStub stub) {
