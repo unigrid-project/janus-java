@@ -100,83 +100,6 @@
 										<Button contentDisplay="CENTER" onAction="#sendTokens" prefWidth="125.0" style="-fx-cursor: hand;" text="Send" />
 									</children>
 								</HBox>
-								<HBox>
-									<children>
-										<Label text="Gridnode Delegation:" textFill="#ababab">
-											<font>
-												<Font size="16.0" />
-											</font>
-											<HBox.margin>
-												<Insets right="10.0" />
-											</HBox.margin>
-										</Label>
-										<Label fx:id="delegationAmountLabel" text="0.00 UGD" textFill="#ababab">
-											<font>
-												<Font size="16.0" />
-											</font>
-										</Label>
-										<Label fx:id="unboundingAmountLabel" text="0.00 UGD" textFill="#ababab">
-											<font>
-												<Font size="16.0" />
-											</font>
-										</Label>
-										<Label fx:id="delegateLabel1" text="Amount:" textFill="#ababab">
-											<font>
-												<Font size="16.0" />
-											</font>
-											<padding>
-												<Insets left="5.0" right="5.0" />
-											</padding>
-										</Label>
-										<TextField fx:id="delegateAmountTextField" prefWidth="150.0">
-											<HBox.margin>
-												<Insets right="10.0" />
-											</HBox.margin>
-										</TextField>
-										<Button contentDisplay="CENTER" onAction="#delegateToGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
-										<Button contentDisplay="CENTER" onAction="#undelegateFromGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
-									</children>
-								</HBox>
-								<HBox>
-									<children>
-										<Label fx:id="stakingLabel1" text="Staking:" textFill="#ababab">
-											<font>
-												<Font size="16.0" />
-											</font>
-											<padding>
-												<Insets left="5.0" right="5.0" />
-											</padding>
-										</Label>
-										<Label fx:id="stakingAmountLabel" text="0.00 UGD" textFill="#ababab">
-											<font>
-												<Font size="16.0" />
-											</font>
-										</Label>
-            						
-										<Label text="Validator Address:" textFill="#ababab">
-											<font>
-												<Font size="16.0" />
-											</font>
-											<HBox.margin>
-												<Insets right="10.0" />
-											</HBox.margin>
-										</Label>
-										<ComboBox fx:id="validatorListComboBox" prefWidth="300.0" />
-            								
-            						
-									</children>
-								</HBox>
-								<HBox>
-									<children>
-										<TextField fx:id="stakeAmountTextField" prefWidth="150.0">
-											<HBox.margin>
-												<Insets right="10.0" />
-											</HBox.margin>
-										</TextField>
-										<Button contentDisplay="CENTER" onAction="#delegateForStaking" prefWidth="125.0" style="-fx-cursor: hand;" text="Stake" />
-            						
-									</children>
-								</HBox>
 							</VBox>
             			
 							<!-- Latest Transactions -->
@@ -249,6 +172,143 @@
 								</TableView>
 							</children>
 						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab closable="false" text="Gridnode">
+					<content>
+						<GridPane alignment="CENTER" hgap="10" vgap="10">
+							<columnConstraints>
+								<ColumnConstraints percentWidth="33.33" />
+								<ColumnConstraints percentWidth="33.33" />
+								<ColumnConstraints percentWidth="33.33" />
+							</columnConstraints>
+							<padding>
+								<Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+							</padding>
+							<rowConstraints>
+								<RowConstraints />
+								<RowConstraints maxHeight="346.0" minHeight="148.0" prefHeight="191.0" />
+								<RowConstraints maxHeight="321.0" minHeight="123.0" prefHeight="222.0" />
+								<RowConstraints maxHeight="214.0" minHeight="97.0" prefHeight="147.0" />
+							</rowConstraints>
+							<children>
+								<Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Unigrid Dashboard" textFill="#ababab" GridPane.columnIndex="0" GridPane.columnSpan="3" />
+								<VBox fx:id="commandsBox1" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="2">
+									<children>
+										<VBox prefHeight="200.0" prefWidth="100.0">
+											<children>
+												<HBox>
+													<children>
+														<Label text="Delegated:" textFill="#ababab">
+															<font>
+																<Font size="16.0" />
+															</font>
+														</Label>
+														<Label fx:id="delegationAmountLabel" text="0.00 UGD" textFill="#ababab">
+															<font>
+																<Font size="16.0" />
+															</font>
+														</Label>
+														<Label text="Unbounding:" textFill="#ababab">
+															<font>
+																<Font size="16.0" />
+															</font>
+															<HBox.margin>
+																<Insets right="10.0" />
+															</HBox.margin>
+														</Label>
+														<Label fx:id="unboundingAmountLabel" text="0.00 UGD" textFill="#ababab">
+															<font>
+																<Font size="16.0" />
+															</font>
+														</Label>
+													</children>
+												</HBox>
+												<HBox prefHeight="100.0" prefWidth="200.0">
+													<children>
+														<Label fx:id="delegateLabel1" text="Amount:" textFill="#ababab">
+															<font>
+																<Font size="16.0" />
+															</font>
+															<padding>
+																<Insets left="5.0" right="5.0" />
+															</padding>
+														</Label>
+														<TextField fx:id="delegateAmountTextField" prefWidth="150.0" />
+														<Button contentDisplay="CENTER" onAction="#delegateToGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
+														<Button contentDisplay="CENTER" onAction="#undelegateFromGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
+													</children>
+												</HBox>
+											</children>
+										</VBox>
+									</children>
+								</VBox>
+							</children>
+						</GridPane>
+					</content>
+				</Tab>
+				<Tab closable="false" text="Staking">
+					<content>
+						<GridPane alignment="CENTER" hgap="10" vgap="10">
+							<columnConstraints>
+								<ColumnConstraints percentWidth="33.33" />
+								<ColumnConstraints percentWidth="33.33" />
+								<ColumnConstraints percentWidth="33.33" />
+							</columnConstraints>
+							<padding>
+								<Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+							</padding>
+							<rowConstraints>
+								<RowConstraints />
+								<RowConstraints maxHeight="346.0" minHeight="148.0" prefHeight="191.0" />
+								<RowConstraints maxHeight="321.0" minHeight="123.0" prefHeight="222.0" />
+								<RowConstraints maxHeight="214.0" minHeight="97.0" prefHeight="147.0" />
+							</rowConstraints>
+							<children>
+								<Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Unigrid Dashboard" textFill="#ababab" GridPane.columnIndex="0" GridPane.columnSpan="3" />
+								<VBox fx:id="commandsBox2" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="2">
+									<children>
+										<VBox prefHeight="200.0" prefWidth="100.0">
+											<children>
+												<HBox>
+													<children>
+														<Label fx:id="stakingLabel1" text="Staking:" textFill="#ababab">
+															<font>
+																<Font size="16.0" />
+															</font>
+															<padding>
+																<Insets left="5.0" right="5.0" />
+															</padding>
+														</Label>
+														<Label fx:id="stakingAmountLabel" text="0.00 UGD" textFill="#ababab">
+															<font>
+																<Font size="16.0" />
+															</font>
+														</Label>
+													</children>
+												</HBox>
+												<HBox>
+													<children>
+														<Label text="Validator Address:" textFill="#ababab">
+															<font>
+																<Font size="16.0" />
+															</font>
+														</Label>
+														<ComboBox fx:id="validatorListComboBox" prefWidth="300.0" />
+														<TextField fx:id="stakeAmountTextField" prefWidth="150.0">
+															<HBox.margin>
+																<Insets right="10.0" />
+															</HBox.margin>
+														</TextField>
+														<Button contentDisplay="CENTER" onAction="#delegateForStaking" prefWidth="125.0" style="-fx-cursor: hand;" text="Stake" />
+													</children>
+												</HBox>
+											</children>
+										</VBox>
+									</children>
+								</VBox>
+							</children>
+						</GridPane>
 					</content>
 				</Tab>
 			</tabs>
