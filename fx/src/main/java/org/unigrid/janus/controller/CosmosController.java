@@ -960,6 +960,8 @@ public class CosmosController implements Initializable {
 		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
+		toAddress.setText("");
+		sendAmount.setText("");
 		
 		// send desktop notofication
 		if (SystemUtils.IS_OS_MAC_OSX) {
@@ -1009,6 +1011,8 @@ public class CosmosController implements Initializable {
 		}
 		
 		System.out.println("Response Tx Delegate");
+		delegateAmountTextField.setText("");
+		stakeAmountTextField.setText("");
 		System.out.println(txResponse);
 		
 		// send desktop notofication
@@ -1053,6 +1057,7 @@ public class CosmosController implements Initializable {
 		} else {
 			System.out.println("ERROR: Validator address is empty");
 		}
+		
 
 	}
 
