@@ -280,6 +280,9 @@ public class CosmosController implements Initializable {
 	@Inject
 	@Named("transactionResponse")
 	private TransactionResponse txModel;
+	
+	static final String TOKEN_DECIMAL_VALUE = "1000000";
+	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
 
 	@FXML
 	private ComboBox accountsDropdown;
@@ -288,7 +291,7 @@ public class CosmosController implements Initializable {
 	private AddressCosmosService addressService = new AddressCosmosService();
 	private AddressCosmos addressCosmos = new AddressCosmos();
 	private BigDecimal scaleFactor = new BigDecimal("100000000");
-	
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		paneMap.put("importPane", importPane);
@@ -384,10 +387,10 @@ public class CosmosController implements Initializable {
 			fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
 		});
 	}
-	
+
 	@FXML
 	public void initCopyButton() {
-		
+
 		FontIcon fontIcon = new FontIcon("fas-clipboard");
 		fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
 		copyBtn.setGraphic(fontIcon);
@@ -395,7 +398,7 @@ public class CosmosController implements Initializable {
 		copyBtn.setOnAction(e -> {
 			final Clipboard cb = Clipboard.getSystemClipboard();
 			final ClipboardContent content1 = new ClipboardContent();
-			
+
 			Account selectedAccount = accountsData.getSelectedAccount();
 
 			content1.putString(selectedAccount.getAddress());
@@ -416,7 +419,7 @@ public class CosmosController implements Initializable {
 					.showInformation();
 			}
 		});
-		
+
 	}
 
 	@FXML
@@ -968,7 +971,7 @@ public class CosmosController implements Initializable {
 		System.out.println(txResponse);
 		toAddress.setText("");
 		sendAmount.setText("");
-		
+
 		// send desktop notofication
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			Notifications
@@ -984,9 +987,9 @@ public class CosmosController implements Initializable {
 				.text(txResponse.getTxhash())
 				.showInformation();
 		}
-		
+
 	}
-		
+
 	public void delegation(boolean delegate, String validatorAddress) throws Exception {
 		byte[] privateKey = Hex.decode(getPrivateKeyHex());
 		System.out.println("privateKeyHex from delegate tokens: " + getPrivateKeyHex());
@@ -1015,12 +1018,12 @@ public class CosmosController implements Initializable {
 		} else if (!delegate && validatorAddress != null) {
 			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
 		}
-		
+
 		System.out.println("Response Tx Delegate");
 		delegateAmountTextField.setText("");
 		stakeAmountTextField.setText("");
 		System.out.println(txResponse);
-		
+
 		// send desktop notofication
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			Notifications
@@ -1063,7 +1066,6 @@ public class CosmosController implements Initializable {
 		} else {
 			System.out.println("ERROR: Validator address is empty");
 		}
-		
 
 	}
 
@@ -1249,6 +1251,7 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
+							updateCollateralDisplay();
 							getValidators();
 							// Update UI with the balance received from the response
 							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
@@ -1334,7 +1337,10 @@ public class CosmosController implements Initializable {
 
 		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 		QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
-		return balanceResponse.getBalance().getAmount();
+		BigDecimal rawBalance = new BigDecimal(balanceResponse.getBalance().getAmount());
+		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(TOKEN_DECIMAL_VALUE), 8, RoundingMode.HALF_UP);
+
+		return scaledBalance.toString();
 
 	}
 
@@ -1347,7 +1353,7 @@ public class CosmosController implements Initializable {
 		QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
 		return delegatedAmountResponse.getAmount();
 	}
-	
+
 	public void getValidators() {
 		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
 		cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest request = cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest.newBuilder()
@@ -1362,10 +1368,10 @@ public class CosmosController implements Initializable {
 				String operatorAddress = validator.getOperatorAddress();
 
 				BigInteger rate = new BigInteger(validator.getCommission().getCommissionRates().getRate());
-				BigInteger devideDecimals = new BigInteger("10000000000000000");
+				BigInteger devideDecimals = new BigInteger(VALIDATORS_DECIMAL_DEVIDER);
 				BigInteger commission = rate.divide(devideDecimals);
-				
-				String commissionPercentage = commission.toString() + "%"; 
+
+				String commissionPercentage = commission.toString() + "%";
 
 				validatorInfoList.add(new ValidatorInfo(moniker, operatorAddress, commissionPercentage));
 			}
@@ -1424,16 +1430,16 @@ public class CosmosController implements Initializable {
 			System.out.println("Error fetching collateral");
 		}
 	}
-
+	
 	public void fetchAccountTransactions(String address) {
-		
+
 		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
-		List<TxOuterClass.Tx> transactionsReceived = new ArrayList<>();		
+		List<TxOuterClass.Tx> transactionsReceived = new ArrayList<>();
 
 		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
-		
+
 		// fetch sender transactions
-		String querySender = "transfer.sender='" + address + "'";		
+		String querySender = "transfer.sender='" + address + "'";
 		transactionsSent.addAll(fetchTransactions(querySender, stub));
 
 		// fetch recipient transactions
@@ -1463,7 +1469,7 @@ public class CosmosController implements Initializable {
 			.setLimit(10)
 			.setQuery(query)
 			.build();
-		
+
 		return stub.getTxsEvent(request).getTxsList();
 	}
 
