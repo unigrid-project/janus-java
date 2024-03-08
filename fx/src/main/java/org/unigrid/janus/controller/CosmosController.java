@@ -277,7 +277,7 @@ public class CosmosController implements Initializable {
 	@Inject
 	@Named("transactionResponse")
 	private TransactionResponse txModel;
-	
+
 	static final String TOKEN_DECIMAL_VALUE = "1000000";
 	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
 
@@ -1245,7 +1245,7 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							updateCollateralDisplay();
+							System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
 							getValidators();
 							// Update UI with the balance received from the response
 							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
@@ -1424,7 +1424,20 @@ public class CosmosController implements Initializable {
 			System.out.println("Error fetching collateral");
 		}
 	}
-	
+
+	private long gridnodeNumberForUser() {
+
+		int amountPerGridnode;
+		long stakedAmount = getDelegatedBalance(accountsData.getSelectedAccount().getAddress());
+		if (hedgehog.fetchCollateralRequired()) {
+			amountPerGridnode = collateral.getAmount();
+			long gridnodeNumber = stakedAmount / amountPerGridnode;
+			return gridnodeNumber;
+		}
+
+		throw new IllegalStateException("Collateral amount was not fetched.");
+	}
+
 	public void fetchAccountTransactions(String address) {
 
 		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
