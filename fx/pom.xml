@@ -384,11 +384,11 @@
 								<mkdir dir="${project.basedir}/src/main/proto/cosmos_proto"/>
 								<mkdir dir="${project.basedir}/src/main/proto/cosmos/msg/v1"/>
 								<mkdir dir="${project.basedir}/src/main/proto/cosmos/base/query/v1beta1"/>
-								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/bank/v1beta1/query.proto"
+								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/bank/v1beta1/query.proto"
 								     dest="${project.basedir}/src/main/proto/cosmos/bank/v1beta1"
 								     verbose="false"
 								     usetimestamp="true"/>
-								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/bank/v1beta1/bank.proto"
+								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/bank/v1beta1/bank.proto"
 								     dest="${project.basedir}/src/main/proto/cosmos/bank/v1beta1"
 								     verbose="false"
 								     usetimestamp="true"/>
@@ -405,15 +405,15 @@
 								     verbose="false"
 								     usetimestamp="true"/>
                                
-								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/crypto/multisig/v1beta1/multisig.proto"
+								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/crypto/multisig/v1beta1/multisig.proto"
 								     dest="${project.basedir}/src/main/proto/cosmos/crypto/multisig/v1beta1"
 								     verbose="false"
 								     usetimestamp="true"/>
-								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/base/v1beta1/coin.proto"
+								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/base/v1beta1/coin.proto"
 								     dest="${project.basedir}/src/main/proto/cosmos/base/v1beta1"
 								     verbose="false"
 								     usetimestamp="true"/>
-								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/tx/signing/v1beta1/signing.proto"
+								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/tx/signing/v1beta1/signing.proto"
 								     dest="${project.basedir}/src/main/proto/cosmos/tx/signing/v1beta1"
 								     verbose="false"
 								     usetimestamp="true"/>
@@ -425,12 +425,12 @@
 								     dest="${project.basedir}/src/main/proto/cosmos/msg/v1"
 								     verbose="false"
 								     usetimestamp="true"/>
-								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.2/proto/cosmos/base/query/v1beta1/pagination.proto"
+								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/base/query/v1beta1/pagination.proto"
 								     dest="${project.basedir}/src/main/proto/cosmos/base/query/v1beta1"
 								     verbose="false"
 								     usetimestamp="true"/>
-								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/bank/v1beta1/tx.proto"
-								     dest="${project.basedir}/src/main/proto/cosmos/bank/v1beta1"
+								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.4/proto/cosmos/bank/v1beta1/tx.proto"
+								     dest="${project.build.directory}/proto/cosmos/bank/v1beta1"
 								     verbose="false"
 								     usetimestamp="true"/>
 							</target>
