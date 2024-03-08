@@ -20,8 +20,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import org.unigrid.janus.model.cdi.Eager;
 
@@ -33,19 +32,16 @@ import org.unigrid.janus.view.PromptScreen;
 public class PromptScreenController {
 	@Inject private PromptScreen promptScreen;
 
-	@FXML private TextArea textArea;
-	@FXML private TextField textField;
+	@FXML private Label promptLabel;
 
 	private PromptRequest currentPromptRequest;
 
 	public void setText(String s) {
-		textArea.setText(s);
-		textField.setText(s);
+		promptLabel.setText(s);
 	}
 
 	private void onPromptRequest(@Observes PromptRequest request) {
-		textArea.setText(request.getType().getLabelText());
-		textField.setText(request.getType().getLabelText());
+		promptLabel.setText(request.getType().getLabelText());
 		currentPromptRequest = request;
 		promptScreen.show();
 	}
