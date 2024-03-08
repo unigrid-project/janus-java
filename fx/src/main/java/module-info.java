@@ -67,6 +67,10 @@ module fx {
 	requires io.grpc.protobuf;
 	requires com.google.errorprone.annotations;
 	requires proto.google.common.protos;
+	requires com.google.protobuf.util;
+	requires okhttp3;
+	requires org.apache.commons.collections4;
+	requires crypto;
 
 	uses org.update4j.service.Launcher;
 

@@ -20,3 +20,5 @@ fx/unigrid-cli
 
 .jqwik-database
 .idea/
+
+fx/src/main/proto/

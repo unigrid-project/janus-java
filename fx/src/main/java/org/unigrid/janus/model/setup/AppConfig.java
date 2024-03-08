@@ -22,10 +22,11 @@ import lombok.Data;
 @Data
 @ApplicationScoped
 public class AppConfig {
-	//private int port = 52884;
+//	private int port = 52884;
 	// TESTNET
 	private int port = 39886;
-
+	// DEVNET
+//	private int port = 40001;
 	private String baseUrl = "https://127.0.0.1";
 
 	public String getCollateralRequiredUri() {

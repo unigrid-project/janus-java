@@ -20,6 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cosmos.bank.v1beta1.QueryGrpc;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
 import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
+
+import com.google.protobuf.Any;
+import cosmos.auth.v1beta1.Auth.BaseAccount;
+import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountRequest;
+import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountResponse;
+
 import java.math.BigDecimal;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -43,8 +49,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,8 +114,30 @@ import org.unigrid.janus.model.signal.MnemonicState;
 import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
 import org.unigrid.janus.utils.AddressUtil;
-import org.unigrid.janus.utils.CosmosCredentials;
 import org.unigrid.janus.view.backing.CosmosTxList;
+import java.math.BigInteger;
+import org.bouncycastle.util.encoders.Hex;
+import cosmos.base.abci.v1beta1.Abci;
+import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
+import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
+import cosmos.tx.v1beta1.ServiceGrpc;
+import cosmos.tx.v1beta1.ServiceOuterClass;
+import cosmos.tx.v1beta1.TxOuterClass;
+import io.grpc.StatusRuntimeException;
+import java.security.MessageDigest;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Pos;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.paint.Paint;
+import org.apache.commons.lang3.SystemUtils;
+import org.controlsfx.control.Notifications;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.unigrid.janus.model.ValidatorInfo;
+import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
+import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -151,6 +179,10 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Label balanceLabel;
 	@FXML
+	private Label stakingAmountLabel;
+	@FXML
+	private Label unboundingAmountLabel;
+	@FXML
 	private TextArea mnemonicArea;
 	@FXML
 	private TextArea seedPhraseTextArea;
@@ -176,6 +208,8 @@ public class CosmosController implements Initializable {
 	private Button importButton;
 	@FXML
 	private Button generateButton;
+	@FXML
+	private Button copyBtn;
 	@FXML
 	private StackPane importPane;
 	@FXML
@@ -219,7 +253,25 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Label delegationAmountLabel;
 	@FXML
+	private TextField delegateAmountTextField;
+	@FXML
+	private TextField validatorAddressTextField;
+	@FXML
+	private TextField stakeAmountTextField;
+	@FXML
 	private ListView<Balance> totalsListView;
+	@FXML
+	private TableView<String> tableTransactionsSent;
+	@FXML
+	private TableView<String> tableTransactionsReceived;
+	@FXML
+	private ComboBox validatorListComboBox;
+	@FXML
+	private TableColumn<String, String> colTrxReceived;
+	@FXML
+	private TableColumn<String, String> colTrxSent;
+	private ObservableList<String> transactionsObReceived = FXCollections.observableArrayList();
+	private ObservableList<String> transactionsObSent = FXCollections.observableArrayList();
 	@FXML
 	private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
 	@FXML
@@ -236,7 +288,7 @@ public class CosmosController implements Initializable {
 	private AddressCosmosService addressService = new AddressCosmosService();
 	private AddressCosmos addressCosmos = new AddressCosmos();
 	private BigDecimal scaleFactor = new BigDecimal("100000000");
-
+	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		paneMap.put("importPane", importPane);
@@ -326,7 +378,45 @@ public class CosmosController implements Initializable {
 					}
 				}
 			});
+
+			colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+			colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+			fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
 		});
+	}
+	
+	@FXML
+	public void initCopyButton() {
+		
+		FontIcon fontIcon = new FontIcon("fas-clipboard");
+		fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
+		copyBtn.setGraphic(fontIcon);
+
+		copyBtn.setOnAction(e -> {
+			final Clipboard cb = Clipboard.getSystemClipboard();
+			final ClipboardContent content1 = new ClipboardContent();
+			
+			Account selectedAccount = accountsData.getSelectedAccount();
+
+			content1.putString(selectedAccount.getAddress());
+			cb.setContent(content1);
+
+			if (SystemUtils.IS_OS_MAC_OSX) {
+				Notifications
+					.create()
+					.title("Address copied to clipboard")
+					.text("")
+					.position(Pos.TOP_RIGHT)
+					.showInformation();
+			} else {
+				Notifications
+					.create()
+					.title("Address copied to clipboard")
+					.text("")
+					.showInformation();
+			}
+		});
+		
 	}
 
 	@FXML
@@ -515,6 +605,7 @@ public class CosmosController implements Initializable {
 
 	private String getPasswordFromUser() {
 		// just use this default for testing right now
+
 		return "pickles";
 	}
 
@@ -532,7 +623,7 @@ public class CosmosController implements Initializable {
 
 			// Prompt the user to enter the password
 			String password = "";
-			//take care of this= getPasswordFromUser();
+			// take care of this= getPasswordFromUser();
 			if (password == null) {
 				System.out.println("Password input cancelled!");
 				return;
@@ -684,7 +775,7 @@ public class CosmosController implements Initializable {
 			"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
 		String path = String.format("m/44'/118'/0'/0/%d", index);
-		CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
+		org.unigrid.janus.utils.CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
 			"unigrid");
 
 		System.out.println("Address from creds: " + creds.getAddress());
@@ -765,49 +856,215 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	@FXML
-	private void checkBalance(ActionEvent event) {
-		QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
-			.setAddress(addressField.getText())
-			.setDenom("ugd")
+	public String getPrivateKeyHex() {
+		try {
+			Account selectedAccount = accountsData.getSelectedAccount();
+			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+
+			String password = getPasswordFromUser();
+			if (password == null) {
+				System.out.println("Password is null! Error in getPasswordFromUser method.");
+				return null;
+			}
+			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey + " password: " + password);
+			// Decrypt the private key
+			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+			if (privateKeyBytes == null) {
+				System.out.println("Decryption returned null! Check decryption method.");
+				return null;
+			}
+
+			// Convert the private key bytes to a HEX string
+			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
+			System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
+
+			return privateKeyHex;
+		} catch (Exception e) {
+			System.err.println("Error while decrypting private key: " + e.getMessage());
+			e.printStackTrace(); // Print the full stack trace for detailed error information
+			return null;
+		}
+	}
+
+	private long getSequence(String address) {
+		// Set up the auth query client
+		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
+			.newBlockingStub(grpcService.getChannel());
+
+		// Prepare the account query request
+		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder()
+			.setAddress(address)
 			.build();
 
-		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
-		QueryBalanceResponse response = stub.balance(request);
-		System.out.println("like balance field: " + response.getBalance().getAmount());
-		System.out.println("balance getBalance: " + response.getBalance());
-		System.out.println("balance to string: " + response.toString());
-		balanceField.setText(response.getBalance().getAmount());
+		try {
+			// Query the account information
+			QueryAccountResponse response = authQueryClient.account(accountRequest);
 
-//uncomment all		try {
-//			CosmosRestApiClient unigridApiService = new CosmosRestApiClient(
-//				"http://localhost:1317", "cosmosdaemon", "ugd");
-//			BigDecimal balance = unigridApiService
-//				.getBalanceInAtom(addressField.getText());
-//			DecimalFormat formatter = new DecimalFormat("0.00000000");
-//			String formattedBalance = formatter.format(balance);
-//			balanceField.setText(formattedBalance);
-//		} catch (Exception ex) {
-//			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-//				ex);
-//		}
+			Any accountAny = response.getAccount();
+			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
+			// Process baseAccount as needed
+			System.out.println("SEQUENCE NUMBER: " + baseAccount.getSequence());
+			return baseAccount.getSequence();
+
+		} catch (Exception e) {
+			// Handle exceptions (e.g., account not found, gRPC errors, unpacking errors)
+			e.printStackTrace();
+			return -1; // or handle it as per your application's requirement
+		}
+
+	}
+
+	public static byte[] longToBytes(long value) {
+		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+		buffer.putLong(value);
+		return buffer.array();
+	}
+
+	private long getAccountNumber(String address) {
+		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
+			.newBlockingStub(grpcService.getChannel());
+		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder().setAddress(address).build();
+
+		try {
+			QueryAccountResponse response = authQueryClient.account(accountRequest);
+			Any accountAny = response.getAccount();
+			System.out.println("Type URL in getAccountNumber: " + accountAny.getTypeUrl());
+			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
+			System.out.println("baseAccount.getPubKey(): " + baseAccount.getPubKey()
+				+ " \naddress :" + baseAccount.getAddress());
+
+			// Process baseAccount as needed
+			// we need the account number and not the sequence here
+			System.out.println("ACCOUNT NUMBER: " + baseAccount.getAccountNumber());
+			return baseAccount.getAccountNumber();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return -1; // Handle this as per your application's requirement
+		}
 	}
 
 	@FXML
-	private void sendTokens(ActionEvent event) {
-		try {
-			String toAddress = this.toAddress.getText();
-			String sendAmount = this.sendAmount.getText();
-			String password = "pickles"; // TODO change to user input
+	public void sendTokens() throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex());
 
-			String response = "crap";
-			cosmosClient.sendTokens(toAddress, sendAmount, "ugd", password);
+		System.out.println("privateKeyHex from send: " + getPrivateKeyHex());
 
-			System.out.println("Response: " + response);
-		} catch (Exception ex) {
-			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = getAccountNumber(selectedAccount.getAddress());
+
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-testnet-4");
+
+		SendInfo sendMsg = SendInfo.builder()
+			.credentials(credentials)
+			.toAddress(toAddress.getText())
+			.amountInAtom(new BigDecimal(sendAmount.getText()))
+			.build();
+
+		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
+		System.out.println("RESPONSE");
+		System.out.println(txResponse);
+		toAddress.setText("");
+		sendAmount.setText("");
+		
+		// send desktop notofication
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.position(Pos.TOP_RIGHT)
+				.showInformation();
+		} else {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.showInformation();
 		}
+		
+	}
+		
+	public void delegation(boolean delegate, String validatorAddress) throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+		System.out.println("privateKeyHex from delegate tokens: " + getPrivateKeyHex());
+
+		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = getAccountNumber(selectedAccount.getAddress());
+
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-testnet-4");
+
+		long amount = 0;
+		if (validatorAddress == null) {
+			amount = Long.parseLong(delegateAmountTextField.getText());
+		} else {
+			amount = Long.parseLong(stakeAmountTextField.getText());
+		}
+
+		Abci.TxResponse txResponse = null;
+
+		if (delegate) {
+			txResponse = transactionService.sendDelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+		} else if (!delegate && validatorAddress == null) {
+			txResponse = transactionService.sendUndelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+		} else if (!delegate && validatorAddress != null) {
+			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
+		}
+		
+		System.out.println("Response Tx Delegate");
+		delegateAmountTextField.setText("");
+		stakeAmountTextField.setText("");
+		System.out.println(txResponse);
+		
+		// send desktop notofication
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.position(Pos.TOP_RIGHT)
+				.showInformation();
+		} else {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.showInformation();
+		}
+
+	}
+
+	@FXML
+	public void delegateToGridnode() throws Exception {
+		delegation(true, null);
+	}
+
+	@FXML
+	public void undelegateFromGridnode() throws Exception {
+		delegation(false, null);
+	}
+
+	@FXML
+	public void delegateForStaking() throws Exception {
+		ValidatorInfo selectedValidator = (ValidatorInfo) validatorListComboBox.getSelectionModel().getSelectedItem();
+		String operatorAddress = "";
+		if (selectedValidator != null) {
+			operatorAddress = selectedValidator.getOperatorAddress();
+			System.out.println("validator address: " + operatorAddress);
+			// Now you can use the operatorAddress for further processing
+		}
+		if (!"".equals(operatorAddress)) {
+			delegation(false, operatorAddress);
+		} else {
+			System.out.println("ERROR: Validator address is empty");
+		}
+		
+
 	}
 
 	private void handleTabRequest(@Observes TabRequestSignal request) {
@@ -991,26 +1248,17 @@ public class CosmosController implements Initializable {
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
 					protected Void call() throws Exception {
-
-						// Prepare the gRPC request
-						QueryBalanceRequest request = QueryBalanceRequest.newBuilder()
-							.setAddress(selectedAccount.get().getAddress())
-							.setDenom("ugd") // Add this line to set the denomination
-							.build();
-
-						QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
-						// Execute the gRPC request
-						QueryBalanceResponse response = stub.balance(request);
-						System.out.println("like balance field: " + response.getBalance().getAmount());
-						System.out.println("balance getBalance: " + response.getBalance());
-						System.out.println("balance to string: " + response.toString());
-
 						Platform.runLater(() -> {
+							getValidators();
 							// Update UI with the balance received from the response
-							balanceLabel.setText(response.getBalance().getAmount() + " ugd");
+							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
+							delegationAmountLabel.setText(getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
+							unboundingAmountLabel.setText(getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
+							stakingAmountLabel.setText(getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
 						});
 
-						// Load transactions and other account data (assuming these methods are adapted for gRPC)
+						// Load transactions and other account data (assuming these methods are adapted
+						// for gRPC)
 						cosmosTxList.loadTransactions(10);
 						loadAccountData(accountsData.getSelectedAccount().getAddress());
 
@@ -1031,7 +1279,7 @@ public class CosmosController implements Initializable {
 				new Thread(fetchDataTask).start();
 			}
 		});
-
+		initCopyButton();
 	}
 
 	private void loadAccountData(String account) throws IOException, InterruptedException {
@@ -1078,6 +1326,85 @@ public class CosmosController implements Initializable {
 
 	}
 
+	private String getWalletBalance(String address) {
+		QueryBalanceRequest balanceRequest = QueryBalanceRequest.newBuilder()
+			.setAddress(address)
+			.setDenom("ugd") // Add this line to set the denomination
+			.build();
+
+		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
+		QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
+		return balanceResponse.getBalance().getAmount();
+
+	}
+
+	private long getDelegatedBalance(String address) {
+		pax.gridnode.QueryGrpc.QueryBlockingStub delegateStub = pax.gridnode.QueryGrpc.newBlockingStub(grpcService.getChannel());
+
+		QueryDelegatedAmountRequest delegatedAmountRequest = QueryDelegatedAmountRequest.newBuilder()
+			.setDelegatorAddress(address)
+			.build();
+		QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
+		return delegatedAmountResponse.getAmount();
+	}
+	
+	public void getValidators() {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest request = cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest.newBuilder()
+			.setStatus("BOND_STATUS_BONDED")
+			.build();
+		try {
+			cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsResponse response = stub.validators(request);
+			System.out.println("Number of validators: " + response.getValidatorsCount());
+			List<ValidatorInfo> validatorInfoList = new ArrayList<>();
+			for (cosmos.staking.v1beta1.Staking.Validator validator : response.getValidatorsList()) {
+				String moniker = validator.getDescription().getMoniker();
+				String operatorAddress = validator.getOperatorAddress();
+
+				BigInteger rate = new BigInteger(validator.getCommission().getCommissionRates().getRate());
+				BigInteger devideDecimals = new BigInteger("10000000000000000");
+				BigInteger commission = rate.divide(devideDecimals);
+				
+				String commissionPercentage = commission.toString() + "%"; 
+
+				validatorInfoList.add(new ValidatorInfo(moniker, operatorAddress, commissionPercentage));
+			}
+
+			validatorListComboBox.getItems().setAll(validatorInfoList);
+		} catch (StatusRuntimeException e) {
+			System.err.println("RPC error: " + e.getStatus());
+		}
+
+	}
+
+	private long getStakedBalance(String address) {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		QueryDelegatorDelegationsRequest stakingRequest = QueryDelegatorDelegationsRequest.newBuilder()
+			.setDelegatorAddr(address)
+			.build();
+
+		QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
+
+		long totalStaked = stakingResponse.getDelegationResponsesList().stream()
+			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
+			.sum();
+
+		return totalStaked;
+	}
+
+	private long getUnboundingBalance(String address) {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub unboundingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest unboundingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest.newBuilder()
+			.setDelegatorAddr(address)
+			.build();
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsResponse unboundingResponse = unboundingStub.delegatorUnbondingDelegations(unboundingRequest);
+		long totalUnbondingAmount = unboundingResponse.getUnbondingResponsesList().stream()
+			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
+			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
+			.sum();
+		return totalUnbondingAmount;
+	}
+
 	public void setDelegationAmount() {
 		GridnodeDelegationAmount.Response response = gridnodeDelegationService
 			.getCurrentResponse();
@@ -1097,4 +1424,65 @@ public class CosmosController implements Initializable {
 			System.out.println("Error fetching collateral");
 		}
 	}
+
+	public void fetchAccountTransactions(String address) {
+		
+		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
+		List<TxOuterClass.Tx> transactionsReceived = new ArrayList<>();		
+
+		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+		
+		// fetch sender transactions
+		String querySender = "transfer.sender='" + address + "'";		
+		transactionsSent.addAll(fetchTransactions(querySender, stub));
+
+		// fetch recipient transactions
+		String queryRecipient = "transfer.recipient='" + address + "'";
+		transactionsReceived.addAll(fetchTransactions(queryRecipient, stub));
+
+		for (TxOuterClass.Tx tx : transactionsSent) {
+			byte[] txBytes = tx.toByteArray();
+			byte[] hashBytes = sha256(txBytes);
+			String transactionHash = bytesToHex(hashBytes);
+			transactionsObSent.add(transactionHash);
+		}
+
+		for (TxOuterClass.Tx tx : transactionsReceived) {
+			byte[] txBytes = tx.toByteArray();
+			byte[] hashBytes = sha256(txBytes);
+			String transactionHash = bytesToHex(hashBytes);
+			transactionsObReceived.add(transactionHash);
+		}
+
+		tableTransactionsSent.setItems(transactionsObSent);
+		tableTransactionsReceived.setItems(transactionsObReceived);
+	}
+
+	private List<TxOuterClass.Tx> fetchTransactions(String query, ServiceGrpc.ServiceBlockingStub stub) {
+		ServiceOuterClass.GetTxsEventRequest request = ServiceOuterClass.GetTxsEventRequest.newBuilder()
+			.setLimit(10)
+			.setQuery(query)
+			.build();
+		
+		return stub.getTxsEvent(request).getTxsList();
+	}
+
+	private static byte[] sha256(byte[] input) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			return digest.digest(input);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private static String bytesToHex(byte[] bytes) {
+		StringBuilder result = new StringBuilder();
+		for (byte b : bytes) {
+			result.append(String.format("%02X", b));
+		}
+		return result.toString();
+	}
+
 }

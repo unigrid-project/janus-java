@@ -15,7 +15,7 @@ public class GrpcService {
 
 	@PostConstruct
 	private void init() {
-		channel = ManagedChannelBuilder.forAddress("grpc-testnet.unigrid.org", 9090).usePlaintext().build();
+		channel = ManagedChannelBuilder.forAddress("194.233.95.48", 9090).usePlaintext().build();
 	}
 
 	public ManagedChannel getChannel() {
