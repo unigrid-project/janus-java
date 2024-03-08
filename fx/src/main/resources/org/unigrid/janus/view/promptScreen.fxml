@@ -13,9 +13,10 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 <?import javafx.stage.Stage?>
 
-<Stage height="320.0" title="Unigrid Janus Prompt Screen" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.PromptScreenController">
+<Stage height="320.0" title="Unigrid Janus Prompt Screen" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.PromptScreenController">
     <scene>
         <Scene>
             <root>
@@ -41,6 +42,11 @@
                               </image>
                         </ImageView>
 			<VBox prefHeight="120.0" prefWidth="400.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <Text fx:id="textField" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Do you want to continue using Legacy Chain?">
+                              <font>
+                                 <Font size="16.0" />
+                              </font>
+                           </Text>
 				<TextArea fx:id="textArea" editable="false" prefHeight="140.0" prefWidth="400.0" styleClass="prompt-text" stylesheets="@main.css" text="Do you want to continue using Legacy Chain?" wrapText="true">
 					<font>
 					   <Font name="Saab" size="16.0" />
