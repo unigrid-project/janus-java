@@ -18,6 +18,7 @@ package org.unigrid.janus.controller;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 
 /* 1 atom = 1,000,000 uATOM
  	atom  = "atom"  // 1 (base denom unit)
@@ -53,6 +54,16 @@ public class ATOMUnitUtil {
             throw new RuntimeException("atom to uAtom: " + bigDecimal);
         }
         return bigDecimal.toBigInteger();
+    }
+    
+    public static String atomToHigherDenomUnitString(BigDecimal atomValue) {
+        BigDecimal result = atomValue.divide(new BigDecimal("100000000"), 8, BigDecimal.ROUND_HALF_UP);
+        DecimalFormat df = new DecimalFormat("0.00000000"); // Ensures eight decimal places
+        return df.format(result);
+    }
+
+    public static String atomToHigherDenomUnitString(String atomValue) {
+        return atomToHigherDenomUnitString(new BigDecimal(atomValue));
     }
 
     public static int getNumberOfDecimalPlaces(BigDecimal bigDecimal) {
