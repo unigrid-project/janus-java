@@ -446,17 +446,30 @@
 .list-cell:even {
   -fx-background-color: #bbc1;
 }
-
-.list-view .cosmos-list-cell {
-  -fx-text-fill: white; /* For white font color */
-  /* Or use light grey color */
-  /* -fx-text-fill: #D3D3D3; */
+.list-view .list-cell {
+  -fx-text-fill: white; /* White text color for list cells */
 }
 
-.list-view .cosmos-list-cell:selected {
-  -fx-text-fill: white; /* For white font color */
-  /* Or use light grey color */
-  /* -fx-text-fill: #D3D3D3; */
-  -fx-background-color: -fx-selection-bar; /* For default selection background */
+.list-view .list-cell:filled:hover {
+  -fx-background-color: #A9A9A9; /* Dark grey background on hover */
+  -fx-text-fill: white; /* Keep text color white on hover */
 }
+
+.list-view .list-cell:filled:selected, .list-view .list-cell:filled:selected:hover {
+  -fx-background-color: transparent; /* Disable the background change on selection */
+  -fx-text-fill: white; /* Keep the text color white when selected */
+}
+
+.large-rounded-textfield {
+    -fx-background-color: black;
+    -fx-background-radius: 10; /* Adjust the radius for the desired roundness */
+    -fx-text-fill: white; /* This will set the text color to white */
+    -fx-prompt-text-fill: derive(-fx-text-fill, 30%); /* Lighter white for prompt text if you have any */
+    -fx-border-color: white;
+    -fx-border-radius: 10; /* This should match -fx-background-radius */
+    -fx-border-width: 2; /* Adjust the width for desired thickness */
+    -fx-min-height: 50px; /* Set the minimum height */
+    -fx-padding: 5px; /* Adjust padding to center the text vertically */
+}
+
 

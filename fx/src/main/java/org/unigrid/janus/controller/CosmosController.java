@@ -126,11 +126,13 @@ import cosmos.tx.v1beta1.TxOuterClass;
 import io.grpc.StatusRuntimeException;
 import java.security.MessageDigest;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
@@ -255,6 +257,8 @@ public class CosmosController implements Initializable {
 	@FXML
 	private TextField delegateAmountTextField;
 	@FXML
+	private TextField undelegateAmount;
+	@FXML
 	private TextField validatorAddressTextField;
 	@FXML
 	private TextField stakeAmountTextField;
@@ -280,7 +284,7 @@ public class CosmosController implements Initializable {
 	@Inject
 	@Named("transactionResponse")
 	private TransactionResponse txModel;
-	
+
 	static final String TOKEN_DECIMAL_VALUE = "1000000";
 	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
 
@@ -358,6 +362,12 @@ public class CosmosController implements Initializable {
 					}
 				}
 			});
+			totalsListView.addEventFilter(MouseEvent.ANY, new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent mouseEvent) {
+					mouseEvent.consume();
+				}
+			});
 			delegationsListView.setCellFactory(
 				listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
 				@Override
@@ -379,6 +389,12 @@ public class CosmosController implements Initializable {
 							item.getBalance().getDenom());
 						setText(text);
 					}
+				}
+			});
+			delegationsListView.addEventFilter(MouseEvent.ANY, new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent mouseEvent) {
+					mouseEvent.consume();
 				}
 			});
 
@@ -849,8 +865,7 @@ public class CosmosController implements Initializable {
 		});
 	}
 
-	@FXML
-	private void createNewAccount(ActionEvent event) {
+	private void createNewAccount() {
 		try {
 			showPane(cosmosWizardPane);
 		} catch (Exception ex) {
@@ -1004,7 +1019,12 @@ public class CosmosController implements Initializable {
 
 		long amount = 0;
 		if (validatorAddress == null) {
-			amount = Long.parseLong(delegateAmountTextField.getText());
+			if (delegate) {
+				amount = Long.parseLong(delegateAmountTextField.getText());
+
+			} else {
+				amount = Long.parseLong(undelegateAmount.getText());
+			}
 		} else {
 			amount = Long.parseLong(stakeAmountTextField.getText());
 		}
@@ -1021,6 +1041,7 @@ public class CosmosController implements Initializable {
 
 		System.out.println("Response Tx Delegate");
 		delegateAmountTextField.setText("");
+		undelegateAmount.setText("");
 		stakeAmountTextField.setText("");
 		System.out.println(txResponse);
 
@@ -1221,6 +1242,9 @@ public class CosmosController implements Initializable {
 
 		}
 
+		// Add the special "+Add Account" option
+		accountsDropdown.getItems().add("+Add New Account");
+
 		// Set the first account as the default selection
 		if (!accountsDropdown.getItems().isEmpty()) {
 			accountsDropdown.getSelectionModel().selectFirst();
@@ -1239,6 +1263,12 @@ public class CosmosController implements Initializable {
 			String selectedAccountName = (String) accountsDropdown.getValue();
 			Optional<Account> selectedAccount = accountsService
 				.findAccountByName(selectedAccountName);
+			// Check if the "+Add Account" option was selected
+			if ("+Add New Account".equals(selectedAccountName)) {
+				createNewAccount();
+				return; // Exit the method early
+			}
+
 			if (selectedAccount.isPresent()) {
 				accountsData.setSelectedAccount(selectedAccount.get());
 				System.out
@@ -1430,7 +1460,7 @@ public class CosmosController implements Initializable {
 			System.out.println("Error fetching collateral");
 		}
 	}
-	
+
 	public void fetchAccountTransactions(String address) {
 
 		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
