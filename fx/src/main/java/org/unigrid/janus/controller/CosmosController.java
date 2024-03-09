@@ -1281,7 +1281,7 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							updateCollateralDisplay();
+							System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
 							getValidators();
 							// Update UI with the balance received from the response
 							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
@@ -1459,6 +1459,19 @@ public class CosmosController implements Initializable {
 		} else {
 			System.out.println("Error fetching collateral");
 		}
+	}
+
+	private long gridnodeNumberForUser() {
+
+		int amountPerGridnode;
+		long stakedAmount = getDelegatedBalance(accountsData.getSelectedAccount().getAddress());
+		if (hedgehog.fetchCollateralRequired()) {
+			amountPerGridnode = collateral.getAmount();
+			long gridnodeNumber = stakedAmount / amountPerGridnode;
+			return gridnodeNumber;
+		}
+
+		throw new IllegalStateException("Collateral amount was not fetched.");
 	}
 
 	public void fetchAccountTransactions(String address) {
