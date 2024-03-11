@@ -288,7 +288,7 @@ public class CosmosController implements Initializable {
 	@Named("transactionResponse")
 	private TransactionResponse txModel;
 
-	static final String TOKEN_DECIMAL_VALUE = "1000000";
+	static final String TOKEN_DECIMAL_VALUE = "100000000";
 	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
 
 	@FXML
@@ -1329,7 +1329,7 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
+							//System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
 							getValidators();
 							// Update UI with the balance received from the response
 							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");

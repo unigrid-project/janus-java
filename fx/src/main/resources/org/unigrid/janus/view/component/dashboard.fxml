@@ -87,7 +87,7 @@
                                     <Insets bottom="5.0" />
                                  </VBox.margin>
                               </Label>
-                              <TextField fx:id="toAddress1" prefWidth="300.0" styleClass="large-rounded-textfield" />
+                              <TextField fx:id="toAddress" prefWidth="300.0" styleClass="large-rounded-textfield" />
                            </children>
                            <VBox.margin>
                               <Insets top="30.0" />
@@ -106,7 +106,7 @@
                                     <Insets bottom="5.0" />
                                  </VBox.margin>
                               </Label>
-                              <TextField fx:id="sendAmount1" prefWidth="150.0" styleClass="large-rounded-textfield" />
+                              <TextField fx:id="sendAmount" prefWidth="150.0" styleClass="large-rounded-textfield" />
                               <HBox alignment="CENTER_RIGHT">
                                  <children>
                                     <Button alignment="CENTER" contentDisplay="CENTER" onAction="#sendTokens" prefWidth="130.0" style="-fx-cursor: hand;" text="Send" />
