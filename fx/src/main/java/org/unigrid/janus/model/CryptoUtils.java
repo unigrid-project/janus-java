@@ -139,7 +139,6 @@ public class CryptoUtils {
 		System.out.println("publicKey: " + bytesToHex(publicKeyBytes));
 
 		String address = AddressUtil.publicKeyToAddress(publicKeyBytes, "unigrid");
-		
 
 		System.out.println("getAddressFromPrivateKey: " /*uncomment + address*/);
 		return address;
@@ -388,6 +387,21 @@ public class CryptoUtils {
 		}
 
 		return derivedKeysList;
+	}
+
+	public static void printKeys(List<ECKey> keys) {
+		for (int i = 0; i < keys.size(); i++) {
+			ECKey key = keys.get(i);
+
+			// Assuming the ECKey class has methods to get the public and private keys
+			String publicKeyHex = key.getPublicKeyAsHex(); // Public key in hexadecimal format
+			String privateKeyHex = key.getPrivateKeyAsHex(); // Private key in hexadecimal format
+
+			System.out.println("Key #" + (i + 1) + ":");
+			System.out.println("Public Key: " + publicKeyHex);
+			System.out.println("Private Key: " + privateKeyHex);
+			System.out.println(); // Adds a newline for better readability
+		}
 	}
 
 	public byte[] signMessage(byte[] messageBytes, byte[] privateKeyBytes) {

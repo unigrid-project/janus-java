@@ -146,4 +146,16 @@ public class DataDirectory {
 			Files.createDirectories(directoryPath);
 		}
 	}
+
+	public static boolean deleteLegacyChainData(String[] legacyFiles) {
+		boolean success = false;
+		for (String fileName : legacyFiles) {
+			try {
+				success = Files.deleteIfExists(Paths.get(get(), fileName));
+			} catch (IOException e) {
+				System.err.println("Failed to delete " + fileName + ": " + e.getMessage());
+}
+		}
+		return success;
+	}
 }

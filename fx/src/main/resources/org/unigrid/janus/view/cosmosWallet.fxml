@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import javafx.stage.Stage?>
+
+<Stage minHeight="400.0" minWidth="600.0" title="Unigrid Mainnet Janus Wallet" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosWalletController">
+	<scene>
+		<Scene fill="#000024" stylesheets="@main.css">
+			<root>
+				<StackPane prefHeight="600.0" prefWidth="1000.0">
+					<children>
+						<BorderPane pickOnBounds="false" prefHeight="300.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
+							<top>
+								<fx:include source="component/windowBar.fxml" />
+							</top>
+							<opaqueInsets>
+								<Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+							</opaqueInsets>
+							<center>
+								<AnchorPane>
+									<children>
+										<VBox fx:id="pnlCosmos" layoutX="10.0" layoutY="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+											<children>
+												<fx:include source="cosmos.fxml" VBox.vgrow="ALWAYS" />
+											</children>
+										</VBox>
+									</children>
+								</AnchorPane>
+							</center>
+						</BorderPane>
+						<fx:include source="component/windowBorder.fxml" />
+					</children>
+				</StackPane>
+			</root>
+		</Scene>
+	</scene>
+</Stage>

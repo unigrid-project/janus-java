@@ -22,4 +22,8 @@ public class CDIUtil {
 	public static <T> T unproxy(T proxy) {
 		return (T) ((TargetInstanceProxy) proxy).weld_getTargetInstance();
 	}
+
+	public static <T> void instantiate(T obj) {
+		obj.toString();
+	}
 }

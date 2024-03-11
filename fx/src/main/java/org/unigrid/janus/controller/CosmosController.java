@@ -109,6 +109,7 @@ import org.unigrid.janus.model.service.GrpcService;
 import org.unigrid.janus.model.service.MnemonicService;
 import org.unigrid.janus.model.service.RestCommand;
 import org.unigrid.janus.model.service.RestService;
+import org.unigrid.janus.model.signal.DisplaySwapPrompt;
 import org.unigrid.janus.model.signal.MnemonicState;
 import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
@@ -116,6 +117,7 @@ import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import java.math.BigInteger;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.encoders.Base64;
 import cosmos.base.abci.v1beta1.Abci;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
@@ -125,18 +127,21 @@ import cosmos.tx.v1beta1.TxOuterClass;
 import io.grpc.StatusRuntimeException;
 import java.security.MessageDigest;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import org.apache.commons.lang3.SystemUtils;
+import org.bitcoinj.crypto.TransactionSignature;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
-import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
-import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
+import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
+import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -159,6 +164,8 @@ public class CosmosController implements Initializable {
 	private CosmosTxList cosmosTxList;
 	@Inject
 	private Event<ResetTextFieldsSignal> resetTextFieldsEvent;
+	@Inject
+	private Event<DisplaySwapPrompt> displaySwapEvent;
 	@Inject
 	private Hedgehog hedgehog;
 	@Inject
@@ -252,6 +259,8 @@ public class CosmosController implements Initializable {
 	@FXML
 	private TextField delegateAmountTextField;
 	@FXML
+	private TextField undelegateAmount;
+	@FXML
 	private TextField validatorAddressTextField;
 	@FXML
 	private TextField stakeAmountTextField;
@@ -318,6 +327,9 @@ public class CosmosController implements Initializable {
 			} else {
 				showPane(cosmosMainPane);
 			}
+
+			displaySwapEvent.fire(DisplaySwapPrompt.builder().build());
+
 			// check whether the word changed in order to reset the value
 			transactionListView.setCellFactory(
 				param -> new ListCell<TransactionResponse.TxResponse>() {
@@ -352,6 +364,12 @@ public class CosmosController implements Initializable {
 					}
 				}
 			});
+			totalsListView.addEventFilter(MouseEvent.ANY, new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent mouseEvent) {
+					mouseEvent.consume();
+				}
+			});
 			delegationsListView.setCellFactory(
 				listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
 				@Override
@@ -373,6 +391,12 @@ public class CosmosController implements Initializable {
 							item.getBalance().getDenom());
 						setText(text);
 					}
+				}
+			});
+			delegationsListView.addEventFilter(MouseEvent.ANY, new EventHandler<MouseEvent>() {
+				@Override
+				public void handle(MouseEvent mouseEvent) {
+					mouseEvent.consume();
 				}
 			});
 
@@ -502,6 +526,51 @@ public class CosmosController implements Initializable {
 	// ex);
 	// }
 	// }
+	@FXML
+	private void testKeys(ActionEvent event) throws SignatureDecodeException, Exception {
+		Account selectedAccount = accountsData.getSelectedAccount();
+		String pubKey = selectedAccount.getPublicKey();
+		byte[] seed = Sha256Hash.hash(pubKey.getBytes());
+		System.out.println("pubKey: " + pubKey);
+		System.out.println("seed: " + seed);
+		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
+
+		// Prompt the user to enter the password
+		String password = getPasswordFromUser();
+		if (password == null) {
+			System.out.println("Password input cancelled!");
+			return;
+		}
+
+		// Assuming privateKeyBytes is the decrypted private key bytes
+		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+
+		// Create an ECKey instance from private key bytes
+		ECKey privateKey = ECKey.fromPrivate(privateKeyBytes);
+		String originalPubKey = Hex.toHexString(privateKey.getPubKey());
+		List<ECKey> keys = cryptoUtils.generateKeysFromCompressedPublicKey(originalPubKey, 10);
+		cryptoUtils.printKeys(keys);
+		System.out.println("Original Public Key: " + originalPubKey);
+
+		// Create a test message and hash it
+		String message = "Test Message";
+		Sha256Hash messageHash = Sha256Hash.wrap(Sha256Hash.hash(message.getBytes()));
+
+		// Sign the message hash
+		ECKey.ECDSASignature signature = privateKey.sign(messageHash);
+
+		// Convert the signature to DER format
+		byte[] signatureDER = signature.encodeToDER();
+
+		// For verification, assume you have the public key in hex format
+		ECKey publicKey = ECKey.fromPublicOnly(Hex.decode(pubKey));
+
+		// Verify the signature
+		boolean isSignatureValid = publicKey.verify(messageHash, signature);
+		System.out.println("Is the signature valid? " + isSignatureValid);
+	}
+
 	@FXML
 	private void generateKeys(ActionEvent event) throws SignatureDecodeException, Exception {
 
@@ -843,8 +912,7 @@ public class CosmosController implements Initializable {
 		});
 	}
 
-	@FXML
-	private void createNewAccount(ActionEvent event) {
+	private void createNewAccount() {
 		try {
 			showPane(cosmosWizardPane);
 		} catch (Exception ex) {
@@ -998,7 +1066,12 @@ public class CosmosController implements Initializable {
 
 		long amount = 0;
 		if (validatorAddress == null) {
-			amount = Long.parseLong(delegateAmountTextField.getText());
+			if (delegate) {
+				amount = Long.parseLong(delegateAmountTextField.getText());
+
+			} else {
+				amount = Long.parseLong(undelegateAmount.getText());
+			}
 		} else {
 			amount = Long.parseLong(stakeAmountTextField.getText());
 		}
@@ -1015,6 +1088,7 @@ public class CosmosController implements Initializable {
 
 		System.out.println("Response Tx Delegate");
 		delegateAmountTextField.setText("");
+		undelegateAmount.setText("");
 		stakeAmountTextField.setText("");
 		System.out.println(txResponse);
 
@@ -1215,6 +1289,9 @@ public class CosmosController implements Initializable {
 
 		}
 
+		// Add the special "+Add Account" option
+		accountsDropdown.getItems().add("+Add New Account");
+
 		// Set the first account as the default selection
 		if (!accountsDropdown.getItems().isEmpty()) {
 			accountsDropdown.getSelectionModel().selectFirst();
@@ -1233,6 +1310,12 @@ public class CosmosController implements Initializable {
 			String selectedAccountName = (String) accountsDropdown.getValue();
 			Optional<Account> selectedAccount = accountsService
 				.findAccountByName(selectedAccountName);
+			// Check if the "+Add Account" option was selected
+			if ("+Add New Account".equals(selectedAccountName)) {
+				createNewAccount();
+				return; // Exit the method early
+			}
+
 			if (selectedAccount.isPresent()) {
 				accountsData.setSelectedAccount(selectedAccount.get());
 				System.out
@@ -1339,7 +1422,7 @@ public class CosmosController implements Initializable {
 	}
 
 	private long getDelegatedBalance(String address) {
-		pax.gridnode.QueryGrpc.QueryBlockingStub delegateStub = pax.gridnode.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
 
 		QueryDelegatedAmountRequest delegatedAmountRequest = QueryDelegatedAmountRequest.newBuilder()
 			.setDelegatorAddress(address)

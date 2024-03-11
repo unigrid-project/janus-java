@@ -28,6 +28,7 @@ import javafx.stage.Stage;
 import lombok.SneakyThrows;
 import org.unigrid.janus.model.UpdateURL;
 import org.unigrid.janus.model.BootstrapModel;
+import org.unigrid.janus.model.cdi.EagerExtension;
 import org.unigrid.janus.model.producer.HostServicesProducer;
 import org.update4j.LaunchContext;
 import org.update4j.inject.InjectTarget;
@@ -55,7 +56,10 @@ public class JanusLauncher implements Launcher {
 			System.out.println(entry.getValue());
 		}
 
-		final SeContainer container = SeContainerInitializer.newInstance().initialize();
+		final SeContainer container = SeContainerInitializer.newInstance()
+			.addExtensions(EagerExtension.class)
+			.initialize();
+
 		System.out.println(CDI.current());
 
 		if (inputArgs.containsKey("URL")) {
