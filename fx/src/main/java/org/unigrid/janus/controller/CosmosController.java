@@ -117,6 +117,7 @@ import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import java.math.BigInteger;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.encoders.Base64;
 import cosmos.base.abci.v1beta1.Abci;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
@@ -135,11 +136,13 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import org.apache.commons.lang3.SystemUtils;
+import org.bitcoinj.crypto.TransactionSignature;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
+import org.unigrid.janus.model.ApiConfig;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -1019,7 +1022,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", CHAIN_ID);
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
 
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
@@ -1414,6 +1417,7 @@ public class CosmosController implements Initializable {
 		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 		QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
 		BigDecimal rawBalance = new BigDecimal(balanceResponse.getBalance().getAmount());
+		System.out.println("rawBalance: " + rawBalance);
 		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(TOKEN_DECIMAL_VALUE), 8, RoundingMode.HALF_UP);
 
 		return scaledBalance.toString();

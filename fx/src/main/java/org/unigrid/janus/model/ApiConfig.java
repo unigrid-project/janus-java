@@ -20,6 +20,10 @@ import lombok.Getter;
 
 public class ApiConfig {
 	@Getter
-	private static final String BASE_URL = "https://rest-testnet.unigrid.org/";
-	//private static final String BASE_URL = "https://rest-devnet.unigrid.org/";
+	//private static final String BASE_URL = "https://rest-testnet.unigrid.org/";
+	private static final String BASE_URL = "https://rest-devnet.unigrid.org/";
+	@Getter
+	private static final String CHAIN_ID = "unigrid-devnet-1";
+	@Getter
+	private static final String GRPC_IP = "173.212.208.212";
 }
