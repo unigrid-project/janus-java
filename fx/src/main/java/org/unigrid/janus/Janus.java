@@ -247,6 +247,16 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	private void startCosmosWallet() {
 		try {
+			hedgehog.startHedgehog();
+			debug.print("starting hedgehog", Janus.class.getSimpleName());
+			// AlertDialog.open(AlertType.ERROR, "Something fucked up!");
+		} catch (Exception e) {
+			debug.print("Hedgehog startup catch: " + e.getMessage(),
+				Janus.class.getSimpleName());
+			// AlertDialog.open(AlertType.ERROR, "Hedgehog start error: " +
+			// e.getMessage());
+		}
+		try {
 			cosmosWallet.show();
 		} catch (Exception e) {
 			System.out.print("error: " + e.getMessage());
@@ -261,7 +271,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	private void onDisplay(@Observes DisplaySwapPrompt event) {
 		Platform.runLater(() -> {
-			showSwapTokens();
+			// comment out for beta
+			//showSwapTokens();
 		});
 	}
 
@@ -427,7 +438,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	private void showChooseChain() {
 		debug.print("opening Choose chain screen...", Janus.class.getSimpleName());
-
+		
 		promptRequestEvent.fire(PromptRequest.builder()
 			.type(PromptRequest.Type.CHAIN)
 			.onPrimary(() -> {

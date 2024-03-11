@@ -134,8 +134,8 @@
    								<Button alignment="CENTER" onAction="#generateKeys" prefWidth="125.0" style="-fx-cursor: hand;" text="Generate Keys" />
                         </children>
                      </HBox>
-							<VBox alignment="CENTER_RIGHT" spacing="10" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="3">
-								<Button contentDisplay="CENTER" prefWidth="125.0" style="-fx-cursor: hand;" text="Create Account" />
+							<VBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnIndex="2" GridPane.rowIndex="3">
+								<Button contentDisplay="CENTER" onAction="#testKeys" prefWidth="125.0" style="-fx-cursor: hand;" text="test" />
             
       								<!-- More delegation entries can be added here -->
 							</VBox>

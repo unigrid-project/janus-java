@@ -40,8 +40,8 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;
 import org.bitcoinj.core.Sha256Hash;
 import org.unigrid.janus.model.service.GrpcService;
-import pax.gridnode.Tx.MsgGridnodeDelegate;
-import pax.gridnode.Tx.MsgGridnodeUndelegate;
+import gridnode.gridnode.v1.Tx.MsgGridnodeDelegate;
+import gridnode.gridnode.v1.Tx.MsgGridnodeUndelegate;
 
 @ApplicationScoped
 public class SignUtil {
