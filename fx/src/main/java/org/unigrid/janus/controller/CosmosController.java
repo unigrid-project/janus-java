@@ -290,6 +290,7 @@ public class CosmosController implements Initializable {
 
 	static final String TOKEN_DECIMAL_VALUE = "1000000";
 	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
+	static final String CHAIN_ID = "unigrid-devnet-1";
 
 	@FXML
 	private ComboBox accountsDropdown;
@@ -1063,7 +1064,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-testnet-4");
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", CHAIN_ID);
 
 		long amount = 0;
 		if (validatorAddress == null) {
