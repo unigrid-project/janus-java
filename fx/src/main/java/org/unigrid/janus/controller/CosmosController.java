@@ -117,7 +117,6 @@ import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import java.math.BigInteger;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.encoders.Base64;
 import cosmos.base.abci.v1beta1.Abci;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
@@ -136,7 +135,6 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import org.apache.commons.lang3.SystemUtils;
-import org.bitcoinj.crypto.TransactionSignature;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
@@ -289,6 +287,7 @@ public class CosmosController implements Initializable {
 
 	static final String TOKEN_DECIMAL_VALUE = "1000000";
 	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
+	static final String CHAIN_ID = "unigrid-devnet-1";
 
 	@FXML
 	private ComboBox accountsDropdown;
@@ -1020,7 +1019,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-testnet-4");
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", CHAIN_ID);
 
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
@@ -1062,7 +1061,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-testnet-4");
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", CHAIN_ID);
 
 		long amount = 0;
 		if (validatorAddress == null) {
