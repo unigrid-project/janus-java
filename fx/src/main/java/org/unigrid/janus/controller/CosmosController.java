@@ -117,6 +117,7 @@ import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import java.math.BigInteger;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.encoders.Base64;
 import cosmos.base.abci.v1beta1.Abci;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
@@ -135,11 +136,12 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import org.apache.commons.lang3.SystemUtils;
+import org.bitcoinj.crypto.TransactionSignature;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
-import pax.gridnode.QueryOuterClass.QueryDelegatedAmountRequest;
-import pax.gridnode.QueryOuterClass.QueryDelegatedAmountResponse;
+import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
+import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -524,6 +526,51 @@ public class CosmosController implements Initializable {
 	// ex);
 	// }
 	// }
+	@FXML
+	private void testKeys(ActionEvent event) throws SignatureDecodeException, Exception {
+		Account selectedAccount = accountsData.getSelectedAccount();
+		String pubKey = selectedAccount.getPublicKey();
+		byte[] seed = Sha256Hash.hash(pubKey.getBytes());
+		System.out.println("pubKey: " + pubKey);
+		System.out.println("seed: " + seed);
+		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
+
+		// Prompt the user to enter the password
+		String password = getPasswordFromUser();
+		if (password == null) {
+			System.out.println("Password input cancelled!");
+			return;
+		}
+
+		// Assuming privateKeyBytes is the decrypted private key bytes
+		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+
+		// Create an ECKey instance from private key bytes
+		ECKey privateKey = ECKey.fromPrivate(privateKeyBytes);
+		String originalPubKey = Hex.toHexString(privateKey.getPubKey());
+		List<ECKey> keys = cryptoUtils.generateKeysFromCompressedPublicKey(originalPubKey, 10);
+		cryptoUtils.printKeys(keys);
+		System.out.println("Original Public Key: " + originalPubKey);
+
+		// Create a test message and hash it
+		String message = "Test Message";
+		Sha256Hash messageHash = Sha256Hash.wrap(Sha256Hash.hash(message.getBytes()));
+
+		// Sign the message hash
+		ECKey.ECDSASignature signature = privateKey.sign(messageHash);
+
+		// Convert the signature to DER format
+		byte[] signatureDER = signature.encodeToDER();
+
+		// For verification, assume you have the public key in hex format
+		ECKey publicKey = ECKey.fromPublicOnly(Hex.decode(pubKey));
+
+		// Verify the signature
+		boolean isSignatureValid = publicKey.verify(messageHash, signature);
+		System.out.println("Is the signature valid? " + isSignatureValid);
+	}
+
 	@FXML
 	private void generateKeys(ActionEvent event) throws SignatureDecodeException, Exception {
 
@@ -1375,7 +1422,7 @@ public class CosmosController implements Initializable {
 	}
 
 	private long getDelegatedBalance(String address) {
-		pax.gridnode.QueryGrpc.QueryBlockingStub delegateStub = pax.gridnode.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
 
 		QueryDelegatedAmountRequest delegatedAmountRequest = QueryDelegatedAmountRequest.newBuilder()
 			.setDelegatorAddress(address)
