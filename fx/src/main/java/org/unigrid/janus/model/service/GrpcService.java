@@ -5,6 +5,7 @@ import io.grpc.ManagedChannelBuilder;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.cdi.Eager;
 
 @Eager
@@ -15,7 +16,7 @@ public class GrpcService {
 
 	@PostConstruct
 	private void init() {
-		channel = ManagedChannelBuilder.forAddress("194.233.95.48", 9090).usePlaintext().build();
+		channel = ManagedChannelBuilder.forAddress(ApiConfig.getGRPC_IP(), 9090).usePlaintext().build();
 	}
 
 	public ManagedChannel getChannel() {

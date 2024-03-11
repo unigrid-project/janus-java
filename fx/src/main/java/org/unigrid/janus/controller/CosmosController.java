@@ -142,6 +142,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
+import org.unigrid.janus.model.ApiConfig;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -1020,7 +1021,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", "unigrid-testnet-4");
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
 
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
@@ -1415,6 +1416,7 @@ public class CosmosController implements Initializable {
 		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 		QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
 		BigDecimal rawBalance = new BigDecimal(balanceResponse.getBalance().getAmount());
+		System.out.println("rawBalance: " + rawBalance);
 		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(TOKEN_DECIMAL_VALUE), 8, RoundingMode.HALF_UP);
 
 		return scaledBalance.toString();
