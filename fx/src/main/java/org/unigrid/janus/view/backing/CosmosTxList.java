@@ -29,7 +29,7 @@ import lombok.Getter;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
-import org.unigrid.janus.model.service.CosmosRestClient;
+import org.unigrid.janus.model.service.CosmosService;
 import org.unigrid.janus.model.service.DebugService;
 
 @ApplicationScoped
@@ -39,7 +39,7 @@ public class CosmosTxList {
 	@Inject
 	private DebugService debug;
 	@Inject
-	private CosmosRestClient restClient;
+	private CosmosService restClient;
 	@Inject
 	private AccountsData accountsData;
 	@Getter
