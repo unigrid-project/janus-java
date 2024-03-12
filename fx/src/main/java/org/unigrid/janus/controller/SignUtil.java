@@ -135,14 +135,10 @@ public class SignUtil {
 		Map<String, Boolean> signerInfoExistMap = new HashMap<>();
 		Map<String, Boolean> signaturesExistMap = new HashMap<>();
 
-		String sendAmountInMicroAtom = ATOMUnitUtil.atomToHigherDenomUnitString(sendMsg.getAmountInAtom());
 		CoinOuterClass.Coin sendCoin = CoinOuterClass.Coin.newBuilder()
 			.setAmount(sendMsg.getAmountInAtom().toString())
 			.setDenom(token)
 			.build();
-		
-		System.out.println("sta je bilo: " + ATOMUnitUtil.atomToMicroAtomBigInteger(sendMsg.getAmountInAtom()));
-		System.out.println("sendAmountInMicroAtom: " + ATOMUnitUtil.atomToHigherDenomUnitString(sendMsg.getAmountInAtom()));
 
 		Tx.MsgSend message = Tx.MsgSend.newBuilder()
 			.setFromAddress(sendMsg.getCredentials().getAddress())

@@ -21,10 +21,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Any;
 import cosmos.auth.v1beta1.Auth;
 import cosmos.auth.v1beta1.QueryOuterClass;
+import cosmos.bank.v1beta1.QueryGrpc;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -35,6 +38,7 @@ import java.util.logging.Logger;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.CryptoUtils;
+import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.DelegationsRequest;
 import org.unigrid.janus.model.rest.entity.GridnodeDelegationAmount;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
@@ -75,6 +79,12 @@ public class CosmosService {
 	private Event<DelegationAmountEvent> delegationAmountEvent;
 	@Inject
 	private Hedgehog hedgehog;
+	@Inject
+	private AccountsData accountsData;
+	@Inject
+	private CollateralRequired collateral;
+
+	static final String TOKEN_DECIMAL_VALUE = "100000000";
 
 	private String apiUrl;
 
@@ -181,4 +191,80 @@ public class CosmosService {
 		}
 	}
 
+	// TODO
+	// this should add this data to a model
+	public long gridnodeNumberForUser() {
+
+		int amountPerGridnode;
+		long stakedAmount = getDelegatedBalance(accountsData.getSelectedAccount().getAddress());
+		if (hedgehog.fetchCollateralRequired()) {
+			amountPerGridnode = collateral.getAmount();
+			long gridnodeNumber = stakedAmount / amountPerGridnode;
+			return gridnodeNumber;
+		}
+
+		throw new IllegalStateException("Collateral amount was not fetched.");
+	}
+
+	// TODO
+	// this should add this data to a model
+	public long getDelegatedBalance(String address) {
+		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+
+		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest delegatedAmountRequest = gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest.newBuilder()
+			.setDelegatorAddress(address)
+			.build();
+		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
+		return delegatedAmountResponse.getAmount();
+	}
+
+	// TODO
+	// this should add this data to a model
+	public String getWalletBalance(String address) {
+		cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest balanceRequest = cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest.newBuilder()
+			.setAddress(address)
+			.setDenom("ugd") // Add this line to set the denomination
+			.build();
+
+		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
+		cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
+		BigDecimal rawBalance = new BigDecimal(balanceResponse.getBalance().getAmount());
+		System.out.println("rawBalance: " + rawBalance);
+		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(TOKEN_DECIMAL_VALUE), 8, RoundingMode.HALF_UP);
+
+		return scaledBalance.toString();
+
+	}
+
+	// TODO
+	// this should add this data to a model
+	public long getUnboundingBalance(String address) {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub unboundingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest unboundingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest.newBuilder()
+			.setDelegatorAddr(address)
+			.build();
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsResponse unboundingResponse = unboundingStub.delegatorUnbondingDelegations(unboundingRequest);
+		long totalUnbondingAmount = unboundingResponse.getUnbondingResponsesList().stream()
+			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
+			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
+			.sum();
+		return totalUnbondingAmount;
+	}
+
+	// TODO
+	// this should add this data to a model
+	public long getStakedBalance(String address) {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest stakingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest.newBuilder()
+			.setDelegatorAddr(address)
+			.build();
+
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
+
+		long totalStaked = stakingResponse.getDelegationResponsesList().stream()
+			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
+			.sum();
+
+		return totalStaked;
+	}
 }
