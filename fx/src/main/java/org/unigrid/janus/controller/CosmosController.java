@@ -142,6 +142,9 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import org.unigrid.janus.model.gridnode.GridnodeData;
+import org.unigrid.janus.model.gridnode.GridnodeModel;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -176,6 +179,8 @@ public class CosmosController implements Initializable {
 	private MnemonicService mnemonicService;
 	@Inject
 	private GrpcService grpcService;
+	@Inject
+	private GridnodeModel gridnodeModel;
 
 	private Account currentSelectedAccount;
 	@FXML
@@ -245,6 +250,8 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Button encryptAndSaveButton;
 	@FXML
+	private Button btnStartAllGridnodes;
+	@FXML
 	private Text sendWarnMsg12;
 	@FXML
 	private Text sendWarnMsg24;
@@ -271,13 +278,22 @@ public class CosmosController implements Initializable {
 	@FXML
 	private TableView<String> tableTransactionsReceived;
 	@FXML
+	private TableView<GridnodeData> tblGridnodeList;
+	@FXML
 	private ComboBox validatorListComboBox;
 	@FXML
 	private TableColumn<String, String> colTrxReceived;
 	@FXML
 	private TableColumn<String, String> colTrxSent;
+	@FXML
+	private TableColumn<String, String> colGridnodeId;
+	@FXML
+	private TableColumn<String, String> colStatus;
+	@FXML
+	private TableColumn<String, String> colStartGridnode;
 	private ObservableList<String> transactionsObReceived = FXCollections.observableArrayList();
 	private ObservableList<String> transactionsObSent = FXCollections.observableArrayList();
+	private ObservableList<GridnodeData> gridnodeData = FXCollections.observableArrayList();
 	@FXML
 	private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
 	@FXML
@@ -403,6 +419,7 @@ public class CosmosController implements Initializable {
 			colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 			colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 			fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
+			fetchGridnodes();
 		});
 	}
 
@@ -1248,6 +1265,11 @@ public class CosmosController implements Initializable {
 			System.out.println("mnemonic does not match");
 		}
 	}
+	
+	@FXML
+	private void onStartAllGridnodes(ActionEvent event) {
+		gridnodeModel.StartGridnode();
+	}
 
 	private static byte[] getBits(byte[] data, int fromBits, int toBits, boolean pad) {
 		final BitSet bits = BitSet.valueOf(data);
@@ -1519,6 +1541,26 @@ public class CosmosController implements Initializable {
 		}
 
 		throw new IllegalStateException("Collateral amount was not fetched.");
+	}
+	
+	public void fetchGridnodes() {
+		
+		
+		GridnodeData data = new GridnodeData();
+		
+		data.setGridnodeId("testing testing");
+		data.setStatus("testing");
+		
+		gridnodeData.add(data);
+		
+		colStartGridnode.setCellValueFactory(cell -> {
+			Button button = new Button();
+			button.setText("Start Gridnode");
+
+			return new ReadOnlyObjectWrapper(button);
+		});
+
+		tblGridnodeList.setItems(gridnodeData);
 	}
 
 	public void fetchAccountTransactions(String address) {
