@@ -129,7 +129,7 @@ public class Client {
 				TransactionResponse.class);
 			return txResponse;
 		} catch (URISyntaxException ex) {
-			Logger.getLogger(CosmosRestClient.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(CosmosService.class.getName()).log(Level.SEVERE, null, ex);
 			return null;
 		}
 	}

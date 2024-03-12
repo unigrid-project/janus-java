@@ -64,6 +64,7 @@ import org.unigrid.janus.model.ExternalVersion;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.HedgehogVersion;
 import org.unigrid.janus.model.setup.AppConfig;
+import org.unigrid.janus.model.signal.CollateralUpdateEvent;
 import org.unigrid.janus.model.ssl.InsecureTrustManager;
 
 @Eager
@@ -82,6 +83,8 @@ public class Hedgehog {
 	private AppConfig appConfig;
 	@Inject
 	private CollateralRequired collateralRequired;
+	@Inject
+	private Event<CollateralUpdateEvent> collateralUpdateEvent;
 
 	private Configuration config = null;
 
@@ -91,8 +94,8 @@ public class Hedgehog {
 
 	private static final Map<?, ?> OS_CONFIG = ArrayUtils
 		.toMap(new Object[][]{{OS.LINUX, UpdateURL.getLinuxUrl()},
-			{OS.WINDOWS, UpdateURL.getWindowsUrl()},
-			{OS.MAC, UpdateURL.getMacUrl()}});
+	{OS.WINDOWS, UpdateURL.getWindowsUrl()},
+	{OS.MAC, UpdateURL.getMacUrl()}});
 
 	@PostConstruct
 	@SneakyThrows
@@ -189,36 +192,36 @@ public class Hedgehog {
 		}
 	}
 
+	// TODO 
+	// change the rest of the calls in here to use the same createClient()
 	public boolean fetchCollateralRequired() {
-		SSLContext sc;
+		Client client = null;
 		try {
-			sc = SSLContext.getInstance("SSL");
-			sc.init(null, InsecureTrustManager.create(), new SecureRandom());
-		} catch (Exception e) {
-			// Log the exception
-			return false;
-		}
-
-		HostnameVerifier allHostsValid = (hostname, session) -> true;
-		Client client = ClientBuilder.newBuilder().sslContext(sc)
-			.hostnameVerifier(allHostsValid).build();
-
-		try {
+			client = createClient();
 			String collateralUri = appConfig.getCollateralRequiredUri();
 			Response response = client.target(URI.create(collateralUri))
-				.request(MediaType.APPLICATION_JSON).get();
+				.request(jakarta.ws.rs.core.MediaType.APPLICATION_JSON).get();
 
 			if (response.getStatus() == Response.Status.OK.getStatusCode()) {
 				double amount = response.readEntity(Double.class);
 				collateralRequired.setAmount((int) amount);
+				collateralUpdateEvent.fire(new CollateralUpdateEvent(true, (int) amount));
 				return true;
+			} else {
+
+				System.err.println("Failed to fetch collateral. Status: {}" + response.getStatus());
+				collateralUpdateEvent.fire(new CollateralUpdateEvent(false, 0));
+				return false;
 			}
 		} catch (Exception e) {
-			// Log the exception
+			System.err.println("Error fetching collateral: {}" + e.getMessage() + e);
+			collateralUpdateEvent.fire(new CollateralUpdateEvent(false, 0));
+			return false;
 		} finally {
-			client.close();
+			if (client != null) {
+				client.close();
+			}
 		}
-		return false;
 	}
 
 	public int connectToHedgehog()
@@ -304,5 +307,12 @@ public class Hedgehog {
 			debug.print("Error stopping Hedgehog: " + e.getMessage() + ")",
 				Hedgehog.class.getSimpleName());
 		}
+	}
+
+	private Client createClient() throws Exception {
+		SSLContext sc = SSLContext.getInstance("SSL");
+		sc.init(null, InsecureTrustManager.create(), new SecureRandom());
+		return ClientBuilder.newBuilder().sslContext(sc)
+			.hostnameVerifier((hostname, session) -> true).build();
 	}
 }

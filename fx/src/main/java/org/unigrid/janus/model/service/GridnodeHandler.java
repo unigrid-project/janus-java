@@ -4,7 +4,7 @@ import org.unigrid.janus.model.transaction.GridnodeTransaction;
 
 public class GridnodeHandler {
 
-	private CosmosRestClient cosmosClient;
+	private CosmosService cosmosClient;
 
 	public GridnodeHandler(String apiUrl) {
 		//this.cosmosClient = new CosmosRestClient(apiUrl);
