@@ -1588,34 +1588,40 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
-	private void sendTokensPasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
-		overlayRequest.fire(OverlayRequest.OPEN);
+	private void sendTokensPasswordRequest() {		
+		if (!"".equals(toAddress.getText()) && !"".equals(sendAmount.getText())) {
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
+			overlayRequest.fire(OverlayRequest.OPEN);
+		}
 	}
 
 	@FXML
 	private void delegateToGridnodePasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE).build());
-		overlayRequest.fire(OverlayRequest.OPEN);
+		if (!"".equals(delegateAmountTextField.getText())) {
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE).build());
+			overlayRequest.fire(OverlayRequest.OPEN);
+		}
 	}
 
 	@FXML
 	private void undelegateFromGridnodePasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE).build());
-		overlayRequest.fire(OverlayRequest.OPEN);
+		if (!"".equals(undelegateAmount.getText())) {
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE).build());
+			overlayRequest.fire(OverlayRequest.OPEN);
+		}
 	}
 
 	@FXML
 	private void delegateToStakingPasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_STAKING).build());
-		overlayRequest.fire(OverlayRequest.OPEN);
+		if (!"".equals(stakeAmountTextField.getText())) {
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_STAKING).build());
+			overlayRequest.fire(OverlayRequest.OPEN);
+		}
 	}
 
 	private void eventCosmosWalletRequest(@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
 		switch (cosmosWalletRequest) {
 			case SEND_TOKENS: {
-				System.out.println("Send Tokens ADDR " + toAddress.getText());
-				System.out.println("Send Tokens AMOUNT " + sendAmount.getText());
 				sendTokens();
 				break;
 			}
