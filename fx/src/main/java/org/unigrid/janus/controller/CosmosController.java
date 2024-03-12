@@ -55,7 +55,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -94,20 +93,14 @@ import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.MnemonicModel;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.DelegationsRequest;
-import org.unigrid.janus.model.rest.entity.GridnodeDelegationAmount;
-import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
-import org.unigrid.janus.model.rest.entity.RewardsRequest;
 import org.unigrid.janus.model.rest.entity.RewardsRequest.Balance;
-import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
-import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
 import org.unigrid.janus.model.service.AccountsService;
 import org.unigrid.janus.model.service.AddressCosmosService;
-import org.unigrid.janus.model.service.CosmosRestClient;
+import org.unigrid.janus.model.service.CosmosService;
 import org.unigrid.janus.model.service.GrpcService;
 import org.unigrid.janus.model.service.MnemonicService;
-import org.unigrid.janus.model.service.RestCommand;
 import org.unigrid.janus.model.service.RestService;
 import org.unigrid.janus.model.signal.DisplaySwapPrompt;
 import org.unigrid.janus.model.signal.MnemonicState;
@@ -117,7 +110,6 @@ import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import java.math.BigInteger;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.encoders.Base64;
 import cosmos.base.abci.v1beta1.Abci;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
 import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
@@ -136,7 +128,6 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import org.apache.commons.lang3.SystemUtils;
-import org.bitcoinj.crypto.TransactionSignature;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
@@ -146,6 +137,15 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import org.unigrid.janus.model.gridnode.GridnodeData;
 import org.unigrid.janus.model.gridnode.GridnodeModel;
 import org.unigrid.janus.model.ApiConfig;
+import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
+import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
+import org.unigrid.janus.model.signal.CollateralUpdateEvent;
+import org.unigrid.janus.model.signal.DelegationAmountEvent;
+import org.unigrid.janus.model.signal.DelegationListEvent;
+import org.unigrid.janus.model.signal.RedelegationsEvent;
+import org.unigrid.janus.model.signal.RewardsEvent;
+import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
+import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -161,7 +161,7 @@ public class CosmosController implements Initializable {
 	@Inject
 	private AccountsData accountsData;
 	@Inject
-	private CosmosRestClient cosmosClient;
+	private CosmosService cosmosClient;
 	@Inject
 	private MnemonicModel mnemonicModel;
 	@Inject
@@ -182,6 +182,8 @@ public class CosmosController implements Initializable {
 	private GrpcService grpcService;
 	@Inject
 	private GridnodeModel gridnodeModel;
+	@Inject
+	private CosmosService cosmosService;
 
 	private Account currentSelectedAccount;
 	@FXML
@@ -732,20 +734,6 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	// @FXML
-	// private void decrypTest(ActionEvent event) {
-	// try {
-	//
-	// // Decrypt the mnemonic
-	// System.out.println("encryptedPrivateKey: " + keytoDecrypt.getText());
-	// String keys = cryptoUtils.decrypt(keytoDecrypt.getText(), "pickles");
-	// decryptField.setText(keys);
-	//
-	// } catch (Exception ex) {
-	// Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-	// ex);
-	// }
-	// }
 	public void handleSaveAddress(AddressCosmos newAddress) {
 		try {
 			addressService.saveAddress(newAddress);
@@ -902,9 +890,22 @@ public class CosmosController implements Initializable {
 	}
 
 	/* DELEGATION LIST VIEW */
-	public void setDelegations(List<DelegationsRequest.DelegationResponse> delegations) {
+	public void onDelegationListEvent(@Observes DelegationListEvent event) {
 		Platform.runLater(() -> {
-			delegationsListView.getItems().setAll(delegations);
+			delegationsListView.getItems().setAll(event.getDelegationList());
+		});
+	}
+
+	// signal event for staking rewards
+	public void onRewardsEvent(@Observes RewardsEvent event) {
+		Platform.runLater(() -> {
+			stakingRewardsValue(event.getRewardsResponse().getTotal());
+		});
+	}
+
+	public void onWithdrawAddressEvent(@Observes WithdrawAddressEvent event) {
+		Platform.runLater(() -> {
+			System.out.println("getWithdrawAddress: " + event.getWithdrawAddress());
 		});
 	}
 
@@ -929,6 +930,38 @@ public class CosmosController implements Initializable {
 			});
 			totalsListView.getItems().addAll(items);
 		});
+	}
+
+	/* STAKING */
+	public void onRedelegationsEvent(@Observes RedelegationsEvent event) {
+		Platform.runLater(() -> {
+			// Update the view with redelegations data
+			updateRedelegationsView(event.getRedelegationsResponse().getRedelegationResponses());
+		});
+	}
+
+	// The method to update the view with redelegations data
+	private void updateRedelegationsView(List<RedelegationResponseEntry> redelegationResponses) {
+		// Update your UI components with redelegation data
+		// For example, if you have a ListView for redelegations:
+		// redelegationsListView.getItems().setAll(redelegationResponses);
+		System.out.println("redelegationResponses: " + redelegationResponses);
+	}
+
+	/* UNBONDING */
+	public void onUnbondingDelegationsEvent(@Observes UnbondingDelegationsEvent event) {
+		Platform.runLater(() -> {
+			// Call a method to update the view with the unbonding delegations data
+			updateUnbondingDelegationsView(event.getUnbondingDelegationsResponse().getUnbondingResponses());
+		});
+	}
+
+	// The method to update the view (the implementation depends on how you want to display the unbonding delegations)
+	private void updateUnbondingDelegationsView(List<UnbondingResponse> unbondingResponses) {
+		// Update your UI components with unbonding delegations data
+		// For example, if you have a ListView for unbonding delegations:
+		// unbondingDelegationsListView.getItems().setAll(unbondingResponses);
+		System.out.println("unbondingResponses: " + unbondingResponses);
 	}
 
 	private void createNewAccount() {
@@ -1004,29 +1037,6 @@ public class CosmosController implements Initializable {
 		return buffer.array();
 	}
 
-	private long getAccountNumber(String address) {
-		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
-			.newBlockingStub(grpcService.getChannel());
-		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder().setAddress(address).build();
-
-		try {
-			QueryAccountResponse response = authQueryClient.account(accountRequest);
-			Any accountAny = response.getAccount();
-			System.out.println("Type URL in getAccountNumber: " + accountAny.getTypeUrl());
-			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
-			System.out.println("baseAccount.getPubKey(): " + baseAccount.getPubKey()
-				+ " \naddress :" + baseAccount.getAddress());
-
-			// Process baseAccount as needed
-			// we need the account number and not the sequence here
-			System.out.println("ACCOUNT NUMBER: " + baseAccount.getAccountNumber());
-			return baseAccount.getAccountNumber();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return -1; // Handle this as per your application's requirement
-		}
-	}
-
 	@FXML
 	public void sendTokens() throws Exception {
 		byte[] privateKey = Hex.decode(getPrivateKeyHex());
@@ -1037,7 +1047,7 @@ public class CosmosController implements Initializable {
 
 		Account selectedAccount = accountsData.getSelectedAccount();
 		long sequence = getSequence(selectedAccount.getAddress());
-		long accountNumber = getAccountNumber(selectedAccount.getAddress());
+		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
 
@@ -1079,9 +1089,9 @@ public class CosmosController implements Initializable {
 
 		Account selectedAccount = accountsData.getSelectedAccount();
 		long sequence = getSequence(selectedAccount.getAddress());
-		long accountNumber = getAccountNumber(selectedAccount.getAddress());
+		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", CHAIN_ID);
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
 
 		long amount = 0;
 		if (validatorAddress == null) {
@@ -1267,28 +1277,10 @@ public class CosmosController implements Initializable {
 			System.out.println("mnemonic does not match");
 		}
 	}
-	
+
 	@FXML
 	private void onStartAllGridnodes(ActionEvent event) {
 		gridnodeModel.StartGridnode();
-	}
-
-	private static byte[] getBits(byte[] data, int fromBits, int toBits, boolean pad) {
-		final BitSet bits = BitSet.valueOf(data);
-		BitSet extractedBits = bits.get(fromBits, toBits);
-
-		int extractedBitLength = toBits - fromBits;
-		int remainder = extractedBitLength % 8;
-
-		if (pad && remainder != 0) {
-			int paddingLength = 8 - remainder;
-			// Increase the size of extractedBits to accommodate padding
-			extractedBits.set(extractedBitLength, extractedBitLength + paddingLength, false); // Set padding bits to 0
-		} else if (!pad && remainder != 0) {
-			// Throw an error if padding is not allowed but is required
-			throw new RuntimeException("ERR_BAD_FORMAT illegal zero padding");
-		}
-		return extractedBits.toByteArray();
 	}
 
 	/* MAIN VIEW */
@@ -1352,7 +1344,7 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
+							//System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
 							getValidators();
 							// Update UI with the balance received from the response
 							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
@@ -1364,7 +1356,7 @@ public class CosmosController implements Initializable {
 						// Load transactions and other account data (assuming these methods are adapted
 						// for gRPC)
 						cosmosTxList.loadTransactions(10);
-						loadAccountData(accountsData.getSelectedAccount().getAddress());
+						cosmosService.loadAccountData(accountsData.getSelectedAccount().getAddress());
 
 						return null;
 					}
@@ -1384,50 +1376,6 @@ public class CosmosController implements Initializable {
 			}
 		});
 		initCopyButton();
-	}
-
-	private void loadAccountData(String account) throws IOException, InterruptedException {
-		RestService restService = new RestService();
-
-		// Delegations
-		DelegationsRequest delegationsRequest = new DelegationsRequest(account);
-		DelegationsRequest.Response delegationsResponse = new RestCommand<>(
-			delegationsRequest, restService).execute();
-		setDelegations(delegationsResponse.getDelegationResponses());
-		System.out.println(delegationsResponse);
-
-		// Rewards
-		RewardsRequest rewardsRequest = new RewardsRequest(account);
-		RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
-			restService).execute();
-		stakingRewardsValue(rewardsResponse.getTotal());
-		System.out.println(rewardsResponse);
-
-		// Unbonding Delegations
-		UnbondingDelegationsRequest unbondingDelegationsRequest = new UnbondingDelegationsRequest(
-			account);
-		UnbondingDelegationsRequest.Response unbondingDelegationsResponse = new RestCommand<>(
-			unbondingDelegationsRequest, restService).execute();
-		System.out.println(unbondingDelegationsResponse);
-
-		// Redelegations
-		RedelegationsRequest redelegationsRequest = new RedelegationsRequest(account);
-		RedelegationsRequest.Response redelegationsResponse = new RestCommand<>(
-			redelegationsRequest, restService).execute();
-		System.out.println(redelegationsResponse);
-
-		// Withdraw Address
-		WithdrawAddressRequest withdrawAddressRequest = new WithdrawAddressRequest(
-			account);
-		WithdrawAddressRequest.Response withdrawAddressResponse = new RestCommand<>(
-			withdrawAddressRequest, restService).execute();
-		System.out.println(withdrawAddressResponse);
-
-		gridnodeDelegationService.fetchDelegationAmount(account);
-		setDelegationAmount();
-
-		updateCollateralDisplay();
-
 	}
 
 	private String getWalletBalance(String address) {
@@ -1513,23 +1461,22 @@ public class CosmosController implements Initializable {
 		return totalUnbondingAmount;
 	}
 
-	public void setDelegationAmount() {
-		GridnodeDelegationAmount.Response response = gridnodeDelegationService
-			.getCurrentResponse();
-		if (response != null) {
-			Platform.runLater(() -> {
-				BigDecimal amount = response.getAmount();
-				String text = amount.toPlainString() + " UGD";
-				delegationAmountLabel.setText(text);
-			});
-		}
+	public void onDelegationAmountEvent(@Observes DelegationAmountEvent event) {
+		Platform.runLater(() -> {
+			String text = event.getAmount().toPlainString() + " UGD";
+			delegationAmountLabel.setText(text);
+			System.out.println("Delegation Amount: " + text);
+		});
 	}
 
-	private void updateCollateralDisplay() {
-		if (hedgehog.fetchCollateralRequired()) {
-			System.out.println("Collateral Required: " + collateral.getAmount());
+	public void onCollateralUpdateEvent(@Observes CollateralUpdateEvent event) {
+		if (event.isSuccess()) {
+			int amount = event.getAmount();
+			System.out.println("Collateral Required: " + amount);
+			// Update the UI with the amount
 		} else {
 			System.out.println("Error fetching collateral");
+			// Update the UI to indicate an error
 		}
 	}
 
@@ -1545,17 +1492,16 @@ public class CosmosController implements Initializable {
 
 		throw new IllegalStateException("Collateral amount was not fetched.");
 	}
-	
+
 	public void fetchGridnodes() {
-		
-		
+
 		GridnodeData data = new GridnodeData();
-		
+
 		data.setGridnodeId("testing testing");
 		data.setStatus("testing");
-		
+
 		gridnodeData.add(data);
-		
+
 		colStartGridnode.setCellValueFactory(cell -> {
 			Button button = new Button();
 			button.setText("Start Gridnode");

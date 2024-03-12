@@ -27,4 +27,6 @@ public class GridnodeData {
 	private String gridnodeId;
 	@Getter @Setter
 	private String active;
+	@Getter @Setter
+	private String status;
 }
