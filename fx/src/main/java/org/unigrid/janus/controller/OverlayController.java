@@ -128,7 +128,7 @@ public class OverlayController implements Initializable {
 		submit();
 	}
 	
-	private void checkPassword(UnlockRequest.Type unlockType) throws Exception {
+	private void checkCosmosPassword(UnlockRequest.Type unlockType) throws Exception {
 		AccountsData.Account selectedAccount = accountsData.getSelectedAccount();
 		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
 
@@ -152,6 +152,8 @@ public class OverlayController implements Initializable {
 			}
 			hide();
 		} catch (AEADBadTagException e) {
+			errorTxt.setText("Bad Password");
+			submitBtn.setDisable(false);
 			e.printStackTrace();
 		}
 
@@ -183,7 +185,7 @@ public class OverlayController implements Initializable {
 			case COSMOS_UNDELEGATE_GRIDNODE:
 			case COSMOS_DELEGATE_STAKING: {
 				try {
-					checkPassword(unlockType);
+					checkCosmosPassword(unlockType);
 					return;
 				} catch (Exception ex) {
 					ex.printStackTrace();
