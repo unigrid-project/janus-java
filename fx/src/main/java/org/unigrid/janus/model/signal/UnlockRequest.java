@@ -42,7 +42,11 @@ public class UnlockRequest {
 		FOR_STAKING("STAKE", "Enable staking in your wallet by entering your passphrase "
 			+ "and pressing the STAKE button."),
 		FOR_MERGING("MERGE", "Enable auto-merging inputs in your wallet by entering your "
-			+ "passphrase and pressing the MERGE button.");
+			+ "passphrase and pressing the MERGE button."),
+		COSMOS_SEND_TOKENS("Submit", "Enter Wallet password to complete the transaction"),
+		COSMOS_DELEGATE_GRIDNODE("Submit", "Enter Wallet password to complete the transaction"),
+		COSMOS_UNDELEGATE_GRIDNODE("Submit", "Enter Wallet password to complete the transaction"),
+		COSMOS_DELEGATE_STAKING("Submit", "Enter Wallet password to complete the transaction");
 
 		@Getter private final String action;
 		@Getter private final String description;
