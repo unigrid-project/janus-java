@@ -142,7 +142,11 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
+import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.ApiConfig;
+import org.unigrid.janus.model.signal.CosmosWalletRequest;
+import org.unigrid.janus.model.signal.OverlayRequest;
+import org.unigrid.janus.model.signal.UnlockRequest;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -177,7 +181,14 @@ public class CosmosController implements Initializable {
 	private MnemonicService mnemonicService;
 	@Inject
 	private GrpcService grpcService;
-
+	@Inject
+	private Event<OverlayRequest> overlayRequest;
+	@Inject
+	private Event<UnlockRequest> unlockRequestEvent;
+	@Inject
+	private Event<CosmosWalletRequest> cosmosWalletEvent;
+	@FXML
+	private Pane pnlOverlay;
 	private Account currentSelectedAccount;
 	@FXML
 	private Label addressLabel;
@@ -312,6 +323,8 @@ public class CosmosController implements Initializable {
 		ObservableList<TxResponse> observableList = FXCollections
 			.observableArrayList(cosmosTxList.getTxResponsesList());
 		transactionListView.setItems(observableList);
+
+		pnlOverlay.setVisible(false);
 
 		Platform.runLater(() -> {
 
@@ -1581,6 +1594,55 @@ public class CosmosController implements Initializable {
 			result.append(String.format("%02X", b));
 		}
 		return result.toString();
+	}
+
+	@FXML
+	private void sendTokensPasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
+	@FXML
+	private void delegateToGridnodePasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
+	@FXML
+	private void undelegateFromGridnodePasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
+	@FXML
+	private void delegateToStakingPasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_STAKING).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
+	private void eventCosmosWalletRequest(@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
+		switch (cosmosWalletRequest) {
+			case SEND_TOKENS: {
+				System.out.println("Send Tokens ADDR " + toAddress.getText());
+				System.out.println("Send Tokens AMOUNT " + sendAmount.getText());
+				sendTokens();
+				break;
+			}
+			case DELEGATE_GRIDNODE: {
+				delegateToGridnode();
+				break;
+			}
+			case UNDELEGATE_GRIDNODE: {
+				undelegateFromGridnode();
+				break;
+			}
+			case DELEGATE_STAKING: {
+				delegateForStaking();
+				break;
+			}
+			default:
+				throw new AssertionError();
+		}
 	}
 
 }
