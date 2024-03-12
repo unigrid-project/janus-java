@@ -35,16 +35,24 @@ import javafx.scene.layout.GridPane;
 import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javax.crypto.AEADBadTagException;
+import org.unigrid.janus.model.AccountsData;
+import org.unigrid.janus.model.CryptoUtils;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
+import org.unigrid.janus.model.signal.CosmosWalletRequest;
 import org.unigrid.janus.model.signal.MergeInputsRequest;
 import org.unigrid.janus.model.signal.NodeRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.State;
 import org.unigrid.janus.model.signal.WalletRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
+import static org.unigrid.janus.model.signal.UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE;
+import static org.unigrid.janus.model.signal.UnlockRequest.Type.COSMOS_DELEGATE_STAKING;
+import static org.unigrid.janus.model.signal.UnlockRequest.Type.COSMOS_SEND_TOKENS;
+import static org.unigrid.janus.model.signal.UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE;
 import org.unigrid.janus.view.FxUtils;
 
 @ApplicationScoped
@@ -64,6 +72,8 @@ public class OverlayController implements Initializable {
 	private Event<State> stateEvent;
 	@Inject
 	private Event<MergeInputsRequest> mergeInputsEvent;
+	@Inject
+	private Event<CosmosWalletRequest> cosmosWalletEvent;
 	@FXML
 	private GridPane pnlUnlock;
 	@FXML
@@ -76,7 +86,11 @@ public class OverlayController implements Initializable {
 	private Button submitBtn;
 	@FXML
 	private Text unlockCopy;
-	private UnlockRequest currentUnlockRequest; // Instance variable to store the current UnlockRequest
+	private UnlockRequest currentUnlockRequest; // Instance variable to store the current UnlockRequest	
+	@Inject
+	private AccountsData accountsData;
+	@Inject
+	private CryptoUtils cryptoUtils;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -113,6 +127,35 @@ public class OverlayController implements Initializable {
 	private void onSubmitPassphrasePressed(MouseEvent event) {
 		submit();
 	}
+	
+	private void checkPassword(UnlockRequest.Type unlockType) throws Exception {
+		AccountsData.Account selectedAccount = accountsData.getSelectedAccount();
+		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+
+		try {
+			cryptoUtils.decrypt(encryptedPrivateKey, passphraseInput.getText());
+			switch (unlockType) {
+				case COSMOS_SEND_TOKENS:
+					cosmosWalletEvent.fire(CosmosWalletRequest.SEND_TOKENS);
+					break;
+				case COSMOS_DELEGATE_GRIDNODE:
+					cosmosWalletEvent.fire(CosmosWalletRequest.DELEGATE_GRIDNODE);
+					break;
+				case COSMOS_UNDELEGATE_GRIDNODE:
+					cosmosWalletEvent.fire(CosmosWalletRequest.UNDELEGATE_GRIDNODE);
+					break;
+				case COSMOS_DELEGATE_STAKING:
+					cosmosWalletEvent.fire(CosmosWalletRequest.DELEGATE_STAKING);
+					break;
+				default:
+					throw new AssertionError();
+			}
+			hide();
+		} catch (AEADBadTagException e) {
+			e.printStackTrace();
+		}
+
+	}
 
 	private void submit() {
 		submitBtn.setDisable(true);
@@ -135,10 +178,22 @@ public class OverlayController implements Initializable {
 				// Unlock for 30 seconds only
 				sendArgs = new Object[]{passphraseInput.getText(), 30};
 				break;
+			case COSMOS_SEND_TOKENS: 
+			case COSMOS_DELEGATE_GRIDNODE:
+			case COSMOS_UNDELEGATE_GRIDNODE:
+			case COSMOS_DELEGATE_STAKING: {
+				try {
+					checkPassword(unlockType);
+					return;
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+
 			default:
 				throw new AssertionError();
 		}
-
+		
 		if (passphraseInput.getText().equals("")) {
 			errorTxt.setText("Please enter a passphrase");
 			submitBtn.setDisable(false);
