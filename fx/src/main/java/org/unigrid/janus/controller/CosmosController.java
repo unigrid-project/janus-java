@@ -346,7 +346,7 @@ public class CosmosController implements Initializable {
 		transactionListView.setItems(observableList);
 
 		pnlOverlay.setVisible(false);
-
+		
 		Platform.runLater(() -> {
 
 			System.out.println("Is on FX thread: " + Platform.isFxApplicationThread());
@@ -364,7 +364,7 @@ public class CosmosController implements Initializable {
 			}
 
 			displaySwapEvent.fire(DisplaySwapPrompt.builder().build());
-
+			
 			// check whether the word changed in order to reset the value
 			transactionListView.setCellFactory(
 				param -> new ListCell<TransactionResponse.TxResponse>() {
@@ -435,9 +435,12 @@ public class CosmosController implements Initializable {
 				}
 			});
 
-			colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-			colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-			fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
+			if (tableTransactionsSent.getItems().isEmpty() && tableTransactionsReceived.getItems().isEmpty()) {
+				colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
+			}
+
 			fetchGridnodes();
 		});
 	}
