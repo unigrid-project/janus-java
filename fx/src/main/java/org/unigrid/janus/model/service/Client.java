@@ -29,6 +29,7 @@ import java.security.Signature;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 import org.unigrid.janus.model.transaction.GridnodeTransaction;
 
@@ -111,7 +112,7 @@ public class Client {
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request;
 		String url = String.format(
-			"http://194.233.95.48:1317/cosmos/tx/v1beta1/txs?events=message.sender='%s'",
+			ApiConfig.getBASE_URL() + "cosmos/tx/v1beta1/txs?events=message.sender='%s'",
 			address);
 		System.out.println("url: " + url);
 
