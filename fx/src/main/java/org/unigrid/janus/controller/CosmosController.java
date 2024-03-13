@@ -101,6 +101,7 @@ import org.unigrid.janus.model.service.AddressCosmosService;
 import org.unigrid.janus.model.service.CosmosService;
 import org.unigrid.janus.model.service.GrpcService;
 import org.unigrid.janus.model.service.MnemonicService;
+import org.unigrid.janus.model.service.RestService;
 import org.unigrid.janus.model.signal.DisplaySwapPrompt;
 import org.unigrid.janus.model.signal.MnemonicState;
 import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
@@ -133,6 +134,19 @@ import org.unigrid.janus.model.ValidatorInfo;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
 import java.util.stream.Collectors;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import org.unigrid.janus.model.gridnode.GridnodeData;
+import org.unigrid.janus.model.gridnode.GridnodeModel;
+import org.unigrid.janus.model.ApiConfig;
+import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
+import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
+import org.unigrid.janus.model.signal.CollateralUpdateEvent;
+import org.unigrid.janus.model.signal.DelegationStatusEvent;
+import org.unigrid.janus.model.signal.DelegationListEvent;
+import org.unigrid.janus.model.signal.RedelegationsEvent;
+import org.unigrid.janus.model.signal.RewardsEvent;
+import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
+import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 
 import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
@@ -145,13 +159,12 @@ import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
 import org.unigrid.janus.model.signal.CollateralUpdateEvent;
-import org.unigrid.janus.model.signal.DelegationAmountEvent;
+import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
-
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -198,7 +211,6 @@ public class CosmosController implements Initializable {
 	private GridnodeModel gridnodeModel;
 	@Inject
 	private CosmosService cosmosService;
-
 
 	private Account currentSelectedAccount;
 	@FXML
@@ -287,6 +299,8 @@ public class CosmosController implements Initializable {
 	private TextField undelegateAmount;
 	@FXML
 	private TextField validatorAddressTextField;
+	@FXML
+	private Label nodeLimit;
 	@FXML
 	private TextField stakeAmountTextField;
 	@FXML
@@ -1069,9 +1083,8 @@ public class CosmosController implements Initializable {
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
-
 		BigDecimal amountInUugd = cosmosService.convertBigDecimalInUugd(new BigDecimal(sendAmount.getText()));
-		
+
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
 			.toAddress(toAddress.getText())
@@ -1127,13 +1140,13 @@ public class CosmosController implements Initializable {
 		}
 
 		Abci.TxResponse txResponse = null;
-
+		long amountInUugd = cosmosService.convertLongToUugd(amount);
 		if (delegate) {
-			txResponse = transactionService.sendDelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendDelegateTx(credentials, amountInUugd, new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress == null) {
-			txResponse = transactionService.sendUndelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendUndelegateTx(credentials, amountInUugd, new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress != null) {
-			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amountInUugd, new BigDecimal("0.000001"), 200000);
 		}
 
 		System.out.println("Response Tx Delegate");
@@ -1365,13 +1378,12 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
 							getValidators();
 							// Update UI with the balance received from the response
-							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
-							delegationAmountLabel.setText(getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
-							unboundingAmountLabel.setText(getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
-							stakingAmountLabel.setText(getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
+							balanceLabel.setText(cosmosService.getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
+							//delegationAmountLabel.setText(cosmosService.getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
+							unboundingAmountLabel.setText(cosmosService.getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
+							stakingAmountLabel.setText(cosmosService.getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
 						});
 
 						// Load transactions and other account data (assuming these methods are adapted
@@ -1397,32 +1409,6 @@ public class CosmosController implements Initializable {
 			}
 		});
 		initCopyButton();
-	}
-
-	private String getWalletBalance(String address) {
-		QueryBalanceRequest balanceRequest = QueryBalanceRequest.newBuilder()
-			.setAddress(address)
-			.setDenom(ApiConfig.getDENOM()) // Add this line to set the denomination
-			.build();
-
-		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
-		QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
-		BigDecimal rawBalance = new BigDecimal(balanceResponse.getBalance().getAmount());
-		System.out.println("rawBalance: " + rawBalance);
-		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(UUGD_VALUE), 8, RoundingMode.HALF_UP);
-
-		return scaledBalance.toString();
-
-	}
-
-	private long getDelegatedBalance(String address) {
-		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-
-		QueryDelegatedAmountRequest delegatedAmountRequest = QueryDelegatedAmountRequest.newBuilder()
-			.setDelegatorAddress(address)
-			.build();
-		QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
-		return delegatedAmountResponse.getAmount();
 	}
 
 	public void getValidators() {
@@ -1482,10 +1468,12 @@ public class CosmosController implements Initializable {
 		return totalUnbondingAmount;
 	}
 
-	public void onDelegationAmountEvent(@Observes DelegationAmountEvent event) {
+	public void onDelegationAmountEvent(@Observes DelegationStatusEvent event) {
 		Platform.runLater(() -> {
-			String text = event.getAmount().toPlainString() + " UGD";
+			String text = event.getDelegatedAmount() + " UGD";
 			delegationAmountLabel.setText(text);
+			String gridnodeLimit = String.valueOf(event.getGridnodeCount());
+			nodeLimit.setText(gridnodeLimit);
 			System.out.println("Delegation Amount: " + text);
 		});
 	}
@@ -1499,19 +1487,6 @@ public class CosmosController implements Initializable {
 			System.out.println("Error fetching collateral");
 			// Update the UI to indicate an error
 		}
-	}
-
-	private long gridnodeNumberForUser() {
-
-		int amountPerGridnode;
-		long stakedAmount = getDelegatedBalance(accountsData.getSelectedAccount().getAddress());
-		if (hedgehog.fetchCollateralRequired()) {
-			amountPerGridnode = collateral.getAmount();
-			long gridnodeNumber = stakedAmount/ Long.parseLong(UUGD_VALUE) / amountPerGridnode;
-			return gridnodeNumber;
-		}
-
-		throw new IllegalStateException("Collateral amount was not fetched.");
 	}
 
 	public void fetchGridnodes() {
