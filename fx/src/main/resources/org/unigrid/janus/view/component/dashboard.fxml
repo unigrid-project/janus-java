@@ -14,14 +14,14 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
+<AnchorPane styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
 	<children>
 		<TabPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<tabs>
@@ -204,131 +204,168 @@
 								<RowConstraints maxHeight="214.0" minHeight="97.0" prefHeight="147.0" />
 							</rowConstraints>
 							<children>
-								<Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Unigrid Dashboard" textFill="#ababab" GridPane.columnIndex="0" GridPane.columnSpan="3" />
-								<VBox fx:id="commandsBox1" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="3">
-									<children>
-										<VBox prefHeight="200.0" prefWidth="100.0">
-											<children>
-                                    <VBox>
+								<Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Gridnode" textFill="#ababab" GridPane.columnIndex="1" />
+                        <TabPane tabClosingPolicy="UNAVAILABLE" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="3">
+                          <tabs>
+                            <Tab text="Delegate">
+                                 <content>
+            								<VBox fx:id="commandsBox1" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box">
+            									<children>
+            										<VBox prefHeight="200.0" prefWidth="100.0">
+            											<children>
+                                                <VBox>
+                                                   <children>
+                                                      <HBox>
+                                                         <children>
+                  														<Label text="Delegated:" textFill="#ababab">
+                  															<font>
+                  																<Font size="16.0" />
+                  															</font>
+                  														</Label>
+                  														<Label fx:id="delegationAmountLabel" text="0.00 UGD" textFill="#ababab">
+                  															<font>
+                  																<Font size="16.0" />
+                  															</font>
+                  														</Label>
+                                                         </children>
+                                                         <VBox.margin>
+                                                            <Insets bottom="10.0" top="10.0" />
+                                                         </VBox.margin>
+                                                      </HBox>
+                                                      <HBox>
+                                                         <children>
+                  														<Label text="Unbounding:" textFill="#ababab">
+                  															<font>
+                  																<Font size="16.0" />
+                  															</font>
+                  															<HBox.margin>
+                  																<Insets right="10.0" />
+                  															</HBox.margin>
+                  														</Label>
+                  														<Label fx:id="unboundingAmountLabel" text="0.00 UGD" textFill="#ababab">
+                  															<font>
+                  																<Font size="16.0" />
+                  															</font>
+                  														</Label>
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                </VBox>
+                                                <VBox prefHeight="200.0" prefWidth="100.0">
+                                                   <children>
+                                                      <HBox alignment="CENTER_RIGHT" VBox.vgrow="ALWAYS">
+                                                         <children>
+                                                            <Label text="Delegate to Gridnode" textFill="#ababab">
+                                                               <font>
+                                                                  <Font name="System Bold" size="25.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children>
+                                                      </HBox>
+                  												<HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                  													<children>
+                                                            <Region HBox.hgrow="ALWAYS" />
+                  														<Label fx:id="delegateLabel1" text="Amount:" textFill="#ababab">
+                  															<font>
+                  																<Font size="16.0" />
+                  															</font>
+                  															<padding>
+                  																<Insets left="5.0" right="5.0" />
+                  															</padding>
+                  														</Label>
+                  														<TextField fx:id="delegateAmountTextField" prefWidth="650.0" styleClass="large-rounded-textfield" />
+                  													</children>
+                                                         <VBox.margin>
+                                                            <Insets top="10.0" />
+                                                         </VBox.margin>
+                  												</HBox>
+                                                      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                                                         <children>
+                  														<Button alignment="CENTER" contentDisplay="CENTER" onAction="#delegateToGridnodePasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
+                                                         </children>
+                                                         <VBox.margin>
+                                                            <Insets top="15.0" />
+                                                         </VBox.margin>
+                                                      </HBox>
+                                                      <HBox alignment="CENTER_RIGHT">
+                                                         <children>
+                                                            <Label text="Ungelegate Gridnode" textFill="#ababab">
+                                                               <font>
+                                                                  <Font name="System Bold" size="25.0" />
+                                                               </font>
+                                                            </Label>
+                                                         </children>
+                                                         <VBox.margin>
+                                                            <Insets top="10.0" />
+                                                         </VBox.margin>
+                                                      </HBox>
+                                                      <HBox alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
+                                                         <children>
+                                                            <Region HBox.hgrow="ALWAYS" />
+                                                            <Label fx:id="delegateLabel11" text="Amount:" textFill="#ababab">
+                                                               <font>
+                                                                  <Font size="16.0" />
+                                                               </font>
+                                                               <padding>
+                                                                  <Insets left="5.0" right="5.0" />
+                                                               </padding>
+                                                            </Label>
+                                                            <TextField fx:id="undelegateAmount" prefWidth="650.0" styleClass="large-rounded-textfield" />
+                                                         </children>
+                                                         <VBox.margin>
+                                                            <Insets top="10.0" />
+                                                         </VBox.margin>
+                                                      </HBox>
+                                                      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+                                                         <children>
+                                                            <Button contentDisplay="CENTER" onAction="#undelegateFromGridnodePasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
+                                                         </children>
+                                                         <VBox.margin>
+                                                            <Insets top="15.0" />
+                                                         </VBox.margin>
+                                                      </HBox>
+                                                   </children>
+                                                   <VBox.margin>
+                                                      <Insets top="15.0" />
+                                                   </VBox.margin>
+                                                </VBox>
+            											</children>
+            										</VBox>
+            									</children>
+            								</VBox>
+                                 </content>
+                              </Tab>
+                            <Tab text="Keys">
+                                 <content>
+                                    <VBox style="-fx-background-color: #1a1a1a; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 10px;" />
+                                 </content></Tab>
+                              <Tab text="List">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
-                                          <HBox>
-                                             <children>
-      														<Label text="Delegated:" textFill="#ababab">
-      															<font>
-      																<Font size="16.0" />
-      															</font>
-      														</Label>
-      														<Label fx:id="delegationAmountLabel" text="0.00 UGD" textFill="#ababab">
-      															<font>
-      																<Font size="16.0" />
-      															</font>
-      														</Label>
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets bottom="10.0" top="10.0" />
-                                             </VBox.margin>
-                                          </HBox>
-                                          <HBox>
-                                             <children>
-      														<Label text="Unbounding:" textFill="#ababab">
-      															<font>
-      																<Font size="16.0" />
-      															</font>
-      															<HBox.margin>
-      																<Insets right="10.0" />
-      															</HBox.margin>
-      														</Label>
-      														<Label fx:id="unboundingAmountLabel" text="0.00 UGD" textFill="#ababab">
-      															<font>
-      																<Font size="16.0" />
-      															</font>
-      														</Label>
-                                             </children>
-                                          </HBox>
-                                       </children>
-                                    </VBox>
-                                    <VBox prefHeight="200.0" prefWidth="100.0">
-                                       <children>
-                                          <HBox alignment="CENTER_RIGHT" VBox.vgrow="ALWAYS">
-                                             <children>
-                                                <Label text="Delegate to Gridnode" textFill="#ababab">
-                                                   <font>
-                                                      <Font name="System Bold" size="25.0" />
-                                                   </font>
-                                                </Label>
-                                             </children>
-                                          </HBox>
-      												<HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
-      													<children>
-                                                <Region HBox.hgrow="ALWAYS" />
-      														<Label fx:id="delegateLabel1" text="Amount:" textFill="#ababab">
-      															<font>
-      																<Font size="16.0" />
-      															</font>
-      															<padding>
-      																<Insets left="5.0" right="5.0" />
-      															</padding>
-      														</Label>
-      														<TextField fx:id="delegateAmountTextField" prefWidth="650.0" styleClass="large-rounded-textfield" />
-      													</children>
-                                             <VBox.margin>
-                                                <Insets top="10.0" />
-                                             </VBox.margin>
-      												</HBox>
-                                          <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
-                                             <children>
-      														<Button alignment="CENTER" contentDisplay="CENTER" onAction="#delegateToGridnodePasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets top="15.0" />
-                                             </VBox.margin>
-                                          </HBox>
-                                          <HBox alignment="CENTER_RIGHT">
-                                             <children>
-                                                <Label text="Ungelegate Gridnode" textFill="#ababab">
-                                                   <font>
-                                                      <Font name="System Bold" size="25.0" />
-                                                   </font>
-                                                </Label>
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets top="10.0" />
-                                             </VBox.margin>
-                                          </HBox>
-                                          <HBox alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-                                             <children>
-                                                <Region HBox.hgrow="ALWAYS" />
-                                                <Label fx:id="delegateLabel11" text="Amount:" textFill="#ababab">
-                                                   <font>
-                                                      <Font size="16.0" />
-                                                   </font>
-                                                   <padding>
-                                                      <Insets left="5.0" right="5.0" />
-                                                   </padding>
-                                                </Label>
-                                                <TextField fx:id="undelegateAmount" prefWidth="650.0" styleClass="large-rounded-textfield" />
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets top="10.0" />
-                                             </VBox.margin>
-                                          </HBox>
-                                          <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
-                                             <children>
-                                                <Button contentDisplay="CENTER" onAction="#undelegateFromGridnodePasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets top="15.0" />
-                                             </VBox.margin>
-                                          </HBox>
-                                       </children>
-                                       <VBox.margin>
-                                          <Insets top="15.0" />
-                                       </VBox.margin>
-                                    </VBox>
-											</children>
-										</VBox>
-									</children>
-								</VBox>
+                                          <BorderPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #1a1a1a; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 10px;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <top>
+                                                <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                                   <children>
+                                                      <Button fx:id="btnStartAllGridnodes" mnemonicParsing="false" onAction="#onStartAllGridnodes" text="Start Gridnodes" />
+                                                   </children>
+                                                </HBox>
+                                             </top>
+                                             <center>
+                                                <TableView fx:id="tblGridnodeList" BorderPane.alignment="CENTER">
+                                                  <columns>
+                                                    <TableColumn fx:id="colGridnodeId" prefWidth="119.0" text="Gridnode ID" />
+                                                    <TableColumn fx:id="colStatus" prefWidth="100.0" text="Status" />
+                                                      <TableColumn fx:id="tbcolStartGridnode" prefWidth="123.0" />
+                                                  </columns>
+                                                </TableView>
+                                             </center>
+                                          </BorderPane>
+                                       </children></AnchorPane>
+                                </content>
+                              </Tab>
+                          </tabs>
+                        </TabPane>
 							</children>
 						</GridPane>
 					</content>
@@ -351,7 +388,7 @@
 								<RowConstraints maxHeight="214.0" minHeight="97.0" prefHeight="147.0" />
 							</rowConstraints>
 							<children>
-								<Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Unigrid Dashboard" textFill="#ababab" GridPane.columnIndex="0" GridPane.columnSpan="3" />
+								<Label alignment="CENTER" contentDisplay="CENTER" maxWidth="Infinity" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Staking" textFill="#ababab" GridPane.columnIndex="0" GridPane.columnSpan="3" />
 								<VBox fx:id="commandsBox2" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="3">
 									<children>
 										<VBox prefHeight="200.0" prefWidth="100.0">
@@ -452,35 +489,9 @@
 						</GridPane>
 					</content>
 				</Tab>
-            <Tab text="Gridnode List">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <BorderPane layoutX="243.0" layoutY="78.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <top>
-                              <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-                                 <children>
-                                    <Button fx:id="btnStartAllGridnodes" mnemonicParsing="false" onAction="#onStartAllGridnodes" text="Start Gridnodes" />
-                                 </children>
-                              </HBox>
-                           </top>
-                           <center>
-                              <TableView fx:id="tblGridnodeList" BorderPane.alignment="CENTER">
-                                <columns>
-                                  <TableColumn fx:id="colGridnodeId" prefWidth="119.0" text="Gridnode ID" />
-                                  <TableColumn fx:id="colStatus" prefWidth="100.0" text="Status" />
-                                    <TableColumn fx:id="tbcolStartGridnode" prefWidth="123.0" />
-                                </columns>
-                              </TableView>
-                           </center>
-                        </BorderPane>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
 			</tabs>
 		</TabPane>
-		<Pane fx:id="pnlOverlay" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+		<Pane fx:id="pnlOverlay" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<children>
 				<fx:include prefHeight="683.0" prefWidth="1000.0" source="../overlays.fxml" />
 			</children>

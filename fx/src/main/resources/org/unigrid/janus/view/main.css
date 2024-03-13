@@ -55,11 +55,11 @@
 }
 
 .tab-header-background {
-  -fx-background-color: black;
+  -fx-background-color: transparent;
 }
 
 .tab-header-area .tab-header-background {
-  -fx-border-color: black black #aaff black;
+  -fx-border-color: transparent;
 }
 
 .tab {
