@@ -69,7 +69,8 @@ public class SignUtil {
 			.setDelegatorAddress(payerCredentials.getAddress())
 			.setAmount(amount)
 			.build();
-		TxOuterClass.Tx tx = getTxDelegate(msg, payerCredentials, null, amount, feeInAtom, gasLimit);
+
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
 		return bradcastTransaction(tx);
 	}
 
@@ -80,14 +81,26 @@ public class SignUtil {
 			.setDelegatorAddress(payerCredentials.getAddress())
 			.setAmount(amount)
 			.build();
-		TxOuterClass.Tx tx = getTxDelegate(msg, payerCredentials, null, amount, feeInAtom, gasLimit);
+
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
 		return bradcastTransaction(tx);
 	}
 
 	public Abci.TxResponse sendTx(CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
 		long gasLimit) throws Exception {
+		
+		CoinOuterClass.Coin sendCoin = CoinOuterClass.Coin.newBuilder()
+			.setAmount(sendMsg.getAmountInAtom().toString())
+			.setDenom(token)
+			.build();
 
-		TxOuterClass.Tx tx = getTxRequest(payerCredentials, sendMsg, feeInAtom, gasLimit);
+		Tx.MsgSend msg = Tx.MsgSend.newBuilder()
+			.setFromAddress(sendMsg.getCredentials().getAddress())
+			.setToAddress(sendMsg.getToAddress())
+			.addAmount(sendCoin)
+			.build();
+
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, sendMsg, feeInAtom, gasLimit);
 		return bradcastTransaction(tx);
 	}
 
@@ -100,7 +113,7 @@ public class SignUtil {
 			.setAmount(Coin.newBuilder().setDenom(token).setAmount(amount.toString()).build())
 			.build();
 
-		TxOuterClass.Tx tx = getTxDelegate(msg, payerCredentials, null, amount, feeInAtom, gasLimit);
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
 		return bradcastTransaction(tx);
 	}
 
@@ -124,7 +137,7 @@ public class SignUtil {
 		return txResponse;
 	}
 
-	public TxOuterClass.Tx getTxRequest(CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
+	public TxOuterClass.Tx getTxRequest(GeneratedMessageV3 msg, CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
 		long gasLimit) throws Exception {
 
 		Map<String, Auth.BaseAccount> baseAccountCache = new HashMap<>();
@@ -135,23 +148,7 @@ public class SignUtil {
 		Map<String, Boolean> signerInfoExistMap = new HashMap<>();
 		Map<String, Boolean> signaturesExistMap = new HashMap<>();
 
-		CoinOuterClass.Coin sendCoin = CoinOuterClass.Coin.newBuilder()
-			.setAmount(sendMsg.getAmountInAtom().toString())
-			.setDenom(token)
-			.build();
-
-		Tx.MsgSend message = Tx.MsgSend.newBuilder()
-			.setFromAddress(sendMsg.getCredentials().getAddress())
-			.setToAddress(sendMsg.getToAddress())
-			.addAmount(sendCoin)
-			.build();
-
-		txBodyBuilder.addMessages(Any.pack(message, "/"));
-
-		if (!signerInfoExistMap.containsKey(sendMsg.getCredentials().getAddress())) {
-			authInfoBuilder.addSignerInfos(getSignInfo(sendMsg.getCredentials(), baseAccountCache));
-			signerInfoExistMap.put(sendMsg.getCredentials().getAddress(), true);
-		}
+		txBodyBuilder.addMessages(Any.pack(msg, "/"));
 
 		if (!signerInfoExistMap.containsKey(payerCredentials.getAddress())) {
 			authInfoBuilder.addSignerInfos(getSignInfo(payerCredentials, baseAccountCache));
@@ -163,14 +160,9 @@ public class SignUtil {
 			.setDenom(token)
 			.build();
 
-		String payerAddress = payerCredentials.getAddress();
-		if (sendMsg.getCredentials().getAddress().equals(payerCredentials.getAddress())) {
-			payerAddress = "";
-		}
-
 		TxOuterClass.Fee fee = TxOuterClass.Fee.newBuilder()
 			.setGasLimit(gasLimit)
-			.setPayer(payerAddress)
+			.setPayer(payerCredentials.getAddress())
 			.addAmount(feeCoin)
 			.build();
 
@@ -179,72 +171,10 @@ public class SignUtil {
 		TxOuterClass.TxBody txBody = txBodyBuilder.build();
 
 		TxOuterClass.AuthInfo authInfo = authInfoBuilder.build();
-
-		if (!signaturesExistMap.containsKey(sendMsg.getCredentials().getAddress())) {
-			txBuilder.addSignatures(getSignBytes(sendMsg.getCredentials(), txBody, authInfo, baseAccountCache));
-			signaturesExistMap.put(sendMsg.getCredentials().getAddress(), true);
-		}
 
 		if (!signaturesExistMap.containsKey(payerCredentials.getAddress())) {
 			txBuilder.addSignatures(getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
 			signaturesExistMap.put(payerCredentials.getAddress(), true);
-		}
-
-		txBuilder.setBody(txBody);
-		txBuilder.setAuthInfo(authInfo);
-		TxOuterClass.Tx tx = txBuilder.build();
-		return tx;
-	}
-
-	public TxOuterClass.Tx getTxDelegate(GeneratedMessageV3 msg, CosmosCredentials payerCredentials, SendInfo sendMsg, long amount, BigDecimal feeInAtom,
-		long gasLimit) throws Exception {
-
-		Map<String, Auth.BaseAccount> baseAccountCache = new HashMap<>();
-		TxOuterClass.TxBody.Builder txBodyBuilder = TxOuterClass.TxBody.newBuilder();
-		TxOuterClass.AuthInfo.Builder authInfoBuilder = TxOuterClass.AuthInfo.newBuilder();
-		String payerAddress = payerCredentials.getAddress();
-
-		TxOuterClass.Tx.Builder txBuilder = TxOuterClass.Tx.newBuilder();
-		Map<String, Boolean> signerInfoExistMap = new HashMap<>();
-		Map<String, Boolean> signaturesExistMap = new HashMap<>();
-
-		txBodyBuilder.addMessages(Any.pack(msg, "/"));
-
-		if (!signerInfoExistMap.containsKey(payerAddress)) {
-			authInfoBuilder.addSignerInfos(getSignInfo(payerCredentials, baseAccountCache));
-			signerInfoExistMap.put(payerAddress, true);
-		}
-
-		if (!signerInfoExistMap.containsKey(payerAddress)) {
-			authInfoBuilder.addSignerInfos(getSignInfo(payerCredentials, baseAccountCache));
-			signerInfoExistMap.put(payerAddress, true);
-		}
-
-		CoinOuterClass.Coin feeCoin = CoinOuterClass.Coin.newBuilder()
-			.setAmount(ATOMUnitUtil.atomToMicroAtom(feeInAtom).toPlainString())
-			.setDenom(token)
-			.build();
-
-		TxOuterClass.Fee fee = TxOuterClass.Fee.newBuilder()
-			.setGasLimit(gasLimit)
-			.setPayer(payerAddress)
-			.addAmount(feeCoin)
-			.build();
-
-		authInfoBuilder.setFee(fee);
-
-		TxOuterClass.TxBody txBody = txBodyBuilder.build();
-
-		TxOuterClass.AuthInfo authInfo = authInfoBuilder.build();
-
-		if (!signaturesExistMap.containsKey(payerAddress)) {
-			txBuilder.addSignatures(getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
-			signaturesExistMap.put(payerAddress, true);
-		}
-
-		if (!signaturesExistMap.containsKey(payerAddress)) {
-			txBuilder.addSignatures(getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
-			signaturesExistMap.put(payerAddress, true);
 		}
 
 		txBuilder.setBody(txBody);
