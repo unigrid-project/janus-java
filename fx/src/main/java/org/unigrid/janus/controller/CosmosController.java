@@ -1365,7 +1365,7 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							//System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
+							System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
 							getValidators();
 							// Update UI with the balance received from the response
 							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
@@ -1507,7 +1507,7 @@ public class CosmosController implements Initializable {
 		long stakedAmount = getDelegatedBalance(accountsData.getSelectedAccount().getAddress());
 		if (hedgehog.fetchCollateralRequired()) {
 			amountPerGridnode = collateral.getAmount();
-			long gridnodeNumber = stakedAmount / amountPerGridnode;
+			long gridnodeNumber = stakedAmount/ Long.parseLong(UUGD_VALUE) / amountPerGridnode;
 			return gridnodeNumber;
 		}
 
