@@ -43,11 +43,13 @@ public class UnlockRequest {
 			+ "and pressing the STAKE button."),
 		FOR_MERGING("MERGE", "Enable auto-merging inputs in your wallet by entering your "
 			+ "passphrase and pressing the MERGE button."),
-		COSMOS_SEND_TOKENS("Send", "Enter Wallet password to complete the transaction"),
-		COSMOS_DELEGATE_GRIDNODE("Delegate", "Enter Wallet password to complete the transaction"),
-		COSMOS_UNDELEGATE_GRIDNODE("Undelegate", "Enter Wallet password to complete the transaction"),
-		COSMOS_DELEGATE_STAKING("Stake", "Enter Wallet password to complete the transaction"),
-		COSMOS_CLAIM_REWARDS("Claim", "Enter Wallet password to claim rewards");
+		COSMOS_SEND_TOKENS("SEND", "Enter Wallet password to complete the transaction"),
+		COSMOS_DELEGATE_GRIDNODE("DELEGATE", "Enter Wallet password to complete the transaction"),
+		COSMOS_UNDELEGATE_GRIDNODE("UNDELEGATE", "Enter Wallet password to complete the transaction"),
+		COSMOS_DELEGATE_STAKING("STAKE", "Enter Wallet password to complete the transaction"),
+		COSMOS_CLAIM_REWARDS("CLAIM", "Enter Wallet password to claim rewards"),
+		COSMOS_GRIDNODE_KEYS("SHOW", "Enter Wallet password to generate gridnode keys");
+		
 
 		@Getter private final String action;
 		@Getter private final String description;

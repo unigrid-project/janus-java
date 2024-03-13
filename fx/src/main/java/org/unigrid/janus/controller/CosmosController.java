@@ -17,10 +17,6 @@ package org.unigrid.janus.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cosmos.bank.v1beta1.QueryGrpc;
-import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
-import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
-
 import com.google.protobuf.Any;
 import cosmos.auth.v1beta1.Auth.BaseAccount;
 import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountRequest;
@@ -49,7 +45,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.File;
 import java.io.IOException;
-import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,14 +72,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.SignatureDecodeException;
-import org.bitcoinj.crypto.ChildNumber;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.wallet.DeterministicKeyChain;
-import org.bitcoinj.wallet.DeterministicSeed;
 import org.unigrid.janus.model.AccountModel;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.AccountsData.Account;
@@ -101,7 +89,6 @@ import org.unigrid.janus.model.service.AddressCosmosService;
 import org.unigrid.janus.model.service.CosmosService;
 import org.unigrid.janus.model.service.GrpcService;
 import org.unigrid.janus.model.service.MnemonicService;
-import org.unigrid.janus.model.service.RestService;
 import org.unigrid.janus.model.signal.DisplaySwapPrompt;
 import org.unigrid.janus.model.signal.MnemonicState;
 import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
@@ -131,23 +118,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
-import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
-import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
 import java.util.stream.Collectors;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import org.unigrid.janus.model.gridnode.GridnodeData;
-import org.unigrid.janus.model.gridnode.GridnodeModel;
-import org.unigrid.janus.model.ApiConfig;
-import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
-import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
-import org.unigrid.janus.model.signal.CollateralUpdateEvent;
-import org.unigrid.janus.model.signal.DelegationStatusEvent;
-import org.unigrid.janus.model.signal.DelegationListEvent;
-import org.unigrid.janus.model.signal.RedelegationsEvent;
-import org.unigrid.janus.model.signal.RewardsEvent;
-import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
-import org.unigrid.janus.model.signal.WithdrawAddressEvent;
-
 import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
@@ -156,11 +127,13 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import org.unigrid.janus.model.gridnode.GridnodeData;
 import org.unigrid.janus.model.gridnode.GridnodeModel;
 import org.unigrid.janus.model.ApiConfig;
+import org.unigrid.janus.model.PublicKeysModel;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
 import org.unigrid.janus.model.signal.CollateralUpdateEvent;
 import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
+import org.unigrid.janus.model.signal.PublicKeysEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
@@ -205,6 +178,10 @@ public class CosmosController implements Initializable {
 	private Event<UnlockRequest> unlockRequestEvent;
 	@Inject
 	private Event<CosmosWalletRequest> cosmosWalletEvent;
+	@Inject
+	private PublicKeysModel publicKeysModel;
+
+	private DelegationStatusEvent delegationEvent;
 	@FXML
 	private Pane pnlOverlay;
 
@@ -323,6 +300,10 @@ public class CosmosController implements Initializable {
 	private TableColumn<String, String> colStatus;
 	@FXML
 	private TableColumn<String, String> colStartGridnode;
+	@FXML
+	private ListView<String> keysListView;
+	private ObservableList<String> keysList = FXCollections.observableArrayList();
+
 	private ObservableList<String> transactionsObReceived = FXCollections.observableArrayList();
 	private ObservableList<String> transactionsObSent = FXCollections.observableArrayList();
 	private ObservableList<GridnodeData> gridnodeData = FXCollections.observableArrayList();
@@ -361,7 +342,7 @@ public class CosmosController implements Initializable {
 		transactionListView.setItems(observableList);
 
 		pnlOverlay.setVisible(false);
-		
+
 		Platform.runLater(() -> {
 
 			System.out.println("Is on FX thread: " + Platform.isFxApplicationThread());
@@ -379,7 +360,7 @@ public class CosmosController implements Initializable {
 			}
 
 			displaySwapEvent.fire(DisplaySwapPrompt.builder().build());
-			
+
 			// check whether the word changed in order to reset the value
 			transactionListView.setCellFactory(
 				param -> new ListCell<TransactionResponse.TxResponse>() {
@@ -455,7 +436,7 @@ public class CosmosController implements Initializable {
 				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
 			}
-
+			keysListView.setItems(publicKeysModel.getPublicKeys());
 			fetchGridnodes();
 		});
 	}
@@ -492,16 +473,6 @@ public class CosmosController implements Initializable {
 			}
 		});
 
-	}
-
-	@FXML
-	private void testBtn(ActionEvent event) {
-		// System.out.println("Transaction Response: " + cosmosTxList.getTxResponse());
-		// System.out.println("Transaction loadTransactions: " +
-		// cosmosTxList.loadTransactions(10));
-
-		// System.out.println("txModel.getTxResponses: " + txModel.getNewTxResponses());
-		System.out.println("txModel.getResult: " + txModel.getResult());
 	}
 
 	@FXML
@@ -564,168 +535,14 @@ public class CosmosController implements Initializable {
 		accountModel.reset();
 	}
 
-	// @FXML
-	// private void encryptTest(ActionEvent event) {
-	// try {
-	// String mnemonic = encryptField.getText();
-	//
-	// cryptoUtils.encrypt(mnemonic, "pickles");
-	// String addressFromPrivateKey =
-	// cryptoUtils.getAddressFromPrivateKey(mnemonic);
-	// addressField.setText(addressFromPrivateKey);
-	// // Show the cosmosMainPane after successful encryption and saving
-	// showPane(cosmosMainPane);
-	// } catch (Exception ex) {
-	// Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-	// ex);
-	// }
-	// }
 	@FXML
-	private void testKeys(ActionEvent event) throws SignatureDecodeException, Exception {
-		Account selectedAccount = accountsData.getSelectedAccount();
-		String pubKey = selectedAccount.getPublicKey();
-		byte[] seed = Sha256Hash.hash(pubKey.getBytes());
-		System.out.println("pubKey: " + pubKey);
-		System.out.println("seed: " + seed);
-		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
-		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
-
-		// Prompt the user to enter the password
-		String password = getPasswordFromUser();
-		if (password == null) {
-			System.out.println("Password input cancelled!");
-			return;
-		}
-
-		// Assuming privateKeyBytes is the decrypted private key bytes
-		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
-
-		// Create an ECKey instance from private key bytes
-		ECKey privateKey = ECKey.fromPrivate(privateKeyBytes);
-		String originalPubKey = Hex.toHexString(privateKey.getPubKey());
-		List<ECKey> keys = cryptoUtils.generateKeysFromCompressedPublicKey(originalPubKey, 10);
-		cryptoUtils.printKeys(keys);
-		System.out.println("Original Public Key: " + originalPubKey);
-
-		// Create a test message and hash it
-		String message = "Test Message";
-		Sha256Hash messageHash = Sha256Hash.wrap(Sha256Hash.hash(message.getBytes()));
-
-		// Sign the message hash
-		ECKey.ECDSASignature signature = privateKey.sign(messageHash);
-
-		// Convert the signature to DER format
-		byte[] signatureDER = signature.encodeToDER();
-
-		// For verification, assume you have the public key in hex format
-		ECKey publicKey = ECKey.fromPublicOnly(Hex.decode(pubKey));
-
-		// Verify the signature
-		boolean isSignatureValid = publicKey.verify(messageHash, signature);
-		System.out.println("Is the signature valid? " + isSignatureValid);
-	}
-
-	@FXML
-	private void generateKeys(ActionEvent event) throws SignatureDecodeException, Exception {
-
-		BigDecimal currentDelegationAmount = gridnodeDelegationService
-			.getCurrentDelegationAmount();
-		BigDecimal collateralAmount = BigDecimal.valueOf(collateral.getAmount());
-		BigDecimal numberOfNodes = currentDelegationAmount.divide(collateralAmount, 0,
-			RoundingMode.DOWN);
-		int numberOfNodesInt = numberOfNodes.intValue();
-		System.out.println("Nodes we can run: " + numberOfNodesInt);
-		int keysToCreate = numberOfNodesInt;
-		Account selectedAccount = accountsData.getSelectedAccount();
-		String pubKey = selectedAccount.getPublicKey();
-		byte[] seed = Sha256Hash.hash(pubKey.getBytes());
-		System.out.println("pubKey: " + pubKey);
-		System.out.println("seed: " + seed);
-
-		// Current time in milliseconds since epoch
-		long creationTimeSeconds = System.currentTimeMillis() / 1000L;
-
-		// Generate the HD wallet from the seed
-		DeterministicSeed deterministicSeed = new DeterministicSeed(seed, "",
-			creationTimeSeconds);
-		DeterministicKeyChain chain = DeterministicKeyChain.builder()
-			.seed(deterministicSeed).build();
-
-		// Derive child keys
-		List<ECKey> derivedKeysList = new ArrayList<>();
-		DeterministicKey parentKey = chain.getWatchingKey();
-		for (int i = 0; i < keysToCreate; i++) {
-			DeterministicKey childKey = HDKeyDerivation.deriveChildKey(parentKey,
-				new ChildNumber(i));
-			derivedKeysList.add(ECKey.fromPrivate(childKey.getPrivKey()));
-		}
-
-		ECKey[] derivedKeys = derivedKeysList.toArray(new ECKey[0]);
-
-		// cryptoUtils.printKeys(derivedKeys);
-		// Now iterate through the allKeys array, signing and verifying a message with
-		// each key
-		String messageStr = "Start gridnode message";
-		byte[] messageBytes = messageStr.getBytes();
-		// get private key to sign with
-		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
-		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
-
-		// Prompt the user to enter the password
-		String password = getPasswordFromUser();
-		if (password == null) {
-			System.out.println("Password input cancelled!");
-			return;
-		}
-
-		// Decrypt the private key. The returned value should be the original private
-		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
-		byte[] signedMessage = cryptoUtils.signMessage(messageBytes, privateKeyBytes);
-
-		// Verify the signature and the derived keys
-		ECKey publicKey = ECKey.fromPrivate(privateKeyBytes);
-		List<ECKey> publicKeysToVerify = derivedKeysList;
-		System.out.println("publicKey.getPubKey(): " + publicKey.getPubKey());
-
-		long startTime = System.currentTimeMillis(); // Capture the start time
-
-		boolean areKeysVerified = cryptoUtils.verifySignatureKeys(messageBytes,
-			signedMessage, derivedKeys, keysToCreate, pubKey);
-
-		long endTime = System.currentTimeMillis(); // Capture the end time
-
-		long elapsedTime = endTime - startTime; // Calculate the elapsed time
-
-		System.out.println("Are keys verified: " + (areKeysVerified ? "Yes" : "No"));
-		System.out.println("Verification time: " + elapsedTime + " milliseconds");
-
-	}
-
-	private void verifyWithBadKeys(byte[] messageBytes, ECKey signingKey)
-		throws SignatureDecodeException {
-		ECKey.ECDSASignature signature = signingKey.sign(Sha256Hash.of(messageBytes));
-		byte[] signatureBytes = signature.encodeToDER();
-
-		ECKey[] badKeys = {
-			ECKey.fromPrivate(new BigInteger("deadbeefdeadbeefdeadbeefdeadbeef", 16)),
-			ECKey.fromPrivate(
-			new BigInteger("badbadbadbadbadbadbadbadbadbadbad", 16)),
-			ECKey.fromPrivate(
-			new BigInteger("facefacefacefacefacefacefaceface", 16))};
-
-		// for (int i = 0; i < badKeys.length; i++) {
-		// ECKey[] singleKeyArray = { badKeys[i] };
-		// boolean isVerified = cryptoUtils.verifySignature(messageBytes,
-		// signatureBytes,
-		// singleKeyArray);
-		// System.out.println("Verification for bad key " + i + ": "
-		// + (isVerified ? "Succeeded" : "Failed"));
-		// }
+	private void onGenerateKeysClicked(ActionEvent event) throws SignatureDecodeException, Exception {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_GRIDNODE_KEYS).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
 	private String getPasswordFromUser() {
 		// just use this default for testing right now
-
 		return "pickles";
 	}
 
@@ -1140,13 +957,13 @@ public class CosmosController implements Initializable {
 		}
 
 		Abci.TxResponse txResponse = null;
-		long amountInUugd = cosmosService.convertLongToUugd(amount);
+		//long amountInUugd = cosmosService.convertLongToUugd(amount);
 		if (delegate) {
-			txResponse = transactionService.sendDelegateTx(credentials, amountInUugd, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendDelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress == null) {
-			txResponse = transactionService.sendUndelegateTx(credentials, amountInUugd, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendUndelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress != null) {
-			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amountInUugd, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
 		}
 
 		System.out.println("Response Tx Delegate");
@@ -1451,7 +1268,7 @@ public class CosmosController implements Initializable {
 		double totalStaked = stakingResponse.getDelegationResponsesList().stream()
 			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
 			.sum();
-		
+
 		return totalStaked / Double.parseDouble(UUGD_VALUE);
 	}
 
@@ -1475,6 +1292,9 @@ public class CosmosController implements Initializable {
 			String gridnodeLimit = String.valueOf(event.getGridnodeCount());
 			nodeLimit.setText(gridnodeLimit);
 			System.out.println("Delegation Amount: " + text);
+			// store the event responses locally
+			// TODO separate the data into models
+			delegationEvent = event;
 		});
 	}
 
@@ -1569,7 +1389,7 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
-	private void sendTokensPasswordRequest() {		
+	private void sendTokensPasswordRequest() {
 		if (!"".equals(toAddress.getText()) && !"".equals(sendAmount.getText())) {
 			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
 			overlayRequest.fire(OverlayRequest.OPEN);
@@ -1599,14 +1419,14 @@ public class CosmosController implements Initializable {
 			overlayRequest.fire(OverlayRequest.OPEN);
 		}
 	}
-	
+
 	@FXML
 	private void onClaimStakingRewardsPasswordRequest() {
 		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_CLAIM_REWARDS).build());
 		overlayRequest.fire(OverlayRequest.OPEN);
 	}
-	
 
+	// this should all be in a model service not UI controller
 	private void eventCosmosWalletRequest(@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
 		switch (cosmosWalletRequest) {
 			case SEND_TOKENS: {
@@ -1629,11 +1449,15 @@ public class CosmosController implements Initializable {
 				onClaimStakingRewards();
 				break;
 			}
+			case GRIDNODE_KEYS: {
+				cosmosService.generateKeys(delegationEvent.getGridnodeCount());
+				break;
+			}
 			default:
 				throw new AssertionError();
 		}
 	}
-	
+
 	@FXML
 	public void onClaimStakingRewards() throws Exception {
 		byte[] privateKey = Hex.decode(getPrivateKeyHex());
@@ -1649,7 +1473,7 @@ public class CosmosController implements Initializable {
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 		transactionService.sendClaimStakingRewardsTx(credentials, validatorAddresses, new BigDecimal("0.000001"), 200000);
-		
+
 		// send desktop notofication
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			Notifications
@@ -1664,6 +1488,6 @@ public class CosmosController implements Initializable {
 				.title("Info")
 				.text("Rewards clamied")
 				.showInformation();
-		}		
+		}
 	}
 }

@@ -9,6 +9,7 @@
 
 .button:hover {
   -fx-background-color: #ccc5;
+  -fx-cursor : hand;
 }
 
 .toggle-button {

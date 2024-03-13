@@ -24,6 +24,7 @@ import cosmos.auth.v1beta1.QueryOuterClass;
 import cosmos.bank.v1beta1.QueryGrpc;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -34,14 +35,20 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.SignatureDecodeException;
+import org.bouncycastle.util.encoders.Hex;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.CryptoUtils;
+import org.unigrid.janus.model.PublicKeysModel;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.DelegationsRequest;
-import org.unigrid.janus.model.rest.entity.GridnodeDelegationAmount;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
 import org.unigrid.janus.model.rest.entity.RewardsRequest;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
@@ -49,6 +56,7 @@ import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
+import org.unigrid.janus.model.signal.PublicKeysEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
@@ -84,6 +92,10 @@ public class CosmosService {
 	private AccountsData accountsData;
 	@Inject
 	private CollateralRequired collateral;
+	@Inject
+	private PublicKeysModel publicKeysModel;
+	@Inject
+	private Event<PublicKeysEvent> publicKeysEvent;
 
 	static final String TOKEN_DECIMAL_VALUE = "100000000";
 
@@ -186,7 +198,11 @@ public class CosmosService {
 		double delegationAmount = getDelegatedBalance(account);
 		int gridnodesTotal = gridnodeNumberForUser(delegationAmount);
 		// Fire an event with both the delegation amount and the gridnode count
-		delegationAmountEvent.fire(DelegationStatusEvent.of(delegationAmount, gridnodesTotal));
+		DelegationStatusEvent event = DelegationStatusEvent.builder()
+			.delegatedAmount(delegationAmount)
+			.gridnodeCount(gridnodesTotal)
+			.build();
+		delegationAmountEvent.fire(event);
 	}
 
 	// TODO
@@ -270,6 +286,44 @@ public class CosmosService {
 		return totalStaked;
 	}
 
+	public void generateKeys(int gridnodeCount) throws SignatureDecodeException, Exception {
+		AccountsData.Account selectedAccount = accountsData.getSelectedAccount();
+		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
+		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
+		System.out.println("Gridnode Count: " + gridnodeCount);
+		// Prompt the user to enter the password
+		String password = "pickles";
+
+		// Assuming privateKeyBytes is the decrypted private key bytes
+		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+
+		// Create an ECKey instance from private key bytes
+		ECKey privateKey = ECKey.fromPrivate(privateKeyBytes);
+		String pubKey = Hex.toHexString(privateKey.getPubKey());
+		List<ECKey> keys = cryptoUtils.generateKeysFromCompressedPublicKey(pubKey, gridnodeCount);
+		cryptoUtils.printKeys(keys);
+		System.out.println("Original Public Key: " + pubKey);
+
+		// Create a test message and hash it
+		String message = "GRIDNODE_KEYS";
+		Sha256Hash messageHash = Sha256Hash.wrap(Sha256Hash.hash(message.getBytes()));
+
+		// Sign the message hash
+		ECKey.ECDSASignature signature = privateKey.sign(messageHash);
+
+		// For verification, assume you have the public key in hex format
+		ECKey publicKey = ECKey.fromPublicOnly(Hex.decode(pubKey));
+
+		// Verify the signature
+		boolean isSignatureValid = publicKey.verify(messageHash, signature);
+		System.out.println("Is the signature valid? " + isSignatureValid);
+		List<String> publicKeysHex = keys.stream()
+			.map(key -> Hex.toHexString(key.getPubKey()))
+			.collect(Collectors.toList());
+
+		publicKeysEvent.fire(new PublicKeysEvent(publicKeysHex));
+	}
+
 	public long convertLongToUugd(long amount) {
 		long amountInUugd = (long) (amount * 100000000);
 		return amountInUugd;
@@ -289,4 +343,9 @@ public class CosmosService {
 		BigDecimal conversionFactor = new BigDecimal("100000000");
 		return amountInUugd.divide(conversionFactor, 8, RoundingMode.HALF_UP);
 	}
+
+	public void onPublicKeysEvent(@Observes PublicKeysEvent event) {
+		publicKeysModel.setPublicKeys(event.getPublicKeys());
+	}
+
 }
