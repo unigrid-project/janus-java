@@ -192,6 +192,8 @@ public class Hedgehog {
 		}
 	}
 
+	// TODO 
+	// change the rest of the calls in here to use the same createClient()
 	public boolean fetchCollateralRequired() {
 		Client client = null;
 		try {

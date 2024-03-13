@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -88,7 +89,7 @@
                                     <Insets bottom="5.0" />
                                  </VBox.margin>
                               </Label>
-                              <TextField fx:id="toAddress1" prefWidth="300.0" styleClass="large-rounded-textfield" />
+                              <TextField fx:id="toAddress" prefWidth="300.0" styleClass="large-rounded-textfield" />
                            </children>
                            <VBox.margin>
                               <Insets top="30.0" />
@@ -107,10 +108,10 @@
                                     <Insets bottom="5.0" />
                                  </VBox.margin>
                               </Label>
-                              <TextField fx:id="sendAmount1" prefWidth="150.0" styleClass="large-rounded-textfield" />
+                              <TextField fx:id="sendAmount" prefWidth="150.0" styleClass="large-rounded-textfield" />
                               <HBox alignment="CENTER_RIGHT">
                                  <children>
-                                    <Button alignment="CENTER" contentDisplay="CENTER" onAction="#sendTokens" prefWidth="130.0" style="-fx-cursor: hand;" text="Send" />
+                                    <Button alignment="CENTER" contentDisplay="CENTER" onAction="#sendTokensPasswordRequest" prefWidth="130.0" style="-fx-cursor: hand;" text="Send" />
                                  </children>
                                  <VBox.margin>
                                     <Insets top="10.0" />
@@ -276,7 +277,7 @@
       												</HBox>
                                           <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
                                              <children>
-      														<Button alignment="CENTER" contentDisplay="CENTER" onAction="#delegateToGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
+      														<Button alignment="CENTER" contentDisplay="CENTER" onAction="#delegateToGridnodePasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Delegate" />
                                              </children>
                                              <VBox.margin>
                                                 <Insets top="15.0" />
@@ -313,7 +314,7 @@
                                           </HBox>
                                           <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
                                              <children>
-                                                <Button contentDisplay="CENTER" onAction="#undelegateFromGridnode" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
+                                                <Button contentDisplay="CENTER" onAction="#undelegateFromGridnodePasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
                                              </children>
                                              <VBox.margin>
                                                 <Insets top="15.0" />
@@ -409,7 +410,7 @@
                                                    </HBox.margin>
                                                 </TextField>
                                                 <Region HBox.hgrow="ALWAYS" />
-                                                <Button contentDisplay="CENTER" onAction="#delegateForStaking" prefWidth="125.0" style="-fx-cursor: hand;" text="Stake" />
+                                                <Button contentDisplay="CENTER" onAction="#delegateToStakingPasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Stake" />
                                              </children>
                                              <VBox.margin>
                                                 <Insets top="10.0" />
@@ -437,14 +438,14 @@
                               </VBox>
                               <VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;">
                                  <children>
-                                    <Label text="Delegations" textFill="#ababab">
-                                       <font>
-                                          <Font size="16.0" />
-                                       </font>
-                                    </Label>
-                                    <ListView fx:id="delegationsListView" prefHeight="200.0" prefWidth="200.0" />
-                                 </children>
-                              </VBox>
+					 <Label text="Delegations" textFill="#ababab">
+						 <font>
+							 <Font size="16.0" />
+						 </font>
+					 </Label>
+					 <ListView fx:id="delegationsListView" prefHeight="200.0" prefWidth="200.0" />
+				 </children>
+			      </VBox>
 									</children>
 								</VBox>
 							</children>
@@ -479,5 +480,10 @@
             </Tab>
 			</tabs>
 		</TabPane>
+		<Pane fx:id="pnlOverlay" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<children>
+				<fx:include prefHeight="683.0" prefWidth="1000.0" source="../overlays.fxml" />
+			</children>
+		</Pane>
 	</children>
 </AnchorPane>

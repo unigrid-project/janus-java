@@ -146,6 +146,23 @@ import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
+import javafx.scene.layout.Pane;
+import org.unigrid.janus.model.signal.CosmosWalletRequest;
+import org.unigrid.janus.model.signal.OverlayRequest;
+import org.unigrid.janus.model.signal.UnlockRequest;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import org.unigrid.janus.model.gridnode.GridnodeData;
+import org.unigrid.janus.model.gridnode.GridnodeModel;
+import org.unigrid.janus.model.ApiConfig;
+import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
+import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
+import org.unigrid.janus.model.signal.CollateralUpdateEvent;
+import org.unigrid.janus.model.signal.DelegationAmountEvent;
+import org.unigrid.janus.model.signal.DelegationListEvent;
+import org.unigrid.janus.model.signal.RedelegationsEvent;
+import org.unigrid.janus.model.signal.RewardsEvent;
+import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
+import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -181,6 +198,14 @@ public class CosmosController implements Initializable {
 	@Inject
 	private GrpcService grpcService;
 	@Inject
+	private Event<OverlayRequest> overlayRequest;
+	@Inject
+	private Event<UnlockRequest> unlockRequestEvent;
+	@Inject
+	private Event<CosmosWalletRequest> cosmosWalletEvent;
+	@FXML
+	private Pane pnlOverlay;
+
 	private GridnodeModel gridnodeModel;
 	@Inject
 	private CosmosService cosmosService;
@@ -306,9 +331,7 @@ public class CosmosController implements Initializable {
 	@Named("transactionResponse")
 	private TransactionResponse txModel;
 
-	static final String TOKEN_DECIMAL_VALUE = "1000000";
 	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
-	static final String CHAIN_ID = "unigrid-devnet-1";
 
 	@FXML
 	private ComboBox accountsDropdown;
@@ -331,6 +354,8 @@ public class CosmosController implements Initializable {
 		ObservableList<TxResponse> observableList = FXCollections
 			.observableArrayList(cosmosTxList.getTxResponsesList());
 		transactionListView.setItems(observableList);
+
+		pnlOverlay.setVisible(false);
 
 		Platform.runLater(() -> {
 
@@ -1344,13 +1369,13 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							//System.out.println("user can run: " + gridnodeNumberForUser() + " gridnode(s)!");
+							System.out.println("user can run: " + cosmosService.gridnodeNumberForUser() + " gridnode(s)!");
 							getValidators();
 							// Update UI with the balance received from the response
-							balanceLabel.setText(getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
-							delegationAmountLabel.setText(getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
-							unboundingAmountLabel.setText(getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
-							stakingAmountLabel.setText(getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
+							balanceLabel.setText(cosmosService.getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
+							delegationAmountLabel.setText(cosmosService.getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
+							unboundingAmountLabel.setText(cosmosService.getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
+							stakingAmountLabel.setText(cosmosService.getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
 						});
 
 						// Load transactions and other account data (assuming these methods are adapted
@@ -1376,32 +1401,6 @@ public class CosmosController implements Initializable {
 			}
 		});
 		initCopyButton();
-	}
-
-	private String getWalletBalance(String address) {
-		QueryBalanceRequest balanceRequest = QueryBalanceRequest.newBuilder()
-			.setAddress(address)
-			.setDenom("ugd") // Add this line to set the denomination
-			.build();
-
-		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
-		QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
-		BigDecimal rawBalance = new BigDecimal(balanceResponse.getBalance().getAmount());
-		System.out.println("rawBalance: " + rawBalance);
-		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(TOKEN_DECIMAL_VALUE), 8, RoundingMode.HALF_UP);
-
-		return scaledBalance.toString();
-
-	}
-
-	private long getDelegatedBalance(String address) {
-		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-
-		QueryDelegatedAmountRequest delegatedAmountRequest = QueryDelegatedAmountRequest.newBuilder()
-			.setDelegatorAddress(address)
-			.build();
-		QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
-		return delegatedAmountResponse.getAmount();
 	}
 
 	public void getValidators() {
@@ -1433,34 +1432,6 @@ public class CosmosController implements Initializable {
 
 	}
 
-	private long getStakedBalance(String address) {
-		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		QueryDelegatorDelegationsRequest stakingRequest = QueryDelegatorDelegationsRequest.newBuilder()
-			.setDelegatorAddr(address)
-			.build();
-
-		QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
-
-		long totalStaked = stakingResponse.getDelegationResponsesList().stream()
-			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
-			.sum();
-
-		return totalStaked;
-	}
-
-	private long getUnboundingBalance(String address) {
-		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub unboundingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest unboundingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest.newBuilder()
-			.setDelegatorAddr(address)
-			.build();
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsResponse unboundingResponse = unboundingStub.delegatorUnbondingDelegations(unboundingRequest);
-		long totalUnbondingAmount = unboundingResponse.getUnbondingResponsesList().stream()
-			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
-			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
-			.sum();
-		return totalUnbondingAmount;
-	}
-
 	public void onDelegationAmountEvent(@Observes DelegationAmountEvent event) {
 		Platform.runLater(() -> {
 			String text = event.getAmount().toPlainString() + " UGD";
@@ -1478,19 +1449,6 @@ public class CosmosController implements Initializable {
 			System.out.println("Error fetching collateral");
 			// Update the UI to indicate an error
 		}
-	}
-
-	private long gridnodeNumberForUser() {
-
-		int amountPerGridnode;
-		long stakedAmount = getDelegatedBalance(accountsData.getSelectedAccount().getAddress());
-		if (hedgehog.fetchCollateralRequired()) {
-			amountPerGridnode = collateral.getAmount();
-			long gridnodeNumber = stakedAmount / amountPerGridnode;
-			return gridnodeNumber;
-		}
-
-		throw new IllegalStateException("Collateral amount was not fetched.");
 	}
 
 	public void fetchGridnodes() {
@@ -1570,6 +1528,55 @@ public class CosmosController implements Initializable {
 			result.append(String.format("%02X", b));
 		}
 		return result.toString();
+	}
+
+	@FXML
+	private void sendTokensPasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
+	@FXML
+	private void delegateToGridnodePasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
+	@FXML
+	private void undelegateFromGridnodePasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
+	@FXML
+	private void delegateToStakingPasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_STAKING).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
+	private void eventCosmosWalletRequest(@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
+		switch (cosmosWalletRequest) {
+			case SEND_TOKENS: {
+				System.out.println("Send Tokens ADDR " + toAddress.getText());
+				System.out.println("Send Tokens AMOUNT " + sendAmount.getText());
+				sendTokens();
+				break;
+			}
+			case DELEGATE_GRIDNODE: {
+				delegateToGridnode();
+				break;
+			}
+			case UNDELEGATE_GRIDNODE: {
+				undelegateFromGridnode();
+				break;
+			}
+			case DELEGATE_STAKING: {
+				delegateForStaking();
+				break;
+			}
+			default:
+				throw new AssertionError();
+		}
 	}
 
 }
