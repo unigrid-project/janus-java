@@ -27,6 +27,7 @@ import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.math.BigDecimal;
+
 import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -288,5 +289,4 @@ public class CosmosService {
 		BigDecimal conversionFactor = new BigDecimal("100000000");
 		return amountInUugd.divide(conversionFactor, 8, RoundingMode.HALF_UP);
 	}
-
 }

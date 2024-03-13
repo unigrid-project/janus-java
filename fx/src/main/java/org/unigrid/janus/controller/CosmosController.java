@@ -133,6 +133,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
+import java.util.stream.Collectors;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import org.unigrid.janus.model.gridnode.GridnodeData;
 import org.unigrid.janus.model.gridnode.GridnodeModel;
@@ -333,6 +334,7 @@ public class CosmosController implements Initializable {
 	@Named("transactionResponse")
 	private TransactionResponse txModel;
 
+	static final String UUGD_VALUE = "100000000";
 	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
 
 	@FXML
@@ -358,7 +360,7 @@ public class CosmosController implements Initializable {
 		transactionListView.setItems(observableList);
 
 		pnlOverlay.setVisible(false);
-
+		
 		Platform.runLater(() -> {
 
 			System.out.println("Is on FX thread: " + Platform.isFxApplicationThread());
@@ -376,7 +378,7 @@ public class CosmosController implements Initializable {
 			}
 
 			displaySwapEvent.fire(DisplaySwapPrompt.builder().build());
-
+			
 			// check whether the word changed in order to reset the value
 			transactionListView.setCellFactory(
 				param -> new ListCell<TransactionResponse.TxResponse>() {
@@ -447,9 +449,12 @@ public class CosmosController implements Initializable {
 				}
 			});
 
-			colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-			colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-			fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
+			if (tableTransactionsSent.getItems().isEmpty() && tableTransactionsReceived.getItems().isEmpty()) {
+				colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
+			}
+
 			fetchGridnodes();
 		});
 	}
@@ -1124,13 +1129,13 @@ public class CosmosController implements Initializable {
 		long amount = 0;
 		if (validatorAddress == null) {
 			if (delegate) {
-				amount = Long.parseLong(delegateAmountTextField.getText());
+				amount = cosmosService.convertLongToUugd(Long.parseLong(delegateAmountTextField.getText()));
 
 			} else {
-				amount = Long.parseLong(undelegateAmount.getText());
+				amount = cosmosService.convertLongToUugd(Long.parseLong(undelegateAmount.getText()));
 			}
 		} else {
-			amount = Long.parseLong(stakeAmountTextField.getText());
+			amount = cosmosService.convertLongToUugd(Long.parseLong(stakeAmountTextField.getText()));
 		}
 
 		Abci.TxResponse txResponse = null;
@@ -1434,6 +1439,34 @@ public class CosmosController implements Initializable {
 
 	}
 
+	private double getStakedBalance(String address) {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		QueryDelegatorDelegationsRequest stakingRequest = QueryDelegatorDelegationsRequest.newBuilder()
+			.setDelegatorAddr(address)
+			.build();
+
+		QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
+
+		double totalStaked = stakingResponse.getDelegationResponsesList().stream()
+			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
+			.sum();
+		
+		return totalStaked / Double.parseDouble(UUGD_VALUE);
+	}
+
+	private long getUnboundingBalance(String address) {
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub unboundingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest unboundingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest.newBuilder()
+			.setDelegatorAddr(address)
+			.build();
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsResponse unboundingResponse = unboundingStub.delegatorUnbondingDelegations(unboundingRequest);
+		long totalUnbondingAmount = unboundingResponse.getUnbondingResponsesList().stream()
+			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
+			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
+			.sum();
+		return totalUnbondingAmount;
+	}
+
 	public void onDelegationAmountEvent(@Observes DelegationStatusEvent event) {
 		Platform.runLater(() -> {
 			String text = event.getDelegatedAmount() + " UGD";
@@ -1535,34 +1568,47 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
-	private void sendTokensPasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
-		overlayRequest.fire(OverlayRequest.OPEN);
+	private void sendTokensPasswordRequest() {		
+		if (!"".equals(toAddress.getText()) && !"".equals(sendAmount.getText())) {
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
+			overlayRequest.fire(OverlayRequest.OPEN);
+		}
 	}
 
 	@FXML
 	private void delegateToGridnodePasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE).build());
-		overlayRequest.fire(OverlayRequest.OPEN);
+		if (!"".equals(delegateAmountTextField.getText())) {
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE).build());
+			overlayRequest.fire(OverlayRequest.OPEN);
+		}
 	}
 
 	@FXML
 	private void undelegateFromGridnodePasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE).build());
-		overlayRequest.fire(OverlayRequest.OPEN);
+		if (!"".equals(undelegateAmount.getText())) {
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE).build());
+			overlayRequest.fire(OverlayRequest.OPEN);
+		}
 	}
 
 	@FXML
 	private void delegateToStakingPasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_STAKING).build());
+		if (!"".equals(stakeAmountTextField.getText())) {
+			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_STAKING).build());
+			overlayRequest.fire(OverlayRequest.OPEN);
+		}
+	}
+	
+	@FXML
+	private void onClaimStakingRewardsPasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_CLAIM_REWARDS).build());
 		overlayRequest.fire(OverlayRequest.OPEN);
 	}
+	
 
 	private void eventCosmosWalletRequest(@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
 		switch (cosmosWalletRequest) {
 			case SEND_TOKENS: {
-				System.out.println("Send Tokens ADDR " + toAddress.getText());
-				System.out.println("Send Tokens AMOUNT " + sendAmount.getText());
 				sendTokens();
 				break;
 			}
@@ -1578,9 +1624,45 @@ public class CosmosController implements Initializable {
 				delegateForStaking();
 				break;
 			}
+			case CLAIM_REWARDS: {
+				onClaimStakingRewards();
+				break;
+			}
 			default:
 				throw new AssertionError();
 		}
 	}
+	
+	@FXML
+	public void onClaimStakingRewards() throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+		ObservableList<DelegationsRequest.DelegationResponse> items = delegationsListView.getItems();
 
+		List<String> validatorAddresses = items.stream()
+			.map(item -> item.getDelegation().getValidatorAddress())
+			.collect(Collectors.toList());
+
+		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+		transactionService.sendClaimStakingRewardsTx(credentials, validatorAddresses, new BigDecimal("0.000001"), 200000);
+		
+		// send desktop notofication
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			Notifications
+				.create()
+				.title("Info")
+				.text("Rewards clamied")
+				.position(Pos.TOP_RIGHT)
+				.showInformation();
+		} else {
+			Notifications
+				.create()
+				.title("Info")
+				.text("Rewards clamied")
+				.showInformation();
+		}		
+	}
 }
