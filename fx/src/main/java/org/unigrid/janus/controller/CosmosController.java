@@ -140,7 +140,7 @@ import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
 import org.unigrid.janus.model.signal.CollateralUpdateEvent;
-import org.unigrid.janus.model.signal.DelegationAmountEvent;
+import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
@@ -157,7 +157,7 @@ import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
 import org.unigrid.janus.model.signal.CollateralUpdateEvent;
-import org.unigrid.janus.model.signal.DelegationAmountEvent;
+import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
@@ -297,6 +297,8 @@ public class CosmosController implements Initializable {
 	private TextField undelegateAmount;
 	@FXML
 	private TextField validatorAddressTextField;
+	@FXML
+	private Label nodeLimit;
 	@FXML
 	private TextField stakeAmountTextField;
 	@FXML
@@ -1074,12 +1076,13 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+		BigDecimal amountInUugd = cosmosService.convertBigDecimalInUugd(new BigDecimal(sendAmount.getText()));
 
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
 			.toAddress(toAddress.getText())
-			.amountInAtom(new BigDecimal(sendAmount.getText()))
+			.amountInAtom(amountInUugd)
 			.build();
 
 		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
@@ -1116,7 +1119,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 
 		long amount = 0;
 		if (validatorAddress == null) {
@@ -1131,13 +1134,13 @@ public class CosmosController implements Initializable {
 		}
 
 		Abci.TxResponse txResponse = null;
-
+		long amountInUugd = cosmosService.convertLongToUugd(amount);
 		if (delegate) {
-			txResponse = transactionService.sendDelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendDelegateTx(credentials, amountInUugd, new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress == null) {
-			txResponse = transactionService.sendUndelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendUndelegateTx(credentials, amountInUugd, new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress != null) {
-			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amountInUugd, new BigDecimal("0.000001"), 200000);
 		}
 
 		System.out.println("Response Tx Delegate");
@@ -1369,11 +1372,10 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							System.out.println("user can run: " + cosmosService.gridnodeNumberForUser() + " gridnode(s)!");
 							getValidators();
 							// Update UI with the balance received from the response
 							balanceLabel.setText(cosmosService.getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
-							delegationAmountLabel.setText(cosmosService.getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
+							//delegationAmountLabel.setText(cosmosService.getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
 							unboundingAmountLabel.setText(cosmosService.getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
 							stakingAmountLabel.setText(cosmosService.getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
 						});
@@ -1432,10 +1434,12 @@ public class CosmosController implements Initializable {
 
 	}
 
-	public void onDelegationAmountEvent(@Observes DelegationAmountEvent event) {
+	public void onDelegationAmountEvent(@Observes DelegationStatusEvent event) {
 		Platform.runLater(() -> {
-			String text = event.getAmount().toPlainString() + " UGD";
+			String text = event.getDelegatedAmount() + " UGD";
 			delegationAmountLabel.setText(text);
+			String gridnodeLimit = String.valueOf(event.getGridnodeCount());
+			nodeLimit.setText(gridnodeLimit);
 			System.out.println("Delegation Amount: " + text);
 		});
 	}

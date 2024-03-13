@@ -46,7 +46,7 @@ import org.unigrid.janus.model.rest.entity.RewardsRequest;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
 import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
-import org.unigrid.janus.model.signal.DelegationAmountEvent;
+import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
@@ -76,7 +76,7 @@ public class CosmosService {
 	@Inject
 	private Event<WithdrawAddressEvent> withdrawAddressEvent;
 	@Inject
-	private Event<DelegationAmountEvent> delegationAmountEvent;
+	private Event<DelegationStatusEvent> delegationAmountEvent;
 	@Inject
 	private Hedgehog hedgehog;
 	@Inject
@@ -182,24 +182,21 @@ public class CosmosService {
 	}
 
 	public void fetchDelegationAmount(String account) throws IOException, InterruptedException {
-		gridnodeDelegationService.fetchDelegationAmount(account);
-		GridnodeDelegationAmount.Response response = gridnodeDelegationService.getCurrentResponse();
-
-		// Fire the event with the fetched data
-		if (response != null) {
-			delegationAmountEvent.fire(new DelegationAmountEvent(response.getAmount()));
-		}
+		double delegationAmount = getDelegatedBalance(account);
+		int gridnodesTotal = gridnodeNumberForUser(delegationAmount);
+		// Fire an event with both the delegation amount and the gridnode count
+		delegationAmountEvent.fire(DelegationStatusEvent.of(delegationAmount, gridnodesTotal));
 	}
 
 	// TODO
 	// this should add this data to a model
-	public long gridnodeNumberForUser() {
-
+	public int gridnodeNumberForUser(double delegated) {
 		int amountPerGridnode;
-		long stakedAmount = getDelegatedBalance(accountsData.getSelectedAccount().getAddress());
+
 		if (hedgehog.fetchCollateralRequired()) {
 			amountPerGridnode = collateral.getAmount();
-			long gridnodeNumber = stakedAmount / amountPerGridnode;
+			int gridnodeNumber = (int) Math.floor(delegated / amountPerGridnode);
+			System.out.println("user can run: " + gridnodeNumber + " gridnode(s)!");
 			return gridnodeNumber;
 		}
 
@@ -208,14 +205,18 @@ public class CosmosService {
 
 	// TODO
 	// this should add this data to a model
-	public long getDelegatedBalance(String address) {
+	public double getDelegatedBalance(String address) {
 		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
 
 		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest delegatedAmountRequest = gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest.newBuilder()
 			.setDelegatorAddress(address)
 			.build();
 		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
-		return delegatedAmountResponse.getAmount();
+		double converted = convertLongToUgd(delegatedAmountResponse.getAmount());
+		System.out.println("converted UGD: " + converted);
+		System.out.println("delegatedAmountResponse UUGD: " + delegatedAmountResponse.getAmount());
+
+		return converted;
 	}
 
 	// TODO
@@ -223,7 +224,7 @@ public class CosmosService {
 	public String getWalletBalance(String address) {
 		cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest balanceRequest = cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest.newBuilder()
 			.setAddress(address)
-			.setDenom("ugd") // Add this line to set the denomination
+			.setDenom(ApiConfig.getDENOM()) // Add this line to set the denomination
 			.build();
 
 		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
@@ -267,4 +268,25 @@ public class CosmosService {
 
 		return totalStaked;
 	}
+
+	public long convertLongToUugd(long amount) {
+		long amountInUugd = (long) (amount * 100000000);
+		return amountInUugd;
+	}
+
+	public BigDecimal convertBigDecimalInUugd(BigDecimal amount) {
+		BigDecimal conversionFactor = new BigDecimal("100000000");
+		return amount.multiply(conversionFactor);
+	}
+
+	public double convertLongToUgd(long amountInUugd) {
+		double amountInUgd = amountInUugd / 100000000.0;
+		return amountInUgd;
+	}
+
+	public BigDecimal convertBigDecimalToUgd(BigDecimal amountInUugd) {
+		BigDecimal conversionFactor = new BigDecimal("100000000");
+		return amountInUugd.divide(conversionFactor, 8, RoundingMode.HALF_UP);
+	}
+
 }
