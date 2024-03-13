@@ -26,9 +26,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
-
 import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,6 +48,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.CryptoUtils;
+import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.PublicKeysModel;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.DelegationsRequest;
@@ -320,7 +323,7 @@ public class CosmosService {
 		List<String> publicKeysHex = keys.stream()
 			.map(key -> Hex.toHexString(key.getPubKey()))
 			.collect(Collectors.toList());
-
+		savePublicKeysToFile(publicKeysHex);
 		publicKeysEvent.fire(new PublicKeysEvent(publicKeysHex));
 	}
 
@@ -346,6 +349,16 @@ public class CosmosService {
 
 	public void onPublicKeysEvent(@Observes PublicKeysEvent event) {
 		publicKeysModel.setPublicKeys(event.getPublicKeys());
+	}
+
+	private void savePublicKeysToFile(List<String> publicKeys) throws IOException {
+		File debugLog = DataDirectory.getGridnodeKeysFile();
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(debugLog, false))) {
+			for (String key : publicKeys) {
+				writer.write(key);
+				writer.newLine();
+			}
+		}
 	}
 
 }

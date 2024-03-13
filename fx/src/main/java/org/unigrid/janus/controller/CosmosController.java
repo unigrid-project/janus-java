@@ -119,6 +119,7 @@ import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import java.util.stream.Collectors;
+import javafx.application.HostServices;
 import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
@@ -138,6 +139,7 @@ import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
+import org.unigrid.janus.view.backing.OsxUtils;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -326,6 +328,9 @@ public class CosmosController implements Initializable {
 	private AddressCosmosService addressService = new AddressCosmosService();
 	private AddressCosmos addressCosmos = new AddressCosmos();
 	private BigDecimal scaleFactor = new BigDecimal("100000000");
+	private OsxUtils osxUtils = new OsxUtils();
+	@Inject
+	private HostServices hostServices;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -435,6 +440,16 @@ public class CosmosController implements Initializable {
 				colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
+			}
+			File gridnodeKeysFile = DataDirectory.getGridnodeKeysFile();
+			if (gridnodeKeysFile.exists()) {
+				try {
+					List<String> keys = DataDirectory.readPublicKeysFromFile(gridnodeKeysFile);
+					publicKeysModel.setPublicKeys(keys);
+				} catch (IOException e) {
+					System.out.println("Error reading keys from file: " + e.getMessage());
+					// Handle the error appropriately
+				}
 			}
 			keysListView.setItems(publicKeysModel.getPublicKeys());
 			fetchGridnodes();
@@ -1015,6 +1030,16 @@ public class CosmosController implements Initializable {
 			System.out.println("ERROR: Validator address is empty");
 		}
 
+	}
+
+	@FXML
+	private void openGridnodeConf(ActionEvent event) throws NullPointerException, IOException {
+		File gridnodeKeys = DataDirectory.getGridnodeKeysFile();
+		try {
+			hostServices.showDocument(gridnodeKeys.getAbsolutePath());
+		} catch (NullPointerException e) {
+			System.out.println("Null Host services " + e.getMessage());
+		}
 	}
 
 	private void handleTabRequest(@Observes TabRequestSignal request) {

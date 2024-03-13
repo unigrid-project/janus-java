@@ -18,12 +18,16 @@ package org.unigrid.janus.model;
 
 import com.sun.jna.platform.win32.KnownFolders;
 import com.sun.jna.platform.win32.Shell32Util;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -35,6 +39,7 @@ import org.apache.commons.lang3.SystemUtils;
 public class DataDirectory {
 	private static final String APPLICATION_NAME = "UNIGRID";
 	public static final String CONFIG_FILE = "unigrid.conf";
+	public static final String GRIDNODE_KEYS_FILE = "gridnode_keys.conf";
 	public static final String GRIDNODE_FILE = "gridnode.conf";
 	public static final String KEYRING_DIRECTORY = "/keyring";
 	public static final String COSMOS_ADDRESSES = "addresses.json";
@@ -140,6 +145,10 @@ public class DataDirectory {
 		return Paths.get(get(), KEYRING_DIRECTORY.concat("/").concat(ACCOUNTS_FILE)).toFile();
 	}
 
+	public static File getGridnodeKeysFile() {
+		return Paths.get(get(), KEYRING_DIRECTORY.concat("/").concat(GRIDNODE_KEYS_FILE)).toFile();
+	}
+
 	public static void ensureDirectoryExists(String directory) throws IOException {
 		Path directoryPath = Paths.get(get(), directory);
 		if (!Files.exists(directoryPath)) {
@@ -154,8 +163,19 @@ public class DataDirectory {
 				success = Files.deleteIfExists(Paths.get(get(), fileName));
 			} catch (IOException e) {
 				System.err.println("Failed to delete " + fileName + ": " + e.getMessage());
-}
+			}
 		}
 		return success;
+	}
+
+	public static List<String> readPublicKeysFromFile(File file) throws IOException {
+		List<String> keys = new ArrayList<>();
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				keys.add(line);
+			}
+		}
+		return keys;
 	}
 }
