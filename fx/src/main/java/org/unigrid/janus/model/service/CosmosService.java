@@ -25,6 +25,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -179,6 +180,16 @@ public class CosmosService {
 		if (response != null) {
 			delegationAmountEvent.fire(new DelegationAmountEvent(response.getAmount()));
 		}
+	}
+	
+	public long convertLongToUugd(long amount) {
+		long amountInUugd = (long) (amount * 100000000);
+		return amountInUugd;
+	}
+
+	public BigDecimal convertBigDecimalInUugd(BigDecimal amount) {
+		BigDecimal conversionFactor = new BigDecimal("100000000");
+		return amount.multiply(conversionFactor);
 	}
 
 }

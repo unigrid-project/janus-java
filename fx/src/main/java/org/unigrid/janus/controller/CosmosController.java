@@ -321,7 +321,7 @@ public class CosmosController implements Initializable {
 	@Named("transactionResponse")
 	private TransactionResponse txModel;
 
-	static final String TOKEN_DECIMAL_VALUE = "100000000";
+	static final String UUGD_VALUE = "100000000";
 	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
 
 	@FXML
@@ -1070,10 +1070,12 @@ public class CosmosController implements Initializable {
 
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 
+		BigDecimal amountInUugd = cosmosService.convertBigDecimalInUugd(new BigDecimal(sendAmount.getText()));
+		
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
 			.toAddress(toAddress.getText())
-			.amountInAtom(new BigDecimal(sendAmount.getText()))
+			.amountInAtom(amountInUugd)
 			.build();
 
 		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
@@ -1115,13 +1117,13 @@ public class CosmosController implements Initializable {
 		long amount = 0;
 		if (validatorAddress == null) {
 			if (delegate) {
-				amount = Long.parseLong(delegateAmountTextField.getText());
+				amount = cosmosService.convertLongToUugd(Long.parseLong(delegateAmountTextField.getText()));
 
 			} else {
-				amount = Long.parseLong(undelegateAmount.getText());
+				amount = cosmosService.convertLongToUugd(Long.parseLong(undelegateAmount.getText()));
 			}
 		} else {
-			amount = Long.parseLong(stakeAmountTextField.getText());
+			amount = cosmosService.convertLongToUugd(Long.parseLong(stakeAmountTextField.getText()));
 		}
 
 		Abci.TxResponse txResponse = null;
@@ -1407,7 +1409,7 @@ public class CosmosController implements Initializable {
 		QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
 		BigDecimal rawBalance = new BigDecimal(balanceResponse.getBalance().getAmount());
 		System.out.println("rawBalance: " + rawBalance);
-		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(TOKEN_DECIMAL_VALUE), 8, RoundingMode.HALF_UP);
+		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(UUGD_VALUE), 8, RoundingMode.HALF_UP);
 
 		return scaledBalance.toString();
 
@@ -1452,7 +1454,7 @@ public class CosmosController implements Initializable {
 
 	}
 
-	private long getStakedBalance(String address) {
+	private double getStakedBalance(String address) {
 		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
 		QueryDelegatorDelegationsRequest stakingRequest = QueryDelegatorDelegationsRequest.newBuilder()
 			.setDelegatorAddr(address)
@@ -1460,11 +1462,11 @@ public class CosmosController implements Initializable {
 
 		QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
 
-		long totalStaked = stakingResponse.getDelegationResponsesList().stream()
+		double totalStaked = stakingResponse.getDelegationResponsesList().stream()
 			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
 			.sum();
-
-		return totalStaked;
+		
+		return totalStaked / Double.parseDouble(UUGD_VALUE);
 	}
 
 	private long getUnboundingBalance(String address) {
