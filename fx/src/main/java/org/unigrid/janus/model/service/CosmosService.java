@@ -223,7 +223,7 @@ public class CosmosService {
 	public String getWalletBalance(String address) {
 		cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest balanceRequest = cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest.newBuilder()
 			.setAddress(address)
-			.setDenom("ugd") // Add this line to set the denomination
+			.setDenom(ApiConfig.getDENOM()) // Add this line to set the denomination
 			.build();
 
 		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());

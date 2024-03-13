@@ -1076,7 +1076,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
@@ -1118,7 +1118,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 
 		long amount = 0;
 		if (validatorAddress == null) {
