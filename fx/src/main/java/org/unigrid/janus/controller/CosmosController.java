@@ -140,7 +140,7 @@ import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
 import org.unigrid.janus.model.signal.CollateralUpdateEvent;
-import org.unigrid.janus.model.signal.DelegationAmountEvent;
+import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
@@ -158,7 +158,7 @@ import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
 import org.unigrid.janus.model.signal.CollateralUpdateEvent;
-import org.unigrid.janus.model.signal.DelegationAmountEvent;
+import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
@@ -298,6 +298,8 @@ public class CosmosController implements Initializable {
 	private TextField undelegateAmount;
 	@FXML
 	private TextField validatorAddressTextField;
+	@FXML
+	private Label nodeLimit;
 	@FXML
 	private TextField stakeAmountTextField;
 	@FXML
@@ -1371,12 +1373,10 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							System.out.println("user can run: " + cosmosService.gridnodeNumberForUser() + " gridnode(s)!");
-
 							getValidators();
 							// Update UI with the balance received from the response
 							balanceLabel.setText(cosmosService.getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
-							delegationAmountLabel.setText(cosmosService.getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
+							//delegationAmountLabel.setText(cosmosService.getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
 							unboundingAmountLabel.setText(cosmosService.getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
 							stakingAmountLabel.setText(cosmosService.getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
 						});
@@ -1435,10 +1435,12 @@ public class CosmosController implements Initializable {
 
 	}
 
-	public void onDelegationAmountEvent(@Observes DelegationAmountEvent event) {
+	public void onDelegationAmountEvent(@Observes DelegationStatusEvent event) {
 		Platform.runLater(() -> {
-			String text = event.getAmount().toPlainString() + " UGD";
+			String text = event.getDelegatedAmount() + " UGD";
 			delegationAmountLabel.setText(text);
+			String gridnodeLimit = String.valueOf(event.getGridnodeCount());
+			nodeLimit.setText(gridnodeLimit);
 			System.out.println("Delegation Amount: " + text);
 		});
 	}

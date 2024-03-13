@@ -69,6 +69,7 @@
 
 .tab:hover {
   -fx-background-color: #aaf5;
+  -fx-cursor : hand;
 }
 
 .tab-label {

@@ -76,7 +76,7 @@
 										</Label>
 										<Label fx:id="addressLabel" prefWidth="375.0" textFill="#ababab" />
                               <Region HBox.hgrow="ALWAYS" />
-										<Button fx:id="copyBtn" mnemonicParsing="false" text="Copy Address" />
+										<Button fx:id="copyBtn" mnemonicParsing="false" style="-fx-cursor: hand;" text="Copy Address" />
 									</children>
 								</HBox>
                         <VBox>
@@ -213,44 +213,63 @@
             									<children>
             										<VBox prefHeight="200.0" prefWidth="100.0">
             											<children>
-                                                <VBox>
+                                                <GridPane hgap="10.0" vgap="15.0" VBox.vgrow="ALWAYS">
+                                                  <columnConstraints>
+                                                    <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="120.0" minWidth="10.0" prefWidth="147.0" />
+                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="200.0" />
+                                                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                                                  </columnConstraints>
+                                                  <rowConstraints>
+                                                    <RowConstraints />
+                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+                                                  </rowConstraints>
                                                    <children>
-                                                      <HBox>
-                                                         <children>
-                  														<Label text="Delegated:" textFill="#ababab">
-                  															<font>
-                  																<Font size="16.0" />
-                  															</font>
-                  														</Label>
-                  														<Label fx:id="delegationAmountLabel" text="0.00 UGD" textFill="#ababab">
-                  															<font>
-                  																<Font size="16.0" />
-                  															</font>
-                  														</Label>
-                                                         </children>
-                                                         <VBox.margin>
+            														<Label alignment="CENTER_RIGHT" text="Delegated:" textFill="#ababab">
+            															<font>
+            																<Font size="16.0" />
+            															</font>
+            														</Label>
+            														<Label fx:id="delegationAmountLabel" text="0.00 UGD" textFill="#ababab" GridPane.columnIndex="1">
+            															<font>
+            																<Font size="16.0" />
+            															</font>
+            														</Label>
+            														<Label text="Unbounding:" textFill="#ababab" GridPane.rowIndex="1">
+            															<font>
+            																<Font size="16.0" />
+            															</font>
+            														</Label>
+            														<Label fx:id="unboundingAmountLabel" text="0.00 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            															<font>
+            																<Font size="16.0" />
+            															</font>
+            														</Label>
+                                                      <Label text="Node Limit:" textFill="#ababab" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="16.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <Label fx:id="nodeLimit" text="0" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                         <font>
+                                                            <Font size="16.0" />
+                                                         </font>
+                                                      </Label>
+                                                      <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+                                                         <GridPane.margin>
+                                                            <Insets />
+                                                         </GridPane.margin>
+                                                         <padding>
                                                             <Insets bottom="10.0" top="10.0" />
-                                                         </VBox.margin>
+                                                         </padding>
                                                       </HBox>
-                                                      <HBox>
-                                                         <children>
-                  														<Label text="Unbounding:" textFill="#ababab">
-                  															<font>
-                  																<Font size="16.0" />
-                  															</font>
-                  															<HBox.margin>
-                  																<Insets right="10.0" />
-                  															</HBox.margin>
-                  														</Label>
-                  														<Label fx:id="unboundingAmountLabel" text="0.00 UGD" textFill="#ababab">
-                  															<font>
-                  																<Font size="16.0" />
-                  															</font>
-                  														</Label>
-                                                         </children>
+                                                      <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                         <padding>
+                                                            <Insets bottom="10.0" top="10.0" />
+                                                         </padding>
                                                       </HBox>
                                                    </children>
-                                                </VBox>
+                                                </GridPane>
                                                 <VBox prefHeight="200.0" prefWidth="100.0">
                                                    <children>
                                                       <HBox alignment="CENTER_RIGHT" VBox.vgrow="ALWAYS">
@@ -436,7 +455,7 @@
                                                       <Insets right="10.0" />
                                                    </HBox.margin>
       														</Label>
-      														<ComboBox fx:id="validatorListComboBox" prefWidth="300.0" />
+      														<ComboBox fx:id="validatorListComboBox" prefWidth="300.0" style="-fx-cursor: hand;" />
       													</children>
       												</HBox>
                                           <HBox alignment="CENTER_LEFT">
