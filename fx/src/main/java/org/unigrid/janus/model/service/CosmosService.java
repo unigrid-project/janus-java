@@ -267,4 +267,14 @@ public class CosmosService {
 
 		return totalStaked;
 	}
+
+	public long convertLongToUugd(long amount) {
+		long amountInUugd = (long) (amount * 100000000);
+		return amountInUugd;
+	}
+
+	public BigDecimal convertBigDecimalInUugd(BigDecimal amount) {
+		BigDecimal conversionFactor = new BigDecimal("100000000");
+		return amount.multiply(conversionFactor);
+	}
 }

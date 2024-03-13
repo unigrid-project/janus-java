@@ -165,7 +165,6 @@ import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 
-
 @ApplicationScoped
 public class CosmosController implements Initializable {
 
@@ -1077,11 +1076,12 @@ public class CosmosController implements Initializable {
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+		BigDecimal amountInUugd = cosmosService.convertBigDecimalInUugd(new BigDecimal(sendAmount.getText()));
 
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
 			.toAddress(toAddress.getText())
-			.amountInAtom(new BigDecimal(sendAmount.getText()))
+			.amountInAtom(amountInUugd)
 			.build();
 
 		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
@@ -1133,13 +1133,13 @@ public class CosmosController implements Initializable {
 		}
 
 		Abci.TxResponse txResponse = null;
-
+		long amountInUugd = cosmosService.convertLongToUugd(amount);
 		if (delegate) {
-			txResponse = transactionService.sendDelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendDelegateTx(credentials, amountInUugd, new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress == null) {
-			txResponse = transactionService.sendUndelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendUndelegateTx(credentials, amountInUugd, new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress != null) {
-			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amountInUugd, new BigDecimal("0.000001"), 200000);
 		}
 
 		System.out.println("Response Tx Delegate");
