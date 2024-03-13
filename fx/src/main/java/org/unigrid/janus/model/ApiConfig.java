@@ -23,7 +23,9 @@ public class ApiConfig {
 	//private static final String BASE_URL = "https://rest-testnet.unigrid.org/";
 	private static final String BASE_URL = "https://rest-devnet.unigrid.org/";
 	@Getter
-	private static final String CHAIN_ID = "unigrid-devnet-1";
+	private static final String CHAIN_ID = "unigrid-devnet-2";
 	@Getter
 	private static final String GRPC_IP = "173.212.208.212";
+	@Getter
+	private static final String DENOM = "uugd";
 }

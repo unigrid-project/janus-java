@@ -430,7 +430,7 @@
                                              </font>
                                           </Label>
                                           <Region HBox.hgrow="ALWAYS" />
-                                          <Button contentDisplay="CENTER" prefWidth="125.0" style="-fx-cursor: hand;" text="Claim" />
+                                          <Button contentDisplay="CENTER" onAction="#onClaimStakingRewardsPasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Claim" />
                                        </children>
                                     </HBox>
                                     <ListView fx:id="totalsListView" prefHeight="200.0" prefWidth="200.0" styleClass="cosmos-list-cell" />

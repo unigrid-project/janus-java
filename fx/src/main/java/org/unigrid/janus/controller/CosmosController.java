@@ -132,6 +132,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest;
 import gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse;
+import java.util.stream.Collectors;
 
 import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
@@ -1067,7 +1068,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
@@ -1109,7 +1110,7 @@ public class CosmosController implements Initializable {
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, "ugd", ApiConfig.getCHAIN_ID());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 
 		long amount = 0;
 		if (validatorAddress == null) {
@@ -1399,7 +1400,7 @@ public class CosmosController implements Initializable {
 	private String getWalletBalance(String address) {
 		QueryBalanceRequest balanceRequest = QueryBalanceRequest.newBuilder()
 			.setAddress(address)
-			.setDenom("ugd") // Add this line to set the denomination
+			.setDenom(ApiConfig.getDENOM()) // Add this line to set the denomination
 			.build();
 
 		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
@@ -1621,6 +1622,13 @@ public class CosmosController implements Initializable {
 			overlayRequest.fire(OverlayRequest.OPEN);
 		}
 	}
+	
+	@FXML
+	private void onClaimStakingRewardsPasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_CLAIM_REWARDS).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+	
 
 	private void eventCosmosWalletRequest(@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
 		switch (cosmosWalletRequest) {
@@ -1640,9 +1648,45 @@ public class CosmosController implements Initializable {
 				delegateForStaking();
 				break;
 			}
+			case CLAIM_REWARDS: {
+				onClaimStakingRewards();
+				break;
+			}
 			default:
 				throw new AssertionError();
 		}
 	}
+	
+	@FXML
+	public void onClaimStakingRewards() throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+		ObservableList<DelegationsRequest.DelegationResponse> items = delegationsListView.getItems();
 
+		List<String> validatorAddresses = items.stream()
+			.map(item -> item.getDelegation().getValidatorAddress())
+			.collect(Collectors.toList());
+
+		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+		transactionService.sendClaimStakingRewardsTx(credentials, validatorAddresses, new BigDecimal("0.000001"), 200000);
+		
+		// send desktop notofication
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			Notifications
+				.create()
+				.title("Info")
+				.text("Rewards clamied")
+				.position(Pos.TOP_RIGHT)
+				.showInformation();
+		} else {
+			Notifications
+				.create()
+				.title("Info")
+				.text("Rewards clamied")
+				.showInformation();
+		}		
+	}
 }

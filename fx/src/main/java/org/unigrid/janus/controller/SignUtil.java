@@ -26,6 +26,7 @@ import cosmos.base.abci.v1beta1.Abci.TxResponse;
 import cosmos.base.v1beta1.CoinOuterClass;
 import cosmos.base.v1beta1.CoinOuterClass.Coin;
 import cosmos.crypto.secp256k1.Keys;
+import cosmos.distribution.v1beta1.Tx.MsgWithdrawDelegatorReward;
 import cosmos.staking.v1beta1.Tx.MsgDelegate;
 import cosmos.tx.signing.v1beta1.Signing;
 import cosmos.tx.v1beta1.ServiceGrpc;
@@ -42,6 +43,7 @@ import org.bitcoinj.core.Sha256Hash;
 import org.unigrid.janus.model.service.GrpcService;
 import gridnode.gridnode.v1.Tx.MsgGridnodeDelegate;
 import gridnode.gridnode.v1.Tx.MsgGridnodeUndelegate;
+import java.util.List;
 
 @ApplicationScoped
 public class SignUtil {
@@ -115,6 +117,21 @@ public class SignUtil {
 
 		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
 		return bradcastTransaction(tx);
+	}
+	
+	public void sendClaimStakingRewardsTx(CosmosCredentials payerCredentials, List<String> validatorAddresses,
+		BigDecimal feeInAtom, long gasLimit) throws Exception {
+
+		for (String validatorAddress : validatorAddresses) {
+			String delegatorAddress = payerCredentials.getAddress();
+
+			MsgWithdrawDelegatorReward msg = MsgWithdrawDelegatorReward.newBuilder()
+				.setDelegatorAddress(delegatorAddress)
+				.setValidatorAddress(validatorAddress)
+				.build();
+			TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
+			bradcastTransaction(tx);
+		}
 	}
 
 	public TxResponse bradcastTransaction(TxOuterClass.Tx tx) throws Exception {

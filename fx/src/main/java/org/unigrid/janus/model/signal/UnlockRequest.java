@@ -46,7 +46,8 @@ public class UnlockRequest {
 		COSMOS_SEND_TOKENS("Send", "Enter Wallet password to complete the transaction"),
 		COSMOS_DELEGATE_GRIDNODE("Delegate", "Enter Wallet password to complete the transaction"),
 		COSMOS_UNDELEGATE_GRIDNODE("Undelegate", "Enter Wallet password to complete the transaction"),
-		COSMOS_DELEGATE_STAKING("Stake", "Enter Wallet password to complete the transaction");
+		COSMOS_DELEGATE_STAKING("Stake", "Enter Wallet password to complete the transaction"),
+		COSMOS_CLAIM_REWARDS("Claim", "Enter Wallet password to claim rewards");
 
 		@Getter private final String action;
 		@Getter private final String description;
