@@ -153,6 +153,12 @@ public class OverlayController implements Initializable {
 				case COSMOS_GRIDNODE_KEYS:
 					cosmosWalletEvent.fire(CosmosWalletRequest.GRIDNODE_KEYS);
 					break;
+				case COSMOS_UNDELEGATE_STAKING:
+					cosmosWalletEvent.fire(CosmosWalletRequest.UNDELEGATE_STAKING);
+					break;
+				case COSMOS_SWITCH_DELEGATOR:
+					cosmosWalletEvent.fire(CosmosWalletRequest.SWITCH_DELEGATOR);
+					break;
 				default:
 					throw new AssertionError();
 			}
@@ -190,8 +196,10 @@ public class OverlayController implements Initializable {
 			case COSMOS_DELEGATE_GRIDNODE:
 			case COSMOS_UNDELEGATE_GRIDNODE:
 			case COSMOS_DELEGATE_STAKING:
-			case COSMOS_GRIDNODE_KEYS:
-			case COSMOS_CLAIM_REWARDS: {
+			case COSMOS_GRIDNODE_KEYS:			
+			case COSMOS_CLAIM_REWARDS:
+			case COSMOS_UNDELEGATE_STAKING:
+			case COSMOS_SWITCH_DELEGATOR: {
 				try {
 					checkCosmosPassword(unlockType);
 					return;

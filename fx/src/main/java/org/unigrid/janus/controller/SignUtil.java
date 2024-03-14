@@ -134,7 +134,7 @@ public class SignUtil {
 		return bradcastTransaction(tx);
 	}
 
-	public Abci.TxResponse sendUnstakingTx(CosmosCredentials payerCredentials, String srcValidator, String dstValidator, Long amount,
+	public Abci.TxResponse sendSwitchDelegatorTx(CosmosCredentials payerCredentials, String srcValidator, String dstValidator, Long amount,
 		BigDecimal feeInAtom, long gasLimit) throws Exception {
 
 		MsgBeginRedelegate msg = MsgBeginRedelegate.newBuilder()

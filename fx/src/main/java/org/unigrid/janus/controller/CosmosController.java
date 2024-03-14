@@ -98,8 +98,6 @@ import org.unigrid.janus.view.backing.CosmosTxList;
 import java.math.BigInteger;
 import org.bouncycastle.util.encoders.Hex;
 import cosmos.base.abci.v1beta1.Abci;
-import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest;
-import cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse;
 import cosmos.tx.v1beta1.ServiceGrpc;
 import cosmos.tx.v1beta1.ServiceOuterClass;
 import cosmos.tx.v1beta1.TxOuterClass;
@@ -125,6 +123,7 @@ import org.unigrid.janus.model.signal.CosmosWalletRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.scene.layout.HBox;
 import org.unigrid.janus.model.gridnode.GridnodeData;
 import org.unigrid.janus.model.gridnode.GridnodeModel;
 import org.unigrid.janus.model.ApiConfig;
@@ -137,9 +136,9 @@ import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.Unbonding
 import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.signal.AccountSelectedEvent;
 import org.unigrid.janus.model.signal.CollateralUpdateEvent;
+import static org.unigrid.janus.model.signal.CosmosWalletRequest.GRIDNODE_KEYS;
 import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
-import org.unigrid.janus.model.signal.PublicKeysEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
@@ -339,6 +338,10 @@ public class CosmosController implements Initializable {
 	private OsxUtils osxUtils = new OsxUtils();
 	@Inject
 	private HostServices hostServices;
+	
+	private String currentValidatorAddr;
+	private String stakedAmount;
+	private String newValidatorAddr;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -424,7 +427,7 @@ public class CosmosController implements Initializable {
 					if (empty || item == null) {
 						setText(null);
 					} else {
-
+						
 						BigDecimal amount = new BigDecimal(
 							item.getBalance().getAmount());
 						BigDecimal displayAmount = amount.divide(scaleFactor);
@@ -433,14 +436,42 @@ public class CosmosController implements Initializable {
 							item.getDelegation().getValidatorAddress(),
 							displayAmount.toPlainString(),
 							"ugd");
-						setText(text);
+
+						Label label = new Label(text);
+						label.setTextFill(Color.WHITE);
+						Button actionButton = new Button("Unstake");
+						actionButton.setStyle("-fx-cursor: hand;");
+						actionButton.setOnAction(event -> {
+							currentValidatorAddr = item.getDelegation().getValidatorAddress();
+							stakedAmount = item.getBalance().getAmount();
+							onUnstakePasswordRequest();
+						});
+						
+						ComboBox<ValidatorInfo> switchDelegteComboBox = new ComboBox<>();
+						switchDelegteComboBox.getItems().addAll(validatorListComboBox.getItems());
+						
+						for (Object it : validatorListComboBox.getItems()) {
+							ValidatorInfo validatorInfo = (ValidatorInfo) it;
+							if (validatorInfo.getOperatorAddress().equals(item.getDelegation().getValidatorAddress())) {
+								switchDelegteComboBox.setValue(validatorInfo);
+							}
+						}
+						
+						switchDelegteComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+							if (newValue != null) {
+								currentValidatorAddr = item.getDelegation().getValidatorAddress();
+								stakedAmount = item.getBalance().getAmount();
+								ValidatorInfo selectedValidator = (ValidatorInfo) newValue;
+								newValidatorAddr = selectedValidator.getOperatorAddress();
+								onSwitchDelegatorRequest();
+							}
+						});
+
+						HBox hBox = new HBox(label, switchDelegteComboBox, actionButton);
+
+						setText(null);
+						setGraphic(hBox);
 					}
-				}
-			});
-			delegationsListView.addEventFilter(MouseEvent.ANY, new EventHandler<MouseEvent>() {
-				@Override
-				public void handle(MouseEvent mouseEvent) {
-					mouseEvent.consume();
 				}
 			});
 
@@ -1423,6 +1454,18 @@ public class CosmosController implements Initializable {
 		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
+	@FXML
+	private void onUnstakePasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_UNDELEGATE_STAKING).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
+	@FXML
+	private void onSwitchDelegatorRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SWITCH_DELEGATOR).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
+	}
+
 	// this should all be in a model service not UI controller
 	private void eventCosmosWalletRequest(@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
 		switch (cosmosWalletRequest) {
@@ -1448,6 +1491,14 @@ public class CosmosController implements Initializable {
 			}
 			case GRIDNODE_KEYS: {
 				cosmosService.generateKeys(delegationEvent.getGridnodeCount());
+				break;
+			}
+			case UNDELEGATE_STAKING: {
+				undelegateStaking();
+				break;
+			}
+			case SWITCH_DELEGATOR: {
+				switchDelegator();
 				break;
 			}
 			default:
@@ -1524,5 +1575,69 @@ public class CosmosController implements Initializable {
 		Platform.runLater(() -> {
 			keysListView.setItems(publicKeysModel.getPublicKeys());
 		});
+	}
+	
+	public void undelegateStaking() throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+		
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
+		
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+
+		Abci.TxResponse txResponse = transactionService.sendUnstakingTx(credentials, currentValidatorAddr,
+				Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 200000);
+
+		System.out.println("RESPONSE");
+		System.out.println(txResponse);
+
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.position(Pos.TOP_RIGHT)
+				.showInformation();
+		} else {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.showInformation();
+		}		
+	}
+	
+	public void switchDelegator() throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+		
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
+		
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+		System.out.println("stakedAmount44 " + stakedAmount);
+		Abci.TxResponse txResponse = transactionService.sendSwitchDelegatorTx(credentials, currentValidatorAddr, newValidatorAddr,
+				Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 400000);
+
+		System.out.println("RESPONSE");
+		System.out.println(txResponse);
+
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.position(Pos.TOP_RIGHT)
+				.showInformation();
+		} else {
+			Notifications
+				.create()
+				.title("Transaction hash")
+				.text(txResponse.getTxhash())
+				.showInformation();
+		}
 	}
 }
