@@ -33,6 +33,14 @@ public class AppConfig {
 		return buildUri("/gridnode/collateral");
 	}
 
+	public String getGridnodeUri() {
+		return buildUri("/gridnode");
+	}
+
+	public String getGridnodeStartUri() {
+		return buildUri("/gridnode/start");
+	}
+
 	public String getHedgehogVersionUri() {
 		return buildUri("/version");
 	}

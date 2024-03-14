@@ -16,19 +16,31 @@
 
 package org.unigrid.janus.model.gridnode;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
 public class GridnodeModel {
+    private List<GridnodeData> gridnodeDataList = new ArrayList<>();
 
-	private List<GridnodeData> gridnodeData;
+    @PostConstruct
+    public void init() {
+        // Initialize or reset gridnodeDataList if needed
+        gridnodeDataList.clear();
+    }
 
-	public void init() {
-		
-	}
+    public void addGridnodeData(GridnodeData data) {
+        gridnodeDataList.add(data);
+    }
 
-	public void StartGridnode() {
-		
-	}
+    public List<GridnodeData> getGridnodeData() {
+        return gridnodeDataList;
+    }
+
+    public void startGridnode() {
+        // Implementation to start gridnode
+    }
 }
+
