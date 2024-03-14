@@ -1,6 +1,6 @@
 /*
 	The Janus Wallet
-	Copyright © 2021-2023 The Unigrid Foundation, UGD Software AB
+	Copyright © 2021-2022 The Unigrid Foundation, UGD Software AB
 
 	This program is free software: you can redistribute it and/or modify it under the terms of the
 	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -14,42 +14,32 @@
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.model.setup;
+package org.unigrid.janus.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import lombok.Data;
+import jakarta.inject.Inject;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import org.unigrid.janus.model.cdi.Eager;
+import org.unigrid.janus.view.NetworkSelection;
 
-@Data
+@Eager
 @ApplicationScoped
-public class AppConfig {
-//	private int port = 52884;
-	// TESTNET
-//	private int port = 39886;
-	// DEVNET
-	private int port = 40001;
-	private String baseUrl = "https://127.0.0.1";
+public class NetworkSelectionController {
 
-	public String getCollateralRequiredUri() {
-		return buildUri("/gridnode/collateral");
+	@Inject
+	private NetworkSelection networkSelection;
+	
+	@FXML
+	private Button btnOk;
+	
+	@FXML
+	private ChoiceBox<String> cboxHedgehogNetwork;
+	
+	public void onBtnPrimaryClicked(ActionEvent event) {
+		String s = cboxHedgehogNetwork.getValue();
 	}
 
-	public String getGridnodeUri() {
-		return buildUri("/gridnode");
-	}
-
-	public String getGridnodeStartUri() {
-		return buildUri("/gridnode/start");
-	}
-
-	public String getHedgehogVersionUri() {
-		return buildUri("/version");
-	}
-
-	public String getGridsporkUri() {
-		return buildUri("/gridspork");
-	}
-
-	private String buildUri(String path) {
-		return baseUrl + ":" + port + path;
-	}
 }

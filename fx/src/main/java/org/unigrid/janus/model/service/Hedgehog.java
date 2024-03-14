@@ -13,7 +13,6 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.model.service;
 
 import jakarta.annotation.PostConstruct;
@@ -26,6 +25,7 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.MediaType;
+import java.io.BufferedReader;
 import javafx.application.Platform;
 
 import java.io.IOException;
@@ -47,6 +47,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
@@ -61,6 +63,9 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import org.unigrid.janus.model.ExternalVersion;
+import org.unigrid.janus.model.HedgehogConfig;
+import static org.unigrid.janus.model.HedgehogConfig.startMode.DEV_NET;
+import static org.unigrid.janus.model.HedgehogConfig.startMode.TEST_NET;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.HedgehogVersion;
 import org.unigrid.janus.model.setup.AppConfig;
@@ -124,9 +129,29 @@ public class Hedgehog {
 	}
 
 	@SneakyThrows
-	public void startHedgehog() {
+	public void startHedgehog(HedgehogConfig.startMode mode) {
+
 		ProcessBuilder pb = new ProcessBuilder();
-		p = pb.command(hedgehogExecName, "daemon").inheritIO().start();
+		HedgehogConfig hedgehogConfig = new HedgehogConfig();
+		switch (mode) {
+			case MAIN_NET:
+				p = pb.command(hedgehogExecName, "daemon").inheritIO().start();
+				break;
+			case TEST_NET:
+				p = pb.command(hedgehogExecName, "daemon",
+					hedgehogConfig.getTestnetRestPort(),
+					hedgehogConfig.getTestnetRestPort(),
+					"--no-seeds",
+					hedgehogConfig.getTestnetPublicKey()).inheritIO().start();
+				break;
+			case DEV_NET:
+				p = pb.command(hedgehogExecName, "daemon",
+					hedgehogConfig.getDevnetP2pPort(),
+					hedgehogConfig.getDevnetRestPort(),
+					"--no-seeds",
+					hedgehogConfig.getTestnetPublicKey()).inheritIO().start();
+				break;
+		}
 		debug.print("Connecting to Hedgehog...", Hedgehog.class.getSimpleName());
 		// splashMessageEvent.fire(
 		// SplashMessage.builder().message("Starting Hedgehog").build());
@@ -141,6 +166,7 @@ public class Hedgehog {
 		int statusCode = future.get();
 		if (statusCode == 200) {
 			debug.print("Connected to Hedgehog", Hedgehog.class.getSimpleName());
+			addNode(mode, future);
 			splashMessageEvent.fire(
 				SplashMessage.builder().message("Connected to Hedgehog").build());
 		} else {
@@ -148,6 +174,54 @@ public class Hedgehog {
 				Hedgehog.class.getSimpleName());
 		}
 	}
+
+	@SneakyThrows
+	private void addNode(HedgehogConfig.startMode mode, CompletableFuture<Integer> future) {
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				while (!future.isDone()) {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException ex) {
+						Logger.getLogger(Hedgehog.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+				ProcessBuilder pb = new ProcessBuilder();
+				Process process;
+				HedgehogConfig hedgehogConfig = new HedgehogConfig();
+
+				switch (mode) {
+					case TEST_NET:
+					{
+						try {
+							process = pb.command(hedgehogExecName, hedgehogConfig.addNodeTestnet())
+								.inheritIO().start();
+						} catch (IOException ex) {
+							Logger.getLogger(Hedgehog.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
+						break;
+
+					case DEV_NET:
+					{
+						try {
+							process = pb.command(hedgehogExecName, hedgehogConfig.addNodeDevnet())
+								.inheritIO().redirectErrorStream(true).start();
+						} catch (IOException ex) {
+							Logger.getLogger(Hedgehog.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
+						break;
+
+				}
+				System.out.println("Have we connected another node??");
+			}
+		});
+	}
+		
+		
 
 	// TODO: Re-enable?
 	public void getHedgehogVersion() {
@@ -182,13 +256,21 @@ public class Hedgehog {
 				return;
 			}
 			System.out.println("Request!");
-			HedgehogVersion hedgehogVersion = response.readEntity(HedgehogVersion.class);
+			HedgehogVersion
+
+hedgehogVersion = response.readEntity(HedgehogVersion.class  
+
+);
 			externalVersion.setHedgehogVersion(hedgehogVersion.getVersion());
 			response.close();
 		} catch (ProcessingException e) {
 			System.err.println("version Error: " + e.getMessage());
-			debug.print("version Error: " + e.getMessage(),
-				Hedgehog.class.getSimpleName());
+			debug
+
+.print("version Error: " + e.getMessage(),
+				Hedgehog.class  
+
+.getSimpleName());
 		}
 	}
 
@@ -202,8 +284,10 @@ public class Hedgehog {
 			Response response = client.target(URI.create(collateralUri))
 				.request(jakarta.ws.rs.core.MediaType.APPLICATION_JSON).get();
 
-			if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-				double amount = response.readEntity(Double.class);
+if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+				double amount = response.readEntity(Double.class  
+
+);
 				collateralRequired.setAmount((int) amount);
 				collateralUpdateEvent.fire(new CollateralUpdateEvent(true, (int) amount));
 				return true;
@@ -256,8 +340,12 @@ public class Hedgehog {
 						.property("javax.xml.ws.client.receiveTimeout", 5000).get();
 				} catch (ProcessingException e) {
 					System.err.println("response Error: " + e.getMessage());
-					debug.print("response Error: " + e.getMessage(),
-						Hedgehog.class.getSimpleName());
+					debug
+
+.print("response Error: " + e.getMessage(),
+						Hedgehog.class  
+
+.getSimpleName());
 					TimeUnit.SECONDS.sleep(1); // Wait a second before retrying
 					continue;
 				}
@@ -275,12 +363,19 @@ public class Hedgehog {
 			throw e; // Rethrow the TimeoutException
 		} finally {
 			executor.shutdown(); // Shutdown the executor
-		}
+
+
+}
 		debug.print("Status Code from hedgehog: " + statusCode.get(),
-			Hedgehog.class.getSimpleName());
-		if (statusCode.get() != 200) {
+			Hedgehog.class  
+
+.getSimpleName());
+
+if (statusCode.get() != 200) {
 			debug.print("Failed to connect to Hedgehog (status code " + statusCode.get()
-				+ ")", Hedgehog.class.getSimpleName());
+				+ ")", Hedgehog.class  
+
+.getSimpleName());
 			hedgehogError.fire(HedgehogError.CONNECTION_FAILED);
 			Platform.runLater(() -> splashMessageEvent.fire(SplashMessage.builder()
 				.message("Failed to connect to Hedgehog").build()));
@@ -296,7 +391,7 @@ public class Hedgehog {
 	}
 
 	@SneakyThrows
-	public void stopHedgehog() {
+public void stopHedgehog() {
 		try {
 			ProcessBuilder pb = new ProcessBuilder();
 			pb.command(hedgehogExecName, "cli", "stop");
@@ -304,8 +399,12 @@ public class Hedgehog {
 		} catch (IOException e) {
 			// Log or print a message indicating that an error occurred
 			System.err.println("Error stopping Hedgehog: " + e.getMessage());
-			debug.print("Error stopping Hedgehog: " + e.getMessage() + ")",
-				Hedgehog.class.getSimpleName());
+			debug
+
+.print("Error stopping Hedgehog: " + e.getMessage() + ")",
+				Hedgehog.class  
+
+.getSimpleName());
 		}
 	}
 

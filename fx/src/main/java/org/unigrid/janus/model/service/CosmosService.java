@@ -203,7 +203,9 @@ public class CosmosService {
 		unboundingBalanceModel.setUnboundingAmount(unboundingBalance);
 		unboundingBalanceModelEvent.fire(unboundingBalanceModel);
 
-		double stakedBalance = getStakedBalance(account);
+		double stakedBalance = convertLongToUgd(getStakedBalance(account));
+
+
 		stakedBalanceModel.setStakedBalance(stakedBalance);
 		stakedBalanceModelEvent.fire(stakedBalanceModel);
 	}
@@ -308,7 +310,7 @@ public class CosmosService {
 
 	// TODO
 	// this should add this data to a model
-	public double getStakedBalance(String address) {
+	public long getStakedBalance(String address) {
 		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
 		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest stakingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest.newBuilder()
 			.setDelegatorAddr(address)
@@ -316,11 +318,11 @@ public class CosmosService {
 
 		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
 
-		double totalStaked = stakingResponse.getDelegationResponsesList().stream()
+		long totalStaked = stakingResponse.getDelegationResponsesList().stream()
 			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
 			.sum();
 
-		return totalStaked / Double.parseDouble(ApiConfig.getUUGD_VALUE());
+		return totalStaked;
 	}
 
 	public void generateKeys(int gridnodeCount) throws SignatureDecodeException, Exception {

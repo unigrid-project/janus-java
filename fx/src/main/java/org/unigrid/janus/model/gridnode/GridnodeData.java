@@ -17,16 +17,10 @@
 package org.unigrid.janus.model.gridnode;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 public class GridnodeData {
-
-	@Getter @Setter
-	private String gridnodeId;
-	@Getter @Setter
-	private String active;
-	@Getter @Setter
 	private String status;
+	private String id; // The public key
+	private String hostName;
 }

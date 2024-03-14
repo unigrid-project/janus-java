@@ -58,6 +58,7 @@ import org.unigrid.janus.model.cdi.Eager;
 import org.unigrid.janus.controller.SplashScreenController;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.ExternalVersion;
+import org.unigrid.janus.model.HedgehogConfig;
 import org.unigrid.janus.model.JanusModel;
 import org.unigrid.janus.model.Preferences;
 import org.unigrid.janus.model.UpdateWallet;
@@ -138,7 +139,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	public void startDaemon() {
 		debug.print("Janus starting daemon...", Janus.class.getSimpleName());
 		try {
-			hedgehog.startHedgehog();
+			hedgehog.startHedgehog(HedgehogConfig.startMode.MAIN_NET);
 
 			// AlertDialog.open(AlertType.ERROR, "Something fucked up!");
 		} catch (Exception e) {
@@ -247,7 +248,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	private void startCosmosWallet() {
 		try {
-			hedgehog.startHedgehog();
+			hedgehog.startHedgehog(HedgehogConfig.startMode.DEV_NET);
 			debug.print("starting hedgehog", Janus.class.getSimpleName());
 			// AlertDialog.open(AlertType.ERROR, "Something fucked up!");
 		} catch (Exception e) {

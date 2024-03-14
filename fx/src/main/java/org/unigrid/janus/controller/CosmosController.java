@@ -122,7 +122,6 @@ import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.layout.HBox;
 import org.unigrid.janus.model.gridnode.GridnodeData;
 import org.unigrid.janus.model.gridnode.GridnodeModel;
@@ -131,12 +130,13 @@ import org.unigrid.janus.model.PublicKeysModel;
 import org.unigrid.janus.model.StakedBalanceModel;
 import org.unigrid.janus.model.UnboundingBalanceModel;
 import org.unigrid.janus.model.WalletBalanceModel;
+import org.unigrid.janus.model.gridnode.GridnodeListViewItem;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
+import org.unigrid.janus.model.service.GridnodeHandler;
 import org.unigrid.janus.model.service.PollingService;
 import org.unigrid.janus.model.signal.AccountSelectedEvent;
 import org.unigrid.janus.model.signal.CollateralUpdateEvent;
-import static org.unigrid.janus.model.signal.CosmosWalletRequest.GRIDNODE_KEYS;
 import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
@@ -144,6 +144,8 @@ import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 import org.unigrid.janus.view.backing.OsxUtils;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.TableCell;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -198,6 +200,8 @@ public class CosmosController implements Initializable {
 	private PollingService pollingService;
 	@Inject
 	private Event<AccountSelectedEvent> accountSelectedEvent;
+	@Inject
+	private GridnodeHandler gridnodeHandler;
 
 	private Account currentSelectedAccount;
 	@FXML
@@ -297,21 +301,24 @@ public class CosmosController implements Initializable {
 	@FXML
 	private TableView<String> tableTransactionsReceived;
 	@FXML
-	private TableView<GridnodeData> tblGridnodeList;
-	@FXML
 	private ComboBox validatorListComboBox;
 	@FXML
 	private TableColumn<String, String> colTrxReceived;
 	@FXML
 	private TableColumn<String, String> colTrxSent;
 	@FXML
-	private TableColumn<String, String> colGridnodeId;
-	@FXML
-	private TableColumn<String, String> colStatus;
-	@FXML
-	private TableColumn<String, String> colStartGridnode;
-	@FXML
 	private ListView<String> keysListView;
+	@FXML
+	private TableView<GridnodeListViewItem> tblGridnodeListStart;
+	@FXML
+	private TableColumn<GridnodeListViewItem, String> colIp;
+	@FXML
+	private TableColumn<GridnodeListViewItem, String> colGridnodeId;
+	@FXML
+	private TableColumn<GridnodeListViewItem, String> colStatus;
+	@FXML
+	private TableColumn<GridnodeListViewItem, String> colStartGridnode;
+
 	private ObservableList<String> keysList = FXCollections.observableArrayList();
 
 	private ObservableList<String> transactionsObReceived = FXCollections.observableArrayList();
@@ -407,7 +414,7 @@ public class CosmosController implements Initializable {
 					if (empty || item == null) {
 						setText(null);
 					} else {
-						setText(item.getAmount() + " " + item.getDenom());
+						setText(item.getAmount() + " ugd");
 					}
 				}
 			});
@@ -471,6 +478,7 @@ public class CosmosController implements Initializable {
 
 						setText(null);
 						setGraphic(hBox);
+
 					}
 				}
 			});
@@ -481,10 +489,49 @@ public class CosmosController implements Initializable {
 				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
 			}
 			setGridnodeKeysList();
-			fetchGridnodes();
-			pollingService.startPoll();
-		});
+			// Gridnode List View
+			colIp.setCellValueFactory(new PropertyValueFactory<>("address"));
+			colGridnodeId.setCellValueFactory(new PropertyValueFactory<>("key"));
+			colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+			colStartGridnode.setCellFactory(tc -> new TableCell<GridnodeListViewItem, String>() {
+				private final Button startButton = new Button("START");
 
+				@Override
+				protected void updateItem(String item, boolean empty) {
+					super.updateItem(item, empty);
+					if (empty) {
+						setGraphic(null);
+					} else {
+						GridnodeListViewItem gridnode = getTableView().getItems().get(getIndex());
+						startButton.setOnAction(event -> {
+							try {
+								// Get the gridnode ID from the gridnode object
+								String gridnodeId = gridnode.getKey();
+								// Call the startGridnode method with the gridnode ID
+								gridnodeHandler.startGridnode(gridnodeId);
+							} catch (Exception e) {
+								// Handle exceptions here
+								e.printStackTrace();
+							}
+						});
+						setGraphic(gridnode.getStatus().equals("INACTIVE") ? startButton : null);
+					}
+				}
+			});
+
+			// Load and set items for the TableView
+			List<GridnodeData> gridnodes = gridnodeHandler.fetchGridnodes();
+			String accountName = accountsData.getSelectedAccount().getName();
+			List<String> keys = gridnodeHandler.loadKeysFromFile(accountName);
+			List<GridnodeListViewItem> items = gridnodeHandler.compareGridnodesWithLocalKeys(gridnodes, keys);
+
+			// Assuming tableView is your TableView and is properly initialized
+			tblGridnodeListStart.setItems(FXCollections.observableArrayList(items));
+			tblGridnodeListStart.refresh();
+			System.out.println("gridnodes: " + gridnodes);
+			pollingService.startPoll();
+
+		});
 	}
 
 	@FXML
@@ -507,14 +554,14 @@ public class CosmosController implements Initializable {
 				Notifications
 					.create()
 					.title("Address copied to clipboard")
-					.text("")
+					.text(selectedAccount.getAddress())
 					.position(Pos.TOP_RIGHT)
 					.showInformation();
 			} else {
 				Notifications
 					.create()
 					.title("Address copied to clipboard")
-					.text("")
+					.text(selectedAccount.getAddress())
 					.showInformation();
 			}
 		});
@@ -588,7 +635,7 @@ public class CosmosController implements Initializable {
 	}
 
 	private String getPasswordFromUser() {
-		// just use this default for testing right now
+		
 		return "pickles";
 	}
 
@@ -820,7 +867,7 @@ public class CosmosController implements Initializable {
 					} else {
 						BigDecimal amount = new BigDecimal(item.getAmount());
 						BigDecimal displayAmount = amount.divide(scaleFactor);
-						setText(displayAmount.toPlainString() + " " + item.getDenom());
+						setText(displayAmount.toPlainString() + " ugd");
 					}
 				}
 			});
@@ -869,12 +916,11 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	public String getPrivateKeyHex() {
+	public String getPrivateKeyHex(String password) {
 		try {
 			Account selectedAccount = accountsData.getSelectedAccount();
 			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
 
-			String password = getPasswordFromUser();
 			if (password == null) {
 				System.out.println("Password is null! Error in getPasswordFromUser method.");
 				return null;
@@ -934,10 +980,10 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
-	public void sendTokens() throws Exception {
-		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+	public void sendTokens(String password) throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
 
-		System.out.println("privateKeyHex from send: " + getPrivateKeyHex());
+		System.out.println("privateKeyHex from send: " + getPrivateKeyHex(password));
 
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
 
@@ -980,9 +1026,9 @@ public class CosmosController implements Initializable {
 
 	}
 
-	public void delegation(boolean delegate, String validatorAddress) throws Exception {
-		byte[] privateKey = Hex.decode(getPrivateKeyHex());
-		System.out.println("privateKeyHex from delegate tokens: " + getPrivateKeyHex());
+	public void delegation(boolean delegate, String validatorAddress, String password) throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
+		System.out.println("privateKeyHex from delegate tokens: " + getPrivateKeyHex(password));
 
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
 
@@ -1038,17 +1084,17 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
-	public void delegateToGridnode() throws Exception {
-		delegation(true, null);
+	public void delegateToGridnode(String password) throws Exception {
+		delegation(true, null, password);
 	}
 
 	@FXML
-	public void undelegateFromGridnode() throws Exception {
-		delegation(false, null);
+	public void undelegateFromGridnode(String password) throws Exception {
+		delegation(false, null, password);
 	}
 
 	@FXML
-	public void delegateForStaking() throws Exception {
+	public void delegateForStaking(String password) throws Exception {
 		ValidatorInfo selectedValidator = (ValidatorInfo) validatorListComboBox.getSelectionModel().getSelectedItem();
 		String operatorAddress = "";
 		if (selectedValidator != null) {
@@ -1057,7 +1103,7 @@ public class CosmosController implements Initializable {
 			// Now you can use the operatorAddress for further processing
 		}
 		if (!"".equals(operatorAddress)) {
-			delegation(false, operatorAddress);
+			delegation(false, operatorAddress, password);
 		} else {
 			System.out.println("ERROR: Validator address is empty");
 		}
@@ -1184,11 +1230,6 @@ public class CosmosController implements Initializable {
 			// Mnemonics do not match
 			System.out.println("mnemonic does not match");
 		}
-	}
-
-	@FXML
-	private void onStartAllGridnodes(ActionEvent event) {
-		gridnodeModel.StartGridnode();
 	}
 
 	/* MAIN VIEW */
@@ -1337,25 +1378,6 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	public void fetchGridnodes() {
-
-		GridnodeData data = new GridnodeData();
-
-		data.setGridnodeId("testing testing");
-		data.setStatus("testing");
-
-		gridnodeData.add(data);
-
-		colStartGridnode.setCellValueFactory(cell -> {
-			Button button = new Button();
-			button.setText("Start Gridnode");
-
-			return new ReadOnlyObjectWrapper(button);
-		});
-
-		tblGridnodeList.setItems(gridnodeData);
-	}
-
 	public void fetchAccountTransactions(String address) {
 
 		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
@@ -1417,6 +1439,22 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
+	private void onStartAllGridnodes(ActionEvent event) {
+		gridnodeModel.startGridnode();
+	}
+
+	@FXML
+	private void onRefreshGridnodes(ActionEvent event) throws IOException, InterruptedException {
+		List<GridnodeData> gridnodes = gridnodeHandler.fetchGridnodes();
+		String accountName = accountsData.getSelectedAccount().getName();
+		List<String> keys = gridnodeHandler.loadKeysFromFile(accountName);
+		List<GridnodeListViewItem> items = gridnodeHandler.compareGridnodesWithLocalKeys(gridnodes, keys);
+		System.out.println("items: " + items);
+		tblGridnodeListStart.setItems(FXCollections.observableArrayList(items));
+		tblGridnodeListStart.refresh();
+	}
+
+	@FXML
 	private void sendTokensPasswordRequest() {
 		if (!"".equals(toAddress.getText()) && !"".equals(sendAmount.getText())) {
 			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
@@ -1468,25 +1506,25 @@ public class CosmosController implements Initializable {
 
 	// this should all be in a model service not UI controller
 	private void eventCosmosWalletRequest(@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
-		switch (cosmosWalletRequest) {
+		switch (cosmosWalletRequest.getRequest()) {
 			case SEND_TOKENS: {
-				sendTokens();
+				sendTokens(cosmosWalletRequest.getPassword());
 				break;
 			}
 			case DELEGATE_GRIDNODE: {
-				delegateToGridnode();
+				delegateToGridnode(cosmosWalletRequest.getPassword());
 				break;
 			}
 			case UNDELEGATE_GRIDNODE: {
-				undelegateFromGridnode();
+				undelegateFromGridnode(cosmosWalletRequest.getPassword());
 				break;
 			}
 			case DELEGATE_STAKING: {
-				delegateForStaking();
+				delegateForStaking(cosmosWalletRequest.getPassword());
 				break;
 			}
 			case CLAIM_REWARDS: {
-				onClaimStakingRewards();
+				onClaimStakingRewards(cosmosWalletRequest.getPassword());
 				break;
 			}
 			case GRIDNODE_KEYS: {
@@ -1525,8 +1563,8 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
-	public void onClaimStakingRewards() throws Exception {
-		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+	public void onClaimStakingRewards(String password) throws Exception {
+		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
 		ObservableList<DelegationsRequest.DelegationResponse> items = delegationsListView.getItems();
 
 		List<String> validatorAddresses = items.stream()
@@ -1557,28 +1595,39 @@ public class CosmosController implements Initializable {
 		}
 	}
 
+//	public void setGridnodeKeysList() {
+//		System.out.println("update keys list");
+//		File gridnodeKeysFile = DataDirectory.getGridnodeKeysFile(accountsData.getSelectedAccount().getName());
+//		if (gridnodeKeysFile.exists()) {
+//			try {
+//				List<String> keys = DataDirectory.readPublicKeysFromFile(gridnodeKeysFile);
+//				publicKeysModel.setPublicKeys(keys);
+//			} catch (IOException e) {
+//				publicKeysModel.getPublicKeys().clear();
+//				System.out.println("Error reading keys from file: " + e.getMessage());
+//				// Handle the error appropriately
+//			}
+//		} else {
+//			publicKeysModel.getPublicKeys().clear();
+//		}
+//		Platform.runLater(() -> {
+//			keysListView.setItems(publicKeysModel.getPublicKeys());
+//		});
+//	}
 	public void setGridnodeKeysList() {
 		System.out.println("update keys list");
-		File gridnodeKeysFile = DataDirectory.getGridnodeKeysFile(accountsData.getSelectedAccount().getName());
-		if (gridnodeKeysFile.exists()) {
-			try {
-				List<String> keys = DataDirectory.readPublicKeysFromFile(gridnodeKeysFile);
-				publicKeysModel.setPublicKeys(keys);
-			} catch (IOException e) {
-				publicKeysModel.getPublicKeys().clear();
-				System.out.println("Error reading keys from file: " + e.getMessage());
-				// Handle the error appropriately
-			}
-		} else {
-			publicKeysModel.getPublicKeys().clear();
-		}
+		String accountName = accountsData.getSelectedAccount().getName();
+		List<String> keys = gridnodeHandler.loadKeysFromFile(accountName);
+
+		publicKeysModel.setPublicKeys(keys); // Update the model with the loaded keys
 		Platform.runLater(() -> {
-			keysListView.setItems(publicKeysModel.getPublicKeys());
+			keysListView.setItems(publicKeysModel.getPublicKeys()); // Update the UI
 		});
 	}
 	
 	public void undelegateStaking() throws Exception {
-		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+		// todo this needs a user entered password
+		byte[] privateKey = Hex.decode(getPrivateKeyHex("pickles"));
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
 		
 		Account selectedAccount = accountsData.getSelectedAccount();
@@ -1610,7 +1659,8 @@ public class CosmosController implements Initializable {
 	}
 	
 	public void switchDelegator() throws Exception {
-		byte[] privateKey = Hex.decode(getPrivateKeyHex());
+		// todo this needs a user entered password
+		byte[] privateKey = Hex.decode(getPrivateKeyHex("pickles"));
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
 		
 		Account selectedAccount = accountsData.getSelectedAccount();
