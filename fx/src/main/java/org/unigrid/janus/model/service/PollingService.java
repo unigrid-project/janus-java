@@ -17,15 +17,24 @@
 package org.unigrid.janus.model.service;
 
 // import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.UpdateWallet;
 import org.unigrid.janus.model.cdi.CDIUtil;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import org.unigrid.janus.model.signal.AccountSelectedEvent;
 
 @ApplicationScoped
 public class PollingService {
@@ -34,7 +43,7 @@ public class PollingService {
 	private Timer syncTimer;
 	private Timer longSyncTimer;
 	private Timer timer;
-
+	private ScheduledFuture<?> cosmosPoll = null;
 	@Getter @Setter private Boolean syncTimerRunning = false;
 	@Getter @Setter private Boolean longSyncTimerRunning = false;
 	@Getter @Setter private Boolean pollingTimerRunning = false;
@@ -43,15 +52,22 @@ public class PollingService {
 	@Inject private DebugService debug;
 	@Inject private UpdateWallet updateWallet;
 
+	ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
+	@Inject
+	private CosmosService cosmosService;
+	@Inject
+	private AccountsData accountsData;
 	// TODO: These methods are all doing the same thing - generalize and put into a common class!
 
-	/*@PostConstruct
+	@PostConstruct
 	private void init() {
-		longSyncTimer = new Timer(true);
-		pollingTimer = new Timer(true);
-		syncTimer = new Timer(true);
-		updateTimer = new Timer(true);
-	}*/
+		executorService = Executors.newSingleThreadScheduledExecutor();
+	}
+
+	public void onAccountSelected(@Observes AccountSelectedEvent event) {
+		startPoll();
+	}
 
 	// Convert all polls to this one where you can pass in the task to be executed
 	// pollingService.startPolling(new LongPollingTask(), 1000, "polling", new Timer());
@@ -88,7 +104,6 @@ public class PollingService {
 		debug.print("starting the update timer", PollingService.class.getSimpleName());
 
 		// TODO: Apparently, Java timers don't like proxy objects - can we clean this up ?
-
 		updateTimer = new Timer(true);
 		updateTimer.scheduleAtFixedRate(CDIUtil.unproxy(updateWallet), 0, interval);
 		setUpdateTimerRunning(true);
@@ -129,6 +144,29 @@ public class PollingService {
 			longSyncTimer.cancel();
 			longSyncTimer.purge();
 			setLongSyncTimerRunning(false);
+		}
+	}
+
+	public void startPoll() {
+		stopPoll(); // Stop any existing poll
+
+		String address = accountsData.getSelectedAccount().getAddress();
+		Runnable task = () -> {
+			try {
+				cosmosService.loadAccountData(address);
+			} catch (Exception ex) {
+				// Handle exception
+			}
+		};
+
+		// Schedule the new polling task
+		cosmosPoll = executorService.scheduleWithFixedDelay(
+			task, 5, 5, TimeUnit.SECONDS);
+	}
+
+	public void stopPoll() {
+		if (cosmosPoll != null && !cosmosPoll.isCancelled()) {
+			cosmosPoll.cancel(true);
 		}
 	}
 

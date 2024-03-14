@@ -136,19 +136,34 @@ public class OverlayController implements Initializable {
 			cryptoUtils.decrypt(encryptedPrivateKey, passphraseInput.getText());
 			switch (unlockType) {
 				case COSMOS_SEND_TOKENS:
-					cosmosWalletEvent.fire(CosmosWalletRequest.SEND_TOKENS);
+					cosmosWalletEvent.fire(CosmosWalletRequest.builder()
+						.password(passphraseInput.getText())
+						.request(CosmosWalletRequest.Request.SEND_TOKENS).build());
 					break;
 				case COSMOS_DELEGATE_GRIDNODE:
-					cosmosWalletEvent.fire(CosmosWalletRequest.DELEGATE_GRIDNODE);
+					cosmosWalletEvent.fire(CosmosWalletRequest.builder()
+						.password(passphraseInput.getText())
+						.request(CosmosWalletRequest.Request.DELEGATE_GRIDNODE).build());
 					break;
 				case COSMOS_UNDELEGATE_GRIDNODE:
-					cosmosWalletEvent.fire(CosmosWalletRequest.UNDELEGATE_GRIDNODE);
+					cosmosWalletEvent.fire(CosmosWalletRequest.builder()
+						.password(passphraseInput.getText())
+						.request(CosmosWalletRequest.Request.UNDELEGATE_GRIDNODE).build());
 					break;
 				case COSMOS_DELEGATE_STAKING:
-					cosmosWalletEvent.fire(CosmosWalletRequest.DELEGATE_STAKING);
+					cosmosWalletEvent.fire(CosmosWalletRequest.builder()
+						.password(passphraseInput.getText())
+						.request(CosmosWalletRequest.Request.DELEGATE_STAKING).build());
 					break;
 				case COSMOS_CLAIM_REWARDS:
-					cosmosWalletEvent.fire(CosmosWalletRequest.CLAIM_REWARDS);
+					cosmosWalletEvent.fire(CosmosWalletRequest.builder()
+						.password(passphraseInput.getText())
+						.request(CosmosWalletRequest.Request.CLAIM_REWARDS).build());
+					break;
+				case COSMOS_GRIDNODE_KEYS:
+					cosmosWalletEvent.fire(CosmosWalletRequest.builder()
+						.password(passphraseInput.getText())
+						.request(CosmosWalletRequest.Request.GRIDNODE_KEYS).build());
 					break;
 				default:
 					throw new AssertionError();
@@ -187,6 +202,7 @@ public class OverlayController implements Initializable {
 			case COSMOS_DELEGATE_GRIDNODE:
 			case COSMOS_UNDELEGATE_GRIDNODE:
 			case COSMOS_DELEGATE_STAKING:
+			case COSMOS_GRIDNODE_KEYS:
 			case COSMOS_CLAIM_REWARDS: {
 				try {
 					checkCosmosPassword(unlockType);
