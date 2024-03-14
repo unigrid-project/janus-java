@@ -47,6 +47,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
@@ -180,7 +182,11 @@ public class Hedgehog {
 			@Override
 			public void run() {
 				while (!future.isDone()) {
-					Thread.sleep(500);
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException ex) {
+						Logger.getLogger(Hedgehog.class.getName()).log(Level.SEVERE, null, ex);
+					}
 				}
 				ProcessBuilder pb = new ProcessBuilder();
 				Process process;
@@ -188,13 +194,27 @@ public class Hedgehog {
 
 				switch (mode) {
 					case TEST_NET:
-						process = pb.command(hedgehogExecName, hedgehogConfig.addNodeTestnet())
-							.inheritIO().start();
+					{
+						try {
+							process = pb.command(hedgehogExecName, hedgehogConfig.addNodeTestnet())
+								.inheritIO().start();
+						} catch (IOException ex) {
+							Logger.getLogger(Hedgehog.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
 						break;
+
 					case DEV_NET:
-						process = pb.command(hedgehogExecName, hedgehogConfig.addNodeDevnet())
-							.inheritIO().redirectErrorStream(true).start();
+					{
+						try {
+							process = pb.command(hedgehogExecName, hedgehogConfig.addNodeDevnet())
+								.inheritIO().redirectErrorStream(true).start();
+						} catch (IOException ex) {
+							Logger.getLogger(Hedgehog.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
 						break;
+
 				}
 				System.out.println("Have we connected another node??");
 			}
