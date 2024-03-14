@@ -38,6 +38,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -50,6 +51,9 @@ import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.CryptoUtils;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.PublicKeysModel;
+import org.unigrid.janus.model.StakedBalanceModel;
+import org.unigrid.janus.model.UnboundingBalanceModel;
+import org.unigrid.janus.model.WalletBalanceModel;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.DelegationsRequest;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
@@ -99,6 +103,20 @@ public class CosmosService {
 	private PublicKeysModel publicKeysModel;
 	@Inject
 	private Event<PublicKeysEvent> publicKeysEvent;
+	@Inject
+	private Event<WalletBalanceModel> walletBalanceEvent;
+	@Inject
+	private WalletBalanceModel balanceModel;
+	@Inject
+	private UnboundingBalanceModel unboundingBalanceModel;
+	@Inject
+	private Event<UnboundingBalanceModel> unboundingBalanceModelEvent;
+	@Inject
+	private StakedBalanceModel stakedBalanceModel;
+	@Inject
+	private Event<StakedBalanceModel> stakedBalanceModelEvent;
+	@Inject
+	private PollingService pollingService;
 
 	static final String TOKEN_DECIMAL_VALUE = "100000000";
 
@@ -132,7 +150,12 @@ public class CosmosService {
 		}
 	}
 
+	public void startAccountPoll() {
+		pollingService.startPoll();
+	}
+
 	public void loadAccountData(String account) throws IOException, InterruptedException {
+		System.out.println("Load Account Data");
 		RestService restService = new RestService();
 
 		// Delegations
@@ -172,6 +195,18 @@ public class CosmosService {
 		fetchDelegationAmount(account);
 
 		hedgehog.fetchCollateralRequired();
+
+		String balance = getWalletBalance(account); // your existing method
+		balanceModel.setBalance(balance);
+		walletBalanceEvent.fire(balanceModel);
+
+		long unboundingBalance = getUnboundingBalance(account);
+		unboundingBalanceModel.setUnboundingAmount(unboundingBalance);
+		unboundingBalanceModelEvent.fire(unboundingBalanceModel);
+
+		long stakedBalance = getStakedBalance(account);
+		stakedBalanceModel.setStakedBalance(stakedBalance);
+		stakedBalanceModelEvent.fire(stakedBalanceModel);
 	}
 
 	public long getAccountNumber(String address) {

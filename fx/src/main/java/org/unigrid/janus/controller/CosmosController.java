@@ -129,8 +129,13 @@ import org.unigrid.janus.model.gridnode.GridnodeData;
 import org.unigrid.janus.model.gridnode.GridnodeModel;
 import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.PublicKeysModel;
+import org.unigrid.janus.model.StakedBalanceModel;
+import org.unigrid.janus.model.UnboundingBalanceModel;
+import org.unigrid.janus.model.WalletBalanceModel;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
+import org.unigrid.janus.model.service.PollingService;
+import org.unigrid.janus.model.signal.AccountSelectedEvent;
 import org.unigrid.janus.model.signal.CollateralUpdateEvent;
 import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
@@ -190,6 +195,10 @@ public class CosmosController implements Initializable {
 	private GridnodeModel gridnodeModel;
 	@Inject
 	private CosmosService cosmosService;
+	@Inject
+	private PollingService pollingService;
+	@Inject
+	private Event<AccountSelectedEvent> accountSelectedEvent;
 
 	private Account currentSelectedAccount;
 	@FXML
@@ -453,7 +462,9 @@ public class CosmosController implements Initializable {
 			}
 			keysListView.setItems(publicKeysModel.getPublicKeys());
 			fetchGridnodes();
+			pollingService.startPoll();
 		});
+
 	}
 
 	@FXML
@@ -1193,6 +1204,7 @@ public class CosmosController implements Initializable {
 					.findAccountByName(defaultAccountName);
 				if (defaultAccount.isPresent()) {
 					accountsData.setSelectedAccount(defaultAccount.get());
+					accountSelectedEvent.fire(new AccountSelectedEvent());
 				}
 			}
 		}
@@ -1212,6 +1224,8 @@ public class CosmosController implements Initializable {
 				accountsData.setSelectedAccount(selectedAccount.get());
 				System.out
 					.println("Selected Account:" + accountsData.getSelectedAccount());
+				accountSelectedEvent.fire(new AccountSelectedEvent());
+
 				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
 				System.out.println("getEncryptedPrivateKey: "
 					+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
@@ -1222,16 +1236,17 @@ public class CosmosController implements Initializable {
 						Platform.runLater(() -> {
 							getValidators();
 							// Update UI with the balance received from the response
-							balanceLabel.setText(cosmosService.getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
+							//balanceLabel.setText(cosmosService.getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
 							//delegationAmountLabel.setText(cosmosService.getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
-							unboundingAmountLabel.setText(cosmosService.getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
-							stakingAmountLabel.setText(cosmosService.getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
+							//unboundingAmountLabel.setText(cosmosService.getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
+							//stakingAmountLabel.setText(cosmosService.getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
+
 						});
+						cosmosService.loadAccountData(accountsData.getSelectedAccount().getAddress());
 
 						// Load transactions and other account data (assuming these methods are adapted
 						// for gRPC)
 						cosmosTxList.loadTransactions(10);
-						cosmosService.loadAccountData(accountsData.getSelectedAccount().getAddress());
 
 						return null;
 					}
@@ -1481,6 +1496,24 @@ public class CosmosController implements Initializable {
 			default:
 				throw new AssertionError();
 		}
+	}
+
+	public void onWalletBalanceUpdate(@Observes WalletBalanceModel balanceModel) {
+		Platform.runLater(() -> {
+			balanceLabel.setText(balanceModel.getBalance() + " ugd");
+		});
+	}
+
+	public void onUnboundingBalanceModelUpdate(@Observes UnboundingBalanceModel model) {
+		Platform.runLater(() -> {
+			unboundingAmountLabel.setText(model.getUnboundingAmount() + " ugd");
+		});
+	}
+
+	public void onStakedBalanceModelUpdate(@Observes StakedBalanceModel model) {
+		Platform.runLater(() -> {
+			stakingAmountLabel.setText(model.getStakedBalance() + " ugd");
+		});
 	}
 
 	@FXML
