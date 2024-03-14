@@ -327,7 +327,6 @@ public class CosmosController implements Initializable {
 	@Named("transactionResponse")
 	private TransactionResponse txModel;
 
-	static final String UUGD_VALUE = "100000000";
 	static final String VALIDATORS_DECIMAL_DEVIDER = "10000000000000000";
 
 	@FXML
@@ -433,7 +432,7 @@ public class CosmosController implements Initializable {
 							"Validator: %s, Amount: %s %s",
 							item.getDelegation().getValidatorAddress(),
 							displayAmount.toPlainString(),
-							item.getBalance().getDenom());
+							"ugd");
 						setText(text);
 					}
 				}
@@ -917,7 +916,7 @@ public class CosmosController implements Initializable {
 
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 		BigDecimal amountInUugd = cosmosService.convertBigDecimalInUugd(new BigDecimal(sendAmount.getText()));
-
+		
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
 			.toAddress(toAddress.getText())
@@ -1226,12 +1225,6 @@ public class CosmosController implements Initializable {
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
 							getValidators();
-							// Update UI with the balance received from the response
-							//balanceLabel.setText(cosmosService.getWalletBalance(selectedAccount.get().getAddress()) + " ugd");
-							//delegationAmountLabel.setText(cosmosService.getDelegatedBalance(selectedAccount.get().getAddress()) + " ugd");
-							//unboundingAmountLabel.setText(cosmosService.getUnboundingBalance(selectedAccount.get().getAddress()) + " ugd");
-							//stakingAmountLabel.setText(cosmosService.getStakedBalance(selectedAccount.get().getAddress()) + " ugd");
-
 						});
 						cosmosService.loadAccountData(accountsData.getSelectedAccount().getAddress());
 
@@ -1286,34 +1279,6 @@ public class CosmosController implements Initializable {
 			System.err.println("RPC error: " + e.getStatus());
 		}
 
-	}
-
-	private double getStakedBalance(String address) {
-		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		QueryDelegatorDelegationsRequest stakingRequest = QueryDelegatorDelegationsRequest.newBuilder()
-			.setDelegatorAddr(address)
-			.build();
-
-		QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
-
-		double totalStaked = stakingResponse.getDelegationResponsesList().stream()
-			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
-			.sum();
-
-		return totalStaked / Double.parseDouble(UUGD_VALUE);
-	}
-
-	private long getUnboundingBalance(String address) {
-		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub unboundingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest unboundingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest.newBuilder()
-			.setDelegatorAddr(address)
-			.build();
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsResponse unboundingResponse = unboundingStub.delegatorUnbondingDelegations(unboundingRequest);
-		long totalUnbondingAmount = unboundingResponse.getUnbondingResponsesList().stream()
-			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
-			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
-			.sum();
-		return totalUnbondingAmount;
 	}
 
 	public void onDelegationAmountEvent(@Observes DelegationStatusEvent event) {

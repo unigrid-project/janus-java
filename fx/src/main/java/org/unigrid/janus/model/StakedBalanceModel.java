@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @ApplicationScoped
 public class StakedBalanceModel {
-    private long stakedBalance;
+    private double stakedBalance;
 }
