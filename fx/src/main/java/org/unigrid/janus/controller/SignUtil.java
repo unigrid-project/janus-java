@@ -92,7 +92,7 @@ public class SignUtil {
 		long gasLimit) throws Exception {
 		
 		CoinOuterClass.Coin sendCoin = CoinOuterClass.Coin.newBuilder()
-			.setAmount(sendMsg.getAmountInAtom().toString())
+			.setAmount(String.valueOf(sendMsg.getAmountInAtom()))
 			.setDenom(token)
 			.build();
 

@@ -915,8 +915,10 @@ public class CosmosController implements Initializable {
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
 
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
-		BigDecimal amountInUugd = cosmosService.convertBigDecimalInUugd(new BigDecimal(sendAmount.getText()));
-		
+		long amountInUugd = cosmosService.convertBigDecimalInUugd(Double.parseDouble(sendAmount.getText()));
+
+		System.out.println("amount in uugd: " + amountInUugd);
+
 		SendInfo sendMsg = SendInfo.builder()
 			.credentials(credentials)
 			.toAddress(toAddress.getText())
@@ -962,13 +964,12 @@ public class CosmosController implements Initializable {
 		long amount = 0;
 		if (validatorAddress == null) {
 			if (delegate) {
-				amount = cosmosService.convertLongToUugd(Long.parseLong(delegateAmountTextField.getText()));
-
+				amount = cosmosService.convertBigDecimalInUugd(Double.parseDouble(delegateAmountTextField.getText()));
 			} else {
-				amount = cosmosService.convertLongToUugd(Long.parseLong(undelegateAmount.getText()));
+				amount = cosmosService.convertBigDecimalInUugd(Double.parseDouble(undelegateAmount.getText()));
 			}
 		} else {
-			amount = cosmosService.convertLongToUugd(Long.parseLong(stakeAmountTextField.getText()));
+			amount = cosmosService.convertBigDecimalInUugd(Double.parseDouble(stakeAmountTextField.getText()));
 		}
 
 		Abci.TxResponse txResponse = null;
