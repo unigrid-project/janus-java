@@ -358,7 +358,7 @@ public class CosmosService {
 		List<String> publicKeysHex = keys.stream()
 			.map(key -> Hex.toHexString(key.getPubKey()))
 			.collect(Collectors.toList());
-		savePublicKeysToFile(publicKeysHex);
+		savePublicKeysToFile(accountsData.getSelectedAccount().getName(), publicKeysHex);
 		publicKeysEvent.fire(new PublicKeysEvent(publicKeysHex));
 	}
 
@@ -386,14 +386,15 @@ public class CosmosService {
 		publicKeysModel.setPublicKeys(event.getPublicKeys());
 	}
 
-	private void savePublicKeysToFile(List<String> publicKeys) throws IOException {
-		File debugLog = DataDirectory.getGridnodeKeysFile();
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(debugLog, false))) {
+	private void savePublicKeysToFile(String accountName, List<String> publicKeys) throws IOException {
+		File keysFile = DataDirectory.getGridnodeKeysFile(accountName);
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(keysFile, false))) {
 			for (String key : publicKeys) {
 				writer.write(key);
 				writer.newLine();
 			}
 		}
 	}
+	
 
 }

@@ -450,17 +450,7 @@ public class CosmosController implements Initializable {
 				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
 			}
-			File gridnodeKeysFile = DataDirectory.getGridnodeKeysFile();
-			if (gridnodeKeysFile.exists()) {
-				try {
-					List<String> keys = DataDirectory.readPublicKeysFromFile(gridnodeKeysFile);
-					publicKeysModel.setPublicKeys(keys);
-				} catch (IOException e) {
-					System.out.println("Error reading keys from file: " + e.getMessage());
-					// Handle the error appropriately
-				}
-			}
-			keysListView.setItems(publicKeysModel.getPublicKeys());
+			setGridnodeKeysList();
 			fetchGridnodes();
 			pollingService.startPoll();
 		});
@@ -1045,7 +1035,7 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	private void openGridnodeConf(ActionEvent event) throws NullPointerException, IOException {
-		File gridnodeKeys = DataDirectory.getGridnodeKeysFile();
+		File gridnodeKeys = DataDirectory.getGridnodeKeysFile(accountsData.getSelectedAccount().getName());
 		try {
 			hostServices.showDocument(gridnodeKeys.getAbsolutePath());
 		} catch (NullPointerException e) {
@@ -1205,6 +1195,7 @@ public class CosmosController implements Initializable {
 				if (defaultAccount.isPresent()) {
 					accountsData.setSelectedAccount(defaultAccount.get());
 					accountSelectedEvent.fire(new AccountSelectedEvent());
+					setGridnodeKeysList();
 				}
 			}
 		}
@@ -1225,7 +1216,7 @@ public class CosmosController implements Initializable {
 				System.out
 					.println("Selected Account:" + accountsData.getSelectedAccount());
 				accountSelectedEvent.fire(new AccountSelectedEvent());
-
+				setGridnodeKeysList();
 				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
 				System.out.println("getEncryptedPrivateKey: "
 					+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
@@ -1547,5 +1538,25 @@ public class CosmosController implements Initializable {
 				.text("Rewards clamied")
 				.showInformation();
 		}
+	}
+
+	public void setGridnodeKeysList() {
+		System.out.println("update keys list");
+		File gridnodeKeysFile = DataDirectory.getGridnodeKeysFile(accountsData.getSelectedAccount().getName());
+		if (gridnodeKeysFile.exists()) {
+			try {
+				List<String> keys = DataDirectory.readPublicKeysFromFile(gridnodeKeysFile);
+				publicKeysModel.setPublicKeys(keys);
+			} catch (IOException e) {
+				publicKeysModel.getPublicKeys().clear();
+				System.out.println("Error reading keys from file: " + e.getMessage());
+				// Handle the error appropriately
+			}
+		} else {
+			publicKeysModel.getPublicKeys().clear();
+		}
+		Platform.runLater(() -> {
+			keysListView.setItems(publicKeysModel.getPublicKeys());
+		});
 	}
 }

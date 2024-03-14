@@ -145,8 +145,9 @@ public class DataDirectory {
 		return Paths.get(get(), KEYRING_DIRECTORY.concat("/").concat(ACCOUNTS_FILE)).toFile();
 	}
 
-	public static File getGridnodeKeysFile() {
-		return Paths.get(get(), KEYRING_DIRECTORY.concat("/").concat(GRIDNODE_KEYS_FILE)).toFile();
+	public static File getGridnodeKeysFile(String accountName) {
+		String filename = "gridnode_keys_" + accountName + ".conf";
+		return Paths.get(get(), KEYRING_DIRECTORY, filename).toFile();
 	}
 
 	public static void ensureDirectoryExists(String directory) throws IOException {
