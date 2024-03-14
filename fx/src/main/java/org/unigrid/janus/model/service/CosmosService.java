@@ -204,7 +204,9 @@ public class CosmosService {
 		unboundingBalanceModel.setUnboundingAmount(unboundingBalance);
 		unboundingBalanceModelEvent.fire(unboundingBalanceModel);
 
-		long stakedBalance = getStakedBalance(account);
+		double stakedBalance = convertLongToUgd(getStakedBalance(account));
+
+		System.out.println("stakedBalance: " + stakedBalance);
 		stakedBalanceModel.setStakedBalance(stakedBalance);
 		stakedBalanceModelEvent.fire(stakedBalanceModel);
 	}
@@ -395,6 +397,5 @@ public class CosmosService {
 			}
 		}
 	}
-	
 
 }
