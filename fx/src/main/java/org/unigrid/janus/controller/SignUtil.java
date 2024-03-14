@@ -27,7 +27,9 @@ import cosmos.base.v1beta1.CoinOuterClass;
 import cosmos.base.v1beta1.CoinOuterClass.Coin;
 import cosmos.crypto.secp256k1.Keys;
 import cosmos.distribution.v1beta1.Tx.MsgWithdrawDelegatorReward;
+import cosmos.staking.v1beta1.Tx.MsgBeginRedelegate;
 import cosmos.staking.v1beta1.Tx.MsgDelegate;
+import cosmos.staking.v1beta1.Tx.MsgUndelegate;
 import cosmos.tx.signing.v1beta1.Signing;
 import cosmos.tx.v1beta1.ServiceGrpc;
 import cosmos.tx.v1beta1.ServiceOuterClass;
@@ -90,7 +92,7 @@ public class SignUtil {
 
 	public Abci.TxResponse sendTx(CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
 		long gasLimit) throws Exception {
-		
+
 		CoinOuterClass.Coin sendCoin = CoinOuterClass.Coin.newBuilder()
 			.setAmount(String.valueOf(sendMsg.getAmountInAtom()))
 			.setDenom(token)
@@ -118,7 +120,34 @@ public class SignUtil {
 		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
 		return bradcastTransaction(tx);
 	}
-	
+
+	public Abci.TxResponse sendUnstakingTx(CosmosCredentials payerCredentials, String validatorAddress, Long amount,
+		BigDecimal feeInAtom, long gasLimit) throws Exception {
+
+		MsgUndelegate msg = MsgUndelegate.newBuilder()
+			.setDelegatorAddress(payerCredentials.getAddress())
+			.setValidatorAddress(validatorAddress)
+			.setAmount(Coin.newBuilder().setDenom(token).setAmount(amount.toString()).build())
+			.build();
+
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
+		return bradcastTransaction(tx);
+	}
+
+	public Abci.TxResponse sendUnstakingTx(CosmosCredentials payerCredentials, String srcValidator, String dstValidator, Long amount,
+		BigDecimal feeInAtom, long gasLimit) throws Exception {
+
+		MsgBeginRedelegate msg = MsgBeginRedelegate.newBuilder()
+			.setDelegatorAddress(payerCredentials.getAddress())
+			.setValidatorSrcAddress(srcValidator)
+			.setValidatorDstAddress(dstValidator)
+			.setAmount(Coin.newBuilder().setDenom(token).setAmount(amount.toString()).build())
+			.build();
+
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
+		return bradcastTransaction(tx);
+	}
+
 	public void sendClaimStakingRewardsTx(CosmosCredentials payerCredentials, List<String> validatorAddresses,
 		BigDecimal feeInAtom, long gasLimit) throws Exception {
 
