@@ -90,8 +90,17 @@
   -fx-margin: 5 5 5 5;
 }
 
+.table-cell {
+    -fx-alignment: CENTER; /* Horizontal alignment */
+}
+
+.table-row-cell {
+    -fx-alignment: CENTER; /* Vertical alignment */
+}
+
 .table-view {
   -fx-background-color: transparent;
+  -fx-alignment: CENTER;
 }
 
 .table-view .column-header-background {

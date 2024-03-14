@@ -352,20 +352,26 @@
                                        <children>
                                           <BorderPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #1a1a1a; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 10px;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <top>
-                                                <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                                <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                                    <children>
-                                                      <Button fx:id="btnStartAllGridnodes" mnemonicParsing="false" onAction="#onStartAllGridnodes" text="Start Gridnodes" />
+                                                      <Button fx:id="btnStartAllGridnodes" mnemonicParsing="false" onAction="#onStartAllGridnodes" text="START ALL" />
+                                                      <Button mnemonicParsing="false" onAction="#onRefreshGridnodes" text="REFRESH">
+                                                         <HBox.margin>
+                                                            <Insets left="10.0" right="10.0" />
+                                                         </HBox.margin>
+                                                      </Button>
                                                    </children>
                                                 </HBox>
                                              </top>
                                              <center>
-                                                <TableView fx:id="tblGridnodeList" BorderPane.alignment="CENTER">
-                                                  <columns>
-                                                    <TableColumn fx:id="colGridnodeId" prefWidth="119.0" text="Gridnode ID" />
-                                                    <TableColumn fx:id="colStatus" prefWidth="100.0" text="Status" />
-                                                      <TableColumn fx:id="tbcolStartGridnode" prefWidth="123.0" />
-                                                  </columns>
-                                                </TableView>
+                                               <TableView fx:id="tblGridnodeListStart" BorderPane.alignment="CENTER">
+    <columns>
+        <TableColumn fx:id="colIp" prefWidth="270.0" text="IP" />
+        <TableColumn fx:id="colGridnodeId" prefWidth="450.0" text="Gridnode ID" />
+        <TableColumn fx:id="colStatus" prefWidth="100.0" text="Status" />
+        <TableColumn fx:id="colStartGridnode" prefWidth="110.0" text="Start" />
+    </columns>
+</TableView>
                                              </center>
                                           </BorderPane>
                                        </children></AnchorPane>
