@@ -426,7 +426,7 @@ public class CosmosController implements Initializable {
 					if (empty || item == null) {
 						setText(null);
 					} else {
-						setText(item.getAmount() + " " + item.getDenom());
+						setText(item.getAmount() + " ugd");
 					}
 				}
 			});
@@ -454,7 +454,7 @@ public class CosmosController implements Initializable {
 							"Validator: %s, Amount: %s %s",
 							item.getDelegation().getValidatorAddress(),
 							displayAmount.toPlainString(),
-							item.getBalance().getDenom());
+							"ugd");
 						setText(text);
 					}
 				}
@@ -850,7 +850,7 @@ public class CosmosController implements Initializable {
 					} else {
 						BigDecimal amount = new BigDecimal(item.getAmount());
 						BigDecimal displayAmount = amount.divide(scaleFactor);
-						setText(displayAmount.toPlainString() + " " + item.getDenom());
+						setText(displayAmount.toPlainString() + " ugd");
 					}
 				}
 			});
