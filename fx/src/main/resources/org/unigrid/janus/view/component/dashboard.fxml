@@ -354,7 +354,7 @@
                                              <top>
                                                 <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                                    <children>
-                                                      <Button fx:id="btnStartAllGridnodes" mnemonicParsing="false" onAction="#onStartAllGridnodes" text="START ALL" />
+                                                      <Button fx:id="btnStartAllGridnodes" mnemonicParsing="false" onAction="#onStartAllGridnodes" text="START ALL" visible="false" />
                                                       <Button mnemonicParsing="false" onAction="#onRefreshGridnodes" text="REFRESH">
                                                          <HBox.margin>
                                                             <Insets left="10.0" right="10.0" />

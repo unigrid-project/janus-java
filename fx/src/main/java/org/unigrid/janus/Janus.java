@@ -258,6 +258,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 			// e.getMessage());
 		}
 		try {
+			hedgehog.addNode(HedgehogConfig.startMode.DEV_NET);
 			cosmosWallet.show();
 		} catch (Exception e) {
 			System.out.print("error: " + e.getMessage());

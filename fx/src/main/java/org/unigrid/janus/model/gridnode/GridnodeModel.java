@@ -20,10 +20,15 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 @ApplicationScoped
 public class GridnodeModel {
     private List<GridnodeData> gridnodeDataList = new ArrayList<>();
+
+    @Getter @Setter
+    private String currentGridnodeId;
 
     @PostConstruct
     public void init() {

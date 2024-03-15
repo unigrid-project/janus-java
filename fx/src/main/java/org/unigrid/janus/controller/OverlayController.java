@@ -127,7 +127,7 @@ public class OverlayController implements Initializable {
 	private void onSubmitPassphrasePressed(MouseEvent event) {
 		submit();
 	}
-	
+
 	private void checkCosmosPassword(UnlockRequest.Type unlockType) throws Exception {
 		AccountsData.Account selectedAccount = accountsData.getSelectedAccount();
 		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
@@ -164,6 +164,11 @@ public class OverlayController implements Initializable {
 					cosmosWalletEvent.fire(CosmosWalletRequest.builder()
 						.password(passphraseInput.getText())
 						.request(CosmosWalletRequest.Request.GRIDNODE_KEYS).build());
+					break;
+				case COSMOS_GRIDNODE_START:
+					cosmosWalletEvent.fire(CosmosWalletRequest.builder()
+						.password(passphraseInput.getText())
+						.request(CosmosWalletRequest.Request.GRIDNODE_START).build());
 					break;
 				case COSMOS_UNDELEGATE_STAKING:
 					cosmosWalletEvent.fire(CosmosWalletRequest.builder()
@@ -208,11 +213,12 @@ public class OverlayController implements Initializable {
 				// Unlock for 30 seconds only
 				sendArgs = new Object[]{passphraseInput.getText(), 30};
 				break;
-			case COSMOS_SEND_TOKENS: 
+			case COSMOS_SEND_TOKENS:
 			case COSMOS_DELEGATE_GRIDNODE:
 			case COSMOS_UNDELEGATE_GRIDNODE:
 			case COSMOS_DELEGATE_STAKING:
-			case COSMOS_GRIDNODE_KEYS:			
+			case COSMOS_GRIDNODE_KEYS:
+			case COSMOS_GRIDNODE_START:
 			case COSMOS_CLAIM_REWARDS:
 			case COSMOS_UNDELEGATE_STAKING:
 			case COSMOS_SWITCH_DELEGATOR: {
@@ -227,7 +233,7 @@ public class OverlayController implements Initializable {
 			default:
 				throw new AssertionError();
 		}
-		
+
 		if (passphraseInput.getText().equals("")) {
 			errorTxt.setText("Please enter a passphrase");
 			submitBtn.setDisable(false);

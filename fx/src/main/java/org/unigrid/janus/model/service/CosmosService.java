@@ -360,13 +360,12 @@ public class CosmosService {
 		return totalStaked;
 	}
 
-	public void generateKeys(int gridnodeCount) throws SignatureDecodeException, Exception {
+	public void generateKeys(int gridnodeCount, String password) throws SignatureDecodeException, Exception {
 		AccountsData.Account selectedAccount = accountsData.getSelectedAccount();
 		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
 		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
 		System.out.println("Gridnode Count: " + gridnodeCount);
 		// Prompt the user to enter the password
-		String password = "pickles";
 
 		// Assuming privateKeyBytes is the decrypted private key bytes
 		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
