@@ -17,10 +17,6 @@ package org.unigrid.janus.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.Any;
-import cosmos.auth.v1beta1.Auth.BaseAccount;
-import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountRequest;
-import cosmos.auth.v1beta1.QueryOuterClass.QueryAccountResponse;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -96,7 +92,6 @@ import org.unigrid.janus.model.signal.TabRequestSignal;
 import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import java.math.BigInteger;
-import org.bouncycastle.util.encoders.Hex;
 import cosmos.base.abci.v1beta1.Abci;
 import cosmos.tx.v1beta1.ServiceGrpc;
 import cosmos.tx.v1beta1.ServiceOuterClass;
@@ -125,7 +120,6 @@ import org.unigrid.janus.model.signal.UnlockRequest;
 import javafx.scene.layout.HBox;
 import org.unigrid.janus.model.gridnode.GridnodeData;
 import org.unigrid.janus.model.gridnode.GridnodeModel;
-import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.PublicKeysModel;
 import org.unigrid.janus.model.StakedBalanceModel;
 import org.unigrid.janus.model.UnboundingBalanceModel;
@@ -424,6 +418,7 @@ public class CosmosController implements Initializable {
 					mouseEvent.consume();
 				}
 			});
+			delegationsListView.getItems().clear();
 			delegationsListView.setCellFactory(
 				listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
 				@Override
@@ -455,7 +450,6 @@ public class CosmosController implements Initializable {
 						});
 						
 						ComboBox<ValidatorInfo> switchDelegteComboBox = new ComboBox<>();
-						switchDelegteComboBox.getItems().clear();
 						switchDelegteComboBox.getItems().addAll(validatorListComboBox.getItems());
 						
 						for (Object it : validatorListComboBox.getItems()) {
@@ -552,21 +546,8 @@ public class CosmosController implements Initializable {
 
 			content1.putString(selectedAccount.getAddress());
 			cb.setContent(content1);
-
-			if (SystemUtils.IS_OS_MAC_OSX) {
-				Notifications
-					.create()
-					.title("Address copied to clipboard")
-					.text(selectedAccount.getAddress())
-					.position(Pos.TOP_RIGHT)
-					.showInformation();
-			} else {
-				Notifications
-					.create()
-					.title("Address copied to clipboard")
-					.text(selectedAccount.getAddress())
-					.showInformation();
-			}
+			
+			cosmosService.sendDesktopNotification("Address copied to clipboard", selectedAccount.getAddress());
 		});
 
 	}
@@ -919,63 +900,6 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	public String getPrivateKeyHex(String password) {
-		try {
-			Account selectedAccount = accountsData.getSelectedAccount();
-			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
-
-			if (password == null) {
-				System.out.println("Password is null! Error in getPasswordFromUser method.");
-				return null;
-			}
-			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey + " password: " + password);
-			// Decrypt the private key
-			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
-			if (privateKeyBytes == null) {
-				System.out.println("Decryption returned null! Check decryption method.");
-				return null;
-			}
-
-			// Convert the private key bytes to a HEX string
-			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
-			System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
-
-			return privateKeyHex;
-		} catch (Exception e) {
-			System.err.println("Error while decrypting private key: " + e.getMessage());
-			e.printStackTrace(); // Print the full stack trace for detailed error information
-			return null;
-		}
-	}
-
-	private long getSequence(String address) {
-		// Set up the auth query client
-		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
-			.newBlockingStub(grpcService.getChannel());
-
-		// Prepare the account query request
-		QueryAccountRequest accountRequest = QueryAccountRequest.newBuilder()
-			.setAddress(address)
-			.build();
-
-		try {
-			// Query the account information
-			QueryAccountResponse response = authQueryClient.account(accountRequest);
-
-			Any accountAny = response.getAccount();
-			BaseAccount baseAccount = accountAny.unpack(BaseAccount.class);
-			// Process baseAccount as needed
-			System.out.println("SEQUENCE NUMBER: " + baseAccount.getSequence());
-			return baseAccount.getSequence();
-
-		} catch (Exception e) {
-			// Handle exceptions (e.g., account not found, gRPC errors, unpacking errors)
-			e.printStackTrace();
-			return -1; // or handle it as per your application's requirement
-		}
-
-	}
-
 	public static byte[] longToBytes(long value) {
 		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
 		buffer.putLong(value);
@@ -984,17 +908,9 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	public void sendTokens(String password) throws Exception {
-		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
+		CosmosCredentials credentials = cosmosService.createCredentials(password);
 
-		System.out.println("privateKeyHex from send: " + getPrivateKeyHex(password));
-
-		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
-
-		Account selectedAccount = accountsData.getSelectedAccount();
-		long sequence = getSequence(selectedAccount.getAddress());
-		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
-
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+		SignUtil transactionService = cosmosService.createSignUtilService();
 		long amountInUugd = cosmosService.convertBigDecimalInUugd(Double.parseDouble(sendAmount.getText()));
 
 		System.out.println("amount in uugd: " + amountInUugd);
@@ -1010,37 +926,16 @@ public class CosmosController implements Initializable {
 		System.out.println(txResponse);
 		toAddress.setText("");
 		sendAmount.setText("");
-
-		// send desktop notofication
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			Notifications
-				.create()
-				.title("Transaction hash")
-				.text(txResponse.getTxhash())
-				.position(Pos.TOP_RIGHT)
-				.showInformation();
-		} else {
-			Notifications
-				.create()
-				.title("Transaction hash")
-				.text(txResponse.getTxhash())
-				.showInformation();
-		}
+		
+		cosmosService.sendDesktopNotification("Transaction hash", txResponse.getTxhash());
 
 	}
 
 	public void delegation(boolean delegate, String validatorAddress, String password) throws Exception {
-		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
-		System.out.println("privateKeyHex from delegate tokens: " + getPrivateKeyHex(password));
+		CosmosCredentials credentials = cosmosService.createCredentials(password);
 
-		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
-
-		Account selectedAccount = accountsData.getSelectedAccount();
-		long sequence = getSequence(selectedAccount.getAddress());
-		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
-
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
-
+		SignUtil transactionService = cosmosService.createSignUtilService();
+		
 		long amount = 0;
 		if (validatorAddress == null) {
 			if (delegate) {
@@ -1067,23 +962,8 @@ public class CosmosController implements Initializable {
 		undelegateAmount.setText("");
 		stakeAmountTextField.setText("");
 		System.out.println(txResponse);
-
-		// send desktop notofication
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			Notifications
-				.create()
-				.title("Transaction hash")
-				.text(txResponse.getTxhash())
-				.position(Pos.TOP_RIGHT)
-				.showInformation();
-		} else {
-			Notifications
-				.create()
-				.title("Transaction hash")
-				.text(txResponse.getTxhash())
-				.showInformation();
-		}
-
+		
+		cosmosService.sendDesktopNotification("Transaction hash", txResponse.getTxhash());
 	}
 
 	@FXML
@@ -1535,11 +1415,11 @@ public class CosmosController implements Initializable {
 				break;
 			}
 			case UNDELEGATE_STAKING: {
-				undelegateStaking();
+				undelegateStaking(cosmosWalletRequest.getPassword());
 				break;
 			}
 			case SWITCH_DELEGATOR: {
-				switchDelegator();
+				switchDelegator(cosmosWalletRequest.getPassword());
 				break;
 			}
 			default:
@@ -1567,35 +1447,18 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	public void onClaimStakingRewards(String password) throws Exception {
-		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
 		ObservableList<DelegationsRequest.DelegationResponse> items = delegationsListView.getItems();
 
 		List<String> validatorAddresses = items.stream()
 			.map(item -> item.getDelegation().getValidatorAddress())
 			.collect(Collectors.toList());
-
-		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
-		Account selectedAccount = accountsData.getSelectedAccount();
-		long sequence = getSequence(selectedAccount.getAddress());
-		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+		CosmosCredentials credentials = cosmosService.createCredentials(password);
+		
+		SignUtil transactionService = cosmosService.createSignUtilService();
 		transactionService.sendClaimStakingRewardsTx(credentials, validatorAddresses, new BigDecimal("0.000001"), 200000);
 
-		// send desktop notofication
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			Notifications
-				.create()
-				.title("Info")
-				.text("Rewards clamied")
-				.position(Pos.TOP_RIGHT)
-				.showInformation();
-		} else {
-			Notifications
-				.create()
-				.title("Info")
-				.text("Rewards clamied")
-				.showInformation();
-		}
+		
+		cosmosService.sendDesktopNotification("Info", "Rewards claimed");
 	}
 
 //	public void setGridnodeKeysList() {
@@ -1628,69 +1491,28 @@ public class CosmosController implements Initializable {
 		});
 	}
 	
-	public void undelegateStaking() throws Exception {
-		// todo this needs a user entered password
-		byte[] privateKey = Hex.decode(getPrivateKeyHex("pickles"));
-		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+	public void undelegateStaking(String password) throws Exception {
+		CosmosCredentials credentials = cosmosService.createCredentials(password);
 		
-		Account selectedAccount = accountsData.getSelectedAccount();
-		long sequence = getSequence(selectedAccount.getAddress());
-		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
-		
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
-
+		SignUtil transactionService = cosmosService.createSignUtilService();
 		Abci.TxResponse txResponse = transactionService.sendUnstakingTx(credentials, currentValidatorAddr,
 				Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 200000);
 
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
-
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			Notifications
-				.create()
-				.title("Transaction hash")
-				.text(txResponse.getTxhash())
-				.position(Pos.TOP_RIGHT)
-				.showInformation();
-		} else {
-			Notifications
-				.create()
-				.title("Transaction hash")
-				.text(txResponse.getTxhash())
-				.showInformation();
-		}		
+		
+		cosmosService.sendDesktopNotification("Transaction hash", txResponse.getTxhash());		
 	}
 	
-	public void switchDelegator() throws Exception {
-		// todo this needs a user entered password
-		byte[] privateKey = Hex.decode(getPrivateKeyHex("pickles"));
-		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
-		
-		Account selectedAccount = accountsData.getSelectedAccount();
-		long sequence = getSequence(selectedAccount.getAddress());
-		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
-		
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
-		System.out.println("stakedAmount44 " + stakedAmount);
+	public void switchDelegator(String password) throws Exception {
+		CosmosCredentials credentials = cosmosService.createCredentials(password);
+		SignUtil transactionService = cosmosService.createSignUtilService();
 		Abci.TxResponse txResponse = transactionService.sendSwitchDelegatorTx(credentials, currentValidatorAddr, newValidatorAddr,
 				Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 400000);
 
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
-
-		if (SystemUtils.IS_OS_MAC_OSX) {
-			Notifications
-				.create()
-				.title("Transaction hash")
-				.text(txResponse.getTxhash())
-				.position(Pos.TOP_RIGHT)
-				.showInformation();
-		} else {
-			Notifications
-				.create()
-				.title("Transaction hash")
-				.text(txResponse.getTxhash())
-				.showInformation();
-		}
+		
+		cosmosService.sendDesktopNotification("Transaction hash", txResponse.getTxhash());
 	}
 }

@@ -41,11 +41,17 @@ import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javafx.geometry.Pos;
+import org.apache.commons.lang3.SystemUtils;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.SignatureDecodeException;
 import org.bouncycastle.util.encoders.Hex;
+import org.controlsfx.control.Notifications;
+import org.unigrid.janus.controller.CosmosCredentials;
+import org.unigrid.janus.controller.SignUtil;
 import org.unigrid.janus.model.AccountsData;
+import org.unigrid.janus.model.AccountsData.Account;
 import org.unigrid.janus.model.ApiConfig;
 import org.unigrid.janus.model.CryptoUtils;
 import org.unigrid.janus.model.DataDirectory;
@@ -195,11 +201,11 @@ public class CosmosService {
 
 		hedgehog.fetchCollateralRequired();
 
-		String balance = getWalletBalance(account); // your existing method
+		String balance = getWalletBalance(account);
 		balanceModel.setBalance(balance);
 		walletBalanceEvent.fire(balanceModel);
 
-		long unboundingBalance = getUnboundingBalance(account);
+		double unboundingBalance = convertLongToUgd(getUnboundingBalance(account));
 		unboundingBalanceModel.setUnboundingAmount(unboundingBalance);
 		unboundingBalanceModelEvent.fire(unboundingBalanceModel);
 
@@ -231,6 +237,34 @@ public class CosmosService {
 			e.printStackTrace();
 			return -1; // Handle this as per your application's requirement
 		}
+	}
+	
+	private long getSequence(String address) {
+		// Set up the auth query client
+		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
+			.newBlockingStub(grpcService.getChannel());
+
+		// Prepare the account query request
+		QueryOuterClass.QueryAccountRequest accountRequest = QueryOuterClass.QueryAccountRequest.newBuilder()
+			.setAddress(address)
+			.build();
+
+		try {
+			// Query the account information
+			QueryOuterClass.QueryAccountResponse response = authQueryClient.account(accountRequest);
+
+			Any accountAny = response.getAccount();
+			Auth.BaseAccount baseAccount = accountAny.unpack(Auth.BaseAccount.class);
+			// Process baseAccount as needed
+			System.out.println("SEQUENCE NUMBER: " + baseAccount.getSequence());
+			return baseAccount.getSequence();
+
+		} catch (Exception e) {
+			// Handle exceptions (e.g., account not found, gRPC errors, unpacking errors)
+			e.printStackTrace();
+			return -1; // or handle it as per your application's requirement
+		}
+
 	}
 
 	public void fetchDelegationAmount(String account) throws IOException, InterruptedException {
@@ -286,7 +320,6 @@ public class CosmosService {
 		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 		cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
 		BigDecimal rawBalance = new BigDecimal(balanceResponse.getBalance().getAmount());
-		System.out.println("rawBalance: " + rawBalance);
 		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(TOKEN_DECIMAL_VALUE), 8, RoundingMode.HALF_UP);
 
 		return scaledBalance.toString();
@@ -305,6 +338,8 @@ public class CosmosService {
 			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
 			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
 			.sum();
+		
+		
 		return totalUnbondingAmount;
 	}
 
@@ -397,5 +432,67 @@ public class CosmosService {
 			}
 		}
 	}
+	
+	public SignUtil createSignUtilService(){
+		Account selectedAccount = accountsData.getSelectedAccount();
+		long sequence = getSequence(selectedAccount.getAddress());
+		long accountNumber = getAccountNumber(selectedAccount.getAddress());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+		
+		return transactionService;
+	}
+	
+	public CosmosCredentials createCredentials(String password){
+		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
+		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+		return credentials;
+	}
+	
+	public String getPrivateKeyHex(String password) {
+		try {
+			Account selectedAccount = accountsData.getSelectedAccount();
+			String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
 
+			if (password == null) {
+				System.out.println("Password is null! Error in getPasswordFromUser method.");
+				return null;
+			}
+			System.out.println("encryptedPrivateKey: " + encryptedPrivateKey + " password: " + password);
+			// Decrypt the private key
+			byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
+			if (privateKeyBytes == null) {
+				System.out.println("Decryption returned null! Check decryption method.");
+				return null;
+			}
+
+			// Convert the private key bytes to a HEX string
+			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
+			System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
+
+			return privateKeyHex;
+		} catch (Exception e) {
+			System.err.println("Error while decrypting private key: " + e.getMessage());
+			e.printStackTrace(); // Print the full stack trace for detailed error information
+			return null;
+		}
+	}
+	
+	
+	public void sendDesktopNotification(String title, String body){
+		// send desktop notofication
+		if (SystemUtils.IS_OS_MAC_OSX) {
+			Notifications
+				.create()
+				.title(title)
+				.text(body)
+				.position(Pos.TOP_RIGHT)
+				.showInformation();
+		} else {
+			Notifications
+				.create()
+				.title(title)
+				.text(body)
+				.showInformation();
+		}
+	}
 }

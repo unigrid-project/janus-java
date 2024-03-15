@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @ApplicationScoped
 public class UnboundingBalanceModel {
-    private long unboundingAmount;
+    private double unboundingAmount;
 }
