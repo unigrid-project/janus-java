@@ -28,4 +28,6 @@ public class ApiConfig {
 	private static final String GRPC_IP = "173.212.208.212";
 	@Getter
 	private static final String DENOM = "uugd";
+	@Getter
+	static final String UUGD_VALUE = "100000000";
 }

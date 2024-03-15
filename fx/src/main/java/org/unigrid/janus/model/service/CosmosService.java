@@ -13,7 +13,6 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.model.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -204,7 +203,9 @@ public class CosmosService {
 		unboundingBalanceModel.setUnboundingAmount(unboundingBalance);
 		unboundingBalanceModelEvent.fire(unboundingBalanceModel);
 
-		long stakedBalance = getStakedBalance(account);
+		double stakedBalance = convertLongToUgd(getStakedBalance(account));
+
+
 		stakedBalanceModel.setStakedBalance(stakedBalance);
 		stakedBalanceModelEvent.fire(stakedBalanceModel);
 	}
@@ -367,9 +368,10 @@ public class CosmosService {
 		return amountInUugd;
 	}
 
-	public BigDecimal convertBigDecimalInUugd(BigDecimal amount) {
-		BigDecimal conversionFactor = new BigDecimal("100000000");
-		return amount.multiply(conversionFactor);
+	public long convertBigDecimalInUugd(double amount) {
+		double conversionFactor = 100000000.0;
+		double result = amount * conversionFactor;
+		return (long) result;
 	}
 
 	public double convertLongToUgd(long amountInUugd) {
@@ -395,6 +397,5 @@ public class CosmosService {
 			}
 		}
 	}
-	
 
 }

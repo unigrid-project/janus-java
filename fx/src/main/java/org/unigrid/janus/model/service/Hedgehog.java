@@ -48,6 +48,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
@@ -179,7 +181,6 @@ public class Hedgehog {
 		Process process;
 		HedgehogConfig hedgehogConfig = new HedgehogConfig();
 		System.out.println("Have we connected another node??");
-
 		switch (mode) {
 			case TEST_NET:
 				process = pb.command(hedgehogExecName,"cli", "node-add",

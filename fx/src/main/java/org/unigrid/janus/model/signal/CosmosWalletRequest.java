@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.janus.model.signal;
 
@@ -24,10 +24,17 @@ import lombok.Data;
 @AllArgsConstructor
 public class CosmosWalletRequest {
 	public enum Request {
-		SEND_TOKENS, DELEGATE_GRIDNODE, UNDELEGATE_GRIDNODE, DELEGATE_STAKING, CLAIM_REWARDS, GRIDNODE_KEYS;
+		SEND_TOKENS,
+		DELEGATE_GRIDNODE,
+		UNDELEGATE_GRIDNODE,
+		DELEGATE_STAKING,
+		CLAIM_REWARDS,
+		GRIDNODE_KEYS,
+		UNDELEGATE_STAKING,
+		SWITCH_DELEGATOR;
 	}
-	
+
 	private String password;
 	private Request request;
-}
 
+}
