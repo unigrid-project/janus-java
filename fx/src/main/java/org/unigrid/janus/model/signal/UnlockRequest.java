@@ -43,15 +43,15 @@ public class UnlockRequest {
 			+ "and pressing the STAKE button."),
 		FOR_MERGING("MERGE", "Enable auto-merging inputs in your wallet by entering your "
 			+ "passphrase and pressing the MERGE button."),
-		COSMOS_SEND_TOKENS("SEND", "Enter Wallet password to complete the transaction"),
-		COSMOS_DELEGATE_GRIDNODE("DELEGATE", "Enter Wallet password to complete the transaction"),
-		COSMOS_UNDELEGATE_GRIDNODE("UNDELEGATE", "Enter Wallet password to complete the transaction"),
-		COSMOS_DELEGATE_STAKING("STAKE", "Enter Wallet password to complete the transaction"),
-		COSMOS_CLAIM_REWARDS("CLAIM", "Enter Wallet password to claim rewards"),
-		COSMOS_GRIDNODE_KEYS("SHOW", "Enter Wallet password to generate gridnode keys"),
-		COSMOS_UNDELEGATE_STAKING("UNSTAKE", "Enter Wallet password to unstake"),
-		COSMOS_SWITCH_DELEGATOR("SWITCH", "Enter Wallet password to switch delegator");
-		
+		COSMOS_SEND_TOKENS("SEND", "Enter account password to complete the transaction"),
+		COSMOS_DELEGATE_GRIDNODE("DELEGATE", "Enter account password to complete the transaction"),
+		COSMOS_UNDELEGATE_GRIDNODE("UNDELEGATE", "Enter account password to complete the transaction"),
+		COSMOS_DELEGATE_STAKING("STAKE", "Enter account password to complete the transaction"),
+		COSMOS_CLAIM_REWARDS("CLAIM", "Enter account password to claim rewards"),
+		COSMOS_GRIDNODE_KEYS("SHOW", "Enter account password to generate gridnode keys"),
+		COSMOS_GRIDNODE_START("START", "Enter account password to start your gridnode"),
+		COSMOS_UNDELEGATE_STAKING("UNSTAKE", "Enter account password to unstake"),
+		COSMOS_SWITCH_DELEGATOR("SWITCH", "Enter account password to switch delegator");
 
 		@Getter private final String action;
 		@Getter private final String description;

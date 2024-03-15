@@ -8,6 +8,6 @@ public class GridnodeEvents {
 	private EventType eventType;
 	// add any additional types here as needed
 	public enum EventType{
-		GRIDNODE_START
+		GRIDNODE_STARTED
 	}
 }

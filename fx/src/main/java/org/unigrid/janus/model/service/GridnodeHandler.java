@@ -118,13 +118,9 @@ public class GridnodeHandler {
 		return Collections.emptyList(); // Return an empty list if the file does not exist
 	}
 
-	public void startGridnode(String gridnodeId) throws Exception {
+	public void startGridnode(String gridnodeId, String password) throws Exception {
 		AccountsData.Account selectedAccount = accountData.getSelectedAccount();
 		String encryptedPrivateKey = selectedAccount.getEncryptedPrivateKey();
-		System.out.println("encryptedPrivateKey: " + encryptedPrivateKey);
-
-		// Prompt the user to enter the password
-		String password = "pickles"; // In a real application, this should be securely input by the user
 
 		// Decrypt the private key
 		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
@@ -157,7 +153,7 @@ public class GridnodeHandler {
 				System.out.println("Gridnode started successfully.");
 				// fire an event to resfresh the list
 				gridnodeEvents.fire(GridnodeEvents.builder()
-					.eventType(GridnodeEvents.EventType.GRIDNODE_START)
+					.eventType(GridnodeEvents.EventType.GRIDNODE_STARTED)
 					.build());
 			} else {
 				System.err.println("Failed to start gridnode. Status: " + response.getStatus());

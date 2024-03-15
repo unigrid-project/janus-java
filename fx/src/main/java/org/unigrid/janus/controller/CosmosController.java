@@ -193,7 +193,7 @@ public class CosmosController implements Initializable {
 	private DelegationStatusEvent delegationEvent;
 	@FXML
 	private Pane pnlOverlay;
-
+	@Inject
 	private GridnodeModel gridnodeModel;
 	@Inject
 	private CosmosService cosmosService;
@@ -507,9 +507,8 @@ public class CosmosController implements Initializable {
 						startButton.setOnAction(event -> {
 							try {
 								// Get the gridnode ID from the gridnode object
-								String gridnodeId = gridnode.getKey();
-								// Call the startGridnode method with the gridnode ID
-								gridnodeHandler.startGridnode(gridnodeId);
+								gridnodeModel.setCurrentGridnodeId(gridnode.getKey());
+								startGridnodePasswordRequest();
 							} catch (Exception e) {
 								// Handle exceptions here
 								e.printStackTrace();
@@ -1370,10 +1369,10 @@ public class CosmosController implements Initializable {
 
 	public void onGridnodeEvent(@Observes GridnodeEvents event) {
 		// Check the event type
-		if (event.getEventType() == GridnodeEvents.EventType.GRIDNODE_START) {
+		if (event.getEventType() == GridnodeEvents.EventType.GRIDNODE_STARTED) {
 			// refresh the list
 			updateGridnodeList();
-			
+
 		}
 	}
 
@@ -1450,6 +1449,8 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	private void onStartAllGridnodes(ActionEvent event) {
+		// TODO build functionality here 
+		// this should also be triggered by a password event
 		gridnodeModel.startGridnode();
 	}
 
@@ -1474,6 +1475,11 @@ public class CosmosController implements Initializable {
 			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
 			overlayRequest.fire(OverlayRequest.OPEN);
 		}
+	}
+
+	private void startGridnodePasswordRequest() {
+		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_GRIDNODE_START).build());
+		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
 	@FXML
@@ -1543,6 +1549,12 @@ public class CosmosController implements Initializable {
 			}
 			case GRIDNODE_KEYS: {
 				cosmosService.generateKeys(delegationEvent.getGridnodeCount(),
+					cosmosWalletRequest.getPassword());
+				break;
+			}
+			case GRIDNODE_START: {
+				// Call the startGridnode method with the gridnode ID
+				gridnodeHandler.startGridnode(gridnodeModel.getCurrentGridnodeId(),
 					cosmosWalletRequest.getPassword());
 				break;
 			}
