@@ -345,7 +345,7 @@ public class CosmosController implements Initializable {
 	private OsxUtils osxUtils = new OsxUtils();
 	@Inject
 	private HostServices hostServices;
-	
+
 	private String currentValidatorAddr;
 	private String stakedAmount;
 	private String newValidatorAddr;
@@ -434,7 +434,7 @@ public class CosmosController implements Initializable {
 					if (empty || item == null) {
 						setText(null);
 					} else {
-						
+
 						BigDecimal amount = new BigDecimal(
 							item.getBalance().getAmount());
 						BigDecimal displayAmount = amount.divide(scaleFactor);
@@ -453,17 +453,17 @@ public class CosmosController implements Initializable {
 							stakedAmount = item.getBalance().getAmount();
 							onUnstakePasswordRequest();
 						});
-						
+
 						ComboBox<ValidatorInfo> switchDelegteComboBox = new ComboBox<>();
 						switchDelegteComboBox.getItems().addAll(validatorListComboBox.getItems());
-						
+
 						for (Object it : validatorListComboBox.getItems()) {
 							ValidatorInfo validatorInfo = (ValidatorInfo) it;
 							if (validatorInfo.getOperatorAddress().equals(item.getDelegation().getValidatorAddress())) {
 								switchDelegteComboBox.setValue(validatorInfo);
 							}
 						}
-						
+
 						switchDelegteComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 							if (newValue != null) {
 								currentValidatorAddr = item.getDelegation().getValidatorAddress();
@@ -635,7 +635,7 @@ public class CosmosController implements Initializable {
 	}
 
 	private String getPasswordFromUser() {
-		
+
 		return "pickles";
 	}
 
@@ -1268,6 +1268,7 @@ public class CosmosController implements Initializable {
 					accountsData.setSelectedAccount(defaultAccount.get());
 					accountSelectedEvent.fire(new AccountSelectedEvent());
 					setGridnodeKeysList();
+					updateGridnodeList();
 				}
 			}
 		}
@@ -1290,8 +1291,7 @@ public class CosmosController implements Initializable {
 				accountSelectedEvent.fire(new AccountSelectedEvent());
 				setGridnodeKeysList();
 				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
-				System.out.println("getEncryptedPrivateKey: "
-					+ accountsData.getSelectedAccount().getEncryptedPrivateKey());
+
 				// Create a background task for the network call
 				Task<Void> fetchDataTask = new Task<Void>() {
 					@Override
@@ -1309,7 +1309,7 @@ public class CosmosController implements Initializable {
 					}
 
 				};
-
+				updateGridnodeList();
 				// Handle exceptions
 				fetchDataTask.setOnFailed(e -> {
 					Throwable exception = fetchDataTask.getException();
@@ -1445,6 +1445,10 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	private void onRefreshGridnodes(ActionEvent event) throws IOException, InterruptedException {
+		updateGridnodeList();
+	}
+
+	private void updateGridnodeList() {
 		List<GridnodeData> gridnodes = gridnodeHandler.fetchGridnodes();
 		String accountName = accountsData.getSelectedAccount().getName();
 		List<String> keys = gridnodeHandler.loadKeysFromFile(accountName);
@@ -1630,15 +1634,15 @@ public class CosmosController implements Initializable {
 		// todo this needs a user entered password
 		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
-		
+
 		Account selectedAccount = accountsData.getSelectedAccount();
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
-		
+
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 
 		Abci.TxResponse txResponse = transactionService.sendUnstakingTx(credentials, currentValidatorAddr,
-				Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 200000);
+			Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 200000);
 
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
@@ -1656,22 +1660,22 @@ public class CosmosController implements Initializable {
 				.title("Transaction hash")
 				.text(txResponse.getTxhash())
 				.showInformation();
-		}		
+		}
 	}
 	
 	public void switchDelegator(String password) throws Exception {
 		// todo this needs a user entered password
 		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
-		
+
 		Account selectedAccount = accountsData.getSelectedAccount();
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = cosmosService.getAccountNumber(selectedAccount.getAddress());
-		
+
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
 		System.out.println("stakedAmount44 " + stakedAmount);
 		Abci.TxResponse txResponse = transactionService.sendSwitchDelegatorTx(credentials, currentValidatorAddr, newValidatorAddr,
-				Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 400000);
+			Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 400000);
 
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
