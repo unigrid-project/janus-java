@@ -455,6 +455,7 @@ public class CosmosController implements Initializable {
 						});
 						
 						ComboBox<ValidatorInfo> switchDelegteComboBox = new ComboBox<>();
+						switchDelegteComboBox.getItems().clear();
 						switchDelegteComboBox.getItems().addAll(validatorListComboBox.getItems());
 						
 						for (Object it : validatorListComboBox.getItems()) {
