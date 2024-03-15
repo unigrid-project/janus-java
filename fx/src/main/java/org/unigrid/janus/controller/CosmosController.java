@@ -146,6 +146,7 @@ import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 import org.unigrid.janus.view.backing.OsxUtils;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableCell;
+import org.unigrid.janus.model.signal.GridnodeEvents;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -1367,6 +1368,15 @@ public class CosmosController implements Initializable {
 		});
 	}
 
+	public void onGridnodeEvent(@Observes GridnodeEvents event) {
+		// Check the event type
+		if (event.getEventType() == GridnodeEvents.EventType.GRIDNODE_START) {
+			// refresh the list
+			updateGridnodeList();
+			
+		}
+	}
+
 	public void onCollateralUpdateEvent(@Observes CollateralUpdateEvent event) {
 		if (event.isSuccess()) {
 			int amount = event.getAmount();
@@ -1629,7 +1639,7 @@ public class CosmosController implements Initializable {
 			keysListView.setItems(publicKeysModel.getPublicKeys()); // Update the UI
 		});
 	}
-	
+
 	public void undelegateStaking(String password) throws Exception {
 		// todo this needs a user entered password
 		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
@@ -1662,7 +1672,7 @@ public class CosmosController implements Initializable {
 				.showInformation();
 		}
 	}
-	
+
 	public void switchDelegator(String password) throws Exception {
 		// todo this needs a user entered password
 		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));

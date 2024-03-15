@@ -5,6 +5,7 @@ package org.unigrid.janus.model.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -31,6 +32,7 @@ import org.unigrid.janus.model.gridnode.GridnodeData;
 import org.unigrid.janus.model.gridnode.GridnodeListViewItem;
 import org.unigrid.janus.model.setup.AppConfig;
 import org.unigrid.janus.model.ssl.InsecureTrustManager;
+import org.unigrid.janus.model.signal.GridnodeEvents;
 
 @ApplicationScoped
 public class GridnodeHandler {
@@ -41,6 +43,8 @@ public class GridnodeHandler {
 	private AccountsData accountData;
 	@Inject
 	private CryptoUtils cryptoUtils;
+	@Inject
+	private Event<GridnodeEvents> gridnodeEvents;
 
 	public List<GridnodeData> fetchGridnodes() {
 		Client client = null;
@@ -151,6 +155,10 @@ public class GridnodeHandler {
 			// Handle the response
 			if (response.getStatus() == Response.Status.ACCEPTED.getStatusCode()) {
 				System.out.println("Gridnode started successfully.");
+				// fire an event to resfresh the list
+				gridnodeEvents.fire(GridnodeEvents.builder()
+					.eventType(GridnodeEvents.EventType.GRIDNODE_START)
+					.build());
 			} else {
 				System.err.println("Failed to start gridnode. Status: " + response.getStatus());
 			}
