@@ -13,6 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus.model.service;
 
 import jakarta.annotation.PostConstruct;
@@ -164,7 +165,6 @@ public class Hedgehog {
 		int statusCode = future.get();
 		if (statusCode == 200) {
 			debug.print("Connected to Hedgehog", Hedgehog.class.getSimpleName());
-			addNode(mode, future);
 			splashMessageEvent.fire(
 				SplashMessage.builder().message("Connected to Hedgehog").build());
 		} else {
@@ -174,34 +174,30 @@ public class Hedgehog {
 	}
 
 	@SneakyThrows
-	private void addNode(HedgehogConfig.startMode mode, CompletableFuture<Integer> future) {
-		Thread t = new Thread(new Runnable() {
+	public void addNode(HedgehogConfig.startMode mode) {
+		ProcessBuilder pb = new ProcessBuilder();
+		Process process;
+		HedgehogConfig hedgehogConfig = new HedgehogConfig();
+		System.out.println("Have we connected another node??");
 
-			@Override
-			public void run() {
-				while (!future.isDone()) {
-					Thread.sleep(500);
-				}
-				ProcessBuilder pb = new ProcessBuilder();
-				Process process;
-				HedgehogConfig hedgehogConfig = new HedgehogConfig();
-
-				switch (mode) {
-					case TEST_NET:
-						process = pb.command(hedgehogExecName, hedgehogConfig.addNodeTestnet())
-							.inheritIO().start();
-						break;
-					case DEV_NET:
-						process = pb.command(hedgehogExecName, hedgehogConfig.addNodeDevnet())
-							.inheritIO().redirectErrorStream(true).start();
-						break;
-				}
+		switch (mode) {
+			case TEST_NET:
+				process = pb.command(hedgehogExecName,"cli", "node-add",
+					hedgehogConfig.getTestnetRestPort(),
+					hedgehogConfig.getTestnetP2pPort(),
+					hedgehogConfig.getTestnetConnectionAddress())
+					.inheritIO().start();
+				break;
+			case DEV_NET:
+				process = pb.command(hedgehogExecName,"cli", "node-add",
+					hedgehogConfig.getDevnetRestPort(),
+					hedgehogConfig.getDevnetP2pPort(), hedgehogConfig.getDevnetConnectionAddress())
+					.inheritIO().redirectErrorStream(true).start();
 				System.out.println("Have we connected another node??");
-			}
-		});
+				break;
+		}
+		
 	}
-		
-		
 
 	// TODO: Re-enable?
 	public void getHedgehogVersion() {
@@ -236,21 +232,16 @@ public class Hedgehog {
 				return;
 			}
 			System.out.println("Request!");
-			HedgehogVersion
-
-hedgehogVersion = response.readEntity(HedgehogVersion.class  
-
-);
+			HedgehogVersion hedgehogVersion = response.readEntity(HedgehogVersion.class
+			);
 			externalVersion.setHedgehogVersion(hedgehogVersion.getVersion());
 			response.close();
 		} catch (ProcessingException e) {
 			System.err.println("version Error: " + e.getMessage());
 			debug
-
-.print("version Error: " + e.getMessage(),
-				Hedgehog.class  
-
-.getSimpleName());
+				.print("version Error: " + e.getMessage(),
+					Hedgehog.class
+						.getSimpleName());
 		}
 	}
 
@@ -264,10 +255,9 @@ hedgehogVersion = response.readEntity(HedgehogVersion.class
 			Response response = client.target(URI.create(collateralUri))
 				.request(jakarta.ws.rs.core.MediaType.APPLICATION_JSON).get();
 
-if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-				double amount = response.readEntity(Double.class  
-
-);
+			if (response.getStatus() == Response.Status.OK.getStatusCode()) {
+				double amount = response.readEntity(Double.class
+				);
 				collateralRequired.setAmount((int) amount);
 				collateralUpdateEvent.fire(new CollateralUpdateEvent(true, (int) amount));
 				return true;
@@ -321,11 +311,9 @@ if (response.getStatus() == Response.Status.OK.getStatusCode()) {
 				} catch (ProcessingException e) {
 					System.err.println("response Error: " + e.getMessage());
 					debug
-
-.print("response Error: " + e.getMessage(),
-						Hedgehog.class  
-
-.getSimpleName());
+						.print("response Error: " + e.getMessage(),
+							Hedgehog.class
+								.getSimpleName());
 					TimeUnit.SECONDS.sleep(1); // Wait a second before retrying
 					continue;
 				}
@@ -344,18 +332,15 @@ if (response.getStatus() == Response.Status.OK.getStatusCode()) {
 		} finally {
 			executor.shutdown(); // Shutdown the executor
 
-
-}
+		}
 		debug.print("Status Code from hedgehog: " + statusCode.get(),
-			Hedgehog.class  
+			Hedgehog.class
+				.getSimpleName());
 
-.getSimpleName());
-
-if (statusCode.get() != 200) {
+		if (statusCode.get() != 200) {
 			debug.print("Failed to connect to Hedgehog (status code " + statusCode.get()
-				+ ")", Hedgehog.class  
-
-.getSimpleName());
+				+ ")", Hedgehog.class
+					.getSimpleName());
 			hedgehogError.fire(HedgehogError.CONNECTION_FAILED);
 			Platform.runLater(() -> splashMessageEvent.fire(SplashMessage.builder()
 				.message("Failed to connect to Hedgehog").build()));
@@ -371,7 +356,7 @@ if (statusCode.get() != 200) {
 	}
 
 	@SneakyThrows
-public void stopHedgehog() {
+	public void stopHedgehog() {
 		try {
 			ProcessBuilder pb = new ProcessBuilder();
 			pb.command(hedgehogExecName, "cli", "stop");
@@ -380,11 +365,9 @@ public void stopHedgehog() {
 			// Log or print a message indicating that an error occurred
 			System.err.println("Error stopping Hedgehog: " + e.getMessage());
 			debug
-
-.print("Error stopping Hedgehog: " + e.getMessage() + ")",
-				Hedgehog.class  
-
-.getSimpleName());
+				.print("Error stopping Hedgehog: " + e.getMessage() + ")",
+					Hedgehog.class
+						.getSimpleName());
 		}
 	}
 

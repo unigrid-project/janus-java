@@ -19,7 +19,7 @@ package org.unigrid.janus.model;
 import lombok.Getter;
 
 public class HedgehogConfig {
-	
+
 	public enum startMode {
 		MAIN_NET, TEST_NET, DEV_NET;
 	}
@@ -56,19 +56,10 @@ public class HedgehogConfig {
 		+ "11e75547b4ae735d5fc416cae42591fb8fba9339bd66c74ccaabf1583f6fde37fd6dc4cc43fbf71d0ad3e503c92ed0dad46"
 		+ "224d089d588404348c5251f1ed921c511714e893c69bd3df26f9e00453978a8bba7d7b7e343af178d54d6c2652b20d604d1"
 		+ "e5a1f4c5bb3a232bdfc025ca6588e78321d5ac679c67ebb67ec9532a44b253b8";
-	
-	public String addNodeTestnet() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("cli").append("node-add").append(testnetRestPort).append(testnetP2pPort).
-			append("149.102.147.45/:39999");
-		return sb.toString();
-	}
-	
-	public String addNodeDevnet() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("cli").append("node-add").append(devnetRestPort).append(devnetP2pPort).
-			append("173.212.208.212/:40000");
-		return sb.toString();
-	}
-	
+
+	@Getter
+	private String testnetConnectionAddress = "149.102.147.45:39999";
+
+	@Getter
+	private String devnetConnectionAddress = "173.212.208.212:40000";
 }
