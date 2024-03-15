@@ -475,6 +475,8 @@ public class CosmosController implements Initializable {
 						});
 
 						HBox hBox = new HBox(label, switchDelegteComboBox, actionButton);
+						hBox.setAlignment(Pos.CENTER_LEFT);
+						hBox.setSpacing(10);
 
 						setText(null);
 						setGraphic(hBox);
