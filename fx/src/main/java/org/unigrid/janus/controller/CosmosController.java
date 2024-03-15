@@ -1528,15 +1528,16 @@ public class CosmosController implements Initializable {
 				break;
 			}
 			case GRIDNODE_KEYS: {
-				cosmosService.generateKeys(delegationEvent.getGridnodeCount());
+				cosmosService.generateKeys(delegationEvent.getGridnodeCount(),
+					cosmosWalletRequest.getPassword());
 				break;
 			}
 			case UNDELEGATE_STAKING: {
-				undelegateStaking();
+				undelegateStaking(cosmosWalletRequest.getPassword());
 				break;
 			}
 			case SWITCH_DELEGATOR: {
-				switchDelegator();
+				switchDelegator(cosmosWalletRequest.getPassword());
 				break;
 			}
 			default:
@@ -1625,9 +1626,9 @@ public class CosmosController implements Initializable {
 		});
 	}
 	
-	public void undelegateStaking() throws Exception {
+	public void undelegateStaking(String password) throws Exception {
 		// todo this needs a user entered password
-		byte[] privateKey = Hex.decode(getPrivateKeyHex("pickles"));
+		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
 		
 		Account selectedAccount = accountsData.getSelectedAccount();
@@ -1658,9 +1659,9 @@ public class CosmosController implements Initializable {
 		}		
 	}
 	
-	public void switchDelegator() throws Exception {
+	public void switchDelegator(String password) throws Exception {
 		// todo this needs a user entered password
-		byte[] privateKey = Hex.decode(getPrivateKeyHex("pickles"));
+		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
 		
 		Account selectedAccount = accountsData.getSelectedAccount();
