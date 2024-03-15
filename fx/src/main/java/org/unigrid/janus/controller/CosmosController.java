@@ -1372,6 +1372,7 @@ public class CosmosController implements Initializable {
 		if (event.getEventType() == GridnodeEvents.EventType.GRIDNODE_STARTED) {
 			// refresh the list
 			updateGridnodeList();
+			//cosmosService.sendDesktopNotification("Gridnode Started!", gridnodeModel.getCurrentGridnodeId());
 
 		}
 	}
