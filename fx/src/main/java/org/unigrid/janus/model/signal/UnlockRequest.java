@@ -48,7 +48,7 @@ public class UnlockRequest {
 		COSMOS_UNDELEGATE_GRIDNODE("UNDELEGATE", "Enter account password to complete the transaction"),
 		COSMOS_DELEGATE_STAKING("STAKE", "Enter account password to complete the transaction"),
 		COSMOS_CLAIM_REWARDS("CLAIM", "Enter account password to claim rewards"),
-		COSMOS_GRIDNODE_KEYS("SHOW", "Enter account password to generate gridnode keys"),
+		COSMOS_GRIDNODE_KEYS("GENERATE", "Enter account password to generate gridnode keys"),
 		COSMOS_GRIDNODE_START("START", "Enter account password to start your gridnode"),
 		COSMOS_UNDELEGATE_STAKING("UNSTAKE", "Enter account password to unstake"),
 		COSMOS_SWITCH_DELEGATOR("SWITCH", "Enter account password to switch delegator");

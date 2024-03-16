@@ -85,6 +85,8 @@ public class CosmosService {
 	@Inject
 	private GridnodeDelegationService gridnodeDelegationService;
 	@Inject
+	private GridnodeKeyManager gridnodeKeyManager;
+	@Inject
 	private Event<DelegationListEvent> delegationListEvent;
 	@Inject
 	private Event<RewardsEvent> rewardsEvent;
@@ -211,7 +213,6 @@ public class CosmosService {
 
 		double stakedBalance = convertLongToUgd(getStakedBalance(account));
 
-
 		stakedBalanceModel.setStakedBalance(stakedBalance);
 		stakedBalanceModelEvent.fire(stakedBalanceModel);
 	}
@@ -238,7 +239,7 @@ public class CosmosService {
 			return -1; // Handle this as per your application's requirement
 		}
 	}
-	
+
 	private long getSequence(String address) {
 		// Set up the auth query client
 		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
@@ -270,6 +271,7 @@ public class CosmosService {
 	public void fetchDelegationAmount(String account) throws IOException, InterruptedException {
 		double delegationAmount = getDelegatedBalance(account);
 		int gridnodesTotal = gridnodeNumberForUser(delegationAmount);
+		System.out.println("Fetched delegation amount: " + delegationAmount + " for account " + account);
 		// Fire an event with both the delegation amount and the gridnode count
 		DelegationStatusEvent event = DelegationStatusEvent.builder()
 			.delegatedAmount(delegationAmount)
@@ -278,8 +280,6 @@ public class CosmosService {
 		delegationAmountEvent.fire(event);
 	}
 
-	// TODO
-	// this should add this data to a model
 	public int gridnodeNumberForUser(double delegated) {
 		int amountPerGridnode;
 
@@ -338,8 +338,7 @@ public class CosmosService {
 			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
 			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
 			.sum();
-		
-		
+
 		return totalUnbondingAmount;
 	}
 
@@ -393,7 +392,7 @@ public class CosmosService {
 		List<String> publicKeysHex = keys.stream()
 			.map(key -> Hex.toHexString(key.getPubKey()))
 			.collect(Collectors.toList());
-		savePublicKeysToFile(accountsData.getSelectedAccount().getName(), publicKeysHex);
+		gridnodeKeyManager.savePublicKeysToFile(accountsData.getSelectedAccount().getName(), publicKeysHex);
 		publicKeysEvent.fire(new PublicKeysEvent(publicKeysHex));
 	}
 
@@ -422,31 +421,21 @@ public class CosmosService {
 		publicKeysModel.setPublicKeys(event.getPublicKeys());
 	}
 
-	private void savePublicKeysToFile(String accountName, List<String> publicKeys) throws IOException {
-		File keysFile = DataDirectory.getGridnodeKeysFile(accountName);
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(keysFile, false))) {
-			for (String key : publicKeys) {
-				writer.write(key);
-				writer.newLine();
-			}
-		}
-	}
-	
-	public SignUtil createSignUtilService(){
+	public SignUtil createSignUtilService() {
 		Account selectedAccount = accountsData.getSelectedAccount();
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = getAccountNumber(selectedAccount.getAddress());
 		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
-		
+
 		return transactionService;
 	}
-	
-	public CosmosCredentials createCredentials(String password){
+
+	public CosmosCredentials createCredentials(String password) {
 		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
 		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
 		return credentials;
 	}
-	
+
 	public String getPrivateKeyHex(String password) {
 		try {
 			Account selectedAccount = accountsData.getSelectedAccount();
@@ -475,9 +464,8 @@ public class CosmosService {
 			return null;
 		}
 	}
-	
-	
-	public void sendDesktopNotification(String title, String body){
+
+	public void sendDesktopNotification(String title, String body) {
 		// send desktop notofication
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			Notifications

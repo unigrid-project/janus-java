@@ -12,7 +12,6 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.security.SecureRandom;
@@ -26,7 +25,6 @@ import org.bitcoinj.core.Sha256Hash;
 import org.bouncycastle.util.encoders.Hex;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.CryptoUtils;
-import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.gridnode.ActivateGridnode;
 import org.unigrid.janus.model.gridnode.GridnodeData;
 import org.unigrid.janus.model.gridnode.GridnodeListViewItem;
@@ -84,17 +82,6 @@ public class GridnodeHandler {
 		});
 	}
 
-//	public void compareGridnodesWithLocalKeys(List<GridnodeData> gridnodes, List<String> localKeys) {
-//		for (GridnodeData gridnode : gridnodes) {
-//			if (localKeys.contains(gridnode.getId())) {
-//				System.out.println("Match found for gridnode ID: " + gridnode.getId() + " with status: " + gridnode.getStatus() + " with host:" + gridnode.getHostName());
-//				// Additional logic for matched gridnode
-//			} else {
-//				System.out.println("No local key match for gridnode ID: " + gridnode.getId());
-//				// Logic for gridnode without a local key match
-//			}
-//		}
-//	}
 	public List<GridnodeListViewItem> compareGridnodesWithLocalKeys(List<GridnodeData> gridnodes, List<String> localKeys) {
 		List<GridnodeListViewItem> listViewItems = new ArrayList<>();
 		for (GridnodeData gridnode : gridnodes) {
@@ -103,19 +90,6 @@ public class GridnodeHandler {
 			}
 		}
 		return listViewItems;
-	}
-
-	public List<String> loadKeysFromFile(String accountName) {
-		File gridnodeKeysFile = DataDirectory.getGridnodeKeysFile(accountName);
-		if (gridnodeKeysFile.exists()) {
-			try {
-				return DataDirectory.readPublicKeysFromFile(gridnodeKeysFile);
-			} catch (IOException e) {
-				System.out.println("Error reading keys from file: " + e.getMessage());
-				return Collections.emptyList(); // Return an empty list in case of an error
-			}
-		}
-		return Collections.emptyList(); // Return an empty list if the file does not exist
 	}
 
 	public void startGridnode(String gridnodeId, String password) throws Exception {

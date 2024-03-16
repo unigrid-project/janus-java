@@ -140,7 +140,10 @@ import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 import org.unigrid.janus.view.backing.OsxUtils;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableCell;
+import org.unigrid.janus.model.service.GridnodeKeyManager;
 import org.unigrid.janus.model.signal.GridnodeEvents;
+import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
+import org.unigrid.janus.model.signal.PublicKeysEvent;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -183,6 +186,8 @@ public class CosmosController implements Initializable {
 	private Event<CosmosWalletRequest> cosmosWalletEvent;
 	@Inject
 	private PublicKeysModel publicKeysModel;
+	@Inject
+	private GridnodeKeyManager gridnodeKeyManager;
 
 	private DelegationStatusEvent delegationEvent;
 	@FXML
@@ -313,6 +318,8 @@ public class CosmosController implements Initializable {
 	private TableColumn<GridnodeListViewItem, String> colStatus;
 	@FXML
 	private TableColumn<GridnodeListViewItem, String> colStartGridnode;
+	@FXML
+	private Label lblUpdateKeys;
 
 	private ObservableList<String> keysList = FXCollections.observableArrayList();
 
@@ -486,7 +493,7 @@ public class CosmosController implements Initializable {
 				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
 			}
-			setGridnodeKeysList();
+
 			// Gridnode List View
 			colIp.setCellValueFactory(new PropertyValueFactory<>("address"));
 			colGridnodeId.setCellValueFactory(new PropertyValueFactory<>("key"));
@@ -517,18 +524,120 @@ public class CosmosController implements Initializable {
 			});
 
 			// Load and set items for the TableView
-			List<GridnodeData> gridnodes = gridnodeHandler.fetchGridnodes();
-			String accountName = accountsData.getSelectedAccount().getName();
-			List<String> keys = gridnodeHandler.loadKeysFromFile(accountName);
-			List<GridnodeListViewItem> items = gridnodeHandler.compareGridnodesWithLocalKeys(gridnodes, keys);
-
-			// Assuming tableView is your TableView and is properly initialized
-			tblGridnodeListStart.setItems(FXCollections.observableArrayList(items));
-			tblGridnodeListStart.refresh();
-			System.out.println("gridnodes: " + gridnodes);
-			pollingService.startPoll();
+			loadAccounts(this::postAccountLoadInitialization);
 
 		});
+	}
+
+	private void postAccountLoadInitialization() {
+
+		// Code that depends on accountsData being initialized
+		updateGridnodeList();
+		pollingService.startPoll();
+
+	}
+
+	/* MAIN VIEW */
+	public void loadAccounts(Runnable callback) {
+
+		try {
+			accountsService.loadAccountsFromJson();
+		} catch (Exception ex) {
+			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
+				ex);
+		}
+
+		// Clear the existing items from the ComboBox
+		accountsDropdown.getItems().clear();
+
+		// Populate the ComboBox with account names
+		for (AccountsData.Account account : accountsData.getAccounts()) {
+			if (account.getName() != null) {
+				accountsDropdown.getItems().add(account.getName());
+			} else {
+				System.out.println("Account name is null");
+			}
+
+		}
+
+		// Add the special "+Add Account" option
+		accountsDropdown.getItems().add("+Add New Account");
+
+		// Set the first account as the default selection
+		if (!accountsDropdown.getItems().isEmpty()) {
+			accountsDropdown.getSelectionModel().selectFirst();
+			String defaultAccountName = (String) accountsDropdown.getValue();
+			if (defaultAccountName != null) {
+				Optional<Account> defaultAccount = accountsService
+					.findAccountByName(defaultAccountName);
+				if (defaultAccount.isPresent()) {
+					accountsData.setSelectedAccount(defaultAccount.get());
+					System.out.println("AccountsData is being initialized/set");
+
+					accountSelectedEvent.fire(new AccountSelectedEvent());
+
+					updateGridnodeList();
+				}
+			}
+		}
+
+		// Set up an action listener for the ComboBox
+		accountsDropdown.setOnAction(event -> {
+			String selectedAccountName = (String) accountsDropdown.getValue();
+			Optional<Account> selectedAccount = accountsService
+				.findAccountByName(selectedAccountName);
+			// Check if the "+Add Account" option was selected
+			if ("+Add New Account".equals(selectedAccountName)) {
+				createNewAccount();
+				return; // Exit the method early
+			}
+
+			if (selectedAccount.isPresent()) {
+				accountsData.setSelectedAccount(selectedAccount.get());
+				System.out.println("AccountsData is being initialized/set");
+
+				System.out
+					.println("Selected Account:" + accountsData.getSelectedAccount());
+				accountSelectedEvent.fire(new AccountSelectedEvent());
+
+				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
+
+				// Create a background task for the network call
+				Task<Void> fetchDataTask = new Task<Void>() {
+					@Override
+					protected Void call() throws Exception {
+						Platform.runLater(() -> {
+							getValidators();
+						});
+						cosmosService.loadAccountData(accountsData.getSelectedAccount().getAddress());
+
+						// Load transactions and other account data (assuming these methods are adapted
+						// for gRPC)
+						cosmosTxList.loadTransactions(10);
+						updateGridnodeList();
+						return null;
+					}
+
+				};
+
+				// Handle exceptions
+				fetchDataTask.setOnFailed(e -> {
+					Throwable exception = fetchDataTask.getException();
+					Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE,
+						null, exception);
+					// Optionally show an error message to the user
+				});
+
+				// Start the task in a new thread
+				new Thread(fetchDataTask).start();
+			}
+		});
+		initCopyButton();
+		// Once accounts are loaded, call the callback
+		if (callback != null) {
+			callback.run();
+		}
+		gridnodeKeyManager.initializeAndLoadKeys();
 	}
 
 	@FXML
@@ -618,11 +727,6 @@ public class CosmosController implements Initializable {
 		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
-	private String getPasswordFromUser() {
-
-		return "pickles";
-	}
-
 	@FXML
 	private void decryptPrivateKey(ActionEvent event) {
 		try {
@@ -688,7 +792,7 @@ public class CosmosController implements Initializable {
 		}
 		if (paneToShow == cosmosMainPane) {
 			// load the accounts json
-			loadAccounts();
+			loadAccounts(this::postAccountLoadInitialization);
 		}
 	}
 
@@ -1115,99 +1219,6 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	/* MAIN VIEW */
-	public void loadAccounts() {
-		try {
-			accountsService.loadAccountsFromJson();
-		} catch (Exception ex) {
-			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
-		}
-
-		// Clear the existing items from the ComboBox
-		accountsDropdown.getItems().clear();
-
-		// Populate the ComboBox with account names
-		for (AccountsData.Account account : accountsData.getAccounts()) {
-			if (account.getName() != null) {
-				accountsDropdown.getItems().add(account.getName());
-			} else {
-				System.out.println("Account name is null");
-			}
-
-		}
-
-		// Add the special "+Add Account" option
-		accountsDropdown.getItems().add("+Add New Account");
-
-		// Set the first account as the default selection
-		if (!accountsDropdown.getItems().isEmpty()) {
-			accountsDropdown.getSelectionModel().selectFirst();
-			String defaultAccountName = (String) accountsDropdown.getValue();
-			if (defaultAccountName != null) {
-				Optional<Account> defaultAccount = accountsService
-					.findAccountByName(defaultAccountName);
-				if (defaultAccount.isPresent()) {
-					accountsData.setSelectedAccount(defaultAccount.get());
-					accountSelectedEvent.fire(new AccountSelectedEvent());
-					setGridnodeKeysList();
-					updateGridnodeList();
-				}
-			}
-		}
-
-		// Set up an action listener for the ComboBox
-		accountsDropdown.setOnAction(event -> {
-			String selectedAccountName = (String) accountsDropdown.getValue();
-			Optional<Account> selectedAccount = accountsService
-				.findAccountByName(selectedAccountName);
-			// Check if the "+Add Account" option was selected
-			if ("+Add New Account".equals(selectedAccountName)) {
-				createNewAccount();
-				return; // Exit the method early
-			}
-
-			if (selectedAccount.isPresent()) {
-				accountsData.setSelectedAccount(selectedAccount.get());
-				System.out
-					.println("Selected Account:" + accountsData.getSelectedAccount());
-				accountSelectedEvent.fire(new AccountSelectedEvent());
-				setGridnodeKeysList();
-				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
-
-				// Create a background task for the network call
-				Task<Void> fetchDataTask = new Task<Void>() {
-					@Override
-					protected Void call() throws Exception {
-						Platform.runLater(() -> {
-							getValidators();
-						});
-						cosmosService.loadAccountData(accountsData.getSelectedAccount().getAddress());
-
-						// Load transactions and other account data (assuming these methods are adapted
-						// for gRPC)
-						cosmosTxList.loadTransactions(10);
-
-						return null;
-					}
-
-				};
-				updateGridnodeList();
-				// Handle exceptions
-				fetchDataTask.setOnFailed(e -> {
-					Throwable exception = fetchDataTask.getException();
-					Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE,
-						null, exception);
-					// Optionally show an error message to the user
-				});
-
-				// Start the task in a new thread
-				new Thread(fetchDataTask).start();
-			}
-		});
-		initCopyButton();
-	}
-
 	public void getValidators() {
 		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
 		cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest request = cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest.newBuilder()
@@ -1239,14 +1250,19 @@ public class CosmosController implements Initializable {
 
 	public void onDelegationAmountEvent(@Observes DelegationStatusEvent event) {
 		Platform.runLater(() -> {
+			gridnodeModel.setDelegatedAmount(event.getDelegatedAmount());
+			gridnodeModel.setPossibleGridnodes(event.getGridnodeCount());
+
 			String text = event.getDelegatedAmount() + " UGD";
 			delegationAmountLabel.setText(text);
+
 			String gridnodeLimit = String.valueOf(event.getGridnodeCount());
 			nodeLimit.setText(gridnodeLimit);
 			System.out.println("Delegation Amount: " + text);
-			// store the event responses locally
-			// TODO separate the data into models
+
 			delegationEvent = event;
+			// trigger check keys file
+			updateGridnodeList();
 		});
 	}
 
@@ -1349,13 +1365,14 @@ public class CosmosController implements Initializable {
 	}
 
 	private void updateGridnodeList() {
-		List<GridnodeData> gridnodes = gridnodeHandler.fetchGridnodes();
-		String accountName = accountsData.getSelectedAccount().getName();
-		List<String> keys = gridnodeHandler.loadKeysFromFile(accountName);
-		List<GridnodeListViewItem> items = gridnodeHandler.compareGridnodesWithLocalKeys(gridnodes, keys);
-		System.out.println("items: " + items);
-		tblGridnodeListStart.setItems(FXCollections.observableArrayList(items));
-		tblGridnodeListStart.refresh();
+		Platform.runLater(() -> {
+			List<GridnodeData> gridnodes = gridnodeHandler.fetchGridnodes();
+			List<String> keys = gridnodeKeyManager.loadKeysFromFile();
+			List<GridnodeListViewItem> items = gridnodeHandler.compareGridnodesWithLocalKeys(gridnodes, keys);
+			System.out.println("items: " + items);
+			tblGridnodeListStart.setItems(FXCollections.observableArrayList(items));
+			tblGridnodeListStart.refresh();
+		});
 	}
 
 	@FXML
@@ -1494,31 +1511,18 @@ public class CosmosController implements Initializable {
 		cosmosService.sendDesktopNotification("Info", "Rewards claimed");
 	}
 
-//	public void setGridnodeKeysList() {
-//		System.out.println("update keys list");
-//		File gridnodeKeysFile = DataDirectory.getGridnodeKeysFile(accountsData.getSelectedAccount().getName());
-//		if (gridnodeKeysFile.exists()) {
-//			try {
-//				List<String> keys = DataDirectory.readPublicKeysFromFile(gridnodeKeysFile);
-//				publicKeysModel.setPublicKeys(keys);
-//			} catch (IOException e) {
-//				publicKeysModel.getPublicKeys().clear();
-//				System.out.println("Error reading keys from file: " + e.getMessage());
-//				// Handle the error appropriately
-//			}
-//		} else {
-//			publicKeysModel.getPublicKeys().clear();
-//		}
-//		Platform.runLater(() -> {
-//			keysListView.setItems(publicKeysModel.getPublicKeys());
-//		});
-//	}
-	public void setGridnodeKeysList() {
-		System.out.println("update keys list");
-		String accountName = accountsData.getSelectedAccount().getName();
-		List<String> keys = gridnodeHandler.loadKeysFromFile(accountName);
+	public void onGridnodeKeyUpdate(@Observes GridnodeKeyUpdateModel model) {
+		Platform.runLater(() -> {
+			String userMessage = model.getMessage();
 
-		publicKeysModel.setPublicKeys(keys); // Update the model with the loaded keys
+			lblUpdateKeys.setText(model.getMessage());
+		});
+	}
+
+	// Event listener for PublicKeysEvent
+	public void onPublicKeysUpdated(@Observes PublicKeysEvent event) {
+		List<String> newKeys = event.getPublicKeys();
+		publicKeysModel.setPublicKeys(newKeys); // Update the model with the loaded keys
 		Platform.runLater(() -> {
 			keysListView.setItems(publicKeysModel.getPublicKeys()); // Update the UI
 		});

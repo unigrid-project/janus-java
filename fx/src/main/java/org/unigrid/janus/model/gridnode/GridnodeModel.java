@@ -25,27 +25,30 @@ import lombok.Setter;
 
 @ApplicationScoped
 public class GridnodeModel {
-    private List<GridnodeData> gridnodeDataList = new ArrayList<>();
+	private List<GridnodeData> gridnodeDataList = new ArrayList<>();
 
-    @Getter @Setter
-    private String currentGridnodeId;
+	@Getter @Setter
+	private String currentGridnodeId;
+	@Getter @Setter
+	private double delegatedAmount;
+	@Getter @Setter
+	private int possibleGridnodes;
 
-    @PostConstruct
-    public void init() {
-        // Initialize or reset gridnodeDataList if needed
-        gridnodeDataList.clear();
-    }
+	@PostConstruct
+	public void init() {
+		// Initialize or reset gridnodeDataList if needed
+		gridnodeDataList.clear();
+	}
 
-    public void addGridnodeData(GridnodeData data) {
-        gridnodeDataList.add(data);
-    }
+	public void addGridnodeData(GridnodeData data) {
+		gridnodeDataList.add(data);
+	}
 
-    public List<GridnodeData> getGridnodeData() {
-        return gridnodeDataList;
-    }
+	public List<GridnodeData> getGridnodeData() {
+		return gridnodeDataList;
+	}
 
-    public void startGridnode() {
-        // Implementation to start gridnode
-    }
+	public void startGridnode() {
+		// Implementation to start gridnode
+	}
 }
-
