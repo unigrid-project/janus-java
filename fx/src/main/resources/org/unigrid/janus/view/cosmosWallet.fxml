@@ -2,24 +2,19 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Scene?>
-<?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 <?import javafx.stage.Stage?>
 
-<Stage minHeight="400.0" minWidth="600.0" title="Unigrid Mainnet Janus Wallet" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosWalletController">
+<Stage minHeight="400.0" minWidth="600.0" title="Unigrid Mainnet Janus Wallet" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosWalletController">
 	<scene>
-		<Scene fill="#000024" stylesheets="@main.css">
+		<Scene fill="#010007" stylesheets="@main.css">
 			<root>
-				<StackPane prefHeight="600.0" prefWidth="1000.0">
+				<StackPane prefHeight="600.0" prefWidth="1000.0" styleClass="bg-dark-gray" stylesheets="@main.css">
 					<children>
-						<BorderPane pickOnBounds="false" prefHeight="300.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
+						<BorderPane pickOnBounds="false" prefHeight="300.0" styleClass="bg-dark-gray" stylesheets="@main.css">
 							<top>
 								<fx:include source="component/windowBar.fxml" />
 							</top>

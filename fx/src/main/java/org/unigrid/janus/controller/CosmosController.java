@@ -97,6 +97,7 @@ import cosmos.tx.v1beta1.ServiceGrpc;
 import cosmos.tx.v1beta1.ServiceOuterClass;
 import cosmos.tx.v1beta1.TxOuterClass;
 import io.grpc.StatusRuntimeException;
+import java.math.RoundingMode;
 import java.security.MessageDigest;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.EventHandler;
@@ -320,6 +321,12 @@ public class CosmosController implements Initializable {
 	private TableColumn<GridnodeListViewItem, String> colStartGridnode;
 	@FXML
 	private Label lblUpdateKeys;
+	@FXML
+	private Label stakingMainView;
+	@FXML
+	private Label gridnodeMainView;
+	@FXML
+	private Label stakingRewards;
 
 	private ObservableList<String> keysList = FXCollections.observableArrayList();
 
@@ -954,8 +961,10 @@ public class CosmosController implements Initializable {
 						setText(null);
 					} else {
 						BigDecimal amount = new BigDecimal(item.getAmount());
-						BigDecimal displayAmount = amount.divide(scaleFactor);
-						setText(displayAmount.toPlainString() + " ugd");
+						BigDecimal displayAmount = amount.divide(scaleFactor, 8, RoundingMode.HALF_UP); // Ensure 8 decimal places
+
+						setText(displayAmount.toPlainString() + " UGD");
+						stakingRewards.setText(displayAmount.toPlainString() + " UGD");
 					}
 				}
 			});
@@ -1255,7 +1264,7 @@ public class CosmosController implements Initializable {
 
 			String text = event.getDelegatedAmount() + " UGD";
 			delegationAmountLabel.setText(text);
-
+			gridnodeMainView.setText(text);
 			String gridnodeLimit = String.valueOf(event.getGridnodeCount());
 			nodeLimit.setText(gridnodeLimit);
 			System.out.println("Delegation Amount: " + text);
@@ -1480,19 +1489,20 @@ public class CosmosController implements Initializable {
 
 	public void onWalletBalanceUpdate(@Observes WalletBalanceModel balanceModel) {
 		Platform.runLater(() -> {
-			balanceLabel.setText(balanceModel.getBalance() + " ugd");
+			balanceLabel.setText(balanceModel.getBalance() + " UGD");
 		});
 	}
 
 	public void onUnboundingBalanceModelUpdate(@Observes UnboundingBalanceModel model) {
 		Platform.runLater(() -> {
-			unboundingAmountLabel.setText(model.getUnboundingAmount() + " ugd");
+			unboundingAmountLabel.setText(model.getUnboundingAmount() + " UGD");
 		});
 	}
 
 	public void onStakedBalanceModelUpdate(@Observes StakedBalanceModel model) {
 		Platform.runLater(() -> {
-			stakingAmountLabel.setText(model.getStakedBalance() + " ugd");
+			stakingAmountLabel.setText(model.getStakedBalance() + " UGD");
+			stakingMainView.setText(model.getStakedBalance() + " UGD");
 		});
 	}
 

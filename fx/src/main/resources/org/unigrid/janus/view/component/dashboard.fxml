@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane styleClass="bg-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
+<AnchorPane styleClass="bg-very-dark-blue" stylesheets="@../main.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosController">
 	<children>
 		<TabPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<tabs>
@@ -35,50 +35,82 @@
             			
 							<!-- Account Information -->
 							<VBox fx:id="commandsBox" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="2">
-								<HBox alignment="CENTER_LEFT">
-									<children>
-										<Label text="Account Information" textFill="#ababab">
-											<font>
-												<Font name="System Bold" size="16.0" />
-											</font>
-										</Label>
-										<Region HBox.hgrow="ALWAYS" />
-            
-										<ComboBox fx:id="accountsDropdown" prefWidth="250.0" promptText="Switch Account" style="-fx-cursor: hand;" styleClass="combo-box" />
-									</children>
-								</HBox>
-								<HBox alignment="CENTER_LEFT">
-									<children>
-										<Label text="Balance:" textFill="#d0cccc">
-											<font>
-												<Font name="System Bold" size="25.0" />
-											</font>
-											<HBox.margin>
-												<Insets right="10.0" />
-											</HBox.margin>
-										</Label>
-										<Label fx:id="balanceLabel" text="0.00 UGD" textFill="#d0cccc">
-											<font>
-												<Font name="System Bold" size="25.0" />
-											</font>
-										</Label>
-									</children>
-								</HBox>
-								<HBox alignment="CENTER_LEFT">
-									<children>
-										<Label text="Address:" textFill="#ababab">
-											<HBox.margin>
-												<Insets right="10.0" />
-											</HBox.margin>
+                        <GridPane hgap="15.0" vgap="20.0">
+                           <columnConstraints>
+                              <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="156.0" minWidth="10.0" prefWidth="149.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="500.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <children>
+                              <Label text="Balance:" textFill="#d0cccc">
                                  <font>
-                                    <Font size="16.0" />
+                                    <Font name="System Bold" size="25.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="balanceLabel" text="0.00 UGD" textFill="#d0cccc" GridPane.columnIndex="1">
+                                 <font>
+                                    <Font name="System Bold" size="25.0" />
+                                 </font>
+                              </Label>
+                              <Label contentDisplay="RIGHT" text="Staking:" textFill="#ababab" GridPane.rowIndex="1">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="stakingMainView" text="0.00 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label contentDisplay="RIGHT" text="Gridnode:" textFill="#ababab" GridPane.rowIndex="2">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="gridnodeMainView" text="0.0 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+										<Label text="Address:" textFill="#ababab" GridPane.rowIndex="4">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
                                  </font>
 										</Label>
-										<Label fx:id="addressLabel" prefWidth="375.0" textFill="#ababab" />
-                              <Region HBox.hgrow="ALWAYS" />
-										<Button fx:id="copyBtn" mnemonicParsing="false" style="-fx-cursor: hand;" text="Copy Address" />
-									</children>
-								</HBox>
+										<Label fx:id="addressLabel" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <Label contentDisplay="RIGHT" text="Rewards:" textFill="#ababab" GridPane.rowIndex="3">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+										<Button fx:id="copyBtn" contentDisplay="CENTER" mnemonicParsing="false" style="-fx-cursor: hand;" text="Copy Address" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="4">
+                                 <GridPane.margin>
+                                    <Insets right="20.0" />
+                                 </GridPane.margin></Button>
+            
+										<ComboBox fx:id="accountsDropdown" prefWidth="250.0" promptText="Switch Account" style="-fx-cursor: hand;" styleClass="combo-box" GridPane.columnIndex="2" />
+                              <Label fx:id="stakingRewards" text="0.0 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <padding>
+                              <Insets top="10.0" />
+                           </padding>
+                        </GridPane>
+								<HBox alignment="CENTER_LEFT" />
                         <VBox>
                            <children>
                               <Label text="To Address:" textFill="#ababab">
@@ -130,7 +162,6 @@
 								</Label>
 								<ListView fx:id="transactionListView" prefHeight="100.0" />
 							</VBox>
-                     <Button mnemonicParsing="false" onAction="#testNotifications" text="NOTIFICATION" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="3" />
 							<columnConstraints>
 								<ColumnConstraints percentWidth="33.33" />
 								<ColumnConstraints percentWidth="33.33" />
@@ -242,7 +273,7 @@
                           <tabs>
                             <Tab text="Delegate">
                                  <content>
-            								<VBox fx:id="commandsBox1" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box">
+            								<VBox fx:id="commandsBox1" spacing="10" styleClass="gridnode-tabs-gray">
             									<children>
             										<VBox>
             											<children>
@@ -332,18 +363,21 @@
                               </Tab>
                             <Tab text="Keys">
                                  <content>
-                                    <VBox style="-fx-background-color: #1a1a1a; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 10px;">
+                                    <VBox styleClass="gridnode-tabs-gray">
                                        <children>
                                           <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                                              <children>
-                                                <Label fx:id="lblUpdateKeys" textFill="#ebebeb">
+                                                <Label fx:id="lblUpdateKeys" textFill="#d7d7d7">
+                                                   <HBox.margin>
+                                                      <Insets right="20.0" />
+                                                   </HBox.margin>
                                                    <font>
                                                       <Font name="System Bold" size="16.0" />
                                                    </font>
                                                 </Label>
                                                 <Button mnemonicParsing="false" onAction="#onGenerateKeysClicked" text="GENERATE">
                                                    <HBox.margin>
-                                                      <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                                                      <Insets bottom="10.0" right="20.0" top="10.0" />
                                                    </HBox.margin>
                                                 </Button>
                                                 <Button mnemonicParsing="false" onAction="#openGridnodeConf" text="OPEN CONF" />
@@ -354,9 +388,9 @@
                                  </content></Tab>
                               <Tab text="List">
                                 <content>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="gridnode-tabs-gray">
                                        <children>
-                                          <BorderPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #1a1a1a; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 10px;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <top>
                                                 <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                                    <children>
