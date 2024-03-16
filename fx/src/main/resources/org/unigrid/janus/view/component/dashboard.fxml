@@ -130,6 +130,7 @@
 								</Label>
 								<ListView fx:id="transactionListView" prefHeight="100.0" />
 							</VBox>
+                     <Button mnemonicParsing="false" onAction="#testNotifications" text="NOTIFICATION" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="3" />
 							<columnConstraints>
 								<ColumnConstraints percentWidth="33.33" />
 								<ColumnConstraints percentWidth="33.33" />

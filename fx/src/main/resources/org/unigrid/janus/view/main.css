@@ -483,4 +483,11 @@
     -fx-padding: 5px; /* Adjust padding to center the text vertically */
 }
 
+.notification-bar {
+    -fx-background-color: darkgray;
+    -fx-border-width: 0;
+    -fx-text-fill: white;
+}
+
+
 

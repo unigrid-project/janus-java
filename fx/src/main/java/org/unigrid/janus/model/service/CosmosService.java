@@ -485,13 +485,17 @@ public class CosmosService {
 				.title(title)
 				.text(body)
 				.position(Pos.TOP_RIGHT)
-				.showInformation();
+				.darkStyle()
+				.graphic(null)
+				.show();
 		} else {
 			Notifications
 				.create()
 				.title(title)
 				.text(body)
-				.showInformation();
+				.darkStyle()
+				.graphic(null)
+				.show();
 		}
 	}
 }

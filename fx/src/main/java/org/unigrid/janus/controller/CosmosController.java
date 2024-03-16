@@ -1255,7 +1255,7 @@ public class CosmosController implements Initializable {
 		if (event.getEventType() == GridnodeEvents.EventType.GRIDNODE_STARTED) {
 			// refresh the list
 			updateGridnodeList();
-			//cosmosService.sendDesktopNotification("Gridnode Started!", gridnodeModel.getCurrentGridnodeId());
+			cosmosService.sendDesktopNotification("Gridnode Started!", gridnodeModel.getCurrentGridnodeId());
 
 		}
 	}
@@ -1341,6 +1341,11 @@ public class CosmosController implements Initializable {
 	@FXML
 	private void onRefreshGridnodes(ActionEvent event) throws IOException, InterruptedException {
 		updateGridnodeList();
+	}
+
+	@FXML
+	private void testNotifications(ActionEvent event) {
+		cosmosService.sendDesktopNotification("this is a test", "036b5b23ae9f61e3af3dc506e7f49baa6f1279cb739fe395bb1b763c1e5ba0d28b");
 	}
 
 	private void updateGridnodeList() {
