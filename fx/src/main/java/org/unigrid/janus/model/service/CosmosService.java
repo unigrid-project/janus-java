@@ -36,6 +36,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Timer;
 import java.util.logging.Level;
@@ -322,7 +323,8 @@ public class CosmosService {
 		BigDecimal rawBalance = new BigDecimal(balanceResponse.getBalance().getAmount());
 		BigDecimal scaledBalance = rawBalance.divide(new BigDecimal(TOKEN_DECIMAL_VALUE), 8, RoundingMode.HALF_UP);
 
-		return scaledBalance.toString();
+		DecimalFormat df = new DecimalFormat("0.00000000"); // Ensure 8 decimal places in the output
+		return df.format(scaledBalance);
 
 	}
 
