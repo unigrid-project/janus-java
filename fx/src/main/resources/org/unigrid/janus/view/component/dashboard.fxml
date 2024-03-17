@@ -170,7 +170,6 @@
 								<RowConstraints />
 								<RowConstraints maxHeight="346.0" minHeight="148.0" prefHeight="191.0" />
 								<RowConstraints maxHeight="321.0" minHeight="123.0" prefHeight="309.0" />
-								<RowConstraints maxHeight="214.0" minHeight="54.0" prefHeight="60.0" />
 							</rowConstraints>
 						</GridPane>
 					</content>
