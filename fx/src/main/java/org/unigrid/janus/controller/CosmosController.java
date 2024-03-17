@@ -99,6 +99,7 @@ import cosmos.tx.v1beta1.TxOuterClass;
 import io.grpc.StatusRuntimeException;
 import java.math.RoundingMode;
 import java.security.MessageDigest;
+import java.util.Random;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -113,6 +114,9 @@ import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import java.util.stream.Collectors;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.HostServices;
 import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
@@ -955,7 +959,9 @@ public class CosmosController implements Initializable {
 			.divide(scaleFactor, 8, RoundingMode.HALF_UP);
 
 		Platform.runLater(() -> {
-			stakingRewards.setText(totalRewards.toPlainString() + " UGD");
+			//stakingRewards.setText(totalRewards.toPlainString() + " UGD");
+			double totalRewardsDouble = totalRewards.doubleValue(); // Convert BigDecimal to double
+			animateLabelToNewValue(stakingRewards, totalRewardsDouble);
 			totalsListView.getItems().setAll(totals);
 			totalsListView.setCellFactory(listView -> new ListCell<Balance>() {
 				@Override
@@ -1264,12 +1270,15 @@ public class CosmosController implements Initializable {
 			gridnodeModel.setDelegatedAmount(event.getDelegatedAmount());
 			gridnodeModel.setPossibleGridnodes(event.getGridnodeCount());
 
-			String text = event.getDelegatedAmount() + " UGD";
-			delegationAmountLabel.setText(text);
-			gridnodeMainView.setText(text);
+			//String text = event.getDelegatedAmount() + " UGD";
+			//delegationAmountLabel.setText(text);
+			//gridnodeMainView.setText(text);
+			animateLabelToNewValue(delegationAmountLabel, event.getDelegatedAmount());
+			animateLabelToNewValue(gridnodeMainView, event.getDelegatedAmount());
+
 			String gridnodeLimit = String.valueOf(event.getGridnodeCount());
 			nodeLimit.setText(gridnodeLimit);
-			System.out.println("Delegation Amount: " + text);
+			//System.out.println("Delegation Amount: " + text);
 
 			delegationEvent = event;
 			// trigger check keys file
@@ -1491,7 +1500,9 @@ public class CosmosController implements Initializable {
 
 	public void onWalletBalanceUpdate(@Observes WalletBalanceModel balanceModel) {
 		Platform.runLater(() -> {
-			balanceLabel.setText(balanceModel.getBalance() + " UGD");
+			double stringToDouble = Double.parseDouble(balanceModel.getBalance());
+			animateLabelToNewValue(balanceLabel, stringToDouble);
+			//balanceLabel.setText(balanceModel.getBalance() + " UGD");
 		});
 	}
 
@@ -1503,8 +1514,10 @@ public class CosmosController implements Initializable {
 
 	public void onStakedBalanceModelUpdate(@Observes StakedBalanceModel model) {
 		Platform.runLater(() -> {
-			stakingAmountLabel.setText(model.getStakedBalance() + " UGD");
-			stakingMainView.setText(model.getStakedBalance() + " UGD");
+			animateLabelToNewValue(stakingAmountLabel, model.getStakedBalance());
+			animateLabelToNewValue(stakingMainView, model.getStakedBalance());
+			//stakingAmountLabel.setText(model.getStakedBalance() + " UGD");
+			//stakingMainView.setText(model.getStakedBalance() + " UGD");
 		});
 	}
 
@@ -1564,4 +1577,54 @@ public class CosmosController implements Initializable {
 
 		cosmosService.sendDesktopNotification("Transaction hash", txResponse.getTxhash());
 	}
+
+	public void animateLabelToNewValue(Label label, double newValue) {
+		final double[] oldValue = new double[]{Double.parseDouble(label.getText().replaceAll("[^0-9.]", ""))};
+		final Timeline[] timeline = new Timeline[1];
+
+		KeyFrame keyFrame = new KeyFrame(Duration.millis(10), e -> {
+			double diff = newValue - oldValue[0];
+			double rate = calculateRate(diff); // Calculate the rate based on the difference
+
+			oldValue[0] += diff / rate;
+			label.setText(String.format("%.8f UGD", oldValue[0]));
+
+			if (shouldStopAnimation(oldValue[0], newValue, rate)) {
+				timeline[0].stop();
+				label.setText(String.format("%.8f UGD", newValue));
+			}
+		});
+
+		timeline[0] = new Timeline(keyFrame);
+		timeline[0].setCycleCount(Animation.INDEFINITE);
+		timeline[0].play();
+	}
+
+	private double calculateRate(double diff) {
+		double absDiff = Math.abs(diff);
+
+		if (absDiff < 0.1) {
+			return 10; // Very slow for very small differences
+		} else if (absDiff < 1) {
+			return 15; // Slow for small differences
+		} else if (absDiff < 10) {
+			return absDiff / 2; // Moderately fast for differences between 1 and 10
+		} else if (absDiff < 100) {
+			return absDiff / 20; // Moderate for medium differences
+		} else if (absDiff < 1000) {
+			return absDiff / 50; // Faster for larger differences
+		} else if (absDiff < 5000) {
+			return absDiff / 100; // Faster for larger differences
+		} else if (absDiff < 10000) {
+			return absDiff / 250; // Faster for larger differences
+		} else {
+			return absDiff / 1000; // Very fast for very large differences
+		}
+	}
+
+	private boolean shouldStopAnimation(double oldValue, double newValue, double rate) {
+		// Improved stop condition
+		return Math.abs(oldValue - newValue) < 0.00000001 || rate < 1.1;
+	}
+
 }
