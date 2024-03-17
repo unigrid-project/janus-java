@@ -508,5 +508,14 @@
 	-fx-text-fill: white;
 }
 
+.adddress-label {
+	-fx-cursor:  hand;
+	-fx-text-fill: #ababab;
+}
+
+.adddress-label:hover {
+	-fx-cursor:  hand;
+	-fx-text-fill: white;
+}
 
 

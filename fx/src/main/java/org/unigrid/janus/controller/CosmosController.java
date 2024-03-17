@@ -145,6 +145,7 @@ import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 import org.unigrid.janus.view.backing.OsxUtils;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableCell;
+import javafx.scene.input.MouseButton;
 import org.unigrid.janus.model.service.GridnodeKeyManager;
 import org.unigrid.janus.model.signal.GridnodeEvents;
 import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
@@ -243,8 +244,6 @@ public class CosmosController implements Initializable {
 	private Button importButton;
 	@FXML
 	private Button generateButton;
-	@FXML
-	private Button copyBtn;
 	@FXML
 	private StackPane importPane;
 	@FXML
@@ -536,7 +535,7 @@ public class CosmosController implements Initializable {
 
 			// Load and set items for the TableView
 			loadAccounts(this::postAccountLoadInitialization);
-
+			initCopyLabel();
 		});
 	}
 
@@ -643,7 +642,7 @@ public class CosmosController implements Initializable {
 				new Thread(fetchDataTask).start();
 			}
 		});
-		initCopyButton();
+
 		// Once accounts are loaded, call the callback
 		if (callback != null) {
 			callback.run();
@@ -651,25 +650,19 @@ public class CosmosController implements Initializable {
 		gridnodeKeyManager.initializeAndLoadKeys();
 	}
 
-	@FXML
-	public void initCopyButton() {
+	private void initCopyLabel() {
+		addressLabel.setOnMouseClicked(e -> {
+			if (e.getButton() == MouseButton.PRIMARY) {
+				Clipboard clipboard = Clipboard.getSystemClipboard();
+				ClipboardContent content = new ClipboardContent();
 
-		FontIcon fontIcon = new FontIcon("fas-clipboard");
-		fontIcon.setIconColor(Paint.valueOf("#FFFFFF"));
-		copyBtn.setGraphic(fontIcon);
+				Account selectedAccount = accountsData.getSelectedAccount();
+				content.putString(selectedAccount.getAddress());
+				clipboard.setContent(content);
 
-		copyBtn.setOnAction(e -> {
-			final Clipboard cb = Clipboard.getSystemClipboard();
-			final ClipboardContent content1 = new ClipboardContent();
-
-			Account selectedAccount = accountsData.getSelectedAccount();
-
-			content1.putString(selectedAccount.getAddress());
-			cb.setContent(content1);
-
-			cosmosService.sendDesktopNotification("Address copied to clipboard", selectedAccount.getAddress());
+				cosmosService.sendDesktopNotification("Address copied to clipboard", selectedAccount.getAddress());
+			}
 		});
-
 	}
 
 	@FXML
@@ -1502,13 +1495,12 @@ public class CosmosController implements Initializable {
 		Platform.runLater(() -> {
 			double stringToDouble = Double.parseDouble(balanceModel.getBalance());
 			animateLabelToNewValue(balanceLabel, stringToDouble);
-			//balanceLabel.setText(balanceModel.getBalance() + " UGD");
 		});
 	}
 
 	public void onUnboundingBalanceModelUpdate(@Observes UnboundingBalanceModel model) {
 		Platform.runLater(() -> {
-			unboundingAmountLabel.setText(model.getUnboundingAmount() + " UGD");
+			animateLabelToNewValue(unboundingAmountLabel, model.getUnboundingAmount());
 		});
 	}
 
@@ -1516,8 +1508,6 @@ public class CosmosController implements Initializable {
 		Platform.runLater(() -> {
 			animateLabelToNewValue(stakingAmountLabel, model.getStakedBalance());
 			animateLabelToNewValue(stakingMainView, model.getStakedBalance());
-			//stakingAmountLabel.setText(model.getStakedBalance() + " UGD");
-			//stakingMainView.setText(model.getStakedBalance() + " UGD");
 		});
 	}
 

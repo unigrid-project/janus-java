@@ -84,7 +84,7 @@
                                     <Font name="System Bold" size="16.0" />
                                  </font>
 										</Label>
-										<Label fx:id="addressLabel" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="4">
+										<Label fx:id="addressLabel" styleClass="adddress-label" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="4">
                                  <font>
                                     <Font name="System Bold" size="16.0" />
                                  </font>
@@ -94,10 +94,6 @@
                                     <Font name="System Bold" size="20.0" />
                                  </font>
                               </Label>
-										<Button fx:id="copyBtn" contentDisplay="CENTER" mnemonicParsing="false" style="-fx-cursor: hand;" text="Copy Address" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="4">
-                                 <GridPane.margin>
-                                    <Insets right="20.0" />
-                                 </GridPane.margin></Button>
             
 										<ComboBox fx:id="accountsDropdown" prefWidth="250.0" promptText="Switch Account" style="-fx-cursor: hand;" styleClass="combo-box" GridPane.columnIndex="2" />
                               <Label fx:id="stakingRewards" text="0.0 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="3">
