@@ -949,10 +949,14 @@ public class CosmosController implements Initializable {
 
 	/* REWARDS LIST VIEW */
 	public void stakingRewardsValue(List<Balance> totals) {
-		ObservableList<Balance> items = FXCollections.observableArrayList(totals);
+		BigDecimal totalRewards = totals.stream()
+			.map(balance -> new BigDecimal(balance.getAmount()))
+			.reduce(BigDecimal.ZERO, BigDecimal::add)
+			.divide(scaleFactor, 8, RoundingMode.HALF_UP);
 
 		Platform.runLater(() -> {
-			totalsListView.getItems().clear();
+			stakingRewards.setText(totalRewards.toPlainString() + " UGD");
+			totalsListView.getItems().setAll(totals);
 			totalsListView.setCellFactory(listView -> new ListCell<Balance>() {
 				@Override
 				protected void updateItem(Balance item, boolean empty) {
@@ -962,15 +966,13 @@ public class CosmosController implements Initializable {
 					} else {
 						BigDecimal amount = new BigDecimal(item.getAmount());
 						BigDecimal displayAmount = amount.divide(scaleFactor, 8, RoundingMode.HALF_UP); // Ensure 8 decimal places
-
 						setText(displayAmount.toPlainString() + " UGD");
-						stakingRewards.setText(displayAmount.toPlainString() + " UGD");
 					}
 				}
 			});
-			totalsListView.getItems().addAll(items);
 		});
 	}
+
 
 	/* STAKING */
 	public void onRedelegationsEvent(@Observes RedelegationsEvent event) {

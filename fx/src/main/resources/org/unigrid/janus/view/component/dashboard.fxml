@@ -344,7 +344,7 @@
                                                       </HBox>
                                                       <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
                                                          <children>
-                                                            <Button contentDisplay="CENTER" onAction="#undelegateFromGridnodePasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
+                                                            <Button alignment="CENTER" contentDisplay="CENTER" onAction="#undelegateFromGridnodePasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Undelegate" />
                                                          </children>
                                                          <VBox.margin>
                                                             <Insets top="15.0" />
