@@ -302,8 +302,6 @@ public class CosmosController implements Initializable {
 	@FXML
 	private TextField stakeAmountTextField;
 	@FXML
-	private ListView<Balance> totalsListView;
-	@FXML
 	private TableView<String> tableTransactionsSent;
 	@FXML
 	private TableView<String> tableTransactionsReceived;
@@ -339,6 +337,8 @@ public class CosmosController implements Initializable {
 	private TableColumn<UnbondingEntry, String> collAmount;
 	@FXML
 	private TableColumn<UnbondingEntry, String> colCompletionTime;
+	@FXML
+	private Label stakeRewardsLbl;
 
 	private ObservableList<String> keysList = FXCollections.observableArrayList();
 
@@ -428,23 +428,7 @@ public class CosmosController implements Initializable {
 					}
 				}
 			});
-			totalsListView.setCellFactory(lv -> new ListCell<Balance>() {
-				@Override
-				protected void updateItem(Balance item, boolean empty) {
-					super.updateItem(item, empty);
-					if (empty || item == null) {
-						setText(null);
-					} else {
-						setText(item.getAmount() + " ugd");
-					}
-				}
-			});
-			totalsListView.addEventFilter(MouseEvent.ANY, new EventHandler<MouseEvent>() {
-				@Override
-				public void handle(MouseEvent mouseEvent) {
-					mouseEvent.consume();
-				}
-			});
+			
 			delegationsListView.getItems().clear();
 			delegationsListView.setCellFactory(
 				listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
@@ -955,6 +939,7 @@ public class CosmosController implements Initializable {
 	public void onRewardsEvent(@Observes RewardsEvent event) {
 		Platform.runLater(() -> {
 			stakingRewardsValue(event.getRewardsResponse().getTotal());
+			
 		});
 	}
 
@@ -975,20 +960,8 @@ public class CosmosController implements Initializable {
 			//stakingRewards.setText(totalRewards.toPlainString() + " UGD");
 			double totalRewardsDouble = totalRewards.doubleValue(); // Convert BigDecimal to double
 			animateLabelToNewValue(stakingRewards, totalRewardsDouble);
-			totalsListView.getItems().setAll(totals);
-			totalsListView.setCellFactory(listView -> new ListCell<Balance>() {
-				@Override
-				protected void updateItem(Balance item, boolean empty) {
-					super.updateItem(item, empty);
-					if (empty || item == null) {
-						setText(null);
-					} else {
-						BigDecimal amount = new BigDecimal(item.getAmount());
-						BigDecimal displayAmount = amount.divide(scaleFactor, 8, RoundingMode.HALF_UP); // Ensure 8 decimal places
-						setText(displayAmount.toPlainString() + " UGD");
-					}
-				}
-			});
+			animateLabelToNewValue(stakeRewardsLbl, totalRewardsDouble);
+			
 		});
 	}
 

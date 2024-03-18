@@ -484,14 +484,34 @@
 												</HBox>
                                     <VBox prefHeight="200.0" prefWidth="100.0">
                                        <children>
-                                          <Label text="Delegate to Staking" textFill="#ababab">
-                                             <font>
-                                                <Font name="System Bold" size="25.0" />
-                                             </font>
-                                             <VBox.margin>
-                                                <Insets bottom="5.0" />
-                                             </VBox.margin>
-                                          </Label>
+                                          <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                                             <children>
+                                                <Label text="Delegate to Staking" textFill="#ababab">
+                                                   <font>
+                                                      <Font name="System Bold" size="25.0" />
+                                                   </font>
+                                                </Label>
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Button contentDisplay="CENTER" onAction="#onClaimStakingRewardsPasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Claim">
+                                                   <HBox.margin>
+                                                      <Insets right="20.0" />
+                                                   </HBox.margin>
+                                                </Button>
+                                                <Label text="Rewards:" textFill="#ababab">
+                                                   <font>
+                                                      <Font name="System Bold" size="16.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets right="15.0" />
+                                                   </HBox.margin>
+                                                </Label>
+                                                <Label fx:id="stakeRewardsLbl" text="0.00 UGD" textFill="#ababab">
+                                                   <font>
+                                                      <Font name="System Bold" size="16.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                          </HBox>
       												<HBox alignment="CENTER_LEFT">
       													<children>
       														<Label text="Validator:" textFill="#ababab">
@@ -523,22 +543,6 @@
                                     </VBox>
 											</children>
 										</VBox>
-                              <VBox fx:id="rewardsContainer1" spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;">
-                                 <children>
-                                    <HBox alignment="CENTER_LEFT">
-                                       <children>
-                                          <Label text="Staking Rewards" textFill="#ababab">
-                                             <font>
-                                                <Font name="System Bold" size="16.0" />
-                                             </font>
-                                          </Label>
-                                          <Region HBox.hgrow="ALWAYS" />
-                                          <Button contentDisplay="CENTER" onAction="#onClaimStakingRewardsPasswordRequest" prefWidth="125.0" style="-fx-cursor: hand;" text="Claim" />
-                                       </children>
-                                    </HBox>
-                                    <ListView fx:id="totalsListView" prefHeight="200.0" prefWidth="200.0" styleClass="cosmos-list-cell" />
-                                 </children>
-                              </VBox>
                               <VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;">
                                  <children>
 					 <Label text="Delegations" textFill="#ababab">
