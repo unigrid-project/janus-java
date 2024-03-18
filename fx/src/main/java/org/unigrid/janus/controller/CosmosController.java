@@ -119,6 +119,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.HostServices;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.geometry.Insets;
 import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
@@ -147,6 +148,8 @@ import org.unigrid.janus.view.backing.OsxUtils;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableCell;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import org.unigrid.janus.model.gridnode.UnbondingEntry;
 import org.unigrid.janus.model.service.GridnodeKeyManager;
 import org.unigrid.janus.model.signal.GridnodeEvents;
@@ -428,7 +431,7 @@ public class CosmosController implements Initializable {
 					}
 				}
 			});
-			
+
 			delegationsListView.getItems().clear();
 			delegationsListView.setCellFactory(
 				listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
@@ -445,8 +448,7 @@ public class CosmosController implements Initializable {
 							item.getBalance().getAmount());
 						BigDecimal displayAmount = amount.divide(scaleFactor);
 						String text = String.format(
-							"Validator: %s, Amount: %s %s",
-							item.getDelegation().getValidatorAddress(),
+							"Amount: %s %s",
 							displayAmount.toPlainString(),
 							"ugd");
 
@@ -479,8 +481,10 @@ public class CosmosController implements Initializable {
 								onSwitchDelegatorRequest();
 							}
 						});
-
-						HBox hBox = new HBox(label, switchDelegteComboBox, actionButton);
+						Region region = new Region();
+						HBox.setHgrow(region, Priority.ALWAYS);
+						HBox.setMargin(actionButton, Insets.EMPTY);
+						HBox hBox = new HBox(label, switchDelegteComboBox, region, actionButton);
 						hBox.setAlignment(Pos.CENTER_LEFT);
 						hBox.setSpacing(10);
 
@@ -939,7 +943,7 @@ public class CosmosController implements Initializable {
 	public void onRewardsEvent(@Observes RewardsEvent event) {
 		Platform.runLater(() -> {
 			stakingRewardsValue(event.getRewardsResponse().getTotal());
-			
+
 		});
 	}
 
@@ -961,7 +965,7 @@ public class CosmosController implements Initializable {
 			double totalRewardsDouble = totalRewards.doubleValue(); // Convert BigDecimal to double
 			animateLabelToNewValue(stakingRewards, totalRewardsDouble);
 			animateLabelToNewValue(stakeRewardsLbl, totalRewardsDouble);
-			
+
 		});
 	}
 
@@ -1532,7 +1536,26 @@ public class CosmosController implements Initializable {
 		List<String> newKeys = event.getPublicKeys();
 		publicKeysModel.setPublicKeys(newKeys); // Update the model with the loaded keys
 		Platform.runLater(() -> {
-			keysListView.setItems(publicKeysModel.getPublicKeys()); // Update the UI
+			keysListView.setItems(publicKeysModel.getPublicKeys());
+			setupListViewCellFactory();
+		});
+	}
+
+	private void setupListViewCellFactory() {
+		keysListView.setCellFactory(lv -> {
+			ListCell<String> cell = new ListCell<>();
+			cell.setOnMouseClicked(event -> {
+				if (event.getButton() == MouseButton.PRIMARY && !cell.isEmpty()) {
+					Clipboard clipboard = Clipboard.getSystemClipboard();
+					ClipboardContent content = new ClipboardContent();
+					content.putString(cell.getItem());
+					clipboard.setContent(content);
+
+					cosmosService.sendDesktopNotification("Key copied to clipboard", cell.getItem());
+				}
+			});
+			cell.textProperty().bind(cell.itemProperty());
+			return cell;
 		});
 	}
 
