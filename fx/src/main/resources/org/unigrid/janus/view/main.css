@@ -490,6 +490,13 @@
 	-fx-text-fill: white; /* Keep the text color white when selected */
 }
 
+.list-view .scroll-bar:horizontal .increment-arrow,
+.list-view .scroll-bar:horizontal .decrement-arrow,
+.list-view .scroll-bar:horizontal .increment-button,
+.list-view .scroll-bar:horizontal .decrement-button {
+    -fx-padding:0;
+}
+
 .large-rounded-textfield {
 	-fx-background-color: #121212;
 	-fx-background-radius: 10; /* Adjust the radius for the desired roundness */

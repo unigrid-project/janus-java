@@ -68,6 +68,8 @@ import org.unigrid.janus.model.signal.PublicKeysEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
+import org.unigrid.janus.model.gridnode.UnbondingEntry;
+import org.unigrid.janus.model.signal.UnbondingListEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 
 @ApplicationScoped
@@ -120,6 +122,8 @@ public class CosmosService {
 	private Event<StakedBalanceModel> stakedBalanceModelEvent;
 	@Inject
 	private PollingService pollingService;
+	@Inject
+	private Event<UnbondingListEvent> unbondingListEvent;
 
 	static final String TOKEN_DECIMAL_VALUE = "100000000";
 
@@ -205,6 +209,7 @@ public class CosmosService {
 
 		double unboundingBalance = convertLongToUgd(getUnboundingBalance(account));
 		unboundingBalanceModel.setUnboundingAmount(unboundingBalance);
+		System.out.println("UNBONDING BALANCE: " + unboundingBalance);
 		unboundingBalanceModelEvent.fire(unboundingBalanceModel);
 
 		double stakedBalance = convertLongToUgd(getStakedBalance(account));
@@ -299,7 +304,7 @@ public class CosmosService {
 			.build();
 		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
 		double converted = convertLongToUgd(delegatedAmountResponse.getAmount());
-		System.out.println("converted UGD: " + converted);
+		System.out.println("delegateStub: " + delegateStub);
 		System.out.println("delegatedAmountResponse UUGD: " + delegatedAmountResponse.getAmount());
 
 		return converted;
@@ -323,20 +328,26 @@ public class CosmosService {
 
 	}
 
-	// TODO
-	// this should add this data to a model
 	public long getUnboundingBalance(String address) {
-		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub unboundingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest unboundingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest.newBuilder()
-			.setDelegatorAddr(address)
+		// Stub setup and request preparation
+		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest unbondingRequest = gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest.newBuilder()
+			.setBondingAccountAddress(address)
 			.build();
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsResponse unboundingResponse = unboundingStub.delegatorUnbondingDelegations(unboundingRequest);
-		long totalUnbondingAmount = unboundingResponse.getUnbondingResponsesList().stream()
-			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
-			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
-			.sum();
 
-		return totalUnbondingAmount;
+		// Get the response
+		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesResponse response = delegateStub.unbondingEntries(unbondingRequest);
+
+		// Map protobuf objects to your model objects
+		List<UnbondingEntry> unbondingEntries = response.getUnbondingEntriesList().stream()
+			.map(protoEntry -> new UnbondingEntry(protoEntry.getAccount(), protoEntry.getAmount(), protoEntry.getCompletionTime()))
+			.collect(Collectors.toList());
+		unbondingListEvent.fire(new UnbondingListEvent(unbondingEntries));
+
+		// Calculate and return the total
+		return unbondingEntries.stream()
+			.mapToLong(UnbondingEntry::getAmount)
+			.sum();
 	}
 
 	// TODO

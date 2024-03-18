@@ -118,6 +118,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.HostServices;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
@@ -146,10 +147,12 @@ import org.unigrid.janus.view.backing.OsxUtils;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableCell;
 import javafx.scene.input.MouseButton;
+import org.unigrid.janus.model.gridnode.UnbondingEntry;
 import org.unigrid.janus.model.service.GridnodeKeyManager;
 import org.unigrid.janus.model.signal.GridnodeEvents;
 import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
 import org.unigrid.janus.model.signal.PublicKeysEvent;
+import org.unigrid.janus.model.signal.UnbondingListEvent;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -330,6 +333,12 @@ public class CosmosController implements Initializable {
 	private Label gridnodeMainView;
 	@FXML
 	private Label stakingRewards;
+	@FXML
+	private TableView<UnbondingEntry> tblGridnodeUnbonding;
+	@FXML
+	private TableColumn<UnbondingEntry, String> collAmount;
+	@FXML
+	private TableColumn<UnbondingEntry, String> colCompletionTime;
 
 	private ObservableList<String> keysList = FXCollections.observableArrayList();
 
@@ -532,6 +541,10 @@ public class CosmosController implements Initializable {
 					}
 				}
 			});
+//			collAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
+//			colCompletionTime.setCellValueFactory(new PropertyValueFactory<>("completionTime"));
+			collAmount.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getFormattedAmount()));
+			colCompletionTime.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getFormattedCompletionTime()));
 
 			// Load and set items for the TableView
 			loadAccounts(this::postAccountLoadInitialization);
@@ -928,6 +941,13 @@ public class CosmosController implements Initializable {
 	public void onDelegationListEvent(@Observes DelegationListEvent event) {
 		Platform.runLater(() -> {
 			delegationsListView.getItems().setAll(event.getDelegationList());
+		});
+	}
+
+	public void onUnbondingListEvent(@Observes UnbondingListEvent event) {
+		Platform.runLater(() -> {
+			ObservableList<UnbondingEntry> observableData = FXCollections.observableArrayList(event.getUnbondingList());
+			tblGridnodeUnbonding.setItems(observableData);
 		});
 	}
 
