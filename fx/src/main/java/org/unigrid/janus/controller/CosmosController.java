@@ -155,6 +155,7 @@ import org.unigrid.janus.model.service.GridnodeKeyManager;
 import org.unigrid.janus.model.signal.GridnodeEvents;
 import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
 import org.unigrid.janus.model.signal.PublicKeysEvent;
+import org.unigrid.janus.model.signal.TransactionListEvent;
 import org.unigrid.janus.model.signal.UnbondingListEvent;
 
 @ApplicationScoped
@@ -497,8 +498,7 @@ public class CosmosController implements Initializable {
 
 			if (tableTransactionsSent.getItems().isEmpty() && tableTransactionsReceived.getItems().isEmpty()) {
 				colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
+				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));				
 			}
 
 			// Gridnode List View
@@ -584,9 +584,8 @@ public class CosmosController implements Initializable {
 				if (defaultAccount.isPresent()) {
 					accountsData.setSelectedAccount(defaultAccount.get());
 					System.out.println("AccountsData is being initialized/set");
-
+					addressLabel.setText(accountsData.getSelectedAccount().getAddress());
 					accountSelectedEvent.fire(new AccountSelectedEvent());
-
 					updateGridnodeList();
 				}
 			}
@@ -1297,64 +1296,14 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	public void fetchAccountTransactions(String address) {
+	public void onTransactionListEvent(@Observes TransactionListEvent event) {
+		Platform.runLater(() -> {
+			ObservableList<String> sentData = FXCollections.observableArrayList(event.getTransactionsSent());
+			tableTransactionsSent.setItems(sentData);
 
-		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
-		List<TxOuterClass.Tx> transactionsReceived = new ArrayList<>();
-
-		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
-
-		// fetch sender transactions
-		String querySender = "transfer.sender='" + address + "'";
-		transactionsSent.addAll(fetchTransactions(querySender, stub));
-
-		// fetch recipient transactions
-		String queryRecipient = "transfer.recipient='" + address + "'";
-		transactionsReceived.addAll(fetchTransactions(queryRecipient, stub));
-
-		for (TxOuterClass.Tx tx : transactionsSent) {
-			byte[] txBytes = tx.toByteArray();
-			byte[] hashBytes = sha256(txBytes);
-			String transactionHash = bytesToHex(hashBytes);
-			transactionsObSent.add(transactionHash);
-		}
-
-		for (TxOuterClass.Tx tx : transactionsReceived) {
-			byte[] txBytes = tx.toByteArray();
-			byte[] hashBytes = sha256(txBytes);
-			String transactionHash = bytesToHex(hashBytes);
-			transactionsObReceived.add(transactionHash);
-		}
-
-		tableTransactionsSent.setItems(transactionsObSent);
-		tableTransactionsReceived.setItems(transactionsObReceived);
-	}
-
-	private List<TxOuterClass.Tx> fetchTransactions(String query, ServiceGrpc.ServiceBlockingStub stub) {
-		ServiceOuterClass.GetTxsEventRequest request = ServiceOuterClass.GetTxsEventRequest.newBuilder()
-			.setLimit(10)
-			.setQuery(query)
-			.build();
-
-		return stub.getTxsEvent(request).getTxsList();
-	}
-
-	private static byte[] sha256(byte[] input) {
-		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			return digest.digest(input);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	private static String bytesToHex(byte[] bytes) {
-		StringBuilder result = new StringBuilder();
-		for (byte b : bytes) {
-			result.append(String.format("%02X", b));
-		}
-		return result.toString();
+			ObservableList<String> receivedData = FXCollections.observableArrayList(event.getTransactionsReceived());
+			tableTransactionsReceived.setItems(receivedData);
+		});
 	}
 
 	@FXML
