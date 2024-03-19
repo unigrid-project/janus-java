@@ -22,6 +22,7 @@ import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -73,11 +74,16 @@ public class AccountsService {
 	public void loadAccountsFromJson() throws Exception {
 		File accountsFile = DataDirectory.getAccountsFile();
 		ObjectMapper objectMapper = new ObjectMapper();
-		AccountsData loadedData = objectMapper.readValue(accountsFile, AccountsData.class);
+		try {
+			AccountsData loadedData = objectMapper.readValue(accountsFile, AccountsData.class);
 
-		for (Account account : loadedData.getAccounts()) {
-			addAccountIfNotPresent(account);
+			for (Account account : loadedData.getAccounts()) {
+				addAccountIfNotPresent(account);
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("Accounts.json not found!");
 		}
+		
 	}
 
 	public void addAccountIfNotPresent(Account newAccount) {
@@ -102,6 +108,4 @@ public class AccountsService {
 		return !accountsFile.exists() || accountsFile.length() == 0;
 	}
 
-	
-	
 }

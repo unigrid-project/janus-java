@@ -498,7 +498,7 @@ public class CosmosController implements Initializable {
 				}
 			});
 
-			if (tableTransactionsSent.getItems().isEmpty() && tableTransactionsReceived.getItems().isEmpty()) {
+			if (accountsData.getSelectedAccount() != null && tableTransactionsSent.getItems().isEmpty() && tableTransactionsReceived.getItems().isEmpty()) {
 				colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());

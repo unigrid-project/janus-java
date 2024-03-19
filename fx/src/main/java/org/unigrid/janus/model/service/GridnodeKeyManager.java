@@ -54,6 +54,10 @@ public class GridnodeKeyManager {
 	public List<String> loadKeysFromFile() {
 		System.out.println("loading keyfile for gridnodes");
 
+		if (accountsData.getSelectedAccount() == null) {
+			System.out.println("AccountsData is empty");
+			return null;
+		}
 		String accountName = accountsData.getSelectedAccount().getName();
 		File keysFile = DataDirectory.getGridnodeKeysFile(accountName);
 		setKeys(Collections.emptyList());

@@ -13,7 +13,6 @@
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.model.service;
 
 // import jakarta.annotation.PostConstruct;
@@ -38,19 +37,30 @@ import org.unigrid.janus.model.signal.AccountSelectedEvent;
 
 @ApplicationScoped
 public class PollingService {
+
 	private Timer pollingTimer;
 	private Timer updateTimer;
 	private Timer syncTimer;
 	private Timer longSyncTimer;
 	private Timer timer;
 	private ScheduledFuture<?> cosmosPoll = null;
-	@Getter @Setter private Boolean syncTimerRunning = false;
-	@Getter @Setter private Boolean longSyncTimerRunning = false;
-	@Getter @Setter private Boolean pollingTimerRunning = false;
-	@Getter @Setter private Boolean updateTimerRunning = false;
+	@Getter
+	@Setter
+	private Boolean syncTimerRunning = false;
+	@Getter
+	@Setter
+	private Boolean longSyncTimerRunning = false;
+	@Getter
+	@Setter
+	private Boolean pollingTimerRunning = false;
+	@Getter
+	@Setter
+	private Boolean updateTimerRunning = false;
 
-	@Inject private DebugService debug;
-	@Inject private UpdateWallet updateWallet;
+	@Inject
+	private DebugService debug;
+	@Inject
+	private UpdateWallet updateWallet;
 
 	ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -149,7 +159,10 @@ public class PollingService {
 
 	public void startPoll() {
 		stopPoll(); // Stop any existing poll
-
+		if (accountsData.getSelectedAccount() == null) {
+			System.out.println("AccountsData is empty!");
+			return;
+		}
 		String address = accountsData.getSelectedAccount().getAddress();
 		Runnable task = () -> {
 			try {
