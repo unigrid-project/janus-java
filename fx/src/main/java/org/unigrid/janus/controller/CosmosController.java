@@ -396,6 +396,7 @@ public class CosmosController implements Initializable {
 			System.out.println("Is on FX thread: " + Platform.isFxApplicationThread());
 
 			System.out.println("run later method called");
+			initCopyLabel();
 			// Bind the width of the labels to the width of the buttons
 			importLabel.prefWidthProperty().bind(importButton.widthProperty());
 			generateLabel.prefWidthProperty().bind(generateButton.widthProperty());
@@ -536,7 +537,7 @@ public class CosmosController implements Initializable {
 
 			// Load and set items for the TableView
 			loadAccounts(this::postAccountLoadInitialization);
-			initCopyLabel();
+			
 		});
 	}
 
