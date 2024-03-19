@@ -21,6 +21,9 @@ import com.google.protobuf.Any;
 import cosmos.auth.v1beta1.Auth;
 import cosmos.auth.v1beta1.QueryOuterClass;
 import cosmos.bank.v1beta1.QueryGrpc;
+import cosmos.tx.v1beta1.ServiceGrpc;
+import cosmos.tx.v1beta1.ServiceOuterClass;
+import cosmos.tx.v1beta1.TxOuterClass;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
@@ -33,7 +36,10 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,6 +75,7 @@ import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.gridnode.UnbondingEntry;
+import org.unigrid.janus.model.signal.TransactionListEvent;
 import org.unigrid.janus.model.signal.UnbondingListEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 
@@ -124,6 +131,9 @@ public class CosmosService {
 	private PollingService pollingService;
 	@Inject
 	private Event<UnbondingListEvent> unbondingListEvent;
+
+	@Inject
+	private Event<TransactionListEvent> transactionEvent;
 
 	static final String TOKEN_DECIMAL_VALUE = "100000000";
 
@@ -216,6 +226,8 @@ public class CosmosService {
 
 		stakedBalanceModel.setStakedBalance(stakedBalance);
 		stakedBalanceModelEvent.fire(stakedBalanceModel);
+		
+		fetchAccountTransactions(account);
 	}
 
 	public long getAccountNumber(String address) {
@@ -493,6 +505,59 @@ public class CosmosService {
 				.graphic(null)
 				.show();
 		}
+	}
+
+	public void fetchAccountTransactions(String address) {
+		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
+		List<TxOuterClass.Tx> transactionsReceived = new ArrayList<>();
+
+		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+
+		// fetch sender transactions
+		String querySender = "transfer.sender='" + address + "'";
+		transactionsSent.addAll(fetchTransactions(querySender, stub));
+
+		// fetch recipient transactions
+		String queryRecipient = "transfer.recipient='" + address + "'";
+		transactionsReceived.addAll(fetchTransactions(queryRecipient, stub));
+
+		List<String> transactionsSentHashes = transactionsSent.stream()
+			.map(tx -> bytesToHex(sha256(tx.toByteArray())))
+			.collect(Collectors.toList());
+
+		List<String> transactionsReceivedHashes = transactionsReceived.stream()
+			.map(tx -> bytesToHex(sha256(tx.toByteArray())))
+			.collect(Collectors.toList());
+
+		// Fire the event
+		transactionEvent.fire(new TransactionListEvent(transactionsSentHashes, transactionsReceivedHashes));
+	}
+
+	private List<TxOuterClass.Tx> fetchTransactions(String query, ServiceGrpc.ServiceBlockingStub stub) {
+		ServiceOuterClass.GetTxsEventRequest request = ServiceOuterClass.GetTxsEventRequest.newBuilder()
+			.setLimit(10)
+			.setQuery(query)
+			.build();
+
+		return stub.getTxsEvent(request).getTxsList();
+	}
+
+	private static byte[] sha256(byte[] input) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			return digest.digest(input);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private static String bytesToHex(byte[] bytes) {
+		StringBuilder result = new StringBuilder();
+		for (byte b : bytes) {
+			result.append(String.format("%02X", b));
+		}
+		return result.toString();
 	}
 
 }
