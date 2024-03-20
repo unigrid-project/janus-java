@@ -174,7 +174,12 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		HostServicesProducer.setHostServices(hostServices);
 
 		CDIUtil.instantiate(promptScreen);
-		showChooseChain();
+		startCosmosWallet();
+
+//		commented for beta
+//		showChooseChain();
+
+//		TODO: Remove after moving completely to cosmos chain
 //		checkStartupState();
 	}
 
@@ -183,7 +188,13 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		// tray.initTrayService(stage);
 		debug.print("start", Janus.class.getSimpleName());
 		System.out.println("start from bootstrap");
-		showChooseChain();
+
+		startCosmosWallet();
+
+//		commented for beta
+//		showChooseChain();
+
+//		TODO: Remove after moving completely to cosmos chain
 //		checkStartupState();
 	}
 
