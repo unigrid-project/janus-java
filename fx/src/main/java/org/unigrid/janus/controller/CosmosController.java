@@ -448,6 +448,7 @@ public class CosmosController implements Initializable {
 					super.updateItem(item, empty);
 					if (empty || item == null) {
 						setText(null);
+						setGraphic(null);
 					} else {
 
 						BigDecimal amount = new BigDecimal(
