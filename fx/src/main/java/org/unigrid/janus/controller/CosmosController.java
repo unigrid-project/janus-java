@@ -297,6 +297,8 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Label nodeLimit;
 	@FXML
+	private Label collateralReq;
+	@FXML
 	private TextField stakeAmountTextField;
 	@FXML
 	private ListView<Balance> totalsListView;
@@ -1271,6 +1273,7 @@ public class CosmosController implements Initializable {
 
 			String gridnodeLimit = String.valueOf(event.getGridnodeCount());
 			nodeLimit.setText(gridnodeLimit);
+			
 			//System.out.println("Delegation Amount: " + text);
 
 			delegationEvent = event;
@@ -1292,6 +1295,7 @@ public class CosmosController implements Initializable {
 	public void onCollateralUpdateEvent(@Observes CollateralUpdateEvent event) {
 		if (event.isSuccess()) {
 			int amount = event.getAmount();
+			collateralReq.setText(String.valueOf(amount));
 			System.out.println("Collateral Required: " + amount);
 			// Update the UI with the amount
 		} else {
