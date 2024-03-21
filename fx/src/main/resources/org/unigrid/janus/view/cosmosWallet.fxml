@@ -8,11 +8,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.stage.Stage?>
 
-<Stage minHeight="400.0" minWidth="600.0" title="Unigrid Mainnet Janus Wallet" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosWalletController">
+<Stage minHeight="700.0" minWidth="1000.0" title="Unigrid Mainnet Janus Wallet" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.janus.controller.CosmosWalletController">
 	<scene>
 		<Scene fill="#010007" stylesheets="@main.css">
 			<root>
-				<StackPane prefHeight="600.0" prefWidth="1000.0" styleClass="bg-dark-gray" stylesheets="@main.css">
+				<StackPane prefHeight="700.0" prefWidth="1000.0" styleClass="bg-dark-gray" stylesheets="@main.css">
 					<children>
 						<BorderPane pickOnBounds="false" prefHeight="300.0" styleClass="bg-dark-gray" stylesheets="@main.css">
 							<top>

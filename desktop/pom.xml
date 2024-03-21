@@ -116,6 +116,7 @@
 								<option>-DAPPDIR=$APPDIR</option>
 								<option>-DAPPVER=${project.version}</option>
 							</javaOptions>
+                                                        <winConsole>true</winConsole>
 						</configuration>
 					</execution>
 					<execution>

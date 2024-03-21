@@ -21,6 +21,7 @@ module org.unigrid.bootstrap {
 	requires org.update4j;
 	requires java.instrument;
 	requires java.sql;
+	requires java.net.http;
 	requires jdk.security.auth;
 	requires transitive java.xml;
 	requires jdk.zipfs;

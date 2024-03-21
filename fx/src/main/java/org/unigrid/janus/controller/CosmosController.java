@@ -118,6 +118,8 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.HostServices;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.geometry.Insets;
 import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
@@ -146,10 +148,15 @@ import org.unigrid.janus.view.backing.OsxUtils;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableCell;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import org.unigrid.janus.model.gridnode.UnbondingEntry;
 import org.unigrid.janus.model.service.GridnodeKeyManager;
 import org.unigrid.janus.model.signal.GridnodeEvents;
 import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
 import org.unigrid.janus.model.signal.PublicKeysEvent;
+import org.unigrid.janus.model.signal.TransactionListEvent;
+import org.unigrid.janus.model.signal.UnbondingListEvent;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -301,8 +308,6 @@ public class CosmosController implements Initializable {
 	@FXML
 	private TextField stakeAmountTextField;
 	@FXML
-	private ListView<Balance> totalsListView;
-	@FXML
 	private TableView<String> tableTransactionsSent;
 	@FXML
 	private TableView<String> tableTransactionsReceived;
@@ -332,6 +337,14 @@ public class CosmosController implements Initializable {
 	private Label gridnodeMainView;
 	@FXML
 	private Label stakingRewards;
+	@FXML
+	private TableView<UnbondingEntry> tblGridnodeUnbonding;
+	@FXML
+	private TableColumn<UnbondingEntry, String> collAmount;
+	@FXML
+	private TableColumn<UnbondingEntry, String> colCompletionTime;
+	@FXML
+	private Label stakeRewardsLbl;
 
 	private ObservableList<String> keysList = FXCollections.observableArrayList();
 
@@ -385,6 +398,7 @@ public class CosmosController implements Initializable {
 			System.out.println("Is on FX thread: " + Platform.isFxApplicationThread());
 
 			System.out.println("run later method called");
+			initCopyLabel();
 			// Bind the width of the labels to the width of the buttons
 			importLabel.prefWidthProperty().bind(importButton.widthProperty());
 			generateLabel.prefWidthProperty().bind(generateButton.widthProperty());
@@ -421,23 +435,7 @@ public class CosmosController implements Initializable {
 					}
 				}
 			});
-			totalsListView.setCellFactory(lv -> new ListCell<Balance>() {
-				@Override
-				protected void updateItem(Balance item, boolean empty) {
-					super.updateItem(item, empty);
-					if (empty || item == null) {
-						setText(null);
-					} else {
-						setText(item.getAmount() + " ugd");
-					}
-				}
-			});
-			totalsListView.addEventFilter(MouseEvent.ANY, new EventHandler<MouseEvent>() {
-				@Override
-				public void handle(MouseEvent mouseEvent) {
-					mouseEvent.consume();
-				}
-			});
+
 			delegationsListView.getItems().clear();
 			delegationsListView.setCellFactory(
 				listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
@@ -455,8 +453,7 @@ public class CosmosController implements Initializable {
 							item.getBalance().getAmount());
 						BigDecimal displayAmount = amount.divide(scaleFactor);
 						String text = String.format(
-							"Validator: %s, Amount: %s %s",
-							item.getDelegation().getValidatorAddress(),
+							"Amount: %s %s",
 							displayAmount.toPlainString(),
 							"ugd");
 
@@ -489,8 +486,10 @@ public class CosmosController implements Initializable {
 								onSwitchDelegatorRequest();
 							}
 						});
-
-						HBox hBox = new HBox(label, switchDelegteComboBox, actionButton);
+						Region region = new Region();
+						HBox.setHgrow(region, Priority.ALWAYS);
+						HBox.setMargin(actionButton, Insets.EMPTY);
+						HBox hBox = new HBox(label, switchDelegteComboBox, region, actionButton);
 						hBox.setAlignment(Pos.CENTER_LEFT);
 						hBox.setSpacing(10);
 
@@ -503,8 +502,7 @@ public class CosmosController implements Initializable {
 
 			if (accountsData.getSelectedAccount() != null && tableTransactionsSent.getItems().isEmpty() && tableTransactionsReceived.getItems().isEmpty()) {
 				colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-				fetchAccountTransactions(accountsData.getSelectedAccount().getAddress());
+				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));				
 			}
 
 			// Gridnode List View
@@ -535,10 +533,14 @@ public class CosmosController implements Initializable {
 					}
 				}
 			});
+//			collAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
+//			colCompletionTime.setCellValueFactory(new PropertyValueFactory<>("completionTime"));
+			collAmount.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getFormattedAmount()));
+			colCompletionTime.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getFormattedCompletionTime()));
 
 			// Load and set items for the TableView
 			loadAccounts(this::postAccountLoadInitialization);
-			initCopyLabel();
+			
 		});
 	}
 
@@ -586,9 +588,8 @@ public class CosmosController implements Initializable {
 				if (defaultAccount.isPresent()) {
 					accountsData.setSelectedAccount(defaultAccount.get());
 					System.out.println("AccountsData is being initialized/set");
-
+					addressLabel.setText(accountsData.getSelectedAccount().getAddress());
 					accountSelectedEvent.fire(new AccountSelectedEvent());
-
 					updateGridnodeList();
 				}
 			}
@@ -934,10 +935,18 @@ public class CosmosController implements Initializable {
 		});
 	}
 
+	public void onUnbondingListEvent(@Observes UnbondingListEvent event) {
+		Platform.runLater(() -> {
+			ObservableList<UnbondingEntry> observableData = FXCollections.observableArrayList(event.getUnbondingList());
+			tblGridnodeUnbonding.setItems(observableData);
+		});
+	}
+
 	// signal event for staking rewards
 	public void onRewardsEvent(@Observes RewardsEvent event) {
 		Platform.runLater(() -> {
 			stakingRewardsValue(event.getRewardsResponse().getTotal());
+
 		});
 	}
 
@@ -958,20 +967,8 @@ public class CosmosController implements Initializable {
 			//stakingRewards.setText(totalRewards.toPlainString() + " UGD");
 			double totalRewardsDouble = totalRewards.doubleValue(); // Convert BigDecimal to double
 			animateLabelToNewValue(stakingRewards, totalRewardsDouble);
-			totalsListView.getItems().setAll(totals);
-			totalsListView.setCellFactory(listView -> new ListCell<Balance>() {
-				@Override
-				protected void updateItem(Balance item, boolean empty) {
-					super.updateItem(item, empty);
-					if (empty || item == null) {
-						setText(null);
-					} else {
-						BigDecimal amount = new BigDecimal(item.getAmount());
-						BigDecimal displayAmount = amount.divide(scaleFactor, 8, RoundingMode.HALF_UP); // Ensure 8 decimal places
-						setText(displayAmount.toPlainString() + " UGD");
-					}
-				}
-			});
+			animateLabelToNewValue(stakeRewardsLbl, totalRewardsDouble);
+
 		});
 	}
 
@@ -1305,64 +1302,14 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	public void fetchAccountTransactions(String address) {
+	public void onTransactionListEvent(@Observes TransactionListEvent event) {
+		Platform.runLater(() -> {
+			ObservableList<String> sentData = FXCollections.observableArrayList(event.getTransactionsSent());
+			tableTransactionsSent.setItems(sentData);
 
-		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
-		List<TxOuterClass.Tx> transactionsReceived = new ArrayList<>();
-
-		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
-
-		// fetch sender transactions
-		String querySender = "transfer.sender='" + address + "'";
-		transactionsSent.addAll(fetchTransactions(querySender, stub));
-
-		// fetch recipient transactions
-		String queryRecipient = "transfer.recipient='" + address + "'";
-		transactionsReceived.addAll(fetchTransactions(queryRecipient, stub));
-
-		for (TxOuterClass.Tx tx : transactionsSent) {
-			byte[] txBytes = tx.toByteArray();
-			byte[] hashBytes = sha256(txBytes);
-			String transactionHash = bytesToHex(hashBytes);
-			transactionsObSent.add(transactionHash);
-		}
-
-		for (TxOuterClass.Tx tx : transactionsReceived) {
-			byte[] txBytes = tx.toByteArray();
-			byte[] hashBytes = sha256(txBytes);
-			String transactionHash = bytesToHex(hashBytes);
-			transactionsObReceived.add(transactionHash);
-		}
-
-		tableTransactionsSent.setItems(transactionsObSent);
-		tableTransactionsReceived.setItems(transactionsObReceived);
-	}
-
-	private List<TxOuterClass.Tx> fetchTransactions(String query, ServiceGrpc.ServiceBlockingStub stub) {
-		ServiceOuterClass.GetTxsEventRequest request = ServiceOuterClass.GetTxsEventRequest.newBuilder()
-			.setLimit(10)
-			.setQuery(query)
-			.build();
-
-		return stub.getTxsEvent(request).getTxsList();
-	}
-
-	private static byte[] sha256(byte[] input) {
-		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			return digest.digest(input);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	private static String bytesToHex(byte[] bytes) {
-		StringBuilder result = new StringBuilder();
-		for (byte b : bytes) {
-			result.append(String.format("%02X", b));
-		}
-		return result.toString();
+			ObservableList<String> receivedData = FXCollections.observableArrayList(event.getTransactionsReceived());
+			tableTransactionsReceived.setItems(receivedData);
+		});
 	}
 
 	@FXML
@@ -1544,7 +1491,26 @@ public class CosmosController implements Initializable {
 		List<String> newKeys = event.getPublicKeys();
 		publicKeysModel.setPublicKeys(newKeys); // Update the model with the loaded keys
 		Platform.runLater(() -> {
-			keysListView.setItems(publicKeysModel.getPublicKeys()); // Update the UI
+			keysListView.setItems(publicKeysModel.getPublicKeys());
+			setupListViewCellFactory();
+		});
+	}
+
+	private void setupListViewCellFactory() {
+		keysListView.setCellFactory(lv -> {
+			ListCell<String> cell = new ListCell<>();
+			cell.setOnMouseClicked(event -> {
+				if (event.getButton() == MouseButton.PRIMARY && !cell.isEmpty()) {
+					Clipboard clipboard = Clipboard.getSystemClipboard();
+					ClipboardContent content = new ClipboardContent();
+					content.putString(cell.getItem());
+					clipboard.setContent(content);
+
+					cosmosService.sendDesktopNotification("Key copied to clipboard", cell.getItem());
+				}
+			});
+			cell.textProperty().bind(cell.itemProperty());
+			return cell;
 		});
 	}
 

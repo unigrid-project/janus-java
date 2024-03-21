@@ -21,6 +21,9 @@ import com.google.protobuf.Any;
 import cosmos.auth.v1beta1.Auth;
 import cosmos.auth.v1beta1.QueryOuterClass;
 import cosmos.bank.v1beta1.QueryGrpc;
+import cosmos.tx.v1beta1.ServiceGrpc;
+import cosmos.tx.v1beta1.ServiceOuterClass;
+import cosmos.tx.v1beta1.TxOuterClass;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
@@ -33,7 +36,10 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,6 +74,9 @@ import org.unigrid.janus.model.signal.PublicKeysEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
+import org.unigrid.janus.model.gridnode.UnbondingEntry;
+import org.unigrid.janus.model.signal.TransactionListEvent;
+import org.unigrid.janus.model.signal.UnbondingListEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 
 @ApplicationScoped
@@ -120,6 +129,11 @@ public class CosmosService {
 	private Event<StakedBalanceModel> stakedBalanceModelEvent;
 	@Inject
 	private PollingService pollingService;
+	@Inject
+	private Event<UnbondingListEvent> unbondingListEvent;
+
+	@Inject
+	private Event<TransactionListEvent> transactionEvent;
 
 	static final String TOKEN_DECIMAL_VALUE = "100000000";
 
@@ -205,12 +219,15 @@ public class CosmosService {
 
 		double unboundingBalance = convertLongToUgd(getUnboundingBalance(account));
 		unboundingBalanceModel.setUnboundingAmount(unboundingBalance);
+		System.out.println("UNBONDING BALANCE: " + unboundingBalance);
 		unboundingBalanceModelEvent.fire(unboundingBalanceModel);
 
 		double stakedBalance = convertLongToUgd(getStakedBalance(account));
 
 		stakedBalanceModel.setStakedBalance(stakedBalance);
 		stakedBalanceModelEvent.fire(stakedBalanceModel);
+		
+		fetchAccountTransactions(account);
 	}
 
 	public long getAccountNumber(String address) {
@@ -299,7 +316,7 @@ public class CosmosService {
 			.build();
 		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
 		double converted = convertLongToUgd(delegatedAmountResponse.getAmount());
-		System.out.println("converted UGD: " + converted);
+		System.out.println("delegateStub: " + delegateStub);
 		System.out.println("delegatedAmountResponse UUGD: " + delegatedAmountResponse.getAmount());
 
 		return converted;
@@ -323,20 +340,26 @@ public class CosmosService {
 
 	}
 
-	// TODO
-	// this should add this data to a model
 	public long getUnboundingBalance(String address) {
-		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub unboundingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest unboundingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsRequest.newBuilder()
-			.setDelegatorAddr(address)
+		// Stub setup and request preparation
+		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest unbondingRequest = gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest.newBuilder()
+			.setBondingAccountAddress(address)
 			.build();
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorUnbondingDelegationsResponse unboundingResponse = unboundingStub.delegatorUnbondingDelegations(unboundingRequest);
-		long totalUnbondingAmount = unboundingResponse.getUnbondingResponsesList().stream()
-			.flatMapToLong(unbondingDelegation -> unbondingDelegation.getEntriesList().stream()
-			.mapToLong(entry -> Long.parseLong(entry.getBalance())))
-			.sum();
 
-		return totalUnbondingAmount;
+		// Get the response
+		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesResponse response = delegateStub.unbondingEntries(unbondingRequest);
+
+		// Map protobuf objects to your model objects
+		List<UnbondingEntry> unbondingEntries = response.getUnbondingEntriesList().stream()
+			.map(protoEntry -> new UnbondingEntry(protoEntry.getAccount(), protoEntry.getAmount(), protoEntry.getCompletionTime()))
+			.collect(Collectors.toList());
+		unbondingListEvent.fire(new UnbondingListEvent(unbondingEntries));
+
+		// Calculate and return the total
+		return unbondingEntries.stream()
+			.mapToLong(UnbondingEntry::getAmount)
+			.sum();
 	}
 
 	// TODO
@@ -482,6 +505,59 @@ public class CosmosService {
 				.graphic(null)
 				.show();
 		}
+	}
+
+	public void fetchAccountTransactions(String address) {
+		List<TxOuterClass.Tx> transactionsSent = new ArrayList<>();
+		List<TxOuterClass.Tx> transactionsReceived = new ArrayList<>();
+
+		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+
+		// fetch sender transactions
+		String querySender = "transfer.sender='" + address + "'";
+		transactionsSent.addAll(fetchTransactions(querySender, stub));
+
+		// fetch recipient transactions
+		String queryRecipient = "transfer.recipient='" + address + "'";
+		transactionsReceived.addAll(fetchTransactions(queryRecipient, stub));
+
+		List<String> transactionsSentHashes = transactionsSent.stream()
+			.map(tx -> bytesToHex(sha256(tx.toByteArray())))
+			.collect(Collectors.toList());
+
+		List<String> transactionsReceivedHashes = transactionsReceived.stream()
+			.map(tx -> bytesToHex(sha256(tx.toByteArray())))
+			.collect(Collectors.toList());
+
+		// Fire the event
+		transactionEvent.fire(new TransactionListEvent(transactionsSentHashes, transactionsReceivedHashes));
+	}
+
+	private List<TxOuterClass.Tx> fetchTransactions(String query, ServiceGrpc.ServiceBlockingStub stub) {
+		ServiceOuterClass.GetTxsEventRequest request = ServiceOuterClass.GetTxsEventRequest.newBuilder()
+			.setLimit(10)
+			.setQuery(query)
+			.build();
+
+		return stub.getTxsEvent(request).getTxsList();
+	}
+
+	private static byte[] sha256(byte[] input) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			return digest.digest(input);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private static String bytesToHex(byte[] bytes) {
+		StringBuilder result = new StringBuilder();
+		for (byte b : bytes) {
+			result.append(String.format("%02X", b));
+		}
+		return result.toString();
 	}
 
 }

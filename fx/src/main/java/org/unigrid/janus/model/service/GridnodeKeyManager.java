@@ -1,5 +1,3 @@
-
-
 package org.unigrid.janus.model.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,7 +11,6 @@ import java.util.List;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.DataDirectory;
 import java.util.Collections;
-import javafx.application.Platform;
 import lombok.Getter;
 import lombok.Setter;
 import org.unigrid.janus.model.gridnode.GridnodeModel;
@@ -72,6 +69,7 @@ public class GridnodeKeyManager {
 			System.out.println("send signal to change message to the user for generate keys");
 		}
 		updateAdditionalKeysPossible();
+		updateLessKeysAvailable();
 		// Fire an event with the loaded keys
 		publicKeysEvent.fire(new PublicKeysEvent(keys));
 
@@ -120,6 +118,23 @@ public class GridnodeKeyManager {
 
 		// Always fire the event
 		gridnodeKeyUpdateModelEvent.fire(gridnodeKeyUpdateModel);
+	}
+
+	private void updateLessKeysAvailable() {
+		int currentKeyCount = keys.size();
+		int potentialKeyCount = gridnodeModel.getPossibleGridnodes();
+		if (currentKeyCount > potentialKeyCount) {
+			// Calculate the number of elements to remove
+			int removeCount = currentKeyCount - potentialKeyCount;
+			// Check if the list has enough elements to remove
+			if (removeCount > 0 && removeCount <= keys.size()) {
+				// Remove elements from the end of the list
+				for (int i = 0; i < removeCount; i++) {
+					keys.remove(keys.size() - 1); // remove last element
+				}
+			}
+		}
+
 	}
 
 }
