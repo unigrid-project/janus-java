@@ -18,14 +18,23 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<release.tag>1.0.20</release.tag>
 		<current.tag>1.0.20</current.tag>
-		<config.opens> fx=jakarta.xml.bind/jakarta.xml.bind-api@jakarta.xml.bind fx=org.eclipse/yasson@org.eclipse.yasson
+		<config.opens>
+                    fx=jakarta.xml.bind/jakarta.xml.bind-api@jakarta.xml.bind
+                    fx=org.eclipse/yasson@org.eclipse.yasson
 		</config.opens>
 		<config.exports>
 			<!--fx=jakarta.json/jakarta.json-api fx=com.fasterxml.jackson.core/jackson-core-->
 			<!--org.glassfish.java.json=jakarta.json/jakarta.json.spi-->
 			<!--jakarta.json=org.glassfish.java.json/org.glassfish.json-->
 			<!--org.glassfish.json=jakarta.json/jakarta.json-api-->
-			<!--org.glassfish.json=jakarta.json.bind/jakarta.json.bind-api--> jakarta.json=org.glassfish/jakarta.json@org.glassfish.json
+			<!--org.glassfish.json=jakarta.json.bind/jakarta.json.bind-api-->
+                        weld.environment.common=org.web3j.crypto@crypto
+                        weld.environment.common=org.web3j.crypto@utils
+                        jakarta.json=org.glassfish/jakarta.json@org.glassfish.json
+                        io.grpc.internal=io.netty/netty-all@netty.all
+                        io.grpc.internal=io.netty/netty-all@io.netty.transport
+                        io.grpc.protobuf=io.netty/netty-all@io.netty.transport
+                        io.grpc.protobuf=io.netty/netty-all@netty.all
 		</config.exports>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
