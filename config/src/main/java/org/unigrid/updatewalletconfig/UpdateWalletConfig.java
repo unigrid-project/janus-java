@@ -128,11 +128,11 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 		for (FileMetadata file : files) {
 			List<Package> opensPackages = getOpensExports(file, opens);
 			if (opensPackages != null && !opensPackages.isEmpty()) {
-				file.setOpensPackages(getOpensExports(file, opens));
+				file.setOpensPackages(opensPackages);
 			}
 			List<Package> exportsPackages = getOpensExports(file, exports);
 			if (exportsPackages != null && !exportsPackages.isEmpty()) {
-				file.setExportsPackages(getOpensExports(file, exports));
+				file.setExportsPackages(exportsPackages);
 			}
 		}
 
@@ -147,7 +147,7 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 
 	public List<Package> getOpensExports(FileMetadata file, String[] opensExportsList) {
 		List<Package> packages = null;
-
+		packages = new ArrayList<Package>();
 		for (String element : opensExportsList) {
 			element.trim();
 			if (!element.isEmpty()) {
@@ -160,7 +160,6 @@ public class UpdateWalletConfig extends AbstractMavenLifecycleParticipant {
 				String moduelPackage = arr[1];
 
 				if (file.getGroupId().equals(groupId) && file.getArtifactId().equals(artifactId)) {
-					packages = new ArrayList<Package>();
 					packages.add(new Package(groupId, target, moduelPackage));
 				}
 			}

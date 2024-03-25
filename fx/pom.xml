@@ -23,21 +23,106 @@
                     fx=org.eclipse/yasson@org.eclipse.yasson
 		</config.opens>
 		<config.exports>
-			<!--fx=jakarta.json/jakarta.json-api fx=com.fasterxml.jackson.core/jackson-core-->
-			<!--org.glassfish.java.json=jakarta.json/jakarta.json.spi-->
-			<!--jakarta.json=org.glassfish.java.json/org.glassfish.json-->
-			<!--org.glassfish.json=jakarta.json/jakarta.json-api-->
-			<!--org.glassfish.json=jakarta.json.bind/jakarta.json.bind-api-->
-                        weld.environment.common=org.web3j.crypto@crypto
-                        weld.environment.common=org.web3j.crypto@utils
+                        <!--target=dependecy/group.id@artifact.id-->
+                        weld.environment.common=org.web3j/crypto@crypto
+                        weld.environment.common=org.web3j/crypto@utils
+                        io.netty.buffer=org.web3j/crypto@crypto
+                        io.netty.buffer=org.web3j/crypto@utils
+                        io.grpc.netty=org.web3j/crypto@crypto
+                        io.grpc.netty=org.web3j/crypto@utils
+                        weld.api=org.web3j/crypto@crypto
+                        weld.api=org.web3j/crypto@utils
+                        j8fu=org.web3j/crypto@crypto
+                        j8fu=org.web3j/crypto@utils
+                        jersey.hk2=org.web3j/crypto@crypto
+                        jersey.hk2=org.web3j/crypto@utils
                         jakarta.json=org.glassfish/jakarta.json@org.glassfish.json
                         io.grpc.internal=io.netty/netty-all@netty.all
                         io.grpc.internal=io.netty/netty-all@io.netty.transport
                         io.grpc.protobuf=io.netty/netty-all@io.netty.transport
                         io.grpc.protobuf=io.netty/netty-all@netty.all
+                        okio=io.netty/netty-all@io.netty.bootstrap
+                        okio=io.netty/netty-transport@io.netty.bootstrap
+                        okio=io.netty/netty-all@io.netty.handler.traffic
+                        okio=io.netty/netty-handler@io.netty.handler.traffic
+                        netty.all=io.netty/netty-handler@io.netty.handler.stream
+                        netty.all=io.netty/netty-handler@io.netty.handler.logging
+                        org.json=io.netty/netty-all@io.netty.channel.embedded
+                        org.json=io.netty/netty-transport@io.netty.channel.embedded
+                        failureaccess=org.web3j/crypto@crypto
+                        failureaccess=org.web3j/crypto@utils
+                        org.apache.commons.io=org.web3j/crypto@utils
+                        org.apache.commons.io=org.web3j/crypto@crypto
+                        com.google.errorprone.annotations=org.web3j/crypto@utils
+                        com.google.errorprone.annotations=org.web3j/crypto@crypto
+                        org.checkerframework.checker.qual=org.web3j/crypto@crypto
+                        org.checkerframework.checker.qual=org.web3j/crypto@utils
+                        io.netty.codec=org.web3j/crypto@crypto
+                        io.netty.codec=org.web3j/crypto@utils
+                        org.checkerframework.checker.qual=org.web3j/crypto@crypto
+                        org.checkerframework.checker.qual=org.web3j/crypto@utils
 		</config.exports>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
+        <dependencyManagement>
+                <dependencies>
+                        <dependency>
+                                <groupId>jakarta.annotation</groupId>
+                                <artifactId>jakarta.annotation-api</artifactId>
+                                <version>2.0.0</version>
+                        </dependency>
+                        <dependency>
+                                <groupId>org.glassfish.jersey.inject</groupId>
+                                <artifactId>jersey-hk2</artifactId>
+                                <version>3.0.5</version>
+                        </dependency>
+                        <dependency>
+                                <groupId>com.evolvedbinary.j8fu</groupId>
+                                <artifactId>j8fu</artifactId>
+                                <version>1.23.0</version>
+                        </dependency>
+                        <dependency>
+                                <groupId>io.grpc</groupId>
+                                <artifactId>grpc-services</artifactId>
+                                <version>1.60.0</version>
+                        </dependency>
+                        <dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-netty</artifactId>
+			<version>1.60.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-protobuf</artifactId>
+			<version>1.60.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-stub</artifactId>
+			<version>1.60.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-services</artifactId>
+			<version>1.60.0</version>
+		</dependency>
+		<!--<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>4.0.9.Final</version>
+		</dependency>--> 
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>3.21.7</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java-util</artifactId>
+			<version>3.21.7</version>
+		</dependency>
+                </dependencies>
+        </dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>com.jcraft</groupId>
@@ -285,11 +370,11 @@
 			<artifactId>grpc-services</artifactId>
 			<version>1.60.0</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
 			<version>4.0.9.Final</version>
-		</dependency> 
+		</dependency>-->
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
