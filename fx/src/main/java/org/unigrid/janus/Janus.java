@@ -249,6 +249,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 	private void startCosmosWallet() {
 		try {
 			hedgehog.startHedgehog(HedgehogConfig.startMode.DEV_NET);
+			//hedgehog.startHedgehog(HedgehogConfig.startMode.TEST_NET);
 			debug.print("starting hedgehog", Janus.class.getSimpleName());
 			// AlertDialog.open(AlertType.ERROR, "Something fucked up!");
 		} catch (Exception e) {
@@ -259,6 +260,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 		}
 		try {
 			hedgehog.addNode(HedgehogConfig.startMode.DEV_NET);
+			//hedgehog.startHedgehog(HedgehogConfig.startMode.TEST_NET);
 			cosmosWallet.show();
 		} catch (Exception e) {
 			System.out.print("error: " + e.getMessage());
@@ -440,7 +442,7 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	private void showChooseChain() {
 		debug.print("opening Choose chain screen...", Janus.class.getSimpleName());
-		
+
 		promptRequestEvent.fire(PromptRequest.builder()
 			.type(PromptRequest.Type.CHAIN)
 			.onPrimary(() -> {

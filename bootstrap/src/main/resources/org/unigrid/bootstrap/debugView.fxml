@@ -14,13 +14,13 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="625.0" maxWidth="714.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="516.0" prefWidth="714.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" stylesheets="@updateview.css" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.bootstrap.controller.DebugViewController">
+<AnchorPane maxHeight="625.0" maxWidth="714.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="516.0" prefWidth="714.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" stylesheets="@updateview.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.unigrid.bootstrap.controller.DebugViewController">
    <children>
       <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" layoutY="2.0" orientation="VERTICAL" prefHeight="523.0" prefWidth="657.0" rowValignment="TOP" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
          <children>
-            <Label prefHeight="35.0" prefWidth="82.0" stylesheets="@updateview.css" text="Debug" textAlignment="CENTER" textFill="WHITE">
+            <Label alignment="CENTER" prefHeight="37.0" prefWidth="164.0" stylesheets="@updateview.css" text="SETTINGS" textAlignment="CENTER" textFill="WHITE">
                <font>
-                  <Font size="24.0" />
+                  <Font name="System Bold" size="22.0" />
                </font>
                <padding>
                   <Insets bottom="5.0" top="2.0" />
@@ -28,43 +28,22 @@
             </Label>
             <Accordion prefHeight="404.0" prefWidth="685.0" stylesheets="@updateview.css">
               <panes>
-                <TitledPane animated="false" text="Folder and File util">
+                <TitledPane animated="false" text="TESTNET">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="track-background" stylesheets="@updateview.css">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);">
                            <children>
-                              <GridPane prefHeight="355.0" prefWidth="653.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <columnConstraints>
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.0" minWidth="10.0" prefWidth="192.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="425.0" minWidth="10.0" prefWidth="321.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="425.0" minWidth="10.0" prefWidth="222.0" />
-                                </columnConstraints>
-                                <rowConstraints>
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                </rowConstraints>
-                                 <children>
-                                    <Button mnemonicParsing="false" onAction="#onResetDepends" text="Reset depends" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-                                    <Label text="Remove the depends folder and everything in it!" textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.valignment="CENTER" />
-                                    <Label fx:id="txtRemoveDepndsDone" textFill="#0ba400" visible="false" GridPane.columnIndex="2" />
-                                    <Button mnemonicParsing="false" onAction="#onRemoveDebug" text="Remove debug.log" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                                    <Label text="Remove debug.log" textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                    <Label fx:id="txtRemoveDebug" textFill="#0ba400" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                    <Button fx:id="onRemoveBlockChainData" mnemonicParsing="false" onAction="#onRemoveBlockChainData" text="Remove blockchain" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-                                    <Label text="Remove blockchain data" textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                    <Label fx:id="txtRemoveBlockChainData" textFill="#0ba400" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                    <Button fx:id="btnOpenDebug" mnemonicParsing="false" onAction="#onOpenDebug" text="Open debug.log" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                                    <Label fx:id="txtRemoveDebug1" text="Open Debug.log" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                    <Label fx:id="txtOpenDebugStatus" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                 </children>
-                              </GridPane>
-                              <ScrollBar orientation="VERTICAL" prefHeight="354.0" prefWidth="12.0" visible="false" AnchorPane.bottomAnchor="1.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0" />
-                           </children>
-                        </AnchorPane>
+                              <Button layoutX="309.0" layoutY="138.0" mnemonicParsing="false" onAction="#onConnectToTestnetClicked" text="CONNECT TO TESTNET" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="80.0">
+                                 <font>
+                                    <Font name="System Bold" size="38.0" />
+                                 </font>
+                              </Button>
+                           </children></AnchorPane>
                   </content>
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
                 </TitledPane>
-                <TitledPane animated="false" text="Input arguments">
+                <TitledPane animated="false" text="DEVELOPMENT">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" stylesheets="@updateview.css">
                            <children>
@@ -86,21 +65,73 @@
                            </children>
                         </AnchorPane>
                   </content>
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
                 </TitledPane>
-                <TitledPane animated="false" text="untitled 3">
+                <TitledPane animated="false" text="LEGACY CHAIN DEBUG">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" />
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="track-background" stylesheets="@updateview.css">
+                           <children>
+                              <GridPane prefHeight="355.0" prefWidth="653.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.0" minWidth="10.0" prefWidth="192.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="425.0" minWidth="10.0" prefWidth="321.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="425.0" minWidth="10.0" prefWidth="222.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#onResetDepends" prefWidth="125.0" text="RESET" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font></Button>
+                                    <Label text="Remove the depends folder and everything in it." textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+                                    <Button mnemonicParsing="false" onAction="#onRemoveDebug" prefWidth="125.0" text="DELETE" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font></Button>
+                                    <Label text="Delete the debug log." textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                                    <Button fx:id="onRemoveBlockChainData" mnemonicParsing="false" onAction="#onRemoveBlockChainData" prefWidth="125.0" text="RESYNC" GridPane.halignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font></Button>
+                                    <Label text="Resync the wallet from the latest daily bootstrap." textFill="WHITE" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                                    <Button fx:id="btnOpenDebug" mnemonicParsing="false" onAction="#onOpenDebug" prefWidth="125.0" text="OPEN" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font></Button>
+                                    <Label fx:id="txtRemoveDebug1" text="Open the Debug log." textFill="WHITE" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                                    <Button fx:id="btnOpenDebug1" mnemonicParsing="false" onAction="#onOpenDebug" prefWidth="125.0" text="HELP" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
+                                       <font>
+                                          <Font name="System Bold" size="13.0" />
+                                       </font>
+                                    </Button>
+                                    <Label fx:id="txtRemoveDebug11" text="Get help to common issues on our docs page." textFill="WHITE" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                                 </children>
+                              </GridPane>
+                              <ScrollBar orientation="VERTICAL" prefHeight="354.0" prefWidth="12.0" visible="false" AnchorPane.bottomAnchor="1.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="1.0" />
+                           </children>
+                        </AnchorPane>
                   </content>
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
                 </TitledPane>
               </panes>
             </Accordion>
-            <Button fx:id="closeButton" mnemonicParsing="false" onAction="#onCLose" text="Close">
-               <font>
-                  <Font size="18.0" />
-               </font>
+            <Button fx:id="closeButton" mnemonicParsing="false" onAction="#onCLose" prefWidth="125.0" text="CLOSE">
                <FlowPane.margin>
-                  <Insets bottom="5.0" top="5.0" />
+                  <Insets bottom="5.0" top="15.0" />
                </FlowPane.margin>
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
             </Button>
          </children>
       </FlowPane>
