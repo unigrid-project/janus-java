@@ -12,7 +12,7 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
-*/
+ */
 
 package org.unigrid.bootstrap.controller;
 
@@ -65,6 +65,23 @@ public class DebugViewController implements Initializable {
 	}
 
 	@FXML
+	public void onConnectToTestnetClicked(ActionEvent event) {
+		OS os = OS.CURRENT;
+		Stage stage = (Stage) closeButton.getScene().getWindow();
+		String configURL = null;
+		if (os.equals(OS.LINUX)) {
+			configURL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/testnet/config-linux-test.xml";
+		} else if (os.equals(OS.WINDOWS)) {
+			configURL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/testnet/config-windows-test.xml";
+		} else if (os.equals(OS.MAC)) {
+			configURL = "https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/testnet/config-mac-test.xml";
+		}
+		UpdateView.getInstance().setConfigURL(configURL);
+		startupState = App.state.NORMAL;
+		stage.close();
+	}
+
+	@FXML
 	public void onResetDepends(ActionEvent event) {
 		if (UpdateView.getInstance().removeDepends()) {
 			txtRemoveDepndsDone.setText("\u2713");
@@ -80,7 +97,7 @@ public class DebugViewController implements Initializable {
 
 			txtRemoveDebug.setText("\u2713");
 			txtRemoveDebug.setVisible(true);
-			
+
 		}
 	}
 
@@ -96,7 +113,7 @@ public class DebugViewController implements Initializable {
 	public void onOpenDebug(ActionEvent event) throws IOException {
 		HostServices services = UpdateView.getInstance().getHostServices();
 		String path = UpdateView.getUnigridHome() + "debug.log";
-		switch(OS.CURRENT) {
+		switch (OS.CURRENT) {
 			case LINUX -> {
 				services.showDocument(path);
 			}
@@ -106,8 +123,10 @@ public class DebugViewController implements Initializable {
 					.directory(new File(UpdateView.getUnigridHome()))
 					.start();
 			}
-			case WINDOWS -> services.showDocument(path);
-			case OTHER -> services.showDocument(path);
+			case WINDOWS ->
+				services.showDocument(path);
+			case OTHER ->
+				services.showDocument(path);
 		}
 	}
 }

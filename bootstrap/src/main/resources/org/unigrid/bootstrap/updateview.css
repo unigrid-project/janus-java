@@ -27,6 +27,7 @@
 
 .button:hover {
 	-fx-background-color: #ccc5;
+	-fx-cursor: hand;
 }
 
 .scroll-bar:vertical,
