@@ -58,18 +58,10 @@ module fx {
 	requires org.bitcoinj.core;
 	requires org.bouncycastle.provider;
 	requires com.google.common;
-	requires org.json;
-	requires org.apache.commons.codec;
 	requires java.net.http;
-	requires com.google.protobuf;
-	requires io.grpc;
-	requires io.grpc.stub;
-	requires io.grpc.protobuf;
 	requires com.google.errorprone.annotations;
 	requires proto.google.common.protos;
-	requires com.google.protobuf.util;
 	requires okhttp3;
-	requires org.apache.commons.collections4;
 	requires crypto;
 
 	uses org.update4j.service.Launcher;
