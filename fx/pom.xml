@@ -250,7 +250,7 @@
 		<dependency>
 			<groupId>com.github.unigrid-project</groupId>
 			<artifactId>pax-sdk-java</artifactId>
-			<version>v0.0.8</version>
+			 <version>v0.0.14</version>
 		</dependency>
 		
 		<!--

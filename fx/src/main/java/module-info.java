@@ -62,8 +62,8 @@ module fx {
 	requires com.google.errorprone.annotations;
 	requires proto.google.common.protos;
 	requires okhttp3;
-	requires cosmos.base.abci.v1beta1;
-	requires org.unigrid.pax.sdk.cosmos;
+	requires paxsdk;
+	requires org.json;
 
 	uses org.update4j.service.Launcher;
 
