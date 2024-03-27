@@ -47,6 +47,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 //import cosmos.base.abci.v1beta1.Abci;
 import java.security.Security;
 import org.bitcoinj.crypto.HDKeyDerivation;
+import org.unigrid.pax.sdk.cosmos.UnigridCredentials;
 
 public class MnemonicToPrivateKey {
 
@@ -124,7 +125,7 @@ public class MnemonicToPrivateKey {
 		System.out.println("Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 		//generateKeys(mnemonic);
 		//
-		CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "",
+		UnigridCredentials creds = AddressUtil.getCredentials(mnemonic, "",
 			"m/44'/118'/0'/0/0", "unigrid");
 
 		System.out.println("Address from creds: " + creds.getAddress());

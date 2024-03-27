@@ -17,6 +17,7 @@ package org.unigrid.janus.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cosmos.base.abci.v1beta1.Abci;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -45,7 +46,6 @@ import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -83,7 +83,6 @@ import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
 import org.unigrid.janus.model.service.AccountsService;
 import org.unigrid.janus.model.service.AddressCosmosService;
 import org.unigrid.janus.model.service.CosmosService;
-import org.unigrid.janus.model.service.GrpcService;
 import org.unigrid.janus.model.service.MnemonicService;
 import org.unigrid.janus.model.signal.DisplaySwapPrompt;
 import org.unigrid.janus.model.signal.MnemonicState;
@@ -91,27 +90,13 @@ import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
 import org.unigrid.janus.model.signal.TabRequestSignal;
 import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
-import java.math.BigInteger;
-import cosmos.base.abci.v1beta1.Abci;
-import cosmos.tx.v1beta1.ServiceGrpc;
-import cosmos.tx.v1beta1.ServiceOuterClass;
-import cosmos.tx.v1beta1.TxOuterClass;
-import io.grpc.StatusRuntimeException;
 import java.math.RoundingMode;
-import java.security.MessageDigest;
-import java.util.Random;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Paint;
-import org.apache.commons.lang3.SystemUtils;
-import org.controlsfx.control.Notifications;
-import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import java.util.stream.Collectors;
 import javafx.animation.Animation;
@@ -157,6 +142,10 @@ import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
 import org.unigrid.janus.model.signal.PublicKeysEvent;
 import org.unigrid.janus.model.signal.TransactionListEvent;
 import org.unigrid.janus.model.signal.UnbondingListEvent;
+import org.unigrid.pax.sdk.cosmos.GrpcService;
+import org.unigrid.pax.sdk.cosmos.SignUtil;
+import org.unigrid.pax.sdk.cosmos.UnigridCredentials;
+import org.unigrid.pax.sdk.cosmos.model.SendInfo;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -618,7 +607,7 @@ public class CosmosController implements Initializable {
 					@Override
 					protected Void call() throws Exception {
 						Platform.runLater(() -> {
-							getValidators();
+							//getValidators();
 						});
 						cosmosService.loadAccountData(accountsData.getSelectedAccount().getAddress());
 
@@ -884,7 +873,7 @@ public class CosmosController implements Initializable {
 			"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
 		String path = String.format("m/44'/118'/0'/0/%d", index);
-		org.unigrid.janus.utils.CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
+		UnigridCredentials creds = (UnigridCredentials) AddressUtil.getCredentials(mnemonic, "", path,
 			"unigrid");
 
 		System.out.println("Address from creds: " + creds.getAddress());
@@ -1019,9 +1008,9 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	public void sendTokens(String password) throws Exception {
-		CosmosCredentials credentials = cosmosService.createCredentials(password);
+		UnigridCredentials credentials = cosmosService.createCredentials(password);
 
-		SignUtil transactionService = cosmosService.createSignUtilService();
+		SignUtil transactionService = (SignUtil) cosmosService.createSignUtilService();
 		long amountInUugd = cosmosService.convertBigDecimalInUugd(Double.parseDouble(sendAmount.getText()));
 
 		System.out.println("amount in uugd: " + amountInUugd);
@@ -1032,7 +1021,8 @@ public class CosmosController implements Initializable {
 			.amountInAtom(amountInUugd)
 			.build();
 
-		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
+		Abci.TxResponse txResponse;
+		txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
 		toAddress.setText("");
@@ -1043,7 +1033,7 @@ public class CosmosController implements Initializable {
 	}
 
 	public void delegation(boolean delegate, String validatorAddress, String password) throws Exception {
-		CosmosCredentials credentials = cosmosService.createCredentials(password);
+		UnigridCredentials credentials = cosmosService.createCredentials(password);
 
 		SignUtil transactionService = cosmosService.createSignUtilService();
 
@@ -1226,34 +1216,35 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	public void getValidators() {
-		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest request = cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest.newBuilder()
-			.setStatus("BOND_STATUS_BONDED")
-			.build();
-		try {
-			cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsResponse response = stub.validators(request);
-			System.out.println("Number of validators: " + response.getValidatorsCount());
-			List<ValidatorInfo> validatorInfoList = new ArrayList<>();
-			for (cosmos.staking.v1beta1.Staking.Validator validator : response.getValidatorsList()) {
-				String moniker = validator.getDescription().getMoniker();
-				String operatorAddress = validator.getOperatorAddress();
-
-				BigInteger rate = new BigInteger(validator.getCommission().getCommissionRates().getRate());
-				BigInteger devideDecimals = new BigInteger(VALIDATORS_DECIMAL_DEVIDER);
-				BigInteger commission = rate.divide(devideDecimals);
-
-				String commissionPercentage = commission.toString() + "%";
-
-				validatorInfoList.add(new ValidatorInfo(moniker, operatorAddress, commissionPercentage));
-			}
-
-			validatorListComboBox.getItems().setAll(validatorInfoList);
-		} catch (StatusRuntimeException e) {
-			System.err.println("RPC error: " + e.getStatus());
-		}
-
-	}
+	// todo move this to pax-sdk
+//	public void getValidators() {
+//		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+//		cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest request = cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest.newBuilder()
+//			.setStatus("BOND_STATUS_BONDED")
+//			.build();
+//		try {
+//			cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsResponse response = stub.validators(request);
+//			System.out.println("Number of validators: " + response.getValidatorsCount());
+//			List<ValidatorInfo> validatorInfoList = new ArrayList<>();
+//			for (cosmos.staking.v1beta1.Staking.Validator validator : response.getValidatorsList()) {
+//				String moniker = validator.getDescription().getMoniker();
+//				String operatorAddress = validator.getOperatorAddress();
+//
+//				BigInteger rate = new BigInteger(validator.getCommission().getCommissionRates().getRate());
+//				BigInteger devideDecimals = new BigInteger(VALIDATORS_DECIMAL_DEVIDER);
+//				BigInteger commission = rate.divide(devideDecimals);
+//
+//				String commissionPercentage = commission.toString() + "%";
+//
+//				validatorInfoList.add(new ValidatorInfo(moniker, operatorAddress, commissionPercentage));
+//			}
+//
+//			validatorListComboBox.getItems().setAll(validatorInfoList);
+//		} catch (StatusRuntimeException e) {
+//			System.err.println("RPC error: " + e.getStatus());
+//		}
+//
+//	}
 
 	public void onDelegationAmountEvent(@Observes DelegationStatusEvent event) {
 		Platform.runLater(() -> {
@@ -1465,7 +1456,7 @@ public class CosmosController implements Initializable {
 		List<String> validatorAddresses = items.stream()
 			.map(item -> item.getDelegation().getValidatorAddress())
 			.collect(Collectors.toList());
-		CosmosCredentials credentials = cosmosService.createCredentials(password);
+		UnigridCredentials credentials = cosmosService.createCredentials(password);
 
 		SignUtil transactionService = cosmosService.createSignUtilService();
 		transactionService.sendClaimStakingRewardsTx(credentials, validatorAddresses, new BigDecimal("0.000001"), 200000);
@@ -1510,9 +1501,9 @@ public class CosmosController implements Initializable {
 	}
 
 	public void undelegateStaking(String password) throws Exception {
-		CosmosCredentials credentials = cosmosService.createCredentials(password);
+		UnigridCredentials credentials = cosmosService.createCredentials(password);
 
-		SignUtil transactionService = cosmosService.createSignUtilService();
+		SignUtil transactionService = (SignUtil) cosmosService.createSignUtilService();
 		Abci.TxResponse txResponse = transactionService.sendUnstakingTx(credentials, currentValidatorAddr,
 			Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 200000);
 
@@ -1523,8 +1514,8 @@ public class CosmosController implements Initializable {
 	}
 
 	public void switchDelegator(String password) throws Exception {
-		CosmosCredentials credentials = cosmosService.createCredentials(password);
-		SignUtil transactionService = cosmosService.createSignUtilService();
+		UnigridCredentials credentials = cosmosService.createCredentials(password);
+		SignUtil transactionService = (SignUtil) cosmosService.createSignUtilService();
 		Abci.TxResponse txResponse = transactionService.sendSwitchDelegatorTx(credentials, currentValidatorAddr, newValidatorAddr,
 			Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 400000);
 

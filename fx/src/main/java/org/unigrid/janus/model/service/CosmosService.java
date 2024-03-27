@@ -51,8 +51,6 @@ import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.SignatureDecodeException;
 import org.bouncycastle.util.encoders.Hex;
 import org.controlsfx.control.Notifications;
-import org.unigrid.janus.controller.CosmosCredentials;
-import org.unigrid.janus.controller.SignUtil;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.AccountsData.Account;
 import org.unigrid.janus.model.ApiConfig;
@@ -78,6 +76,9 @@ import org.unigrid.janus.model.gridnode.UnbondingEntry;
 import org.unigrid.janus.model.signal.TransactionListEvent;
 import org.unigrid.janus.model.signal.UnbondingListEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
+import org.unigrid.pax.sdk.cosmos.GrpcService;
+import org.unigrid.pax.sdk.cosmos.SignUtil;
+import org.unigrid.pax.sdk.cosmos.UnigridCredentials;
 
 @ApplicationScoped
 public class CosmosService {
@@ -231,7 +232,8 @@ public class CosmosService {
 	}
 
 	public long getAccountNumber(String address) {
-		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
+		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient;
+		authQueryClient = cosmos.auth.v1beta1.QueryGrpc
 			.newBlockingStub(grpcService.getChannel());
 		QueryOuterClass.QueryAccountRequest accountRequest = QueryOuterClass.QueryAccountRequest.newBuilder().setAddress(address).build();
 
@@ -450,9 +452,9 @@ public class CosmosService {
 		return transactionService;
 	}
 
-	public CosmosCredentials createCredentials(String password) {
+	public UnigridCredentials createCredentials(String password) {
 		byte[] privateKey = Hex.decode(getPrivateKeyHex(password));
-		CosmosCredentials credentials = CosmosCredentials.create(privateKey, "unigrid");
+		UnigridCredentials credentials = UnigridCredentials.create(privateKey, "unigrid");
 		return credentials;
 	}
 

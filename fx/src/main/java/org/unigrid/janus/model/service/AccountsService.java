@@ -44,6 +44,7 @@ import org.unigrid.janus.model.rest.entity.RewardsRequest;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
 import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
 import org.unigrid.janus.view.backing.CosmosTxList;
+import org.unigrid.pax.sdk.cosmos.GrpcService;
 
 @ApplicationScoped
 public class AccountsService {

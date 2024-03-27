@@ -247,20 +247,24 @@
 			<scope>test</scope>
 		</dependency>
 
-        
-		
 		<dependency>
-			<groupId>org.unigrid</groupId>
-			<artifactId>pax-sdk</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>com.github.unigrid-project</groupId>
+			<artifactId>pax-sdk-java</artifactId>
+			<version>v0.0.8</version>
 		</dependency>
 		
-<!--
+		<!--
 		<dependency>
 		    <groupId>com.dustinredmond.fxtrayicon</groupId>
 		    <artifactId>FXTrayIcon</artifactId>
 		    <version>3.3.0</version>
 		</dependency>-->
+	 <dependency>
+	  <groupId>org.json</groupId>
+	  <artifactId>json</artifactId>
+	  <version>20230618</version>
+	  <type>jar</type>
+	 </dependency>
 	</dependencies>
 	<build>
 		<extensions>
@@ -406,11 +410,8 @@
 	</reporting>
 	<repositories>
 		<repository>
-			<id>github</id>
-			<name>GitHub Maven Packages</name>
-			<url>https://maven.pkg.github.com/unigrid-project/pax-sdk-java</url>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
 		</repository>
 	</repositories>
-
-
 </project>

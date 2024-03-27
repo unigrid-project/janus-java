@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.unigrid.pax.sdk.cosmos.UnigridCredentials;
 
 public class AddressUtil {
 
@@ -53,7 +54,7 @@ public class AddressUtil {
         return true;
     }
 
-    public static CosmosCredentials getCredentials(String mnemonic, String password, String derivePath, String addressPrefix) {
+    public static UnigridCredentials getCredentials(String mnemonic, String password, String derivePath, String addressPrefix) {
 
         String[] mnemonicArr = mnemonic.split(" ");
 
@@ -63,7 +64,7 @@ public class AddressUtil {
         List<ChildNumber> childNumbers = decodePath(derivePath);
         DeterministicKey deterministicKey = deterministicKeyChain.getKeyByPath(childNumbers, true);
 
-        return CosmosCredentials.create(deterministicKey, addressPrefix);
+        return UnigridCredentials.create(deterministicKey, addressPrefix);
     }
 
     public static List<ChildNumber> decodePath(String path) {

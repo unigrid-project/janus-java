@@ -16,7 +16,6 @@
 
 package org.unigrid.janus.model.service;
 
-import com.evolvedbinary.j8fu.function.TriConsumer;
 import com.evolvedbinary.j8fu.function.TriFunction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -36,7 +35,8 @@ import org.bitcoinj.crypto.MnemonicException;
 import org.unigrid.janus.model.AccountModel;
 import org.unigrid.janus.model.MnemonicModel;
 import org.unigrid.janus.utils.AddressUtil;
-import org.unigrid.janus.utils.CosmosCredentials;
+import org.unigrid.pax.sdk.cosmos.UnigridCredentials;
+
 
 @ApplicationScoped
 public class MnemonicService {
@@ -120,7 +120,7 @@ public class MnemonicService {
 			"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
 		String path = String.format("m/44'/118'/0'/0/%d", index);
-		CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
+		UnigridCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
 			"unigrid");
 
 		System.out.println("Address from creds: " + creds.getAddress());
