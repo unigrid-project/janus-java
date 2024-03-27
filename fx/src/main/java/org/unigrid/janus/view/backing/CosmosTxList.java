@@ -27,10 +27,10 @@ import lombok.Data;
 import lombok.Getter;
 
 import org.unigrid.janus.model.AccountsData;
-import org.unigrid.janus.model.rpc.entity.TransactionResponse;
-import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
 import org.unigrid.janus.model.service.CosmosService;
 import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.pax.sdk.cosmos.model.transaction.TransactionResponse;
+import org.unigrid.pax.sdk.cosmos.model.transaction.TransactionResponse.TxResponse;
 
 @ApplicationScoped
 public class CosmosTxList {

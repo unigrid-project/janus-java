@@ -16,35 +16,17 @@
 package org.unigrid.janus.model.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cosmos.bank.v1beta1.QueryGrpc;
-import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest;
-import cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import org.unigrid.janus.controller.CosmosController;
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.AccountsData.Account;
 import org.unigrid.janus.model.DataDirectory;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
-import org.unigrid.janus.model.rest.entity.DelegationsRequest;
-import org.unigrid.janus.model.rest.entity.GridnodeDelegationAmount;
-import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
-import org.unigrid.janus.model.rest.entity.RewardsRequest;
-import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
-import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
 import org.unigrid.janus.view.backing.CosmosTxList;
-import org.unigrid.pax.sdk.cosmos.GrpcService;
 
 @ApplicationScoped
 public class AccountsService {
@@ -59,8 +41,6 @@ public class AccountsService {
 	private Hedgehog hedgehog;
 	@Inject
 	private CollateralRequired collateral;
-	@Inject
-	private GrpcService grpcService;
 
 	@FXML
 	private Label addressLabel;

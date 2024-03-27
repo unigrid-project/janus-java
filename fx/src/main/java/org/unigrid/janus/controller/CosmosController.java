@@ -77,8 +77,6 @@ import org.unigrid.janus.model.MnemonicModel;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.DelegationsRequest;
 import org.unigrid.janus.model.rest.entity.RewardsRequest.Balance;
-import org.unigrid.janus.model.rpc.entity.TransactionResponse;
-import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
 import org.unigrid.janus.model.service.AccountsService;
 import org.unigrid.janus.model.service.AddressCosmosService;
 import org.unigrid.janus.model.service.CosmosService;
@@ -102,6 +100,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.HostServices;
+import javafx.beans.Observable;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.geometry.Insets;
 import javafx.scene.layout.Pane;
@@ -142,10 +141,11 @@ import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
 import org.unigrid.janus.model.signal.PublicKeysEvent;
 import org.unigrid.janus.model.signal.TransactionListEvent;
 import org.unigrid.janus.model.signal.UnbondingListEvent;
-import org.unigrid.pax.sdk.cosmos.GrpcService;
 import org.unigrid.pax.sdk.cosmos.SignUtil;
 import org.unigrid.pax.sdk.cosmos.UnigridCredentials;
 import org.unigrid.pax.sdk.cosmos.model.SendInfo;
+import org.unigrid.pax.sdk.cosmos.model.transaction.TransactionResponse.TxResponse;
+import org.unigrid.pax.sdk.cosmos.model.transaction.TransactionResponse;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -178,8 +178,6 @@ public class CosmosController implements Initializable {
 	private GridnodeDelegationService gridnodeDelegationService;
 	@Inject
 	private MnemonicService mnemonicService;
-	@Inject
-	private GrpcService grpcService;
 	@Inject
 	private Event<OverlayRequest> overlayRequest;
 	@Inject
@@ -488,7 +486,7 @@ public class CosmosController implements Initializable {
 
 			if (tableTransactionsSent.getItems().isEmpty() && tableTransactionsReceived.getItems().isEmpty()) {
 				colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));				
+				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 			}
 
 			// Gridnode List View
@@ -526,7 +524,7 @@ public class CosmosController implements Initializable {
 
 			// Load and set items for the TableView
 			loadAccounts(this::postAccountLoadInitialization);
-			
+
 		});
 	}
 
@@ -1245,7 +1243,6 @@ public class CosmosController implements Initializable {
 //		}
 //
 //	}
-
 	public void onDelegationAmountEvent(@Observes DelegationStatusEvent event) {
 		Platform.runLater(() -> {
 			gridnodeModel.setDelegatedAmount(event.getDelegatedAmount());

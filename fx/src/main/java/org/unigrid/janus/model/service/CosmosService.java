@@ -65,7 +65,6 @@ import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
 import org.unigrid.janus.model.rest.entity.RewardsRequest;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
 import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
-import org.unigrid.janus.model.rpc.entity.TransactionResponse;
 import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
 import org.unigrid.janus.model.signal.PublicKeysEvent;
@@ -73,12 +72,14 @@ import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.gridnode.UnbondingEntry;
+import org.unigrid.janus.model.qualifer.MyCustomQualifier;
 import org.unigrid.janus.model.signal.TransactionListEvent;
 import org.unigrid.janus.model.signal.UnbondingListEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
-import org.unigrid.pax.sdk.cosmos.GrpcService;
 import org.unigrid.pax.sdk.cosmos.SignUtil;
 import org.unigrid.pax.sdk.cosmos.UnigridCredentials;
+import org.unigrid.pax.sdk.cosmos.model.transaction.TransactionResponse;
+import org.unigrid.pax.sdk.cosmos.service.GrpcService;
 
 @ApplicationScoped
 public class CosmosService {
@@ -101,6 +102,7 @@ public class CosmosService {
 	@Inject
 	private Event<RedelegationsEvent> redelegationsEvent;
 	@Inject
+	@MyCustomQualifier
 	private GrpcService grpcService;
 	@Inject
 	private Event<WithdrawAddressEvent> withdrawAddressEvent;
