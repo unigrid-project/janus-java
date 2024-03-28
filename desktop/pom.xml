@@ -6,7 +6,7 @@
 	<artifactId>desktop</artifactId>
 	<packaging>jlink</packaging>
 	<name>Unigrid Janus Desktop Application</name>
-        <version>1.0.12</version>
+        <version>1.0.13</version>
 
 	<parent>
 		<groupId>org.unigrid.janus</groupId>
@@ -16,7 +16,7 @@
 	<properties>
 		<mainClass>org.unigrid.janus.Janus</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jpackage.version>1.0.12</jpackage.version>
+		<jpackage.version>1.0.13</jpackage.version>
 	</properties>
 	<dependencies>
 		<!--<dependency>
