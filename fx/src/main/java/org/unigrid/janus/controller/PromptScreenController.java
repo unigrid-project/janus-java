@@ -19,6 +19,7 @@ package org.unigrid.janus.controller;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -37,13 +38,27 @@ public class PromptScreenController {
 	private PromptRequest currentPromptRequest;
 
 	public void setText(String s) {
-		promptLabel.setText(s);
+		if (promptLabel == null) {
+			// Log the error or handle it as appropriate
+			System.out.println("promptLabel is null setText. Skipping setText.");
+			return;
+		}
+
+		Platform.runLater(() -> promptLabel.setText(s));
 	}
 
 	private void onPromptRequest(@Observes PromptRequest request) {
-		promptLabel.setText(request.getType().getLabelText());
-		currentPromptRequest = request;
-		promptScreen.show();
+		Platform.runLater(() -> {
+			if (promptLabel != null) {
+				promptLabel.setText(request.getType().getLabelText());
+			} else {
+				// Handle null case, possibly log an error
+				System.out.println("promptLabel is null.");
+			}
+
+			currentPromptRequest = request;
+			promptScreen.show();
+		});
 	}
 
 	public void onBtnPrimaryClicked(MouseEvent event) {
