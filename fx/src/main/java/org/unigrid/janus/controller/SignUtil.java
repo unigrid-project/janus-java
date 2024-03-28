@@ -47,7 +47,6 @@ import gridnode.gridnode.v1.Tx.MsgGridnodeDelegate;
 import gridnode.gridnode.v1.Tx.MsgGridnodeUndelegate;
 import java.util.List;
 
-@ApplicationScoped
 public class SignUtil {
 
 	private final GrpcService grpcService;

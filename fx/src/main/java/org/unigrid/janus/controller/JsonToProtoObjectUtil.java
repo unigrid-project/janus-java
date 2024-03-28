@@ -32,10 +32,10 @@ public class JsonToProtoObjectUtil {
         builder.add(cosmos.staking.v1beta1.Tx.getDescriptor().getMessageTypes());
         builder.add(ibc.core.client.v1.Client.getDescriptor().getMessageTypes());
         builder.add(ibc.core.client.v1.Tx.getDescriptor().getMessageTypes());
-        builder.add(ibc.core.client.v1.QueryOuterClass.getDescriptor().getMessageTypes());
+        //builder.add(ibc.core.client.v1.QueryOuterClass.getDescriptor().getMessageTypes());
         builder.add(ibc.core.client.v1.Genesis.getDescriptor().getMessageTypes());
         builder.add(Tendermint.getDescriptor().getMessageTypes());
-        builder.add(ibc.lightclients.solomachine.v1.Solomachine.getDescriptor().getMessageTypes());
+        //builder.add(ibc.lightclients.solomachine.v1.Solomachine.getDescriptor().getMessageTypes());
         builder.add(ibc.core.channel.v1.Tx.getDescriptor().getMessageTypes());
         builder.add(ibc.applications.transfer.v1.Tx.getDescriptor().getMessageTypes());
         builder.add(cosmos.gov.v1beta1.Tx.getDescriptor().getMessageTypes());

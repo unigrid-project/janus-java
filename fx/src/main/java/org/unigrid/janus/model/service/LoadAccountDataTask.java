@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.util.TimerTask;
 
-@ApplicationScoped
 public class LoadAccountDataTask extends TimerTask {
     private CosmosService cosmosService;
     private String accountAddress;

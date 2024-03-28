@@ -71,6 +71,7 @@ module fx {
 	requires okhttp3;
 	requires org.apache.commons.collections4;
 	requires crypto;
+	requires com.fasterxml.jackson.annotation;
 
 	uses org.update4j.service.Launcher;
 
@@ -109,4 +110,17 @@ module fx {
 	exports org.unigrid.janus.view.component to weld.core.impl;
 	exports org.unigrid.janus.view.decorator to weld.core.impl;
 	exports org.unigrid.janus.model to org.eclipse.yasson, com.fasterxml.jackson.databind;
+	exports gridnode.gridnode.v1;
+	exports cosmos.auth.v1beta1;
+	exports cosmos.bank.v1beta1;
+	exports cosmos.base.v1beta1;
+	exports cosmos.crypto.multisig;
+	exports cosmos.crypto.multisig.v1beta1;
+	exports cosmos.distribution.v1beta1;
+	exports cosmos.tx.v1beta1;
+	exports cosmos.base.abci.v1beta1;
+	exports cosmos.gov.v1beta1;
+	exports cosmos.staking.v1beta1;
+	exports cosmos.crypto.secp256k1;
+	exports ibc.lightclients.tendermint.v1;
 }
