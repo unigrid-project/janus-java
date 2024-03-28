@@ -3,7 +3,9 @@ package org.unigrid.janus.model.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.util.TimerTask;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @ApplicationScoped
 public class LoadAccountDataTask extends TimerTask {
     private CosmosService cosmosService;

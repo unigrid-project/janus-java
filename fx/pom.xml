@@ -250,7 +250,7 @@
 		<dependency>
 			<groupId>com.github.unigrid-project</groupId>
 			<artifactId>pax-sdk-java</artifactId>
-			 <version>v0.0.17</version>
+			<version>v0.0.23</version>
 		</dependency>
 		
 		<!--
@@ -259,12 +259,12 @@
 		    <artifactId>FXTrayIcon</artifactId>
 		    <version>3.3.0</version>
 		</dependency>-->
-	 <dependency>
-	  <groupId>org.json</groupId>
-	  <artifactId>json</artifactId>
-	  <version>20230618</version>
-	  <type>jar</type>
-	 </dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20230618</version>
+			<type>jar</type>
+		</dependency>
 	</dependencies>
 	<build>
 		<extensions>

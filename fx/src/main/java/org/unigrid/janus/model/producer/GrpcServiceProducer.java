@@ -11,7 +11,7 @@ import org.unigrid.pax.sdk.cosmos.service.GrpcService;
 public class GrpcServiceProducer {
 
     @Produces
-    @MyCustomQualifier // Custom qualifier to resolve ambiguity
+    //@MyCustomQualifier // Custom qualifier to resolve ambiguity
     public GrpcService createMyCustomGrpcService() {
         // Instantiate your GrpcService here
         GrpcService service = new GrpcService();

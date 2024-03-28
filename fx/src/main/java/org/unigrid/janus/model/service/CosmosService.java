@@ -17,7 +17,7 @@ package org.unigrid.janus.model.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.Any;
+//import com.google.protobuf.Any;
 import cosmos.auth.v1beta1.Auth;
 import cosmos.auth.v1beta1.QueryOuterClass;
 import cosmos.bank.v1beta1.QueryGrpc;
@@ -27,7 +27,10 @@ import cosmos.tx.v1beta1.TxOuterClass;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -72,21 +75,22 @@ import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.gridnode.UnbondingEntry;
-import org.unigrid.janus.model.qualifer.MyCustomQualifier;
 import org.unigrid.janus.model.signal.TransactionListEvent;
 import org.unigrid.janus.model.signal.UnbondingListEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
+import org.unigrid.pax.sdk.cosmos.PaxSdkInitializer;
 import org.unigrid.pax.sdk.cosmos.SignUtil;
 import org.unigrid.pax.sdk.cosmos.UnigridCredentials;
 import org.unigrid.pax.sdk.cosmos.model.transaction.TransactionResponse;
 import org.unigrid.pax.sdk.cosmos.service.GrpcService;
+import org.unigrid.pax.sdk.cosmos.service.UnigridService;
+import org.unigrid.pax.sdk.cosmos.model.dto.UnbondingEntryDTO;
 
-@ApplicationScoped
+//@ApplicationScoped
 public class CosmosService {
 
 	@Inject
 	private AccountsData accountData;
-
 	@Inject
 	private CryptoUtils cryptoUtils;
 	@Inject
@@ -101,9 +105,7 @@ public class CosmosService {
 	private Event<UnbondingDelegationsEvent> unbondingDelegationsEvent;
 	@Inject
 	private Event<RedelegationsEvent> redelegationsEvent;
-	@Inject
-	@MyCustomQualifier
-	private GrpcService grpcService;
+
 	@Inject
 	private Event<WithdrawAddressEvent> withdrawAddressEvent;
 	@Inject
@@ -141,6 +143,14 @@ public class CosmosService {
 	static final String TOKEN_DECIMAL_VALUE = "100000000";
 
 	private String apiUrl;
+
+	private final UnigridService unigridService;
+
+	private final GrpcService grpcService;
+	public CosmosService() {
+		this.unigridService = PaxSdkInitializer.getInstance().getUnigridService();
+		this.grpcService = PaxSdkInitializer.getInstance().getGrpcService();
+	}
 
 	public TransactionResponse txResponse(String address)
 		throws IOException, InterruptedException {
@@ -229,7 +239,7 @@ public class CosmosService {
 
 		stakedBalanceModel.setStakedBalance(stakedBalance);
 		stakedBalanceModelEvent.fire(stakedBalanceModel);
-		
+
 		fetchAccountTransactions(account);
 	}
 
@@ -241,7 +251,7 @@ public class CosmosService {
 
 		try {
 			QueryOuterClass.QueryAccountResponse response = authQueryClient.account(accountRequest);
-			Any accountAny = response.getAccount();
+			com.google.protobuf.Any accountAny = response.getAccount();
 			System.out.println("Type URL in getAccountNumber: " + accountAny.getTypeUrl());
 			Auth.BaseAccount baseAccount = accountAny.unpack(Auth.BaseAccount.class);
 			System.out.println("baseAccount.getPubKey(): " + baseAccount.getPubKey()
@@ -271,7 +281,7 @@ public class CosmosService {
 			// Query the account information
 			QueryOuterClass.QueryAccountResponse response = authQueryClient.account(accountRequest);
 
-			Any accountAny = response.getAccount();
+			com.google.protobuf.Any accountAny = response.getAccount();
 			Auth.BaseAccount baseAccount = accountAny.unpack(Auth.BaseAccount.class);
 			// Process baseAccount as needed
 			System.out.println("SEQUENCE NUMBER: " + baseAccount.getSequence());
@@ -345,18 +355,12 @@ public class CosmosService {
 	}
 
 	public long getUnboundingBalance(String address) {
-		// Stub setup and request preparation
-		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest unbondingRequest = gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest.newBuilder()
-			.setBondingAccountAddress(address)
-			.build();
+		// Get the list of UnbondingEntryDTO from UnigridService
+		List<UnbondingEntryDTO> unbondingEntryDTOs = unigridService.getUnbondingEntries(address);
 
-		// Get the response
-		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesResponse response = delegateStub.unbondingEntries(unbondingRequest);
-
-		// Map protobuf objects to your model objects
-		List<UnbondingEntry> unbondingEntries = response.getUnbondingEntriesList().stream()
-			.map(protoEntry -> new UnbondingEntry(protoEntry.getAccount(), protoEntry.getAmount(), protoEntry.getCompletionTime()))
+		// Map UnbondingEntryDTOs to UnbondingEntry and fire event
+		List<UnbondingEntry> unbondingEntries = unbondingEntryDTOs.stream()
+			.map(dto -> new UnbondingEntry(dto.getAccount(), dto.getAmount(), dto.getCompletionTime()))
 			.collect(Collectors.toList());
 		unbondingListEvent.fire(new UnbondingListEvent(unbondingEntries));
 
