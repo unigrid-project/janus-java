@@ -19,44 +19,44 @@
 		<release.tag>1.0.20</release.tag>
 		<current.tag>1.0.20</current.tag>
 		<config.opens>
-                    fx=jakarta.xml.bind/jakarta.xml.bind-api@jakarta.xml.bind
-                    fx=org.eclipse/yasson@org.eclipse.yasson
+			fx=jakarta.xml.bind/jakarta.xml.bind-api@jakarta.xml.bind
+			fx=org.eclipse/yasson@org.eclipse.yasson
 		</config.opens>
 		<config.exports>
-                        <!--target=dependecy/group.id@artifact.id-->
-                        weld.environment.common=org.web3j/crypto@crypto
-                        weld.environment.common=org.web3j/crypto@utils
-                        io.netty.buffer=org.web3j/crypto@crypto
-                        io.netty.buffer=org.web3j/crypto@utils
-                        io.grpc.netty=org.web3j/crypto@crypto
-                        io.grpc.netty=org.web3j/crypto@utils
-                        weld.api=org.web3j/crypto@crypto
-                        weld.api=org.web3j/crypto@utils
-                        j8fu=org.web3j/crypto@crypto
-                        j8fu=org.web3j/crypto@utils
-                        jersey.hk2=org.web3j/crypto@crypto
-                        jersey.hk2=org.web3j/crypto@utils
-                        jakarta.json=org.glassfish/jakarta.json@org.glassfish.json
-                        io.grpc.internal=io.netty/netty-all@io.netty.transport
-                        io.grpc.protobuf=io.netty/netty-all@io.netty.transport
-                        okio=io.netty/netty-all@io.netty.bootstrap
-                        okio=io.netty/netty-transport@io.netty.bootstrap
-                        okio=io.netty/netty-all@io.netty.handler.traffic
-                        okio=io.netty/netty-handler@io.netty.handler.traffic
-                        org.json=io.netty/netty-all@io.netty.channel.embedded
-                        org.json=io.netty/netty-transport@io.netty.channel.embedded
-                        failureaccess=org.web3j/crypto@crypto
-                        failureaccess=org.web3j/crypto@utils
-                        org.apache.commons.io=org.web3j/crypto@utils
-                        org.apache.commons.io=org.web3j/crypto@crypto
-                        com.google.errorprone.annotations=org.web3j/crypto@utils
-                        com.google.errorprone.annotations=org.web3j/crypto@crypto
-                        org.checkerframework.checker.qual=org.web3j/crypto@crypto
-                        org.checkerframework.checker.qual=org.web3j/crypto@utils
-                        io.netty.codec=org.web3j/crypto@crypto
-                        io.netty.codec=org.web3j/crypto@utils
-                        org.checkerframework.checker.qual=org.web3j/crypto@crypto
-                        org.checkerframework.checker.qual=org.web3j/crypto@utils
+			<!--target=dependecy/group.id@artifact.id-->
+<!--			weld.environment.common=org.web3j/crypto@crypto
+			weld.environment.common=org.web3j/crypto@utils
+			io.netty.buffer=org.web3j/crypto@crypto
+			io.netty.buffer=org.web3j/crypto@utils
+			io.grpc.netty=org.web3j/crypto@crypto
+			io.grpc.netty=org.web3j/crypto@utils
+			weld.api=org.web3j/crypto@crypto
+			weld.api=org.web3j/crypto@utils
+			j8fu=org.web3j/crypto@crypto
+			j8fu=org.web3j/crypto@utils
+			jersey.hk2=org.web3j/crypto@crypto
+			jersey.hk2=org.web3j/crypto@utils-->
+			jakarta.json=org.glassfish/jakarta.json@org.glassfish.json
+			io.grpc.internal=io.netty/netty-all@io.netty.transport
+			io.grpc.protobuf=io.netty/netty-all@io.netty.transport
+			okio=io.netty/netty-all@io.netty.bootstrap
+			okio=io.netty/netty-transport@io.netty.bootstrap
+			okio=io.netty/netty-all@io.netty.handler.traffic
+			okio=io.netty/netty-handler@io.netty.handler.traffic
+			org.json=io.netty/netty-all@io.netty.channel.embedded
+			org.json=io.netty/netty-transport@io.netty.channel.embedded
+<!--			failureaccess=org.web3j/crypto@crypto
+			failureaccess=org.web3j/crypto@utils
+			org.apache.commons.io=org.web3j/crypto@utils
+			org.apache.commons.io=org.web3j/crypto@crypto
+			com.google.errorprone.annotations=org.web3j/crypto@utils
+			com.google.errorprone.annotations=org.web3j/crypto@crypto
+			org.checkerframework.checker.qual=org.web3j/crypto@crypto
+			org.checkerframework.checker.qual=org.web3j/crypto@utils
+			io.netty.codec=org.web3j/crypto@crypto
+			io.netty.codec=org.web3j/crypto@utils
+			org.checkerframework.checker.qual=org.web3j/crypto@crypto
+			org.checkerframework.checker.qual=org.web3j/crypto@utils-->
 		</config.exports>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
@@ -322,22 +322,27 @@
 			<artifactId>protobuf-java-util</artifactId>
 			<version>3.21.7</version>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>org.web3j</groupId>
 			<artifactId>crypto</artifactId>
-			<version>5.0.0</version>
+			<version>4.11.1</version>
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>com.fasterxml.jackson.core</groupId>
 					<artifactId>jackson-databind</artifactId>
 				</exclusion>
-                                <exclusion>
+				<exclusion>
 					<groupId>org.web3j</groupId>
 					<artifactId>utils</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
+		</dependency>-->
+<!--		<dependency>
+			<groupId>org.web3j</groupId>
+			<artifactId>utils</artifactId>
+			<version>5.0.0</version>
+		</dependency>-->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
@@ -401,7 +406,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-                                <version>3.1.0</version>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>download-files</id>
@@ -532,7 +537,7 @@
 								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.5/proto/cosmos/auth/v1beta1/query.proto" dest="${project.build.directory}/proto/cosmos/auth/v1beta1" verbose="false" usetimestamp="true"/>
 								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.5/proto/cosmos/staking/v1beta1/query.proto" dest="${project.build.directory}/proto/cosmos/staking/v1beta1" verbose="false" usetimestamp="true"/>
 								<get src="https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.50.5/proto/cosmos/vesting/v1beta1/vesting.proto" dest="${project.build.directory}/proto/cosmos/vesting/v1beta1" verbose="false" usetimestamp="true"/>
-                                                        </target>
+							</target>
 						</configuration>
 
 

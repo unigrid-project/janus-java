@@ -70,13 +70,16 @@ module fx {
 	requires com.google.protobuf.util;
 	requires okhttp3;
 	requires org.apache.commons.collections4;
-	requires crypto;
+	//requires crypto;
 	requires com.fasterxml.jackson.annotation;
 
 	uses org.update4j.service.Launcher;
 
 	provides org.update4j.service.Launcher with org.unigrid.janus.JanusLauncher;
-
+	
+	opens org.unigrid.janus.model.signal to weld.core.impl;
+	opens org.unigrid.janus.model.setup to weld.core.impl;
+	opens org.unigrid.janus.model.gridnode to weld.core.impl;
 	opens org.unigrid.janus.view.backing to weld.core.impl;
 	opens org.unigrid.janus to weld.core.impl, org.update4j;// , javafx.swing;
 	opens org.unigrid.janus.controller.component to javafx.fxml, javafx.base,
@@ -98,9 +101,12 @@ module fx {
 			jakarta.xml.bind, jakarta.ws.rs, jersey.media.jaxb;
 
 	exports org.unigrid.janus;
-
+	
+	exports org.unigrid.janus.model.rpc.entity to com.fasterxml.jackson.databind;
+	exports org.unigrid.janus.model.rest.entity to com.fasterxml.jackson.databind;
 	exports org.unigrid.janus.controller.component to weld.core.impl, javafx.fxml,
 			javafx.base, javafx.controls, org.update4j, javafx.graphics;
+	exports org.unigrid.janus.model.gridnode to weld.core.impl, com.fasterxml.jackson.databind;
 	exports org.unigrid.janus.controller to weld.core.impl, javafx.fxml, javafx.base,
 			javafx.controls, org.update4j, javafx.graphics;
 	exports org.unigrid.janus.model.signal to weld.core.impl;
