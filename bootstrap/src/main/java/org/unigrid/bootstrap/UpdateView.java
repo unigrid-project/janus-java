@@ -159,8 +159,9 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Task<Void> doUpdate = new Task<>() {
 			@Override
 			protected Void call() throws Exception {
-				//System.out.println("wait for normal state");
-				//waitForNormalState();
+				System.out.println("Waiting for normal state via asyncDebugView");
+           		asyncDebugView().get(); // Wait for the async operation to complete
+				waitForNormalState();
 				System.out.println("before update");
 				removeOldJars(config);
 				update();
@@ -210,7 +211,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Task<Void> doUpdate = new Task<>() {
 			@Override
 			protected Void call() throws Exception {
-				asyncDebugView().get();
+				//asyncDebugView().get();
 				if (!config.requiresUpdate()) {
 					if (!daemonDirExists()) {
 						extractDaemon();
