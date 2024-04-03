@@ -325,7 +325,7 @@ public class MnemonicController implements Initializable {
 	private void handleFocusEventCommon(TextField textField, List<TextField> textFieldList, String placeholderText) {
 		textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
 			int idx = textFieldList.indexOf(textField);
-			if (idx == -1 || idx >= mnemonicWordList.size()) {
+			if (idx == -1 || idx > mnemonicWordList.size()) {
 				System.err.println("Index out of bounds. Exiting focus event handling.");
 				return;
 			}
@@ -342,6 +342,9 @@ public class MnemonicController implements Initializable {
 				}
 			} else { // if focus is lost
 				System.out.println("Focus lost. Text: " + textField.getText());
+				//TODO: why do we have two lists to keep the mnemonic???
+				mnemonicWordList.add(idx, textField.getText());
+				mnemonicModel.getMnemonicWordList().add(idx, placeholderText);
 				textField.setText(placeholderText);
 			}
 			isHandlingFocus = false;
