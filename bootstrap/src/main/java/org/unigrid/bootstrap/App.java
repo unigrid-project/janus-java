@@ -229,11 +229,16 @@ public class App extends Application implements Delegate {
 	}
 
 	private static Parent loadFXML(String fxml) throws IOException {
-		FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-		loader = fxmlLoader;
-		return fxmlLoader.load();
+		try {
+			FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+			loader = fxmlLoader;
+			return fxmlLoader.load();
+		} catch (IOException e) {
+			e.printStackTrace(); // print the full stack trace
+			throw e;
+		}
 	}
-
+	
 	public static void main(String[] args) {
 		if (args != null) {
 			for (String arg : args) {
