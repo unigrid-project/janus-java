@@ -106,7 +106,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		return primaryStage;
 	}
 
-	public void setConfig(Configuration config, Stage primaryStage, Map<String, String> input, HostServices hostServices) {
+	public void setConfig(Configuration config, Stage primaryStage,
+			Map<String, String> input, HostServices hostServices) {
 		this.config = config;
 		this.primaryStage = primaryStage;
 		final Properties properties = new Properties();
@@ -180,7 +181,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					Thread.sleep(5);
 					counter++;
 				} catch (InterruptedException ex) {
-					//On purpose
+					// On purpose
 				}
 			}
 			completableFuture.complete("Hello");
@@ -219,23 +220,24 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 						launchTrigger.notifyAll();
 					}
 				} else {
-					System.out.println("DoUpdate thread = " + Thread.currentThread().getName());
+					System.out.println(
+							"DoUpdate thread = " + Thread.currentThread().getName());
 
-					/*try {
-							asyncDebugView().get();
-						} catch (ExecutionException ex) {
-							System.out.println("Faild to wait for debug. contiue");
-						} catch (InterruptedException ex) {
-							System.out.println("Faild to wait for debug. contiue");
-						}*/
+					/*
+					 * try { asyncDebugView().get(); } catch (ExecutionException ex) {
+					 * System.out.println("Faild to wait for debug. contiue"); } catch
+					 * (InterruptedException ex) {
+					 * System.out.println("Faild to wait for debug. contiue"); }
+					 */
 					System.out.println("calling the zip");
 					Path zip = Paths.get(getBaseDirectory(), "zip");
 
 					System.out.println("zip location: " + zip.toString());
 					System.out.println("depenendencies location: " + getBaseDirectory());
 
-					Throwable s = config.update(UpdateOptions.archive(zip)
-						.updateHandler(UpdateView.this)).getException();
+					Throwable s = config.update(
+							UpdateOptions.archive(zip).updateHandler(UpdateView.this))
+							.getException();
 
 					if (Objects.isNull(s)) {
 						System.out.println("Do the install");
@@ -297,8 +299,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				if (OS.CURRENT == OS.LINUX
-					|| OS.CURRENT == OS.MAC) {
+				if (OS.CURRENT == OS.LINUX || OS.CURRENT == OS.MAC) {
 					untarDaemonLinux();
 				} else {
 					unzipDaemonWindows();
@@ -322,11 +323,11 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	private void launch() {
 		System.out.println("Launch");
-		//Stage stage = getStage();
+		// Stage stage = getStage();
 		System.out.println("Getting stage");
 
 		launchApp();
-		//launch.setDisable(false);
+		// launch.setDisable(false);
 	}
 
 	private boolean daemonDirExists() {
@@ -394,12 +395,12 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 		try {
 			final ProcessBuilder pb = new ProcessBuilder("tar", "-xf", archive.toString(),
-				"-C", destination.toString()
-			);
+					"-C", destination.toString());
 
 			final Process process = pb.start();
 
-			try ( var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+			try (var reader = new BufferedReader(
+					new InputStreamReader(process.getInputStream()))) {
 				String line;
 
 				while ((line = reader.readLine()) != null) {
@@ -416,16 +417,15 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			final ProcessBuilder pb = new ProcessBuilder();
 
 			if (OS.CURRENT == OS.MAC) {
-				pb.command("find", destination.toString(), "-perm", "+111",
-					"-type", "f", "-name", "unigrid*"
-				);
+				pb.command("find", destination.toString(), "-perm", "+111", "-type", "f",
+						"-name", "unigrid*");
 			} else {
-				pb.command("find", destination.toString(), "-type", "f",
-					"-name", "unigrid*"
-				);
+				pb.command("find", destination.toString(), "-type", "f", "-name",
+						"unigrid*");
 			}
 			final Process process = pb.start();
-			try ( var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+			try (var reader = new BufferedReader(
+					new InputStreamReader(process.getInputStream()))) {
 				String line;
 
 				while ((line = reader.readLine()) != null) {
@@ -468,7 +468,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	public static void unzipFolder(Path source, Path target) throws IOException {
 		final Path endDir = Paths.get(startLoacation + "/bin");
 
-		try ( ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
+		try (ZipInputStream zis = new ZipInputStream(
+				new FileInputStream(source.toFile()))) {
 			ZipEntry zipEntry = zis.getNextEntry();
 
 			while (zipEntry != null) {
@@ -493,9 +494,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 					Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
 
-					final Path moveName = Paths.get(endDir + "/"
-						+ new File(zipEntry.getName()).getName()
-					);
+					final Path moveName = Paths
+							.get(endDir + "/" + new File(zipEntry.getName()).getName());
 
 					System.out.println("moveName: " + moveName.toString());
 					Files.copy(newPath, moveName, StandardCopyOption.REPLACE_EXISTING);
@@ -509,7 +509,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		}
 	}
 
-	public static Path zipSlipProtect(ZipEntry zipEntry, Path targetDir) throws IOException {
+	public static Path zipSlipProtect(ZipEntry zipEntry, Path targetDir)
+			throws IOException {
 		Path targetDirResolved = targetDir.resolve(zipEntry.getName());
 		Path normalizePath = targetDirResolved.normalize();
 
@@ -524,7 +525,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		setStatusText("Preparing application start");
 		try {
 			config.launch(inject);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 		Platform.runLater(() -> {
@@ -540,35 +541,25 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	public static String getUnigridHome() {
-		final String blockRoot = System.getProperty("user.home").concat(
-			switch (OS.CURRENT) {
-			case LINUX ->
-				"/.unigrid/";
-			case WINDOWS ->
-				"/AppData/Roaming/UNIGRID/";
-			case MAC ->
-				"/Library/Application Support/UNIGRID/";
-			default ->
-				"/UNIGRID/";
-		}
-		);
+		final String blockRoot = System.getProperty("user.home")
+				.concat(switch (OS.CURRENT) {
+				case LINUX -> "/.unigrid/";
+				case WINDOWS -> "/AppData/Roaming/UNIGRID/";
+				case MAC -> "/Library/Application Support/UNIGRID/";
+				default -> "/UNIGRID/";
+				});
 
 		return blockRoot;
 	}
 
 	public static String getBaseDirectory() {
-		final String blockRoot = System.getProperty("user.home").concat(
-			switch (OS.CURRENT) {
-			case LINUX ->
-				"/.unigrid/dependencies";
-			case WINDOWS ->
-				"/AppData/Roaming/UNIGRID/dependencies";
-			case MAC ->
-				"/Library/Application Support/UNIGRID/dependencies";
-			default ->
-				"/UNIGRID/dependencies";
-		}
-		);
+		final String blockRoot = System.getProperty("user.home")
+				.concat(switch (OS.CURRENT) {
+				case LINUX -> "/.unigrid/dependencies";
+				case WINDOWS -> "/AppData/Roaming/UNIGRID/dependencies";
+				case MAC -> "/Library/Application Support/UNIGRID/dependencies";
+				default -> "/UNIGRID/dependencies";
+				});
 
 		File depenendencies = new File(blockRoot);
 		File file = new File(depenendencies.getAbsolutePath() + "/lib");
@@ -610,7 +601,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	@Override
 	public void updateDownloadFileProgress(FileMetadata file, float frac) {
 		Platform.runLater(() -> {
-			status.setText("Downloading " + file.getPath().getFileName() + " (" + ((int) (100 * frac)) + "%)");
+			status.setText("Downloading " + file.getPath().getFileName() + " ("
+					+ ((int) (100 * frac)) + "%)");
 			secondaryPercent.set(frac);
 			progress.setProgress(frac);
 		});
@@ -640,15 +632,30 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	}
 
 	public void removeOldJars(Configuration config) {
-		File baseDir = new File(getBaseDirectory().concat("/lib"));
+		String baseDirPath = getBaseDirectory();
+		if (baseDirPath == null) {
+			System.out.println("Base directory is null, exiting the method.");
+			return; // Exit the method if base directory path is null
+		}
+
+		File baseDir = new File(baseDirPath.concat("/lib"));
+		if (!baseDir.exists() || !baseDir.isDirectory()) {
+			System.out.println(
+					"Base directory does not exist or is not a directory, exiting the method.");
+			// Optionally, you can create the directory here, throw an exception, or
+			// handle the error as needed
+			return; // Exit the method if base directory is invalid
+		}
+
 		List<FileMetadata> onlineFiles = config.getFiles();
 		List<String> fileNames = new ArrayList<String>();
-		//if (fileNames.size() == 0) {
-		//	return;
-		//}
+		// if (fileNames.size() == 0) {
+		// return;
+		// }
 
 		for (FileMetadata onlineFile : onlineFiles) {
-			fileNames.add(new File(onlineFile.getPath().getFileName().toString()).getName());
+			fileNames.add(
+					new File(onlineFile.getPath().getFileName().toString()).getName());
 		}
 		for (File file : baseDir.listFiles()) {
 			if (!fileNames.contains(file.getName())) {
@@ -713,7 +720,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			System.out.println("configURL textField contains = " + url);
 			URL configUrl = new URL(url);
 			Configuration config = null;
-			try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+			try (Reader in = new InputStreamReader(configUrl.openStream(),
+					StandardCharsets.UTF_8)) {
 				config = Configuration.read(in);
 				config.sync();
 				this.config = config;
@@ -725,7 +733,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			Logger.getLogger(UpdateView.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-	
+
 	public HostServices getHostServices() {
 		return services;
 	}
