@@ -159,6 +159,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Task<Void> doUpdate = new Task<>() {
 			@Override
 			protected Void call() throws Exception {
+				System.out.println("wait for normal state");
+				waitForNormalState();
 				System.out.println("before update");
 				removeOldJars(config);
 				update();
@@ -744,5 +746,16 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		fileName = strings[strings.length - 1];
 		System.out.println(fileName);
 		return fileName;
+	}
+
+	private void waitForNormalState() {
+		while (startupState != App.state.NORMAL) {
+			try {
+				Thread.sleep(100); // Wait for some time before checking again
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt(); // Restore the interrupted status
+				break;
+			}
+		}
 	}
 }
