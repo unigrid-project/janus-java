@@ -288,14 +288,16 @@ public class App extends Application implements Delegate {
 	private void openDebugView() {
 		try {
 			Stage debugStage = new Stage();
+			Scene debugView;
 			debugStage.centerOnScreen();
 			debugStage.setResizable(false);
 			debugStage.initStyle(StageStyle.UNDECORATED);
 
-			Scene debugView = new Scene(loadFXML("debugView"));
+			debugView = new Scene(loadFXML("debugView"));
+			
 			debugStage.setScene(debugView);
 
-			debugStage.showAndWait(); // Show the debug stage and wait
+			debugStage.show(); // Show the debug stage and wait
 		} catch (IOException e) {
 			System.err.println("Error loading debug view: " + e.getMessage());
 		}
