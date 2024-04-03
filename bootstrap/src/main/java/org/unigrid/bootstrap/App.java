@@ -90,16 +90,23 @@ public class App extends Application implements Delegate {
 			return;
 		}
 		debugStage.setScene(debugView);
-		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-			@Override
-			public void handle(KeyEvent key) {
-				if (key.getCode() == KeyCode.F5 || key.getCode() == KeyCode.F12) {
-					//open window
-					System.out.println("Key event triggerd!!!!");
-					startupState = state.DEBUG;
+		// scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		// 	@Override
+		// 	public void handle(KeyEvent key) {
+		// 		if (key.getCode() == KeyCode.F5 || key.getCode() == KeyCode.F12) {
+		// 			//open window
+		// 			System.out.println("Key event triggerd!!!!");
+		// 			startupState = state.DEBUG;
 
-					debugStage.show();
-				}
+		// 			debugStage.show();
+		// 		}
+		// 	}
+		// });
+		scene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.F5 || event.getCode() == KeyCode.F12) {
+				System.out.println("Key event triggered!!!!");
+				startupState = state.DEBUG;
+				debugStage.showAndWait(); // Show the debug stage and wait
 			}
 		});
 	}
@@ -112,6 +119,12 @@ public class App extends Application implements Delegate {
 		stage.setMinHeight(300);
 
 		scene = new Scene(loadFXML("updateView"));
+		scene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.F5 || event.getCode() == KeyCode.F12) {
+				// Handle key press
+				System.out.println("F5 or F12 pressed");
+			}
+		});
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.centerOnScreen();
 		stage.setResizable(false);
