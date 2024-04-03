@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -124,7 +125,7 @@ public class App extends Application implements Delegate {
 			if (event.getCode() == KeyCode.F5 || event.getCode() == KeyCode.F12) {
 				System.out.println("F5 or F12 pressed - Opening Debug View");
 				startupState = state.DEBUG;
-				openDebugView();
+				Platform.runLater(() -> openDebugView());
 			}
 		});
 		// Call postStart here if necessary
