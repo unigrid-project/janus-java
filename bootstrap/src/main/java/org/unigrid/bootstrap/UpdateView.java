@@ -159,8 +159,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Task<Void> doUpdate = new Task<>() {
 			@Override
 			protected Void call() throws Exception {
-				System.out.println("wait for normal state");
-				waitForNormalState();
+				//System.out.println("wait for normal state");
+				//waitForNormalState();
 				System.out.println("before update");
 				removeOldJars(config);
 				update();

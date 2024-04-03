@@ -90,52 +90,56 @@ public class App extends Application implements Delegate {
 			return;
 		}
 		debugStage.setScene(debugView);
-		// scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-		// 	@Override
-		// 	public void handle(KeyEvent key) {
-		// 		if (key.getCode() == KeyCode.F5 || key.getCode() == KeyCode.F12) {
-		// 			//open window
-		// 			System.out.println("Key event triggerd!!!!");
-		// 			startupState = state.DEBUG;
+		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent key) {
+				if (key.getCode() == KeyCode.F5 || key.getCode() == KeyCode.F12) {
+					//open window
+					System.out.println("Key event triggerd!!!!");
+					startupState = state.DEBUG;
 
-		// 			debugStage.show();
-		// 		}
-		// 	}
-		// });
-		scene.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.F5 || event.getCode() == KeyCode.F12) {
-				System.out.println("Key event triggered!!!!");
-				startupState = state.DEBUG;
-				debugStage.showAndWait(); // Show the debug stage and wait
+					debugStage.show();
+				}
 			}
 		});
 	}
 
 	@Override
 	public void start(Stage stage) throws IOException, InterruptedException, ExecutionException {
-		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		//root.setLevel(Level.ALL);
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
-
+	
+		// Load the primary scene
 		scene = new Scene(loadFXML("updateView"));
+	
+		// Setting up the debug stage
+		Stage debugStage = new Stage();
+		debugStage.centerOnScreen();
+		debugStage.setResizable(false);
+		debugStage.initStyle(StageStyle.UNDECORATED);
+		Scene debugView = new Scene(loadFXML("debugView"));
+		debugStage.setScene(debugView);
+	
+		// Set the key event handler on the scene
 		scene.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.F5 || event.getCode() == KeyCode.F12) {
-				// Handle key press
-				System.out.println("F5 or F12 pressed");
+				System.out.println("F5 or F12 pressed - Opening Debug View");
+				startupState = state.DEBUG;
+				debugStage.showAndWait(); // Show the debug stage and wait
 			}
 		});
+	
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.centerOnScreen();
 		stage.setResizable(false);
 		stage.setScene(scene);
 		stage.show();
 		classStage = stage;
-
-		preStart();
+	
+		// Call postStart here if necessary
 		postStart();
-
 	}
+	
 
 	public void postStart() throws IOException, InterruptedException, ExecutionException {
 		URL configUrl = null;
