@@ -202,15 +202,26 @@ public class App extends Application implements Delegate {
 	static void updateLocalConfigFile(String in) {
 		try {
 			File targetFile = new File(localPath() + "/config.xml");
-			targetFile.createNewFile();
-
-			Writer targetFileWriter = new FileWriter(targetFile);
-			targetFileWriter.write(in);
-			targetFileWriter.close();
+			File parentDir = targetFile.getParentFile();
+			if (!parentDir.exists()) {
+				parentDir.mkdirs(); // This will create the parent directory if it doesn't exist
+			}
+			if (targetFile.createNewFile()) { // createNewFile() returns true if the file didn't exist and was successfully created
+				System.out.println("Config file created");
+			} else {
+				System.out.println("Config file already exists or couldn't be created");
+			}
+	
+			try (Writer targetFileWriter = new FileWriter(targetFile)) {
+				targetFileWriter.write(in);
+			} catch (IOException e) {
+				System.err.println("Error writing to config file: " + e.getMessage());
+			}
 		} catch (IOException ex) {
 			Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
+	
 
 	static void setRoot(String fxml) throws IOException {
 		scene.setRoot(loadFXML(fxml));
