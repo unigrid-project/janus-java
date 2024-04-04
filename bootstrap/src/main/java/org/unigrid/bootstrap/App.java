@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -86,7 +87,7 @@ public class App extends Application implements Delegate {
 		try {
 			debugView = new Scene(loadFXML("debugView"));
 		} catch (IOException ex) {
-			System.out.println(ex.getMessage()); 
+			System.out.println(ex.getMessage());
 			return;
 		}
 		debugStage.setScene(debugView);
@@ -94,7 +95,7 @@ public class App extends Application implements Delegate {
 			@Override
 			public void handle(KeyEvent key) {
 				if (key.getCode() == KeyCode.F5 || key.getCode() == KeyCode.F12) {
-					//open window
+					// open window
 					System.out.println("Key event triggerd!!!!");
 					startupState = state.DEBUG;
 
@@ -105,23 +106,30 @@ public class App extends Application implements Delegate {
 	}
 
 	@Override
-	public void start(Stage stage) throws IOException, InterruptedException, ExecutionException {
-		//final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		//root.setLevel(Level.ALL);
+	public void start(Stage stage)
+			throws IOException, InterruptedException, ExecutionException {
 		stage.setMinWidth(600);
 		stage.setMinHeight(300);
 
+		// Load the primary scene
 		scene = new Scene(loadFXML("updateView"));
+
 		stage.initStyle(StageStyle.UNDECORATED);
 		stage.centerOnScreen();
 		stage.setResizable(false);
 		stage.setScene(scene);
 		stage.show();
 		classStage = stage;
-
-		preStart();
+		// Set the key event handler on the scene
+		scene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.F5 || event.getCode() == KeyCode.F12) {
+				System.out.println("F5 or F12 pressed - Opening Debug View");
+				startupState = state.DEBUG;
+				Platform.runLater(() -> openDebugView());
+			}
+		});
+		// Call postStart here if necessary
 		postStart();
-
 	}
 
 	public void postStart() throws IOException, InterruptedException, ExecutionException {
@@ -129,11 +137,14 @@ public class App extends Application implements Delegate {
 		OS os = OS.CURRENT;
 		if (!inputArgs.containsKey("URL")) {
 			if (os.equals(OS.LINUX)) {
-				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-linux.xml");
+				configUrl = new URL(
+						"https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-linux.xml");
 			} else if (os.equals(OS.WINDOWS)) {
-				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
+				configUrl = new URL(
+						"https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
 			} else if (os.equals(OS.MAC)) {
-				configUrl = new URL("https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-mac.xml");
+				configUrl = new URL(
+						"https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-mac.xml");
 			}
 		} else {
 			configUrl = new URL(inputArgs.get("URL"));
@@ -142,14 +153,16 @@ public class App extends Application implements Delegate {
 
 		Configuration config = null;
 
-		try ( Reader in = new InputStreamReader(configUrl.openStream(), StandardCharsets.UTF_8)) {
+		try (Reader in = new InputStreamReader(configUrl.openStream(),
+				StandardCharsets.UTF_8)) {
 			System.out.println("are we getting here??????");
 			config = Configuration.read(in);
 			updateLocalConfigFile(config.toString());
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			Sentry.captureException(e);
-			try ( Reader in = Files.newBufferedReader(Paths.get(localPath() + "/config.xml"))) {
+			try (Reader in = Files
+					.newBufferedReader(Paths.get(localPath() + "/config.xml"))) {
 				System.out.println("reading local config xml");
 				config = Configuration.read(in);
 			}
@@ -159,8 +172,10 @@ public class App extends Application implements Delegate {
 			String server = "";
 			final String version = config.getProperties("fx.version").get(0).getValue();
 			Sentry.init(options -> {
-				options.setDsn("https://18a30d2bf41643ce9efe84a451ecef1a@o266736.ingest.sentry.io/6632466");
-				// Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+				options.setDsn(
+						"https://18a30d2bf41643ce9efe84a451ecef1a@o266736.ingest.sentry.io/6632466");
+				// Set tracesSampleRate to 1.0 to capture 100% of transactions for
+				// performance monitoring.
 				// We recommend adjusting this value in production.
 				options.setServerName(cryptCompName());
 				options.setTag("os", OS.CURRENT.getShortName());
@@ -174,46 +189,56 @@ public class App extends Application implements Delegate {
 		config.sync();
 		UpdateView.getInstance().setConfig(config, classStage, inputArgs, hostServices);
 	}
-	
+
 	static String localPath() {
-		final String s = System.getProperty("user.home").concat(
-			switch (OS.CURRENT) {
-				case LINUX ->
-					"/.unigrid/dependencies";
-				case WINDOWS ->
-					"/AppData/Roaming/UNIGRID/dependencies";
-				case MAC ->
-					"/Library/Application Support/UNIGRID/dependencies";
-				default ->
-					"/UNIGRID/dependencies";
-			}
-		);
+		final String s = System.getProperty("user.home").concat(switch (OS.CURRENT) {
+		case LINUX -> "/.unigrid/dependencies";
+		case WINDOWS -> "/AppData/Roaming/UNIGRID/dependencies";
+		case MAC -> "/Library/Application Support/UNIGRID/dependencies";
+		default -> "/UNIGRID/dependencies";
+		});
 		return s;
 	}
-	
+
 	static void updateLocalConfigFile(String in) {
 		try {
 			File targetFile = new File(localPath() + "/config.xml");
-			targetFile.createNewFile();
-			
-			Writer targetFileWriter = new FileWriter(targetFile);
-			targetFileWriter.write(in);
-			targetFileWriter.close();
+			File parentDir = targetFile.getParentFile();
+			if (!parentDir.exists()) {
+				parentDir.mkdirs(); // This will create the parent directory if it doesn't exist
+			}
+			if (targetFile.createNewFile()) { // createNewFile() returns true if the file didn't exist and was successfully created
+				System.out.println("Config file created");
+			} else {
+				System.out.println("Config file already exists or couldn't be created");
+			}
+	
+			try (Writer targetFileWriter = new FileWriter(targetFile)) {
+				targetFileWriter.write(in);
+			} catch (IOException e) {
+				System.err.println("Error writing to config file: " + e.getMessage());
+			}
 		} catch (IOException ex) {
 			Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
+	
 
 	static void setRoot(String fxml) throws IOException {
 		scene.setRoot(loadFXML(fxml));
 	}
 
 	private static Parent loadFXML(String fxml) throws IOException {
-		FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-		loader = fxmlLoader;
-		return fxmlLoader.load();
+		try {
+			FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+			loader = fxmlLoader;
+			return fxmlLoader.load();
+		} catch (IOException e) {
+			e.printStackTrace(); // print the full stack trace
+			throw e;
+		}
 	}
-
+	
 	public static void main(String[] args) {
 		if (args != null) {
 			for (String arg : args) {
@@ -266,13 +291,30 @@ public class App extends Application implements Delegate {
 		return result;
 	}
 
-	/*@Override
-	public void keyTyped(KeyEvent e) {
-		//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	private void openDebugView() {
+		try {
+			Stage debugStage = new Stage();
+			Scene debugView;
+			debugStage.centerOnScreen();
+			debugStage.setResizable(false);
+			debugStage.initStyle(StageStyle.UNDECORATED);
+
+			debugView = new Scene(loadFXML("debugView"));
+			
+			debugStage.setScene(debugView);
+
+			debugStage.show(); // Show the debug stage and wait
+		} catch (IOException e) {
+			System.err.println("Error loading debug view: " + e.getMessage());
+		}
 	}
 
-	@Override
-	public void keyReleased(KeyEvent e) {
-		//throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}*/
+	/*
+	 * @Override public void keyTyped(KeyEvent e) { //throw new
+	 * UnsupportedOperationException("Not supported yet."); //To change body of
+	 * generated methods, choose Tools | Templates. }
+	 * @Override public void keyReleased(KeyEvent e) { //throw new
+	 * UnsupportedOperationException("Not supported yet."); //To change body of
+	 * generated methods, choose Tools | Templates. }
+	 */
 }
