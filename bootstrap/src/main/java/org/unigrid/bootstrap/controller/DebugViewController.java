@@ -41,7 +41,7 @@ public class DebugViewController implements Initializable {
 	@FXML private Label txtRemoveBlockChainData;
 	@FXML private TextField txtConfigURL;
 	@FXML private Button btnOpenDebug;
-	@FXML private Label txtOpenDebugStatus;
+	//@FXML private Label txtOpenDebugStatus;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -49,7 +49,7 @@ public class DebugViewController implements Initializable {
 		File file = new File(basePath + "debug.log");
 		if (!file.exists()) {
 			btnOpenDebug.setDisable(true);
-			txtOpenDebugStatus.setText("Could not find debug.log");
+			//txtOpenDebugStatus.setText("Could not find debug.log");
 		}
 	}
 
@@ -93,7 +93,7 @@ public class DebugViewController implements Initializable {
 	public void onRemoveDebug(ActionEvent event) {
 		if (UpdateView.getInstance().removeDebug()) {
 			btnOpenDebug.setDisable(true);
-			txtOpenDebugStatus.setText("debug.log is removed");
+			//txtOpenDebugStatus.setText("debug.log is removed");
 
 			txtRemoveDebug.setText("\u2713");
 			txtRemoveDebug.setVisible(true);
