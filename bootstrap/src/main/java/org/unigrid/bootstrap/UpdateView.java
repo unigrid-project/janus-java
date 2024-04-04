@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -94,6 +95,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	private String bootstrapVersion = "";
 	private static UpdateView updateView = null;
 	private static String startLoacation = getBaseDirectory();
+	private Map<String, String> input = new HashMap<>();
+	private HostServices hostServices;
 
 	public static UpdateView getInstance() {
 		if (updateView == null) {
@@ -110,6 +113,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			Map<String, String> input, HostServices hostServices) {
 		this.config = config;
 		this.primaryStage = primaryStage;
+		this.input = input;
+		this.hostServices = hostServices;
 		final Properties properties = new Properties();
 		services = hostServices;
 		try {
@@ -120,15 +125,6 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			System.out.println(e.getMessage());
 			System.out.println(e.getCause().toString());
 		}
-
-		inject = new Injectable() {
-			@InjectSource
-			Map<String, String> inputArgs = input;
-			@InjectSource
-			HostServices hostService = hostServices;
-			@InjectSource
-			String bootstrapVer = bootstrapVersion;
-		};
 
 		System.out.println(input.get("URL"));
 		status = (Label) primaryStage.getScene().lookup("#status");
@@ -528,6 +524,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	public void launchApp() {
 		setStatusText("Preparing application start");
+		setupInjectable();
 		try {
 			config.launch(inject);
 		} catch (Exception e) {
@@ -537,6 +534,17 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			Stage stage = getStage();
 			stage.hide();
 		});
+	}
+	
+	private void setupInjectable() {
+		inject = new Injectable() {
+			@InjectSource
+			Map<String, String> inputArgs = input;
+			@InjectSource
+			HostServices hostService = hostServices;
+			@InjectSource
+			String bootstrapVer = bootstrapVersion;
+		};
 	}
 
 	private void run(Runnable runnable) {
@@ -729,6 +737,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 					StandardCharsets.UTF_8)) {
 				config = Configuration.read(in);
 				config.sync();
+				input.put("URL", configUrl.toString());
 				this.config = config;
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
