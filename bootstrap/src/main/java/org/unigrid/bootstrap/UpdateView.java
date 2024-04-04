@@ -171,6 +171,8 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 	public Future<String> asyncDebugView() throws InterruptedException {
 		CompletableFuture<String> completableFuture = new CompletableFuture<>();
 		Executors.newCachedThreadPool().submit(() -> {
+			System.out.println("asyncDebugView futuer start!!!!!!!");
+			System.out.println("StartupState = " + startupState);
 			int counter = 0;
 			while (startupState == App.state.WAIT || startupState == App.state.DEBUG) {
 				try {
@@ -641,12 +643,16 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	public void removeOldJars(Configuration config) {
 		File baseDir = new File(getBaseDirectory().concat("/lib"));
+
+		if (!baseDir.exists()) {
+			return;
+		}
+
 		List<FileMetadata> onlineFiles = config.getFiles();
 		List<String> fileNames = new ArrayList<String>();
 		//if (fileNames.size() == 0) {
 		//	return;
 		//}
-
 		for (FileMetadata onlineFile : onlineFiles) {
 			fileNames.add(new File(onlineFile.getPath().getFileName().toString()).getName());
 		}
