@@ -156,7 +156,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			@Override
 			protected Void call() throws Exception {
 				System.out.println("Waiting for normal state via asyncDebugView");
-           		asyncDebugView().get(); // Wait for the async operation to complete
+				asyncDebugView().get(); // Wait for the async operation to complete
 				waitForNormalState();
 				System.out.println("before update");
 				removeOldJars(config);
@@ -168,27 +168,42 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 
 	}
 
-	public Future<String> asyncDebugView() throws InterruptedException {
+	public Future<String> asyncDebugView() {
 		CompletableFuture<String> completableFuture = new CompletableFuture<>();
 		Executors.newCachedThreadPool().submit(() -> {
-			System.out.println("asyncDebugView futuer start!!!!!!!");
+			System.out.println("asyncDebugView future start!");
 			System.out.println("StartupState = " + startupState);
-			int counter = 0;
-			while (startupState == App.state.WAIT || startupState == App.state.DEBUG) {
+	
+			// Duration to wait (e.g., 3 seconds)
+			long waitDuration = 3000; // milliseconds
+			long startTime = System.currentTimeMillis();
+	
+			// Check for the DEBUG state every 100ms
+			while (System.currentTimeMillis() - startTime < waitDuration) {
+				if (startupState == App.state.DEBUG) {
+					System.out.println("DEBUG mode activated, keeping state as DEBUG");
+					completableFuture.complete("Debug Mode");
+					return "Debug Mode"; // Return String indicating the debug mode
+				}
 				try {
-					if (counter == 500 && startupState != App.state.DEBUG) {
-						startupState = App.state.NORMAL;
-					}
-					Thread.sleep(5);
-					counter++;
-				} catch (InterruptedException ex) {
-					// On purpose
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					completableFuture.completeExceptionally(e);
+					return "Interrupted"; // Return String indicating an interruption
 				}
 			}
-			completableFuture.complete("Hello");
-			return null;
+	
+			// If DEBUG mode not activated within timeout, set to NORMAL
+			if (startupState != App.state.DEBUG) {
+				System.out.println("Timeout reached without DEBUG mode, setting state to NORMAL");
+				startupState = App.state.NORMAL;
+			}
+	
+			completableFuture.complete("Normal State");
+			return "Normal State"; // Return String indicating normal state
 		});
-
+	
 		System.out.println("Return future");
 		return completableFuture;
 	}
@@ -209,7 +224,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 		Task<Void> doUpdate = new Task<>() {
 			@Override
 			protected Void call() throws Exception {
-				//asyncDebugView().get();
+				// asyncDebugView().get();
 				if (!config.requiresUpdate()) {
 					if (!daemonDirExists()) {
 						extractDaemon();
@@ -535,7 +550,7 @@ public class UpdateView implements UpdateHandler, Injectable, Initializable {
 			stage.hide();
 		});
 	}
-	
+
 	private void setupInjectable() {
 		inject = new Injectable() {
 			@InjectSource
