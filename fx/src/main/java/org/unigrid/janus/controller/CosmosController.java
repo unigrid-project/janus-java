@@ -32,6 +32,8 @@ import org.unigrid.janus.model.CryptoUtils;
 import org.unigrid.janus.model.service.DebugService;
 import org.unigrid.janus.model.service.GridnodeDelegationService;
 import org.unigrid.janus.model.service.Hedgehog;
+
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -340,9 +342,12 @@ public class CosmosController implements Initializable {
 
 	private ObservableList<String> keysList = FXCollections.observableArrayList();
 
-	private ObservableList<String> transactionsObReceived = FXCollections.observableArrayList();
-	private ObservableList<String> transactionsObSent = FXCollections.observableArrayList();
-	private ObservableList<GridnodeData> gridnodeData = FXCollections.observableArrayList();
+	private ObservableList<String> transactionsObReceived = FXCollections
+			.observableArrayList();
+	private ObservableList<String> transactionsObSent = FXCollections
+			.observableArrayList();
+	private ObservableList<GridnodeData> gridnodeData = FXCollections
+			.observableArrayList();
 	@FXML
 	private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
 	@FXML
@@ -380,22 +385,25 @@ public class CosmosController implements Initializable {
 		paneMap.put("confirmMnemonic", confirmMnemonic);
 
 		ObservableList<TxResponse> observableList = FXCollections
-			.observableArrayList(cosmosTxList.getTxResponsesList());
+				.observableArrayList(cosmosTxList.getTxResponsesList());
 		transactionListView.setItems(observableList);
 
 		pnlOverlay.setVisible(false);
 
 		Platform.runLater(() -> {
 
-			importTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
-				@Override
-				public void changed(ObservableValue<? extends Tab> observable, Tab oldTab, Tab newTab) {
-					if (newTab != null) {
-						System.out.println("Switched to tab: " + newTab.getText());
-						mnemonicController.reset();
-					}
-				}
-			});
+			importTabPane.getSelectionModel().selectedItemProperty()
+					.addListener(new ChangeListener<Tab>() {
+						@Override
+						public void changed(ObservableValue<? extends Tab> observable,
+								Tab oldTab, Tab newTab) {
+							if (newTab != null) {
+								System.out
+										.println("Switched to tab: " + newTab.getText());
+								mnemonicController.reset();
+							}
+						}
+					});
 			System.out.println("Is on FX thread: " + Platform.isFxApplicationThread());
 
 			System.out.println("run later method called");
@@ -415,128 +423,147 @@ public class CosmosController implements Initializable {
 
 			// check whether the word changed in order to reset the value
 			transactionListView.setCellFactory(
-				param -> new ListCell<TransactionResponse.TxResponse>() {
-				@Override
-				protected void updateItem(
-					TransactionResponse.TxResponse txResponse,
-					boolean empty) {
-					System.out.println(
-						"Cell factory called for item: " + txResponse);
-					System.out.println("Number of transactions: "
-						+ cosmosTxList.getTxResponsesList().size());
+					param -> new ListCell<TransactionResponse.TxResponse>() {
+						@Override
+						protected void updateItem(
+								TransactionResponse.TxResponse txResponse,
+								boolean empty) {
+							System.out.println(
+									"Cell factory called for item: " + txResponse);
+							System.out.println("Number of transactions: "
+									+ cosmosTxList.getTxResponsesList().size());
 
-					super.updateItem(txResponse, empty);
-					if (empty || txResponse == null) {
-						setText(null);
-					} else {
-						setText(txResponse.getTxhash() + " - "
-							+ txResponse.getTimestamp());
-						System.out.println("txResponse getHeight(): "
-							+ txResponse.getHeight());
-					}
-				}
-			});
+							super.updateItem(txResponse, empty);
+							if (empty || txResponse == null) {
+								setText(null);
+							} else {
+								setText(txResponse.getTxhash() + " - "
+										+ txResponse.getTimestamp());
+								System.out.println("txResponse getHeight(): "
+										+ txResponse.getHeight());
+							}
+						}
+					});
 
 			delegationsListView.getItems().clear();
 			delegationsListView.setCellFactory(
-				listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
-				@Override
-				protected void updateItem(
-					DelegationsRequest.DelegationResponse item,
-					boolean empty) {
-					super.updateItem(item, empty);
-					if (empty || item == null) {
-						setText(null);
-					} else {
+					listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
+						@Override
+						protected void updateItem(
+								DelegationsRequest.DelegationResponse item,
+								boolean empty) {
+							super.updateItem(item, empty);
+							if (empty || item == null) {
+								setText(null);
+							} else {
 
-						BigDecimal amount = new BigDecimal(
-							item.getBalance().getAmount());
-						BigDecimal displayAmount = amount.divide(scaleFactor);
-						String text = String.format(
-							"Amount: %s %s",
-							displayAmount.toPlainString(),
-							"ugd");
+								BigDecimal amount = new BigDecimal(
+										item.getBalance().getAmount());
+								BigDecimal displayAmount = amount.divide(scaleFactor);
+								String text = String.format("Amount: %s %s",
+										displayAmount.toPlainString(), "ugd");
 
-						Label label = new Label(text);
-						label.setTextFill(Color.WHITE);
-						Button actionButton = new Button("Unstake");
-						actionButton.setStyle("-fx-cursor: hand;");
-						actionButton.setOnAction(event -> {
-							currentValidatorAddr = item.getDelegation().getValidatorAddress();
-							stakedAmount = item.getBalance().getAmount();
-							onUnstakePasswordRequest();
-						});
+								Label label = new Label(text);
+								label.setTextFill(Color.WHITE);
+								Button actionButton = new Button("Unstake");
+								actionButton.setStyle("-fx-cursor: hand;");
+								actionButton.setOnAction(event -> {
+									currentValidatorAddr = item.getDelegation()
+											.getValidatorAddress();
+									stakedAmount = item.getBalance().getAmount();
+									onUnstakePasswordRequest();
+								});
 
-						ComboBox<ValidatorInfo> switchDelegteComboBox = new ComboBox<>();
-						switchDelegteComboBox.getItems().addAll(validatorListComboBox.getItems());
+								ComboBox<ValidatorInfo> switchDelegteComboBox = new ComboBox<>();
+								switchDelegteComboBox.getItems()
+										.addAll(validatorListComboBox.getItems());
 
-						for (Object it : validatorListComboBox.getItems()) {
-							ValidatorInfo validatorInfo = (ValidatorInfo) it;
-							if (validatorInfo.getOperatorAddress().equals(item.getDelegation().getValidatorAddress())) {
-								switchDelegteComboBox.setValue(validatorInfo);
+								for (Object it : validatorListComboBox.getItems()) {
+									ValidatorInfo validatorInfo = (ValidatorInfo) it;
+									if (validatorInfo.getOperatorAddress().equals(
+											item.getDelegation().getValidatorAddress())) {
+										switchDelegteComboBox.setValue(validatorInfo);
+									}
+								}
+
+								switchDelegteComboBox.getSelectionModel()
+										.selectedItemProperty()
+										.addListener((observable, oldValue, newValue) -> {
+											if (newValue != null) {
+												currentValidatorAddr = item
+														.getDelegation()
+														.getValidatorAddress();
+												stakedAmount = item.getBalance()
+														.getAmount();
+												ValidatorInfo selectedValidator = (ValidatorInfo) newValue;
+												newValidatorAddr = selectedValidator
+														.getOperatorAddress();
+												onSwitchDelegatorRequest();
+											}
+										});
+								Region region = new Region();
+								HBox.setHgrow(region, Priority.ALWAYS);
+								HBox.setMargin(actionButton, Insets.EMPTY);
+								HBox hBox = new HBox(label, switchDelegteComboBox, region,
+										actionButton);
+								hBox.setAlignment(Pos.CENTER_LEFT);
+								hBox.setSpacing(10);
+
+								setText(null);
+								setGraphic(hBox);
+
 							}
 						}
+					});
 
-						switchDelegteComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-							if (newValue != null) {
-								currentValidatorAddr = item.getDelegation().getValidatorAddress();
-								stakedAmount = item.getBalance().getAmount();
-								ValidatorInfo selectedValidator = (ValidatorInfo) newValue;
-								newValidatorAddr = selectedValidator.getOperatorAddress();
-								onSwitchDelegatorRequest();
-							}
-						});
-						Region region = new Region();
-						HBox.setHgrow(region, Priority.ALWAYS);
-						HBox.setMargin(actionButton, Insets.EMPTY);
-						HBox hBox = new HBox(label, switchDelegteComboBox, region, actionButton);
-						hBox.setAlignment(Pos.CENTER_LEFT);
-						hBox.setSpacing(10);
-
-						setText(null);
-						setGraphic(hBox);
-
-					}
-				}
-			});
-
-			if (tableTransactionsSent.getItems().isEmpty() && tableTransactionsReceived.getItems().isEmpty()) {
-				colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
+			if (tableTransactionsSent.getItems().isEmpty()
+					&& tableTransactionsReceived.getItems().isEmpty()) {
+				colTrxReceived.setCellValueFactory(
+						cellData -> new SimpleStringProperty(cellData.getValue()));
+				colTrxSent.setCellValueFactory(
+						cellData -> new SimpleStringProperty(cellData.getValue()));
 			}
 
 			// Gridnode List View
 			colIp.setCellValueFactory(new PropertyValueFactory<>("address"));
 			colGridnodeId.setCellValueFactory(new PropertyValueFactory<>("key"));
 			colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-			colStartGridnode.setCellFactory(tc -> new TableCell<GridnodeListViewItem, String>() {
-				private final Button startButton = new Button("START");
+			colStartGridnode
+					.setCellFactory(tc -> new TableCell<GridnodeListViewItem, String>() {
+						private final Button startButton = new Button("START");
 
-				@Override
-				protected void updateItem(String item, boolean empty) {
-					super.updateItem(item, empty);
-					if (empty) {
-						setGraphic(null);
-					} else {
-						GridnodeListViewItem gridnode = getTableView().getItems().get(getIndex());
-						startButton.setOnAction(event -> {
-							try {
-								// Get the gridnode ID from the gridnode object
-								gridnodeModel.setCurrentGridnodeId(gridnode.getKey());
-								startGridnodePasswordRequest();
-							} catch (Exception e) {
-								// Handle exceptions here
-								e.printStackTrace();
+						@Override
+						protected void updateItem(String item, boolean empty) {
+							super.updateItem(item, empty);
+							if (empty) {
+								setGraphic(null);
+							} else {
+								GridnodeListViewItem gridnode = getTableView().getItems()
+										.get(getIndex());
+								startButton.setOnAction(event -> {
+									try {
+										// Get the gridnode ID from the gridnode object
+										gridnodeModel
+												.setCurrentGridnodeId(gridnode.getKey());
+										startGridnodePasswordRequest();
+									} catch (Exception e) {
+										// Handle exceptions here
+										e.printStackTrace();
+									}
+								});
+								setGraphic(gridnode.getStatus().equals("INACTIVE")
+										? startButton
+										: null);
 							}
-						});
-						setGraphic(gridnode.getStatus().equals("INACTIVE") ? startButton : null);
-					}
-				}
-			});
-//			collAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
-//			colCompletionTime.setCellValueFactory(new PropertyValueFactory<>("completionTime"));
-			collAmount.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getFormattedAmount()));
-			colCompletionTime.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getFormattedCompletionTime()));
+						}
+					});
+			// collAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
+			// colCompletionTime.setCellValueFactory(new
+			// PropertyValueFactory<>("completionTime"));
+			collAmount.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(
+					cellData.getValue().getFormattedAmount()));
+			colCompletionTime.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(
+					cellData.getValue().getFormattedCompletionTime()));
 
 			// Load and set items for the TableView
 			loadAccounts(this::postAccountLoadInitialization);
@@ -559,7 +586,7 @@ public class CosmosController implements Initializable {
 			accountsService.loadAccountsFromJson();
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 
 		// Clear the existing items from the ComboBox
@@ -584,7 +611,7 @@ public class CosmosController implements Initializable {
 			String defaultAccountName = (String) accountsDropdown.getValue();
 			if (defaultAccountName != null) {
 				Optional<Account> defaultAccount = accountsService
-					.findAccountByName(defaultAccountName);
+						.findAccountByName(defaultAccountName);
 				if (defaultAccount.isPresent()) {
 					accountsData.setSelectedAccount(defaultAccount.get());
 					System.out.println("AccountsData is being initialized/set");
@@ -599,7 +626,7 @@ public class CosmosController implements Initializable {
 		accountsDropdown.setOnAction(event -> {
 			String selectedAccountName = (String) accountsDropdown.getValue();
 			Optional<Account> selectedAccount = accountsService
-				.findAccountByName(selectedAccountName);
+					.findAccountByName(selectedAccountName);
 			// Check if the "+Add Account" option was selected
 			if ("+Add New Account".equals(selectedAccountName)) {
 				createNewAccount();
@@ -611,7 +638,7 @@ public class CosmosController implements Initializable {
 				System.out.println("AccountsData is being initialized/set");
 
 				System.out
-					.println("Selected Account:" + accountsData.getSelectedAccount());
+						.println("Selected Account:" + accountsData.getSelectedAccount());
 				accountSelectedEvent.fire(new AccountSelectedEvent());
 
 				addressLabel.setText(accountsData.getSelectedAccount().getAddress());
@@ -623,9 +650,11 @@ public class CosmosController implements Initializable {
 						Platform.runLater(() -> {
 							getValidators();
 						});
-						cosmosService.loadAccountData(accountsData.getSelectedAccount().getAddress());
+						cosmosService.loadAccountData(
+								accountsData.getSelectedAccount().getAddress());
 
-						// Load transactions and other account data (assuming these methods are adapted
+						// Load transactions and other account data (assuming these
+						// methods are adapted
 						// for gRPC)
 						cosmosTxList.loadTransactions(10);
 						updateGridnodeList();
@@ -638,7 +667,7 @@ public class CosmosController implements Initializable {
 				fetchDataTask.setOnFailed(e -> {
 					Throwable exception = fetchDataTask.getException();
 					Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE,
-						null, exception);
+							null, exception);
 					// Optionally show an error message to the user
 				});
 
@@ -664,7 +693,8 @@ public class CosmosController implements Initializable {
 				content.putString(selectedAccount.getAddress());
 				clipboard.setContent(content);
 
-				cosmosService.sendDesktopNotification("Address copied to clipboard", selectedAccount.getAddress());
+				cosmosService.sendDesktopNotification("Address copied to clipboard",
+						selectedAccount.getAddress());
 			}
 		});
 	}
@@ -713,7 +743,7 @@ public class CosmosController implements Initializable {
 			showPane(cosmosMainPane);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
 
@@ -730,8 +760,10 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
-	private void onGenerateKeysClicked(ActionEvent event) throws SignatureDecodeException, Exception {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_GRIDNODE_KEYS).build());
+	private void onGenerateKeysClicked(ActionEvent event)
+			throws SignatureDecodeException, Exception {
+		unlockRequestEvent.fire(UnlockRequest.builder()
+				.type(UnlockRequest.Type.COSMOS_GRIDNODE_KEYS).build());
 		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
@@ -761,7 +793,7 @@ public class CosmosController implements Initializable {
 			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
 
@@ -777,10 +809,10 @@ public class CosmosController implements Initializable {
 	private void showPane(StackPane paneToShow) {
 		// List of all panes
 		String paneName = paneMap.entrySet().stream()
-			.filter(entry -> entry.getValue() == paneToShow).map(Map.Entry::getKey)
-			.findFirst().orElse(null);
+				.filter(entry -> entry.getValue() == paneToShow).map(Map.Entry::getKey)
+				.findFirst().orElse(null);
 		List<StackPane> allPanes = Arrays.asList(importPane, cosmosWizardPane,
-			cosmosMainPane, generatePane, passwordPane, confirmMnemonic);
+				cosmosMainPane, generatePane, passwordPane, confirmMnemonic);
 		mnemonicModel.setCurrentPane(paneName);
 		// Loop through all panes and set visibility
 		for (StackPane pane : allPanes) {
@@ -814,8 +846,8 @@ public class CosmosController implements Initializable {
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		List<AddressCosmos> addresses = objectMapper.readValue(file,
-			new TypeReference<List<AddressCosmos>>() {
-		});
+				new TypeReference<List<AddressCosmos>>() {
+				});
 		return addresses.size();
 	}
 
@@ -828,7 +860,7 @@ public class CosmosController implements Initializable {
 
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
 
@@ -837,14 +869,14 @@ public class CosmosController implements Initializable {
 	private void importPrivateKey(ActionEvent event) {
 		try {
 			accountModel.setAddress(
-				cryptoUtils.getAddressFromPrivateKey(importPassword.getText()));
+					cryptoUtils.getAddressFromPrivateKey(importPassword.getText()));
 			accountModel.setPublicKey(
-				cryptoUtils.getPublicKeyBytes(importPassword.getText()));
+					cryptoUtils.getPublicKeyBytes(importPassword.getText()));
 			accountModel.setPrivateKey(
-				cryptoUtils.getPrivateKeyBytes(importPassword.getText()));
+					cryptoUtils.getPrivateKeyBytes(importPassword.getText()));
 			addressFieldPassword.setText(accountModel.getAddress());
 		} catch (NoSuchAlgorithmException | NoSuchProviderException
-			| InvalidKeySpecException e) {
+				| InvalidKeySpecException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -864,7 +896,8 @@ public class CosmosController implements Initializable {
 		int index = 0;
 
 		// this.mnemonicArea.setText(mnemonic);
-		byte[] privateKey = mnemonicService.derivePrivateKeyFromMnemonic(mnemonicModel.getList(), index);
+		byte[] privateKey = mnemonicService
+				.derivePrivateKeyFromMnemonic(mnemonicModel.getList(), index);
 		// Encrypt the mnemonic before setting it to the accountModel
 		// String password1 = passwordField1.getText();
 		// String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
@@ -873,8 +906,7 @@ public class CosmosController implements Initializable {
 
 		String path = String.format("m/44'/118'/0'/0/%d", index);
 		org.unigrid.janus.utils.CosmosCredentials creds = AddressUtil
-			.getCredentials(mnemonicModel.getMnemonic(), "", path,
-				"unigrid");
+				.getCredentials(mnemonicModel.getMnemonic(), "", path, "unigrid");
 
 		// Populate the AccountModel
 		accountModel.setMnemonic(mnemonicModel.getMnemonic());
@@ -918,7 +950,8 @@ public class CosmosController implements Initializable {
 
 	public void onUnbondingListEvent(@Observes UnbondingListEvent event) {
 		Platform.runLater(() -> {
-			ObservableList<UnbondingEntry> observableData = FXCollections.observableArrayList(event.getUnbondingList());
+			ObservableList<UnbondingEntry> observableData = FXCollections
+					.observableArrayList(event.getUnbondingList());
 			tblGridnodeUnbonding.setItems(observableData);
 		});
 	}
@@ -940,30 +973,32 @@ public class CosmosController implements Initializable {
 	/* REWARDS LIST VIEW */
 	public void stakingRewardsValue(List<Balance> totals) {
 		BigDecimal totalRewards = totals.stream()
-			.map(balance -> new BigDecimal(balance.getAmount()))
-			.reduce(BigDecimal.ZERO, BigDecimal::add)
-			.divide(scaleFactor, 8, RoundingMode.HALF_UP);
+				.map(balance -> new BigDecimal(balance.getAmount()))
+				.reduce(BigDecimal.ZERO, BigDecimal::add)
+				.divide(scaleFactor, 8, RoundingMode.HALF_UP);
 
 		Platform.runLater(() -> {
-			//stakingRewards.setText(totalRewards.toPlainString() + " UGD");
-			double totalRewardsDouble = totalRewards.doubleValue(); // Convert BigDecimal to double
+			// stakingRewards.setText(totalRewards.toPlainString() + " UGD");
+			double totalRewardsDouble = totalRewards.doubleValue(); // Convert BigDecimal
+																	// to double
 			animateLabelToNewValue(stakingRewards, totalRewardsDouble);
 			animateLabelToNewValue(stakeRewardsLbl, totalRewardsDouble);
 
 		});
 	}
 
-
 	/* STAKING */
 	public void onRedelegationsEvent(@Observes RedelegationsEvent event) {
 		Platform.runLater(() -> {
 			// Update the view with redelegations data
-			updateRedelegationsView(event.getRedelegationsResponse().getRedelegationResponses());
+			updateRedelegationsView(
+					event.getRedelegationsResponse().getRedelegationResponses());
 		});
 	}
 
 	// The method to update the view with redelegations data
-	private void updateRedelegationsView(List<RedelegationResponseEntry> redelegationResponses) {
+	private void updateRedelegationsView(
+			List<RedelegationResponseEntry> redelegationResponses) {
 		// Update your UI components with redelegation data
 		// For example, if you have a ListView for redelegations:
 		// redelegationsListView.getItems().setAll(redelegationResponses);
@@ -974,12 +1009,15 @@ public class CosmosController implements Initializable {
 	public void onUnbondingDelegationsEvent(@Observes UnbondingDelegationsEvent event) {
 		Platform.runLater(() -> {
 			// Call a method to update the view with the unbonding delegations data
-			updateUnbondingDelegationsView(event.getUnbondingDelegationsResponse().getUnbondingResponses());
+			updateUnbondingDelegationsView(
+					event.getUnbondingDelegationsResponse().getUnbondingResponses());
 		});
 	}
 
-	// The method to update the view (the implementation depends on how you want to display the unbonding delegations)
-	private void updateUnbondingDelegationsView(List<UnbondingResponse> unbondingResponses) {
+	// The method to update the view (the implementation depends on how you want to
+	// display the unbonding delegations)
+	private void updateUnbondingDelegationsView(
+			List<UnbondingResponse> unbondingResponses) {
 		// Update your UI components with unbonding delegations data
 		// For example, if you have a ListView for unbonding delegations:
 		// unbondingDelegationsListView.getItems().setAll(unbondingResponses);
@@ -991,7 +1029,7 @@ public class CosmosController implements Initializable {
 			showPane(cosmosWizardPane);
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
-				ex);
+					ex);
 		}
 	}
 
@@ -1006,17 +1044,16 @@ public class CosmosController implements Initializable {
 		CosmosCredentials credentials = cosmosService.createCredentials(password);
 
 		SignUtil transactionService = cosmosService.createSignUtilService();
-		long amountInUugd = cosmosService.convertBigDecimalInUugd(Double.parseDouble(sendAmount.getText()));
+		long amountInUugd = cosmosService
+				.convertBigDecimalInUugd(Double.parseDouble(sendAmount.getText()));
 
 		System.out.println("amount in uugd: " + amountInUugd);
 
-		SendInfo sendMsg = SendInfo.builder()
-			.credentials(credentials)
-			.toAddress(toAddress.getText())
-			.amountInAtom(amountInUugd)
-			.build();
+		SendInfo sendMsg = SendInfo.builder().credentials(credentials)
+				.toAddress(toAddress.getText()).amountInAtom(amountInUugd).build();
 
-		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg, new BigDecimal("0.000001"), 200000);
+		Abci.TxResponse txResponse = transactionService.sendTx(credentials, sendMsg,
+				new BigDecimal("0.000001"), 200000);
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
 		toAddress.setText("");
@@ -1026,7 +1063,8 @@ public class CosmosController implements Initializable {
 
 	}
 
-	public void delegation(boolean delegate, String validatorAddress, String password) throws Exception {
+	public void delegation(boolean delegate, String validatorAddress, String password)
+			throws Exception {
 		CosmosCredentials credentials = cosmosService.createCredentials(password);
 
 		SignUtil transactionService = cosmosService.createSignUtilService();
@@ -1034,22 +1072,28 @@ public class CosmosController implements Initializable {
 		long amount = 0;
 		if (validatorAddress == null) {
 			if (delegate) {
-				amount = cosmosService.convertBigDecimalInUugd(Double.parseDouble(delegateAmountTextField.getText()));
+				amount = cosmosService.convertBigDecimalInUugd(
+						Double.parseDouble(delegateAmountTextField.getText()));
 			} else {
-				amount = cosmosService.convertBigDecimalInUugd(Double.parseDouble(undelegateAmount.getText()));
+				amount = cosmosService.convertBigDecimalInUugd(
+						Double.parseDouble(undelegateAmount.getText()));
 			}
 		} else {
-			amount = cosmosService.convertBigDecimalInUugd(Double.parseDouble(stakeAmountTextField.getText()));
+			amount = cosmosService.convertBigDecimalInUugd(
+					Double.parseDouble(stakeAmountTextField.getText()));
 		}
 
 		Abci.TxResponse txResponse = null;
-		//long amountInUugd = cosmosService.convertLongToUugd(amount);
+		// long amountInUugd = cosmosService.convertLongToUugd(amount);
 		if (delegate) {
-			txResponse = transactionService.sendDelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendDelegateTx(credentials, amount,
+					new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress == null) {
-			txResponse = transactionService.sendUndelegateTx(credentials, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendUndelegateTx(credentials, amount,
+					new BigDecimal("0.000001"), 200000);
 		} else if (!delegate && validatorAddress != null) {
-			txResponse = transactionService.sendStakingTx(credentials, validatorAddress, amount, new BigDecimal("0.000001"), 200000);
+			txResponse = transactionService.sendStakingTx(credentials, validatorAddress,
+					amount, new BigDecimal("0.000001"), 200000);
 		}
 
 		System.out.println("Response Tx Delegate");
@@ -1073,7 +1117,8 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	public void delegateForStaking(String password) throws Exception {
-		ValidatorInfo selectedValidator = (ValidatorInfo) validatorListComboBox.getSelectionModel().getSelectedItem();
+		ValidatorInfo selectedValidator = (ValidatorInfo) validatorListComboBox
+				.getSelectionModel().getSelectedItem();
 		String operatorAddress = "";
 		if (selectedValidator != null) {
 			operatorAddress = selectedValidator.getOperatorAddress();
@@ -1089,8 +1134,10 @@ public class CosmosController implements Initializable {
 	}
 
 	@FXML
-	private void openGridnodeConf(ActionEvent event) throws NullPointerException, IOException {
-		File gridnodeKeys = DataDirectory.getGridnodeKeysFile(accountsData.getSelectedAccount().getName());
+	private void openGridnodeConf(ActionEvent event)
+			throws NullPointerException, IOException {
+		File gridnodeKeys = DataDirectory
+				.getGridnodeKeysFile(accountsData.getSelectedAccount().getName());
 		try {
 			hostServices.showDocument(gridnodeKeys.getAbsolutePath());
 		} catch (NullPointerException e) {
@@ -1106,7 +1153,7 @@ public class CosmosController implements Initializable {
 		System.out.println("Word List Length: " + request.getWordListLength());
 
 		if ("select".equals(request.getAction())
-			|| "select12".equals(request.getAction())) {
+				|| "select12".equals(request.getAction())) {
 			if (selectedTab == mnemonic12Tab) {
 				if (request.getWordListLength() == 12) {
 					System.out.println("Correct number of words for 12-word mnemonic");
@@ -1122,7 +1169,7 @@ public class CosmosController implements Initializable {
 				} else {
 					System.out.println("Invalid number of words for 12-word mnemonic");
 					showError("Invalid number of words. Please enter 12 words.",
-						selectedTab);
+							selectedTab);
 				}
 			} else if (selectedTab == mnemonic24Tab) {
 				if (request.getWordListLength() == 24) {
@@ -1138,13 +1185,13 @@ public class CosmosController implements Initializable {
 				} else {
 					System.out.println("Invalid number of words for 24-word mnemonic");
 					showError("Invalid number of words. Please enter 24 words.",
-						selectedTab);
+							selectedTab);
 				}
 			}
 		} else {
 			showError(
-				"Invalid mnemonic length. Please enter either a 12 or 24 word mnemonic.",
-				selectedTab);
+					"Invalid mnemonic length. Please enter either a 12 or 24 word mnemonic.",
+					selectedTab);
 		}
 
 		System.out.println("Should Proceed: " + shouldProceed);
@@ -1164,7 +1211,7 @@ public class CosmosController implements Initializable {
 
 			// Update UI fields
 			seedPhraseTextArea.setStyle(
-				"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
+					"-fx-font-size: 25px; -fx-background-color: rgba(0, 0, 0, 0.2);");
 			seedPhraseTextArea.setText(accountModel.getMnemonic());
 			addressFieldPassword.setText(accountModel.getAddress());
 
@@ -1208,30 +1255,47 @@ public class CosmosController implements Initializable {
 			showPane(passwordPane);
 		} else {
 			// Mnemonics do not match
+			showMnemonicMismatchAlert();
 			System.out.println("mnemonic does not match");
 		}
 	}
 
+	// TODO convert to a signal and display in view
+	private void showMnemonicMismatchAlert() {
+		Alert alert = new Alert(Alert.AlertType.ERROR);
+		alert.setTitle("Mnemonic Mismatch");
+		alert.setHeaderText(null); // You can set a header text or leave it null for no
+									// header
+		alert.setContentText(
+				"The mnemonic does not match. Please verify your input and try again.");
+
+		alert.showAndWait();
+	}
+
 	public void getValidators() {
-		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest request = cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest.newBuilder()
-			.setStatus("BOND_STATUS_BONDED")
-			.build();
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stub = cosmos.staking.v1beta1.QueryGrpc
+				.newBlockingStub(grpcService.getChannel());
+		cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest request = cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsRequest
+				.newBuilder().setStatus("BOND_STATUS_BONDED").build();
 		try {
-			cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsResponse response = stub.validators(request);
+			cosmos.staking.v1beta1.QueryOuterClass.QueryValidatorsResponse response = stub
+					.validators(request);
 			System.out.println("Number of validators: " + response.getValidatorsCount());
 			List<ValidatorInfo> validatorInfoList = new ArrayList<>();
-			for (cosmos.staking.v1beta1.Staking.Validator validator : response.getValidatorsList()) {
+			for (cosmos.staking.v1beta1.Staking.Validator validator : response
+					.getValidatorsList()) {
 				String moniker = validator.getDescription().getMoniker();
 				String operatorAddress = validator.getOperatorAddress();
 
-				BigInteger rate = new BigInteger(validator.getCommission().getCommissionRates().getRate());
+				BigInteger rate = new BigInteger(
+						validator.getCommission().getCommissionRates().getRate());
 				BigInteger devideDecimals = new BigInteger(VALIDATORS_DECIMAL_DEVIDER);
 				BigInteger commission = rate.divide(devideDecimals);
 
 				String commissionPercentage = commission.toString() + "%";
 
-				validatorInfoList.add(new ValidatorInfo(moniker, operatorAddress, commissionPercentage));
+				validatorInfoList.add(new ValidatorInfo(moniker, operatorAddress,
+						commissionPercentage));
 			}
 
 			validatorListComboBox.getItems().setAll(validatorInfoList);
@@ -1246,15 +1310,15 @@ public class CosmosController implements Initializable {
 			gridnodeModel.setDelegatedAmount(event.getDelegatedAmount());
 			gridnodeModel.setPossibleGridnodes(event.getGridnodeCount());
 
-			//String text = event.getDelegatedAmount() + " UGD";
-			//delegationAmountLabel.setText(text);
-			//gridnodeMainView.setText(text);
+			// String text = event.getDelegatedAmount() + " UGD";
+			// delegationAmountLabel.setText(text);
+			// gridnodeMainView.setText(text);
 			animateLabelToNewValue(delegationAmountLabel, event.getDelegatedAmount());
 			animateLabelToNewValue(gridnodeMainView, event.getDelegatedAmount());
 
 			String gridnodeLimit = String.valueOf(event.getGridnodeCount());
 			nodeLimit.setText(gridnodeLimit);
-			//System.out.println("Delegation Amount: " + text);
+			// System.out.println("Delegation Amount: " + text);
 
 			delegationEvent = event;
 			// trigger check keys file
@@ -1267,7 +1331,8 @@ public class CosmosController implements Initializable {
 		if (event.getEventType() == GridnodeEvents.EventType.GRIDNODE_STARTED) {
 			// refresh the list
 			updateGridnodeList();
-			cosmosService.sendDesktopNotification("Gridnode Started!", gridnodeModel.getCurrentGridnodeId());
+			cosmosService.sendDesktopNotification("Gridnode Started!",
+					gridnodeModel.getCurrentGridnodeId());
 
 		}
 	}
@@ -1285,36 +1350,41 @@ public class CosmosController implements Initializable {
 
 	public void onTransactionListEvent(@Observes TransactionListEvent event) {
 		Platform.runLater(() -> {
-			ObservableList<String> sentData = FXCollections.observableArrayList(event.getTransactionsSent());
+			ObservableList<String> sentData = FXCollections
+					.observableArrayList(event.getTransactionsSent());
 			tableTransactionsSent.setItems(sentData);
 
-			ObservableList<String> receivedData = FXCollections.observableArrayList(event.getTransactionsReceived());
+			ObservableList<String> receivedData = FXCollections
+					.observableArrayList(event.getTransactionsReceived());
 			tableTransactionsReceived.setItems(receivedData);
 		});
 	}
 
 	@FXML
 	private void onStartAllGridnodes(ActionEvent event) {
-		// TODO build functionality here 
+		// TODO build functionality here
 		// this should also be triggered by a password event
 		gridnodeModel.startGridnode();
 	}
 
 	@FXML
-	private void onRefreshGridnodes(ActionEvent event) throws IOException, InterruptedException {
+	private void onRefreshGridnodes(ActionEvent event)
+			throws IOException, InterruptedException {
 		updateGridnodeList();
 	}
 
 	@FXML
 	private void testNotifications(ActionEvent event) {
-		cosmosService.sendDesktopNotification("this is a test", "036b5b23ae9f61e3af3dc506e7f49baa6f1279cb739fe395bb1b763c1e5ba0d28b");
+		cosmosService.sendDesktopNotification("this is a test",
+				"036b5b23ae9f61e3af3dc506e7f49baa6f1279cb739fe395bb1b763c1e5ba0d28b");
 	}
 
 	private void updateGridnodeList() {
 		Platform.runLater(() -> {
 			List<GridnodeData> gridnodes = gridnodeHandler.fetchGridnodes();
 			List<String> keys = gridnodeKeyManager.loadKeysFromFile();
-			List<GridnodeListViewItem> items = gridnodeHandler.compareGridnodesWithLocalKeys(gridnodes, keys);
+			List<GridnodeListViewItem> items = gridnodeHandler
+					.compareGridnodesWithLocalKeys(gridnodes, keys);
 			System.out.println("items: " + items);
 			tblGridnodeListStart.setItems(FXCollections.observableArrayList(items));
 			tblGridnodeListStart.refresh();
@@ -1324,20 +1394,23 @@ public class CosmosController implements Initializable {
 	@FXML
 	private void sendTokensPasswordRequest() {
 		if (!"".equals(toAddress.getText()) && !"".equals(sendAmount.getText())) {
-			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
+			unlockRequestEvent.fire(UnlockRequest.builder()
+					.type(UnlockRequest.Type.COSMOS_SEND_TOKENS).build());
 			overlayRequest.fire(OverlayRequest.OPEN);
 		}
 	}
 
 	private void startGridnodePasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_GRIDNODE_START).build());
+		unlockRequestEvent.fire(UnlockRequest.builder()
+				.type(UnlockRequest.Type.COSMOS_GRIDNODE_START).build());
 		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
 	@FXML
 	private void delegateToGridnodePasswordRequest() {
 		if (!"".equals(delegateAmountTextField.getText())) {
-			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE).build());
+			unlockRequestEvent.fire(UnlockRequest.builder()
+					.type(UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE).build());
 			overlayRequest.fire(OverlayRequest.OPEN);
 		}
 	}
@@ -1345,7 +1418,8 @@ public class CosmosController implements Initializable {
 	@FXML
 	private void undelegateFromGridnodePasswordRequest() {
 		if (!"".equals(undelegateAmount.getText())) {
-			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE).build());
+			unlockRequestEvent.fire(UnlockRequest.builder()
+					.type(UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE).build());
 			overlayRequest.fire(OverlayRequest.OPEN);
 		}
 	}
@@ -1353,74 +1427,79 @@ public class CosmosController implements Initializable {
 	@FXML
 	private void delegateToStakingPasswordRequest() {
 		if (!"".equals(stakeAmountTextField.getText())) {
-			unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_DELEGATE_STAKING).build());
+			unlockRequestEvent.fire(UnlockRequest.builder()
+					.type(UnlockRequest.Type.COSMOS_DELEGATE_STAKING).build());
 			overlayRequest.fire(OverlayRequest.OPEN);
 		}
 	}
 
 	@FXML
 	private void onClaimStakingRewardsPasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_CLAIM_REWARDS).build());
+		unlockRequestEvent.fire(UnlockRequest.builder()
+				.type(UnlockRequest.Type.COSMOS_CLAIM_REWARDS).build());
 		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
 	@FXML
 	private void onUnstakePasswordRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_UNDELEGATE_STAKING).build());
+		unlockRequestEvent.fire(UnlockRequest.builder()
+				.type(UnlockRequest.Type.COSMOS_UNDELEGATE_STAKING).build());
 		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
 	@FXML
 	private void onSwitchDelegatorRequest() {
-		unlockRequestEvent.fire(UnlockRequest.builder().type(UnlockRequest.Type.COSMOS_SWITCH_DELEGATOR).build());
+		unlockRequestEvent.fire(UnlockRequest.builder()
+				.type(UnlockRequest.Type.COSMOS_SWITCH_DELEGATOR).build());
 		overlayRequest.fire(OverlayRequest.OPEN);
 	}
 
 	// this should all be in a model service not UI controller
-	private void eventCosmosWalletRequest(@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
+	private void eventCosmosWalletRequest(
+			@Observes CosmosWalletRequest cosmosWalletRequest) throws Exception {
 		switch (cosmosWalletRequest.getRequest()) {
-			case SEND_TOKENS: {
-				sendTokens(cosmosWalletRequest.getPassword());
-				break;
-			}
-			case DELEGATE_GRIDNODE: {
-				delegateToGridnode(cosmosWalletRequest.getPassword());
-				break;
-			}
-			case UNDELEGATE_GRIDNODE: {
-				undelegateFromGridnode(cosmosWalletRequest.getPassword());
-				break;
-			}
-			case DELEGATE_STAKING: {
-				delegateForStaking(cosmosWalletRequest.getPassword());
-				break;
-			}
-			case CLAIM_REWARDS: {
-				onClaimStakingRewards(cosmosWalletRequest.getPassword());
-				break;
-			}
-			case GRIDNODE_KEYS: {
-				cosmosService.generateKeys(delegationEvent.getGridnodeCount(),
+		case SEND_TOKENS: {
+			sendTokens(cosmosWalletRequest.getPassword());
+			break;
+		}
+		case DELEGATE_GRIDNODE: {
+			delegateToGridnode(cosmosWalletRequest.getPassword());
+			break;
+		}
+		case UNDELEGATE_GRIDNODE: {
+			undelegateFromGridnode(cosmosWalletRequest.getPassword());
+			break;
+		}
+		case DELEGATE_STAKING: {
+			delegateForStaking(cosmosWalletRequest.getPassword());
+			break;
+		}
+		case CLAIM_REWARDS: {
+			onClaimStakingRewards(cosmosWalletRequest.getPassword());
+			break;
+		}
+		case GRIDNODE_KEYS: {
+			cosmosService.generateKeys(delegationEvent.getGridnodeCount(),
 					cosmosWalletRequest.getPassword());
-				break;
-			}
-			case GRIDNODE_START: {
-				// Call the startGridnode method with the gridnode ID
-				gridnodeHandler.startGridnode(gridnodeModel.getCurrentGridnodeId(),
+			break;
+		}
+		case GRIDNODE_START: {
+			// Call the startGridnode method with the gridnode ID
+			gridnodeHandler.startGridnode(gridnodeModel.getCurrentGridnodeId(),
 					cosmosWalletRequest.getPassword());
-				break;
-			}
-			case UNDELEGATE_STAKING: {
-				undelegateStaking(cosmosWalletRequest.getPassword());
-				break;
-			}
+			break;
+		}
+		case UNDELEGATE_STAKING: {
+			undelegateStaking(cosmosWalletRequest.getPassword());
+			break;
+		}
 
-			case SWITCH_DELEGATOR: {
-				switchDelegator(cosmosWalletRequest.getPassword());
-				break;
-			}
-			default:
-				throw new AssertionError();
+		case SWITCH_DELEGATOR: {
+			switchDelegator(cosmosWalletRequest.getPassword());
+			break;
+		}
+		default:
+			throw new AssertionError();
 		}
 	}
 
@@ -1446,15 +1525,17 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	public void onClaimStakingRewards(String password) throws Exception {
-		ObservableList<DelegationsRequest.DelegationResponse> items = delegationsListView.getItems();
+		ObservableList<DelegationsRequest.DelegationResponse> items = delegationsListView
+				.getItems();
 
 		List<String> validatorAddresses = items.stream()
-			.map(item -> item.getDelegation().getValidatorAddress())
-			.collect(Collectors.toList());
+				.map(item -> item.getDelegation().getValidatorAddress())
+				.collect(Collectors.toList());
 		CosmosCredentials credentials = cosmosService.createCredentials(password);
 
 		SignUtil transactionService = cosmosService.createSignUtilService();
-		transactionService.sendClaimStakingRewardsTx(credentials, validatorAddresses, new BigDecimal("0.000001"), 200000);
+		transactionService.sendClaimStakingRewardsTx(credentials, validatorAddresses,
+				new BigDecimal("0.000001"), 200000);
 
 		cosmosService.sendDesktopNotification("Info", "Rewards claimed");
 	}
@@ -1487,7 +1568,8 @@ public class CosmosController implements Initializable {
 					content.putString(cell.getItem());
 					clipboard.setContent(content);
 
-					cosmosService.sendDesktopNotification("Key copied to clipboard", cell.getItem());
+					cosmosService.sendDesktopNotification("Key copied to clipboard",
+							cell.getItem());
 				}
 			});
 			cell.textProperty().bind(cell.itemProperty());
@@ -1499,8 +1581,9 @@ public class CosmosController implements Initializable {
 		CosmosCredentials credentials = cosmosService.createCredentials(password);
 
 		SignUtil transactionService = cosmosService.createSignUtilService();
-		Abci.TxResponse txResponse = transactionService.sendUnstakingTx(credentials, currentValidatorAddr,
-			Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 200000);
+		Abci.TxResponse txResponse = transactionService.sendUnstakingTx(credentials,
+				currentValidatorAddr, Long.valueOf(stakedAmount),
+				new BigDecimal("0.000001"), 200000);
 
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
@@ -1511,8 +1594,9 @@ public class CosmosController implements Initializable {
 	public void switchDelegator(String password) throws Exception {
 		CosmosCredentials credentials = cosmosService.createCredentials(password);
 		SignUtil transactionService = cosmosService.createSignUtilService();
-		Abci.TxResponse txResponse = transactionService.sendSwitchDelegatorTx(credentials, currentValidatorAddr, newValidatorAddr,
-			Long.valueOf(stakedAmount), new BigDecimal("0.000001"), 400000);
+		Abci.TxResponse txResponse = transactionService.sendSwitchDelegatorTx(credentials,
+				currentValidatorAddr, newValidatorAddr, Long.valueOf(stakedAmount),
+				new BigDecimal("0.000001"), 400000);
 
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);
@@ -1521,12 +1605,14 @@ public class CosmosController implements Initializable {
 	}
 
 	public void animateLabelToNewValue(Label label, double newValue) {
-		final double[] oldValue = new double[]{Double.parseDouble(label.getText().replaceAll("[^0-9.]", ""))};
+		final double[] oldValue = new double[] {
+				Double.parseDouble(label.getText().replaceAll("[^0-9.]", "")) };
 		final Timeline[] timeline = new Timeline[1];
 
 		KeyFrame keyFrame = new KeyFrame(Duration.millis(10), e -> {
 			double diff = newValue - oldValue[0];
-			double rate = calculateRate(diff); // Calculate the rate based on the difference
+			double rate = calculateRate(diff); // Calculate the rate based on the
+												// difference
 
 			oldValue[0] += diff / rate;
 			label.setText(String.format("%.8f UGD", oldValue[0]));
