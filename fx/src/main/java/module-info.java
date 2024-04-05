@@ -70,6 +70,7 @@ module fx {
 	requires com.google.protobuf.util;
 	requires okhttp3;
 	requires org.apache.commons.collections4;
+
 	//requires crypto;
 	requires com.fasterxml.jackson.annotation;
 
@@ -123,7 +124,7 @@ module fx {
 	exports cosmos.crypto.multisig;
 	exports cosmos.crypto.multisig.v1beta1;
 	exports cosmos.distribution.v1beta1;
-	exports cosmos.tx.v1beta1;
+	// exports cosmos.tx.v1beta1;
 	exports cosmos.base.abci.v1beta1;
 	exports cosmos.gov.v1beta1;
 	exports cosmos.staking.v1beta1;
