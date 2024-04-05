@@ -305,7 +305,7 @@ public class MnemonicController implements Initializable {
 		int index = Arrays.asList(currentList).indexOf(clickedField);
 
 		System.out.println("Clicked field index: " + index);
-		System.out.println("Mnemonic word list: " + originalTextMap);
+		System.out.println("Mnemonic word list: " + mnemonicModel.getMnemonicWordList());
 
 		/*if (index != -1 && index < mnemonicModel.getMnemonicWordList().size()) {
 			currentList[index].setText(mnemonicModel.getMnemonicWordList().get(index));
@@ -364,7 +364,7 @@ public class MnemonicController implements Initializable {
 				String maskedText = placeholderText;
 				if (!placeholderText.equals(textField.getText())) {
 					originalTextMap.put(textField, textField.getText());
-					mnemonicModel.getMnemonicWordList().put(idx, maskedText);
+					mnemonicModel.getMnemonicWordList().put(idx, textField.getText());
 				}
 				textField.setText(maskedText);
 			}
