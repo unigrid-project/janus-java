@@ -72,6 +72,9 @@ public class AccountsService {
 
 	public void loadAccountsFromJson() throws Exception {
 		File accountsFile = DataDirectory.getAccountsFile();
+		if(!accountsFile.exists()) {
+			return;
+		}
 		ObjectMapper objectMapper = new ObjectMapper();
 		AccountsData loadedData = objectMapper.readValue(accountsFile, AccountsData.class);
 

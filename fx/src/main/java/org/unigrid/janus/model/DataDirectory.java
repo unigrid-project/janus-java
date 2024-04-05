@@ -83,10 +83,12 @@ public class DataDirectory {
 		// System.out.println("found folder = " + builder.getFileHandler().locate());
 		// System.out.println(builder.getFileHandler().getPath());
 		System.out.println("Path: ".concat(builder.getFileHandler().getPath()));
-
 		try {
 			do {
 				System.out.println("init loop DataDirectory!!!");
+				if (!builder.getFileHandler().getFile().exists()) {
+					throw new ConfigurationException();
+				}
 
 				try {
 					Thread.sleep(250);

@@ -13,7 +13,6 @@
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
-
 package org.unigrid.janus.controller;
 
 import java.net.URL;
@@ -44,6 +43,7 @@ import org.unigrid.janus.model.signal.TabRequestSignal;
 
 @ApplicationScoped
 public class MnemonicController implements Initializable {
+
 	@Inject
 	private MnemonicModel mnemonicModel;
 	@Inject
@@ -123,10 +123,7 @@ public class MnemonicController implements Initializable {
 			for (TextField textField : textFields24Confirm) {
 				handleFocusEventFor24WordMnemonicConfirm(textField);
 			}
-
-		}
-		);
-
+		});
 	}
 
 	private void initializeTextFields12() {
@@ -191,7 +188,7 @@ public class MnemonicController implements Initializable {
 				if (words.length == 24) {
 					mnemonicWordList.clear();
 					int counter = 0;
-					for (String s: words) {
+					for (String s : words) {
 						mnemonicModel.getMnemonicWordList().put(counter, s);
 						counter++;
 					}
@@ -212,7 +209,7 @@ public class MnemonicController implements Initializable {
 				} else {
 					mnemonicWordList.clear();
 					int counter = 0;
-					for (String s: words) {
+					for (String s : words) {
 						mnemonicModel.getMnemonicWordList().put(counter, s);
 						counter++;
 					}
@@ -234,11 +231,11 @@ public class MnemonicController implements Initializable {
 			if (shouldProceed) {
 				mnemonicWordList.clear();
 				int counter = 0;
-				for (String s: words) {
+				for (String s : words) {
 					mnemonicModel.getMnemonicWordList().put(counter, s);
 					counter++;
 				}
-				
+
 				if ("select".equals(action)) {
 					clearTextFields(textFields12List);
 					setPlaceholderText(textFields24ImportList);
@@ -317,7 +314,7 @@ public class MnemonicController implements Initializable {
 	}
 
 	private void handleFocusEventCommon(TextField textField, List<TextField> textFieldList, String placeholderText) {
-		
+
 		textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
 			int idx = textFieldList.indexOf(textField);
 			String originalText = originalTextMap.getOrDefault(textField, "");

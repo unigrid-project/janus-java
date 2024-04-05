@@ -93,25 +93,14 @@ import org.unigrid.janus.utils.AddressUtil;
 import org.unigrid.janus.view.backing.CosmosTxList;
 import java.math.BigInteger;
 import cosmos.base.abci.v1beta1.Abci;
-import cosmos.tx.v1beta1.ServiceGrpc;
-import cosmos.tx.v1beta1.ServiceOuterClass;
-import cosmos.tx.v1beta1.TxOuterClass;
 import io.grpc.StatusRuntimeException;
 import java.math.RoundingMode;
-import java.security.MessageDigest;
-import java.util.Random;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Paint;
-import org.apache.commons.lang3.SystemUtils;
-import org.controlsfx.control.Notifications;
-import org.kordamp.ikonli.javafx.FontIcon;
 import org.unigrid.janus.model.ValidatorInfo;
 import java.util.stream.Collectors;
 import javafx.animation.Animation;
@@ -501,7 +490,7 @@ public class CosmosController implements Initializable {
 
 			if (tableTransactionsSent.getItems().isEmpty() && tableTransactionsReceived.getItems().isEmpty()) {
 				colTrxReceived.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
-				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));				
+				colTrxSent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue()));
 			}
 
 			// Gridnode List View
@@ -821,9 +810,9 @@ public class CosmosController implements Initializable {
 	@FXML
 	private void onCancelAccountGeneration(ActionEvent event) {
 		try {
-			showPane(cosmosMainPane);
-
 			resetTextFieldsEvent.fire(ResetTextFieldsSignal.builder().build());
+
+			showPane(cosmosMainPane);
 
 		} catch (Exception ex) {
 			Logger.getLogger(CosmosController.class.getName()).log(Level.SEVERE, null,
@@ -862,7 +851,6 @@ public class CosmosController implements Initializable {
 
 		int index = 0;
 
-		
 		// this.mnemonicArea.setText(mnemonic);
 		byte[] privateKey = mnemonicService.derivePrivateKeyFromMnemonic(mnemonicModel.getList(), index);
 		// Encrypt the mnemonic before setting it to the accountModel
@@ -874,7 +862,7 @@ public class CosmosController implements Initializable {
 		String path = String.format("m/44'/118'/0'/0/%d", index);
 		org.unigrid.janus.utils.CosmosCredentials creds = AddressUtil
 			.getCredentials(mnemonicModel.getMnemonic(), "", path,
-			"unigrid");
+				"unigrid");
 
 		// Populate the AccountModel
 		accountModel.setMnemonic(mnemonicModel.getMnemonic());
