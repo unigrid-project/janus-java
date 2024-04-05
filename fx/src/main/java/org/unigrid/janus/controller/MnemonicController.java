@@ -101,7 +101,6 @@ public class MnemonicController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 
 		Platform.runLater(() -> {
-			System.out.println("Platform.runLater");
 			initializeTextFields12();
 			//initializeTextFields24();
 			initializeTextFields24Import();
@@ -136,7 +135,6 @@ public class MnemonicController implements Initializable {
 			wordTwelveSeven, wordTwelveEight, wordTwelveNine, wordTwelveTen,
 			wordTwelveEleven, wordTwelveTwelve};
 		//setTextFieldEventHandlers(textFields12List);
-		System.out.println("initializeTextFields12 " + textFields12List);
 	}
 
 	private void initializeTextFields24Import() {
@@ -152,7 +150,6 @@ public class MnemonicController implements Initializable {
 			wordTwentyFourImportTwentyTwo, wordTwentyFourImportTwentyThree,
 			wordTwentyFourImportTwentyFour
 		};
-		System.out.println("initializeTextFields24Import " + textFields24ImportList);
 		//setTextFieldEventHandlers(textFields24ImportList);
 	}
 
@@ -169,7 +166,6 @@ public class MnemonicController implements Initializable {
 			wordTwentyFourConfirmTwentyTwo, wordTwentyFourConfirmTwentyThree,
 			wordTwentyFourConfirmTwentyFour
 		};
-		System.out.println("initializeTextFields24Confirm " + textFields24Confirm);
 	}
 
 	private void handlePasteEvent(KeyEvent event) {
@@ -243,13 +239,10 @@ public class MnemonicController implements Initializable {
 					counter++;
 				}
 				
-				System.out.println("!!!!!!!!!!!!!!!!!!!");
 				if ("select".equals(action)) {
-					System.out.println("??????????????????");
 					clearTextFields(textFields12List);
 					setPlaceholderText(textFields24ImportList);
 				} else if ("select12".equals(action)) {
-					System.out.println("@@@@@@@@@@@@@@@@@@@@");
 					clearTextFields(textFields24ImportList);
 					setPlaceholderText(textFields12List);
 				}
@@ -295,24 +288,14 @@ public class MnemonicController implements Initializable {
 		handleTextFieldClickCommon(event, textFields24Confirm);
 	}
 
+	//TODO: remove if thier is no use for it. dosent seam to be any use now
 	private void handleTextFieldClickCommon(MouseEvent event, TextField[] currentList) {
 		if (originalTextMap.isEmpty()) {
-			System.out.println("Mnemonic word list is empty. Ignoring click event.");
 			return;
 		}
 
 		TextField clickedField = (TextField) event.getSource();
 		int index = Arrays.asList(currentList).indexOf(clickedField);
-
-		System.out.println("Clicked field index: " + index);
-		System.out.println("Mnemonic word list: " + mnemonicModel.getMnemonicWordList());
-
-		/*if (index != -1 && index < mnemonicModel.getMnemonicWordList().size()) {
-			currentList[index].setText(mnemonicModel.getMnemonicWordList().get(index));
-			//clickedField.setText(mnemonicWordList.get(index));
-		} else {
-			currentList[index].setText("");
-		}*/
 	}
 
 	private void handleResetTextFields(@Observes ResetTextFieldsSignal signal) {
@@ -322,33 +305,15 @@ public class MnemonicController implements Initializable {
 
 	/* HANDLE FOCUS */
 	private void handleFocusEventFor12WordMnemonic(TextField textField) {
-		System.out.println("Entering 12-word Mnemonic block");
-		handelTextCommonEvent(textField, Arrays.asList(textFields12List));
 		handleFocusEventCommon(textField, Arrays.asList(textFields12List), placeholderText);
-		System.out.println("Exiting 12-word Mnemonic block");
 	}
 
 	private void handleFocusEventFor24WordMnemonicImport(TextField textField) {
-		System.out.println("Entering 24-word Mnemonic Import block");
-		handelTextCommonEvent(textField, Arrays.asList(textFields24ImportList));
 		handleFocusEventCommon(textField, Arrays.asList(textFields24ImportList), placeholderText);
-		System.out.println("Exiting 24-word Mnemonic Import block");
 	}
 
 	private void handleFocusEventFor24WordMnemonicConfirm(TextField textField) {
-		System.out.println("Entering 24-word Mnemonic Confirm block");
-		handelTextCommonEvent(textField, Arrays.asList(textFields24Confirm));
 		handleFocusEventCommon(textField, Arrays.asList(textFields24Confirm), placeholderText);
-		System.out.println("Exiting 24-word Mnemonic Confirm block");
-	}
-	
-	private void handelTextCommonEvent(TextField textField, List<TextField> textFieldList) {
-		// When the text property changes, update the original text map
-		/*textField.textProperty().addListener((observable, oldValue, newValue) -> {
-			System.out.println("textChangeListner");
-			int idx = textFieldList.indexOf(textField);
-			originalTextMap.put(textField, newValue);
-		});*/
 	}
 
 	private void handleFocusEventCommon(TextField textField, List<TextField> textFieldList, String placeholderText) {
@@ -369,39 +334,6 @@ public class MnemonicController implements Initializable {
 				textField.setText(maskedText);
 			}
 		});
-		
-		/*textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-			int idx = textFieldList.indexOf(textField);
-			
-			if (idx == -1 || idx > mnemonicModel.getMnemonicWordList().size()) {
-				System.err.println("Index out of bounds. Exiting focus event handling.");
-				return;
-			}
-
-			if (isHandlingFocus) {
-				return;
-			}
-			isHandlingFocus = true;
-
-			
-			
-			
-			
-			if (newValue) { // if focus is gained
-				System.out.println("Focus gained. Text: " + textField.getText());
-				if (textField.getText().equals(placeholderText)) {
-					textField.setText(mnemonicModel.getMnemonicWordList().get(idx));
-				} else {
-					textField.setText("");
-				}
-			} else { // if focus is lost
-				System.out.println("Focus lost. Text: " + textField.getText());
-				//TODO: why do we have two lists to keep the mnemonic???
-				mnemonicModel.getMnemonicWordList().add(idx, textField.getText());
-				textField.setText(placeholderText);
-			}
-			isHandlingFocus = false;
-		});*/
 	}
 
 	public void reset() {
