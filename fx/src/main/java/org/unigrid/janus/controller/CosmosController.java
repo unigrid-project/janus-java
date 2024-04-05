@@ -201,6 +201,8 @@ public class CosmosController implements Initializable {
 	private PublicKeysModel publicKeysModel;
 	@Inject
 	private GridnodeKeyManager gridnodeKeyManager;
+	@Inject
+	private MnemonicController mnemonicController;
 
 	private DelegationStatusEvent delegationEvent;
 	@FXML
@@ -871,10 +873,14 @@ public class CosmosController implements Initializable {
 
 		int index = 0;
 
-		String mnemonic = String.join(" ", mnemonicModel.getMnemonicWordList());
-		System.out.println("mnemonic: " + mnemonic);
+		/*List<String> mnemonicList = new ArrayList<>();
+		for (int i = 0; i < mnemonicModel.getMnemonicWordList().size(); i++) {
+			mnemonicList.add(mnemonicModel.getMnemonicWordList().get(i));
+		}
+		String mnemonic = String.join(" ", mnemonicList);*/
+		System.out.println("mnemonic: " + mnemonicModel.getList());
 		// this.mnemonicArea.setText(mnemonic);
-		byte[] privateKey = mnemonicService.derivePrivateKeyFromMnemonic(mnemonic, index);
+		byte[] privateKey = mnemonicService.derivePrivateKeyFromMnemonic(mnemonicModel.getList(), index);
 		// Encrypt the mnemonic before setting it to the accountModel
 		// String password1 = passwordField1.getText();
 		// String encryptedPrivateKey = cryptoUtils.encrypt(privateKey, password1);
@@ -884,14 +890,15 @@ public class CosmosController implements Initializable {
 			"Private Key: " + org.bitcoinj.core.Utils.HEX.encode(privateKey));
 
 		String path = String.format("m/44'/118'/0'/0/%d", index);
-		org.unigrid.janus.utils.CosmosCredentials creds = AddressUtil.getCredentials(mnemonic, "", path,
+		org.unigrid.janus.utils.CosmosCredentials creds = AddressUtil
+			.getCredentials(mnemonicModel.getMnemonic(), "", path,
 			"unigrid");
 
 		System.out.println("Address from creds: " + creds.getAddress());
 		System.out.println("EcKey from creds: " + creds.getEcKey());
 
 		// Populate the AccountModel
-		accountModel.setMnemonic(mnemonic);
+		accountModel.setMnemonic(mnemonicModel.getMnemonic());
 		System.out.println("Set mnemonic: " + accountModel.getMnemonic());
 
 		accountModel.setAddress(creds.getAddress());
@@ -1194,6 +1201,7 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	private void onVerifyBackPress(ActionEvent event) {
+		mnemonicController.reset();
 		showPane(generatePane);
 	}
 
@@ -1204,6 +1212,7 @@ public class CosmosController implements Initializable {
 
 	@FXML
 	private void verifyBack(ActionEvent event) {
+		mnemonicController.reset();
 		showPane(generatePane);
 	}
 

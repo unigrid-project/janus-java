@@ -25,7 +25,9 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -93,6 +95,7 @@ public class MnemonicController implements Initializable {
 	private List<String> mnemonicWordList = new ArrayList<>();
 	private final String placeholderText = "•••••";
 	private boolean isHandlingFocus = false;
+	private Map<TextField, String> originalTextMap = new HashMap<>();
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -191,8 +194,11 @@ public class MnemonicController implements Initializable {
 			if (mnemonicModel.getCurrentPane().equals("confirmMnemonic")) {
 				if (words.length == 24) {
 					mnemonicWordList.clear();
-					mnemonicWordList.addAll(Arrays.asList(words));
-					mnemonicModel.setMnemonicWordList(mnemonicWordList);
+					int counter = 0;
+					for (String s: words) {
+						mnemonicModel.getMnemonicWordList().put(counter, s);
+						counter++;
+					}
 					setPlaceholderText(textFields24Confirm);
 				} else {
 					showErrorMessage("Invalid number of words. "
@@ -209,8 +215,11 @@ public class MnemonicController implements Initializable {
 					return;
 				} else {
 					mnemonicWordList.clear();
-					mnemonicWordList.addAll(Arrays.asList(words));
-					mnemonicModel.setMnemonicWordList(mnemonicWordList);
+					int counter = 0;
+					for (String s: words) {
+						mnemonicModel.getMnemonicWordList().put(counter, s);
+						counter++;
+					}
 					String action = words.length == 12 ? "select12" : "select";
 					handleTabSwitch(action, words);
 				}
@@ -228,13 +237,19 @@ public class MnemonicController implements Initializable {
 		signal.setCallback(shouldProceed -> {
 			if (shouldProceed) {
 				mnemonicWordList.clear();
-				mnemonicWordList.addAll(Arrays.asList(words));
-				mnemonicModel.setMnemonicWordList(mnemonicWordList);
-
+				int counter = 0;
+				for (String s: words) {
+					mnemonicModel.getMnemonicWordList().put(counter, s);
+					counter++;
+				}
+				
+				System.out.println("!!!!!!!!!!!!!!!!!!!");
 				if ("select".equals(action)) {
+					System.out.println("??????????????????");
 					clearTextFields(textFields12List);
 					setPlaceholderText(textFields24ImportList);
 				} else if ("select12".equals(action)) {
+					System.out.println("@@@@@@@@@@@@@@@@@@@@");
 					clearTextFields(textFields24ImportList);
 					setPlaceholderText(textFields12List);
 				}
@@ -281,7 +296,7 @@ public class MnemonicController implements Initializable {
 	}
 
 	private void handleTextFieldClickCommon(MouseEvent event, TextField[] currentList) {
-		if (mnemonicWordList.isEmpty()) {
+		if (originalTextMap.isEmpty()) {
 			System.out.println("Mnemonic word list is empty. Ignoring click event.");
 			return;
 		}
@@ -290,42 +305,75 @@ public class MnemonicController implements Initializable {
 		int index = Arrays.asList(currentList).indexOf(clickedField);
 
 		System.out.println("Clicked field index: " + index);
-		System.out.println("Mnemonic word list: " + mnemonicWordList);
+		System.out.println("Mnemonic word list: " + originalTextMap);
 
-		if (index != -1 && index < mnemonicWordList.size()) {
-			clickedField.setText(mnemonicWordList.get(index));
+		/*if (index != -1 && index < mnemonicModel.getMnemonicWordList().size()) {
+			currentList[index].setText(mnemonicModel.getMnemonicWordList().get(index));
+			//clickedField.setText(mnemonicWordList.get(index));
 		} else {
-			clickedField.clear();
-		}
+			currentList[index].setText("");
+		}*/
 	}
 
 	private void handleResetTextFields(@Observes ResetTextFieldsSignal signal) {
+		System.out.println("resetteing textFields!!!!!!!!");
 		reset();
 	}
 
 	/* HANDLE FOCUS */
 	private void handleFocusEventFor12WordMnemonic(TextField textField) {
 		System.out.println("Entering 12-word Mnemonic block");
+		handelTextCommonEvent(textField, Arrays.asList(textFields12List));
 		handleFocusEventCommon(textField, Arrays.asList(textFields12List), placeholderText);
 		System.out.println("Exiting 12-word Mnemonic block");
 	}
 
 	private void handleFocusEventFor24WordMnemonicImport(TextField textField) {
 		System.out.println("Entering 24-word Mnemonic Import block");
+		handelTextCommonEvent(textField, Arrays.asList(textFields24ImportList));
 		handleFocusEventCommon(textField, Arrays.asList(textFields24ImportList), placeholderText);
 		System.out.println("Exiting 24-word Mnemonic Import block");
 	}
 
 	private void handleFocusEventFor24WordMnemonicConfirm(TextField textField) {
 		System.out.println("Entering 24-word Mnemonic Confirm block");
+		handelTextCommonEvent(textField, Arrays.asList(textFields24Confirm));
 		handleFocusEventCommon(textField, Arrays.asList(textFields24Confirm), placeholderText);
 		System.out.println("Exiting 24-word Mnemonic Confirm block");
 	}
+	
+	private void handelTextCommonEvent(TextField textField, List<TextField> textFieldList) {
+		// When the text property changes, update the original text map
+		/*textField.textProperty().addListener((observable, oldValue, newValue) -> {
+			System.out.println("textChangeListner");
+			int idx = textFieldList.indexOf(textField);
+			originalTextMap.put(textField, newValue);
+		});*/
+	}
 
 	private void handleFocusEventCommon(TextField textField, List<TextField> textFieldList, String placeholderText) {
-		textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+		
+		textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
 			int idx = textFieldList.indexOf(textField);
-			if (idx == -1 || idx > mnemonicWordList.size()) {
+			String originalText = originalTextMap.getOrDefault(textField, "");
+			if (isNowFocused) {
+				// When focused, show original text
+				textField.setText(originalText);
+			} else {
+				// When focus is lost, mask text
+				String maskedText = placeholderText;
+				if (!placeholderText.equals(textField.getText())) {
+					originalTextMap.put(textField, textField.getText());
+					mnemonicModel.getMnemonicWordList().put(idx, maskedText);
+				}
+				textField.setText(maskedText);
+			}
+		});
+		
+		/*textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+			int idx = textFieldList.indexOf(textField);
+			
+			if (idx == -1 || idx > mnemonicModel.getMnemonicWordList().size()) {
 				System.err.println("Index out of bounds. Exiting focus event handling.");
 				return;
 			}
@@ -335,38 +383,45 @@ public class MnemonicController implements Initializable {
 			}
 			isHandlingFocus = true;
 
+			
+			
+			
+			
 			if (newValue) { // if focus is gained
 				System.out.println("Focus gained. Text: " + textField.getText());
 				if (textField.getText().equals(placeholderText)) {
-					textField.clear();
+					textField.setText(mnemonicModel.getMnemonicWordList().get(idx));
+				} else {
+					textField.setText("");
 				}
 			} else { // if focus is lost
 				System.out.println("Focus lost. Text: " + textField.getText());
 				//TODO: why do we have two lists to keep the mnemonic???
-				mnemonicWordList.add(idx, textField.getText());
-				mnemonicModel.getMnemonicWordList().add(idx, placeholderText);
+				mnemonicModel.getMnemonicWordList().add(idx, textField.getText());
 				textField.setText(placeholderText);
 			}
 			isHandlingFocus = false;
-		});
+		});*/
 	}
 
 	public void reset() {
+		System.out.println("are we clering the text??");
 		// Clear all text fields
 		for (TextField textField : textFields12List) {
-			textField.clear();
+			textField.setText("");
 			//clickedField.setPromptText("•••••");
 		}
 
 		for (TextField textField : textFields24ImportList) {
-			textField.clear();
+			textField.setText("");
 		}
 		for (TextField textField : textFields24Confirm) {
-			textField.clear();
+			textField.setText("");
 		}
 
 		// Clear the mnemonic word list
 		mnemonicWordList.clear();
+		originalTextMap.clear();
 
 		// Reset the models
 		mnemonicModel.reset();  // Assuming you have a reset method in your model class

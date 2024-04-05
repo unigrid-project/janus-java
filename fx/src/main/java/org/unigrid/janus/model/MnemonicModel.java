@@ -20,15 +20,32 @@ import lombok.Data;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @ApplicationScoped
 public class MnemonicModel {
-	private List<String> mnemonicWordList = new ArrayList<>();
+	private Map<Integer, String> mnemonicWordList = new HashMap<>();
 	private String currentPane;
 
 	public void reset() {
 		mnemonicWordList.clear();
+	}
+	
+	public List<String> getList() {
+		List<String> list = new ArrayList<>();
+		
+		for (int i = 0; i < mnemonicWordList.size(); i++) {
+			list.add(mnemonicWordList.get(i));
+		}
+		
+		return list; 
+	}
+	
+	public String getMnemonic() {
+		String s = String.join(" ", getList());
+		return s;
 	}
 }

@@ -67,7 +67,7 @@ public class MnemonicService {
 	
 	public boolean compareMnemonicWithModel() {
 		// Convert mnemonicWordList to a space-separated string
-		String copiedMnemonic = String.join(" ", mnemonicModel.getMnemonicWordList());
+		String copiedMnemonic = String.join(" ", mnemonicModel.getList());
 
 		String modelMnemonic = accountModel.getMnemonic();
 		System.out.println("modelMnemonic: " + modelMnemonic);
@@ -81,6 +81,21 @@ public class MnemonicService {
 		return HDKeyDerivation.deriveChildKey(key, new ChildNumber(child, hardened));
 	};
 
+	public byte[] derivePrivateKeyFromMnemonic(List<String> mnemonicWords, int index) {
+		//final List<String> mnemonicWords = Arrays.asList(mnemonic.split(" "));
+		final byte[] seed = MnemonicCode.toSeed(mnemonicWords, "");
+
+		// Derive the key step by step following the path "M/44'/118'/0'/0/0"
+		final DeterministicKey masterKey = HDKeyDerivation.createMasterPrivateKey(seed);
+		final DeterministicKey level1 = deriveKey.apply(masterKey, 44, true);
+		final DeterministicKey level2 = deriveKey.apply(level1, 118, true);
+		final DeterministicKey level3 = deriveKey.apply(level2, 0, true);
+		final DeterministicKey level4 = deriveKey.apply(level3, 0, false);
+		final DeterministicKey key = deriveKey.apply(level4, index, false);
+
+		return key.getPrivKeyBytes();
+	}
+	
 	public byte[] derivePrivateKeyFromMnemonic(String mnemonic, int index) {
 		final List<String> mnemonicWords = Arrays.asList(mnemonic.split(" "));
 		final byte[] seed = MnemonicCode.toSeed(mnemonicWords, "");
