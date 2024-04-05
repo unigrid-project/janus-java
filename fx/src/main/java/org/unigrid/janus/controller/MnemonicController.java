@@ -335,18 +335,20 @@ public class MnemonicController implements Initializable {
 
 	public void reset() {
 		System.out.println("are we clering the text??");
-		// Clear all text fields
-		for (TextField textField : textFields12List) {
-			textField.setText("");
-			//clickedField.setPromptText("•••••");
-		}
+		Platform.runLater(() -> {
+			// Clear all text fields
+			for (TextField textField : textFields12List) {
+				textField.setText("");
+				//clickedField.setPromptText("•••••");
+			}
 
-		for (TextField textField : textFields24ImportList) {
-			textField.setText("");
-		}
-		for (TextField textField : textFields24Confirm) {
-			textField.setText("");
-		}
+			for (TextField textField : textFields24ImportList) {
+				textField.setText("");
+			}
+			for (TextField textField : textFields24Confirm) {
+				textField.setText("");
+			}
+		});
 
 		// Clear the mnemonic word list
 		mnemonicWordList.clear();

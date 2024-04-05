@@ -13,6 +13,7 @@
 	You should have received an addended copy of the GNU Affero General Public License with this program.
 	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
+
 package org.unigrid.janus.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -108,6 +109,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.HostServices;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.layout.Pane;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
@@ -384,6 +387,15 @@ public class CosmosController implements Initializable {
 
 		Platform.runLater(() -> {
 
+			importTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
+				@Override
+				public void changed(ObservableValue<? extends Tab> observable, Tab oldTab, Tab newTab) {
+					if (newTab != null) {
+						System.out.println("Switched to tab: " + newTab.getText());
+						mnemonicController.reset();
+					}
+				}
+			});
 			System.out.println("Is on FX thread: " + Platform.isFxApplicationThread());
 
 			System.out.println("run later method called");
@@ -528,7 +540,7 @@ public class CosmosController implements Initializable {
 
 			// Load and set items for the TableView
 			loadAccounts(this::postAccountLoadInitialization);
-			
+
 		});
 	}
 
