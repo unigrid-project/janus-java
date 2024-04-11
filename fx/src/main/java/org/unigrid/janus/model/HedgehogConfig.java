@@ -58,7 +58,7 @@ public class HedgehogConfig {
 //		+ "e5a1f4c5bb3a232bdfc025ca6588e78321d5ac679c67ebb67ec9532a44b253b8";
 //
 //	@Getter
-//	private String testnetConnectionAddress = "149.102.147.45:39999";
+//	private String testnetConnectionAddress = "207.180.254.48:39999";
 //
 //	@Getter
 //	private String devnetConnectionAddress = "173.212.208.212:40000";
@@ -95,8 +95,8 @@ public class HedgehogConfig {
 		+ "69948781fee95e89c53f0755edd46e";
 
 	@Getter
-	private String testnetConnectionAddress = "149.102.147.45:39999";
+	private String testnetConnectionAddress = "207.180.254.48:39999";
 
 	@Getter
-	private String devnetConnectionAddress = "149.102.147.45:39999";
+	private String devnetConnectionAddress = "207.180.254.48:39999";
 }

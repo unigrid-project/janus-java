@@ -525,9 +525,12 @@ public class CosmosController implements Initializable {
 			}
 
 			// Gridnode List View
-			colIp.setCellValueFactory(new PropertyValueFactory<>("address"));
-			colGridnodeId.setCellValueFactory(new PropertyValueFactory<>("key"));
-			colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+			colIp.setCellValueFactory(cellData -> cellData.getValue().addressProperty());
+			colGridnodeId
+					.setCellValueFactory(cellData -> cellData.getValue().keyProperty());
+
+			colStatus.setCellValueFactory(
+					cellData -> cellData.getValue().statusProperty());
 			colStartGridnode
 					.setCellFactory(tc -> new TableCell<GridnodeListViewItem, String>() {
 						private final Button startButton = new Button("START");
@@ -542,21 +545,19 @@ public class CosmosController implements Initializable {
 										.get(getIndex());
 								startButton.setOnAction(event -> {
 									try {
-										// Get the gridnode ID from the gridnode object
 										gridnodeModel
 												.setCurrentGridnodeId(gridnode.getKey());
 										startGridnodePasswordRequest();
 									} catch (Exception e) {
-										// Handle exceptions here
 										e.printStackTrace();
 									}
 								});
-								setGraphic(gridnode.getStatus().equals("INACTIVE")
-										? startButton
+								setGraphic(gridnode.isShowStartButton() ? startButton
 										: null);
 							}
 						}
 					});
+
 			// collAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
 			// colCompletionTime.setCellValueFactory(new
 			// PropertyValueFactory<>("completionTime"));
@@ -1334,6 +1335,15 @@ public class CosmosController implements Initializable {
 			cosmosService.sendDesktopNotification("Gridnode Started!",
 					gridnodeModel.getCurrentGridnodeId());
 
+		} else if (event
+				.getEventType() == GridnodeEvents.EventType.GRIDNODE_LIST_LOADED) {
+			Platform.runLater(() -> {
+				System.out.println(
+						"Gridnode List Items: " + event.getGridnodeListViewItems());
+				ObservableList<GridnodeListViewItem> observableList = FXCollections
+						.observableArrayList(event.getGridnodeListViewItems());
+				tblGridnodeListStart.setItems(observableList);
+			});
 		}
 	}
 
@@ -1380,15 +1390,7 @@ public class CosmosController implements Initializable {
 	}
 
 	private void updateGridnodeList() {
-		Platform.runLater(() -> {
-			List<GridnodeData> gridnodes = gridnodeHandler.fetchGridnodes();
-			List<String> keys = gridnodeKeyManager.loadKeysFromFile();
-			List<GridnodeListViewItem> items = gridnodeHandler
-					.compareGridnodesWithLocalKeys(gridnodes, keys);
-			System.out.println("items: " + items);
-			tblGridnodeListStart.setItems(FXCollections.observableArrayList(items));
-			tblGridnodeListStart.refresh();
-		});
+		gridnodeHandler.loadGridnodeList();
 	}
 
 	@FXML

@@ -43,6 +43,8 @@ public class GridnodeHandler {
 	private CryptoUtils cryptoUtils;
 	@Inject
 	private Event<GridnodeEvents> gridnodeEvents;
+	@Inject
+	private GridnodeKeyManager gridnodeKeyManager;
 
 	public List<GridnodeData> fetchGridnodes() {
 		Client client = null;
@@ -80,6 +82,17 @@ public class GridnodeHandler {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.readValue(json, new TypeReference<List<GridnodeData>>() {
 		});
+	}
+
+	public void loadGridnodeList() {
+		List<GridnodeData> gridnodes = fetchGridnodes();
+		List<String> keys = gridnodeKeyManager.loadKeysFromFile();
+		List<GridnodeListViewItem> listViewItems = compareGridnodesWithLocalKeys(gridnodes, keys);
+		System.out.println("Gridnodes: " + listViewItems);
+		gridnodeEvents.fire(GridnodeEvents.builder()
+			.eventType(GridnodeEvents.EventType.GRIDNODE_LIST_LOADED)
+			.gridnodeListViewItems(listViewItems)
+			.build());
 	}
 
 	public List<GridnodeListViewItem> compareGridnodesWithLocalKeys(List<GridnodeData> gridnodes, List<String> localKeys) {
