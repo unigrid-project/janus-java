@@ -332,6 +332,8 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Label gridnodeMainView;
 	@FXML
+	private Label unboundingMainView;
+	@FXML
 	private Label stakingRewards;
 	@FXML
 	private TableView<UnbondingEntry> tblGridnodeUnbonding;
@@ -1518,6 +1520,7 @@ public class CosmosController implements Initializable {
 	public void onUnboundingBalanceModelUpdate(@Observes UnboundingBalanceModel model) {
 		Platform.runLater(() -> {
 			animateLabelToNewValue(unboundingAmountLabel, model.getUnboundingAmount());
+			animateLabelToNewValue(unboundingMainView, model.getUnboundingAmount());
 		});
 	}
 
