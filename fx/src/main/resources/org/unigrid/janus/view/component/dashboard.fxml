@@ -592,7 +592,7 @@
 														</font>
 													</Label>
 												</HBox>
-												<ListView fx:id="delegationsListView" prefHeight="200.0" prefWidth="200.0" />
+												<ListView fx:id="delegationsListView" prefHeight="200.0" prefWidth="200.0" styleClass="delegations-list" />
 											</children>
 										</VBox>
 									</children>
