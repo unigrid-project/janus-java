@@ -580,11 +580,18 @@
 										</VBox>
 										<VBox spacing="10" style="-fx-background-color: #2C2C2C; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;">
 											<children>
-												<Label text="Delegations" textFill="#ababab">
-													<font>
-														<Font size="16.0" />
-													</font>
-												</Label>
+												<HBox spacing="10">
+													<Label text="Delegations" textFill="#ababab" prefWidth="230">
+														<font>
+															<Font size="16.0" />
+														</font>
+													</Label>
+													<Label fx:id="selectLabel" text="Select a delegator to switch your current delegation" textFill="#ababab">
+														<font>
+															<Font size="16.0" />
+														</font>
+													</Label>
+												</HBox>
 												<ListView fx:id="delegationsListView" prefHeight="200.0" prefWidth="200.0" />
 											</children>
 										</VBox>

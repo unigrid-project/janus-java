@@ -110,6 +110,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.HostServices;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -139,7 +140,6 @@ import org.unigrid.janus.model.signal.RewardsEvent;
 import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 import org.unigrid.janus.view.backing.OsxUtils;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Priority;
@@ -336,6 +336,8 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Label stakingRewards;
 	@FXML
+	private Label selectLabel;
+	@FXML
 	private TableView<UnbondingEntry> tblGridnodeUnbonding;
 	@FXML
 	private TableColumn<UnbondingEntry, String> collAmount;
@@ -450,8 +452,10 @@ public class CosmosController implements Initializable {
 			});
 
 			delegationsListView.getItems().clear();
-			delegationsListView.setCellFactory(
-					listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
+
+			selectLabel.visibleProperty().bind(Bindings.isNotEmpty(delegationsListView.getItems()));
+
+			delegationsListView.setCellFactory(listView -> new ListCell<DelegationsRequest.DelegationResponse>() {
 				@Override
 				protected void updateItem(
 						DelegationsRequest.DelegationResponse item,
@@ -459,63 +463,62 @@ public class CosmosController implements Initializable {
 					super.updateItem(item, empty);
 					if (empty || item == null) {
 						setText(null);
+						setGraphic(null);
 					} else {
 
-						BigDecimal amount = new BigDecimal(
-								item.getBalance().getAmount());
+						BigDecimal amount = new BigDecimal( item.getBalance().getAmount());
 						BigDecimal displayAmount = amount.divide(scaleFactor);
-						String text = String.format("Amount: %s %s",
-								displayAmount.toPlainString(), "ugd");
+						String text = String.format("Amount: %s %s", displayAmount.toPlainString(), "ugd");
 
 						Label label = new Label(text);
 						label.setTextFill(Color.WHITE);
+						label.setMinWidth(220);
+						label.setPrefWidth(220);
+
 						Button actionButton = new Button("Unstake");
 						actionButton.setStyle("-fx-cursor: hand;");
+						actionButton.setMinWidth(125);
+						actionButton.setPrefWidth(125);
 						actionButton.setOnAction(event -> {
-							currentValidatorAddr = item.getDelegation()
-									.getValidatorAddress();
+							currentValidatorAddr = item.getDelegation().getValidatorAddress();
 							stakedAmount = item.getBalance().getAmount();
 							onUnstakePasswordRequest();
 						});
 
-						ComboBox<ValidatorInfo> switchDelegteComboBox = new ComboBox<>();
-						switchDelegteComboBox.getItems()
-								.addAll(validatorListComboBox.getItems());
+						ComboBox<ValidatorInfo> switchDelegateComboBox = new ComboBox<>();
+						switchDelegateComboBox.getItems().addAll(validatorListComboBox.getItems());
+						switchDelegateComboBox.setPromptText("Select Delegator");
 
 						for (Object it : validatorListComboBox.getItems()) {
 							ValidatorInfo validatorInfo = (ValidatorInfo) it;
-							if (validatorInfo.getOperatorAddress().equals(
-									item.getDelegation().getValidatorAddress())) {
-								switchDelegteComboBox.setValue(validatorInfo);
+							if (validatorInfo.getOperatorAddress().equals(item.getDelegation().getValidatorAddress())) {
+								switchDelegateComboBox.setValue(validatorInfo);
 							}
 						}
 
-						switchDelegteComboBox.getSelectionModel()
-								.selectedItemProperty()
-								.addListener((observable, oldValue, newValue) -> {
-									if (newValue != null) {
-										currentValidatorAddr = item
-												.getDelegation()
-												.getValidatorAddress();
-										stakedAmount = item.getBalance()
-												.getAmount();
-										ValidatorInfo selectedValidator = (ValidatorInfo) newValue;
-										newValidatorAddr = selectedValidator
-												.getOperatorAddress();
-										onSwitchDelegatorRequest();
-									}
-								});
-						Region region = new Region();
-						HBox.setHgrow(region, Priority.ALWAYS);
-						HBox.setMargin(actionButton, Insets.EMPTY);
-						HBox hBox = new HBox(label, switchDelegteComboBox, region,
-								actionButton);
+						switchDelegateComboBox.getSelectionModel().selectedItemProperty()
+							.addListener((observable, oldValue, newValue) -> {
+								if (newValue != null) {
+									currentValidatorAddr = item.getDelegation().getValidatorAddress();
+									stakedAmount = item.getBalance().getAmount();
+									ValidatorInfo selectedValidator = (ValidatorInfo) newValue;
+									newValidatorAddr = selectedValidator.getOperatorAddress();
+									onSwitchDelegatorRequest();
+								}
+							});
+
+						Region spacer = new Region();
+
+						HBox hBox = new HBox(label, switchDelegateComboBox, spacer, actionButton);
 						hBox.setAlignment(Pos.CENTER_LEFT);
 						hBox.setSpacing(10);
 
+						HBox.setMargin(actionButton, Insets.EMPTY);
+						HBox.setHgrow(spacer, Priority.ALWAYS);
+						HBox.setHgrow(switchDelegateComboBox, Priority.ALWAYS);
+
 						setText(null);
 						setGraphic(hBox);
-
 					}
 				}
 			});
