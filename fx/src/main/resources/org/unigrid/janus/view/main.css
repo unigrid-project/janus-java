@@ -496,6 +496,16 @@
 	-fx-background-color: transparent;
 }
 
+.delegations-list .combo-box-base .cell:hover,
+.delegations-list .combo-box-base .cell:filled:hover,
+.delegations-list .combo-box-base .cell:filled:selected:hover {
+	-fx-background-color: #1a1a1a; /* even darker grey background for hovered item */
+}
+
+.delegations-list .combo-box-base .cell:selected {
+	-fx-background-color: #002442; /* dark blue background for selected item */
+}
+
 .list-view .scroll-bar:horizontal .increment-arrow,
 .list-view .scroll-bar:horizontal .decrement-arrow,
 .list-view .scroll-bar:horizontal .increment-button,
