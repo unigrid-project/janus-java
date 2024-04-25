@@ -1594,7 +1594,7 @@ public class CosmosController implements Initializable {
 		SignUtil transactionService = cosmosService.createSignUtilService();
 		Abci.TxResponse txResponse = transactionService.sendUnstakingTx(credentials,
 				currentValidatorAddr, Long.valueOf(stakedAmount),
-				new BigDecimal("0.000001"), 200000);
+				new BigDecimal("0.000001"), 400000);
 
 		System.out.println("RESPONSE");
 		System.out.println(txResponse);

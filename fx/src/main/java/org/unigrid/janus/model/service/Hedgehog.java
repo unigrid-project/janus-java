@@ -134,6 +134,7 @@ public class Hedgehog {
 
 		ProcessBuilder pb = new ProcessBuilder();
 		HedgehogConfig hedgehogConfig = new HedgehogConfig();
+		System.out.println("Starting hedgehog version: " + hedgehogExecName);
 		switch (mode) {
 			case MAIN_NET:
 				p = pb.command(hedgehogExecName, "daemon").inheritIO().start();
@@ -361,6 +362,8 @@ public class Hedgehog {
 		try {
 			ProcessBuilder pb = new ProcessBuilder();
 			pb.command(hedgehogExecName, "cli", "stop");
+			// Log the command to be executed
+			System.err.println("Executing command: " + pb.command().toString());
 			pb.start();
 		} catch (IOException e) {
 			// Log or print a message indicating that an error occurred

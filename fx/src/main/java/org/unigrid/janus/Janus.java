@@ -159,7 +159,8 @@ public class Janus extends BaseApplication implements PropertyChangeListener {
 
 	@PreDestroy
 	@SneakyThrows
-	private void destroy() {
+	private void destroy() throws InterruptedException {
+		debug.print("trying to stop hedgehog and the daemon", Janus.class.getSimpleName());
 		// TODO: should this change to spalshScreenInsted
 		hedgehog.stopHedgehog();
 		daemon.stop();
