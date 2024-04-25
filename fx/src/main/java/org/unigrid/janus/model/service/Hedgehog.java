@@ -25,8 +25,6 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.MediaType;
-import java.io.BufferedReader;
 import javafx.application.Platform;
 
 import java.io.IOException;
@@ -48,8 +46,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.unigrid.janus.model.UpdateURL;
@@ -91,6 +87,8 @@ public class Hedgehog {
 	private CollateralRequired collateralRequired;
 	@Inject
 	private Event<CollateralUpdateEvent> collateralUpdateEvent;
+	@Inject
+	private HedgehogConfig hedgehogConfig;
 
 	private Configuration config = null;
 
@@ -133,7 +131,7 @@ public class Hedgehog {
 	public void startHedgehog(HedgehogConfig.startMode mode) {
 
 		ProcessBuilder pb = new ProcessBuilder();
-		HedgehogConfig hedgehogConfig = new HedgehogConfig();
+		hedgehogConfig.setCurrentMode(mode);
 		System.out.println("Starting hedgehog version: " + hedgehogExecName);
 		switch (mode) {
 			case MAIN_NET:
@@ -141,7 +139,7 @@ public class Hedgehog {
 				break;
 			case TEST_NET:
 				p = pb.command(hedgehogExecName, "daemon",
-					hedgehogConfig.getTestnetRestPort(),
+					hedgehogConfig.getTestnetP2pPort(),
 					hedgehogConfig.getTestnetRestPort(),
 					"--no-seeds",
 					hedgehogConfig.getTestnetPublicKey()).inheritIO().start();
@@ -177,28 +175,27 @@ public class Hedgehog {
 	}
 
 	@SneakyThrows
-	public void addNode(HedgehogConfig.startMode mode) {
+	public void addNode(HedgehogConfig.startMode mode) throws IOException {
 		ProcessBuilder pb = new ProcessBuilder();
 		Process process;
-		HedgehogConfig hedgehogConfig = new HedgehogConfig();
 		System.out.println("Have we connected another node??");
 		switch (mode) {
 			case TEST_NET:
-				process = pb.command(hedgehogExecName,"cli", "node-add",
+				process = pb.command(hedgehogExecName, "cli", "node-add",
 					hedgehogConfig.getTestnetRestPort(),
 					hedgehogConfig.getTestnetP2pPort(),
 					hedgehogConfig.getTestnetConnectionAddress())
 					.inheritIO().start();
 				break;
 			case DEV_NET:
-				process = pb.command(hedgehogExecName,"cli", "node-add",
+				process = pb.command(hedgehogExecName, "cli", "node-add",
 					hedgehogConfig.getDevnetRestPort(),
 					hedgehogConfig.getDevnetP2pPort(), hedgehogConfig.getDevnetConnectionAddress())
 					.inheritIO().redirectErrorStream(true).start();
 				System.out.println("Have we connected another node??");
 				break;
 		}
-		
+
 	}
 
 	// TODO: Re-enable?
@@ -359,19 +356,33 @@ public class Hedgehog {
 
 	@SneakyThrows
 	public void stopHedgehog() {
+		System.out.print("Network to stop: " + hedgehogConfig.getCurrentMode());
+
 		try {
 			ProcessBuilder pb = new ProcessBuilder();
-			pb.command(hedgehogExecName, "cli", "stop");
+			// Adjust command based on the current network mode
+			switch (hedgehogConfig.getCurrentMode()) {
+				case MAIN_NET:
+					pb.command(hedgehogExecName, "cli", "stop");
+					break;
+				case TEST_NET:
+					pb.command(hedgehogExecName, "cli", "stop",
+						hedgehogConfig.getTestnetRestPort());
+					break;
+				case DEV_NET:
+					pb.command(hedgehogExecName, "cli", "stop",
+						hedgehogConfig.getDevnetRestPort());
+					break;
+			}
+
 			// Log the command to be executed
-			System.err.println("Executing command: " + pb.command().toString());
+			System.out.println("Executing command: " + pb.command().toString());
 			pb.start();
 		} catch (IOException e) {
 			// Log or print a message indicating that an error occurred
 			System.err.println("Error stopping Hedgehog: " + e.getMessage());
-			debug
-				.print("Error stopping Hedgehog: " + e.getMessage() + ")",
-					Hedgehog.class
-						.getSimpleName());
+			debug.print("Error stopping Hedgehog: " + e.getMessage(),
+				Hedgehog.class.getSimpleName());
 		}
 	}
 

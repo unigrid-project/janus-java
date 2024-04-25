@@ -16,14 +16,19 @@
 
 package org.unigrid.janus.model;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import lombok.Getter;
+import lombok.Setter;
 
+@ApplicationScoped
 public class HedgehogConfig {
 
 	public enum startMode {
 		MAIN_NET, TEST_NET, DEV_NET;
 	}
 
+	@Getter @Setter
+	private static startMode currentMode;
 //	@Getter
 //	private String testnetRestPort = "--restport=39886";
 //	@Getter
@@ -62,7 +67,7 @@ public class HedgehogConfig {
 //
 //	@Getter
 //	private String devnetConnectionAddress = "173.212.208.212:40000";
-		@Getter
+	@Getter
 	private String testnetRestPort = "--restport=39886";
 	@Getter
 	private String testnetP2pPort = "--netport=39999";
