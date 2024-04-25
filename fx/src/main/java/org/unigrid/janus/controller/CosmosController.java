@@ -98,6 +98,9 @@ import java.math.BigInteger;
 import cosmos.base.abci.v1beta1.Abci;
 import io.grpc.StatusRuntimeException;
 import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableColumn;
@@ -145,6 +148,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import org.unigrid.janus.model.gridnode.UnbondingEntry;
+import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
 import org.unigrid.janus.model.service.GridnodeKeyManager;
 import org.unigrid.janus.model.signal.GridnodeEvents;
 import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
@@ -340,9 +344,15 @@ public class CosmosController implements Initializable {
 	@FXML
 	private TableView<UnbondingEntry> tblGridnodeUnbonding;
 	@FXML
+	private TableView<UnbondingDelegationsRequest.Entry> tblUnstaking;
+	@FXML
 	private TableColumn<UnbondingEntry, String> collAmount;
 	@FXML
 	private TableColumn<UnbondingEntry, String> colCompletionTime;
+	@FXML
+	private TableColumn<UnbondingDelegationsRequest.Entry, String> colUnstakingAmount;
+	@FXML
+	private TableColumn<UnbondingDelegationsRequest.Entry, String> colUnstakingCompletionTime;
 	@FXML
 	private Label stakeRewardsLbl;
 
@@ -466,7 +476,7 @@ public class CosmosController implements Initializable {
 						setGraphic(null);
 					} else {
 
-						BigDecimal amount = new BigDecimal( item.getBalance().getAmount());
+						BigDecimal amount = new BigDecimal(item.getBalance().getAmount());
 						BigDecimal displayAmount = amount.divide(scaleFactor);
 						String text = String.format("Amount: %s %s", displayAmount.toPlainString(), "ugd");
 
@@ -497,15 +507,15 @@ public class CosmosController implements Initializable {
 						}
 
 						switchDelegateComboBox.getSelectionModel().selectedItemProperty()
-							.addListener((observable, oldValue, newValue) -> {
-								if (newValue != null) {
-									currentValidatorAddr = item.getDelegation().getValidatorAddress();
-									stakedAmount = item.getBalance().getAmount();
-									ValidatorInfo selectedValidator = (ValidatorInfo) newValue;
-									newValidatorAddr = selectedValidator.getOperatorAddress();
-									onSwitchDelegatorRequest();
-								}
-							});
+								.addListener((observable, oldValue, newValue) -> {
+									if (newValue != null) {
+										currentValidatorAddr = item.getDelegation().getValidatorAddress();
+										stakedAmount = item.getBalance().getAmount();
+										ValidatorInfo selectedValidator = (ValidatorInfo) newValue;
+										newValidatorAddr = selectedValidator.getOperatorAddress();
+										onSwitchDelegatorRequest();
+									}
+								});
 
 						Region spacer = new Region();
 
@@ -521,6 +531,18 @@ public class CosmosController implements Initializable {
 						setGraphic(hBox);
 					}
 				}
+			});
+
+			colUnstakingAmount.setCellValueFactory(cellData -> {
+				BigDecimal value = cellData.getValue().getBalance().divide(scaleFactor, 8, RoundingMode.HALF_UP);
+				return new ReadOnlyStringWrapper(value.toPlainString());
+			});
+			colUnstakingCompletionTime.setCellValueFactory(cellData -> {
+				Instant instant = Instant.parse(cellData.getValue().getCompletionTime());
+				String formattedTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+						.withZone(ZoneId.systemDefault())
+						.format(instant);
+				return new ReadOnlyStringWrapper(formattedTime);
 			});
 
 			if (tableTransactionsSent.getItems().isEmpty()
@@ -1022,14 +1044,17 @@ public class CosmosController implements Initializable {
 		});
 	}
 
-	// The method to update the view (the implementation depends on how you want to
-	// display the unbonding delegations)
-	private void updateUnbondingDelegationsView(
-			List<UnbondingResponse> unbondingResponses) {
-		// Update your UI components with unbonding delegations data
-		// For example, if you have a ListView for unbonding delegations:
-		// unbondingDelegationsListView.getItems().setAll(unbondingResponses);
+	private void updateUnbondingDelegationsView(List<UnbondingResponse> unbondingResponses) {
+		List<UnbondingDelegationsRequest.Entry> entries = unbondingResponses.stream()
+				.flatMap(unbondingResponse -> unbondingResponse.getEntries().stream())
+				.collect(Collectors.toList());
 		System.out.println("unbondingResponses: " + unbondingResponses);
+
+		Platform.runLater(() -> {
+			ObservableList<UnbondingDelegationsRequest.Entry> observableData = FXCollections
+					.observableArrayList(entries);
+			tblUnstaking.setItems(observableData);
+		});
 	}
 
 	private void createNewAccount() {
