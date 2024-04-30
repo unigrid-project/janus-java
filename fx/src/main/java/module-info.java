@@ -118,6 +118,7 @@ module fx {
 	exports org.unigrid.janus.view.component to weld.core.impl;
 	exports org.unigrid.janus.view.decorator to weld.core.impl;
 	exports org.unigrid.janus.model to org.eclipse.yasson, com.fasterxml.jackson.databind;
+	exports cosmos.tx.v1beta1 to com.google.protobuf;
 	exports gridnode.gridnode.v1;
 	exports cosmos.auth.v1beta1;
 	exports cosmos.bank.v1beta1;
@@ -125,7 +126,6 @@ module fx {
 	exports cosmos.crypto.multisig;
 	exports cosmos.crypto.multisig.v1beta1;
 	exports cosmos.distribution.v1beta1;
-	// exports cosmos.tx.v1beta1;
 	exports cosmos.base.abci.v1beta1;
 	exports cosmos.gov.v1beta1;
 	exports cosmos.staking.v1beta1;
