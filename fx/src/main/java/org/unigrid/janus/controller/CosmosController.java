@@ -1571,7 +1571,7 @@ public class CosmosController implements Initializable {
 
 		SignUtil transactionService = cosmosService.createSignUtilService();
 		transactionService.sendClaimStakingRewardsTx(credentials, validatorAddresses,
-				new BigDecimal("0.000001"), 200000);
+				new BigDecimal("0.000001"), 400000);
 
 		cosmosService.sendDesktopNotification("Info", "Rewards claimed");
 	}
