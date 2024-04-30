@@ -48,10 +48,10 @@ public class DecryptCosmosService {
 		// Decrypt the private key. The returned value should be the original private
 		// key bytes.
 		byte[] privateKeyBytes = cryptoUtils.decrypt(encryptedPrivateKey, password);
-		System.out.println(
-			"Decrypted Private Key (Bytes): " + Arrays.toString(privateKeyBytes));
-		System.out.println("Decrypted Private Key (HEX): "
-			+ cryptoUtils.bytesToHex(privateKeyBytes));
+//		System.out.println(
+//			"Decrypted Private Key (Bytes): " + Arrays.toString(privateKeyBytes));
+//		System.out.println("Decrypted Private Key (HEX): "
+//			+ cryptoUtils.bytesToHex(privateKeyBytes));
 		// Convert the private key bytes to a HEX string
 		String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
 		System.out.println("Private Key in HEX: " + privateKeyHex);

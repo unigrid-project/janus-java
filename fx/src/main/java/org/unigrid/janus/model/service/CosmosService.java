@@ -475,7 +475,7 @@ public class CosmosService {
 
 			// Convert the private key bytes to a HEX string
 			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
-			System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
+			//System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
 
 			return privateKeyHex;
 		} catch (Exception e) {
