@@ -37,6 +37,7 @@ import cosmos.tx.v1beta1.TxOuterClass;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.web3j.cryptozoo.ECKeyPair;
@@ -55,7 +56,8 @@ public class SignUtil {
 	private final String token;
 	private final String chainId;
 
-	public SignUtil(GrpcService grpcService, long sequence, long accountNumber, String token, String chainId) {
+	public SignUtil(GrpcService grpcService, long sequence, long accountNumber,
+			String token, String chainId) {
 		this.grpcService = grpcService;
 		this.sequence = sequence;
 		this.accountNumber = accountNumber;
@@ -65,112 +67,122 @@ public class SignUtil {
 
 	private static final JsonFormat.Printer printer = JsonToProtoObjectUtil.getPrinter();
 
-	public Abci.TxResponse sendDelegateTx(CosmosCredentials payerCredentials, Long amount, BigDecimal feeInAtom,
-		long gasLimit) throws Exception {
+	public Abci.TxResponse sendDelegateTx(CosmosCredentials payerCredentials, Long amount,
+			BigDecimal feeInAtom, long gasLimit) throws Exception {
 
 		MsgGridnodeDelegate msg = MsgGridnodeDelegate.newBuilder()
-			.setDelegatorAddress(payerCredentials.getAddress())
-			.setAmount(amount)
-			.build();
+				.setDelegatorAddress(payerCredentials.getAddress()).setAmount(amount)
+				.build();
 
-		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom,
+				gasLimit);
 		return bradcastTransaction(tx);
 	}
 
-	public Abci.TxResponse sendUndelegateTx(CosmosCredentials payerCredentials, Long amount, BigDecimal feeInAtom,
-		long gasLimit) throws Exception {
+	public Abci.TxResponse sendUndelegateTx(CosmosCredentials payerCredentials,
+			Long amount, BigDecimal feeInAtom, long gasLimit) throws Exception {
 
 		MsgGridnodeUndelegate msg = MsgGridnodeUndelegate.newBuilder()
-			.setDelegatorAddress(payerCredentials.getAddress())
-			.setAmount(amount)
-			.build();
+				.setDelegatorAddress(payerCredentials.getAddress()).setAmount(amount)
+				.build();
 
-		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom,
+				gasLimit);
 		return bradcastTransaction(tx);
 	}
 
-	public Abci.TxResponse sendTx(CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
-		long gasLimit) throws Exception {
+	public Abci.TxResponse sendTx(CosmosCredentials payerCredentials, SendInfo sendMsg,
+			BigDecimal feeInAtom, long gasLimit) throws Exception {
 
 		CoinOuterClass.Coin sendCoin = CoinOuterClass.Coin.newBuilder()
-			.setAmount(String.valueOf(sendMsg.getAmountInAtom()))
-			.setDenom(token)
-			.build();
+				.setAmount(String.valueOf(sendMsg.getAmountInAtom())).setDenom(token)
+				.build();
 
 		Tx.MsgSend msg = Tx.MsgSend.newBuilder()
-			.setFromAddress(sendMsg.getCredentials().getAddress())
-			.setToAddress(sendMsg.getToAddress())
-			.addAmount(sendCoin)
-			.build();
+				.setFromAddress(sendMsg.getCredentials().getAddress())
+				.setToAddress(sendMsg.getToAddress()).addAmount(sendCoin).build();
 
-		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, sendMsg, feeInAtom, gasLimit);
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, sendMsg, feeInAtom,
+				gasLimit);
 		return bradcastTransaction(tx);
 	}
 
-	public Abci.TxResponse sendStakingTx(CosmosCredentials payerCredentials, String validatorAddress, Long amount,
-		BigDecimal feeInAtom, long gasLimit) throws Exception {
+	public Abci.TxResponse sendStakingTx(CosmosCredentials payerCredentials,
+			String validatorAddress, Long amount, BigDecimal feeInAtom, long gasLimit)
+			throws Exception {
 
 		MsgDelegate msg = MsgDelegate.newBuilder()
-			.setDelegatorAddress(payerCredentials.getAddress())
-			.setValidatorAddress(validatorAddress)
-			.setAmount(Coin.newBuilder().setDenom(token).setAmount(amount.toString()).build())
-			.build();
+				.setDelegatorAddress(payerCredentials.getAddress())
+				.setValidatorAddress(validatorAddress).setAmount(Coin.newBuilder()
+						.setDenom(token).setAmount(amount.toString()).build())
+				.build();
 
-		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom,
+				gasLimit);
 		return bradcastTransaction(tx);
 	}
 
-	public Abci.TxResponse sendUnstakingTx(CosmosCredentials payerCredentials, String validatorAddress, Long amount,
-		BigDecimal feeInAtom, long gasLimit) throws Exception {
+	public Abci.TxResponse sendUnstakingTx(CosmosCredentials payerCredentials,
+			String validatorAddress, Long amount, BigDecimal feeInAtom, long gasLimit)
+			throws Exception {
 
 		MsgUndelegate msg = MsgUndelegate.newBuilder()
-			.setDelegatorAddress(payerCredentials.getAddress())
-			.setValidatorAddress(validatorAddress)
-			.setAmount(Coin.newBuilder().setDenom(token).setAmount(amount.toString()).build())
-			.build();
+				.setDelegatorAddress(payerCredentials.getAddress())
+				.setValidatorAddress(validatorAddress).setAmount(Coin.newBuilder()
+						.setDenom(token).setAmount(amount.toString()).build())
+				.build();
 
-		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom,
+				gasLimit);
 		return bradcastTransaction(tx);
 	}
 
-	public Abci.TxResponse sendSwitchDelegatorTx(CosmosCredentials payerCredentials, String srcValidator, String dstValidator, Long amount,
-		BigDecimal feeInAtom, long gasLimit) throws Exception {
+	public Abci.TxResponse sendSwitchDelegatorTx(CosmosCredentials payerCredentials,
+			String srcValidator, String dstValidator, Long amount, BigDecimal feeInAtom,
+			long gasLimit) throws Exception {
 
 		MsgBeginRedelegate msg = MsgBeginRedelegate.newBuilder()
-			.setDelegatorAddress(payerCredentials.getAddress())
-			.setValidatorSrcAddress(srcValidator)
-			.setValidatorDstAddress(dstValidator)
-			.setAmount(Coin.newBuilder().setDenom(token).setAmount(amount.toString()).build())
-			.build();
+				.setDelegatorAddress(payerCredentials.getAddress())
+				.setValidatorSrcAddress(srcValidator).setValidatorDstAddress(dstValidator)
+				.setAmount(Coin.newBuilder().setDenom(token).setAmount(amount.toString())
+						.build())
+				.build();
 
-		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
+		TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom,
+				gasLimit);
 		return bradcastTransaction(tx);
 	}
 
-	public void sendClaimStakingRewardsTx(CosmosCredentials payerCredentials, List<String> validatorAddresses,
-		BigDecimal feeInAtom, long gasLimit) throws Exception {
+	public void sendClaimStakingRewardsTx(CosmosCredentials payerCredentials,
+			List<String> validatorAddresses, BigDecimal feeInAtom, long gasLimit)
+			throws Exception {
+
+		List<GeneratedMessageV3> messages = new ArrayList<>();
+		String delegatorAddress = payerCredentials.getAddress();
 
 		for (String validatorAddress : validatorAddresses) {
-			String delegatorAddress = payerCredentials.getAddress();
-
 			MsgWithdrawDelegatorReward msg = MsgWithdrawDelegatorReward.newBuilder()
-				.setDelegatorAddress(delegatorAddress)
-				.setValidatorAddress(validatorAddress)
-				.build();
-			TxOuterClass.Tx tx = getTxRequest(msg, payerCredentials, null, feeInAtom, gasLimit);
-			bradcastTransaction(tx);
+					.setDelegatorAddress(delegatorAddress)
+					.setValidatorAddress(validatorAddress).build();
+			messages.add(msg);
 		}
+
+		TxOuterClass.Tx tx = getTxRequestForMultipleMessages(messages, payerCredentials,
+				feeInAtom, gasLimit);
+		bradcastTransaction(tx);
 	}
 
 	public TxResponse bradcastTransaction(TxOuterClass.Tx tx) throws Exception {
-		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc.newBlockingStub(grpcService.getChannel());
+		System.out.println("Broadcasting transaction " + tx.toString());
+		ServiceGrpc.ServiceBlockingStub stub = ServiceGrpc
+				.newBlockingStub(grpcService.getChannel());
 
-		ServiceOuterClass.BroadcastTxRequest broadcastTxRequest = ServiceOuterClass.BroadcastTxRequest.newBuilder()
-			.setTxBytes(tx.toByteString())
-			.setMode(ServiceOuterClass.BroadcastMode.BROADCAST_MODE_SYNC)
-			.build();
+		ServiceOuterClass.BroadcastTxRequest broadcastTxRequest = ServiceOuterClass.BroadcastTxRequest
+				.newBuilder().setTxBytes(tx.toByteString())
+				.setMode(ServiceOuterClass.BroadcastMode.BROADCAST_MODE_SYNC).build();
 
-		ServiceOuterClass.BroadcastTxResponse broadcastTxResponse = stub.broadcastTx(broadcastTxRequest);
+		ServiceOuterClass.BroadcastTxResponse broadcastTxResponse = stub
+				.broadcastTx(broadcastTxRequest);
 
 		if (!broadcastTxResponse.hasTxResponse()) {
 			throw new Exception("broadcastTxResponse no body\n" + printer.print(tx));
@@ -182,12 +194,14 @@ public class SignUtil {
 		return txResponse;
 	}
 
-	public TxOuterClass.Tx getTxRequest(GeneratedMessageV3 msg, CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
-		long gasLimit) throws Exception {
+	public TxOuterClass.Tx getTxRequest(GeneratedMessageV3 msg,
+			CosmosCredentials payerCredentials, SendInfo sendMsg, BigDecimal feeInAtom,
+			long gasLimit) throws Exception {
 
 		Map<String, Auth.BaseAccount> baseAccountCache = new HashMap<>();
 		TxOuterClass.TxBody.Builder txBodyBuilder = TxOuterClass.TxBody.newBuilder();
-		TxOuterClass.AuthInfo.Builder authInfoBuilder = TxOuterClass.AuthInfo.newBuilder();
+		TxOuterClass.AuthInfo.Builder authInfoBuilder = TxOuterClass.AuthInfo
+				.newBuilder();
 
 		TxOuterClass.Tx.Builder txBuilder = TxOuterClass.Tx.newBuilder();
 		Map<String, Boolean> signerInfoExistMap = new HashMap<>();
@@ -196,20 +210,17 @@ public class SignUtil {
 		txBodyBuilder.addMessages(Any.pack(msg, "/"));
 
 		if (!signerInfoExistMap.containsKey(payerCredentials.getAddress())) {
-			authInfoBuilder.addSignerInfos(getSignInfo(payerCredentials, baseAccountCache));
+			authInfoBuilder
+					.addSignerInfos(getSignInfo(payerCredentials, baseAccountCache));
 			signerInfoExistMap.put(payerCredentials.getAddress(), true);
 		}
 
 		CoinOuterClass.Coin feeCoin = CoinOuterClass.Coin.newBuilder()
-			.setAmount(ATOMUnitUtil.atomToMicroAtom(feeInAtom).toPlainString())
-			.setDenom(token)
-			.build();
+				.setAmount(ATOMUnitUtil.atomToMicroAtom(feeInAtom).toPlainString())
+				.setDenom(token).build();
 
-		TxOuterClass.Fee fee = TxOuterClass.Fee.newBuilder()
-			.setGasLimit(gasLimit)
-			.setPayer(payerCredentials.getAddress())
-			.addAmount(feeCoin)
-			.build();
+		TxOuterClass.Fee fee = TxOuterClass.Fee.newBuilder().setGasLimit(gasLimit)
+				.setPayer(payerCredentials.getAddress()).addAmount(feeCoin).build();
 
 		authInfoBuilder.setFee(fee);
 
@@ -218,7 +229,8 @@ public class SignUtil {
 		TxOuterClass.AuthInfo authInfo = authInfoBuilder.build();
 
 		if (!signaturesExistMap.containsKey(payerCredentials.getAddress())) {
-			txBuilder.addSignatures(getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
+			txBuilder.addSignatures(
+					getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
 			signaturesExistMap.put(payerCredentials.getAddress(), true);
 		}
 
@@ -228,38 +240,84 @@ public class SignUtil {
 		return tx;
 	}
 
-	public TxOuterClass.SignerInfo getSignInfo(CosmosCredentials credentials, Map<String, Auth.BaseAccount> baseAccountCache) throws Exception {
+	public TxOuterClass.Tx getTxRequestForMultipleMessages(List<GeneratedMessageV3> msgs,
+			CosmosCredentials payerCredentials, BigDecimal feeInAtom, long gasLimit)
+			throws Exception {
+
+		Map<String, Auth.BaseAccount> baseAccountCache = new HashMap<>();
+		TxOuterClass.TxBody.Builder txBodyBuilder = TxOuterClass.TxBody.newBuilder();
+		TxOuterClass.AuthInfo.Builder authInfoBuilder = TxOuterClass.AuthInfo
+				.newBuilder();
+		TxOuterClass.Tx.Builder txBuilder = TxOuterClass.Tx.newBuilder();
+		Map<String, Boolean> signerInfoExistMap = new HashMap<>();
+		Map<String, Boolean> signaturesExistMap = new HashMap<>();
+
+		// Add all messages to the transaction body
+		for (GeneratedMessageV3 msg : msgs) {
+			txBodyBuilder.addMessages(Any.pack(msg, "/"));
+		}
+
+		if (!signerInfoExistMap.containsKey(payerCredentials.getAddress())) {
+			authInfoBuilder
+					.addSignerInfos(getSignInfo(payerCredentials, baseAccountCache));
+			signerInfoExistMap.put(payerCredentials.getAddress(), true);
+		}
+
+		CoinOuterClass.Coin feeCoin = CoinOuterClass.Coin.newBuilder()
+				.setAmount(ATOMUnitUtil.atomToMicroAtom(feeInAtom).toPlainString())
+				.setDenom(token).build();
+
+		TxOuterClass.Fee fee = TxOuterClass.Fee.newBuilder().setGasLimit(gasLimit)
+				.setPayer(payerCredentials.getAddress()).addAmount(feeCoin).build();
+
+		authInfoBuilder.setFee(fee);
+
+		TxOuterClass.TxBody txBody = txBodyBuilder.build();
+		TxOuterClass.AuthInfo authInfo = authInfoBuilder.build();
+
+		if (!signaturesExistMap.containsKey(payerCredentials.getAddress())) {
+			txBuilder.addSignatures(
+					getSignBytes(payerCredentials, txBody, authInfo, baseAccountCache));
+			signaturesExistMap.put(payerCredentials.getAddress(), true);
+		}
+
+		txBuilder.setBody(txBody);
+		txBuilder.setAuthInfo(authInfo);
+		TxOuterClass.Tx tx = txBuilder.build();
+		return tx;
+	}
+
+	public TxOuterClass.SignerInfo getSignInfo(CosmosCredentials credentials,
+			Map<String, Auth.BaseAccount> baseAccountCache) throws Exception {
 		byte[] encodedPubKey = credentials.getEcKey().getPubKeyPoint().getEncoded(true);
 		Keys.PubKey pubKey = Keys.PubKey.newBuilder()
-			.setKey(ByteString.copyFrom(encodedPubKey))
-			.build();
+				.setKey(ByteString.copyFrom(encodedPubKey)).build();
 		TxOuterClass.ModeInfo.Single single = TxOuterClass.ModeInfo.Single.newBuilder()
-			.setMode(Signing.SignMode.SIGN_MODE_DIRECT)
-			.build();
+				.setMode(Signing.SignMode.SIGN_MODE_DIRECT).build();
 
 		TxOuterClass.SignerInfo signerInfo = TxOuterClass.SignerInfo.newBuilder()
-			.setPublicKey(Any.pack(pubKey, "/"))
-			.setModeInfo(TxOuterClass.ModeInfo.newBuilder().setSingle(single))
-			.setSequence(sequence)
-			.build();
+				.setPublicKey(Any.pack(pubKey, "/"))
+				.setModeInfo(TxOuterClass.ModeInfo.newBuilder().setSingle(single))
+				.setSequence(sequence).build();
 		return signerInfo;
 	}
 
-	public ByteString getSignBytes(CosmosCredentials credentials, TxOuterClass.TxBody txBody, TxOuterClass.AuthInfo authInfo, Map<String, Auth.BaseAccount> baseAccountCache) throws Exception {
-		byte[] sigBytes = signDoc(credentials, credentials.getEcKey().getPrivKeyBytes(), txBody, authInfo);
+	public ByteString getSignBytes(CosmosCredentials credentials,
+			TxOuterClass.TxBody txBody, TxOuterClass.AuthInfo authInfo,
+			Map<String, Auth.BaseAccount> baseAccountCache) throws Exception {
+		byte[] sigBytes = signDoc(credentials, credentials.getEcKey().getPrivKeyBytes(),
+				txBody, authInfo);
 		return ByteString.copyFrom(sigBytes);
 	}
 
-	public byte[] signDoc(CosmosCredentials credentials, byte[] privateKey, TxOuterClass.TxBody txBody,
-		TxOuterClass.AuthInfo authInfo) {
+	public byte[] signDoc(CosmosCredentials credentials, byte[] privateKey,
+			TxOuterClass.TxBody txBody, TxOuterClass.AuthInfo authInfo) {
 
 		ECKeyPair keyPair = ECKeyPair.create(privateKey);
 		TxOuterClass.SignDoc signDoc = TxOuterClass.SignDoc.newBuilder()
-			.setBodyBytes(txBody.toByteString())
-			.setAuthInfoBytes(authInfo.toByteString())
-			.setAccountNumber(accountNumber)
-			.setChainId(chainId)
-			.build();
+				.setBodyBytes(txBody.toByteString())
+				.setAuthInfoBytes(authInfo.toByteString()).setAccountNumber(accountNumber)
+				.setChainId(chainId).build();
 		byte[] hash = Sha256Hash.hash(signDoc.toByteArray());
 		Sign.SignatureData signature = Sign.signMessage(hash, keyPair, false);
 		return mergeBytes(signature.getR(), signature.getS());
