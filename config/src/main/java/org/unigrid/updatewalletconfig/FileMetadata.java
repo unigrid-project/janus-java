@@ -67,6 +67,7 @@ public class FileMetadata {
 	@Getter(AccessLevel.PROTECTED)
 	@XmlTransient
 	private String artifactId;
+	private String chain;
 
 	public FileMetadata(String uri, long size, String checksum) {
 		this(uri, size, checksum, "", "");
@@ -80,4 +81,12 @@ public class FileMetadata {
 		this.artifactId = artifactId;
 		this.modulePath = true;
 	}
+
+	public void setChain(String chain) {
+        this.chain = chain;
+    }
+
+    public String getChain() {
+        return chain;
+    }
 }

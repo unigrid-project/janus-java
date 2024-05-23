@@ -13,7 +13,8 @@
 	</organization>
 	<modules>
 		<module>desktop</module>
-		<module>fx</module>
+		<module>fx-legacy</module>
+		<module>fx-mainnet</module>
 		<module>bootstrap</module>
 	</modules>
 	<dependencyManagement>

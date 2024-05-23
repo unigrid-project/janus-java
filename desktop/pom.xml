@@ -162,7 +162,7 @@
 							<execution>
 								<id>appimage</id>
 								<configuration>
-									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-256-256.ico</icon>
+									<icon>${project.basedir}/../fx-mainnet/src/main/resources/org/unigrid/janus/view/images/unigrid-256-256.ico</icon>
 								</configuration>
 							</execution>
 							<execution>
@@ -195,7 +195,7 @@
 							<execution>
 								<id>appimage</id>
 								<configuration>
-									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.icns</icon>
+									<icon>${project.basedir}/../fx-mainnet/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.icns</icon>
 									<macPackageIdentifier>org.unigrid.janus</macPackageIdentifier>
 									<macPackageName>"Unigrid"</macPackageName>
 									<macPackageSigningPrefix>"UnigridJanus"</macPackageSigningPrefix>
@@ -243,7 +243,7 @@
 									<linuxPackageName>unigrid</linuxPackageName>
 									<linuxAppCategory>Utilities</linuxAppCategory>
 									<linuxMenuGroup>Utilities</linuxMenuGroup>
-									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
+									<icon>${project.basedir}/../fx-mainnet/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
 								</configuration>
 							</execution>
 						</executions>

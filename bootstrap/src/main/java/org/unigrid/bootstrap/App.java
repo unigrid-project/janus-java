@@ -135,24 +135,42 @@ public class App extends Application implements Delegate {
 	public void postStart() throws IOException, InterruptedException, ExecutionException {
 		URL configUrl = null;
 		OS os = OS.CURRENT;
+		boolean isTesting = inputArgs.containsKey("test");
+	
 		if (!inputArgs.containsKey("URL")) {
 			if (os.equals(OS.LINUX)) {
-				configUrl = new URL(
-						"https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-linux.xml");
+				if (isTesting) {
+					configUrl = new URL(
+							"https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-linux-test.xml");
+				} else {
+					configUrl = new URL(
+							"https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-linux.xml");
+				}
 			} else if (os.equals(OS.WINDOWS)) {
-				configUrl = new URL(
-						"https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
+				if (isTesting) {
+					configUrl = new URL(
+							"https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-windows-test.xml");
+				} else {
+					configUrl = new URL(
+							"https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-windows.xml");
+				}
 			} else if (os.equals(OS.MAC)) {
-				configUrl = new URL(
-						"https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-mac.xml");
+				if (isTesting) {
+					configUrl = new URL(
+							"https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-mac-test.xml");
+				} else {
+					configUrl = new URL(
+							"https://raw.githubusercontent.com/unigrid-project/unigrid-update/main/config-mac.xml");
+				}
 			}
 		} else {
 			configUrl = new URL(inputArgs.get("URL"));
 		}
+	
 		System.out.println(configUrl);
-
+	
 		Configuration config = null;
-
+	
 		try (Reader in = new InputStreamReader(configUrl.openStream(),
 				StandardCharsets.UTF_8)) {
 			System.out.println("are we getting here??????");
@@ -167,7 +185,7 @@ public class App extends Application implements Delegate {
 				config = Configuration.read(in);
 			}
 		}
-
+	
 		if (inputArgs.get("test") == null) {
 			String server = "";
 			final String version = config.getProperties("fx.version").get(0).getValue();
@@ -185,10 +203,10 @@ public class App extends Application implements Delegate {
 				options.setDebug(false);
 			});
 		}
-
+	
 		config.sync();
 		UpdateView.getInstance().setConfig(config, classStage, inputArgs, hostServices);
-	}
+	}	
 
 	static String localPath() {
 		final String s = System.getProperty("user.home").concat(switch (OS.CURRENT) {

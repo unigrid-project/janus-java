@@ -1,0 +1,20 @@
+[
+  {
+    "account": "",
+    "address": "HPLYiUytoZsWVSi9HyiP68oL1RiMhgsmRZ",
+    "category": "generate",
+    "generatedfrom": "stake",
+    "amount": 0.25101562,
+    "confirmations": 2063,
+    "bcconfirmations": 2063,
+    "generated": true,
+    "blockhash": "df6a09b2c92b453ec6b57bc637d39cbdba4ef5bd6c60b60ed1aa2a06e45ae244",
+    "blockindex": 1,
+    "blocktime": 1661998161,
+    "txid": "d39877d279e22f1f9d6b76ec4440f76fbe00900607930b7544c7527cbb9de2b9",
+    "walletconflicts": [
+    ],
+    "time": 1661998147,
+    "timereceived": 1661998147
+  }
+]
