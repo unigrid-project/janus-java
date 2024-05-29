@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="300.0" maxWidth="600.0" prefHeight="300.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(from 75px 75px to 200px 150px, #00001c, #000024);" styleClass="mainFxmlClass" stylesheets="@updateview.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"  fx:controller="org.unigrid.bootstrap.controller.ChainSelectionController">
+    <children>
+        <VBox layoutX="20.0" layoutY="20.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <children>
+                <HBox>
+                    <Button fx:id="mainnetButton" text="Mainnet"/>
+                    <Button fx:id="legacyButton" text="Legacy"/>
+                </HBox>
+            </children>
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+        </VBox>
+    </children>
+</AnchorPane>
