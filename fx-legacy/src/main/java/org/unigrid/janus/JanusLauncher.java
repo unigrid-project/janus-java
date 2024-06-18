@@ -81,7 +81,10 @@ public class JanusLauncher implements Launcher {
 		}
 
 		if (inputArgs.containsKey("testing")) {
-			System.out.println("Setting testing to true");
+			System.out.println("Setting bootstrap testing to true and setting Update URLs to testing");
+			UpdateURL.setLinuxUrl(UpdateURL.getLinuxTestUrl());
+			UpdateURL.setMacUrl(UpdateURL.getMacTestUrl());
+			UpdateURL.setWindowsUrl(UpdateURL.getWindowsTestUrl());
 			BootstrapModel.getInstance().setTesting(true);
 		}
 

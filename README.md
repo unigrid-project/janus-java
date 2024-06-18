@@ -109,6 +109,11 @@ cd desktop/target/dist/Unigrid/bin/
 ./Unigrid URL=https://raw.githubusercontent.com/unigrid-project/unigrid-update-testing/main/config-linux-test.xml
 ```
 
+To use config files from testing repo:
+```
+testing=true
+```
+
 Troubleshooting
 ---------------
 If you are running into issues starting the wallet a good place to look is our [documentation](https://docs.unigrid.org/) page.
