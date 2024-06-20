@@ -20,28 +20,30 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class UpdateURL {
+	// PROD mode
+	// @Getter @Setter
+	// private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
+	// 	+ "unigrid-update/main/legacy-linux.xml";
+
+	// @Getter @Setter
+	// private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
+	// 	+ "unigrid-update/main/legacy-mac.xml";
+
+	// @Getter @Setter
+	// private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
+	// 	+ "unigrid-update/main/legacy-windows.xml";
+
+	// TEST mode
 	@Getter @Setter
 	private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/legacy-linux.xml";
+		+ "unigrid-update-testing/main/legacy-linux-test.xml";
 
 	@Getter @Setter
 	private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/legacy-mac.xml";
+		+ "unigrid-update-testing/main/legacy-mac-test.xml";
 
 	@Getter @Setter
 	private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/legacy-windows.xml";
-
-	@Getter
-	private static String linuxTestUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update-testing/main/legacy-linux-test.xml";
-
-	@Getter
-	private static String macTestUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update-testing/main/legacy-mac-test.xml";
-
-	@Getter
-	private static String windowsTestUrl = "https://raw.githubusercontent.com/unigrid-project/"
 		+ "unigrid-update-testing/main/legacy-windows-test.xml";
 
 	@Getter @Setter

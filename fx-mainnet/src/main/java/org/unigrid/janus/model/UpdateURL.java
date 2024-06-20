@@ -20,29 +20,31 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class UpdateURL {
+	// PROD mode
+	// @Getter @Setter
+	// private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
+	// 	+ "unigrid-update/main/config-linux.xml";
+
+	// @Getter @Setter
+	// private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
+	// 	+ "unigrid-update/main/config-mac.xml";
+
+	// @Getter @Setter
+	// private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
+	// 	+ "unigrid-update/main/config-windows.xml";
+
+	// TEST mode
 	@Getter @Setter
 	private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/config-linux.xml";
+		+ "unigrid-update-testing/main/config-linux-test.xml";
 
 	@Getter @Setter
 	private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/config-mac.xml";
+		+ "unigrid-update-testing/main/config-mac-test.xml";
 
 	@Getter @Setter
 	private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update/main/config-windows.xml";
-
-	@Getter
-	private static String linuxTestUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update-testing/main/config-linux-test.xml";
-
-	@Getter
-	private static String macTestUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update-testing/main/config-mac.xml";
-
-	@Getter
-	private static String windowsTestUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update-testing/main/config-windows.xml";
+		+ "unigrid-update-testing/main/config-windows-test.xml";
 
 	@Getter @Setter
 	private static String bootstrapUrl = "https://github.com/unigrid-project/janus-java/releases.atom";
