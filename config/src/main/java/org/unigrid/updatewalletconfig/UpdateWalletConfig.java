@@ -437,7 +437,7 @@
      public static String getFileUrl(OS os, boolean testing, String chain) {
          String isTesting = testing ? "-test" : "";
          String osName = os.equals(os.WINDOWS) ? os.name().toLowerCase() : os.getShortName();
-         String chainName = chain.equals("legacy") ? chain + "-" : "config-";
+         String chainName = chain.equals("legacy") ? "config-" : "mainnet-";
  
          return System.getProperty("user.dir").concat("/config/target/") + chainName + osName + isTesting + ".xml";
      }

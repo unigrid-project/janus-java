@@ -23,28 +23,28 @@ public class UpdateURL {
 	// PROD mode
 	// @Getter @Setter
 	// private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
-	// 	+ "unigrid-update/main/legacy-linux.xml";
+	// 	+ "unigrid-update/main/config-linux.xml";
 
 	// @Getter @Setter
 	// private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
-	// 	+ "unigrid-update/main/legacy-mac.xml";
+	// 	+ "unigrid-update/main/config-mac.xml";
 
 	// @Getter @Setter
 	// private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
-	// 	+ "unigrid-update/main/legacy-windows.xml";
+	// 	+ "unigrid-update/main/config-windows.xml";
 
 	// TEST mode
 	@Getter @Setter
 	private static String linuxUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update-testing/main/legacy-linux-test.xml";
+		+ "unigrid-update-testing/main/config-linux-test.xml";
 
 	@Getter @Setter
 	private static String macUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update-testing/main/legacy-mac-test.xml";
+		+ "unigrid-update-testing/main/config-mac-test.xml";
 
 	@Getter @Setter
 	private static String windowsUrl = "https://raw.githubusercontent.com/unigrid-project/"
-		+ "unigrid-update-testing/main/legacy-windows-test.xml";
+		+ "unigrid-update-testing/main/config-windows-test.xml";
 
 	@Getter @Setter
 	private static String bootstrapUrl = "https://github.com/unigrid-project/janus-java/releases.atom";

@@ -119,19 +119,19 @@ public class App extends Application implements Delegate {
 
         if (chain.equals("mainnet")) {
             if (os.equals(OS.LINUX)) {
+                configUrl = new URL(baseUrl + "mainnet-linux-test.xml");
+            } else if (os.equals(OS.WINDOWS)) {
+                configUrl = new URL(baseUrl + "mainnet-windows-test.xml");
+            } else if (os.equals(OS.MAC)) {
+                configUrl = new URL(baseUrl + "mainnet-mac-test.xml");
+            }
+        } else if (chain.equals("legacy")) {
+            if (os.equals(OS.LINUX)) {
                 configUrl = new URL(baseUrl + "config-linux-test.xml");
             } else if (os.equals(OS.WINDOWS)) {
                 configUrl = new URL(baseUrl + "config-windows-test.xml");
             } else if (os.equals(OS.MAC)) {
                 configUrl = new URL(baseUrl + "config-mac-test.xml");
-            }
-        } else if (chain.equals("legacy")) {
-            if (os.equals(OS.LINUX)) {
-                configUrl = new URL(baseUrl + "legacy-linux-test.xml");
-            } else if (os.equals(OS.WINDOWS)) {
-                configUrl = new URL(baseUrl + "legacy-windows-test.xml");
-            } else if (os.equals(OS.MAC)) {
-                configUrl = new URL(baseUrl + "legacy-mac-test.xml");
             }
         }
 
