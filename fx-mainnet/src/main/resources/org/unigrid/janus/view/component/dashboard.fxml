@@ -37,8 +37,8 @@
 							<VBox fx:id="commandsBox" spacing="10" style="-fx-background-color: #1a1a1a; -fx-padding: 10px; -fx-border-radius: 4px; -fx-background-radius: 4px;" styleClass="box" GridPane.columnSpan="3" GridPane.rowIndex="1" GridPane.rowSpan="2">
 								<GridPane hgap="15.0" vgap="20.0">
 									<columnConstraints>
-										<ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="165.0" minWidth="10.0" prefWidth="165.0" />
-										<ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="545.0" />
+										<ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="245.0" minWidth="10.0" prefWidth="245.0" />
+										<ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="465.0" />
 										<ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
 									</columnConstraints>
 									<rowConstraints>
@@ -48,6 +48,7 @@
 										<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
 										<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
 										<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+                              			<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
 									</rowConstraints>
 									<children>
 										<Label text="Balance:" textFill="#d0cccc">
@@ -60,52 +61,62 @@
 												<Font name="System Bold" size="25.0" />
 											</font>
 										</Label>
-										<Label contentDisplay="RIGHT" text="Staking:" textFill="#ababab" GridPane.rowIndex="1">
+										<Label contentDisplay="RIGHT" text="Spendable balance:" textFill="#ababab" GridPane.rowIndex="1">
 											<font>
 												<Font name="System Bold" size="20.0" />
 											</font>
 										</Label>
-										<Label fx:id="stakingMainView" text="0.00 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="1">
+										<Label fx:id="spendableBalanceLabel" text="0.00 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="1">
 											<font>
 												<Font name="System Bold" size="20.0" />
 											</font>
 										</Label>
-										<Label contentDisplay="RIGHT" text="Gridnode:" textFill="#ababab" GridPane.rowIndex="2">
+										<Label contentDisplay="RIGHT" text="Staking:" textFill="#ababab" GridPane.rowIndex="2">
 											<font>
 												<Font name="System Bold" size="20.0" />
 											</font>
 										</Label>
-										<Label fx:id="gridnodeMainView" text="0.0 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="2">
+										<Label fx:id="stakingMainView" text="0.00 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="2">
 											<font>
 												<Font name="System Bold" size="20.0" />
 											</font>
 										</Label>
-										<Label contentDisplay="RIGHT" text="Unbounding:" textFill="#ababab" GridPane.rowIndex="3">
+										<Label contentDisplay="RIGHT" text="Gridnode:" textFill="#ababab" GridPane.rowIndex="3">
 											<font>
 												<Font name="System Bold" size="20.0" />
 											</font>
 										</Label>
-										<Label fx:id="unboundingMainView" text="0.0 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="3">
+										<Label fx:id="gridnodeMainView" text="0.00 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="3">
 											<font>
 												<Font name="System Bold" size="20.0" />
 											</font>
 										</Label>
-										<Label contentDisplay="RIGHT" text="Rewards:" textFill="#ababab" GridPane.rowIndex="4">
+										<Label contentDisplay="RIGHT" text="Unbounding:" textFill="#ababab" GridPane.rowIndex="4">
 											<font>
 												<Font name="System Bold" size="20.0" />
 											</font>
 										</Label>
-										<Label fx:id="stakingRewards" text="0.0 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="4">
+										<Label fx:id="unboundingMainView" text="0.00 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="4">
 											<font>
 												<Font name="System Bold" size="20.0" />
 											</font>
 										</Label>
-										<Label text="Address:" textFill="#ababab" GridPane.rowIndex="5">
+										<Label contentDisplay="RIGHT" text="Rewards:" textFill="#ababab" GridPane.rowIndex="5">
+											<font>
+												<Font name="System Bold" size="20.0" />
+											</font>
+										</Label>
+										<Label fx:id="stakingRewards" text="0.00 UGD" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="5">
+											<font>
+												<Font name="System Bold" size="20.0" />
+											</font>
+										</Label>
+										<Label text="Address:" textFill="#ababab" GridPane.rowIndex="6">
 											<font>
 												<Font name="System Bold" size="16.0" />
 											</font>
 										</Label>
-										<Label fx:id="addressLabel" styleClass="adddress-label" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="5">
+										<Label fx:id="addressLabel" styleClass="adddress-label" textFill="#ababab" GridPane.columnIndex="1" GridPane.rowIndex="6">
 											<font>
 												<Font name="System Bold" size="16.0" />
 											</font>

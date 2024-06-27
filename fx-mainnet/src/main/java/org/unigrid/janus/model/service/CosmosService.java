@@ -15,19 +15,6 @@
  */
 package org.unigrid.janus.model.service;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.Any;
-import cosmos.auth.v1beta1.Auth;
-import cosmos.auth.v1beta1.QueryOuterClass;
-import cosmos.bank.v1beta1.QueryGrpc;
-import cosmos.tx.v1beta1.ServiceGrpc;
-import cosmos.tx.v1beta1.ServiceOuterClass;
-import cosmos.tx.v1beta1.TxOuterClass;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Event;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -44,7 +31,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javafx.geometry.Pos;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
@@ -61,23 +48,41 @@ import org.unigrid.janus.model.PublicKeysModel;
 import org.unigrid.janus.model.StakedBalanceModel;
 import org.unigrid.janus.model.UnboundingBalanceModel;
 import org.unigrid.janus.model.WalletBalanceModel;
+import org.unigrid.janus.model.gridnode.UnbondingEntry;
 import org.unigrid.janus.model.rest.entity.CollateralRequired;
 import org.unigrid.janus.model.rest.entity.DelegationsRequest;
 import org.unigrid.janus.model.rest.entity.RedelegationsRequest;
 import org.unigrid.janus.model.rest.entity.RewardsRequest;
+import org.unigrid.janus.model.rest.entity.SpendableBalancesRequest;
 import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
 import org.unigrid.janus.model.rest.entity.WithdrawAddressRequest;
 import org.unigrid.janus.model.rpc.entity.TransactionResponse;
-import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.DelegationListEvent;
+import org.unigrid.janus.model.signal.DelegationStatusEvent;
 import org.unigrid.janus.model.signal.PublicKeysEvent;
 import org.unigrid.janus.model.signal.RedelegationsEvent;
 import org.unigrid.janus.model.signal.RewardsEvent;
-import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
-import org.unigrid.janus.model.gridnode.UnbondingEntry;
+import org.unigrid.janus.model.signal.SpendableBalancesEvent;
 import org.unigrid.janus.model.signal.TransactionListEvent;
+import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
 import org.unigrid.janus.model.signal.UnbondingListEvent;
 import org.unigrid.janus.model.signal.WithdrawAddressEvent;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.Any;
+import com.google.rpc.context.AttributeContext.Auth;
+
+import cosmos.auth.v1beta1.QueryOuterClass;
+import cosmos.bank.v1beta1.QueryGrpc;
+import cosmos.tx.v1beta1.ServiceGrpc;
+import cosmos.tx.v1beta1.ServiceOuterClass;
+import cosmos.tx.v1beta1.TxOuterClass;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import javafx.geometry.Pos;
 
 @ApplicationScoped
 public class CosmosService {
@@ -95,6 +100,8 @@ public class CosmosService {
 	private Event<DelegationListEvent> delegationListEvent;
 	@Inject
 	private Event<RewardsEvent> rewardsEvent;
+	@Inject
+	private Event<SpendableBalancesEvent> spendableBalancesEvent;
 	@Inject
 	private Event<UnbondingDelegationsEvent> unbondingDelegationsEvent;
 	@Inject
@@ -140,26 +147,26 @@ public class CosmosService {
 	private String apiUrl;
 
 	public TransactionResponse txResponse(String address)
-		throws IOException, InterruptedException {
+			throws IOException, InterruptedException {
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request;
 
 		String url = String.format(
-			ApiConfig.getBASE_URL() + "cosmos/tx/v1beta1/txs?events=message.sender='%s'",
-			address);
+				ApiConfig.getBASE_URL() + "cosmos/tx/v1beta1/txs?events=message.sender='%s'",
+				address);
 		System.out.println("url: " + url);
 
 		try {
 			request = HttpRequest.newBuilder().uri(new URI(url)).build();
 			HttpResponse<String> response = client.send(request,
-				HttpResponse.BodyHandlers.ofString());
+					HttpResponse.BodyHandlers.ofString());
 			System.out.println("txResponse: " + response.body());
 			ObjectMapper objectMapper = new ObjectMapper();
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-				false);
+					false);
 
 			TransactionResponse txResponse = objectMapper.readValue(response.body(),
-				TransactionResponse.class);
+					TransactionResponse.class);
 			return txResponse;
 		} catch (URISyntaxException ex) {
 			Logger.getLogger(CosmosService.class.getName()).log(Level.SEVERE, null, ex);
@@ -178,35 +185,42 @@ public class CosmosService {
 		// Delegations
 		DelegationsRequest delegationsRequest = new DelegationsRequest(account);
 		DelegationsRequest.Response delegationsResponse = new RestCommand<>(
-			delegationsRequest, restService).execute();
-		// fire event	
+				delegationsRequest, restService).execute();
+		// fire event
 		delegationListEvent.fire(new DelegationListEvent(delegationsResponse.getDelegationResponses()));
 
 		// Rewards
 		RewardsRequest rewardsRequest = new RewardsRequest(account);
 		RewardsRequest.Response rewardsResponse = new RestCommand<>(rewardsRequest,
-			restService).execute();
-		//fire event
+				restService).execute();
+		// fire event
 		rewardsEvent.fire(new RewardsEvent(rewardsResponse));
+
+		// Spendable balances
+		SpendableBalancesRequest spendableBalancesRequest = new SpendableBalancesRequest(account);
+		SpendableBalancesRequest.Response spendableBalancesResponse = new RestCommand<>(spendableBalancesRequest,
+				restService).execute();
+		// fire event
+		spendableBalancesEvent.fire(new SpendableBalancesEvent(spendableBalancesResponse));
 
 		// Unbonding Delegations
 		UnbondingDelegationsRequest unbondingDelegationsRequest = new UnbondingDelegationsRequest(
-			account);
+				account);
 		UnbondingDelegationsRequest.Response unbondingDelegationsResponse = new RestCommand<>(
-			unbondingDelegationsRequest, restService).execute();
+				unbondingDelegationsRequest, restService).execute();
 		unbondingDelegationsEvent.fire(new UnbondingDelegationsEvent(unbondingDelegationsResponse));
 
 		// Redelegations
 		RedelegationsRequest redelegationsRequest = new RedelegationsRequest(account);
 		RedelegationsRequest.Response redelegationsResponse = new RestCommand<>(
-			redelegationsRequest, restService).execute();
+				redelegationsRequest, restService).execute();
 		redelegationsEvent.fire(new RedelegationsEvent(redelegationsResponse));
 
 		// Withdraw Address
 		WithdrawAddressRequest withdrawAddressRequest = new WithdrawAddressRequest(
-			account);
+				account);
 		WithdrawAddressRequest.Response withdrawAddressResponse = new RestCommand<>(
-			withdrawAddressRequest, restService).execute();
+				withdrawAddressRequest, restService).execute();
 		withdrawAddressEvent.fire(new WithdrawAddressEvent(withdrawAddressResponse.getWithdrawAddress()));
 
 		fetchDelegationAmount(account);
@@ -226,14 +240,15 @@ public class CosmosService {
 
 		stakedBalanceModel.setStakedBalance(stakedBalance);
 		stakedBalanceModelEvent.fire(stakedBalanceModel);
-		
+
 		fetchAccountTransactions(account);
 	}
 
 	public long getAccountNumber(String address) {
 		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
-			.newBlockingStub(grpcService.getChannel());
-		QueryOuterClass.QueryAccountRequest accountRequest = QueryOuterClass.QueryAccountRequest.newBuilder().setAddress(address).build();
+				.newBlockingStub(grpcService.getChannel());
+		QueryOuterClass.QueryAccountRequest accountRequest = QueryOuterClass.QueryAccountRequest.newBuilder()
+				.setAddress(address).build();
 
 		try {
 			QueryOuterClass.QueryAccountResponse response = authQueryClient.account(accountRequest);
@@ -241,7 +256,7 @@ public class CosmosService {
 			System.out.println("Type URL in getAccountNumber: " + accountAny.getTypeUrl());
 			Auth.BaseAccount baseAccount = accountAny.unpack(Auth.BaseAccount.class);
 			System.out.println("baseAccount.getPubKey(): " + baseAccount.getPubKey()
-				+ " \naddress :" + baseAccount.getAddress());
+					+ " \naddress :" + baseAccount.getAddress());
 
 			// Process baseAccount as needed
 			// we need the account number and not the sequence here
@@ -256,12 +271,12 @@ public class CosmosService {
 	private long getSequence(String address) {
 		// Set up the auth query client
 		cosmos.auth.v1beta1.QueryGrpc.QueryBlockingStub authQueryClient = cosmos.auth.v1beta1.QueryGrpc
-			.newBlockingStub(grpcService.getChannel());
+				.newBlockingStub(grpcService.getChannel());
 
 		// Prepare the account query request
 		QueryOuterClass.QueryAccountRequest accountRequest = QueryOuterClass.QueryAccountRequest.newBuilder()
-			.setAddress(address)
-			.build();
+				.setAddress(address)
+				.build();
 
 		try {
 			// Query the account information
@@ -287,9 +302,9 @@ public class CosmosService {
 		System.out.println("Fetched delegation amount: " + delegationAmount + " for account " + account);
 		// Fire an event with both the delegation amount and the gridnode count
 		DelegationStatusEvent event = DelegationStatusEvent.builder()
-			.delegatedAmount(delegationAmount)
-			.gridnodeCount(gridnodesTotal)
-			.build();
+				.delegatedAmount(delegationAmount)
+				.gridnodeCount(gridnodesTotal)
+				.build();
 		delegationAmountEvent.fire(event);
 	}
 
@@ -309,12 +324,15 @@ public class CosmosService {
 	// TODO
 	// this should add this data to a model
 	public double getDelegatedBalance(String address) {
-		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
+		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc
+				.newBlockingStub(grpcService.getChannel());
 
-		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest delegatedAmountRequest = gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest.newBuilder()
-			.setDelegatorAddress(address)
-			.build();
-		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub.delegatedAmount(delegatedAmountRequest);
+		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest delegatedAmountRequest = gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountRequest
+				.newBuilder()
+				.setDelegatorAddress(address)
+				.build();
+		gridnode.gridnode.v1.QueryOuterClass.QueryDelegatedAmountResponse delegatedAmountResponse = delegateStub
+				.delegatedAmount(delegatedAmountRequest);
 		double converted = convertLongToUgd(delegatedAmountResponse.getAmount());
 		System.out.println("delegateStub: " + delegateStub);
 		System.out.println("delegatedAmountResponse UUGD: " + delegatedAmountResponse.getAmount());
@@ -325,10 +343,11 @@ public class CosmosService {
 	// TODO
 	// this should add this data to a model
 	public String getWalletBalance(String address) {
-		cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest balanceRequest = cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest.newBuilder()
-			.setAddress(address)
-			.setDenom(ApiConfig.getDENOM()) // Add this line to set the denomination
-			.build();
+		cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest balanceRequest = cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceRequest
+				.newBuilder()
+				.setAddress(address)
+				.setDenom(ApiConfig.getDENOM()) // Add this line to set the denomination
+				.build();
 
 		QueryGrpc.QueryBlockingStub stub = QueryGrpc.newBlockingStub(grpcService.getChannel());
 		cosmos.bank.v1beta1.QueryOuterClass.QueryBalanceResponse balanceResponse = stub.balance(balanceRequest);
@@ -342,39 +361,46 @@ public class CosmosService {
 
 	public long getUnboundingBalance(String address) {
 		// Stub setup and request preparation
-		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest unbondingRequest = gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest.newBuilder()
-			.setBondingAccountAddress(address)
-			.build();
+		gridnode.gridnode.v1.QueryGrpc.QueryBlockingStub delegateStub = gridnode.gridnode.v1.QueryGrpc
+				.newBlockingStub(grpcService.getChannel());
+		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest unbondingRequest = gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesRequest
+				.newBuilder()
+				.setBondingAccountAddress(address)
+				.build();
 
 		// Get the response
-		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesResponse response = delegateStub.unbondingEntries(unbondingRequest);
+		gridnode.gridnode.v1.QueryOuterClass.QueryUnbondingEntriesResponse response = delegateStub
+				.unbondingEntries(unbondingRequest);
 
 		// Map protobuf objects to your model objects
 		List<UnbondingEntry> unbondingEntries = response.getUnbondingEntriesList().stream()
-			.map(protoEntry -> new UnbondingEntry(protoEntry.getAccount(), protoEntry.getAmount(), protoEntry.getCompletionTime()))
-			.collect(Collectors.toList());
+				.map(protoEntry -> new UnbondingEntry(protoEntry.getAccount(), protoEntry.getAmount(),
+						protoEntry.getCompletionTime()))
+				.collect(Collectors.toList());
 		unbondingListEvent.fire(new UnbondingListEvent(unbondingEntries));
 
 		// Calculate and return the total
 		return unbondingEntries.stream()
-			.mapToLong(UnbondingEntry::getAmount)
-			.sum();
+				.mapToLong(UnbondingEntry::getAmount)
+				.sum();
 	}
 
 	// TODO
 	// this should add this data to a model
 	public long getStakedBalance(String address) {
-		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc.newBlockingStub(grpcService.getChannel());
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest stakingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest.newBuilder()
-			.setDelegatorAddr(address)
-			.build();
+		cosmos.staking.v1beta1.QueryGrpc.QueryBlockingStub stakingStub = cosmos.staking.v1beta1.QueryGrpc
+				.newBlockingStub(grpcService.getChannel());
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest stakingRequest = cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsRequest
+				.newBuilder()
+				.setDelegatorAddr(address)
+				.build();
 
-		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse stakingResponse = stakingStub.delegatorDelegations(stakingRequest);
+		cosmos.staking.v1beta1.QueryOuterClass.QueryDelegatorDelegationsResponse stakingResponse = stakingStub
+				.delegatorDelegations(stakingRequest);
 
 		long totalStaked = stakingResponse.getDelegationResponsesList().stream()
-			.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
-			.sum();
+				.mapToLong(delegationResponse -> Long.valueOf(delegationResponse.getBalance().getAmount()))
+				.sum();
 
 		return totalStaked;
 	}
@@ -410,8 +436,8 @@ public class CosmosService {
 		boolean isSignatureValid = publicKey.verify(messageHash, signature);
 		System.out.println("Is the signature valid? " + isSignatureValid);
 		List<String> publicKeysHex = keys.stream()
-			.map(key -> Hex.toHexString(key.getPubKey()))
-			.collect(Collectors.toList());
+				.map(key -> Hex.toHexString(key.getPubKey()))
+				.collect(Collectors.toList());
 		gridnodeKeyManager.savePublicKeysToFile(accountsData.getSelectedAccount().getName(), publicKeysHex);
 		publicKeysEvent.fire(new PublicKeysEvent(publicKeysHex));
 	}
@@ -445,7 +471,8 @@ public class CosmosService {
 		Account selectedAccount = accountsData.getSelectedAccount();
 		long sequence = getSequence(selectedAccount.getAddress());
 		long accountNumber = getAccountNumber(selectedAccount.getAddress());
-		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(), ApiConfig.getCHAIN_ID());
+		SignUtil transactionService = new SignUtil(grpcService, sequence, accountNumber, ApiConfig.getDENOM(),
+				ApiConfig.getCHAIN_ID());
 
 		return transactionService;
 	}
@@ -475,7 +502,7 @@ public class CosmosService {
 
 			// Convert the private key bytes to a HEX string
 			String privateKeyHex = org.bitcoinj.core.Utils.HEX.encode(privateKeyBytes);
-			//System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
+			// System.out.println("Decrypted Private Key (HEX): " + privateKeyHex);
 
 			return privateKeyHex;
 		} catch (Exception e) {
@@ -489,21 +516,21 @@ public class CosmosService {
 		// send desktop notofication
 		if (SystemUtils.IS_OS_MAC_OSX) {
 			Notifications
-				.create()
-				.title(title)
-				.text(body)
-				.position(Pos.TOP_RIGHT)
-				.darkStyle()
-				.graphic(null)
-				.show();
+					.create()
+					.title(title)
+					.text(body)
+					.position(Pos.TOP_RIGHT)
+					.darkStyle()
+					.graphic(null)
+					.show();
 		} else {
 			Notifications
-				.create()
-				.title(title)
-				.text(body)
-				.darkStyle()
-				.graphic(null)
-				.show();
+					.create()
+					.title(title)
+					.text(body)
+					.darkStyle()
+					.graphic(null)
+					.show();
 		}
 	}
 
@@ -522,12 +549,12 @@ public class CosmosService {
 		transactionsReceived.addAll(fetchTransactions(queryRecipient, stub));
 
 		List<String> transactionsSentHashes = transactionsSent.stream()
-			.map(tx -> bytesToHex(sha256(tx.toByteArray())))
-			.collect(Collectors.toList());
+				.map(tx -> bytesToHex(sha256(tx.toByteArray())))
+				.collect(Collectors.toList());
 
 		List<String> transactionsReceivedHashes = transactionsReceived.stream()
-			.map(tx -> bytesToHex(sha256(tx.toByteArray())))
-			.collect(Collectors.toList());
+				.map(tx -> bytesToHex(sha256(tx.toByteArray())))
+				.collect(Collectors.toList());
 
 		// Fire the event
 		transactionEvent.fire(new TransactionListEvent(transactionsSentHashes, transactionsReceivedHashes));
@@ -535,9 +562,9 @@ public class CosmosService {
 
 	private List<TxOuterClass.Tx> fetchTransactions(String query, ServiceGrpc.ServiceBlockingStub stub) {
 		ServiceOuterClass.GetTxsEventRequest request = ServiceOuterClass.GetTxsEventRequest.newBuilder()
-			.setLimit(10)
-			.setQuery(query)
-			.build();
+				.setLimit(10)
+				.setQuery(query)
+				.build();
 
 		return stub.getTxsEvent(request).getTxsList();
 	}

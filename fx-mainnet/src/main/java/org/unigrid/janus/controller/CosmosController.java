@@ -16,50 +16,117 @@
 
 package org.unigrid.janus.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
-import org.unigrid.janus.model.CryptoUtils;
-import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.GridnodeDelegationService;
-import org.unigrid.janus.model.service.Hedgehog;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import org.bitcoinj.core.SignatureDecodeException;
+import org.unigrid.janus.model.AccountModel;
+import org.unigrid.janus.model.AccountsData;
+import org.unigrid.janus.model.AccountsData.Account;
+import org.unigrid.janus.model.AddressCosmos;
+import org.unigrid.janus.model.CryptoUtils;
+import org.unigrid.janus.model.DataDirectory;
+import org.unigrid.janus.model.MnemonicModel;
+import org.unigrid.janus.model.PublicKeysModel;
+import org.unigrid.janus.model.StakedBalanceModel;
+import org.unigrid.janus.model.UnboundingBalanceModel;
+import org.unigrid.janus.model.ValidatorInfo;
+import org.unigrid.janus.model.WalletBalanceModel;
+import org.unigrid.janus.model.gridnode.GridnodeListViewItem;
+import org.unigrid.janus.model.gridnode.GridnodeModel;
+import org.unigrid.janus.model.gridnode.UnbondingEntry;
+import org.unigrid.janus.model.rest.entity.DelegationsRequest;
+import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
+import org.unigrid.janus.model.rest.entity.RewardsRequest.Balance;
+import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
+import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
+import org.unigrid.janus.model.rpc.entity.TransactionResponse;
+import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
+import org.unigrid.janus.model.service.AccountsService;
+import org.unigrid.janus.model.service.AddressCosmosService;
+import org.unigrid.janus.model.service.CosmosService;
+import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.GridnodeHandler;
+import org.unigrid.janus.model.service.GridnodeKeyManager;
+import org.unigrid.janus.model.service.GrpcService;
+import org.unigrid.janus.model.service.MnemonicService;
+import org.unigrid.janus.model.service.PollingService;
+import org.unigrid.janus.model.signal.AccountSelectedEvent;
+import org.unigrid.janus.model.signal.CollateralUpdateEvent;
+import org.unigrid.janus.model.signal.CosmosWalletRequest;
+import org.unigrid.janus.model.signal.DelegationListEvent;
+import org.unigrid.janus.model.signal.DelegationStatusEvent;
+import org.unigrid.janus.model.signal.DisplaySwapPrompt;
+import org.unigrid.janus.model.signal.GridnodeEvents;
+import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
+import org.unigrid.janus.model.signal.MnemonicState;
+import org.unigrid.janus.model.signal.OverlayRequest;
+import org.unigrid.janus.model.signal.PublicKeysEvent;
+import org.unigrid.janus.model.signal.RedelegationsEvent;
+import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
+import org.unigrid.janus.model.signal.RewardsEvent;
+import org.unigrid.janus.model.signal.SpendableBalancesEvent;
+import org.unigrid.janus.model.signal.TabRequestSignal;
+import org.unigrid.janus.model.signal.TransactionListEvent;
+import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
+import org.unigrid.janus.model.signal.UnbondingListEvent;
+import org.unigrid.janus.model.signal.UnlockRequest;
+import org.unigrid.janus.model.signal.WithdrawAddressEvent;
+import org.unigrid.janus.utils.AddressUtil;
+import org.unigrid.janus.view.backing.CosmosTxList;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import cosmos.base.abci.v1beta1.Abci;
+import io.grpc.StatusRuntimeException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
-
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
+import javafx.application.HostServices;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -67,94 +134,22 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import org.bitcoinj.core.SignatureDecodeException;
-import org.unigrid.janus.model.AccountModel;
-import org.unigrid.janus.model.AccountsData;
-import org.unigrid.janus.model.AccountsData.Account;
-import org.unigrid.janus.model.AddressCosmos;
-import org.unigrid.janus.model.DataDirectory;
-import org.unigrid.janus.model.MnemonicModel;
-import org.unigrid.janus.model.rest.entity.CollateralRequired;
-import org.unigrid.janus.model.rest.entity.DelegationsRequest;
-import org.unigrid.janus.model.rest.entity.RewardsRequest.Balance;
-import org.unigrid.janus.model.rpc.entity.TransactionResponse;
-import org.unigrid.janus.model.rpc.entity.TransactionResponse.TxResponse;
-import org.unigrid.janus.model.service.AccountsService;
-import org.unigrid.janus.model.service.AddressCosmosService;
-import org.unigrid.janus.model.service.CosmosService;
-import org.unigrid.janus.model.service.GrpcService;
-import org.unigrid.janus.model.service.MnemonicService;
-import org.unigrid.janus.model.signal.DisplaySwapPrompt;
-import org.unigrid.janus.model.signal.MnemonicState;
-import org.unigrid.janus.model.signal.ResetTextFieldsSignal;
-import org.unigrid.janus.model.signal.TabRequestSignal;
-import org.unigrid.janus.utils.AddressUtil;
-import org.unigrid.janus.view.backing.CosmosTxList;
-import java.math.BigInteger;
-import cosmos.base.abci.v1beta1.Abci;
-import io.grpc.StatusRuntimeException;
-import java.math.RoundingMode;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.geometry.Pos;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import org.unigrid.janus.model.ValidatorInfo;
-import java.util.stream.Collectors;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.application.HostServices;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.geometry.Insets;
-import javafx.scene.layout.Pane;
-import org.unigrid.janus.model.signal.CosmosWalletRequest;
-import org.unigrid.janus.model.signal.OverlayRequest;
-import org.unigrid.janus.model.signal.UnlockRequest;
-import javafx.scene.layout.HBox;
-import org.unigrid.janus.model.gridnode.GridnodeData;
-import org.unigrid.janus.model.gridnode.GridnodeModel;
-import org.unigrid.janus.model.PublicKeysModel;
-import org.unigrid.janus.model.StakedBalanceModel;
-import org.unigrid.janus.model.UnboundingBalanceModel;
-import org.unigrid.janus.model.WalletBalanceModel;
-import org.unigrid.janus.model.gridnode.GridnodeListViewItem;
-import org.unigrid.janus.model.rest.entity.RedelegationsRequest.RedelegationResponseEntry;
-import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest.UnbondingResponse;
-import org.unigrid.janus.model.service.GridnodeHandler;
-import org.unigrid.janus.model.service.PollingService;
-import org.unigrid.janus.model.signal.AccountSelectedEvent;
-import org.unigrid.janus.model.signal.CollateralUpdateEvent;
-import org.unigrid.janus.model.signal.DelegationStatusEvent;
-import org.unigrid.janus.model.signal.DelegationListEvent;
-import org.unigrid.janus.model.signal.RedelegationsEvent;
-import org.unigrid.janus.model.signal.RewardsEvent;
-import org.unigrid.janus.model.signal.UnbondingDelegationsEvent;
-import org.unigrid.janus.model.signal.WithdrawAddressEvent;
-import org.unigrid.janus.view.backing.OsxUtils;
-import javafx.scene.control.TableCell;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import org.unigrid.janus.model.gridnode.UnbondingEntry;
-import org.unigrid.janus.model.rest.entity.UnbondingDelegationsRequest;
-import org.unigrid.janus.model.service.GridnodeKeyManager;
-import org.unigrid.janus.model.signal.GridnodeEvents;
-import org.unigrid.janus.model.signal.GridnodeKeyUpdateModel;
-import org.unigrid.janus.model.signal.PublicKeysEvent;
-import org.unigrid.janus.model.signal.TransactionListEvent;
-import org.unigrid.janus.model.signal.UnbondingListEvent;
 
 @ApplicationScoped
 public class CosmosController implements Initializable {
@@ -170,8 +165,6 @@ public class CosmosController implements Initializable {
 	@Inject
 	private AccountsData accountsData;
 	@Inject
-	private CosmosService cosmosClient;
-	@Inject
 	private MnemonicModel mnemonicModel;
 	@Inject
 	private CosmosTxList cosmosTxList;
@@ -180,12 +173,6 @@ public class CosmosController implements Initializable {
 	@Inject
 	private Event<DisplaySwapPrompt> displaySwapEvent;
 	@Inject
-	private Hedgehog hedgehog;
-	@Inject
-	private CollateralRequired collateral;
-	@Inject
-	private GridnodeDelegationService gridnodeDelegationService;
-	@Inject
 	private MnemonicService mnemonicService;
 	@Inject
 	private GrpcService grpcService;
@@ -193,8 +180,6 @@ public class CosmosController implements Initializable {
 	private Event<OverlayRequest> overlayRequest;
 	@Inject
 	private Event<UnlockRequest> unlockRequestEvent;
-	@Inject
-	private Event<CosmosWalletRequest> cosmosWalletEvent;
 	@Inject
 	private PublicKeysModel publicKeysModel;
 	@Inject
@@ -216,13 +201,14 @@ public class CosmosController implements Initializable {
 	@Inject
 	private GridnodeHandler gridnodeHandler;
 
-	private Account currentSelectedAccount;
 	@FXML
 	private Label addressLabel;
 	@FXML
 	private Label balanceLabel;
 	@FXML
 	private Label balanceLabel2;
+	@FXML
+	private Label spendableBalanceLabel;
 	@FXML
 	private Label stakingAmountLabel;
 	@FXML
@@ -356,14 +342,6 @@ public class CosmosController implements Initializable {
 	@FXML
 	private Label stakeRewardsLbl;
 
-	private ObservableList<String> keysList = FXCollections.observableArrayList();
-
-	private ObservableList<String> transactionsObReceived = FXCollections
-			.observableArrayList();
-	private ObservableList<String> transactionsObSent = FXCollections
-			.observableArrayList();
-	private ObservableList<GridnodeData> gridnodeData = FXCollections
-			.observableArrayList();
 	@FXML
 	private ListView<DelegationsRequest.DelegationResponse> delegationsListView;
 	@FXML
@@ -380,9 +358,9 @@ public class CosmosController implements Initializable {
 	private Map<String, StackPane> paneMap = new HashMap<>();
 	// List to store the actual mnemonic words
 	private AddressCosmosService addressService = new AddressCosmosService();
-	private AddressCosmos addressCosmos = new AddressCosmos();
+
 	private BigDecimal scaleFactor = new BigDecimal("100000000");
-	private OsxUtils osxUtils = new OsxUtils();
+
 	@Inject
 	private HostServices hostServices;
 
@@ -395,7 +373,6 @@ public class CosmosController implements Initializable {
 		paneMap.put("importPane", importPane);
 		paneMap.put("cosmosWizardPane", cosmosWizardPane);
 		paneMap.put("cosmosMainPane", cosmosMainPane);
-		paneMap.put("cosmosWizardPane", cosmosWizardPane);
 		paneMap.put("generatePane", generatePane);
 		paneMap.put("passwordPane", passwordPane);
 		paneMap.put("confirmMnemonic", confirmMnemonic);
@@ -440,26 +417,26 @@ public class CosmosController implements Initializable {
 			// check whether the word changed in order to reset the value
 			transactionListView.setCellFactory(
 					param -> new ListCell<TransactionResponse.TxResponse>() {
-				@Override
-				protected void updateItem(
-						TransactionResponse.TxResponse txResponse,
-						boolean empty) {
-					System.out.println(
-							"Cell factory called for item: " + txResponse);
-					System.out.println("Number of transactions: "
-							+ cosmosTxList.getTxResponsesList().size());
+						@Override
+						protected void updateItem(
+								TransactionResponse.TxResponse txResponse,
+								boolean empty) {
+							System.out.println(
+									"Cell factory called for item: " + txResponse);
+							System.out.println("Number of transactions: "
+									+ cosmosTxList.getTxResponsesList().size());
 
-					super.updateItem(txResponse, empty);
-					if (empty || txResponse == null) {
-						setText(null);
-					} else {
-						setText(txResponse.getTxhash() + " - "
-								+ txResponse.getTimestamp());
-						System.out.println("txResponse getHeight(): "
-								+ txResponse.getHeight());
-					}
-				}
-			});
+							super.updateItem(txResponse, empty);
+							if (empty || txResponse == null) {
+								setText(null);
+							} else {
+								setText(txResponse.getTxhash() + " - "
+										+ txResponse.getTimestamp());
+								System.out.println("txResponse getHeight(): "
+										+ txResponse.getHeight());
+							}
+						}
+					});
 
 			delegationsListView.getItems().clear();
 
@@ -562,30 +539,30 @@ public class CosmosController implements Initializable {
 					cellData -> cellData.getValue().statusProperty());
 			colStartGridnode
 					.setCellFactory(tc -> new TableCell<GridnodeListViewItem, String>() {
-				private final Button startButton = new Button("START");
+						private final Button startButton = new Button("START");
 
-				@Override
-				protected void updateItem(String item, boolean empty) {
-					super.updateItem(item, empty);
-					if (empty) {
-						setGraphic(null);
-					} else {
-						GridnodeListViewItem gridnode = getTableView().getItems()
-								.get(getIndex());
-						startButton.setOnAction(event -> {
-							try {
-								gridnodeModel
-										.setCurrentGridnodeId(gridnode.getKey());
-								startGridnodePasswordRequest();
-							} catch (Exception e) {
-								e.printStackTrace();
+						@Override
+						protected void updateItem(String item, boolean empty) {
+							super.updateItem(item, empty);
+							if (empty) {
+								setGraphic(null);
+							} else {
+								GridnodeListViewItem gridnode = getTableView().getItems()
+										.get(getIndex());
+								startButton.setOnAction(event -> {
+									try {
+										gridnodeModel
+												.setCurrentGridnodeId(gridnode.getKey());
+										startGridnodePasswordRequest();
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								});
+								setGraphic(gridnode.isShowStartButton() ? startButton
+										: null);
 							}
-						});
-						setGraphic(gridnode.isShowStartButton() ? startButton
-								: null);
-					}
-				}
-			});
+						}
+					});
 
 			// collAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
 			// colCompletionTime.setCellValueFactory(new
@@ -858,29 +835,6 @@ public class CosmosController implements Initializable {
 		}
 	}
 
-	private void revealContent(TextField tf) {
-		tf.setPromptText(tf.getText());
-		tf.setText("");
-	}
-
-	private void hideContent(TextField tf) {
-		tf.setText(tf.getPromptText());
-		tf.setPromptText("");
-	}
-
-	private int getNextIndex() throws IOException {
-		File file = DataDirectory.getCosmosAddresses();
-		if (!file.exists() || file.length() == 0) {
-			return 0;
-		}
-
-		ObjectMapper objectMapper = new ObjectMapper();
-		List<AddressCosmos> addresses = objectMapper.readValue(file,
-				new TypeReference<List<AddressCosmos>>() {
-		});
-		return addresses.size();
-	}
-
 	@FXML
 	private void onCancelAccountGeneration(ActionEvent event) {
 		try {
@@ -990,7 +944,18 @@ public class CosmosController implements Initializable {
 	public void onRewardsEvent(@Observes RewardsEvent event) {
 		Platform.runLater(() -> {
 			stakingRewardsValue(event.getRewardsResponse().getTotal());
+		});
+	}
 
+	public void onSpendableBalancesEvent(@Observes SpendableBalancesEvent event) {
+		BigDecimal spendableAmount = event.getSpendableBalancesResponse().getBalances().stream()
+				.filter(balance -> "uugd".equalsIgnoreCase(balance.getDenom()))
+				.map(balance -> new BigDecimal(balance.getAmount()))
+				.reduce(BigDecimal.ZERO, BigDecimal::add)
+				.divide(scaleFactor, 8, RoundingMode.HALF_UP);
+
+		Platform.runLater(() -> {
+			animateLabelToNewValue(spendableBalanceLabel, spendableAmount.doubleValue());
 		});
 	}
 
@@ -1578,8 +1543,6 @@ public class CosmosController implements Initializable {
 
 	public void onGridnodeKeyUpdate(@Observes GridnodeKeyUpdateModel model) {
 		Platform.runLater(() -> {
-			String userMessage = model.getMessage();
-
 			lblUpdateKeys.setText(model.getMessage());
 		});
 	}
@@ -1641,8 +1604,8 @@ public class CosmosController implements Initializable {
 	}
 
 	public void animateLabelToNewValue(Label label, double newValue) {
-		final double[] oldValue = new double[]{
-			Double.parseDouble(label.getText().replaceAll("[^0-9.]", ""))};
+		final double[] oldValue = new double[] {
+				Double.parseDouble(label.getText().replaceAll("[^0-9.]", "")) };
 		final Timeline[] timeline = new Timeline[1];
 
 		KeyFrame keyFrame = new KeyFrame(Duration.millis(10), e -> {

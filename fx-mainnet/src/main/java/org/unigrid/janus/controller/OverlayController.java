@@ -16,44 +16,43 @@
 
 package org.unigrid.janus.controller;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Event;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.ResourceBundle;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Text;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.application.Platform;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+
 import javax.crypto.AEADBadTagException;
+
 import org.unigrid.janus.model.AccountsData;
 import org.unigrid.janus.model.CryptoUtils;
-import org.unigrid.janus.model.service.DebugService;
-import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.Wallet;
 import org.unigrid.janus.model.rpc.entity.UnlockWallet;
+import org.unigrid.janus.model.service.DebugService;
+import org.unigrid.janus.model.service.RPCService;
 import org.unigrid.janus.model.signal.CosmosWalletRequest;
 import org.unigrid.janus.model.signal.MergeInputsRequest;
 import org.unigrid.janus.model.signal.NodeRequest;
 import org.unigrid.janus.model.signal.OverlayRequest;
 import org.unigrid.janus.model.signal.State;
-import org.unigrid.janus.model.signal.WalletRequest;
 import org.unigrid.janus.model.signal.UnlockRequest;
-import static org.unigrid.janus.model.signal.UnlockRequest.Type.COSMOS_DELEGATE_GRIDNODE;
-import static org.unigrid.janus.model.signal.UnlockRequest.Type.COSMOS_DELEGATE_STAKING;
-import static org.unigrid.janus.model.signal.UnlockRequest.Type.COSMOS_SEND_TOKENS;
-import static org.unigrid.janus.model.signal.UnlockRequest.Type.COSMOS_UNDELEGATE_GRIDNODE;
+import org.unigrid.janus.model.signal.WalletRequest;
 import org.unigrid.janus.view.FxUtils;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 
 @ApplicationScoped
 public class OverlayController implements Initializable {

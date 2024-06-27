@@ -1,18 +1,20 @@
-package org.unigrid.bootstrap;
+/*
+	The Janus Wallet
+	Copyright © 2021-2024 The Unigrid Foundation, UGD Software AB
 
-import javafx.application.Application;
-import javafx.application.HostServices;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import io.sentry.Sentry;
-import org.update4j.Configuration;
-import org.update4j.OS;
-import org.update4j.service.Delegate;
+	This program is free software: you can redistribute it and/or modify it under the terms of the
+	addended GNU Affero General Public License as published by the Free Software Foundation, version 3
+	of the License (see COPYING and COPYING.addendum).
+
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received an addended copy of the GNU Affero General Public License with this program.
+	If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
+ */
+
+package org.unigrid.bootstrap;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -20,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -36,16 +37,29 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.update4j.Configuration;
+import org.update4j.OS;
+import org.update4j.service.Delegate;
+
+import io.sentry.Sentry;
+import javafx.application.Application;
+import javafx.application.HostServices;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
 public class App extends Application implements Delegate {
 
     private static Scene scene;
-    private static FXMLLoader loader;
     private static Map<String, String> inputArgs = new HashMap<>();
     private HostServices hostServices = getHostServices();
     private Stage classStage;
     final static AtomicBoolean keyPressed = new AtomicBoolean();
     public static state startupState;
-    private static String selectedChain;
 
     public enum state {
         NORMAL, DEBUG, WAIT;
@@ -90,7 +104,6 @@ public class App extends Application implements Delegate {
     }
 
     public void loadUpdateView(String chain) throws IOException, InterruptedException, ExecutionException {
-        selectedChain = chain;
         Stage stage = new Stage();
         scene = new Scene(loadFXML("updateView"));
         stage.initStyle(StageStyle.UNDECORATED);
@@ -102,13 +115,13 @@ public class App extends Application implements Delegate {
 
         preStart();
         // Set the key event handler on the scene
-		scene.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.F5 || event.getCode() == KeyCode.F12) {
-				System.out.println("F5 or F12 pressed - Opening Debug View");
-				startupState = state.DEBUG;
-				Platform.runLater(() -> openDebugView());
-			}
-		});
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F5 || event.getCode() == KeyCode.F12) {
+                System.out.println("F5 or F12 pressed - Opening Debug View");
+                startupState = state.DEBUG;
+                Platform.runLater(() -> openDebugView());
+            }
+        });
         postStart(chain);
     }
 
@@ -153,8 +166,7 @@ public class App extends Application implements Delegate {
         }
 
         if (inputArgs.get("test") == null) {
-            String server = "";
-			String fxVersionString = "fx." + chain + ".version";
+            String fxVersionString = "fx." + chain + ".version";
             final String version = config.getProperties(fxVersionString).get(0).getValue();
             Sentry.init(options -> {
                 options.setDsn("https://18a30d2bf41643ce9efe84a451ecef1a@o266736.ingest.sentry.io/6632466");
@@ -173,53 +185,52 @@ public class App extends Application implements Delegate {
 
     static String localPath() {
         final String s = System.getProperty("user.home").concat(
-            switch (OS.CURRENT) {
-                case LINUX -> "/.unigrid/dependencies";
-                case WINDOWS -> "/AppData/Roaming/UNIGRID/dependencies";
-                case MAC -> "/Library/Application Support/UNIGRID/dependencies";
-                default -> "/UNIGRID/dependencies";
-            }
-        );
+                switch (OS.CURRENT) {
+                    case LINUX -> "/.unigrid/dependencies";
+                    case WINDOWS -> "/AppData/Roaming/UNIGRID/dependencies";
+                    case MAC -> "/Library/Application Support/UNIGRID/dependencies";
+                    default -> "/UNIGRID/dependencies";
+                });
         return s;
     }
 
     static void updateLocalConfigFile(String in) {
-		try {
-			File targetFile = new File(localPath() + "/config.xml");
-			File parentDir = targetFile.getParentFile();
-			if (!parentDir.exists()) {
-				parentDir.mkdirs(); // This will create the parent directory if it doesn't exist
-			}
-			if (targetFile.createNewFile()) { // createNewFile() returns true if the file didn't exist and was successfully created
-				System.out.println("Config file created");
-			} else {
-				System.out.println("Config file already exists or couldn't be created");
-			}
-	
-			try (Writer targetFileWriter = new FileWriter(targetFile)) {
-				targetFileWriter.write(in);
-			} catch (IOException e) {
-				System.err.println("Error writing to config file: " + e.getMessage());
-			}
-		} catch (IOException ex) {
-			Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-		}
-	}
+        try {
+            File targetFile = new File(localPath() + "/config.xml");
+            File parentDir = targetFile.getParentFile();
+            if (!parentDir.exists()) {
+                parentDir.mkdirs(); // This will create the parent directory if it doesn't exist
+            }
+            if (targetFile.createNewFile()) { // createNewFile() returns true if the file didn't exist and was
+                                              // successfully created
+                System.out.println("Config file created");
+            } else {
+                System.out.println("Config file already exists or couldn't be created");
+            }
+
+            try (Writer targetFileWriter = new FileWriter(targetFile)) {
+                targetFileWriter.write(in);
+            } catch (IOException e) {
+                System.err.println("Error writing to config file: " + e.getMessage());
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
     }
 
     private static Parent loadFXML(String fxml) throws IOException {
-		try {
-			FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-			loader = fxmlLoader;
-			return fxmlLoader.load();
-		} catch (IOException e) {
-			e.printStackTrace(); // print the full stack trace
-			throw e;
-		}
-	}
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+            return fxmlLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace(); // print the full stack trace
+            throw e;
+        }
+    }
 
     public static void main(String[] args) {
         if (args != null) {
@@ -235,7 +246,7 @@ public class App extends Application implements Delegate {
         launch();
     }
 
-	@Override
+    @Override
     public void main(List<String> list) throws Throwable {
         launch();
     }
@@ -243,7 +254,6 @@ public class App extends Application implements Delegate {
     private String cryptCompName() {
         String s = "";
         try {
-            InetAddress localHost = InetAddress.getLocalHost();
             Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
             while (nis.hasMoreElements()) {
                 NetworkInterface ni = nis.nextElement();
@@ -274,20 +284,20 @@ public class App extends Application implements Delegate {
     }
 
     private void openDebugView() {
-		try {
-			Stage debugStage = new Stage();
-			Scene debugView;
-			debugStage.centerOnScreen();
-			debugStage.setResizable(false);
-			debugStage.initStyle(StageStyle.UNDECORATED);
+        try {
+            Stage debugStage = new Stage();
+            Scene debugView;
+            debugStage.centerOnScreen();
+            debugStage.setResizable(false);
+            debugStage.initStyle(StageStyle.UNDECORATED);
 
-			debugView = new Scene(loadFXML("debugView"));
-			
-			debugStage.setScene(debugView);
+            debugView = new Scene(loadFXML("debugView"));
 
-			debugStage.show(); // Show the debug stage and wait
-		} catch (IOException e) {
-			System.err.println("Error loading debug view: " + e.getMessage());
-		}
-	}
+            debugStage.setScene(debugView);
+
+            debugStage.show(); // Show the debug stage and wait
+        } catch (IOException e) {
+            System.err.println("Error loading debug view: " + e.getMessage());
+        }
+    }
 }
