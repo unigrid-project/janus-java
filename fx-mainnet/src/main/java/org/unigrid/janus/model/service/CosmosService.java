@@ -71,8 +71,8 @@ import org.unigrid.janus.model.signal.WithdrawAddressEvent;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Any;
-import com.google.rpc.context.AttributeContext.Auth;
 
+import cosmos.auth.v1beta1.Auth;
 import cosmos.auth.v1beta1.QueryOuterClass;
 import cosmos.bank.v1beta1.QueryGrpc;
 import cosmos.tx.v1beta1.ServiceGrpc;
