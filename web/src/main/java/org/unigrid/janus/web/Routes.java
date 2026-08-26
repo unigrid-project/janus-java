@@ -29,11 +29,13 @@ public final class Routes {
 	private Routes() {
 	}
 
-	public static Handler create(final Templates templates) {
-		return create(templates, WindowControl.NONE);
+	public static Handler create(final Templates templates, final SessionToken token) {
+		return create(templates, token, WindowControl.NONE);
 	}
 
-	public static Handler create(final Templates templates, final WindowControl window) {
+	public static Handler create(final Templates templates, final SessionToken token,
+		final WindowControl window) {
+
 		final ResourceHandler assets = new ResourceHandler();
 
 		assets.setBaseResource(ResourceFactory.of(assets).newClassLoaderResource(ASSETS));
@@ -41,10 +43,10 @@ public final class Routes {
 
 		/* Anything the asset handler does not recognise falls through to the pages,
 		   so an unknown path renders the interface rather than a Jetty error page. */
-		return new Handler.Sequence(
+		return new Guard(new Handler.Sequence(
 			new ContextHandler(assets, ASSET_PATH),
 			new ContextHandler(new WindowHandler(window), WINDOW_PATH),
 			new UiHandler(templates)
-		);
+		), token);
 	}
 }

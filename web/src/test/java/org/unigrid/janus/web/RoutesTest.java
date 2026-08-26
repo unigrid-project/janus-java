@@ -16,49 +16,28 @@
 
 package org.unigrid.janus.web;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import net.jqwik.api.Example;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RoutesTest {
-	private HttpResponse<String> get(final URI uri, final String path) throws Exception {
-		return HttpClient.newHttpClient().send(HttpRequest.newBuilder(uri.resolve(path)).build(),
-			HttpResponse.BodyHandlers.ofString()
-		);
-	}
-
+public class RoutesTest extends ServedTest {
 	@Example
 	public void shouldServeTheStylesheetAsCss() throws Exception {
-		final UiServer server = new UiServer(Routes.create(new Templates(false)));
-		final URI uri = server.start();
+		final HttpResponse<String> response = admitted().get("/static/css/janus.css");
 
-		try {
-			final HttpResponse<String> response = get(uri, "/static/css/janus.css");
-
-			assertEquals(200, response.statusCode());
-			assertTrue(response.headers().firstValue("content-type").orElse("").startsWith("text/css"),
-				response.headers().toString()
-			);
-			assertTrue(response.body().contains("--accent"), response.body());
-		} finally {
-			server.stop();
-		}
+		assertEquals(200, response.statusCode());
+		assertTrue(response.headers().firstValue("content-type").orElse("").startsWith("text/css"),
+			response.headers().toString()
+		);
+		assertTrue(response.body().contains("--accent"), response.body());
 	}
 
 	@Example
 	public void shouldFallThroughToThePageForUnknownPaths() throws Exception {
-		final UiServer server = new UiServer(Routes.create(new Templates(false)));
-		final URI uri = server.start();
+		final Client client = admitted();
 
-		try {
-			assertTrue(get(uri, "/").body().contains("<h1>Janus</h1>"));
-			assertTrue(get(uri, "/wallet").body().contains("<h1>Janus</h1>"));
-		} finally {
-			server.stop();
-		}
+		assertTrue(client.get("/").body().contains("<h1>Janus</h1>"));
+		assertTrue(client.get("/wallet").body().contains("<h1>Janus</h1>"));
 	}
 }

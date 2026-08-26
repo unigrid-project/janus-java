@@ -16,46 +16,23 @@
 
 package org.unigrid.janus.web;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import net.jqwik.api.Example;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UiServerTest {
-	private HttpResponse<String> get(final URI uri) throws Exception {
-		return HttpClient.newHttpClient().send(HttpRequest.newBuilder(uri).build(),
-			HttpResponse.BodyHandlers.ofString()
-		);
-	}
-
+public class UiServerTest extends ServedTest {
 	@Example
 	public void shouldServeTheRenderedPage() throws Exception {
-		final UiServer server = new UiServer(new UiHandler(new Templates(false)));
-		final URI uri = server.start();
+		final HttpResponse<String> response = admitted().get("/");
 
-		try {
-			final HttpResponse<String> response = get(uri);
-
-			assertEquals(200, response.statusCode());
-			assertTrue(response.body().contains("<h1>Janus</h1>"), response.body());
-		} finally {
-			server.stop();
-		}
+		assertEquals(200, response.statusCode());
+		assertTrue(response.body().contains("<h1>Janus</h1>"), response.body());
 	}
 
 	@Example
-	public void shouldBindToLoopbackOnly() throws Exception {
-		final UiServer server = new UiServer(new UiHandler(new Templates(false)));
-		final URI uri = server.start();
-
-		try {
-			assertEquals("127.0.0.1", uri.getHost());
-			assertTrue(uri.getPort() > 0, "an ephemeral port should have been assigned");
-		} finally {
-			server.stop();
-		}
+	public void shouldBindToLoopbackOnly() {
+		assertEquals("127.0.0.1", base().getHost());
+		assertTrue(base().getPort() > 0, "an ephemeral port should have been assigned");
 	}
 }

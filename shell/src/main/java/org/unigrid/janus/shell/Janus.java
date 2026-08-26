@@ -20,6 +20,7 @@ import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unigrid.janus.web.Routes;
+import org.unigrid.janus.web.SessionToken;
 import org.unigrid.janus.web.Templates;
 import org.unigrid.janus.web.UiServer;
 
@@ -31,10 +32,14 @@ public final class Janus {
 
 	public static void main(final String[] args) throws Exception {
 		final BrowserWindow window = new BrowserWindow();
-		final UiServer server = new UiServer(Routes.create(new Templates(false), window.control()));
+		final SessionToken token = SessionToken.random();
+		final UiServer server = new UiServer(Routes.create(new Templates(false), token, window.control()));
 		final URI uri = server.start();
 
 		LOG.info("Janus is serving its interface at {}", uri);
-		window.open(uri);
+
+		/* The token rides on the first navigation only; the server swaps it for a cookie and
+		   redirects, so it does not linger in the address. */
+		window.open(uri.resolve("/?" + SessionToken.PARAMETER + "=" + token.value()));
 	}
 }

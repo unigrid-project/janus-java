@@ -16,16 +16,13 @@
 
 package org.unigrid.janus.web;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import net.jqwik.api.Example;
+import org.eclipse.jetty.server.Handler;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WindowHandlerTest {
+public class WindowHandlerTest extends ServedTest {
 	private final List<String> invoked = new ArrayList<>();
 
 	private final WindowControl recorder = new WindowControl() {
@@ -55,40 +52,32 @@ public class WindowHandlerTest {
 		}
 	};
 
-	private int post(final URI uri, final String path) throws Exception {
-		return HttpClient.newHttpClient().send(
-			HttpRequest.newBuilder(uri.resolve(path)).POST(HttpRequest.BodyPublishers.noBody()).build(),
-			HttpResponse.BodyHandlers.discarding()
-		).statusCode();
+	@Override
+	protected Handler routes() {
+		return Routes.create(templates(), token(), recorder);
 	}
 
 	@Example
 	public void shouldForwardEachCommandToTheHost() throws Exception {
-		final UiServer server = new UiServer(Routes.create(new Templates(false), recorder));
-		final URI uri = server.start();
+		final Client client = admitted();
 
-		try {
-			assertEquals(204, post(uri, "/window/minimise"));
-			assertEquals(204, post(uri, "/window/maximise"));
-			assertEquals(204, post(uri, "/window/close"));
-			assertEquals(204, post(uri, "/window/move/start"));
-			assertEquals(204, post(uri, "/window/move/end"));
-			assertEquals(List.of("minimise", "maximise", "close", "move/start", "move/end"), invoked);
-		} finally {
-			server.stop();
-		}
+		assertEquals(204, client.post("/window/minimise").statusCode());
+		assertEquals(204, client.post("/window/maximise").statusCode());
+		assertEquals(204, client.post("/window/close").statusCode());
+		assertEquals(204, client.post("/window/move/start").statusCode());
+		assertEquals(204, client.post("/window/move/end").statusCode());
+		assertEquals(List.of("minimise", "maximise", "close", "move/start", "move/end"), invoked);
 	}
 
 	@Example
 	public void shouldNotInventCommandsItDoesNotHave() throws Exception {
-		final UiServer server = new UiServer(Routes.create(new Templates(false), recorder));
-		final URI uri = server.start();
+		admitted().post("/window/selfdestruct");
+		assertEquals(List.of(), invoked);
+	}
 
-		try {
-			post(uri, "/window/selfdestruct");
-			assertEquals(List.of(), invoked);
-		} finally {
-			server.stop();
-		}
+	@Example
+	public void shouldNotActForAnUnknownCaller() throws Exception {
+		assertEquals(403, anonymous().post("/window/close").statusCode());
+		assertEquals(List.of(), invoked);
 	}
 }
