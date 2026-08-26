@@ -46,4 +46,8 @@ public class UiServer {
 	public void stop() throws Exception {
 		server.stop();
 	}
+
+	public void join() throws InterruptedException {
+		server.join();
+	}
 }
