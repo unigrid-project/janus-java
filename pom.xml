@@ -7,7 +7,7 @@
 	<packaging>pom</packaging>
 	<name>Unigrid Janus Parent</name>
 	<organization>
-		<name>The Unigrid Foundation</name>
+		<name>Stiftelsen The Unigrid Foundation</name>
 		<url>https://www.unigrid.org</url>
 	</organization>
 	<modules>

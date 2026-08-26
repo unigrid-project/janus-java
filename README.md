@@ -1,5 +1,5 @@
-The Janus Wallet © The Unigrid Foundation
-=========================================
+The Janus Wallet © Stiftelsen The Unigrid Foundation
+=====================================================
 <img align="right" width="300px" height="auto" src="documentation/janus-logo.png" alt="Janus">
 
 [![Janus build status](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml/badge.svg)](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml)
