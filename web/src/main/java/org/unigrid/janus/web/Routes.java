@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021-2022 Stiftelsen The Unigrid Foundation
+    Copyright © 2021-2026 Stiftelsen The Unigrid Foundation
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -24,11 +24,16 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
 public final class Routes {
 	private static final String ASSETS = "static/";
 	private static final String ASSET_PATH = "/static";
+	private static final String WINDOW_PATH = "/window";
 
 	private Routes() {
 	}
 
 	public static Handler create(final Templates templates) {
+		return create(templates, WindowControl.NONE);
+	}
+
+	public static Handler create(final Templates templates, final WindowControl window) {
 		final ResourceHandler assets = new ResourceHandler();
 
 		assets.setBaseResource(ResourceFactory.of(assets).newClassLoaderResource(ASSETS));
@@ -36,6 +41,10 @@ public final class Routes {
 
 		/* Anything the asset handler does not recognise falls through to the pages,
 		   so an unknown path renders the interface rather than a Jetty error page. */
-		return new Handler.Sequence(new ContextHandler(assets, ASSET_PATH), new UiHandler(templates));
+		return new Handler.Sequence(
+			new ContextHandler(assets, ASSET_PATH),
+			new ContextHandler(new WindowHandler(window), WINDOW_PATH),
+			new UiHandler(templates)
+		);
 	}
 }
