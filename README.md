@@ -21,6 +21,10 @@ The patch will be accepted if there is broad consensus. Developers should expect
 
 The `master` branch is regularly built and tested, but is not guaranteed to be completely stable. [Tags](https://github.com/unigrid-project/janus-java/tags) are created regularly to indicate new official, stable release versions.
 
+Design documents
+----------------
+* [Frontend migration](documentation/frontend-migration.md) — proposal to replace the JavaFX user interface with server-rendered HTML and CSS in an embedded browser.
+
 Building
 --------
 To build a working package, you first need to create an app-image that can hold the native binaries of the Unigrid daemon;
