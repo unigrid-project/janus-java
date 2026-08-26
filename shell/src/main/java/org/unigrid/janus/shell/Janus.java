@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021-2022 Stiftelsen The Unigrid Foundation
+    Copyright © 2021-2026 Stiftelsen The Unigrid Foundation
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -30,10 +30,11 @@ public final class Janus {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		final UiServer server = new UiServer(Routes.create(new Templates(false)));
+		final BrowserWindow window = new BrowserWindow();
+		final UiServer server = new UiServer(Routes.create(new Templates(false), window.control()));
 		final URI uri = server.start();
 
 		LOG.info("Janus is serving its interface at {}", uri);
-		new BrowserWindow(uri).show();
+		window.open(uri);
 	}
 }

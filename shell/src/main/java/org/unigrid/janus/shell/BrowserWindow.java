@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021-2022 Stiftelsen The Unigrid Foundation
+    Copyright © 2021-2026 Stiftelsen The Unigrid Foundation
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -29,7 +29,7 @@ import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
 import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
 import org.cef.CefApp;
 import org.cef.CefClient;
-import org.cef.browser.CefBrowser;
+import org.unigrid.janus.web.WindowControl;
 
 public class BrowserWindow {
 	private static final File INSTALL_DIR = new File(System.getProperty("user.home"), ".janus/jcef");
@@ -37,10 +37,28 @@ public class BrowserWindow {
 	private static final String TITLE = "Unigrid";
 
 	private final JFrame frame = new JFrame(TITLE);
-	private final CefApp app;
-	private final CefClient client;
+	private final FrameControl control = new FrameControl(frame);
 
-	public BrowserWindow(final URI uri) throws Exception {
+	public BrowserWindow() {
+		/* The title bar and its buttons are drawn by the page, so the frame contributes
+		   nothing but a rectangle. Decoration has to be settled before the frame is
+		   realised, which is why it happens here rather than alongside the sizing. */
+		frame.setUndecorated(true);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(final WindowEvent event) {
+				CefApp.getInstance().dispose();
+				frame.dispose();
+			}
+		});
+	}
+
+	public WindowControl control() {
+		return control;
+	}
+
+	public void open(final URI uri) throws Exception {
 		final CefAppBuilder builder = new CefAppBuilder();
 
 		builder.setInstallDir(INSTALL_DIR);
@@ -58,26 +76,20 @@ public class BrowserWindow {
 			}
 		});
 
-		app = builder.build();
-		client = app.createClient();
-		build(client.createBrowser(uri.toString(), false, false));
-	}
+		final CefClient client = builder.build().createClient();
 
-	private void build(final CefBrowser browser) {
-		frame.getContentPane().add(browser.getUIComponent(), BorderLayout.CENTER);
-		frame.setSize(SIZE);
-		frame.setLocationRelativeTo(null);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(final WindowEvent event) {
-				CefApp.getInstance().dispose();
-				frame.dispose();
-			}
+		/* The browser has to be in the content pane before the frame is shown. Attaching it
+		   afterwards leaves Chromium to open a top level window of its own, and the frame
+		   stays empty. */
+		frame.getContentPane().add(
+			client.createBrowser(uri.toString(), false, false).getUIComponent(),
+			BorderLayout.CENTER
+		);
+
+		SwingUtilities.invokeLater(() -> {
+			frame.setSize(SIZE);
+			frame.setLocationRelativeTo(null);
+			frame.setVisible(true);
 		});
-	}
-
-	public void show() {
-		SwingUtilities.invokeLater(() -> frame.setVisible(true));
 	}
 }
