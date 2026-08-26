@@ -8,25 +8,24 @@
 	<name>Unigrid Janus Desktop Application</name>
         <version>1.0.12</version>
 
+	<!-- Held outside the parent reactor until the shell module provides an
+	     entry point. The jlink and jpackage configuration below is retained
+	     and repointed, but cannot run until then. -->
+
 	<parent>
 		<groupId>org.unigrid.janus</groupId>
 		<artifactId>parent</artifactId>
 		<version>1.0.12</version>
 	</parent>
 	<properties>
-		<mainClass>org.unigrid.janus.Janus</mainClass>
+		<mainClass>org.unigrid.janus.shell.Janus</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jpackage.version>1.0.12</jpackage.version>
 	</properties>
 	<dependencies>
-		<!--<dependency>
-		    <groupId>org.unigrid.janus</groupId>
-		    <artifactId>fx</artifactId>
-		    <version>${project.version}</version>
-		</dependency>-->
 		<dependency>
-			<groupId>org.unigrid</groupId>
-			<artifactId>bootstrap</artifactId>
+			<groupId>org.unigrid.janus</groupId>
+			<artifactId>shell</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -43,8 +42,8 @@
 			    <extensions>true</extensions>
 			    <configuration>
 				<verbosity>debug</verbosity>
-				<mainClass>org.unigrid.janus.Janus</mainClass>
-				<mainModule>fx</mainModule>
+				<mainClass>org.unigrid.janus.shell.Janus</mainClass>
+				<mainModule>org.unigrid.janus.shell</mainModule>
 				<templateDir>src/main/templates</templateDir>
 				<stripDebug>false</stripDebug>
 				<excludeModules>jdk.jfr</excludeModules>
@@ -60,8 +59,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<verbosity>debug</verbosity>
-					<mainClass>org.unigrid.bootstrap.App</mainClass>
-					<mainModule>org.unigrid.bootstrap</mainModule>
+					<mainClass>org.unigrid.janus.shell.Janus</mainClass>
+					<mainModule>org.unigrid.janus.shell</mainModule>
 					<addModules>jdk.crypto.ec</addModules>
 					<addModules>java.compiler</addModules>
 					<templateDir>src/main/templates</templateDir>
@@ -103,7 +102,7 @@
 						<configuration>
 							<appVersion>${jpackage.version}</appVersion>
 							<vendor>org.unigrid</vendor>
-							<module>org.unigrid.bootstrap/org.unigrid.bootstrap.App</module>
+							<module>org.unigrid.janus.shell/org.unigrid.janus.shell.Janus</module>
                                                         <modulePaths>
                                                             <modulePath>target/mp</modulePath>
                                                         </modulePaths>
@@ -161,7 +160,7 @@
 							<execution>
 								<id>appimage</id>
 								<configuration>
-									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-256-256.ico</icon>
+									<icon>${project.basedir}/src/main/packaging/icons/unigrid-256-256.ico</icon>
 								</configuration>
 							</execution>
 							<execution>
@@ -194,7 +193,7 @@
 							<execution>
 								<id>appimage</id>
 								<configuration>
-									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.icns</icon>
+									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.icns</icon>
 									<macPackageIdentifier>org.unigrid.janus</macPackageIdentifier>
 									<macPackageName>"Unigrid"</macPackageName>
 									<macPackageSigningPrefix>"UnigridJanus"</macPackageSigningPrefix>
@@ -242,7 +241,7 @@
 									<linuxPackageName>unigrid</linuxPackageName>
 									<linuxAppCategory>Utilities</linuxAppCategory>
 									<linuxMenuGroup>Utilities</linuxMenuGroup>
-									<icon>${project.basedir}/../fx/src/main/resources/org/unigrid/janus/view/images/unigrid-1024x1024.png</icon>
+									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.png</icon>
 								</configuration>
 							</execution>
 						</executions>

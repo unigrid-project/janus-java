@@ -37,10 +37,13 @@ property types that leaked into the model.
   the frontend.** No React, Vue, Svelte, or equivalent. The only client-side
   JavaScript is htmx and its SSE extension, two vendored files totalling around
   16KB, used entirely through HTML attributes.
-- No change to the distribution model. Native installers via jlink and
-  jpackage, and update4j auto-updates, are retained.
-- No change to the JSON-RPC protocol or to how the wallet talks to `unigridd`.
-- No redesign of the visual identity. This migration reproduces the existing
+- No change to the JSON-RPC protocol itself, or to how the wallet talks to
+  `unigridd`. The client that speaks it is being rewritten; the wire format is
+  not.
+- No change to the shape of the distribution. Native installers via jlink and
+  jpackage remain the delivery mechanism, though the packaging and auto-update
+  machinery is rebuilt rather than carried over.
+- No redesign of the visual identity. This work reproduces the existing
   screens; restyling is separate follow-up work made possible by it.
 
 ## 4. Decision
@@ -113,23 +116,23 @@ security cost of a listening socket is bounded and addressed in section 8.
 
 ### 5.1 New module layout
 
-A new Maven module, `web`, sits between `fx` and the rest. The existing `fx`
-module is retired once migration completes.
+The JavaFX modules `fx`, `bootstrap` and `config` have been removed from
+`master`. They remain available on the `legacy-javafx` branch, which is the
+reference for behaviour this reimplementation must reproduce.
 
 ```
 janus-java/
-  bootstrap/      unchanged
-  config/         unchanged
-  core/           extracted from fx: model, services, rpc, signals  (no UI)
-  web/            new: Jetty, Thymeleaf, handlers, templates, css, htmx
-  shell/          new: JFrame + JCEF host, tray, lifecycle
-  desktop/        jlink/jpackage assembly, updated
-  fx/             removed at end of migration
+  core/           model, services, daemon protocol client, signals  (no UI)
+  web/            Jetty, Thymeleaf, handlers, templates, css, htmx
+  shell/          JFrame + JCEF host, tray, lifecycle
+  desktop/        jlink/jpackage assembly; outside the reactor until
+                  shell provides an entry point
 ```
 
-Splitting `core` out of `fx` is not gold-plating: it is the mechanism that lets
-the old JavaFX UI and the new HTML UI both build against the same logic during
-migration, and it is what makes the model testable without a UI toolkit at all.
+The three-way split is what keeps the model testable without a UI toolkit at
+all, and keeps the rendering concern (`web`) separable from the native window
+concern (`shell`). `core` must not depend on `web` or `shell`; this is enforced
+by an ArchUnit rule rather than by convention.
 
 ### 5.2 Components
 
@@ -202,15 +205,28 @@ explicit module. **jlink cannot link automatic modules.**
 
 ### 7.1 Dependency status
 
+Status below is observed from `mvn dependency:list` against the pinned
+versions, not inferred from documentation.
+
 | Dependency | JPMS status | Action |
 |---|---|---|
-| Jetty 12 (`org.eclipse.jetty.*`) | Real `module-info.class` | None. Links cleanly. |
-| slf4j-api 2.x | Real `module-info.class` | None. Already in use. |
-| Thymeleaf 3 | Automatic module only | **Must be patched.** |
-| attoparser (Thymeleaf dep) | Automatic module only | **Must be patched.** |
-| unbescape (Thymeleaf dep) | Automatic module only | **Must be patched.** |
-| ognl (Thymeleaf expression engine) | Automatic module only | **Must be patched.** |
-| JCEF (jcefmaven) | Undocumented; presumed automatic | **Must be verified first.** |
+| Jetty 12 (`org.eclipse.jetty.server`) | Real named module | None. Links cleanly. |
+| Yasson (`org.eclipse.yasson`) | Real named module | None. |
+| slf4j-api 2.x | Real named module | None. |
+| Thymeleaf 3 | Automatic (`thymeleaf`) | **Must be patched.** |
+| attoparser, unbescape, ognl (Thymeleaf deps) | Automatic | **Must be patched.** |
+| JCEF (`jcefmaven`) | Automatic | **Must be patched.** |
+| Weld SE (`weld.se.core`) | Automatic | Precedent exists — see below. |
+| Jersey client (`jersey.client`) | Automatic | Precedent exists — see below. |
+
+The precedent matters more than it first appears. Weld and Jersey were already
+automatic modules in the JavaFX implementation, and that build nonetheless
+produced working jlink images and installers via
+`tentackle-jlink-maven-plugin`, which synthesises descriptors for non-modular
+jars. So "jlink cannot link automatic modules" has already been worked around
+once in this repository. The open question is narrower than it looked: not
+*whether* automatic modules can be linked here, but whether the same mechanism
+copes with jcefmaven's native-bearing artifact.
 
 ### 7.2 Resolution
 
@@ -307,36 +323,43 @@ discovered consequence.
 
 ## 9. Migration strategy
 
-Staged, with the application shippable at the end of each stage.
+This is a reimplementation, not a migration. There is no parallel build and no
+launch flag selecting between two user interfaces: `master` carries the new
+implementation only, and `legacy-javafx` is consulted as a reference for
+behaviour rather than run alongside.
 
-**De-risk, with a throwaway spike.**
-Prove JCEF links under jlink and jpackage on one platform: a bare `JFrame`
-hosting JCEF showing a Thymeleaf-rendered page served by Jetty, packaged as an
-installer. Answers section 7.1 and 7.2 before any real code is written. If
-`jlink` proves impossible, decide the `jpackage` fallback here.
+The consequence is that **the application is not runnable until the shell,
+server and one route exist together**. That is accepted. Nothing between the
+first and third stage below produces something a user can start.
 
-**Extract `core`.**
-Move `model`, `model.service`, `model.rpc`, `model.signal` out of `fx` into a
-new `core` module with no JavaFX dependency. Replace JavaFX property and
-`ObservableList` usage (54 sites) with plain types plus the existing CDI event
-bus. The JavaFX UI continues to build and run against `core` throughout. This
-stage ships with no user-visible change and is independently valuable.
+**Scaffolding.** *(done)* Modules `core`, `web` and `shell` created with their
+POMs, dependency versions pinned, `desktop` parked outside the reactor. No
+code.
 
-**Build the shell and server skeleton.**
-Build `shell` and `web`. Serve one route end to end. Establish the CSS
-foundation, the SSE bridge, and `WindowCommands`.
+**De-risk, with a throwaway spike.** Prove JCEF links under jlink and jpackage
+on one platform: a bare `JFrame` hosting JCEF showing a Thymeleaf-rendered page
+served by Jetty, packaged as an installer. This answers section 7.1 and 7.2 and
+should happen before handler code is written, because a forced fallback to
+classpath-based `jpackage` determines whether the modules carry
+`module-info.java` at all.
 
-**Migrate screen by screen.**
-Port screens in ascending order of difficulty, verifying each against the
-JavaFX original: documentation (45 lines FXML), transactions (23), addresses
-(127), wallet (159), governance (167 across vote and proposal), nodes (260),
-settings (494). Both UIs remain buildable; a launch flag selects which one
-starts.
+**Daemon protocol client.** Rebuild the JSON-RPC client and its entity types in
+`core` — plain types, CDI events for signalling, no UI toolkit dependency.
+`legacy-javafx` is the reference for the wire format, which is unchanged. This
+stage is verifiable in isolation against a running `unigridd` without any UI.
 
-**Retire JavaFX.**
-Delete `fx`, drop the JavaFX and ControlsFX and ikonli and FXTrayIcon
-dependencies, remove JavaFX modules from `module-info.java`, and update the
-jlink and jpackage configuration.
+**Shell and server skeleton.** `shell` and `web` together, serving one route end
+to end. Establish the CSS foundation, the SSE bridge, and `WindowCommands`.
+This is the first stage that produces something runnable.
+
+**Screens.** Build out in ascending order of difficulty, with `legacy-javafx`
+as the behavioural reference: documentation, transactions, addresses, wallet,
+governance, nodes, settings.
+
+**Packaging and updates.** Rebuild the jlink/jpackage chain around `shell`,
+return `desktop` to the reactor, and rebuild the auto-update mechanism and the
+release workflows. The deleted workflows on `legacy-javafx` are the starting
+point.
 
 ## 10. Testing
 
@@ -353,30 +376,41 @@ Monocle. TestFX disappears with JavaFX; the rest survives and improves.
 
 ## 11. Cost
 
+Everything below is rebuilt. Nothing carries over as code; `legacy-javafx` is
+consulted, not imported.
+
 | Item | Assessment |
 |---|---|
-| Rewritten | 2,176 lines FXML to HTML templates; 273 lines JavaFX CSS to standard CSS; ~3,675 LOC controllers to handlers |
-| Reworked | 54 JavaFX property and `ObservableList` sites; 15 `Platform.runLater` sites; `FXTrayIcon` to AWT `SystemTray`; four window-chrome classes to CSS |
-| Untouched | Jersey JSON-RPC client, `model.rpc.entity`, `Daemon`, polling services, `Hedgehog`, configuration, update4j — the majority of the 5,279 LOC model |
-| Removed dependencies | javafx-controls, -graphics, -fxml, -media, -swing; ControlsFX; ikonli; FXTrayIcon; TestFX; Monocle |
+| User interface | 2,176 lines FXML and 273 lines JavaFX CSS replaced by HTML templates and standard CSS; ~3,675 LOC of controllers replaced by handlers |
+| Domain and protocol | ~5,279 LOC of model, including the Jersey JSON-RPC client and ~90 entity types, `Daemon`, polling services and `Hedgehog`, rewritten from scratch in `core`. The wire format is unchanged, so `legacy-javafx` remains an accurate specification of it. |
+| Launcher and updater | `bootstrap` (JavaFX updater UI, update4j delegate, Sentry) and `config` (update4j manifest generator) removed; the auto-update mechanism is rebuilt |
+| Release chain | Five packaging and release workflows removed and rebuilt once `shell` can package |
+| Removed dependencies | javafx-controls, -graphics, -fxml, -media, -swing; ControlsFX; ikonli; FXTrayIcon; TestFX; Monocle; update4j; Sentry |
 | Added dependencies | jcefmaven plus one native bundle; Jetty 12; Thymeleaf 3 and attoparser, unbescape, ognl; ModiTect (build only) |
 | Installer size | roughly 60–80MB to roughly 180–200MB per platform |
 | New ongoing burden | Tracking Chromium security releases |
 
+The domain and protocol row is the expensive one, and it is a deliberate choice
+rather than a technical necessity: that code worked. It is being rewritten to
+avoid carrying the JavaFX-shaped design of the old model forward into a
+codebase that no longer has a UI toolkit in it.
+
 ## 12. Open questions
 
-1. Does JCEF link under jlink, or is a jpackage fallback required? Blocks
-   everything. Resolved by the de-risking spike.
+1. jcefmaven is confirmed an automatic module, so it needs the same treatment
+   Weld and Jersey already received. Does `tentackle-jlink-maven-plugin` handle
+   an artifact that carries native binaries, or is a classpath-based `jpackage`
+   fallback required? Resolved by the de-risking spike.
 2. Is the roughly 2.5x installer size increase acceptable for the user base,
    given wallet users on constrained connections?
 3. Is a replacement macOS Developer ID certificate for Stiftelsen The Unigrid
    Foundation obtainable, and on what timescale? Blocks macOS releases
    regardless of this work.
-4. Does update4j's differential update mechanism behave acceptably with a
-   roughly 100MB native payload that changes on every Chromium bump, or does
-   the update strategy need revisiting?
-5. Should the governance and proposal screens be migrated as-is, or is that
-   feature set changing independently in a way that would waste the effort?
+4. What replaces update4j? Its differential update mechanism has to cope with a
+   roughly 100MB native payload that changes on every Chromium bump, and the
+   generator that produced its manifests has been removed.
+5. Should the governance and proposal screens be reproduced as they were, or is
+   that feature set changing independently in a way that would waste the effort?
 
 ## 13. Not decided here
 

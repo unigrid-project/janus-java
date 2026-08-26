@@ -2,21 +2,11 @@
 **/nb-configuration.xml
 
 .vscode/
-**/.DS_Store  
+**/.DS_Store
 
 /src/main/resources/daemon/
 
 target/
-!config/src/test/resources/target
-
-/fx/templates/
-/fx/runtime/ # What is this?
-
-fx/debug.log
-fx/unigrid-cli.exe
-fx/unigridd.exe
-fx/unigridd
-fx/unigrid-cli
 
 .jqwik-database
 .idea/
