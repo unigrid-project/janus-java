@@ -33,9 +33,7 @@ public final class Janus {
 		final UiServer server = new UiServer(Routes.create(new Templates(false)));
 		final URI uri = server.start();
 
-		/* The embedded browser window that will host this is not built yet, so the
-		   address is logged for a browser to be pointed at by hand. */
 		LOG.info("Janus is serving its interface at {}", uri);
-		server.join();
+		new BrowserWindow(uri).show();
 	}
 }
