@@ -5,8 +5,25 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title th:text="${title}">Janus</title>
 		<link rel="stylesheet" href="/static/css/janus.css">
+		<script src="/static/js/window.js" defer></script>
 	</head>
 	<body>
+		<header class="titlebar" data-drag>
+			<span class="titlebar__title" th:text="${title}">Janus</span>
+			<div class="titlebar__controls">
+				<button class="titlebar__button" type="button" data-window="minimise" aria-label="Minimise">
+					<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M0 5h10"/></svg>
+				</button>
+				<button class="titlebar__button" type="button" data-window="maximise" aria-label="Maximise">
+					<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M0.5 0.5h9v9h-9z"/></svg>
+				</button>
+				<button class="titlebar__button titlebar__button--close" type="button" data-window="close"
+					aria-label="Close">
+					<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M0 0l10 10M10 0L0 10"/></svg>
+				</button>
+			</div>
+		</header>
+
 		<main>
 			<h1 th:text="${title}">Janus</h1>
 		</main>

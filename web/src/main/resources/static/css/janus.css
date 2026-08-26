@@ -1,6 +1,6 @@
 /*
     The Janus Wallet
-    Copyright © 2021-2022 Stiftelsen The Unigrid Foundation
+    Copyright © 2021-2026 Stiftelsen The Unigrid Foundation
 
     This program is free software: you can redistribute it and/or modify it under the terms of the
     addended GNU Affero General Public License as published by the Free Software Foundation, version 3
@@ -24,6 +24,7 @@
 
 	--space: 1rem;
 	--radius: 6px;
+	--titlebar-height: 34px;
 	--font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -48,10 +49,68 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
+.titlebar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: var(--titlebar-height);
+	padding-left: var(--space);
+	background: var(--surface-raised);
+	border-bottom: 1px solid var(--border);
+	cursor: move;
+	user-select: none;
+}
+
+/* The pointer leaves the title bar the moment the drag outruns the window, so the
+   cursor is held for the whole document until the drag ends. */
+body.is-dragging,
+body.is-dragging * {
+	cursor: move;
+}
+
+.titlebar__title {
+	font-size: 0.8125rem;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+}
+
+.titlebar__controls {
+	display: flex;
+	height: 100%;
+}
+
+.titlebar__button {
+	display: grid;
+	place-items: center;
+	width: 46px;
+	border: 0;
+	background: none;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.titlebar__button svg {
+	width: 10px;
+	height: 10px;
+	stroke: currentColor;
+	stroke-width: 1.2;
+	fill: none;
+}
+
+.titlebar__button:hover {
+	background: var(--border);
+	color: var(--text);
+}
+
+.titlebar__button--close:hover {
+	background: #c4342b;
+	color: #fff;
+}
+
 main {
 	display: grid;
 	place-items: center;
-	min-height: 100%;
+	min-height: calc(100% - var(--titlebar-height));
 	padding: var(--space);
 }
 
