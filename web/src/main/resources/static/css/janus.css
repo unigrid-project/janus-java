@@ -57,7 +57,7 @@ body {
 	padding-left: var(--space);
 	background: var(--surface-raised);
 	border-bottom: 1px solid var(--border);
-	cursor: move;
+	cursor: default;
 	user-select: none;
 }
 
