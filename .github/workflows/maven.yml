@@ -21,12 +21,5 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Build config jar
-      working-directory: config
-      run: mvn install
-
-    - name: Install xvfb
-      run: sudo apt-get install xvfb
-
     - name: Build main
-      run: xvfb-run mvn install
+      run: mvn install
