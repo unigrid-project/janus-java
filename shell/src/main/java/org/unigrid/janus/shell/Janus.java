@@ -16,10 +16,14 @@
 
 package org.unigrid.janus.shell;
 
+import jakarta.enterprise.inject.se.SeContainer;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
 import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unigrid.janus.web.Routes;
+import org.unigrid.janus.web.action.ActionExtension;
+import org.unigrid.janus.web.action.Actions;
 import org.unigrid.janus.web.SessionToken;
 import org.unigrid.janus.web.Templates;
 import org.unigrid.janus.web.UiServer;
@@ -31,9 +35,16 @@ public final class Janus {
 	}
 
 	public static void main(final String[] args) throws Exception {
+		final SeContainer container = SeContainerInitializer.newInstance().initialize();
+		final Actions actions = Actions.discovered(
+			container.getBeanManager().getExtension(ActionExtension.class)
+		);
+
 		final BrowserWindow window = new BrowserWindow();
 		final SessionToken token = SessionToken.random();
-		final UiServer server = new UiServer(Routes.create(new Templates(false), token, window.control()));
+		final UiServer server = new UiServer(
+			Routes.create(new Templates(false), token, window.control(), actions)
+		);
 		final URI uri = server.start();
 
 		LOG.info("Janus is serving its interface at {}", uri);

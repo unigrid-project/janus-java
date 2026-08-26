@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.jqwik.api.Example;
 import org.eclipse.jetty.server.Handler;
+import org.unigrid.janus.web.action.Actions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WindowHandlerTest extends ServedTest {
@@ -54,7 +55,7 @@ public class WindowHandlerTest extends ServedTest {
 
 	@Override
 	protected Handler routes() {
-		return Routes.create(templates(), token(), recorder);
+		return Routes.create(templates(), token(), recorder, Actions.of());
 	}
 
 	@Example
