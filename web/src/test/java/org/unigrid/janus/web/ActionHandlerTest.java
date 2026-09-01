@@ -61,7 +61,7 @@ public class ActionHandlerTest extends ServedTest {
 
 	@Override
 	protected Handler routes() {
-		return Routes.create(templates(), token(), WindowControl.NONE, Actions.of(wallet));
+		return Routes.create(templates(), token(), WindowControl.NONE, Actions.of(wallet), new Page("Janus"));
 	}
 
 	@Example
@@ -79,7 +79,7 @@ public class ActionHandlerTest extends ServedTest {
 	}
 
 	@Example
-	public void shouldRenderTheFragmentThatWasReturned() throws Exception {
+	public void shouldRenderTheViewThatWasReturned() throws Exception {
 		final HttpResponse<String> response = admitted()
 			.submit("/action/unlock-wallet", "passphrase=x");
 

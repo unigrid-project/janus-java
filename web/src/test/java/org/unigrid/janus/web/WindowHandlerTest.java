@@ -55,7 +55,7 @@ public class WindowHandlerTest extends ServedTest {
 
 	@Override
 	protected Handler routes() {
-		return Routes.create(templates(), token(), recorder, Actions.of());
+		return Routes.create(templates(), token(), recorder, Actions.of(), new Page("Janus"));
 	}
 
 	@Example

@@ -21,6 +21,7 @@ import jakarta.enterprise.inject.se.SeContainerInitializer;
 import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unigrid.janus.ui.view.IndexView;
 import org.unigrid.janus.web.Routes;
 import org.unigrid.janus.web.action.ActionExtension;
 import org.unigrid.janus.web.action.Actions;
@@ -43,7 +44,7 @@ public final class Janus {
 		final BrowserWindow window = new BrowserWindow();
 		final SessionToken token = SessionToken.random();
 		final UiServer server = new UiServer(
-			Routes.create(new Templates(false), token, window.control(), actions)
+			Routes.create(new Templates(false), token, window.control(), actions, new IndexView("Janus"))
 		);
 		final URI uri = server.start();
 

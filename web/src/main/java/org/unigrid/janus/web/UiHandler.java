@@ -18,27 +18,28 @@ package org.unigrid.janus.web;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
+import org.unigrid.janus.web.action.View;
 
 public class UiHandler extends Handler.Abstract {
 	private static final String HTML = "text/html;charset=utf-8";
 
 	private final Templates templates;
+	private final View index;
 
-	public UiHandler(final Templates templates) {
+	public UiHandler(final Templates templates, final View index) {
 		this.templates = templates;
+		this.index = index;
 	}
 
 	@Override
 	public boolean handle(final Request request, final Response response, final Callback callback) {
-		final String html = templates.render("index", Map.of("title", "Janus"));
-		final ByteBuffer body = ByteBuffer.wrap(html.getBytes(StandardCharsets.UTF_8));
+		final ByteBuffer body = ByteBuffer.wrap(templates.render(index).getBytes(StandardCharsets.UTF_8));
 
 		response.setStatus(HttpStatus.OK_200);
 		response.getHeaders().put(HttpHeader.CONTENT_TYPE, HTML);

@@ -30,7 +30,7 @@ public abstract class ServedTest {
 	private URI base;
 
 	protected Handler routes() {
-		return Routes.create(templates, token);
+		return Routes.create(templates, token, new Page("Janus"));
 	}
 
 	@BeforeTry

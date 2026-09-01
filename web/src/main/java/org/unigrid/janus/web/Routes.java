@@ -21,6 +21,7 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.unigrid.janus.web.action.Actions;
+import org.unigrid.janus.web.action.View;
 
 public final class Routes {
 	private static final String ASSETS = "static/";
@@ -31,12 +32,12 @@ public final class Routes {
 	private Routes() {
 	}
 
-	public static Handler create(final Templates templates, final SessionToken token) {
-		return create(templates, token, WindowControl.NONE, Actions.of());
+	public static Handler create(final Templates templates, final SessionToken token, final View index) {
+		return create(templates, token, WindowControl.NONE, Actions.of(), index);
 	}
 
 	public static Handler create(final Templates templates, final SessionToken token,
-		final WindowControl window, final Actions actions) {
+		final WindowControl window, final Actions actions, final View index) {
 
 		final ResourceHandler assets = new ResourceHandler();
 
@@ -49,7 +50,7 @@ public final class Routes {
 			new ContextHandler(assets, ASSET_PATH),
 			new ContextHandler(new WindowHandler(window), WINDOW_PATH),
 			new ContextHandler(new ActionHandler(actions, templates), ACTION_PATH),
-			new UiHandler(templates)
+			new UiHandler(templates, index)
 		), token);
 	}
 }

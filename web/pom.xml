@@ -9,7 +9,7 @@
 	<artifactId>web</artifactId>
 	<packaging>jar</packaging>
 	<name>Unigrid Janus Web</name>
-	<description>Local HTTP server, request handlers, Thymeleaf templates and static assets that make up the user interface.</description>
+	<description>Local HTTP server, request handlers and template engine behind the user interface.</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.unigrid.janus</groupId>

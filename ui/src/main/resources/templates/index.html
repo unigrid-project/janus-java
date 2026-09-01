@@ -3,14 +3,14 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title th:text="${title}">Janus</title>
+		<title th:text="${view.title}">Janus</title>
 		<link rel="stylesheet" href="/static/css/janus.css">
 		<script src="/static/js/htmx.min.js" defer></script>
 		<script src="/static/js/window.js" defer></script>
 	</head>
 	<body>
 		<header class="titlebar" data-drag>
-			<span class="titlebar__title" th:text="${title}">Janus</span>
+			<span class="titlebar__title" th:text="${view.title}">Janus</span>
 			<div class="titlebar__controls">
 				<button class="titlebar__button" type="button" data-window="minimise" aria-label="Minimise">
 					<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M0 5h10"/></svg>
@@ -26,7 +26,7 @@
 		</header>
 
 		<main>
-			<h1 th:text="${title}">Janus</h1>
+			<h1 th:text="${view.title}">Janus</h1>
 			<button class="button" type="button" hx-post="/action/about" hx-target="#about">
 				About
 			</button>

@@ -16,7 +16,6 @@
 
 package org.unigrid.janus.web;
 
-import java.util.Map;
 import java.util.Set;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -46,10 +45,10 @@ public class Templates {
 		engine.setTemplateResolver(resolver);
 	}
 
-	public String render(final String template, final Map<String, Object> variables) {
-		return engine.process(template, context(variables));
-	}
-
+	/**
+	 * Renders what the view names, the way Thymeleaf names it: {@code page} or {@code page :: block}.
+	 * The view itself is what the template reads as {@code view}.
+	 */
 	public String render(final View view) {
 		final String specification = view.template();
 		final int separator = specification.indexOf(SELECTOR);
@@ -64,12 +63,5 @@ public class Templates {
 		return engine.process(specification.substring(0, separator).trim(),
 			Set.of(specification.substring(separator + SELECTOR.length()).trim()), context
 		);
-	}
-
-	private Context context(final Map<String, Object> variables) {
-		final Context context = new Context();
-
-		context.setVariables(variables);
-		return context;
 	}
 }
