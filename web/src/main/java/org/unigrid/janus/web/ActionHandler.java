@@ -28,7 +28,7 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 import org.unigrid.janus.web.action.Actions;
 import org.unigrid.janus.web.action.Form;
-import org.unigrid.janus.web.action.Fragment;
+import org.unigrid.janus.web.action.View;
 
 public class ActionHandler extends Handler.Abstract {
 	private static final String HTML = "text/html;charset=utf-8";
@@ -55,7 +55,7 @@ public class ActionHandler extends Handler.Abstract {
 			return true;
 		}
 
-		final Optional<Fragment> shown = actions.invoke(name, Form.parse(Content.Source.asString(request)));
+		final Optional<View> shown = actions.invoke(name, Form.parse(Content.Source.asString(request)));
 
 		if (shown.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT_204);
@@ -63,8 +63,7 @@ public class ActionHandler extends Handler.Abstract {
 			return true;
 		}
 
-		final byte[] body = templates.fragment(shown.get().specification(), shown.get().variables())
-			.getBytes(StandardCharsets.UTF_8);
+		final byte[] body = templates.render(shown.get()).getBytes(StandardCharsets.UTF_8);
 
 		response.setStatus(HttpStatus.OK_200);
 		response.getHeaders().put(HttpHeader.CONTENT_TYPE, HTML);

@@ -23,8 +23,9 @@ import org.unigrid.janus.core.Release;
 import org.unigrid.janus.ui.view.AboutView;
 import org.unigrid.janus.web.action.ActionExtension;
 import org.unigrid.janus.web.action.Actions;
+import org.unigrid.janus.web.action.Form;
+import org.unigrid.janus.web.action.View;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AboutControllerTest {
 	private final Release release = new Release() {
@@ -48,8 +49,9 @@ public class AboutControllerTest {
 			final Actions actions = Actions.discovered(
 				container.getBeanManager().getExtension(ActionExtension.class)
 			);
+			final View view = actions.invoke("about", Form.parse("")).orElseThrow();
 
-			assertTrue(actions.knows("about"));
+			assertEquals(new AboutView(new Release().version()), view);
 		}
 	}
 }

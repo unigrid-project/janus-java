@@ -66,22 +66,6 @@ public class Templates {
 		);
 	}
 
-	/**
-	 * Renders part of a template, named the way Thymeleaf names one: {@code page :: block}. A
-	 * whole template renders as itself, so an action need not care which it returned.
-	 */
-	public String fragment(final String specification, final Map<String, Object> variables) {
-		final int separator = specification.indexOf(SELECTOR);
-
-		if (separator < 0) {
-			return render(specification.trim(), variables);
-		}
-
-		return engine.process(specification.substring(0, separator).trim(),
-			Set.of(specification.substring(separator + SELECTOR.length()).trim()), context(variables)
-		);
-	}
-
 	private Context context(final Map<String, Object> variables) {
 		final Context context = new Context();
 

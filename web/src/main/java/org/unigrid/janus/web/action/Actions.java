@@ -63,16 +63,19 @@ public final class Actions {
 		return bound.containsKey(name);
 	}
 
-	/** A bare name is a fragment that needs nothing to render. */
-	private static Fragment asFragment(final Object outcome) {
-		return outcome instanceof Fragment fragment ? fragment : Fragment.of(outcome.toString());
+	private static View asView(final String name, final Object outcome) {
+		if (outcome instanceof View view) {
+			return view;
+		}
+
+		throw new ActionFailed(name, new ClassCastException(outcome.getClass().getName() + " is not a view"));
 	}
 
 	/**
-	 * Carries out the named action, answering with the fragment the page should show, or nothing
+	 * Carries out the named action, answering with the view the page should show, or nothing
 	 * when there is nothing to change.
 	 */
-	public Optional<Fragment> invoke(final String name, final Form form) {
+	public Optional<View> invoke(final String name, final Form form) {
 		final Method method = bound.get(name);
 
 		if (method == null) {
@@ -85,7 +88,7 @@ public final class Actions {
 				? method.invoke(target)
 				: method.invoke(target, form);
 
-			return Optional.ofNullable(outcome).map(Actions::asFragment);
+			return Optional.ofNullable(outcome).map(o -> asView(name, o));
 		} catch (IllegalAccessException e) {
 			throw new ActionFailed(name, e);
 		} catch (InvocationTargetException e) {

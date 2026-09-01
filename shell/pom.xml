@@ -13,7 +13,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.unigrid.janus</groupId>
-			<artifactId>web</artifactId>
+			<artifactId>ui</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

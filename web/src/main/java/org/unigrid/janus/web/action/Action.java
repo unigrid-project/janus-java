@@ -26,8 +26,8 @@ import java.lang.annotation.Target;
  * Binds a method to something the interface can ask for by name, so that markup naming an action
  * and the method carrying it out can be read against each other.
  *
- * <p>The method takes either nothing or a {@link Form}. Returning a fragment specification renders
- * it for the page to swap in; returning nothing tells the page that there is nothing to change.
+ * <p>The method takes either nothing or a {@link Form}. Returning a {@link View} renders it for
+ * the page to swap in; returning nothing tells the page that there is nothing to change.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

@@ -24,7 +24,6 @@ import org.eclipse.jetty.server.Handler;
 import org.unigrid.janus.web.action.Action;
 import org.unigrid.janus.web.action.Actions;
 import org.unigrid.janus.web.action.Form;
-import org.unigrid.janus.web.action.Fragment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -40,14 +39,19 @@ public class ActionHandlerTest extends ServedTest {
 		}
 
 		@Action("unlock-wallet")
-		public Fragment onClickUnlockWallet(final Form form) {
+		public Status onClickUnlockWallet(final Form form) {
 			unlocked.add(form.get("passphrase"));
-			return Fragment.of("testing :: status", "view", new Status(form.get("passphrase")));
+			return new Status(form.get("passphrase"));
 		}
 
 		@Action("break-wallet")
 		public void onClickBreakWallet() {
 			throw new IllegalStateException("the daemon said no");
+		}
+
+		@Action("misreport-wallet")
+		public String onClickMisreportWallet() {
+			return "not a view";
 		}
 
 		public List<String> unlocked() {
@@ -98,5 +102,10 @@ public class ActionHandlerTest extends ServedTest {
 	@Example
 	public void shouldReportAFailedActionRatherThanPretendItWorked() throws Exception {
 		assertEquals(500, admitted().post("/action/break-wallet").statusCode());
+	}
+
+	@Example
+	public void shouldReportAnActionThatAnswersWithSomethingOtherThanAView() throws Exception {
+		assertEquals(500, admitted().post("/action/misreport-wallet").statusCode());
 	}
 }
