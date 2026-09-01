@@ -9,6 +9,7 @@
 	<!-- Weld narrates every bean it finds at info, which buries the test
 	     results it is running underneath. -->
 	<logger name="org.jboss.weld" level="WARN"/>
+	<logger name="com.tngtech.archunit" level="WARN"/>
 
 	<root level="INFO">
 		<appender-ref ref="console"/>

@@ -89,7 +89,7 @@ public final class Actions {
 			return view;
 		}
 
-		throw new ActionFailed(name, new ClassCastException(outcome.getClass().getName() + " is not a view"));
+		throw new ActionFailed(name, new IllegalStateException(outcome.getClass().getName() + " is not a view"));
 	}
 
 	/**

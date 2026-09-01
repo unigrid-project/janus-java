@@ -20,8 +20,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import lombok.extern.slf4j.Slf4j;
 
 /** The build this wallet was made from. */
+@Slf4j
 @ApplicationScoped
 public class Release {
 	private static final String FILE = "/org/unigrid/janus/core/application.properties";
@@ -49,7 +51,8 @@ public class Release {
 
 			properties.load(in);
 			return properties.getProperty("version", UNKNOWN);
-		} catch (IOException e) {
+		} catch (final IOException e) {
+			log.warn("Could not read {}", file, e);
 			return UNKNOWN;
 		}
 	}
