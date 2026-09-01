@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class RoutesTest extends ServedTest {
 	@Example
 	public void shouldServeTheStylesheetAsCss() throws Exception {
-		final HttpResponse<String> response = admitted().get("/static/css/janus.css");
+		final HttpResponse<String> response = admitted().get("/static/css/testing.css");
 
 		assertEquals(200, response.statusCode());
 		assertTrue(response.headers().firstValue("content-type").orElse("").startsWith("text/css"),

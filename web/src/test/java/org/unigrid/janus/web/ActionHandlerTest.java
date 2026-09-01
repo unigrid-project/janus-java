@@ -42,7 +42,7 @@ public class ActionHandlerTest extends ServedTest {
 		@Action("unlock-wallet")
 		public Fragment onClickUnlockWallet(final Form form) {
 			unlocked.add(form.get("passphrase"));
-			return Fragment.of("testing :: status", "holder", form.get("passphrase"));
+			return Fragment.of("testing :: status", "view", new Status(form.get("passphrase")));
 		}
 
 		@Action("break-wallet")

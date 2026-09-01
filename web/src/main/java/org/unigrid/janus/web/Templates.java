@@ -22,11 +22,13 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+import org.unigrid.janus.web.action.View;
 
 public class Templates {
 	private static final String PREFIX = "templates/";
 	private static final String SUFFIX = ".html";
 	private static final String SELECTOR = "::";
+	private static final String VARIABLE = "view";
 
 	private final TemplateEngine engine = new TemplateEngine();
 
@@ -46,6 +48,22 @@ public class Templates {
 
 	public String render(final String template, final Map<String, Object> variables) {
 		return engine.process(template, context(variables));
+	}
+
+	public String render(final View view) {
+		final String specification = view.template();
+		final int separator = specification.indexOf(SELECTOR);
+		final Context context = new Context();
+
+		context.setVariable(VARIABLE, view);
+
+		if (separator < 0) {
+			return engine.process(specification.trim(), context);
+		}
+
+		return engine.process(specification.substring(0, separator).trim(),
+			Set.of(specification.substring(separator + SELECTOR.length()).trim()), context
+		);
 	}
 
 	/**

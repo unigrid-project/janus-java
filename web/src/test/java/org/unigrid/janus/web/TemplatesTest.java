@@ -16,7 +16,6 @@
 
 package org.unigrid.janus.web;
 
-import java.util.Map;
 import net.jqwik.api.Example;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,16 +24,24 @@ public class TemplatesTest {
 
 	@Example
 	public void shouldResolveTemplateFromClasspath() {
-		final String html = templates.render("index", Map.of("title", "Janus"));
+		final String html = templates.render(new Page("Janus"));
 
 		assertTrue(html.contains("<!DOCTYPE html>"), html);
 	}
 
 	@Example
 	public void shouldEvaluateExpressionsRatherThanEchoTheFile() {
-		final String html = templates.render("index", Map.of("title", "Unigrid"));
+		final String html = templates.render(new Page("Unigrid"));
 
 		assertTrue(html.contains("<h1>Unigrid</h1>"), html);
 		assertTrue(!html.contains("th:text"), "the th: attributes should be consumed during rendering");
+	}
+
+	@Example
+	public void shouldRenderOnlyTheNamedBlockOfATemplate() {
+		final String html = templates.render(new Status("Alice"));
+
+		assertTrue(html.contains("unlocked by <span>Alice</span>"), html);
+		assertTrue(!html.contains("<!DOCTYPE html>"), "a block should not carry the whole page: " + html);
 	}
 }
