@@ -33,11 +33,7 @@ public class ActionExtension implements Extension {
 
 	<T> void collect(@Observes final ProcessAnnotatedType<T> event) {
 		for (final AnnotatedMethod<? super T> method : event.getAnnotatedType().getMethods()) {
-			final Action action = method.getAnnotation(Action.class);
-
-			if (action != null) {
-				found.put(action.value(), method.getJavaMember());
-			}
+			Actions.bind(found, method.getJavaMember());
 		}
 	}
 

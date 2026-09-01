@@ -48,15 +48,36 @@ public final class Actions {
 			instances.put(handler.getClass(), handler);
 
 			for (final Method method : handler.getClass().getMethods()) {
-				final Action action = method.getAnnotation(Action.class);
-
-				if (action != null) {
-					bound.put(action.value(), method);
-				}
+				bind(bound, method);
 			}
 		}
 
 		return new Actions(bound, instances::get);
+	}
+
+	/**
+	 * Remembers the action the method carries out, refusing a name that another method already
+	 * answers to. Which of them the interface reached would otherwise depend on the order they
+	 * happened to be scanned in.
+	 */
+	static void bind(final Map<String, Method> bound, final Method method) {
+		final Action action = method.getAnnotation(Action.class);
+
+		if (action == null) {
+			return;
+		}
+
+		final Method taken = bound.putIfAbsent(action.value(), method);
+
+		if (taken != null) {
+			throw new IllegalStateException("The action " + action.value() + " is bound to both "
+				+ describe(taken) + " and " + describe(method)
+			);
+		}
+	}
+
+	private static String describe(final Method method) {
+		return method.getDeclaringClass().getSimpleName() + "." + method.getName() + "()";
 	}
 
 	public boolean knows(final String name) {
