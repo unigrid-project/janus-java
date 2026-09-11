@@ -18,6 +18,9 @@ package org.unigrid.janus.shell;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -29,6 +32,7 @@ import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
 import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
 import org.cef.CefApp;
 import org.cef.CefClient;
+import org.cef.browser.CefBrowser;
 import org.unigrid.janus.web.WindowControl;
 
 public class BrowserWindow {
@@ -41,17 +45,38 @@ public class BrowserWindow {
 
 	public BrowserWindow() {
 		/* The title bar and its buttons are drawn by the page, so the frame contributes
-		   nothing but a rectangle. Decoration has to be settled before the frame is
+		   nothing but its outline. Decoration has to be settled before the frame is
 		   realised, which is why it happens here rather than alongside the sizing. */
 		frame.setUndecorated(true);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter() {
+		fitShapeToFrame();
+	}
+
+	private void fitShapeToFrame() {
+		if (!shapedWindowsSupported()) {
+			return;
+		}
+
+		/* The state changes from the window manager as well as from the page, and the
+		   resize that comes with it is not ordered against the state change, so the
+		   shape follows both. */
+		frame.addComponentListener(new ComponentAdapter() {
 			@Override
-			public void windowClosing(final WindowEvent event) {
-				CefApp.getInstance().dispose();
-				frame.dispose();
+			public void componentResized(final ComponentEvent event) {
+				fitShape();
 			}
 		});
+		frame.addWindowStateListener(event -> fitShape());
+	}
+
+	private void fitShape() {
+		frame.setShape(WindowShape.of(frame.getExtendedState(), frame.getSize()).orElse(null));
+	}
+
+	private boolean shapedWindowsSupported() {
+		return frame.getGraphicsConfiguration().getDevice().isWindowTranslucencySupported(
+			GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT
+		);
 	}
 
 	public WindowControl control() {
@@ -77,19 +102,35 @@ public class BrowserWindow {
 		});
 
 		final CefClient client = builder.build().createClient();
+		final CefBrowser browser = client.createBrowser(uri.toString(), false, false);
+
+		frame.addWindowListener(shutDownOnClose(browser));
 
 		/* The browser has to be in the content pane before the frame is shown. Attaching it
 		   afterwards leaves Chromium to open a top level window of its own, and the frame
 		   stays empty. */
-		frame.getContentPane().add(
-			client.createBrowser(uri.toString(), false, false).getUIComponent(),
-			BorderLayout.CENTER
-		);
+		frame.getContentPane().add(browser.getUIComponent(), BorderLayout.CENTER);
 
 		SwingUtilities.invokeLater(() -> {
 			frame.setSize(SIZE);
 			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
 		});
+	}
+
+	/* Chromium answers a close request by asking the window to close and cancels its own
+	   unless the browser has been told that closing is allowed, so without that permission
+	   the browser, and with it the process, lives on. The frame is hidden rather than
+	   disposed because the shutdown completes on the event thread, which AWT retires once
+	   the last window is gone. */
+	private WindowAdapter shutDownOnClose(final CefBrowser browser) {
+		return new WindowAdapter() {
+			@Override
+			public void windowClosing(final WindowEvent event) {
+				frame.setVisible(false);
+				browser.setCloseAllowed();
+				CefApp.getInstance().dispose();
+			}
+		};
 	}
 }
