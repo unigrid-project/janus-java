@@ -30,7 +30,7 @@ const bar = document.querySelector("[data-drag]");
 
 if (bar) {
 	bar.addEventListener("pointerdown", (event) => {
-		if (event.button !== 0 || event.target.closest("[data-window]")) {
+		if (event.button !== 0 || event.target.closest("button")) {
 			return;
 		}
 
