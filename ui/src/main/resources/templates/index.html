@@ -3,15 +3,32 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title th:text="${view.title}">Janus</title>
+		<title th:text="${view.title}">Unigrid Control Center</title>
 		<link rel="stylesheet" href="/static/css/janus.css">
+		<!-- Runs before the first paint, so a stored light theme never flashes dark. -->
+		<script>document.documentElement.dataset.theme = localStorage.getItem("theme") || "dark";</script>
 		<script src="/static/js/htmx.min.js" defer></script>
 		<script src="/static/js/window.js" defer></script>
 	</head>
 	<body>
+		<div class="glow" aria-hidden="true">
+			<span class="glow__blob glow__blob--warm"></span>
+			<span class="glow__blob glow__blob--cool"></span>
+		</div>
+
 		<header class="titlebar" data-drag>
-			<span class="titlebar__title" th:text="${view.title}">Janus</span>
+			<span class="titlebar__title" th:text="${view.title}">Unigrid Control Center</span>
 			<div class="titlebar__controls">
+				<button class="titlebar__button titlebar__button--theme" type="button" data-theme-toggle
+					aria-label="Switch theme">
+					<svg class="titlebar__sun" viewBox="0 0 10 10" aria-hidden="true">
+						<circle cx="5" cy="5" r="2"/>
+						<path d="M5 0.5v1.5M5 8v1.5M0.5 5h1.5M8 5h1.5M1.8 1.8l1.1 1.1M7.1 7.1l1.1 1.1M1.8 8.2l1.1-1.1M7.1 2.9l1.1-1.1"/>
+					</svg>
+					<svg class="titlebar__moon" viewBox="0 0 10 10" aria-hidden="true">
+						<path d="M6.8 7.6A3.6 3.6 0 1 1 6.8 2.4A2.8 2.8 0 0 0 6.8 7.6Z"/>
+					</svg>
+				</button>
 				<button class="titlebar__button" type="button" data-window="minimise" aria-label="Minimise">
 					<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M0 5h10"/></svg>
 				</button>
@@ -26,11 +43,7 @@
 		</header>
 
 		<main>
-			<h1 th:text="${view.title}">Janus</h1>
-			<button class="button" type="button" hx-post="/action/about" hx-target="#about">
-				About
-			</button>
-			<div id="about"></div>
+			<section th:replace="~{fragments/welcome :: welcome}"></section>
 		</main>
 	</body>
 </html>

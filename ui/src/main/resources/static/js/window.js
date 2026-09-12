@@ -50,3 +50,14 @@ if (bar) {
 	bar.addEventListener("pointercancel", release);
 	bar.addEventListener("dblclick", () => command("maximise"));
 }
+
+const toggle = document.querySelector("[data-theme-toggle]");
+
+if (toggle) {
+	toggle.addEventListener("click", () => {
+		const theme = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+
+		document.documentElement.dataset.theme = theme;
+		localStorage.setItem("theme", theme);
+	});
+}

@@ -37,7 +37,7 @@ import org.unigrid.janus.web.WindowControl;
 
 public class BrowserWindow {
 	private static final File INSTALL_DIR = new File(System.getProperty("user.home"), ".janus/jcef");
-	private static final Dimension SIZE = new Dimension(1100, 720);
+	private static final Dimension SIZE = new Dimension(1240, 800);
 	private static final String TITLE = "Unigrid";
 
 	private final JFrame frame = new JFrame(TITLE);

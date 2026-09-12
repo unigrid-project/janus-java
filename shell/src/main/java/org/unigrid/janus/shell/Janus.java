@@ -31,6 +31,7 @@ import org.unigrid.janus.web.UiServer;
 
 public final class Janus {
 	private static final Logger LOG = LoggerFactory.getLogger(Janus.class);
+	private static final String TITLE = "Unigrid Control Center";
 
 	private Janus() {
 	}
@@ -44,7 +45,7 @@ public final class Janus {
 		final BrowserWindow window = new BrowserWindow();
 		final SessionToken token = SessionToken.random();
 		final UiServer server = new UiServer(
-			Routes.create(new Templates(false), token, window.control(), actions, new IndexView("Janus"))
+			Routes.create(new Templates(false), token, window.control(), actions, new IndexView(TITLE))
 		);
 		final URI uri = server.start();
 

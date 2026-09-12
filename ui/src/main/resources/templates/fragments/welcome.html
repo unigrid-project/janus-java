@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<section th:fragment="welcome" class="card">
+			<div class="brand">
+				<img class="brand__mark" src="/static/images/unigrid-mark.svg" alt="">
+				<div>
+					<div class="brand__name">Unigrid</div>
+					<div class="brand__tag">Sharded Internet</div>
+				</div>
+			</div>
+
+			<div class="steps" aria-hidden="true">
+				<span class="steps__dot steps__dot--current"></span>
+				<span class="steps__dot"></span>
+				<span class="steps__dot"></span>
+			</div>
+
+			<h1 class="card__heading">Welcome to <span class="gradient-text">Unigrid</span></h1>
+			<p class="card__lead">Your keys, your coins, your grid. Let's get your wallet ready.</p>
+
+			<div class="choices">
+				<button class="choice choice--primary" type="button">
+					<span class="choice__icon">✦</span>
+					<span class="choice__text">
+						<span class="choice__title">Create a new wallet</span>
+						<span class="choice__note">Fresh 12-word recovery phrase</span>
+					</span>
+					<span class="choice__arrow">→</span>
+				</button>
+				<button class="choice" type="button">
+					<span class="choice__icon">↺</span>
+					<span class="choice__text">
+						<span class="choice__title">Import existing wallet</span>
+						<span class="choice__note">Restore from recovery phrase</span>
+					</span>
+					<span class="choice__arrow">→</span>
+				</button>
+			</div>
+		</section>
+	</body>
+</html>
