@@ -16,13 +16,17 @@
 
 package org.unigrid.janus.web;
 
+import java.util.Optional;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
+import org.unigrid.janus.web.WindowControl.Edge;
 
 public class WindowHandler extends Handler.Abstract {
+	private static final String RESIZE_START = "resize/start/";
+
 	private final WindowControl window;
 
 	public WindowHandler(final WindowControl window) {
@@ -31,7 +35,19 @@ public class WindowHandler extends Handler.Abstract {
 
 	@Override
 	public boolean handle(final Request request, final Response response, final Callback callback) {
-		final String command = Request.getPathInContext(request).substring(1);
+		if (!perform(Request.getPathInContext(request).substring(1))) {
+			return false;
+		}
+
+		response.setStatus(HttpStatus.NO_CONTENT_204);
+		callback.succeeded();
+		return true;
+	}
+
+	private boolean perform(final String command) {
+		if (command.startsWith(RESIZE_START)) {
+			return beginResize(command.substring(RESIZE_START.length()));
+		}
 
 		switch (command) {
 			case "minimise" -> window.minimise();
@@ -39,13 +55,19 @@ public class WindowHandler extends Handler.Abstract {
 			case "close" -> window.close();
 			case "move/start" -> window.beginMove();
 			case "move/end" -> window.endMove();
+			case "resize/end" -> window.endResize();
 			default -> {
 				return false;
 			}
 		}
 
-		response.setStatus(HttpStatus.NO_CONTENT_204);
-		callback.succeeded();
 		return true;
+	}
+
+	private boolean beginResize(final String name) {
+		final Optional<Edge> edge = Edge.named(name);
+
+		edge.ifPresent(window::beginResize);
+		return edge.isPresent();
 	}
 }

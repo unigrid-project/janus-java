@@ -51,6 +51,16 @@ public class WindowHandlerTest extends ServedTest {
 		public void endMove() {
 			invoked.add("move/end");
 		}
+
+		@Override
+		public void beginResize(final Edge edge) {
+			invoked.add("resize/start/" + edge);
+		}
+
+		@Override
+		public void endResize() {
+			invoked.add("resize/end");
+		}
 	};
 
 	@Override
@@ -71,8 +81,24 @@ public class WindowHandlerTest extends ServedTest {
 	}
 
 	@Example
+	public void shouldForwardEachResizableEdgeToTheHost() throws Exception {
+		final Client client = admitted();
+
+		assertEquals(204, client.post("/window/resize/start/left").statusCode());
+		assertEquals(204, client.post("/window/resize/start/right").statusCode());
+		assertEquals(204, client.post("/window/resize/start/bottom").statusCode());
+		assertEquals(204, client.post("/window/resize/start/bottom-right").statusCode());
+		assertEquals(204, client.post("/window/resize/end").statusCode());
+		assertEquals(List.of(
+			"resize/start/LEFT", "resize/start/RIGHT", "resize/start/BOTTOM", "resize/start/BOTTOM_RIGHT",
+			"resize/end"
+		), invoked);
+	}
+
+	@Example
 	public void shouldNotInventCommandsItDoesNotHave() throws Exception {
 		admitted().post("/window/selfdestruct");
+		admitted().post("/window/resize/start/top");
 		assertEquals(List.of(), invoked);
 	}
 

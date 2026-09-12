@@ -16,11 +16,14 @@
 
 package org.unigrid.janus.shell;
 
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
+import java.awt.Rectangle;
 import java.awt.event.WindowEvent;
+import java.util.function.Consumer;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -28,11 +31,12 @@ import org.unigrid.janus.web.WindowControl;
 
 public class FrameControl implements WindowControl {
 	private static final int FOLLOW_INTERVAL = 10;
+	private static final Dimension MINIMUM = new Dimension(900, 640);
 
 	private final JFrame frame;
 	private final Timer follow = new Timer(FOLLOW_INTERVAL, event -> follow());
 
-	private Point grip;
+	private Consumer<Point> tracking;
 
 	public FrameControl(final JFrame frame) {
 		this.frame = frame;
@@ -45,13 +49,7 @@ public class FrameControl implements WindowControl {
 
 	@Override
 	public void toggleMaximise() {
-		onSwingThread(() -> {
-			if ((frame.getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
-				frame.setExtendedState(Frame.NORMAL);
-			} else {
-				frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-			}
-		});
+		onSwingThread(() -> frame.setExtendedState(maximised() ? Frame.NORMAL : Frame.MAXIMIZED_BOTH));
 	}
 
 	@Override
@@ -72,12 +70,13 @@ public class FrameControl implements WindowControl {
 
 			/* A maximised window cannot be dragged anywhere useful, so pulling on the
 			   title bar restores it first, the way a native one behaves. */
-			if ((frame.getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
+			if (maximised()) {
 				frame.setExtendedState(Frame.NORMAL);
 			}
 
-			grip = new Point(pointer.x - frame.getX(), pointer.y - frame.getY());
-			follow.start();
+			final Point grip = new Point(pointer.x - frame.getX(), pointer.y - frame.getY());
+
+			track(at -> frame.setLocation(at.x - grip.x, at.y - grip.y));
 		});
 	}
 
@@ -86,12 +85,43 @@ public class FrameControl implements WindowControl {
 		onSwingThread(follow::stop);
 	}
 
+	@Override
+	public void beginResize(final Edge edge) {
+		onSwingThread(() -> {
+			final Point pointer = pointer();
+
+			if (pointer == null || maximised()) {
+				return;
+			}
+
+			final Rectangle origin = frame.getBounds();
+
+			track(at -> frame.setBounds(
+				ResizeBounds.resized(edge, origin, new Point(at.x - pointer.x, at.y - pointer.y), MINIMUM)
+			));
+		});
+	}
+
+	@Override
+	public void endResize() {
+		onSwingThread(follow::stop);
+	}
+
+	private void track(final Consumer<Point> placement) {
+		tracking = placement;
+		follow.start();
+	}
+
 	private void follow() {
 		final Point pointer = pointer();
 
-		if (pointer != null && grip != null) {
-			frame.setLocation(pointer.x - grip.x, pointer.y - grip.y);
+		if (pointer != null) {
+			tracking.accept(pointer);
 		}
+	}
+
+	private boolean maximised() {
+		return (frame.getExtendedState() & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
 	}
 
 	private Point pointer() {

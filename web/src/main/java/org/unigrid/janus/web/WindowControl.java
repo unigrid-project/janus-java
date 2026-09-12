@@ -16,12 +16,30 @@
 
 package org.unigrid.janus.web;
 
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Optional;
+
 /**
  * The operations a page cannot perform on its own window. Implemented by whatever hosts the
  * interface, so that the pages stay unaware of whether they are in a frame or a browser tab.
  */
 public interface WindowControl {
 	WindowControl NONE = new WindowControl() { };
+
+	/** The edges a window can be resized from. The top is left to the title bar. */
+	enum Edge {
+		LEFT, RIGHT, BOTTOM, BOTTOM_RIGHT;
+
+		/** The edge a page names in a path, as in {@code bottom-right}. */
+		public static Optional<Edge> named(final String name) {
+			return Arrays.stream(values()).filter(edge -> edge.pathName().equals(name)).findFirst();
+		}
+
+		private String pathName() {
+			return name().toLowerCase(Locale.ROOT).replace('_', '-');
+		}
+	}
 
 	default void minimise() {
 	}
@@ -40,5 +58,12 @@ public interface WindowControl {
 	}
 
 	default void endMove() {
+	}
+
+	/** Begins resizing the window from an edge with the pointer, reported like a move. */
+	default void beginResize(final Edge edge) {
+	}
+
+	default void endResize() {
 	}
 }

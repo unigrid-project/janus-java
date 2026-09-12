@@ -26,29 +26,39 @@ document.addEventListener("click", (event) => {
 	}
 });
 
-const bar = document.querySelector("[data-drag]");
-
-if (bar) {
-	bar.addEventListener("pointerdown", (event) => {
+/* Capturing keeps the release with the element even when the pointer has run ahead of
+   the window, which it always does during a fast drag. */
+const hold = (element, cursor, start, end) => {
+	element.addEventListener("pointerdown", (event) => {
 		if (event.button !== 0 || event.target.closest("button")) {
 			return;
 		}
 
-		/* Capturing keeps the release with the title bar even when the pointer has run
-		   ahead of the window, which it always does during a fast drag. */
-		bar.setPointerCapture(event.pointerId);
-		document.body.classList.add("is-dragging");
-		command("move/start");
+		element.setPointerCapture(event.pointerId);
+		document.body.classList.add("is-holding");
+		document.body.style.cursor = cursor;
+		command(start);
 	});
 
 	const release = () => {
-		document.body.classList.remove("is-dragging");
-		command("move/end");
+		document.body.classList.remove("is-holding");
+		document.body.style.cursor = "";
+		command(end);
 	};
 
-	bar.addEventListener("pointerup", release);
-	bar.addEventListener("pointercancel", release);
+	element.addEventListener("pointerup", release);
+	element.addEventListener("pointercancel", release);
+};
+
+const bar = document.querySelector("[data-drag]");
+
+if (bar) {
+	hold(bar, "move", "move/start", "move/end");
 	bar.addEventListener("dblclick", () => command("maximise"));
+}
+
+for (const handle of document.querySelectorAll("[data-resize]")) {
+	hold(handle, getComputedStyle(handle).cursor, "resize/start/" + handle.dataset.resize, "resize/end");
 }
 
 const toggle = document.querySelector("[data-theme-toggle]");

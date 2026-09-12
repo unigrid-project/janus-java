@@ -142,11 +142,10 @@ body {
 	user-select: none;
 }
 
-/* The pointer leaves the title bar the moment the drag outruns the window, so the
-   cursor is held for the whole document until the drag ends. */
-body.is-dragging,
-body.is-dragging * {
-	cursor: move;
+/* The pointer leaves the element the moment a drag outruns the window, so the cursor
+   the script puts on the body is held for the whole document until the drag ends. */
+body.is-holding * {
+	cursor: inherit;
 }
 
 .titlebar__title {
@@ -218,6 +217,54 @@ main {
 	place-items: center;
 	height: calc(100% - var(--titlebar-height));
 	padding: 40px;
+}
+
+.resize {
+	position: fixed;
+	z-index: 1;
+}
+
+.resize--left,
+.resize--right {
+	top: 0;
+	bottom: 0;
+	width: 6px;
+	cursor: ew-resize;
+}
+
+.resize--left {
+	left: 0;
+}
+
+.resize--right {
+	right: 0;
+}
+
+.resize--bottom {
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: 6px;
+	cursor: ns-resize;
+}
+
+.resize--corner {
+	right: 0;
+	bottom: 0;
+	width: 18px;
+	height: 18px;
+	cursor: nwse-resize;
+}
+
+.resize--corner::after {
+	content: "";
+	position: absolute;
+	right: 5px;
+	bottom: 5px;
+	width: 11px;
+	height: 11px;
+	background: repeating-linear-gradient(135deg, transparent 0 3px, var(--text-faint) 3px 4px);
+	clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
 
 .card {

@@ -50,6 +50,16 @@ public class ViewsTest {
 	}
 
 	@Example
+	public void shouldCarryResizeHandlesOnThreeEdgesAndTheCorner() {
+		final String html = templates.render(new IndexView("Unigrid"));
+
+		assertTrue(html.contains("data-resize=\"left\""), html);
+		assertTrue(html.contains("data-resize=\"right\""), html);
+		assertTrue(html.contains("data-resize=\"bottom\""), html);
+		assertTrue(html.contains("data-resize=\"bottom-right\""), html);
+	}
+
+	@Example
 	public void shouldShowTheVersionInTheAboutBlock() {
 		final String html = templates.render(new AboutView("9.9.9"));
 
