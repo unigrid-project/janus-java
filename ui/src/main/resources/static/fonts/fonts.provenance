@@ -1,0 +1,28 @@
+Sora, Orbitron and Space Mono, latin subsets as served by Google Fonts
+
+Vendored rather than fetched at runtime, so that what ships is what was reviewed
+and the wallet never reaches out for a typeface. All three families are licensed
+under the SIL Open Font License 1.1; each family's notice sits next to its file.
+
+  sora-latin.woff2              Sora, variable weight 400 to 800, 25284 bytes
+    source   https://fonts.gstatic.com/s/sora/v17/xMQ9uFFYT72X5wkB_18qmnndmSdSnh2BAfO5mnuyOo1lfiQwV6-x.woff2
+    sha256   811e11966d29f3a01fcb19b087b61ac067d380665a55aebb7fcdf2cda95e4a93
+    licence  sora.OFL.txt
+
+  orbitron-700-latin.woff2      Orbitron, weight 700, 6528 bytes
+    source   https://fonts.gstatic.com/s/orbitron/v35/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1ny_CmBoWgz.woff2
+    sha256   ee6acc5ad5349018f9ca71fab8118144160e110838931874150a1ac3f97db38d
+    licence  orbitron.OFL.txt
+
+  space-mono-400-latin.woff2    Space Mono, weight 400, 16520 bytes
+    source   https://fonts.gstatic.com/s/spacemono/v17/i7dPIFZifjKcF5UAWdDRYEF8RQ.woff2
+    sha256   fb4a81a2d0a893e5c38c394a7e716a1cef0b24610a0af49c96f6d529bd66bf2b
+    licence  space-mono.OFL.txt
+
+The files were resolved through
+  https://fonts.googleapis.com/css2?family=Sora:wght@400;600&family=Orbitron:wght@700&family=Space+Mono&display=swap
+requested with a Chrome user agent, taking the latin block of each face. The
+notices come from https://github.com/google/fonts/tree/main/ofl.
+
+Verify a replacement before committing it:
+  sha256sum *.woff2
