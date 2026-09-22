@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -125,10 +126,10 @@ public class HedgehogService {
 
 		try {
 			if (!process.waitFor(STOP_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
-				process.destroyForcibly();
+				destroyAll(process);
 			}
 		} catch (InterruptedException e) {
-			process.destroyForcibly();
+			destroyAll(process);
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -159,7 +160,7 @@ public class HedgehogService {
 			}
 
 			if (Instant.now().isAfter(deadline)) {
-				process.destroyForcibly();
+				destroyAll(process);
 				throw new IllegalStateException("Hedgehog did not answer within " + startTimeout.toSeconds()
 					+ " seconds"
 				);
@@ -167,6 +168,18 @@ public class HedgehogService {
 
 			pause();
 		}
+	}
+
+	/*
+	 * The released Hedgehog is a launcher that runs the real one as a child of its own, so ending the
+	 * launcher alone would leave Hedgehog behind. The children are taken first, while they can still be
+	 * found through their parent.
+	 */
+	private static void destroyAll(final Process process) {
+		final List<ProcessHandle> children = process.descendants().toList();
+
+		process.destroyForcibly();
+		children.forEach(ProcessHandle::destroyForcibly);
 	}
 
 	private static void pause() {
@@ -185,7 +198,7 @@ public class HedgehogService {
 		final Process fetch = fetching;
 
 		if (fetch != null) {
-			fetch.destroyForcibly();
+			destroyAll(fetch);
 		}
 
 		end(started);
@@ -214,7 +227,7 @@ public class HedgehogService {
 				throw new IllegalStateException("The legacy ledger could not be downloaded; see " + logFile);
 			}
 		} catch (InterruptedException e) {
-			fetching.destroyForcibly();
+			destroyAll(fetching);
 			Thread.currentThread().interrupt();
 			throw new IllegalStateException("Janus is shutting down", e);
 		}

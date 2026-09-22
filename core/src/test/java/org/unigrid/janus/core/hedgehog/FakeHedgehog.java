@@ -60,10 +60,19 @@ public final class FakeHedgehog {
 
 	/** A launcher that runs this class in a JVM of its own, the way the real executable runs. */
 	static Path install(final Path home) throws IOException {
+		return install(home, "exec ");
+	}
+
+	/** Like the released Hedgehog, whose launcher runs the real one as a child rather than becoming it. */
+	static Path installAsLauncher(final Path home) throws IOException {
+		return install(home, "");
+	}
+
+	private static Path install(final Path home, final String exec) throws IOException {
 		final Path java = Path.of(System.getProperty("java.home"), "bin", "java");
 		final Path script = home.resolve("hedgehog");
 
-		Files.writeString(script, "#!/bin/sh\nFAKE_HEDGEHOG_HOME='" + home + "' exec '" + java + "' -cp '"
+		Files.writeString(script, "#!/bin/sh\nFAKE_HEDGEHOG_HOME='" + home + "' " + exec + "'" + java + "' -cp '"
 			+ System.getProperty("java.class.path") + "' " + FakeHedgehog.class.getName() + " \"$@\"\n"
 		);
 		script.toFile().setExecutable(true);

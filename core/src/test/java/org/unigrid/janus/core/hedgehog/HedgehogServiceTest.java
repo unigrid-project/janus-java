@@ -139,11 +139,13 @@ public class HedgehogServiceTest {
 	private URI launchedAt;
 
 	private HedgehogService launching() throws IOException {
+		return launching(FakeHedgehog.install(home));
+	}
+
+	private HedgehogService launching(final Path script) throws IOException {
 		try (ServerSocket socket = new ServerSocket(0)) {
 			launchedAt = URI.create("http://127.0.0.1:" + socket.getLocalPort());
 		}
-
-		final Path script = FakeHedgehog.install(home);
 
 		service = new HedgehogService(new HedgehogLocation(script.toString(), null, "", "Linux"),
 			new HedgehogClient(launchedAt, Duration.ofSeconds(2)), launchedAt, home.resolve("hedgehog.log"),
@@ -322,5 +324,35 @@ public class HedgehogServiceTest {
 		settle(service);
 		service.stop();
 		assertTrue(gone(home.resolve(FakeHedgehog.DAEMON_PID)));
+	}
+
+	@Example
+	public void shouldEndTheHedgehogALauncherStartedAsWell() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
+		Files.createFile(home.resolve(FakeHedgehog.STOP_REFUSED));
+
+		final HedgehogService service = launching(FakeHedgehog.installAsLauncher(home));
+
+		service.prepare();
+		settle(service);
+		service.stop();
+		assertTrue(gone(home.resolve(FakeHedgehog.DAEMON_PID)));
+	}
+
+	@Example
+	public void shouldEndAFetchALauncherStartedWhenJanusCloses() throws IOException, InterruptedException {
+		Files.createFile(home.resolve(FakeHedgehog.FETCH_HANGS));
+
+		final HedgehogService service = launching(FakeHedgehog.installAsLauncher(home));
+		final Path pid = home.resolve(FakeHedgehog.FETCH_PID);
+
+		service.prepare();
+
+		for (int i = 0; i < 100 && !(Files.exists(pid) && Files.size(pid) > 0); i++) {
+			Thread.sleep(100);
+		}
+
+		service.stop();
+		assertTrue(gone(pid));
 	}
 }
