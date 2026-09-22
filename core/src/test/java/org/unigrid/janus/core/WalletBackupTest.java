@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Comparator;
-import java.util.Optional;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
@@ -32,20 +34,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class WalletChoiceTest {
-	private static final byte[] KEYS = {1, 2, 3};
+public class WalletBackupTest {
+	private static final Clock NOON = Clock.fixed(Instant.parse("2026-09-22T12:30:05Z"), ZoneOffset.UTC);
+	private static final byte[] KEYS = {1, 2, 3, 4};
 
 	private Path root;
-	private Path backups;
+	private Path folder;
 	private Path wallet;
-	private WalletChoice choice;
+	private WalletBackup backup;
 
 	@BeforeTry
 	public void prepareAWallet() throws IOException {
 		root = Files.createTempDirectory("janus");
-		backups = root.resolve("backups");
+		folder = root.resolve("backups");
 		wallet = Files.write(root.resolve("wallet.dat"), KEYS);
-		choice = new WalletChoice(new WalletBackup(backups, Clock.systemUTC()));
+		backup = new WalletBackup(folder, NOON);
 	}
 
 	@AfterTry
@@ -58,61 +61,43 @@ public class WalletChoiceTest {
 	}
 
 	@Example
-	public void shouldHaveNothingChosenToBeginWith() {
-		assertEquals(Optional.empty(), choice.chosen());
-		assertEquals(Optional.empty(), choice.backup());
-	}
+	public void shouldCopyTheWalletIntoAFolderItCreates() throws IOException {
+		final Path copy = backup.backup(wallet);
 
-	@Example
-	public void shouldRememberTheWalletThatWasChosen() {
-		choice.choose(wallet);
-		assertEquals(Optional.of(wallet), choice.chosen());
-	}
-
-	@Example
-	public void shouldBackUpTheWalletAsItIsChosen() throws IOException {
-		choice.choose(wallet);
-
-		final Path copy = choice.backup().orElseThrow();
-
-		assertEquals(backups, copy.getParent());
+		assertEquals(folder.resolve("wallet-20260922-123005.dat"), copy);
 		assertArrayEquals(KEYS, Files.readAllBytes(copy));
 	}
 
 	@Example
-	public void shouldNotBackUpTheSameChoiceTwice() throws IOException {
-		choice.choose(wallet);
-		choice.choose(wallet);
+	public void shouldKeepAnEarlierCopyMadeTheSameSecond() throws IOException {
+		final Path first = backup.backup(wallet);
 
-		try (Stream<Path> copies = Files.list(backups)) {
-			assertEquals(1, copies.count());
+		Files.write(wallet, new byte[] {9});
+
+		final Path second = backup.backup(wallet);
+
+		assertEquals(folder.resolve("wallet-20260922-123005-2.dat"), second);
+		assertArrayEquals(KEYS, Files.readAllBytes(first));
+		assertArrayEquals(new byte[] {9}, Files.readAllBytes(second));
+	}
+
+	@Example
+	public void shouldKeepTheCopiesFromOtherUsers() throws IOException {
+		final Path copy = backup.backup(wallet);
+
+		if (Files.getFileStore(root).supportsFileAttributeView("posix")) {
+			assertEquals("rwx------", PosixFilePermissions.toString(Files.getPosixFilePermissions(folder)));
+			assertEquals("rw-------", PosixFilePermissions.toString(Files.getPosixFilePermissions(copy)));
 		}
 	}
 
 	@Example
-	public void shouldKeepTheEarlierChoiceWhenTheBackupFails() throws IOException {
-		choice.choose(wallet);
-
-		final Path copy = choice.backup().orElseThrow();
-		final Path other = Files.createFile(root.resolve("other.dat"));
-
-		Files.delete(copy);
-		Files.delete(backups);
-		Files.createFile(backups);
-
-		assertThrows(UncheckedIOException.class, () -> choice.choose(other));
-		assertEquals(Optional.of(wallet), choice.chosen());
-		assertEquals(Optional.of(copy), choice.backup());
-	}
-
-	@Example
-	public void shouldRefuseAPathWithoutAWalletFile() {
-		final Path missing = Path.of("/nowhere/wallet.dat");
-		final IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-			() -> choice.choose(missing)
+	public void shouldSayWhichWalletCouldNotBeCopied() {
+		final Path missing = root.resolve("gone.dat");
+		final UncheckedIOException thrown = assertThrows(UncheckedIOException.class,
+			() -> backup.backup(missing)
 		);
 
 		assertTrue(thrown.getMessage().contains(missing.toString()), thrown.getMessage());
-		assertEquals(Optional.empty(), choice.chosen());
 	}
 }

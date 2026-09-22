@@ -23,11 +23,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
 import org.unigrid.janus.core.DataDirectory;
+import org.unigrid.janus.core.WalletBackup;
 import org.unigrid.janus.core.WalletChoice;
 import org.unigrid.janus.ui.view.ImportView;
 import org.unigrid.janus.web.action.ActionExtension;
@@ -41,16 +45,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ImportControllerTest {
-	private final WalletChoice choice = new WalletChoice();
-
 	private Path directory;
 	private Path elsewhere;
+	private Path backups;
+	private WalletChoice choice;
 	private ImportController controller;
 
 	@BeforeTry
 	public void prepareAnEmptyDataDirectory() throws IOException {
 		directory = Files.createTempDirectory("janus");
 		elsewhere = Files.createTempFile("backup", ".dat");
+		backups = Files.createTempDirectory("backups");
+		choice = new WalletChoice(new WalletBackup(backups, Clock.systemUTC()));
 		controller = new ImportController(new DataDirectory(directory), choice);
 	}
 
@@ -59,6 +65,12 @@ public class ImportControllerTest {
 		Files.deleteIfExists(directory.resolve("wallet.dat"));
 		Files.delete(directory);
 		Files.delete(elsewhere);
+
+		try (Stream<Path> paths = Files.walk(backups)) {
+			for (final Path path : paths.sorted(Comparator.reverseOrder()).toList()) {
+				Files.delete(path);
+			}
+		}
 	}
 
 	private Path leaveAWalletBehind() throws IOException {

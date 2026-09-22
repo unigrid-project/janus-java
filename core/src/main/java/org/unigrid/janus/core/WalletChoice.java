@@ -17,24 +17,43 @@
 package org.unigrid.janus.core;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-/** The wallet file the user has settled on, kept until the daemon is started with it. */
+/**
+ * The wallet file the user has settled on, kept until the daemon is started with it. A wallet only
+ * counts as chosen once a copy of it has been made.
+ */
 @ApplicationScoped
 public class WalletChoice {
-	private volatile Path chosen;
+	private record Chosen(Path wallet, Path backup) { }
 
-	public void choose(final Path wallet) {
+	private final WalletBackup backups;
+	private volatile Chosen chosen;
+
+	@Inject
+	public WalletChoice(final WalletBackup backups) {
+		this.backups = backups;
+	}
+
+	public synchronized void choose(final Path wallet) {
 		if (!Files.isRegularFile(wallet)) {
 			throw new IllegalArgumentException("There is no wallet file at " + wallet);
 		}
 
-		chosen = wallet;
+		if (!chosen().equals(Optional.of(wallet))) {
+			chosen = new Chosen(wallet, backups.backup(wallet));
+		}
 	}
 
 	public Optional<Path> chosen() {
-		return Optional.ofNullable(chosen);
+		return Optional.ofNullable(chosen).map(Chosen::wallet);
+	}
+
+	/** Where the copy of the chosen wallet was put. */
+	public Optional<Path> backup() {
+		return Optional.ofNullable(chosen).map(Chosen::backup);
 	}
 }
