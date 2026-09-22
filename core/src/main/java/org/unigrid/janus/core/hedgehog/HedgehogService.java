@@ -16,13 +16,19 @@
 
 package org.unigrid.janus.core.hedgehog;
 
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.unigrid.janus.core.hedgehog.HedgehogState.Phase;
 
@@ -31,6 +37,8 @@ import org.unigrid.janus.core.hedgehog.HedgehogState.Phase;
 @ApplicationScoped
 public class HedgehogService {
 	private static final Duration START_TIMEOUT = Duration.ofSeconds(30);
+	private static final Duration POLL = Duration.ofMillis(200);
+	private static final Duration STOP_TIMEOUT = Duration.ofSeconds(5);
 
 	private final HedgehogLocation location;
 	private final HedgehogClient client;
@@ -45,6 +53,7 @@ public class HedgehogService {
 	});
 
 	private volatile HedgehogState state = HedgehogState.IDLE;
+	private volatile Process started;
 
 	@Inject
 	public HedgehogService(final HedgehogLocation location) {
@@ -81,7 +90,8 @@ public class HedgehogService {
 	private void bringUp() {
 		try {
 			if (client.version().isEmpty()) {
-				throw new IllegalStateException("No Hedgehog answers on this computer");
+				started = launch();
+				awaitAnswer(started);
 			}
 
 			state = HedgehogState.ready(signed(client.snapshot()));
@@ -97,5 +107,79 @@ public class HedgehogService {
 		}
 
 		return snapshot;
+	}
+
+	@PreDestroy
+	public void stop() {
+		worker.shutdownNow();
+		end(started);
+		client.close();
+	}
+
+	/* Hedgehog is asked to stop first so it can close its files, and only ended by force if it will not. */
+	private void end(final Process process) {
+		if (process == null || !process.isAlive()) {
+			return;
+		}
+
+		try {
+			client.stop();
+		} catch (HedgehogUnavailable | IllegalStateException e) {
+			log.debug("Hedgehog did not take the request to stop", e);
+		}
+
+		try {
+			if (!process.waitFor(STOP_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
+				process.destroyForcibly();
+			}
+		} catch (InterruptedException e) {
+			process.destroyForcibly();
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private Process launch() {
+		final Path executable = location.find()
+			.orElseThrow(() -> new IllegalStateException("Hedgehog is not installed on this computer"));
+
+		return run(executable.toString(), "daemon", "--restport=" + base.getPort());
+	}
+
+	private Process run(final String... command) {
+		try {
+			Files.createDirectories(logFile.getParent());
+			return new ProcessBuilder(command).redirectErrorStream(true)
+				.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile.toFile())).start();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Hedgehog could not be run from " + command[0], e);
+		}
+	}
+
+	private void awaitAnswer(final Process process) {
+		final Instant deadline = Instant.now().plus(startTimeout);
+
+		while (client.version().isEmpty()) {
+			if (!process.isAlive()) {
+				throw new IllegalStateException("Hedgehog stopped as it started; see " + logFile);
+			}
+
+			if (Instant.now().isAfter(deadline)) {
+				process.destroyForcibly();
+				throw new IllegalStateException("Hedgehog did not answer within " + startTimeout.toSeconds()
+					+ " seconds"
+				);
+			}
+
+			pause();
+		}
+	}
+
+	private static void pause() {
+		try {
+			Thread.sleep(POLL.toMillis());
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException("Janus is shutting down", e);
+		}
 	}
 }
