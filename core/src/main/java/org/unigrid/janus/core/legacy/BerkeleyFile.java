@@ -33,6 +33,7 @@ import java.util.BitSet;
 import java.util.Deque;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
@@ -103,25 +104,29 @@ public final class BerkeleyFile {
 		}
 	}
 
-	/* A damaged file points past its own end sooner or later, and the buffer says so by throwing. */
-	public static List<Entry> read(final Path path) {
+	/**
+	 * Every key of the main database, each with its value only where {@code valueWanted} asks for it and
+	 * an empty one elsewhere, so values such as private keys are never copied out of the file.
+	 */
+	public static List<Entry> read(final Path path, final Predicate<byte[]> valueWanted) {
 		try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
 			final ByteBuffer file = channel.map(MapMode.READ_ONLY, 0, channel.size())
 				.order(ByteOrder.LITTLE_ENDIAN);
 
-			return new BerkeleyFile(path, file).main();
+			return new BerkeleyFile(path, file).main(valueWanted);
 		} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+			/* A damaged file points past its own end sooner or later, and the buffer says so by throwing. */
 			throw new IllegalArgumentException(path + " is not a wallet.dat Janus can read: it is cut short", e);
 		} catch (IOException e) {
 			throw new UncheckedIOException("The wallet at " + path + " could not be read", e);
 		}
 	}
 
-	private List<Entry> main() {
-		final Entry main = entries(root(0)).stream().filter(entry -> Arrays.equals(MAIN, entry.key()))
+	private List<Entry> main(final Predicate<byte[]> valueWanted) {
+		final Entry main = entries(root(0), key -> true).stream().filter(entry -> Arrays.equals(MAIN, entry.key()))
 			.findFirst().orElseThrow(() -> refusal("it has no main database"));
 
-		return entries(root(ByteBuffer.wrap(main.value()).getInt()));
+		return entries(root(ByteBuffer.wrap(main.value()).getInt()), valueWanted);
 	}
 
 	private int root(final int page) {
@@ -146,7 +151,7 @@ public final class BerkeleyFile {
 		return file.getInt(start + META_ROOT);
 	}
 
-	private List<Entry> entries(final int root) {
+	private List<Entry> entries(final int root, final Predicate<byte[]> valueWanted) {
 		final List<Entry> entries = new ArrayList<>();
 		final Deque<Integer> pending = new ArrayDeque<>(List.of(root));
 
@@ -157,7 +162,7 @@ public final class BerkeleyFile {
 			switch (file.get(start + PAGE_TYPE)) {
 				case INTERNAL -> items(page, start, this::internalExtent)
 					.forEach(item -> pending.push(file.getInt(item + ITEM_PAGE)));
-				case LEAF -> entries.addAll(pairs(page, start));
+				case LEAF -> entries.addAll(pairs(page, start, valueWanted));
 				default -> throw refusal("page " + page + " is of a kind a wallet does not use");
 			}
 		}
@@ -165,7 +170,7 @@ public final class BerkeleyFile {
 		return entries;
 	}
 
-	private List<Entry> pairs(final int page, final int start) {
+	private List<Entry> pairs(final int page, final int start, final Predicate<byte[]> valueWanted) {
 		final List<Integer> items = items(page, start, this::leafExtent);
 		final List<Entry> pairs = new ArrayList<>();
 
@@ -178,7 +183,9 @@ public final class BerkeleyFile {
 			final int value = items.get(i + 1);
 
 			if (!deleted(key) && !deleted(value)) {
-				pairs.add(new Entry(data(key), data(value)));
+				final byte[] keyData = data(key);
+
+				pairs.add(new Entry(keyData, valueWanted.test(keyData) ? data(value) : new byte[0]));
 			}
 		}
 

@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
@@ -39,6 +40,7 @@ public class BerkeleyFileTest {
 	private static final int PAGE_SIZE = 512;
 	private static final int MAIN_META_PAGE = 2;
 	private static final int FIRST_LEAF_PAGE = 4;
+	private static final Predicate<byte[]> EVERY_VALUE = key -> true;
 
 	static Path fixture(final String name) {
 		try {
@@ -58,7 +60,7 @@ public class BerkeleyFileTest {
 
 	private static void assertRefused(final Path file) {
 		final IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-			() -> BerkeleyFile.read(file)
+			() -> BerkeleyFile.read(file, EVERY_VALUE)
 		);
 
 		assertTrue(thrown.getMessage().startsWith(file + REFUSAL), thrown.getMessage());
@@ -66,13 +68,13 @@ public class BerkeleyFileTest {
 
 	@Example
 	public void shouldReadEveryRecordOfTheMainDatabase() {
-		assertEquals(311, BerkeleyFile.read(fixture("wallet.dat")).size());
+		assertEquals(311, BerkeleyFile.read(fixture("wallet.dat"), EVERY_VALUE).size());
 	}
 
 	@Example
 	public void shouldFollowOverflowPagesForALargeValue() {
 		final byte[] key = {8, 'd', 'e', 's', 't', 'd', 'a', 't', 'a', 3, 'b', 'i', 'g'};
-		final List<BerkeleyFile.Entry> entries = BerkeleyFile.read(fixture("wallet.dat"));
+		final List<BerkeleyFile.Entry> entries = BerkeleyFile.read(fixture("wallet.dat"), EVERY_VALUE);
 		final byte[] value = entries.stream().filter(entry -> Arrays.equals(key, entry.key()))
 			.findFirst().orElseThrow().value();
 		final byte[] expected = new byte[3003];
@@ -82,6 +84,14 @@ public class BerkeleyFileTest {
 		expected[1] = (byte) 0xb8;
 		expected[2] = 0x0b;
 		assertArrayEquals(expected, value);
+	}
+
+	@Example
+	public void shouldLeaveOutTheValuesNobodyAskedFor() {
+		final List<BerkeleyFile.Entry> entries = BerkeleyFile.read(fixture("wallet.dat"), key -> false);
+
+		assertEquals(311, entries.size());
+		assertTrue(entries.stream().allMatch(entry -> entry.value().length == 0));
 	}
 
 	@Example
@@ -165,7 +175,7 @@ public class BerkeleyFileTest {
 		content[offset] = damage;
 
 		try {
-			BerkeleyFile.read(copy(content));
+			BerkeleyFile.read(copy(content), EVERY_VALUE);
 		} catch (IllegalArgumentException refused) {
 			assertTrue(refused.getMessage().contains(REFUSAL), refused.getMessage());
 		} catch (RuntimeException e) {

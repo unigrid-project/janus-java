@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +32,7 @@ import java.util.Set;
 public final class WalletRecords {
 	private static final Set<String> KEY_RECORDS = Set.of("key", "wkey", "ckey");
 	private static final String POOL_RECORD = "pool";
+	private static final byte[] POOL_PREFIX = {4, 'p', 'o', 'o', 'l'};
 	private static final int POOL_VERSION_AND_TIME = Integer.BYTES + Long.BYTES;
 	private static final Set<Integer> PUBLIC_KEY_SIZES = Set.of(33, 65);
 
@@ -39,6 +41,12 @@ public final class WalletRecords {
 	private static final int LONG_LENGTH = 0xff;
 
 	private WalletRecords() {
+	}
+
+	/** Only a keypool record keeps its public key in its value; every other value can stay in the file. */
+	public static boolean needsValue(final byte[] key) {
+		return key.length >= POOL_PREFIX.length
+			&& Arrays.equals(key, 0, POOL_PREFIX.length, POOL_PREFIX, 0, POOL_PREFIX.length);
 	}
 
 	public static List<byte[]> publicKeys(final List<BerkeleyFile.Entry> entries) {

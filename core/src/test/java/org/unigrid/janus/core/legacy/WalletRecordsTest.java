@@ -25,6 +25,7 @@ import java.util.List;
 import net.jqwik.api.Example;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -80,6 +81,15 @@ public class WalletRecordsTest {
 		assertArrayEquals(COMPRESSED, keys.get(1));
 		assertArrayEquals(COMPRESSED, keys.get(2));
 		assertArrayEquals(UNCOMPRESSED, keys.get(3));
+	}
+
+	@Example
+	public void shouldNeedTheValueOfAKeypoolRecordAlone() {
+		assertTrue(WalletRecords.needsValue(pool(COMPRESSED).key()));
+		assertFalse(WalletRecords.needsValue(record("key", compact(UNCOMPRESSED), new byte[0]).key()));
+		assertFalse(WalletRecords.needsValue(record("ckey", compact(COMPRESSED), new byte[0]).key()));
+		assertFalse(WalletRecords.needsValue(record("wkey", compact(COMPRESSED), new byte[0]).key()));
+		assertFalse(WalletRecords.needsValue(record("mkey", new byte[4], new byte[0]).key()));
 	}
 
 	@Example

@@ -28,7 +28,7 @@ public final class LegacyWallet {
 	}
 
 	public static SortedSet<String> addresses(final Path wallet) {
-		final List<BerkeleyFile.Entry> entries = BerkeleyFile.read(wallet);
+		final List<BerkeleyFile.Entry> entries = BerkeleyFile.read(wallet, WalletRecords::needsValue);
 
 		try {
 			return WalletRecords.publicKeys(entries).stream().map(LegacyAddress::of)
