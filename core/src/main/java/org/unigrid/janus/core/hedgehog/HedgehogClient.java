@@ -91,13 +91,16 @@ public class HedgehogClient implements AutoCloseable {
 		return ask(page, response -> read(response, answer -> answer.readEntity(TRANSACTIONS)));
 	}
 
-	/** The version of the Hedgehog answering here, or empty when none does. */
+	/**
+	 * The version of the Hedgehog answering here, or empty when none does. Something else answering on
+	 * Hedgehog's port counts as no Hedgehog, since it cannot be asked about the ledger either.
+	 */
 	public Optional<String> version() {
 		try {
 			return Optional.of(ask(hedgehog.path("version"),
 				response -> read(response, answer -> answer.readEntity(Version.class))
 			).version());
-		} catch (HedgehogUnavailable e) {
+		} catch (HedgehogUnavailable | SnapshotMissing | IllegalArgumentException | IllegalStateException e) {
 			return Optional.empty();
 		}
 	}

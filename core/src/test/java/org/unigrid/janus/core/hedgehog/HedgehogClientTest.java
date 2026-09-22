@@ -163,6 +163,18 @@ public class HedgehogClientTest {
 	}
 
 	@Example
+	public void shouldGiveNoVersionWhenSomethingElseAnswers() {
+		hedgehog.answer("/version", 200, "<html><body>Something else lives here</body></html>");
+
+		assertEquals(Optional.empty(), client.version());
+	}
+
+	@Example
+	public void shouldGiveNoVersionWhenTheAnswerIsNotHedgehogs() {
+		assertEquals(Optional.empty(), client.version());
+	}
+
+	@Example
 	public void shouldGiveNoVersionWhenNothingListens() throws IOException {
 		try (HedgehogClient nowhere = new HedgehogClient(nothingListening(), Duration.ofSeconds(2))) {
 			assertEquals(Optional.empty(), nowhere.version());
