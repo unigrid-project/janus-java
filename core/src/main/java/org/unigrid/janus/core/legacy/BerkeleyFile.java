@@ -110,13 +110,17 @@ public final class BerkeleyFile {
 	 */
 	public static List<Entry> read(final Path path, final Predicate<byte[]> valueWanted) {
 		try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
+			if (channel.size() > Integer.MAX_VALUE) {
+				throw refusal(path, "it is larger than 2 GB", null);
+			}
+
 			final ByteBuffer file = channel.map(MapMode.READ_ONLY, 0, channel.size())
 				.order(ByteOrder.LITTLE_ENDIAN);
 
 			return new BerkeleyFile(path, file).main(valueWanted);
 		} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 			/* A damaged file points past its own end sooner or later, and the buffer says so by throwing. */
-			throw new IllegalArgumentException(path + " is not a wallet.dat Janus can read: it is cut short", e);
+			throw refusal(path, "it is cut short", e);
 		} catch (IOException e) {
 			throw new UncheckedIOException("The wallet at " + path + " could not be read", e);
 		}
@@ -293,6 +297,10 @@ public final class BerkeleyFile {
 	}
 
 	private IllegalArgumentException refusal(final String reason) {
-		return new IllegalArgumentException(path + " is not a wallet.dat Janus can read: " + reason);
+		return refusal(path, reason, null);
+	}
+
+	private static IllegalArgumentException refusal(final Path path, final String reason, final Throwable cause) {
+		return new IllegalArgumentException(path + " is not a wallet.dat Janus can read: " + reason, cause);
 	}
 }

@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
@@ -109,6 +111,18 @@ public class BerkeleyFileTest {
 		final byte[] whole = Files.readAllBytes(fixture("wallet.dat"));
 
 		assertRefused(copy(Arrays.copyOf(whole, whole.length / 2)));
+	}
+
+	@Example
+	public void shouldRefuseAFileTooLargeToMap() throws IOException {
+		final Path file = copy(Files.readAllBytes(fixture("wallet.dat")));
+
+		try (FileChannel channel = FileChannel.open(file, StandardOpenOption.WRITE)) {
+			channel.write(ByteBuffer.wrap(new byte[1]), Integer.MAX_VALUE);
+		}
+
+		assertRefused(file);
+		Files.delete(file);
 	}
 
 	@Example
