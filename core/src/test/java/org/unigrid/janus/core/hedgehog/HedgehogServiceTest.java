@@ -229,4 +229,71 @@ public class HedgehogServiceTest {
 		service.stop();
 		assertTrue(running.requests().stream().noneMatch(request -> "/stop".equals(request.getRawPath())));
 	}
+
+	@Example
+	public void shouldFetchTheLedgerWhenHedgehogHasNone() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.SIGNATURE), "SIGNED");
+
+		final HedgehogService service = launching();
+
+		service.prepare();
+		assertEquals(Phase.READY, settle(service).phase(), service.state().reason());
+		assertTrue(Files.exists(home.resolve(FakeHedgehog.LEDGER)));
+	}
+
+	@Example
+	public void shouldRefuseAFetchedLedgerThatIsNotSigned() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.SIGNATURE), "UNSIGNED");
+
+		final HedgehogService service = launching();
+
+		service.prepare();
+		assertEquals(HedgehogState.failed("The ledger is not signed by the Unigrid Foundation"), settle(service));
+	}
+
+	@Example
+	public void shouldFailWhenTheLedgerCannotBeFetched() throws IOException {
+		Files.createFile(home.resolve(FakeHedgehog.FETCH_FAILS));
+
+		final HedgehogService service = launching();
+
+		service.prepare();
+		assertTrue(settle(service).reason().startsWith("The legacy ledger could not be downloaded; see "),
+			service.state().reason()
+		);
+	}
+
+	@Example
+	public void shouldFailWhenThereIsNothingHereToFetchWith() {
+		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
+		running.answer("/bootstrap", 503, "");
+
+		final HedgehogService service = reusing();
+
+		service.prepare();
+		final String reason = "Hedgehog has no legacy ledger, and there is no Hedgehog here to fetch one";
+
+		assertEquals(HedgehogState.failed(reason), settle(service));
+	}
+
+	@Example
+	public void shouldStopAFetchUnderWayWhenJanusCloses() throws IOException, InterruptedException {
+		Files.createFile(home.resolve(FakeHedgehog.FETCH_HANGS));
+
+		final HedgehogService service = launching();
+		final Path pid = home.resolve(FakeHedgehog.FETCH_PID);
+
+		service.prepare();
+
+		for (int i = 0; i < 100 && !(Files.exists(pid) && Files.size(pid) > 0); i++) {
+			Thread.sleep(100);
+		}
+
+		assertEquals(Phase.FETCHING, service.state().phase());
+		service.stop();
+		Thread.sleep(500);
+		assertEquals(Optional.of(false), ProcessHandle.of(Long.parseLong(Files.readString(pid).trim()))
+			.map(ProcessHandle::isAlive).or(() -> Optional.of(false))
+		);
+	}
 }

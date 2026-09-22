@@ -54,6 +54,7 @@ public class HedgehogService {
 
 	private volatile HedgehogState state = HedgehogState.IDLE;
 	private volatile Process started;
+	private volatile Process fetching;
 
 	@Inject
 	public HedgehogService(final HedgehogLocation location) {
@@ -94,7 +95,7 @@ public class HedgehogService {
 				awaitAnswer(started);
 			}
 
-			state = HedgehogState.ready(signed(client.snapshot()));
+			state = HedgehogState.ready(signed(ledger()));
 		} catch (RuntimeException e) {
 			log.warn("Hedgehog could not be made ready", e);
 			state = HedgehogState.failed(e.getMessage());
@@ -107,13 +108,6 @@ public class HedgehogService {
 		}
 
 		return snapshot;
-	}
-
-	@PreDestroy
-	public void stop() {
-		worker.shutdownNow();
-		end(started);
-		client.close();
 	}
 
 	/* Hedgehog is asked to stop first so it can close its files, and only ended by force if it will not. */
@@ -180,6 +174,65 @@ public class HedgehogService {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new IllegalStateException("Janus is shutting down", e);
+		}
+	}
+
+	@PreDestroy
+	public void stop() {
+		worker.shutdownNow();
+
+		final Process fetch = fetching;
+
+		if (fetch != null) {
+			fetch.destroyForcibly();
+		}
+
+		end(started);
+		client.close();
+	}
+
+	private SnapshotInfo ledger() {
+		try {
+			return client.snapshot();
+		} catch (SnapshotMissing e) {
+			state = HedgehogState.FETCHING;
+			fetch();
+			return awaitLedger();
+		}
+	}
+
+	private void fetch() {
+		final Path executable = location.find().orElseThrow(() -> new IllegalStateException(
+			"Hedgehog has no legacy ledger, and there is no Hedgehog here to fetch one"
+		));
+
+		fetching = run(executable.toString(), "bootstrap", "fetch", "--force");
+
+		try {
+			if (fetching.waitFor() != 0) {
+				throw new IllegalStateException("The legacy ledger could not be downloaded; see " + logFile);
+			}
+		} catch (InterruptedException e) {
+			fetching.destroyForcibly();
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException("Janus is shutting down", e);
+		}
+	}
+
+	/* Hedgehog notices the new file by itself, but not necessarily on the very first request after it lands. */
+	private SnapshotInfo awaitLedger() {
+		final Instant deadline = Instant.now().plus(startTimeout);
+
+		while (true) {
+			try {
+				return client.snapshot();
+			} catch (SnapshotMissing e) {
+				if (Instant.now().isAfter(deadline)) {
+					throw new IllegalStateException("Hedgehog did not take up the downloaded ledger", e);
+				}
+
+				pause();
+			}
 		}
 	}
 }
