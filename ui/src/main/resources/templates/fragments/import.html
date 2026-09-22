@@ -47,6 +47,10 @@
 				</button>
 			</div>
 
+			<p class="step__note" th:if="${view.backup != null}">
+				A copy was saved to <code class="path" th:text="${view.backup}">~/.janus/backups/wallet.dat</code>
+			</p>
+
 			<div class="step__actions">
 				<button class="button" type="button" hx-post="/action/welcome">Back</button>
 				<button class="button button--primary" type="button" th:disabled="${!view.hasChosen()}">Continue →</button>

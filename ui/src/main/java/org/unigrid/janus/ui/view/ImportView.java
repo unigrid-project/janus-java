@@ -20,10 +20,11 @@ import java.nio.file.Path;
 import org.unigrid.janus.web.action.View;
 
 /**
- * The import step: where a wallet was looked for, the one found there and the one settled on.
- * Either of the latter is absent as {@code null}, which is what the template tests for.
+ * The import step: where a wallet was looked for, the one found there, the one settled on and
+ * where that one was copied. Any of the last three is absent as {@code null}, which is what the
+ * template tests for.
  */
-public record ImportView(Path directory, Path found, Path chosen) implements View {
+public record ImportView(Path directory, Path found, Path chosen, Path backup) implements View {
 	@Override
 	public String template() {
 		return "fragments/import :: import";

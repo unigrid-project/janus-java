@@ -62,6 +62,8 @@ public class ImportController {
 	}
 
 	private ImportView view() {
-		return new ImportView(directory.path(), directory.wallet().orElse(null), choice.chosen().orElse(null));
+		return new ImportView(directory.path(), directory.wallet().orElse(null), choice.chosen().orElse(null),
+			choice.backup().orElse(null)
+		);
 	}
 }

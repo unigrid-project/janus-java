@@ -28,6 +28,8 @@ public class ViewsTest {
 	private static final Path DIRECTORY = Path.of("/data/unigrid");
 	private static final Path FOUND = DIRECTORY.resolve("wallet.dat");
 	private static final Path PICKED = Path.of("/mnt/backup/wallet.dat");
+	private static final Path BACKUP = Path.of("/home/ann/.janus/backups/wallet-20260922-123005.dat");
+	private static final String BACKUP_NOTE = "A copy was saved to";
 	private static final String LIT_DOT = "steps__dot--lit";
 	private static final String FOUND_CHOICE = "type=\"button\" hx-post=\"/action/import-found\"";
 	private static final String FILE_CHOICE = "type=\"button\" data-choose-file";
@@ -85,7 +87,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldOfferTheFoundWalletFirst() {
-		final String html = templates.render(new ImportView(DIRECTORY, FOUND, null));
+		final String html = templates.render(new ImportView(DIRECTORY, FOUND, null, null));
 
 		assertTrue(html.contains("Import wallet"), html);
 		assertTrue(html.contains(primary(FOUND_CHOICE)), html);
@@ -96,7 +98,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldSayWhereItLookedWhenNothingWasFound() {
-		final String html = templates.render(new ImportView(DIRECTORY, null, null));
+		final String html = templates.render(new ImportView(DIRECTORY, null, null, null));
 
 		assertTrue(html.contains("No wallet was found in"), html);
 		assertTrue(html.contains(DIRECTORY.toString()), html);
@@ -106,7 +108,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldHoldTheContinueButtonBackUntilAWalletIsChosen() {
-		final String html = templates.render(new ImportView(DIRECTORY, FOUND, null));
+		final String html = templates.render(new ImportView(DIRECTORY, FOUND, null, null));
 
 		assertTrue(html.contains("class=\"button button--primary\" type=\"button\" disabled=\"disabled\""), html);
 		assertFalse(html.contains("choice--selected"), html);
@@ -114,7 +116,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldMarkTheFoundWalletOnceItIsChosen() {
-		final String html = templates.render(new ImportView(DIRECTORY, FOUND, FOUND));
+		final String html = templates.render(new ImportView(DIRECTORY, FOUND, FOUND, BACKUP));
 
 		assertTrue(html.contains(selected(FOUND_CHOICE)), html);
 		assertTrue(html.contains(plain(FILE_CHOICE)), html);
@@ -123,7 +125,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldShowThePickedFileOnItsChoice() {
-		final String html = templates.render(new ImportView(DIRECTORY, FOUND, PICKED));
+		final String html = templates.render(new ImportView(DIRECTORY, FOUND, PICKED, BACKUP));
 
 		assertTrue(html.contains(selected(FILE_CHOICE)), html);
 		assertTrue(html.contains(PICKED.toString()), html);
@@ -131,8 +133,23 @@ public class ViewsTest {
 	}
 
 	@Example
+	public void shouldSayWhereTheChosenWalletWasCopied() {
+		final String html = templates.render(new ImportView(DIRECTORY, FOUND, PICKED, BACKUP));
+
+		assertTrue(html.contains(BACKUP_NOTE), html);
+		assertTrue(html.contains(BACKUP.toString()), html);
+	}
+
+	@Example
+	public void shouldMentionNoCopyBeforeAWalletIsChosen() {
+		final String html = templates.render(new ImportView(DIRECTORY, FOUND, null, null));
+
+		assertFalse(html.contains(BACKUP_NOTE), html);
+	}
+
+	@Example
 	public void shouldSendThePickedFileToTheImportAction() {
-		final String html = templates.render(new ImportView(DIRECTORY, null, null));
+		final String html = templates.render(new ImportView(DIRECTORY, null, null, null));
 
 		assertTrue(html.contains("hx-post=\"/action/import-file\""), html);
 		assertTrue(html.contains("hx-trigger=\"file-chosen\""), html);
@@ -141,14 +158,14 @@ public class ViewsTest {
 
 	@Example
 	public void shouldOfferTheRecoveryPhraseAsWell() {
-		final String html = templates.render(new ImportView(DIRECTORY, null, null));
+		final String html = templates.render(new ImportView(DIRECTORY, null, null, null));
 
 		assertTrue(html.contains("Restore from recovery phrase"), html);
 	}
 
 	@Example
 	public void shouldGoBackToTheWelcomeStep() {
-		final String html = templates.render(new ImportView(DIRECTORY, null, null));
+		final String html = templates.render(new ImportView(DIRECTORY, null, null, null));
 
 		assertTrue(html.contains("hx-post=\"/action/welcome\""), html);
 		assertFalse(html.contains("<!DOCTYPE html>"), "only the card should render: " + html);

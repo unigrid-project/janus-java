@@ -129,6 +129,14 @@ public class ImportControllerTest {
 	}
 
 	@Example
+	public void shouldShowWhereTheChosenWalletWasCopied() throws IOException {
+		final ImportView view = controller.onChooseFile(form(elsewhere));
+
+		assertEquals(choice.backup().orElseThrow(), view.backup());
+		assertEquals(backups, view.backup().getParent());
+	}
+
+	@Example
 	public void shouldRefuseAPickedPathThatIsNotAFile() {
 		assertThrows(IllegalArgumentException.class, () -> controller.onChooseFile(form(directory)));
 		assertEquals(Optional.empty(), choice.chosen());
