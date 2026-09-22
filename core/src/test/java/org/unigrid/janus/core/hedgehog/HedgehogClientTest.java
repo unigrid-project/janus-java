@@ -18,6 +18,8 @@ package org.unigrid.janus.core.hedgehog;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.ServerSocket;
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -27,6 +29,7 @@ import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HedgehogClientTest {
 	private static final String ADDRESS = "HQPjfHhSHs2rt97BrdGjT1BdL3Yg43yhXe";
@@ -133,5 +136,45 @@ public class HedgehogClientTest {
 
 		assertEquals("/bootstrap/address/a%2Fb%3Fc", hedgehog.requests().get(0).getRawPath());
 		assertEquals(null, hedgehog.requests().get(0).getRawQuery());
+	}
+
+	private static URI nothingListening() throws IOException {
+		try (ServerSocket socket = new ServerSocket(0)) {
+			return URI.create("http://127.0.0.1:" + socket.getLocalPort());
+		}
+	}
+
+	@Example
+	public void shouldGiveTheVersionOfTheHedgehogThatAnswers() {
+		hedgehog.answer("/version", 202, "{\"version\":\"0.0.8\",\"protocols\":[\"hedgehog/0.0.2\"]}");
+
+		assertEquals(Optional.of("0.0.8"), client.version());
+	}
+
+	@Example
+	public void shouldGiveNoVersionWhenNothingListens() throws IOException {
+		try (HedgehogClient nowhere = new HedgehogClient(nothingListening(), Duration.ofSeconds(2))) {
+			assertEquals(Optional.empty(), nowhere.version());
+		}
+	}
+
+	@Example
+	public void shouldSayHedgehogIsUnavailableWhenNothingListens() throws IOException {
+		try (HedgehogClient nowhere = new HedgehogClient(nothingListening(), Duration.ofSeconds(2))) {
+			assertThrows(HedgehogUnavailable.class, nowhere::snapshot);
+		}
+	}
+
+	@Example
+	public void shouldGiveUpOnAHedgehogThatNeverAnswers() {
+		final long start = System.nanoTime();
+
+		hedgehog.stall("/bootstrap", Duration.ofSeconds(3));
+
+		try (HedgehogClient impatient = new HedgehogClient(hedgehog.uri(), Duration.ofSeconds(1))) {
+			assertThrows(HedgehogUnavailable.class, impatient::snapshot);
+		}
+
+		assertTrue(Duration.ofNanos(System.nanoTime() - start).compareTo(Duration.ofMillis(2500)) < 0);
 	}
 }

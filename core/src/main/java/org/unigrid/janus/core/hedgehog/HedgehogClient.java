@@ -27,6 +27,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /** Asks Hedgehog what the frozen legacy ledger holds for the addresses of a wallet. */
@@ -37,11 +38,16 @@ public class HedgehogClient implements AutoCloseable {
 	private static final GenericType<List<AddressTransaction>> TRANSACTIONS = new GenericType<>() {
 	};
 
+	/** The part of Hedgehog's version answer Janus reads. */
+	public record Version(String version) {
+	}
+
 	private final Client client;
 	private final WebTarget hedgehog;
 
 	HedgehogClient(final URI base, final Duration timeout) {
-		client = ClientBuilder.newClient();
+		client = ClientBuilder.newBuilder().connectTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS)
+			.readTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS).build();
 		hedgehog = client.target(base);
 	}
 
@@ -62,6 +68,17 @@ public class HedgehogClient implements AutoCloseable {
 			.queryParam("limit", limit);
 
 		return ask(page, response -> read(response, answer -> answer.readEntity(TRANSACTIONS)));
+	}
+
+	/** The version of the Hedgehog answering here, or empty when none does. */
+	public Optional<String> version() {
+		try {
+			return Optional.of(ask(hedgehog.path("version"),
+				response -> read(response, answer -> answer.readEntity(Version.class))
+			).version());
+		} catch (HedgehogUnavailable e) {
+			return Optional.empty();
+		}
 	}
 
 	@Override
