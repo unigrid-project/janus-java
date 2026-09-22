@@ -234,4 +234,13 @@ public class HedgehogClientTest {
 			assertThrows(HedgehogUnavailable.class, impatient::snapshot);
 		}
 	}
+
+	@Example
+	public void shouldAskHedgehogToStop() {
+		hedgehog.answer("/stop", 202, "");
+
+		client.stop();
+
+		assertEquals("/stop", hedgehog.requests().get(0).getRawPath());
+	}
 }

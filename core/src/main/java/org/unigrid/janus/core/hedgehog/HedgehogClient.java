@@ -19,6 +19,8 @@ package org.unigrid.janus.core.hedgehog;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
@@ -106,6 +108,12 @@ public class HedgehogClient implements AutoCloseable {
 		}
 	}
 
+	public void stop() {
+		ask(hedgehog.path("stop"), request -> request.post(Entity.json("")),
+			response -> read(response, answer -> answer.getStatus())
+		);
+	}
+
 	@Override
 	public void close() {
 		client.close();
@@ -117,7 +125,13 @@ public class HedgehogClient implements AutoCloseable {
 	}
 
 	private static <T> T ask(final WebTarget target, final Function<Response, T> reader) {
-		try (Response response = target.request(MediaType.APPLICATION_JSON_TYPE).get()) {
+		return ask(target, request -> request.get(), reader);
+	}
+
+	private static <T> T ask(final WebTarget target, final Function<Invocation.Builder, Response> call,
+		final Function<Response, T> reader) {
+
+		try (Response response = call.apply(target.request(MediaType.APPLICATION_JSON_TYPE))) {
 			return reader.apply(response);
 		} catch (ProcessingException e) {
 			throw new HedgehogUnavailable("Hedgehog does not answer at " + target.getUri(), e);
