@@ -17,11 +17,15 @@
 package org.unigrid.janus.core.hedgehog;
 
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
@@ -29,6 +33,7 @@ import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
 import org.unigrid.janus.core.hedgehog.HedgehogState.Phase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HedgehogServiceTest {
 	private static final Set<Phase> SETTLED = Set.of(Phase.READY, Phase.FAILED);
@@ -45,6 +50,10 @@ public class HedgehogServiceTest {
 
 	@AfterTry
 	public void cleanUp() throws IOException {
+		if (service != null) {
+			service.stop();
+		}
+
 		running.close();
 
 		try (Stream<Path> paths = Files.walk(home)) {
@@ -124,5 +133,100 @@ public class HedgehogServiceTest {
 		running.answer("/bootstrap", 200, FakeHedgehog.snapshot("SIGNED"));
 		service.prepare();
 		assertEquals(Phase.READY, settle(service).phase());
+	}
+
+	private URI launchedAt;
+
+	private HedgehogService launching() throws IOException {
+		try (ServerSocket socket = new ServerSocket(0)) {
+			launchedAt = URI.create("http://127.0.0.1:" + socket.getLocalPort());
+		}
+
+		final Path script = FakeHedgehog.install(home);
+
+		service = new HedgehogService(new HedgehogLocation(script.toString(), null, "", "Linux"),
+			new HedgehogClient(launchedAt, Duration.ofSeconds(2)), launchedAt, home.resolve("hedgehog.log"),
+			Duration.ofSeconds(20)
+		);
+		return service;
+	}
+
+	private List<String> starts() throws IOException {
+		final Path starts = home.resolve(FakeHedgehog.STARTS);
+
+		return Files.exists(starts) ? Files.readAllLines(starts) : List.of();
+	}
+
+	@Example
+	public void shouldStartAHedgehogWhenNoneAnswers() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
+
+		final HedgehogService service = launching();
+
+		service.prepare();
+		assertEquals(Phase.READY, settle(service).phase(), service.state().reason());
+		assertEquals(1, starts().size());
+	}
+
+	@Example
+	public void shouldStartOnlyOneHedgehogHoweverOftenAsked() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
+
+		final HedgehogService service = launching();
+
+		for (int i = 0; i < 5; i++) {
+			service.prepare();
+		}
+
+		settle(service);
+		assertEquals(1, starts().size());
+	}
+
+	@Example
+	public void shouldFailWhenNoHedgehogIsInstalled() {
+		final HedgehogService service = service(new HedgehogClient(running.uri(), Duration.ofSeconds(2)), nowhere());
+
+		service.prepare();
+		assertEquals(HedgehogState.failed("Hedgehog is not installed on this computer"), settle(service));
+	}
+
+	@Example
+	public void shouldFailWhenHedgehogStopsAsItStarts() throws IOException {
+		Files.createFile(home.resolve(FakeHedgehog.DIES));
+
+		final HedgehogService service = launching();
+
+		service.prepare();
+		assertTrue(settle(service).reason().startsWith("Hedgehog stopped as it started; see "),
+			service.state().reason()
+		);
+	}
+
+	@Example
+	public void shouldStopTheHedgehogItStarted() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
+
+		final HedgehogService service = launching();
+
+		service.prepare();
+		settle(service);
+		service.stop();
+
+		try (HedgehogClient afterwards = new HedgehogClient(launchedAt, Duration.ofSeconds(1))) {
+			assertEquals(Optional.empty(), afterwards.version());
+		}
+	}
+
+	@Example
+	public void shouldLeaveAHedgehogItDidNotStartRunning() {
+		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
+		running.answer("/bootstrap", 200, FakeHedgehog.snapshot("SIGNED"));
+
+		final HedgehogService service = reusing();
+
+		service.prepare();
+		settle(service);
+		service.stop();
+		assertTrue(running.requests().stream().noneMatch(request -> "/stop".equals(request.getRawPath())));
 	}
 }
