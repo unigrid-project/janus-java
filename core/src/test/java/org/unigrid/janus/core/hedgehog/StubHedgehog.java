@@ -18,20 +18,30 @@ package org.unigrid.janus.core.hedgehog;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 
 /** A stand-in for Hedgehog's REST server that answers each path the way a test tells it to. */
 class StubHedgehog implements AutoCloseable {
+	private static final String THROWAWAY = "throwaway";
 	private static final Answer NOT_FOUND = new Answer(404, "", Duration.ZERO);
 
 	private record Answer(int status, String body, Duration delay) {
@@ -51,6 +61,41 @@ class StubHedgehog implements AutoCloseable {
 		this.scheme = scheme;
 		server.createContext("/", this::handle);
 		server.start();
+	}
+
+	/** A stand-in behind a self-signed certificate made for it alone, the way Hedgehog makes one each start. */
+	static StubHedgehog secure() throws IOException, GeneralSecurityException, InterruptedException {
+		final Path store = Files.createTempFile("hedgehog", ".p12");
+
+		Files.delete(store);
+
+		final String keytoolPath = Path.of(System.getProperty("java.home"), "bin", "keytool").toString();
+		final Process keytool = new ProcessBuilder(keytoolPath,
+			"-genkeypair", "-alias", "hedgehog", "-keyalg", "RSA", "-keysize", "2048", "-dname", "CN=localhost",
+			"-validity", "1", "-storetype", "PKCS12", "-keystore", store.toString(), "-storepass", THROWAWAY,
+			"-keypass", THROWAWAY
+		).redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
+
+		if (keytool.waitFor() != 0) {
+			throw new IllegalStateException("keytool could not make a certificate");
+		}
+
+		final KeyStore keys = KeyStore.getInstance("PKCS12");
+
+		try (InputStream in = Files.newInputStream(store)) {
+			keys.load(in, THROWAWAY.toCharArray());
+		} finally {
+			Files.delete(store);
+		}
+
+		final KeyManagerFactory factory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		final SSLContext context = SSLContext.getInstance("TLS");
+		final HttpsServer server = HttpsServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+
+		factory.init(keys, THROWAWAY.toCharArray());
+		context.init(factory.getKeyManagers(), null, null);
+		server.setHttpsConfigurator(new HttpsConfigurator(context));
+		return new StubHedgehog(server, "https");
 	}
 
 	void answer(final String rawPath, final int status, final String body) {

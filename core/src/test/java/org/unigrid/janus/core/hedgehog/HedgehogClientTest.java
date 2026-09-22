@@ -177,4 +177,29 @@ public class HedgehogClientTest {
 
 		assertTrue(Duration.ofNanos(System.nanoTime() - start).compareTo(Duration.ofMillis(2500)) < 0);
 	}
+
+	@Example
+	public void shouldTrustTheSelfSignedCertificateOfTheHedgehogHere() throws Exception {
+		try (StubHedgehog secure = StubHedgehog.secure();
+			HedgehogClient overTls = new HedgehogClient(secure.uri(), Duration.ofSeconds(2))) {
+
+			secure.answer("/version", 202, "{\"version\":\"0.0.8\",\"protocols\":[]}");
+			assertEquals(Optional.of("0.0.8"), overTls.version());
+		}
+	}
+
+	@Example
+	public void shouldRefuseAHostOtherThanThisComputer() {
+		final IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+			() -> new HedgehogClient(URI.create("https://hedgehog.example.org:52884"), Duration.ofSeconds(2))
+		);
+
+		assertTrue(thrown.getMessage().contains("hedgehog.example.org"), thrown.getMessage());
+	}
+
+	@Example
+	public void shouldAskTheHedgehogOnThisComputerByDefault() {
+		assertEquals(URI.create("https://127.0.0.1:52884"), HedgehogClient.LOCAL);
+		new HedgehogClient().close();
+	}
 }

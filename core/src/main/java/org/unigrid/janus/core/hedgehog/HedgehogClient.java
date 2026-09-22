@@ -24,14 +24,23 @@ import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.net.URI;
+import java.security.GeneralSecurityException;
+import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /** Asks Hedgehog what the frozen legacy ledger holds for the addresses of a wallet. */
 public class HedgehogClient implements AutoCloseable {
+	public static final URI LOCAL = URI.create("https://127.0.0.1:52884");
+
+	private static final String LOOPBACK = "127.0.0.1";
+	private static final Duration TIMEOUT = Duration.ofSeconds(10);
 	private static final int BAD_REQUEST = 400;
 	private static final int NOT_FOUND = 404;
 	private static final int UNAVAILABLE = 503;
@@ -45,8 +54,18 @@ public class HedgehogClient implements AutoCloseable {
 	private final Client client;
 	private final WebTarget hedgehog;
 
+	public HedgehogClient() {
+		this(LOCAL, TIMEOUT);
+	}
+
 	HedgehogClient(final URI base, final Duration timeout) {
-		client = ClientBuilder.newBuilder().connectTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS)
+		if (!LOOPBACK.equals(base.getHost())) {
+			throw new IllegalArgumentException("Hedgehog is only ever asked on this computer, never at " + base);
+		}
+
+		client = ClientBuilder.newBuilder().sslContext(trustingContext())
+			.hostnameVerifier((host, session) -> LOOPBACK.equals(host))
+			.connectTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS)
 			.readTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS).build();
 		hedgehog = client.target(base);
 	}
@@ -118,6 +137,37 @@ public class HedgehogClient implements AutoCloseable {
 			return entity.apply(response);
 		} catch (ProcessingException e) {
 			throw new IllegalStateException("Hedgehog answered with something Janus cannot read", e);
+		}
+	}
+
+	/*
+	 * Hedgehog makes a new self-signed certificate every time it starts, so there is no certificate to
+	 * pin. What is trusted instead is the address: the client talks to this computer and nowhere else,
+	 * and all it asks for is public ledger data whose signature Hedgehog has already checked.
+	 */
+	private static SSLContext trustingContext() {
+		final X509TrustManager anyCertificate = new X509TrustManager() {
+			@Override
+			public void checkClientTrusted(final X509Certificate[] chain, final String authType) {
+			}
+
+			@Override
+			public void checkServerTrusted(final X509Certificate[] chain, final String authType) {
+			}
+
+			@Override
+			public X509Certificate[] getAcceptedIssuers() {
+				return new X509Certificate[0];
+			}
+		};
+
+		try {
+			final SSLContext context = SSLContext.getInstance("TLS");
+
+			context.init(null, new TrustManager[] {anyCertificate}, null);
+			return context;
+		} catch (GeneralSecurityException e) {
+			throw new IllegalStateException("This Java platform offers no TLS", e);
 		}
 	}
 }
