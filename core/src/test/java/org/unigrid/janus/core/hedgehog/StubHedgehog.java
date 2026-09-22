@@ -42,9 +42,9 @@ import javax.net.ssl.SSLContext;
 /** A stand-in for Hedgehog's REST server that answers each path the way a test tells it to. */
 class StubHedgehog implements AutoCloseable {
 	private static final String THROWAWAY = "throwaway";
-	private static final Answer NOT_FOUND = new Answer(404, "", Duration.ZERO, Map.of());
+	private static final Answer NOT_FOUND = new Answer(404, "", Duration.ZERO, Map.of(), false);
 
-	private record Answer(int status, String body, Duration delay, Map<String, String> headers) {
+	private record Answer(int status, String body, Duration delay, Map<String, String> headers, boolean cutShort) {
 	}
 
 	private final HttpServer server;
@@ -99,15 +99,22 @@ class StubHedgehog implements AutoCloseable {
 	}
 
 	void answer(final String rawPath, final int status, final String body) {
-		answers.put(rawPath, new Answer(status, body, Duration.ZERO, Map.of()));
+		answers.put(rawPath, new Answer(status, body, Duration.ZERO, Map.of(), false));
 	}
 
 	void stall(final String rawPath, final Duration delay) {
-		answers.put(rawPath, new Answer(200, "{}", delay, Map.of()));
+		answers.put(rawPath, new Answer(200, "{}", delay, Map.of(), false));
 	}
 
 	void redirect(final String rawPath, final URI location) {
-		answers.put(rawPath, new Answer(302, "", Duration.ZERO, Map.of("Location", location.toString())));
+		answers.put(rawPath, new Answer(302, "", Duration.ZERO, Map.of("Location", location.toString()),
+			false
+		));
+	}
+
+	/* Sends the start of an answer and then goes quiet, the way a Hedgehog that hangs mid-answer would. */
+	void stallMidAnswer(final String rawPath, final Duration delay) {
+		answers.put(rawPath, new Answer(200, "{\"tipHash\":", delay, Map.of(), true));
 	}
 
 	List<URI> requests() {
@@ -124,18 +131,29 @@ class StubHedgehog implements AutoCloseable {
 		final Answer answer = answers.getOrDefault(exchange.getRequestURI().getRawPath(), NOT_FOUND);
 		final byte[] body = answer.body().getBytes(StandardCharsets.UTF_8);
 
-		try {
-			Thread.sleep(answer.delay().toMillis());
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+		if (!answer.cutShort()) {
+			pause(answer.delay());
 		}
 
 		exchange.getResponseHeaders().set("Content-Type", "application/json");
 		answer.headers().forEach(exchange.getResponseHeaders()::set);
-		exchange.sendResponseHeaders(answer.status(), body.length == 0 ? -1 : body.length);
+		exchange.sendResponseHeaders(answer.status(), answer.cutShort() || body.length == 0 ? 0 : body.length);
 
 		try (OutputStream out = exchange.getResponseBody()) {
 			out.write(body);
+			out.flush();
+
+			if (answer.cutShort()) {
+				pause(answer.delay());
+			}
+		}
+	}
+
+	private static void pause(final Duration delay) {
+		try {
+			Thread.sleep(delay.toMillis());
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 

@@ -23,6 +23,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
@@ -141,8 +142,23 @@ public class HedgehogClient implements AutoCloseable {
 		try {
 			return entity.apply(response);
 		} catch (ProcessingException e) {
+			if (cutOff(e)) {
+				throw new HedgehogUnavailable("Hedgehog stopped answering halfway", e);
+			}
+
 			throw new IllegalStateException("Hedgehog answered with something Janus cannot read", e);
 		}
+	}
+
+	/* A read that times out or breaks halfway surfaces several layers down, wrapped by the JSON reader. */
+	private static boolean cutOff(final Throwable failure) {
+		for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
+			if (cause instanceof IOException) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/*

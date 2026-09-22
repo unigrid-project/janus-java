@@ -225,4 +225,13 @@ public class HedgehogClientTest {
 		assertEquals(URI.create("https://127.0.0.1:52884"), HedgehogClient.LOCAL);
 		new HedgehogClient().close();
 	}
+
+	@Example
+	public void shouldSayHedgehogIsUnavailableWhenItStopsMidAnswer() {
+		hedgehog.stallMidAnswer("/bootstrap", Duration.ofSeconds(3));
+
+		try (HedgehogClient impatient = new HedgehogClient(hedgehog.uri(), Duration.ofSeconds(1))) {
+			assertThrows(HedgehogUnavailable.class, impatient::snapshot);
+		}
+	}
 }
