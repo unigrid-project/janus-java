@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
@@ -301,5 +302,25 @@ public class HedgehogServiceTest {
 		assertEquals(Optional.of(false), ProcessHandle.of(Long.parseLong(Files.readString(pid).trim()))
 			.map(ProcessHandle::isAlive).or(() -> Optional.of(false))
 		);
+	}
+
+	static boolean gone(final Path pidFile) throws IOException {
+		final long pid = Long.parseLong(Files.readString(pidFile).trim());
+
+		return ProcessHandle.of(pid).map(process -> process.onExit().completeOnTimeout(null, 5, TimeUnit.SECONDS)
+			.thenApply(exited -> !process.isAlive()).join()).orElse(true);
+	}
+
+	@Example
+	public void shouldEndItsOwnHedgehogEvenWhenItRefusesToStop() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
+		Files.createFile(home.resolve(FakeHedgehog.STOP_REFUSED));
+
+		final HedgehogService service = launching();
+
+		service.prepare();
+		settle(service);
+		service.stop();
+		assertTrue(gone(home.resolve(FakeHedgehog.DAEMON_PID)));
 	}
 }

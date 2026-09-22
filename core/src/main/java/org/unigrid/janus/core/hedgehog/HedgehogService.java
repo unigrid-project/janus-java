@@ -116,9 +116,10 @@ public class HedgehogService {
 			return;
 		}
 
+		/* Whatever Hedgehog makes of the request, it is ended below regardless, so no answer may stop that. */
 		try {
 			client.stop();
-		} catch (HedgehogUnavailable | IllegalStateException e) {
+		} catch (RuntimeException e) {
 			log.debug("Hedgehog did not take the request to stop", e);
 		}
 

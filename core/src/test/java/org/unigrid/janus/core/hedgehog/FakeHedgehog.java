@@ -40,6 +40,8 @@ public final class FakeHedgehog {
 	static final String DIES = "dies-at-start";
 	static final String STARTS = "starts";
 	static final String FETCH_PID = "fetch-pid";
+	static final String DAEMON_PID = "daemon-pid";
+	static final String STOP_REFUSED = "stop-refused";
 
 	private static final String PORT = "--restport=";
 
@@ -91,6 +93,7 @@ public final class FakeHedgehog {
 
 	private static void daemon(final Path home, final int port) throws IOException {
 		Files.writeString(home.resolve(STARTS), "started\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		Files.writeString(home.resolve(DAEMON_PID), Long.toString(ProcessHandle.current().pid()));
 
 		if (Files.exists(home.resolve(DIES))) {
 			System.exit(3);
@@ -103,6 +106,11 @@ public final class FakeHedgehog {
 			exchange -> answer(exchange, 202, "{\"version\":\"fake\",\"protocols\":[]}")
 		);
 		server.createContext("/stop", exchange -> {
+			if (Files.exists(home.resolve(STOP_REFUSED))) {
+				answer(exchange, 503, "");
+				return;
+			}
+
 			try {
 				answer(exchange, 202, "");
 			} finally {
