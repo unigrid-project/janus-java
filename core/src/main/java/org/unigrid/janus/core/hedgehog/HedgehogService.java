@@ -56,6 +56,7 @@ public class HedgehogService {
 	private volatile HedgehogState state = HedgehogState.IDLE;
 	private volatile Process started;
 	private volatile Process fetching;
+	private boolean stopped;
 
 	@Inject
 	public HedgehogService(final HedgehogLocation location) {
@@ -80,7 +81,7 @@ public class HedgehogService {
 
 	/** Starts getting Hedgehog ready unless that is under way or done; after a failure it tries again. */
 	public synchronized HedgehogState prepare() {
-		if (state.phase() == Phase.IDLE || state.phase() == Phase.FAILED) {
+		if (!stopped && (state.phase() == Phase.IDLE || state.phase() == Phase.FAILED)) {
 			state = HedgehogState.STARTING;
 			worker.execute(this::bringUp);
 		}
@@ -92,7 +93,7 @@ public class HedgehogService {
 	private void bringUp() {
 		try {
 			if (client.version().isEmpty()) {
-				started = launch();
+				started = kept(launch());
 				awaitAnswer(started);
 			}
 
@@ -171,6 +172,19 @@ public class HedgehogService {
 	}
 
 	/*
+	 * A process started while Janus was being stopped would be missed by stop(), which has already
+	 * looked, so it is ended here instead of being handed on.
+	 */
+	private synchronized Process kept(final Process process) {
+		if (stopped) {
+			destroyAll(process);
+			throw new IllegalStateException("Janus is shutting down");
+		}
+
+		return process;
+	}
+
+	/*
 	 * The released Hedgehog is a launcher that runs the real one as a child of its own, so ending the
 	 * launcher alone would leave Hedgehog behind. The children are taken first, while they can still be
 	 * found through their parent.
@@ -193,6 +207,10 @@ public class HedgehogService {
 
 	@PreDestroy
 	public void stop() {
+		synchronized (this) {
+			stopped = true;
+		}
+
 		worker.shutdownNow();
 
 		final Process fetch = fetching;
@@ -220,7 +238,7 @@ public class HedgehogService {
 			"Hedgehog has no legacy ledger, and there is no Hedgehog here to fetch one"
 		));
 
-		fetching = run(executable.toString(), "bootstrap", "fetch", "--force");
+		fetching = kept(run(executable.toString(), "bootstrap", "fetch", "--force"));
 
 		try {
 			if (fetching.waitFor() != 0) {

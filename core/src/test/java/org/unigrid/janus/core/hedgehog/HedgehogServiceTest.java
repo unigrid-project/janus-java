@@ -355,4 +355,12 @@ public class HedgehogServiceTest {
 		service.stop();
 		assertTrue(gone(pid));
 	}
+
+	@Example
+	public void shouldStartNothingOnceStopped() {
+		final HedgehogService service = reusing();
+
+		service.stop();
+		assertEquals(HedgehogState.IDLE, service.prepare());
+	}
 }
