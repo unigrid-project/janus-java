@@ -103,8 +103,11 @@ public final class FakeHedgehog {
 			exchange -> answer(exchange, 202, "{\"version\":\"fake\",\"protocols\":[]}")
 		);
 		server.createContext("/stop", exchange -> {
-			answer(exchange, 202, "");
-			System.exit(0);
+			try {
+				answer(exchange, 202, "");
+			} finally {
+				System.exit(0);
+			}
 		});
 		server.createContext("/bootstrap", exchange -> {
 			final Path ledger = home.resolve(LEDGER);
@@ -125,7 +128,9 @@ public final class FakeHedgehog {
 		exchange.sendResponseHeaders(status, bytes.length == 0 ? -1 : bytes.length);
 
 		try (OutputStream out = exchange.getResponseBody()) {
-			out.write(bytes);
+			if (bytes.length > 0) {
+				out.write(bytes);
+			}
 		}
 	}
 }

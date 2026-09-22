@@ -210,7 +210,13 @@ public class HedgehogServiceTest {
 
 		service.prepare();
 		settle(service);
+
+		final Instant asked = Instant.now();
+
 		service.stop();
+		assertTrue(Duration.between(asked, Instant.now()).compareTo(Duration.ofSeconds(3)) < 0,
+			"Hedgehog should leave when asked, well before it has to be forced"
+		);
 
 		try (HedgehogClient afterwards = new HedgehogClient(launchedAt, Duration.ofSeconds(1))) {
 			assertEquals(Optional.empty(), afterwards.version());
