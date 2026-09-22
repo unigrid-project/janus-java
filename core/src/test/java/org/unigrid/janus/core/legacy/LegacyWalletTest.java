@@ -16,7 +16,10 @@
 
 package org.unigrid.janus.core.legacy;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import net.jqwik.api.Example;
@@ -53,5 +56,15 @@ public class LegacyWalletTest {
 		assertEquals(wallet + " is not a wallet.dat Janus can read: a public key is 10 bytes",
 			thrown.getMessage()
 		);
+	}
+
+	@Example
+	public void shouldReadWalletsShapedLikeTheDaemonsOwn() throws IOException {
+		for (final String name : List.of("plain-wallet", "encrypted-wallet")) {
+			final Path addresses = BerkeleyFileTest.fixture(name + ".addresses");
+			final Set<String> expected = Set.copyOf(Files.readAllLines(addresses));
+
+			assertEquals(expected, LegacyWallet.addresses(BerkeleyFileTest.fixture(name + ".dat")), name);
+		}
 	}
 }
