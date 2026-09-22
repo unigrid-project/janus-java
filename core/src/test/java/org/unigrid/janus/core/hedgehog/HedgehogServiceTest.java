@@ -1,0 +1,128 @@
+/*
+    The Janus Wallet
+    Copyright © 2021-2026 Stiftelsen The Unigrid Foundation
+
+    This program is free software: you can redistribute it and/or modify it under the terms of the
+    addended GNU Affero General Public License as published by the Free Software Foundation, version 3
+    of the License (see COPYING and COPYING.addendum).
+
+    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received an addended copy of the GNU Affero General Public License with this program.
+    If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
+ */
+
+package org.unigrid.janus.core.hedgehog;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.stream.Stream;
+import net.jqwik.api.Example;
+import net.jqwik.api.lifecycle.AfterTry;
+import net.jqwik.api.lifecycle.BeforeTry;
+import org.unigrid.janus.core.hedgehog.HedgehogState.Phase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class HedgehogServiceTest {
+	private static final Set<Phase> SETTLED = Set.of(Phase.READY, Phase.FAILED);
+
+	private Path home;
+	private StubHedgehog running;
+	private HedgehogService service;
+
+	@BeforeTry
+	public void makeAHome() throws IOException {
+		home = Files.createTempDirectory("hedgehog");
+		running = new StubHedgehog();
+	}
+
+	@AfterTry
+	public void cleanUp() throws IOException {
+		running.close();
+
+		try (Stream<Path> paths = Files.walk(home)) {
+			paths.sorted(Comparator.reverseOrder()).forEach(path -> path.toFile().delete());
+		}
+	}
+
+	private HedgehogService service(final HedgehogClient client, final HedgehogLocation location) {
+		service = new HedgehogService(location, client, running.uri(), home.resolve("hedgehog.log"),
+			Duration.ofSeconds(20)
+		);
+		return service;
+	}
+
+	private HedgehogService reusing() {
+		return service(new HedgehogClient(running.uri(), Duration.ofSeconds(2)), nowhere());
+	}
+
+	static HedgehogLocation nowhere() {
+		return new HedgehogLocation(null, null, "", "Linux");
+	}
+
+	static HedgehogState settle(final HedgehogService service) {
+		final Instant deadline = Instant.now().plusSeconds(30);
+
+		try {
+			while (!SETTLED.contains(service.state().phase()) && Instant.now().isBefore(deadline)) {
+				Thread.sleep(50);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+
+		return service.state();
+	}
+
+	@Example
+	public void shouldBeIdleUntilAsked() {
+		assertEquals(HedgehogState.IDLE, reusing().state());
+	}
+
+	@Example
+	public void shouldBeReadyWithARunningHedgehogAndItsSignedLedger() {
+		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
+		running.answer("/bootstrap", 200, FakeHedgehog.snapshot("SIGNED"));
+
+		final HedgehogService service = reusing();
+
+		service.prepare();
+
+		final HedgehogState state = settle(service);
+
+		assertEquals(Phase.READY, state.phase(), state.reason());
+		assertEquals(3172666, state.snapshot().tipHeight());
+	}
+
+	@Example
+	public void shouldRefuseALedgerThatIsNotSigned() {
+		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
+		running.answer("/bootstrap", 200, FakeHedgehog.snapshot("UNSIGNED"));
+
+		final HedgehogService service = reusing();
+
+		service.prepare();
+		assertEquals(HedgehogState.failed("The ledger is not signed by the Unigrid Foundation"), settle(service));
+	}
+
+	@Example
+	public void shouldTryAgainAfterAFailure() {
+		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
+		running.answer("/bootstrap", 200, FakeHedgehog.snapshot("UNSIGNED"));
+
+		final HedgehogService service = reusing();
+
+		service.prepare();
+		settle(service);
+		running.answer("/bootstrap", 200, FakeHedgehog.snapshot("SIGNED"));
+		service.prepare();
+		assertEquals(Phase.READY, settle(service).phase());
+	}
+}
