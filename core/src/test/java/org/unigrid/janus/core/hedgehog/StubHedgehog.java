@@ -42,9 +42,9 @@ import javax.net.ssl.SSLContext;
 /** A stand-in for Hedgehog's REST server that answers each path the way a test tells it to. */
 class StubHedgehog implements AutoCloseable {
 	private static final String THROWAWAY = "throwaway";
-	private static final Answer NOT_FOUND = new Answer(404, "", Duration.ZERO);
+	private static final Answer NOT_FOUND = new Answer(404, "", Duration.ZERO, Map.of());
 
-	private record Answer(int status, String body, Duration delay) {
+	private record Answer(int status, String body, Duration delay, Map<String, String> headers) {
 	}
 
 	private final HttpServer server;
@@ -99,11 +99,15 @@ class StubHedgehog implements AutoCloseable {
 	}
 
 	void answer(final String rawPath, final int status, final String body) {
-		answers.put(rawPath, new Answer(status, body, Duration.ZERO));
+		answers.put(rawPath, new Answer(status, body, Duration.ZERO, Map.of()));
 	}
 
 	void stall(final String rawPath, final Duration delay) {
-		answers.put(rawPath, new Answer(200, "{}", delay));
+		answers.put(rawPath, new Answer(200, "{}", delay, Map.of()));
+	}
+
+	void redirect(final String rawPath, final URI location) {
+		answers.put(rawPath, new Answer(302, "", Duration.ZERO, Map.of("Location", location.toString())));
 	}
 
 	List<URI> requests() {
@@ -127,6 +131,7 @@ class StubHedgehog implements AutoCloseable {
 		}
 
 		exchange.getResponseHeaders().set("Content-Type", "application/json");
+		answer.headers().forEach(exchange.getResponseHeaders()::set);
 		exchange.sendResponseHeaders(answer.status(), body.length == 0 ? -1 : body.length);
 
 		try (OutputStream out = exchange.getResponseBody()) {

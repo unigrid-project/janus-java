@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import org.glassfish.jersey.client.ClientProperties;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -65,6 +66,7 @@ public class HedgehogClient implements AutoCloseable {
 
 		client = ClientBuilder.newBuilder().sslContext(trustingContext())
 			.hostnameVerifier((host, session) -> LOOPBACK.equals(host))
+			.property(ClientProperties.FOLLOW_REDIRECTS, false)
 			.connectTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS)
 			.readTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS).build();
 		hedgehog = client.target(base);
@@ -143,7 +145,8 @@ public class HedgehogClient implements AutoCloseable {
 	/*
 	 * Hedgehog makes a new self-signed certificate every time it starts, so there is no certificate to
 	 * pin. What is trusted instead is the address: the client talks to this computer and nowhere else,
-	 * and all it asks for is public ledger data whose signature Hedgehog has already checked.
+	 * never following a redirect away from it, and all it asks for is public ledger data whose signature
+	 * Hedgehog has already checked.
 	 */
 	private static SSLContext trustingContext() {
 		final X509TrustManager anyCertificate = new X509TrustManager() {

@@ -131,6 +131,17 @@ public class HedgehogClientTest {
 	}
 
 	@Example
+	public void shouldNotFollowARedirectAwayFromTheHedgehogAsked() throws IOException {
+		try (StubHedgehog elsewhere = new StubHedgehog()) {
+			elsewhere.answer("/bootstrap", 200, SNAPSHOT);
+			hedgehog.redirect("/bootstrap", elsewhere.uri().resolve("/bootstrap"));
+
+			assertThrows(IllegalStateException.class, () -> client.snapshot());
+			assertTrue(elsewhere.requests().isEmpty(), "the redirect should not have been followed");
+		}
+	}
+
+	@Example
 	public void shouldKeepAnOddAddressInsideItsPathSegment() {
 		client.balance("a/b?c");
 
