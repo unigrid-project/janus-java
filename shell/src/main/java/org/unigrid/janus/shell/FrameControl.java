@@ -17,12 +17,20 @@
 package org.unigrid.janus.shell;
 
 import java.awt.Dimension;
+import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
 import java.awt.Rectangle;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -35,6 +43,7 @@ public class FrameControl implements WindowControl {
 
 	private final JFrame frame;
 	private final Timer follow = new Timer(FOLLOW_INTERVAL, event -> follow());
+	private final AtomicBoolean asking = new AtomicBoolean();
 
 	private Consumer<Point> tracking;
 
@@ -105,6 +114,40 @@ public class FrameControl implements WindowControl {
 	@Override
 	public void endResize() {
 		onSwingThread(follow::stop);
+	}
+
+	/* The dialog is modal to the frame but not to Chromium's window inside it, so a second
+	   request while one is open would stack a second dialog; it is answered empty instead. */
+	@Override
+	public Optional<Path> chooseFile(final String title) {
+		if (!asking.compareAndSet(false, true)) {
+			return Optional.empty();
+		}
+
+		final AtomicReference<File[]> picked = new AtomicReference<>(new File[0]);
+
+		try {
+			SwingUtilities.invokeAndWait(() -> picked.set(ask(title)));
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		} catch (InvocationTargetException e) {
+			throw new IllegalStateException("The file dialog could not be shown", e.getCause());
+		} finally {
+			asking.set(false);
+		}
+
+		return Arrays.stream(picked.get()).findFirst().map(File::toPath);
+	}
+
+	private File[] ask(final String title) {
+		final FileDialog dialog = new FileDialog(frame, title, FileDialog.LOAD);
+
+		try {
+			dialog.setVisible(true);
+			return dialog.getFiles();
+		} finally {
+			dialog.dispose();
+		}
 	}
 
 	private void track(final Consumer<Point> placement) {

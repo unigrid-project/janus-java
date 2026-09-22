@@ -16,8 +16,11 @@
 
 package org.unigrid.janus.web;
 
+import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import net.jqwik.api.Example;
 import org.eclipse.jetty.server.Handler;
 import org.unigrid.janus.web.action.Actions;
@@ -26,7 +29,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class WindowHandlerTest extends ServedTest {
 	private final List<String> invoked = new ArrayList<>();
 
+	private Path chosenByHost;
+
 	private final WindowControl recorder = new WindowControl() {
+		@Override
+		public Optional<Path> chooseFile(final String title) {
+			invoked.add("choose-file:" + title);
+			return Optional.ofNullable(chosenByHost);
+		}
+
 		@Override
 		public void minimise() {
 			invoked.add("minimise");
@@ -93,6 +104,25 @@ public class WindowHandlerTest extends ServedTest {
 			"resize/start/LEFT", "resize/start/RIGHT", "resize/start/BOTTOM", "resize/start/BOTTOM_RIGHT",
 			"resize/end"
 		), invoked);
+	}
+
+	@Example
+	public void shouldAnswerWithTheFileTheHostChose() throws Exception {
+		chosenByHost = Path.of("/mnt/backup/wallet.dat");
+
+		final HttpResponse<String> response = admitted().post("/window/choose-file?title=Pick+a+wallet");
+
+		assertEquals(200, response.statusCode());
+		assertEquals("/mnt/backup/wallet.dat", response.body());
+		assertEquals(List.of("choose-file:Pick a wallet"), invoked);
+	}
+
+	@Example
+	public void shouldAnswerWithNothingWhenTheDialogWasDismissed() throws Exception {
+		final HttpResponse<String> response = admitted().post("/window/choose-file?title=Pick+a+wallet");
+
+		assertEquals(204, response.statusCode());
+		assertEquals("", response.body());
 	}
 
 	@Example

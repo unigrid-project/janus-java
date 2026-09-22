@@ -26,6 +26,29 @@ document.addEventListener("click", (event) => {
 	}
 });
 
+/* A page can be handed a file's contents but never its place on disk, so the host's own
+   dialog is asked, and the path it names is handed to the action the button carries. The
+   page is inert meanwhile, since the dialog is modal to the frame but not to Chromium. */
+document.addEventListener("click", async (event) => {
+	const button = event.target.closest("[data-choose-file]");
+
+	if (!button) {
+		return;
+	}
+
+	document.body.inert = true;
+
+	try {
+		const response = await command("choose-file?title=" + encodeURIComponent(button.dataset.chooseFile));
+
+		if (response.status === 200) {
+			htmx.trigger(button, "file-chosen", { path: await response.text() });
+		}
+	} finally {
+		document.body.inert = false;
+	}
+});
+
 /* Capturing keeps the release with the element even when the pointer has run ahead of
    the window, which it always does during a fast drag. */
 const hold = (element, cursor, start, end) => {

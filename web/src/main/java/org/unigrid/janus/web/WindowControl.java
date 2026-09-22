@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.web;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
@@ -65,5 +66,14 @@ public interface WindowControl {
 	}
 
 	default void endResize() {
+	}
+
+	/**
+	 * Asks the person for a file with the host's own dialog and answers with where it is. A page
+	 * can only ever be handed a file's contents, never its place on disk, and a wallet is too
+	 * large to copy through a request. Empty when the dialog was dismissed.
+	 */
+	default Optional<Path> chooseFile(final String title) {
+		return Optional.empty();
 	}
 }
