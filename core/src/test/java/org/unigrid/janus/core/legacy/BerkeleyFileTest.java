@@ -38,6 +38,7 @@ public class BerkeleyFileTest {
 	private static final String REFUSAL = " is not a wallet.dat Janus can read: ";
 	private static final int PAGE_SIZE = 512;
 	private static final int MAIN_META_PAGE = 2;
+	private static final int FIRST_LEAF_PAGE = 4;
 
 	static Path fixture(final String name) {
 		try {
@@ -118,6 +119,40 @@ public class BerkeleyFileTest {
 		final int firstChild = root * PAGE_SIZE + Short.toUnsignedInt(file.getShort(root * PAGE_SIZE + 26));
 
 		file.putInt(firstChild + 4, root);
+		assertRefused(copy(content));
+	}
+
+	private static ByteBuffer firstLeaf(final byte[] content) {
+		final ByteBuffer leaf = ByteBuffer.wrap(content, FIRST_LEAF_PAGE * PAGE_SIZE, PAGE_SIZE).slice()
+			.order(ByteOrder.LITTLE_ENDIAN);
+
+		assertEquals(5, leaf.get(25), "the fixture's page " + FIRST_LEAF_PAGE + " should be a leaf");
+		return leaf;
+	}
+
+	@Example
+	public void shouldRefuseTwoEntriesSharingOneItem() throws IOException {
+		final byte[] content = Files.readAllBytes(fixture("wallet.dat"));
+		final ByteBuffer leaf = firstLeaf(content);
+
+		leaf.putShort(28, leaf.getShort(26));
+		assertRefused(copy(content));
+	}
+
+	@Example
+	public void shouldRefuseAnItemReachingPastItsPage() throws IOException {
+		final byte[] content = Files.readAllBytes(fixture("wallet.dat"));
+		final ByteBuffer leaf = firstLeaf(content);
+
+		leaf.putShort(Short.toUnsignedInt(leaf.getShort(26)), (short) 100);
+		assertRefused(copy(content));
+	}
+
+	@Example
+	public void shouldRefuseMoreEntriesThanAPageHolds() throws IOException {
+		final byte[] content = Files.readAllBytes(fixture("wallet.dat"));
+
+		firstLeaf(content).putShort(20, (short) 250);
 		assertRefused(copy(content));
 	}
 

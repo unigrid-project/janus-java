@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Deque;
 import java.util.List;
+import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
 
 /**
@@ -72,6 +73,8 @@ public final class BerkeleyFile {
 	private static final int INLINE = 1;
 	private static final int OUT_OF_LINE = 3;
 	private static final int DELETED = 0x80;
+	private static final int OUT_OF_LINE_ITEM_SIZE = 12;
+	private static final int INTERNAL_ITEM_HEADER = 12;
 
 	public record Entry(byte[] key, byte[] value) {
 	}
@@ -152,7 +155,8 @@ public final class BerkeleyFile {
 			final int start = visit(page);
 
 			switch (file.get(start + PAGE_TYPE)) {
-				case INTERNAL -> items(start).forEach(item -> pending.push(file.getInt(item + ITEM_PAGE)));
+				case INTERNAL -> items(page, start, this::internalExtent)
+					.forEach(item -> pending.push(file.getInt(item + ITEM_PAGE)));
 				case LEAF -> entries.addAll(pairs(page, start));
 				default -> throw refusal("page " + page + " is of a kind a wallet does not use");
 			}
@@ -162,7 +166,7 @@ public final class BerkeleyFile {
 	}
 
 	private List<Entry> pairs(final int page, final int start) {
-		final List<Integer> items = items(start);
+		final List<Integer> items = items(page, start, this::leafExtent);
 		final List<Entry> pairs = new ArrayList<>();
 
 		if (items.size() % 2 != 0) {
@@ -181,11 +185,45 @@ public final class BerkeleyFile {
 		return pairs;
 	}
 
-	private List<Integer> items(final int start) {
+	/* Items lie side by side between a page's index and its end. Holding a hostile file to that keeps it
+	   from having one large item copied once for every entry that points at it. */
+	private List<Integer> items(final int page, final int start, final IntUnaryOperator extent) {
 		final int count = Short.toUnsignedInt(file.getShort(start + PAGE_ENTRIES));
+		final int indexEnd = PAGE_HEADER + Short.BYTES * count;
 
-		return IntStream.range(0, count).map(i -> start + PAGE_HEADER + Short.BYTES * i)
-			.mapToObj(index -> start + Short.toUnsignedInt(file.getShort(index))).toList();
+		if (indexEnd > pageSize) {
+			throw refusal("page " + page + " claims " + count + " entries");
+		}
+
+		final int[] items = IntStream.range(0, count)
+			.map(i -> Short.toUnsignedInt(file.getShort(start + PAGE_HEADER + Short.BYTES * i))).toArray();
+		int end = indexEnd;
+
+		for (final int item : IntStream.of(items).sorted().toArray()) {
+			if (item < end) {
+				throw refusal("page " + page + " has items that overlap");
+			}
+
+			end = item + extent.applyAsInt(start + item);
+		}
+
+		if (end > pageSize) {
+			throw refusal("page " + page + " has an item reaching past its end");
+		}
+
+		return IntStream.of(items).mapToObj(item -> start + item).toList();
+	}
+
+	private int leafExtent(final int item) {
+		return switch (Byte.toUnsignedInt(file.get(item + ITEM_TYPE)) & ~DELETED) {
+			case INLINE -> ITEM_DATA + Short.toUnsignedInt(file.getShort(item));
+			case OUT_OF_LINE -> OUT_OF_LINE_ITEM_SIZE;
+			default -> throw refusal("it holds an item of a kind a wallet does not use");
+		};
+	}
+
+	private int internalExtent(final int item) {
+		return INTERNAL_ITEM_HEADER + Short.toUnsignedInt(file.getShort(item));
 	}
 
 	private boolean deleted(final int item) {
