@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<section th:fragment="import" class="card" hx-target="this" hx-swap="outerHTML">
+			<div th:replace="~{fragments/card :: brand}"></div>
+			<div th:replace="~{fragments/card :: steps(1)}"></div>
+
+			<span class="step__label">Import wallet</span>
+			<h1 class="step__heading">Bring your wallet</h1>
+			<p class="step__note" th:if="${view.hasFound()}">
+				A wallet is already on this computer. Use it, pick another file, or restore from your
+				recovery phrase.
+			</p>
+			<p class="step__note" th:unless="${view.hasFound()}">
+				No wallet was found in <code class="path" th:text="${view.directory}">~/.unigrid</code>.
+				Pick the file yourself, or restore from your recovery phrase.
+			</p>
+
+			<div class="choices">
+				<button class="choice" type="button" hx-post="/action/import-found" th:if="${view.hasFound()}"
+					th:classappend="${view.foundChosen() ? 'choice--selected' : (view.recommendsFound() ? 'choice--primary' : '')}">
+					<span class="choice__icon">⌂</span>
+					<span class="choice__text">
+						<span class="choice__title">Use the wallet on this computer</span>
+						<span class="choice__note path" th:text="${view.found}">~/.unigrid/wallet.dat</span>
+					</span>
+					<span class="choice__arrow" th:text="${view.foundChosen()} ? '✓' : '→'">→</span>
+				</button>
+				<button class="choice" type="button" data-choose-file="Choose a wallet.dat"
+					th:classappend="${view.otherChosen() ? 'choice--selected' : (view.recommendsFile() ? 'choice--primary' : '')}"
+					hx-post="/action/import-file" hx-trigger="file-chosen" hx-vals="js:{path: event.detail.path}">
+					<span class="choice__icon">⌕</span>
+					<span class="choice__text">
+						<span class="choice__title">Choose a wallet.dat file</span>
+						<span class="choice__note" th:unless="${view.otherChosen()}">A backup, or a wallet from another computer</span>
+						<span class="choice__note path" th:if="${view.otherChosen()}" th:text="${view.chosen}">/mnt/backup/wallet.dat</span>
+					</span>
+					<span class="choice__arrow" th:text="${view.otherChosen()} ? '✓' : '→'">→</span>
+				</button>
+				<button class="choice" type="button">
+					<span class="choice__icon">✎</span>
+					<span class="choice__text">
+						<span class="choice__title">Restore from recovery phrase</span>
+						<span class="choice__note">Enter your 12 words instead</span>
+					</span>
+					<span class="choice__arrow">→</span>
+				</button>
+			</div>
+
+			<div class="step__actions">
+				<button class="button" type="button" hx-post="/action/welcome">Back</button>
+				<button class="button button--primary" type="button" th:disabled="${!view.hasChosen()}">Continue →</button>
+			</div>
+		</section>
+	</body>
+</html>

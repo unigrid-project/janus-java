@@ -322,7 +322,7 @@ main {
 	background: var(--border);
 }
 
-.steps__dot--current {
+.steps__dot--lit {
 	background: var(--gradient);
 }
 
@@ -375,7 +375,8 @@ main {
 
 /* Two backgrounds, one clipped to the padding box and one to the border box, draw the
    gradient border without a wrapper element. */
-.choice--primary {
+.choice--primary,
+.choice--selected {
 	border: 2px solid transparent;
 	background:
 		linear-gradient(var(--surface-raised), var(--surface-raised)) padding-box,
@@ -395,7 +396,8 @@ main {
 	color: var(--text-muted);
 }
 
-.choice--primary .choice__icon {
+.choice--primary .choice__icon,
+.choice--selected .choice__icon {
 	border: 0;
 	background: linear-gradient(135deg, rgba(254, 116, 22, 0.25), rgba(255, 47, 142, 0.25));
 	font-size: 20px;
@@ -424,8 +426,82 @@ main {
 	color: var(--text-muted);
 }
 
-.choice--primary .choice__arrow {
+.choice--primary .choice__arrow,
+.choice--selected .choice__arrow {
 	color: var(--accent-2);
+}
+
+.path {
+	font-family: var(--font-mono);
+	word-break: break-all;
+}
+
+.step__label {
+	display: block;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--accent-2);
+}
+
+.step__heading {
+	margin: 10px 0 0;
+	font-size: 25px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	line-height: 1.1;
+}
+
+.step__note {
+	margin: 9px 0 0;
+	font-size: 13.5px;
+	line-height: 1.55;
+	color: var(--text-muted);
+}
+
+.step__actions {
+	display: flex;
+	gap: 12px;
+	margin-top: 20px;
+}
+
+.button {
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	padding: 13px 22px;
+	background: transparent;
+	color: var(--text-muted);
+	font: inherit;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.button:hover {
+	color: var(--text);
+}
+
+.button--primary {
+	flex: 1;
+	border: 0;
+	padding: 13px;
+	background: var(--gradient);
+	color: #fff;
+	font-weight: 600;
+	box-shadow: 0 8px 28px rgba(254, 116, 22, 0.35);
+}
+
+.button--primary:hover {
+	color: #fff;
+	filter: brightness(1.08);
+}
+
+.button--primary:disabled {
+	background: var(--glass-strong);
+	color: var(--text-faint);
+	box-shadow: none;
+	cursor: default;
+	filter: none;
 }
 
 .about {

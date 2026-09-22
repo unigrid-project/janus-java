@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<div th:fragment="brand" class="brand">
+			<img class="brand__mark" src="/static/images/unigrid-mark.svg" alt="">
+			<div>
+				<div class="brand__name">Unigrid</div>
+				<div class="brand__tag">Sharded Internet</div>
+			</div>
+		</div>
+
+		<div th:fragment="steps(current)" class="steps" aria-hidden="true">
+			<span th:each="step : ${#numbers.sequence(0, 2)}" class="steps__dot"
+				th:classappend="${step lte current} ? 'steps__dot--lit'"></span>
+		</div>
+	</body>
+</html>
