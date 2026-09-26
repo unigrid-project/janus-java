@@ -16,16 +16,30 @@
 
 package org.unigrid.janus.ui;
 
+import java.io.IOException;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ControlCenterFlowTest {
 	private static final String CARD = "main > .card";
+	private static final String IMPORT = "[hx-post=/action/import]";
+	private static final String USE_FOUND = "[hx-post=/action/import-found]";
+	private static final String CHOOSE_FILE = "[data-choose-file]";
+	private static final String BACK = "[hx-post=/action/welcome]";
+	private static final String CONTINUE = ".button--primary";
+	private static final String PRIMARY = "choice--primary";
+	private static final String SELECTED = "choice--selected";
 
 	private ControlCenterRig rig;
 
@@ -61,5 +75,76 @@ public class ControlCenterFlowTest {
 			assertEquals(200, response.statusCode(), path);
 			assertFalse(response.headers().firstValue("Content-Type").orElse("").startsWith("text/html"), path);
 		}));
+	}
+
+	@Example
+	public void shouldOfferTheWalletLeftBehind() throws Exception {
+		final Path wallet = rig.leaveWalletBehind();
+		final Screen screen = Screen.open(rig).click(IMPORT);
+
+		assertEquals(wallet.toString(), screen.find(USE_FOUND + " .choice__note").text());
+		assertTrue(screen.find(USE_FOUND).hasClass(PRIMARY));
+		assertEquals(2, litSteps(screen));
+	}
+
+	@Example
+	public void shouldSayWhereItLookedWhenNothingIsThere() throws Exception {
+		final Screen screen = Screen.open(rig).click(IMPORT);
+
+		assertTrue(screen.document().select(USE_FOUND).isEmpty());
+		assertEquals(rig.data().toString(), screen.find(CARD + " .step__note code").text());
+		assertTrue(screen.find(CHOOSE_FILE).hasClass(PRIMARY));
+	}
+
+	@Example
+	public void shouldCopyTheWalletLeftBehindOnceItIsUsed() throws Exception {
+		rig.leaveWalletBehind();
+
+		final Screen screen = Screen.open(rig).click(IMPORT).click(USE_FOUND);
+
+		assertTrue(screen.find(USE_FOUND).hasClass(SELECTED));
+		assertEquals(1, backups().size());
+		assertEquals(backups().get(0).toString(), screen.find(CARD + " > .step__note code").text());
+		assertFalse(screen.find(CONTINUE).hasAttr("disabled"));
+	}
+
+	@Example
+	public void shouldTakeTheFileThatWasPicked() throws Exception {
+		final Path wallet = rig.keepWalletElsewhere();
+		final Screen screen = Screen.open(rig).click(IMPORT).trigger(CHOOSE_FILE, Map.of("path", wallet.toString()));
+
+		assertTrue(screen.find(CHOOSE_FILE).hasClass(SELECTED));
+		assertEquals(wallet.toString(), screen.find(CHOOSE_FILE + " .choice__note").text());
+		assertEquals(1, backups().size());
+	}
+
+	@Example
+	public void shouldLeaveTheCardAsItWasWhenNoFileIsNamed() throws Exception {
+		final Screen screen = Screen.open(rig).click(IMPORT);
+		final String before = screen.find(CARD).outerHtml();
+
+		screen.trigger(CHOOSE_FILE, Map.of());
+		assertEquals(500, screen.status());
+		assertEquals(before, screen.find(CARD).outerHtml());
+		assertTrue(screen.find(CONTINUE).hasAttr("disabled"));
+	}
+
+	@Example
+	public void shouldGoBackToTheWelcomeCard() throws Exception {
+		final Screen screen = Screen.open(rig).click(IMPORT).click(BACK);
+
+		assertEquals("Welcome to Unigrid", screen.find(CARD + " h1").text());
+		assertEquals(1, screen.document().select(CARD).size());
+		assertEquals(1, litSteps(screen));
+	}
+
+	private List<Path> backups() throws IOException {
+		try (Stream<Path> files = Files.list(rig.backups())) {
+			return files.toList();
+		}
+	}
+
+	private static int litSteps(final Screen screen) {
+		return screen.document().select(CARD + " .steps__dot--lit").size();
 	}
 }
