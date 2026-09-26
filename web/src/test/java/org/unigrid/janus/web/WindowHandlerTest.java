@@ -18,65 +18,18 @@ package org.unigrid.janus.web;
 
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import net.jqwik.api.Example;
 import org.eclipse.jetty.server.Handler;
 import org.unigrid.janus.web.action.Actions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WindowHandlerTest extends ServedTest {
-	private final List<String> invoked = new ArrayList<>();
-
-	private Path chosenByHost;
-
-	private final WindowControl recorder = new WindowControl() {
-		@Override
-		public Optional<Path> chooseFile(final String title) {
-			invoked.add("choose-file:" + title);
-			return Optional.ofNullable(chosenByHost);
-		}
-
-		@Override
-		public void minimise() {
-			invoked.add("minimise");
-		}
-
-		@Override
-		public void toggleMaximise() {
-			invoked.add("maximise");
-		}
-
-		@Override
-		public void close() {
-			invoked.add("close");
-		}
-
-		@Override
-		public void beginMove() {
-			invoked.add("move/start");
-		}
-
-		@Override
-		public void endMove() {
-			invoked.add("move/end");
-		}
-
-		@Override
-		public void beginResize(final Edge edge) {
-			invoked.add("resize/start/" + edge);
-		}
-
-		@Override
-		public void endResize() {
-			invoked.add("resize/end");
-		}
-	};
+	private final RecordingWindow window = new RecordingWindow();
 
 	@Override
 	protected Handler routes() {
-		return Routes.create(templates(), token(), recorder, Actions.of(), new Page("Janus"));
+		return Routes.create(templates(), token(), window, Actions.of(), new Page("Janus"));
 	}
 
 	@Example
@@ -88,7 +41,7 @@ public class WindowHandlerTest extends ServedTest {
 		assertEquals(204, client.post("/window/close").statusCode());
 		assertEquals(204, client.post("/window/move/start").statusCode());
 		assertEquals(204, client.post("/window/move/end").statusCode());
-		assertEquals(List.of("minimise", "maximise", "close", "move/start", "move/end"), invoked);
+		assertEquals(List.of("minimise", "maximise", "close", "move/start", "move/end"), window.commands());
 	}
 
 	@Example
@@ -101,20 +54,20 @@ public class WindowHandlerTest extends ServedTest {
 		assertEquals(204, client.post("/window/resize/start/bottom-right").statusCode());
 		assertEquals(204, client.post("/window/resize/end").statusCode());
 		assertEquals(List.of(
-			"resize/start/LEFT", "resize/start/RIGHT", "resize/start/BOTTOM", "resize/start/BOTTOM_RIGHT",
+			"resize/start/left", "resize/start/right", "resize/start/bottom", "resize/start/bottom-right",
 			"resize/end"
-		), invoked);
+		), window.commands());
 	}
 
 	@Example
 	public void shouldAnswerWithTheFileTheHostChose() throws Exception {
-		chosenByHost = Path.of("/mnt/backup/wallet.dat");
+		window.picking(Path.of("/mnt/backup/wallet.dat"));
 
 		final HttpResponse<String> response = admitted().post("/window/choose-file?title=Pick+a+wallet");
 
 		assertEquals(200, response.statusCode());
 		assertEquals("/mnt/backup/wallet.dat", response.body());
-		assertEquals(List.of("choose-file:Pick a wallet"), invoked);
+		assertEquals(List.of("choose-file:Pick a wallet"), window.commands());
 	}
 
 	@Example
@@ -129,12 +82,12 @@ public class WindowHandlerTest extends ServedTest {
 	public void shouldNotInventCommandsItDoesNotHave() throws Exception {
 		admitted().post("/window/selfdestruct");
 		admitted().post("/window/resize/start/top");
-		assertEquals(List.of(), invoked);
+		assertEquals(List.of(), window.commands());
 	}
 
 	@Example
 	public void shouldNotActForAnUnknownCaller() throws Exception {
 		assertEquals(403, anonymous().post("/window/close").statusCode());
-		assertEquals(List.of(), invoked);
+		assertEquals(List.of(), window.commands());
 	}
 }

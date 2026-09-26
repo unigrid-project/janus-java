@@ -37,7 +37,7 @@ public interface WindowControl {
 			return Arrays.stream(values()).filter(edge -> edge.pathName().equals(name)).findFirst();
 		}
 
-		private String pathName() {
+		public String pathName() {
 			return name().toLowerCase(Locale.ROOT).replace('_', '-');
 		}
 	}
