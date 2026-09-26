@@ -52,18 +52,27 @@ document.addEventListener("click", async (event) => {
 /* Capturing keeps the release with the element even when the pointer has run ahead of
    the window, which it always does during a fast drag. */
 const hold = (element, cursor, start, end) => {
+	let held = false;
+
 	element.addEventListener("pointerdown", (event) => {
 		if (event.button !== 0 || event.target.closest("button")) {
 			return;
 		}
 
+		held = true;
 		element.setPointerCapture(event.pointerId);
 		document.body.classList.add("is-holding");
 		document.body.style.cursor = cursor;
 		command(start);
 	});
 
+	/* A click on a button inside is released here as well, and must not end a hold it never began. */
 	const release = () => {
+		if (!held) {
+			return;
+		}
+
+		held = false;
 		document.body.classList.remove("is-holding");
 		document.body.style.cursor = "";
 		command(end);
