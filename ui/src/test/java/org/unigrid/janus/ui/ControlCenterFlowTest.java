@@ -20,15 +20,23 @@ import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ControlCenterFlowTest {
@@ -136,6 +144,52 @@ public class ControlCenterFlowTest {
 		assertEquals("Welcome to Unigrid", screen.find(CARD + " h1").text());
 		assertEquals(1, screen.document().select(CARD).size());
 		assertEquals(1, litSteps(screen));
+	}
+
+	/* An action nobody registered is answered 404, and htmx then leaves the card as it was, so a
+	   control named differently from its controller would look merely unresponsive. */
+	@Example
+	public void shouldKnowEveryActionThePagesCanSend() throws Exception {
+		rig.leaveWalletBehind();
+
+		final Screen screen = Screen.open(rig);
+		final Set<String> sent = new HashSet<>();
+		final Deque<Element> reached = new ArrayDeque<>(List.of(screen.document()));
+
+		while (!reached.isEmpty()) {
+			for (final Element control : reached.pop().select("[hx-post]")) {
+				final String action = control.attr("hx-post");
+
+				if (sent.add(action)) {
+					final HttpResponse<String> response = screen.client().submit(action, "");
+
+					assertNotEquals(404, response.statusCode(), action);
+					reached.push(Jsoup.parseBodyFragment(response.body()));
+				}
+			}
+		}
+
+		assertTrue(sent.contains("/action/import-found"), sent::toString);
+	}
+
+	/* A command the host does not have is answered with the page and a 200, so only the host
+	   hearing about it shows that the name on the control is one it knows. */
+	@Example
+	public void shouldReachTheWindowFromEveryControlOnThePage() throws Exception {
+		final Screen screen = Screen.open(rig);
+		final List<String> commands = new ArrayList<>(List.of("move/start", "move/end"));
+
+		screen.document().select("[data-window]").forEach(control -> commands.add(control.attr("data-window")));
+		screen.document().select("[data-resize]").forEach(handle -> {
+			commands.add("resize/start/" + handle.attr("data-resize"));
+			commands.add("resize/end");
+		});
+
+		for (final String command : commands) {
+			assertEquals(204, screen.client().post("/window/" + command).statusCode(), command);
+		}
+
+		assertEquals(commands, rig.window().commands());
 	}
 
 	private List<Path> backups() throws IOException {
