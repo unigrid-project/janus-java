@@ -22,6 +22,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,11 +36,13 @@ public final class HedgehogStand implements AutoCloseable {
 
 	private final StubHedgehog stub;
 	private final HedgehogClient client;
+	private final List<String> mints = new ArrayList<>();
 
 	private HedgehogStand(final StubHedgehog stub) {
 		this.stub = stub;
 		this.client = new HedgehogClient(stub.uri(), Duration.ofSeconds(2));
 		stub.answer("/version", 200, "{\"version\":\"0.0.8\"}");
+		stub.answer("/gridspork/mint-storage", 204, "");
 	}
 
 	public static HedgehogStand start() {
@@ -75,6 +78,15 @@ public final class HedgehogStand implements AutoCloseable {
 		}
 
 		stub.answer(path + "/transactions?offset=" + pageAfter(entries.length) + "&limit=" + PAGE, 200, "[]");
+		return this;
+	}
+
+	/** Adds a mint for the address to the mint storage spork the stand answers with. */
+	public HedgehogStand mint(final String address, final int height, final String amount) {
+		mints.add("\"" + address + "/" + height + "\":" + amount);
+		stub.answer("/gridspork/mint-storage", 200, mints.stream()
+			.collect(Collectors.joining(",", "{\"type\":\"MINT_STORAGE\",\"data\":{\"mints\":{", "}}}"))
+		);
 		return this;
 	}
 

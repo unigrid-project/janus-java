@@ -20,18 +20,22 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.UncheckedIOException;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.extern.slf4j.Slf4j;
 import org.unigrid.janus.core.hedgehog.AddressBalance;
+import org.unigrid.janus.core.evm.EvmWalletStore;
 import org.unigrid.janus.core.hedgehog.AddressTransaction;
 import org.unigrid.janus.core.hedgehog.HedgehogClient;
 import org.unigrid.janus.core.hedgehog.HedgehogService;
@@ -39,9 +43,10 @@ import org.unigrid.janus.core.legacy.LegacyWallet;
 import org.unigrid.janus.core.wallet.LedgerState.Phase;
 
 /**
- * The chosen wallet as the frozen ledger records it, read from Hedgehog once and kept, since nothing on a
- * frozen chain can change it afterwards. Reading takes a request per address and page, so it runs on a
- * thread of its own and the views ask how far along it is.
+ * The chosen wallet as the frozen ledger records it, or for an EVM wallet as the mint storage spork
+ * promises it, read from Hedgehog once and kept, since nothing on a frozen chain can change it afterwards.
+ * Reading takes a request per address and page, so it runs on a thread of its own and the views ask how
+ * far along it is.
  */
 @Slf4j
 @ApplicationScoped
@@ -74,10 +79,10 @@ public class WalletLedger {
 	}
 
 	/** Starts reading the wallet unless that is under way or done; after a failure it reads again. */
-	public synchronized LedgerState load(final Path backup) {
+	public synchronized LedgerState load(final Path wallet) {
 		if (state.phase() == Phase.IDLE || state.phase() == Phase.FAILED) {
 			state = LedgerState.LOADING;
-			worker.execute(() -> state = attempt(backup));
+			worker.execute(() -> state = attempt(wallet));
 		}
 
 		return state;
@@ -94,20 +99,21 @@ public class WalletLedger {
 	 * Whatever goes wrong ends as FAILED, so a view waiting on the ledger never waits forever. Only the
 	 * wallet file itself can be unreadable; anything after it is Hedgehog's doing.
 	 */
-	private LedgerState attempt(final Path backup) {
-		final SortedSet<String> addresses;
+	private LedgerState attempt(final Path wallet) {
+		final boolean evm = EvmWalletStore.holds(wallet);
+		final Collection<String> addresses;
 
 		try {
-			addresses = LegacyWallet.addresses(backup);
+			addresses = evm ? EvmWalletStore.read(wallet).addresses() : LegacyWallet.addresses(wallet);
 		} catch (IllegalArgumentException | UncheckedIOException e) {
-			log.warn("The wallet at {} could not be read", backup, e);
+			log.warn("The wallet at {} could not be read", wallet, e);
 			return LedgerState.failed(e.getMessage(), true);
 		}
 
 		try {
-			return LedgerState.loaded(read(addresses));
+			return LedgerState.loaded(evm ? promised(addresses) : read(addresses));
 		} catch (RuntimeException e) {
-			log.warn("The ledger of the wallet at {} could not be read", backup, e);
+			log.warn("The ledger of the wallet at {} could not be read", wallet, e);
 			return LedgerState.failed("Hedgehog stopped answering", false);
 		}
 	}
@@ -116,7 +122,26 @@ public class WalletLedger {
 		return read(LegacyWallet.addresses(backup));
 	}
 
-	private WalletFunds read(final SortedSet<String> addresses) {
+	/*
+	 * An EVM address has no past on the legacy chain; all it holds is what the mint storage spork promises
+	 * it, and so all of that awaits its mint. The spork may spell an address in either case.
+	 */
+	private WalletFunds promised(final Collection<String> addresses) {
+		final Map<String, BigDecimal> owed = new HashMap<>();
+		final Map<String, Optional<AddressBalance>> balances = new LinkedHashMap<>();
+
+		client.mints().forEach(mint -> owed.merge(mint.address().toLowerCase(Locale.ROOT), mint.amount(),
+			BigDecimal::add
+		));
+
+		addresses.forEach(address -> balances.put(address, Optional.ofNullable(
+			owed.get(address.toLowerCase(Locale.ROOT))).map(amount -> new AddressBalance(address, amount, 0))
+		));
+
+		return WalletFunds.of(balances, List.of(), client.snapshot(), zone);
+	}
+
+	private WalletFunds read(final Collection<String> addresses) {
 		final Map<String, Optional<AddressBalance>> balances = new LinkedHashMap<>();
 		final Map<String, List<AddressTransaction>> entries = new LinkedHashMap<>();
 

@@ -22,12 +22,20 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
+import org.unigrid.janus.core.evm.EvmWallet;
+import org.unigrid.janus.core.evm.EvmWalletStore;
+import org.unigrid.janus.core.evm.Mnemonic;
+import org.unigrid.janus.core.evm.SeedVault;
 import org.unigrid.janus.core.hedgehog.AddressTransaction;
 import org.unigrid.janus.core.hedgehog.EntryKind;
 import org.unigrid.janus.core.hedgehog.HedgehogStand;
@@ -181,6 +189,47 @@ public class WalletLedgerTest {
 		ledger.reset();
 		ledger.load(WALLET);
 		assertEquals(Phase.LOADED, settle().phase());
+	}
+
+	@Example
+	public void shouldOweAnEvmWalletWhatTheSporkPromisesIt() throws InterruptedException, IOException {
+		final Path folder = Files.createTempDirectory("wallets");
+		final EvmWallet wallet = EvmWallet.create(Mnemonic.parse("abandon abandon abandon abandon abandon abandon "
+			+ "abandon abandon abandon abandon abandon about"), "pw", new SeedVault(new SecureRandom(), 16)
+		);
+		final List<String> evm = wallet.addresses();
+
+		stand.mint(evm.get(0).toLowerCase(Locale.ROOT), 3200000, "1000").mint(evm.get(0), 3300000, "500")
+			.mint(evm.get(2), 3200000, "25").mint(addresses.get(0), 3200000, "7");
+
+		try {
+			ledger.load(new EvmWalletStore(folder).save(wallet));
+
+			final WalletFunds funds = settle().funds();
+
+			assertEquals(0, new BigDecimal("1525").compareTo(funds.total()));
+			assertEquals(0, new BigDecimal("1525").compareTo(funds.awaitingMint()));
+			assertEquals(List.of(), funds.transactions());
+			assertEquals(new AddressBreakdown(2, 0, EvmWallet.ADDRESSES - 2), funds.breakdown());
+		} finally {
+			try (Stream<Path> files = Files.walk(folder)) {
+				for (final Path path : files.sorted(Comparator.reverseOrder()).toList()) {
+					Files.delete(path);
+				}
+			}
+		}
+	}
+
+	@Example
+	public void shouldSayWhenAnEvmWalletCannotBeRead() throws InterruptedException, IOException {
+		final Path junk = Files.writeString(Files.createTempFile("evm-junk", ".json"), "not a wallet");
+
+		try {
+			ledger.load(junk);
+			assertTrue(settle().unreadable());
+		} finally {
+			Files.delete(junk);
+		}
 	}
 
 	@Example
