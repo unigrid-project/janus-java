@@ -60,6 +60,12 @@ public class RecordingWindow implements WindowControl {
 	}
 
 	@Override
+	public Optional<Path> saveFile(final String title, final String name) {
+		commands.add("save-file:" + title + ":" + name);
+		return Optional.ofNullable(picked);
+	}
+
+	@Override
 	public void minimise() {
 		commands.add("minimise");
 	}

@@ -90,4 +90,21 @@ public class WindowHandlerTest extends ServedTest {
 		assertEquals(403, anonymous().post("/window/close").statusCode());
 		assertEquals(List.of(), window.commands());
 	}
+
+	@Example
+	public void shouldAnswerWithWhereTheHostWillSave() throws Exception {
+		window.picking(Path.of("/home/ann/history.csv"));
+
+		final HttpResponse<String> response = admitted()
+			.post("/window/save-file?title=Save+the+history&name=history.csv");
+
+		assertEquals(200, response.statusCode());
+		assertEquals("/home/ann/history.csv", response.body());
+		assertEquals(List.of("save-file:Save the history:history.csv"), window.commands());
+	}
+
+	@Example
+	public void shouldAnswerWithNothingWhenSavingWasCancelled() throws Exception {
+		assertEquals(204, admitted().post("/window/save-file?title=Save&name=a.csv").statusCode());
+	}
 }

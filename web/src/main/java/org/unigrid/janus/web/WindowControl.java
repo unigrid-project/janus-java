@@ -76,4 +76,9 @@ public interface WindowControl {
 	default Optional<Path> chooseFile(final String title) {
 		return Optional.empty();
 	}
+
+	/** Asks the person where to save a file, suggesting a name, with the host's own dialog. Empty when dismissed. */
+	default Optional<Path> saveFile(final String title, final String name) {
+		return Optional.empty();
+	}
 }

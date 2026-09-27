@@ -29,8 +29,13 @@ document.addEventListener("click", (event) => {
 /* A page can be handed a file's contents but never its place on disk, so the host's own
    dialog is asked, and the path it names is handed to the action the button carries. The
    page is inert meanwhile, since the dialog is modal to the frame but not to Chromium. */
+const dialogFor = (button) => button.dataset.chooseFile !== undefined
+	? "choose-file?title=" + encodeURIComponent(button.dataset.chooseFile)
+	: "save-file?title=" + encodeURIComponent(button.dataset.saveFile)
+		+ "&name=" + encodeURIComponent(button.dataset.fileName || "");
+
 document.addEventListener("click", async (event) => {
-	const button = event.target.closest("[data-choose-file]");
+	const button = event.target.closest("[data-choose-file], [data-save-file]");
 
 	if (!button) {
 		return;
@@ -39,7 +44,7 @@ document.addEventListener("click", async (event) => {
 	document.body.inert = true;
 
 	try {
-		const response = await command("choose-file?title=" + encodeURIComponent(button.dataset.chooseFile));
+		const response = await command(dialogFor(button));
 
 		if (response.status === 200) {
 			htmx.trigger(button, "file-chosen", { path: await response.text() });

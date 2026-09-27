@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -116,10 +117,19 @@ public class FrameControl implements WindowControl {
 		onSwingThread(follow::stop);
 	}
 
-	/* The dialog is modal to the frame but not to Chromium's window inside it, so a second
-	   request while one is open would stack a second dialog; it is answered empty instead. */
 	@Override
 	public Optional<Path> chooseFile(final String title) {
+		return askHost(() -> ask(title, FileDialog.LOAD, null));
+	}
+
+	@Override
+	public Optional<Path> saveFile(final String title, final String name) {
+		return askHost(() -> ask(title, FileDialog.SAVE, name));
+	}
+
+	/* The dialog is modal to the frame but not to Chromium's window inside it, so a second
+	   request while one is open would stack a second dialog; it is answered empty instead. */
+	private Optional<Path> askHost(final Supplier<File[]> dialog) {
 		if (!asking.compareAndSet(false, true)) {
 			return Optional.empty();
 		}
@@ -127,7 +137,7 @@ public class FrameControl implements WindowControl {
 		final AtomicReference<File[]> picked = new AtomicReference<>(new File[0]);
 
 		try {
-			SwingUtilities.invokeAndWait(() -> picked.set(ask(title)));
+			SwingUtilities.invokeAndWait(() -> picked.set(dialog.get()));
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		} catch (InvocationTargetException e) {
@@ -139,8 +149,10 @@ public class FrameControl implements WindowControl {
 		return Arrays.stream(picked.get()).findFirst().map(File::toPath);
 	}
 
-	private File[] ask(final String title) {
-		final FileDialog dialog = new FileDialog(frame, title, FileDialog.LOAD);
+	private File[] ask(final String title, final int mode, final String name) {
+		final FileDialog dialog = new FileDialog(frame, title, mode);
+
+		dialog.setFile(name);
 
 		try {
 			dialog.setVisible(true);

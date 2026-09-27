@@ -27,11 +27,14 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.Fields;
 import org.unigrid.janus.web.WindowControl.Edge;
 
 public class WindowHandler extends Handler.Abstract {
 	private static final String RESIZE_START = "resize/start/";
 	private static final String CHOOSE_FILE = "choose-file";
+	private static final String SAVE_FILE = "save-file";
+	private static final String NAME = "name";
 	private static final String TITLE = "title";
 	private static final String TEXT = "text/plain;charset=utf-8";
 
@@ -44,9 +47,14 @@ public class WindowHandler extends Handler.Abstract {
 	@Override
 	public boolean handle(final Request request, final Response response, final Callback callback) {
 		final String command = Request.getPathInContext(request).substring(1);
+		final Fields query = Request.extractQueryParameters(request);
 
 		if (CHOOSE_FILE.equals(command)) {
-			return answerWithFile(request, response, callback);
+			return answerWith(window.chooseFile(value(query, TITLE)), response, callback);
+		}
+
+		if (SAVE_FILE.equals(command)) {
+			return answerWith(window.saveFile(value(query, TITLE), value(query, NAME)), response, callback);
 		}
 
 		if (!perform(command)) {
@@ -58,10 +66,11 @@ public class WindowHandler extends Handler.Abstract {
 		return true;
 	}
 
-	private boolean answerWithFile(final Request request, final Response response, final Callback callback) {
-		final String title = Request.extractQueryParameters(request).getValue(TITLE);
-		final Optional<Path> chosen = window.chooseFile(Objects.requireNonNullElse(title, ""));
+	private static String value(final Fields query, final String name) {
+		return Objects.requireNonNullElse(query.getValue(name), "");
+	}
 
+	private static boolean answerWith(final Optional<Path> chosen, final Response response, final Callback callback) {
 		if (chosen.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT_204);
 			callback.succeeded();
