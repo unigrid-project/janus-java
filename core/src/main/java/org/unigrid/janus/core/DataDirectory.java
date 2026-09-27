@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Optional;
 
-/** Where the daemon keeps its files on this computer, and so where a wallet left behind would be. */
+/** Where the legacy daemon kept its files on this computer, and so where a wallet left behind would be. */
 @ApplicationScoped
 public class DataDirectory {
 	private static final String WALLET = "wallet.dat";
@@ -43,7 +43,7 @@ public class DataDirectory {
 		this.path = path;
 	}
 
-	/** Where the daemon puts its files by default on the named platform. */
+	/** Where the legacy daemon put its files by default on the named platform. */
 	static Path usual(final String os, final Path home, final String appData) {
 		final String platform = os.toLowerCase(Locale.ROOT);
 
@@ -62,7 +62,7 @@ public class DataDirectory {
 		return path;
 	}
 
-	/** The wallet the daemon left here, if there is one. */
+	/** The wallet.dat left here, if there is one. */
 	public Optional<Path> wallet() {
 		return Optional.of(path.resolve(WALLET)).filter(Files::isRegularFile);
 	}

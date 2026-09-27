@@ -23,8 +23,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 /**
- * The wallet file the user has settled on, kept until the daemon is started with it. A wallet only
- * counts as chosen once a copy of it has been made.
+ * The wallet file the user has settled on. A wallet only counts as chosen once a copy of it has been made.
  */
 @ApplicationScoped
 public class WalletChoice {

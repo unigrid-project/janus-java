@@ -29,7 +29,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/** Copies of the wallets the user has chosen, kept by Janus in case the daemon spoils the original. */
+/** Copies of the wallets the user has chosen, kept by Janus so that nothing it does can spoil the original. */
 @ApplicationScoped
 public class WalletBackup {
 	private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
