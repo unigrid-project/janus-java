@@ -128,7 +128,10 @@ class StubHedgehog implements AutoCloseable {
 	private void handle(final HttpExchange exchange) throws IOException {
 		requests.add(exchange.getRequestURI());
 
-		final Answer answer = answers.getOrDefault(exchange.getRequestURI().getRawPath(), NOT_FOUND);
+		final URI asked = exchange.getRequestURI();
+		final Answer answer = answers.getOrDefault(asked.getRawPath() + "?" + asked.getRawQuery(),
+			answers.getOrDefault(asked.getRawPath(), NOT_FOUND)
+		);
 		final byte[] body = answer.body().getBytes(StandardCharsets.UTF_8);
 
 		if (!answer.cutShort()) {

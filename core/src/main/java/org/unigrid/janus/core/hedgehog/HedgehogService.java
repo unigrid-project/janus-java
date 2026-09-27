@@ -79,6 +79,11 @@ public class HedgehogService {
 		return state;
 	}
 
+	/** The client this service asks Hedgehog with, for callers that read the ledger once it is ready. */
+	public HedgehogClient client() {
+		return client;
+	}
+
 	/** Starts getting Hedgehog ready unless that is under way or done; after a failure it tries again. */
 	public synchronized HedgehogState prepare() {
 		if (!stopped && (state.phase() == Phase.IDLE || state.phase() == Phase.FAILED)) {
