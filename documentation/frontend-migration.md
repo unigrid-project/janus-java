@@ -1,26 +1,32 @@
 # Janus frontend migration: JavaFX to embedded Chromium + server-rendered HTML
 
-Status: Proposal. Not implemented.
-Last updated: 2026-08-26
+Status: In progress.
+Last updated: 2026-09-27
 
 ## 1. Context
 
-Janus is a desktop wallet for the Unigrid network. The UI is JavaFX: 2,176
+Janus is a desktop wallet for the Unigrid network. The UI was JavaFX: 2,176
 lines of FXML across 17 files, 273 lines of JavaFX CSS, and roughly 3,675 LOC
-of controllers. 54 of the 149 production Java files import `javafx`.
+of controllers. 54 of the 149 production Java files imported `javafx`.
 
-Underneath the UI the architecture is already well separated:
+Underneath the UI the JavaFX wallet was already well separated:
 
-- **Weld SE** provides CDI, with a `model.signal` package of 14 CDI event types
+- **Weld SE** provided CDI, with a `model.signal` package of 14 CDI event types
   acting as an application-wide signal bus.
-- **Jersey JAX-RS client** speaks JSON-RPC to the local `unigridd` daemon.
-  Request and response entities live in `model.rpc.entity`.
+- **Jersey JAX-RS client** spoke JSON-RPC to the local `unigridd` daemon.
+  Request and response entities lived in `model.rpc.entity`.
 - Supporting services (`Daemon`, polling tasks, `Hedgehog`, configuration,
-  update4j) hold no view code.
+  update4j) held no view code.
 
-The business logic therefore does not depend on what draws the pixels. The
+The business logic therefore did not depend on what draws the pixels. The
 migration cost is concentrated in FXML, the controllers, and the JavaFX
 property types that leaked into the model.
+
+Janus no longer uses the legacy daemon, `unigridd`. Its only backend is
+Hedgehog, the Unigrid network node, which Janus reaches over Hedgehog's REST
+interface on the loopback address and starts itself when none is running. Wallets left behind by
+the legacy daemon are read directly from their `wallet.dat` files, and the
+legacy chain is served by Hedgehog as a signed, frozen snapshot.
 
 ## 2. Goals
 
@@ -37,9 +43,6 @@ property types that leaked into the model.
   the frontend.** No React, Vue, Svelte, or equivalent. The only client-side
   JavaScript is htmx and its SSE extension, two vendored files totalling around
   16KB, used entirely through HTML attributes.
-- No change to the JSON-RPC protocol itself, or to how the wallet talks to
-  `unigridd`. The client that speaks it is being rewritten; the wire format is
-  not.
 - No change to the shape of the distribution. Native installers via jlink and
   jpackage remain the delivery mechanism, though the packaging and auto-update
   machinery is rebuilt rather than carried over.
@@ -60,7 +63,8 @@ and interactivity supplied by htmx.
 | Templating | Thymeleaf 3, standalone (not thymeleaf-spring) |
 | Interactivity | htmx plus its SSE extension, vendored as static files |
 | Live updates | Server-Sent Events, bridged from existing CDI events |
-| Business logic | Unchanged: Weld CDI, Jersey JSON-RPC client |
+| Business logic | Weld CDI; Jersey client for Hedgehog's REST interface |
+| Backend | Hedgehog, run locally and started by Janus when none is running; `unigridd` is not used |
 
 ### Why the window host moves off JavaFX
 
@@ -108,10 +112,10 @@ security cost of a listening socket is bounded and addressed in section 8.
   |                                    |               |
   +------------------------------------|---------------+
                                        v
-                            Jersey JSON-RPC client
+                          Jersey REST client (127.0.0.1)
                                        |
                                        v
-                              unigridd (local daemon)
+                            Hedgehog (local process)
 ```
 
 ### 5.1 New module layout
@@ -122,9 +126,11 @@ reference for behaviour this reimplementation must reproduce.
 
 ```
 janus-java/
-  core/           model, services, daemon protocol client, signals  (no UI)
-  web/            Jetty, Thymeleaf, handlers, templates, css, htmx
+  core/           model, services, Hedgehog client and process, signals  (no UI)
+  web/            Jetty, Thymeleaf, handlers, actions
+  ui/             controllers, views, templates, css, htmx
   shell/          JFrame + JCEF host, tray, lifecycle
+  e2e/            browser tests, built only with the browser profile
   desktop/        jlink/jpackage assembly; outside the reactor until
                   shell provides an entry point
 ```
@@ -170,7 +176,8 @@ testable surface in `core`.
 1. User submits the send-funds form. The markup carries
    `hx-post="/api/wallet/send" hx-target="#send-result"`.
 2. htmx issues an XHR; no page reload, no hand-written JavaScript.
-3. `ApiHandler` resolves the `WalletService` CDI bean and performs the RPC.
+3. `ApiHandler` resolves the `WalletService` CDI bean, which does the work,
+   calling Hedgehog where needed.
 4. The handler renders `fragments/send-result.html` through Thymeleaf.
 5. htmx swaps the returned HTML into `#send-result`.
 
@@ -190,7 +197,7 @@ mode, and reconnection logic for no gain. SSE reconnects automatically.
 
 ### 6.3 Threading
 
-Jetty handler threads must not block on daemon RPC. Handlers dispatch to the
+Jetty handler threads must not block on calls to Hedgehog. Handlers dispatch to the
 existing polling/executor services and complete the response asynchronously.
 The 15 current `Platform.runLater` call sites disappear: there is no UI thread
 to marshal onto, because the UI is a browser rendering HTML that the server
@@ -266,7 +273,7 @@ to a template must be opened to OGNL:
 
 ```java
 opens org.unigrid.janus.core.model to ognl;
-opens org.unigrid.janus.core.rpc.entity to ognl;
+opens org.unigrid.janus.core.hedgehog to ognl;
 ```
 
 An alternative that avoids this entirely is to expose only purpose-built view
@@ -313,7 +320,7 @@ justified and bounded.
 | Another local process or browser tab drives the wallet | Generate a random token per launch. The shell passes it to JCEF as a cookie; every handler rejects requests without it. |
 | Cross-site request forgery from a page in the user's real browser | Reject requests carrying an `Origin` header that is not the server's own. Token check already covers this; the origin check is defence in depth. |
 | Remote content loaded into the browser | Deny navigation to any non-local URL in a `CefRequestHandler`. External links open in the system browser through `WindowCommands`. |
-| Injection into rendered HTML | Thymeleaf escapes by default. Never use unescaped output (`th:utext`) for daemon or user-supplied data. |
+| Injection into rendered HTML | Thymeleaf escapes by default. Never use unescaped output (`th:utext`) for data from Hedgehog or the user. |
 | Chromium CVE exposure | Accepted, and new. Chromium must be tracked and jcefmaven bumped on security releases. This is an ongoing maintenance commitment, not a one-time cost. |
 | Developer tools exposing wallet internals | Enabled in development builds, disabled in release builds. |
 
@@ -343,10 +350,11 @@ should happen before handler code is written, because a forced fallback to
 classpath-based `jpackage` determines whether the modules carry
 `module-info.java` at all.
 
-**Daemon protocol client.** Rebuild the JSON-RPC client and its entity types in
-`core` — plain types, CDI events for signalling, no UI toolkit dependency.
-`legacy-javafx` is the reference for the wire format, which is unchanged. This
-stage is verifiable in isolation against a running `unigridd` without any UI.
+**Hedgehog client.** *(done)* A client for Hedgehog's REST interface and the
+management of the local Hedgehog process, in `core` — plain types, no UI
+toolkit dependency. This stage is verifiable in isolation against a running
+Hedgehog, or the stub and fake used by its tests, without any UI. The JSON-RPC
+client for `unigridd` is not rebuilt.
 
 **Shell and server skeleton.** `shell` and `web` together, serving one route end
 to end. Establish the CSS foundation, the SSE bridge, and `WindowCommands`.
@@ -371,7 +379,7 @@ Monocle. TestFX disappears with JavaFX; the rest survives and improves.
 | `core` logic | Existing jqwik and JUnit tests, now runnable with no UI toolkit and no Monocle headless setup. A clear net improvement. |
 | Handlers | Start Jetty on an ephemeral port, issue real HTTP requests, assert on returned HTML. Fast, no browser required. |
 | Template rendering | Render templates against fixed view models and assert on the output. |
-| Architecture rules | Extend the existing ArchUnit tests: `core` must not depend on `web` or `shell`; handlers must not contain RPC calls. |
+| Architecture rules | Extend the existing ArchUnit tests: `core` must not depend on `web` or `shell`; handlers must not call Hedgehog directly. |
 | Flows | The real controllers and templates served as the shell serves them, with a temporary data folder and a window that only records commands. A small htmx stand-in follows `hx-post` controls and swaps the returned fragments. Every action and window command a page can send must reach its handler. Runs in every build. |
 | End-to-end | The same served interface driven by Playwright in headless Chromium, which covers the page scripts: the file dialog, moving and resizing, and the theme. The page reaches its window only over HTTP, so JCEF itself is not needed. Built only with the `browser` profile and run as a separate CI job. The JCEF frame stays manual. |
 
@@ -383,7 +391,7 @@ consulted, not imported.
 | Item | Assessment |
 |---|---|
 | User interface | 2,176 lines FXML and 273 lines JavaFX CSS replaced by HTML templates and standard CSS; ~3,675 LOC of controllers replaced by handlers |
-| Domain and protocol | ~5,279 LOC of model, including the Jersey JSON-RPC client and ~90 entity types, `Daemon`, polling services and `Hedgehog`, rewritten from scratch in `core`. The wire format is unchanged, so `legacy-javafx` remains an accurate specification of it. |
+| Domain and protocol | ~5,279 LOC of model. The Jersey JSON-RPC client, its ~90 entity types and `Daemon` are dropped with `unigridd`. The Hedgehog client and process management are rewritten from scratch in `core`. |
 | Launcher and updater | `bootstrap` (JavaFX updater UI, update4j delegate, Sentry) and `config` (update4j manifest generator) removed; the auto-update mechanism is rebuilt |
 | Release chain | Five packaging and release workflows removed and rebuilt once `shell` can package |
 | Removed dependencies | javafx-controls, -graphics, -fxml, -media, -swing; ControlsFX; ikonli; FXTrayIcon; TestFX; Monocle; update4j; Sentry |
@@ -391,10 +399,11 @@ consulted, not imported.
 | Installer size | roughly 60–80MB to roughly 180–200MB per platform |
 | New ongoing burden | Tracking Chromium security releases |
 
-The domain and protocol row is the expensive one, and it is a deliberate choice
-rather than a technical necessity: that code worked. It is being rewritten to
-avoid carrying the JavaFX-shaped design of the old model forward into a
-codebase that no longer has a UI toolkit in it.
+The domain and protocol row is a deliberate choice rather than a technical
+necessity: that code worked. What survives is rewritten to avoid carrying the
+JavaFX-shaped design of the old model forward into a codebase that no longer
+has a UI toolkit in it, and the part that spoke to `unigridd` is not carried
+forward at all.
 
 ## 12. Open questions
 
