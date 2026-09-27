@@ -1,0 +1,36 @@
+/*
+    The Janus Wallet
+    Copyright © 2021-2026 Stiftelsen The Unigrid Foundation
+
+    This program is free software: you can redistribute it and/or modify it under the terms of the
+    addended GNU Affero General Public License as published by the Free Software Foundation, version 3
+    of the License (see COPYING and COPYING.addendum).
+
+    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+    even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received an addended copy of the GNU Affero General Public License with this program.
+    If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
+ */
+
+package org.unigrid.janus.core.wallet;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.SortedSet;
+
+/**
+ * One transaction as the wallet saw it: what it did to the wallet as a whole, summed over every address
+ * of the wallet it touched. The amount is negative when the wallet paid out more than it took in.
+ */
+public record WalletTransaction(String txid, Instant time, int height, BigDecimal amount, Kind kind,
+	SortedSet<String> addresses) {
+
+	public enum Kind {
+		RECEIVED,
+		SENT,
+		MINED,
+		STAKED
+	}
+}
