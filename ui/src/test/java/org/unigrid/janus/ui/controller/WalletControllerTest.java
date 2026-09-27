@@ -234,6 +234,27 @@ public class WalletControllerTest {
 		assertInstanceOf(DashboardView.class, settle(controller.onClickRetry()).screen());
 	}
 
+	/* The only way out of a Hedgehog that died after it was ready is Retry, so Retry must start one again. */
+	@Example
+	public void shouldLookForHedgehogAgainOnRetryWhenTheOneInUseHasGone() throws Exception {
+		chooseTheFixture();
+		stand.address(addresses.get(0), "1", entry("aa", 1, "1", EntryKind.RECEIVED)).broken(addresses.get(0));
+
+		final PreparingView stopped = assertInstanceOf(PreparingView.class,
+			settle(controller.onClickContinue()).screen()
+		);
+
+		assertEquals("Hedgehog stopped answering", stopped.failure());
+
+		stand.gone();
+
+		final PreparingView retried = assertInstanceOf(PreparingView.class,
+			settle(controller.onClickRetry()).screen()
+		);
+
+		assertEquals("Hedgehog is not installed on this computer", retried.failure());
+	}
+
 	@Example
 	public void shouldForgetTheWalletWhenAnotherIsToBeChosen() throws Exception {
 		chooseTheFixture();

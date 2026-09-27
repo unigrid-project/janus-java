@@ -127,6 +127,7 @@ public class WalletController {
 
 	@Action("wallet-retry")
 	public AppView onClickRetry() {
+		hedgehog.recheck();
 		ledger.reset();
 		hedgehog.prepare();
 		return app();
