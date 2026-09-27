@@ -43,7 +43,9 @@
 		</header>
 
 		<main>
-			<section th:replace="~{fragments/welcome :: welcome}"></section>
+			<th:block th:with="view=${view.content()}">
+				<section th:replace="~{__${view.template()}__}"></section>
+			</th:block>
 		</main>
 
 		<div class="resize resize--left" data-resize="left"></div>

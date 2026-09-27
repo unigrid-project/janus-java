@@ -16,6 +16,7 @@
 
 package org.unigrid.janus.web;
 
+import java.util.function.Supplier;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -38,6 +39,12 @@ public final class Routes {
 
 	public static Handler create(final Templates templates, final SessionToken token,
 		final WindowControl window, final Actions actions, final View index) {
+
+		return create(templates, token, window, actions, () -> index);
+	}
+
+	public static Handler create(final Templates templates, final SessionToken token,
+		final WindowControl window, final Actions actions, final Supplier<? extends View> index) {
 
 		final ResourceHandler assets = new ResourceHandler();
 

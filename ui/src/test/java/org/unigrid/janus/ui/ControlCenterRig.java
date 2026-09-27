@@ -31,6 +31,7 @@ import org.unigrid.janus.ui.controller.AboutController;
 import org.unigrid.janus.ui.controller.ImportController;
 import org.unigrid.janus.ui.controller.WelcomeController;
 import org.unigrid.janus.ui.view.IndexView;
+import org.unigrid.janus.ui.view.WelcomeView;
 import org.unigrid.janus.web.RecordingWindow;
 import org.unigrid.janus.web.Routes;
 import org.unigrid.janus.web.SessionToken;
@@ -64,7 +65,9 @@ public class ControlCenterRig implements AutoCloseable {
 			new ImportController(new DataDirectory(data), choice)
 		);
 
-		server = new UiServer(Routes.create(new Templates(false), token, window, actions, new IndexView(TITLE)));
+		server = new UiServer(Routes.create(new Templates(false), token, window, actions,
+			new IndexView(TITLE, new WelcomeView())
+		));
 		base = server.start();
 	}
 

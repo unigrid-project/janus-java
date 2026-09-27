@@ -18,6 +18,7 @@ package org.unigrid.janus.web;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Supplier;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Handler;
@@ -30,16 +31,16 @@ public class UiHandler extends Handler.Abstract {
 	private static final String HTML = "text/html;charset=utf-8";
 
 	private final Templates templates;
-	private final View index;
+	private final Supplier<? extends View> index;
 
-	public UiHandler(final Templates templates, final View index) {
+	public UiHandler(final Templates templates, final Supplier<? extends View> index) {
 		this.templates = templates;
 		this.index = index;
 	}
 
 	@Override
 	public boolean handle(final Request request, final Response response, final Callback callback) {
-		final ByteBuffer body = ByteBuffer.wrap(templates.render(index).getBytes(StandardCharsets.UTF_8));
+		final ByteBuffer body = ByteBuffer.wrap(templates.render(index.get()).getBytes(StandardCharsets.UTF_8));
 
 		response.setStatus(HttpStatus.OK_200);
 		response.getHeaders().put(HttpHeader.CONTENT_TYPE, HTML);

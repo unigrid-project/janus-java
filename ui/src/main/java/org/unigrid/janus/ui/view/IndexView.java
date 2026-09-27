@@ -18,7 +18,8 @@ package org.unigrid.janus.ui.view;
 
 import org.unigrid.janus.web.action.View;
 
-public record IndexView(String title) implements View {
+/** The page the window opens on, and the view inside it: the welcome card, or the wallet once one is chosen. */
+public record IndexView(String title, View content) implements View {
 	@Override
 	public String template() {
 		return "index";

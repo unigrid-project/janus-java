@@ -54,7 +54,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldShowTheTitleInTheTabAndTheTitleBar() {
-		final String html = templates.render(new IndexView("Unigrid"));
+		final String html = templates.render(new IndexView("Unigrid", new WelcomeView()));
 
 		assertTrue(html.contains("<title>Unigrid</title>"), html);
 		assertTrue(html.contains("<span class=\"titlebar__title\">Unigrid</span>"), html);
@@ -62,7 +62,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldWelcomeWithTheTwoWaysToGetAWallet() {
-		final String html = templates.render(new IndexView("Unigrid"));
+		final String html = templates.render(new IndexView("Unigrid", new WelcomeView()));
 
 		assertTrue(html.contains("Welcome to <span class=\"gradient-text\">Unigrid</span>"), html);
 		assertTrue(html.contains("Create a new wallet"), html);
@@ -71,7 +71,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldLeadFromTheWelcomeToTheImportStep() {
-		final String html = templates.render(new IndexView("Unigrid"));
+		final String html = templates.render(new IndexView("Unigrid", new WelcomeView()));
 
 		assertTrue(html.contains("hx-post=\"/action/import\""), html);
 		assertEquals(1, count(html, LIT_DOT), html);
@@ -173,7 +173,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldOfferTheThemeToggleWithAnIconForEitherTheme() {
-		final String html = templates.render(new IndexView("Unigrid"));
+		final String html = templates.render(new IndexView("Unigrid", new WelcomeView()));
 
 		assertTrue(html.contains("data-theme-toggle"), html);
 		assertTrue(html.contains("class=\"titlebar__sun\""), html);
@@ -182,7 +182,7 @@ public class ViewsTest {
 
 	@Example
 	public void shouldCarryResizeHandlesOnThreeEdgesAndTheCorner() {
-		final String html = templates.render(new IndexView("Unigrid"));
+		final String html = templates.render(new IndexView("Unigrid", new WelcomeView()));
 
 		assertTrue(html.contains("data-resize=\"left\""), html);
 		assertTrue(html.contains("data-resize=\"right\""), html);
