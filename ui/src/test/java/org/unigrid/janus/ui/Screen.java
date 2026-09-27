@@ -38,7 +38,10 @@ import org.unigrid.janus.web.Client;
  * is refused, so that a test can never pass on behaviour the real page would not have.
  */
 public final class Screen {
-	private static final Set<String> UNDERSTOOD = Set.of("hx-post", "hx-target", "hx-swap", "hx-trigger", "hx-vals");
+	private static final Set<String> UNDERSTOOD = Set.of("hx-post", "hx-target", "hx-swap", "hx-trigger", "hx-vals",
+		"hx-params"
+	);
+	private static final String NO_PARAMS = "none";
 	private static final String OUTER = "outerHTML";
 	private static final String INNER = "innerHTML";
 	private static final String CLICK = "click";
@@ -112,6 +115,23 @@ public final class Screen {
 		return send(find(css), values);
 	}
 
+	/** Submits a form with what its fields hold, after the given fields are typed into. */
+	public Screen submit(final String css, final Map<String, String> typed) throws Exception {
+		final Element form = find(css);
+		final Map<String, String> values = new LinkedHashMap<>();
+
+		for (final Element field : form.select("input[name]")) {
+			values.put(field.attr("name"), field.attr("value"));
+		}
+
+		if (!values.keySet().containsAll(typed.keySet())) {
+			throw new AssertionError(css + " has no field for some of " + typed.keySet());
+		}
+
+		values.putAll(typed);
+		return send(form, values);
+	}
+
 	private Screen send(final Element element, final Map<String, String> values) throws Exception {
 		refuseWhatIsNotPlayedOut(element);
 
@@ -149,8 +169,14 @@ public final class Screen {
 			throw new AssertionError("Nothing is sent by " + element.cssSelector());
 		}
 
-		if (element.closest("form") != null) {
-			throw new UnsupportedOperationException("Values carried by forms are not played out");
+		final Element form = element.closest("form");
+
+		if (form != null && form != element && !NO_PARAMS.equals(element.attr("hx-params"))) {
+			throw new UnsupportedOperationException("Values a form carries for its controls are not played out");
+		}
+
+		if (element.hasAttr("hx-params") && !NO_PARAMS.equals(element.attr("hx-params"))) {
+			throw new UnsupportedOperationException("Only hx-params=\"none\" is played out");
 		}
 
 		for (Element carrier = element; carrier != null; carrier = carrier.parent()) {
