@@ -37,7 +37,7 @@
 					</span>
 					<span class="choice__arrow" th:text="${view.otherChosen()} ? '✓' : '→'">→</span>
 				</button>
-				<button class="choice" type="button">
+				<button class="choice" type="button" hx-post="/action/restore">
 					<span class="choice__icon">✎</span>
 					<span class="choice__text">
 						<span class="choice__title">Restore from recovery phrase</span>

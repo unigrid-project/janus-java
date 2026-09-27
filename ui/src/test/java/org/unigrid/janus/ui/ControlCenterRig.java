@@ -22,6 +22,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.ZoneOffset;
 import java.util.Comparator;
@@ -32,11 +33,14 @@ import org.unigrid.janus.core.DataDirectory;
 import org.unigrid.janus.core.Release;
 import org.unigrid.janus.core.WalletBackup;
 import org.unigrid.janus.core.WalletChoice;
+import org.unigrid.janus.core.evm.EvmWalletStore;
+import org.unigrid.janus.core.evm.SeedVault;
 import org.unigrid.janus.core.hedgehog.HedgehogService;
 import org.unigrid.janus.core.hedgehog.HedgehogStand;
 import org.unigrid.janus.core.wallet.WalletLedger;
 import org.unigrid.janus.ui.controller.AboutController;
 import org.unigrid.janus.ui.controller.ImportController;
+import org.unigrid.janus.ui.controller.PhraseController;
 import org.unigrid.janus.ui.controller.WalletController;
 import org.unigrid.janus.ui.controller.WelcomeController;
 import org.unigrid.janus.ui.view.IndexView;
@@ -57,6 +61,9 @@ public class ControlCenterRig implements AutoCloseable {
 	public static final String TITLE = "Unigrid Control Center";
 
 	private static final String FIXTURE = "/org/unigrid/janus/core/legacy/plain-wallet";
+
+	/* Sealing at the standard scrypt cost takes a second and 256 MB, which no test needs to pay. */
+	private static final int CHEAP_SEAL = 16;
 
 	private final SessionToken token = SessionToken.random();
 	private final RecordingWindow window = new RecordingWindow();
@@ -82,8 +89,11 @@ public class ControlCenterRig implements AutoCloseable {
 		final WalletController wallet = new WalletController(chosen, choice, hedgehog, ledger, importer,
 			ZoneOffset.UTC
 		);
+		final PhraseController phrase = new PhraseController(new EvmWalletStore(home.resolve("wallets")),
+			new SeedVault(new SecureRandom(), CHEAP_SEAL), wallet, importer, new SecureRandom()
+		);
 		final Actions actions = Actions.of(new WelcomeController(), new AboutController(new Release()), importer,
-			wallet
+			wallet, phrase
 		);
 
 		try (InputStream in = getClass().getResourceAsStream(FIXTURE + ".addresses")) {
@@ -128,6 +138,11 @@ public class ControlCenterRig implements AutoCloseable {
 
 	public Path backups() {
 		return backups;
+	}
+
+	/** Where the EVM wallets made or restored in the rig are kept. */
+	public Path wallets() {
+		return home.resolve("wallets");
 	}
 
 	/** A wallet left behind in the data folder, where the legacy daemon kept it. */
