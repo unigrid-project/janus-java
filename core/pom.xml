@@ -9,7 +9,7 @@
 	<artifactId>core</artifactId>
 	<packaging>jar</packaging>
 	<name>Unigrid Janus Core</name>
-	<description>Wallet domain model, daemon protocol client and application services. Carries no user interface code.</description>
+	<description>Wallet domain model, Hedgehog client and application services. Carries no user interface code.</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
