@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
@@ -100,6 +101,34 @@ public class HedgehogClientTest {
 			)
 		), page);
 		assertEquals("offset=50&limit=25", hedgehog.requests().get(0).getRawQuery());
+	}
+
+	@Example
+	public void shouldReadEveryMintTheSporkHolds() {
+		hedgehog.answer("/gridspork/mint-storage", 200, """
+			{"type":"MINT_STORAGE","flags":0,"timeStamp":"2026-09-25T09:00:00Z","signatures":[],
+			"data":{"mints":{"0x9858EfFD232B4033E47d90003D41EC34EcaEda94/3200000":1500.25,
+			"%s/3172700":42}}}""".formatted(ADDRESS)
+		);
+
+		assertEquals(Set.of(
+			new Mint("0x9858EfFD232B4033E47d90003D41EC34EcaEda94", 3200000, new BigDecimal("1500.25")),
+			new Mint(ADDRESS, 3172700, new BigDecimal("42"))
+		), Set.copyOf(client.mints()));
+	}
+
+	@Example
+	public void shouldFindNoMintsWhileNoSporkIsStored() {
+		hedgehog.answer("/gridspork/mint-storage", 204, "");
+
+		assertEquals(List.of(), client.mints());
+	}
+
+	@Example
+	public void shouldRefuseAMintKeptWithoutAHeight() {
+		hedgehog.answer("/gridspork/mint-storage", 200, "{\"data\":{\"mints\":{\"" + ADDRESS + "\":1}}}");
+
+		assertThrows(IllegalArgumentException.class, () -> client.mints());
 	}
 
 	@Example

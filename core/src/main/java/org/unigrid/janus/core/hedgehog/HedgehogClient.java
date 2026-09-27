@@ -26,11 +26,13 @@ import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -45,6 +47,7 @@ public class HedgehogClient implements AutoCloseable {
 
 	private static final String LOOPBACK = "127.0.0.1";
 	private static final Duration TIMEOUT = Duration.ofSeconds(10);
+	private static final int NO_CONTENT = 204;
 	private static final int BAD_REQUEST = 400;
 	private static final int NOT_FOUND = 404;
 	private static final int UNAVAILABLE = 503;
@@ -53,6 +56,13 @@ public class HedgehogClient implements AutoCloseable {
 
 	/** The part of Hedgehog's version answer Janus reads. */
 	public record Version(String version) {
+	}
+
+	/** The part of the mint storage spork Janus reads: every mint, keyed by its address and height. */
+	public record MintStorage(MintData data) {
+	}
+
+	public record MintData(Map<String, BigDecimal> mints) {
 	}
 
 	private final Client client;
@@ -92,6 +102,17 @@ public class HedgehogClient implements AutoCloseable {
 			.queryParam("limit", limit);
 
 		return ask(page, response -> read(response, answer -> answer.readEntity(TRANSACTIONS)));
+	}
+
+	/** Every mint the foundation's mint storage spork holds, or none while no such spork is stored. */
+	public List<Mint> mints() {
+		final Optional<MintStorage> spork = ask(hedgehog.path("gridspork/mint-storage"),
+			response -> response.getStatus() == NO_CONTENT ? Optional.empty()
+				: Optional.of(read(response, answer -> answer.readEntity(MintStorage.class)))
+		);
+
+		return spork.map(MintStorage::data).map(MintData::mints).orElse(Map.of()).entrySet().stream()
+			.map(mint -> Mint.of(mint.getKey(), mint.getValue())).toList();
 	}
 
 	/**
