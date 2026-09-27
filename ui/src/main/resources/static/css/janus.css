@@ -661,6 +661,7 @@ main {
 
 main:has(> .app) {
 	display: block;
+	place-items: normal;
 	padding: 0;
 }
 

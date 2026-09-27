@@ -58,6 +58,17 @@ public class WalletIT extends BrowserTest {
 		assertThat(page().locator("#app")).not().hasAttribute("hx-trigger", Pattern.compile(".*"));
 	}
 
+	/* The window used to shrink and centre itself, a leftover of the onboarding layout it swaps out of. */
+	@Example
+	public void shouldFillTheWindowRatherThanShrinkToItsContent() throws Exception {
+		openTheWalletLeftBehind();
+
+		final double window = page().viewportSize().width;
+		final double app = page().locator("#app").boundingBox().width;
+
+		assertEquals(window, app, 1.0);
+	}
+
 	@Example
 	public void shouldOpenARowOntoItsDetails() throws Exception {
 		openTheWalletLeftBehind();
