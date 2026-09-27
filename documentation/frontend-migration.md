@@ -372,7 +372,8 @@ Monocle. TestFX disappears with JavaFX; the rest survives and improves.
 | Handlers | Start Jetty on an ephemeral port, issue real HTTP requests, assert on returned HTML. Fast, no browser required. |
 | Template rendering | Render templates against fixed view models and assert on the output. |
 | Architecture rules | Extend the existing ArchUnit tests: `core` must not depend on `web` or `shell`; handlers must not contain RPC calls. |
-| End-to-end | Deferred. Driving JCEF from tests is expensive and brittle. Handler plus template tests cover the logic; visual verification stays manual until the migration settles. |
+| Flows | The real controllers and templates served as the shell serves them, with a temporary data folder and a window that only records commands. A small htmx stand-in follows `hx-post` controls and swaps the returned fragments. Every action and window command a page can send must reach its handler. Runs in every build. |
+| End-to-end | The same served interface driven by Playwright in headless Chromium, which covers the page scripts: the file dialog, moving and resizing, and the theme. The page reaches its window only over HTTP, so JCEF itself is not needed. Built only with the `browser` profile and run as a separate CI job. The JCEF frame stays manual. |
 
 ## 11. Cost
 

@@ -67,3 +67,18 @@ If you are running into issues starting the wallet a good place to look is our [
 Automated Testing
 -----------------
 Developers are strongly encouraged to write unit tests for new code, and to submit new unit tests for old code.
+
+`mvn install` runs the unit tests together with the flow tests in `ui`, which
+serve the real controllers and templates and walk through them over HTTP.
+
+The browser tests in `e2e` drive the same interface in headless Chromium and
+are only built with the `browser` profile. Playwright downloads Chromium on the
+first run:
+```
+mvn install -DskipTests
+mvn -Pbrowser -pl e2e verify
+```
+
+On a distribution Playwright does not recognise, such as Linux Mint Debian
+Edition, name the closest supported one, for example
+`PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=debian12-x64`.
