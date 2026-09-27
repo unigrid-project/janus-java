@@ -362,7 +362,9 @@ This is the first stage that produces something runnable.
 
 **Screens.** Build out in ascending order of difficulty, with `legacy-javafx`
 as the behavioural reference: documentation, transactions, addresses, wallet,
-governance, nodes, settings.
+governance, nodes, settings. The wallet's Dashboard and Activity come first,
+read-only over Hedgehog's frozen legacy ledger; the other tabs are shown
+disabled until their features exist.
 
 **Packaging and updates.** Rebuild the jlink/jpackage chain around `shell`,
 return `desktop` to the reactor, and rebuild the auto-update mechanism and the

@@ -49,10 +49,11 @@ mvn install -DskipTests
 mvn -pl shell exec:java
 ```
 
-This starts the interface on a loopback address and logs the URL to open;
-the port is assigned at startup and changes between runs. The embedded
-browser window that will eventually host it does not exist yet, so point an
-ordinary browser at the logged address.
+This opens the Control Center in its own window. Once a wallet has been
+chosen, Janus remembers its backup copy in `~/.janus/wallet` and opens on that
+wallet's Dashboard at the next start; deleting the file starts over at
+Welcome. The wallet is shown read-only from Hedgehog's frozen legacy ledger, so
+Hedgehog must be on the `PATH`, or be named with `-Djanus.hedgehog=<path>`.
 
 Templates are resolved from the classpath with caching disabled, so running
 from a development classpath picks up an edited template on the next request
