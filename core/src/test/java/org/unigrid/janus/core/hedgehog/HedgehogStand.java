@@ -84,6 +84,13 @@ public final class HedgehogStand implements AutoCloseable {
 		return this;
 	}
 
+	/** Stops answering as Hedgehog, the way one that died would. */
+	public HedgehogStand gone() {
+		stub.answer("/version", 404, "");
+		stub.answer("/bootstrap", 404, "");
+		return this;
+	}
+
 	public HedgehogClient client() {
 		return client;
 	}

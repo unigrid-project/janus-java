@@ -84,6 +84,13 @@ public class HedgehogService {
 		return client;
 	}
 
+	/** Forgets a Hedgehog that was ready but no longer answers, so that the next prepare looks for one again. */
+	public synchronized void recheck() {
+		if (state.phase() == Phase.READY && client.version().isEmpty()) {
+			state = HedgehogState.IDLE;
+		}
+	}
+
 	/** Starts getting Hedgehog ready unless that is under way or done; after a failure it tries again. */
 	public synchronized HedgehogState prepare() {
 		if (!stopped && (state.phase() == Phase.IDLE || state.phase() == Phase.FAILED)) {

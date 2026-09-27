@@ -111,6 +111,36 @@ public class HedgehogServiceTest {
 		assertEquals(3172666, state.snapshot().tipHeight());
 	}
 
+	/* A Hedgehog that was ready can still die later, and asking again must then look for one anew. */
+	@Example
+	public void shouldLookForHedgehogAgainOnceTheOneItFoundHasGone() {
+		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
+		running.answer("/bootstrap", 200, FakeHedgehog.snapshot("SIGNED"));
+
+		final HedgehogService service = reusing();
+
+		service.prepare();
+		assertEquals(Phase.READY, settle(service).phase());
+
+		running.answer("/version", 404, "");
+		service.recheck();
+		service.prepare();
+		assertEquals("Hedgehog is not installed on this computer", settle(service).reason());
+	}
+
+	@Example
+	public void shouldKeepAHedgehogThatStillAnswers() {
+		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
+		running.answer("/bootstrap", 200, FakeHedgehog.snapshot("SIGNED"));
+
+		final HedgehogService service = reusing();
+
+		service.prepare();
+		settle(service);
+		service.recheck();
+		assertEquals(Phase.READY, service.state().phase());
+	}
+
 	@Example
 	public void shouldRefuseALedgerThatIsNotSigned() {
 		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
