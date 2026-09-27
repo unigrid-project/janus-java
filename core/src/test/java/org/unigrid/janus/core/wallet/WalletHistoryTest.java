@@ -71,6 +71,7 @@ public class WalletHistoryTest {
 
 		assertEquals(Kind.SENT, history.get(0).kind());
 		assertEquals(0, BigDecimal.ZERO.compareTo(history.get(0).amount()));
+		assertEquals(new TreeSet<>(List.of("Hone", "Htwo")), history.get(0).addresses());
 	}
 
 	@Example
