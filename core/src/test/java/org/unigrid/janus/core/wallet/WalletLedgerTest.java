@@ -18,6 +18,7 @@ package org.unigrid.janus.core.wallet;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +33,7 @@ import org.unigrid.janus.core.hedgehog.EntryKind;
 import org.unigrid.janus.core.hedgehog.HedgehogStand;
 import org.unigrid.janus.core.wallet.LedgerState.Phase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WalletLedgerTest {
@@ -104,6 +106,52 @@ public class WalletLedgerTest {
 
 		stand.address(addresses.get(0), "2345", many);
 		assertEquals(2345, ledger.read(WALLET).transactions().size());
+	}
+
+	/* A history that fills its last page exactly is only known to end by the empty page after it. */
+	@Example
+	public void shouldReadAHistoryThatFillsExactlyOnePage() {
+		final AddressTransaction[] page = new AddressTransaction[1000];
+
+		for (int i = 0; i < page.length; i++) {
+			page[i] = entry("t" + i, i, "1", EntryKind.MINED);
+		}
+
+		stand.address(addresses.get(0), "1000", page);
+
+		final WalletFunds funds = ledger.read(WALLET);
+
+		assertEquals(1000, funds.transactions().size());
+		assertEquals(0, new BigDecimal("1000").compareTo(funds.historyNet()));
+	}
+
+	/* An address owed only a mint has a balance but nothing to page through. */
+	@Example
+	public void shouldNotAskForTheHistoryOfAnAddressWithoutAny() {
+		stand.address(addresses.get(0), "25");
+		ledger.read(WALLET);
+
+		assertTrue(stand.requests().stream().map(URI::getPath).noneMatch(path -> path.endsWith("/transactions")),
+			stand.requests()::toString
+		);
+	}
+
+	@Example
+	public void shouldFailWhenHedgehogStopsAnsweringMidwayThroughAHistory() throws InterruptedException {
+		final AddressTransaction[] many = new AddressTransaction[1500];
+
+		for (int i = 0; i < many.length; i++) {
+			many[i] = entry("t" + i, i, "1", EntryKind.MINED);
+		}
+
+		stand.address(addresses.get(0), "1500", many).broken(addresses.get(0), 1000);
+		ledger.load(WALLET);
+
+		final LedgerState failed = settle();
+
+		assertEquals(Phase.FAILED, failed.phase());
+		assertEquals("Hedgehog stopped answering", failed.reason());
+		assertNull(failed.funds());
 	}
 
 	@Example

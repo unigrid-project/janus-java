@@ -80,8 +80,18 @@ public final class HedgehogStand implements AutoCloseable {
 
 	/** Makes the history of the address fail the way a Hedgehog that fell over would. */
 	public HedgehogStand broken(final String address) {
-		stub.answer("/bootstrap/address/" + address + "/transactions?offset=0&limit=" + PAGE, 500, "");
+		return broken(address, 0);
+	}
+
+	/** Makes the history of the address fail from the page at the offset on, as though Hedgehog fell over midway. */
+	public HedgehogStand broken(final String address, final int offset) {
+		stub.answer("/bootstrap/address/" + address + "/transactions?offset=" + offset + "&limit=" + PAGE, 500, "");
 		return this;
+	}
+
+	/** Everything asked of the stand so far. */
+	public List<URI> requests() {
+		return List.copyOf(stub.requests());
 	}
 
 	/** Stops answering as Hedgehog, the way one that died would. */
