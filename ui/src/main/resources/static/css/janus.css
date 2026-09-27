@@ -641,7 +641,6 @@ main:has(> .app) {
 	border-radius: 22px;
 	background: var(--glass);
 	backdrop-filter: blur(30px);
-	animation: rise 0.5s ease both;
 }
 
 .preparing__steps {
@@ -873,7 +872,6 @@ main:has(> .app) {
 	display: grid;
 	grid-template-columns: 1.6fr 1fr;
 	gap: 16px;
-	animation: rise 0.5s ease both;
 }
 
 .dashboard__balance {
@@ -1017,7 +1015,6 @@ main:has(> .app) {
 	grid-template-columns: repeat(3, 1fr);
 	gap: 14px;
 	margin-top: 16px;
-	animation: rise 0.5s ease both 0.09s;
 }
 
 .stat {
@@ -1059,7 +1056,6 @@ main:has(> .app) {
 
 .dashboard__recent {
 	margin-top: 16px;
-	animation: rise 0.5s ease both 0.18s;
 }
 
 .dashboard__recent-head {
@@ -1087,18 +1083,6 @@ main:has(> .app) {
 	text-align: center;
 	font-size: 13.5px;
 	color: var(--text-muted);
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.dashboard__top,
-	.dashboard__stats,
-	.dashboard__recent {
-		animation: none;
-	}
-}
-
-.activity {
-	animation: slide-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .activity__head {
@@ -1268,22 +1252,35 @@ main:has(> .app) {
 	}
 }
 
-@media (prefers-reduced-motion: reduce) {
-	.activity {
-		animation: none;
-	}
-}
-
 @keyframes spin {
 	to {
 		transform: rotate(360deg);
 	}
 }
 
+/* The window is drawn whole on every poll and every filter, so only a screen that has just
+   arrived moves in; one drawn again in place stays still. */
+.app--entering .preparing,
+.app--entering .dashboard__top {
+	animation: rise 0.5s ease both;
+}
+
+.app--entering .dashboard__stats {
+	animation: rise 0.5s ease both 0.09s;
+}
+
+.app--entering .dashboard__recent {
+	animation: rise 0.5s ease both 0.18s;
+}
+
+.app--entering .activity {
+	animation: slide-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-	.preparing,
-	.preparing__step--active .preparing__mark {
-		animation: none;
+	.app--entering *,
+	.preparing__mark {
+		animation: none !important;
 	}
 }
 

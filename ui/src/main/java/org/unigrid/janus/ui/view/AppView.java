@@ -21,9 +21,9 @@ import org.unigrid.janus.web.action.View;
 /**
  * The wallet's own window: its tabs, the state of the ledger and the screen being shown. It is drawn and
  * swapped as a whole, so the tabs always agree with the screen. While the ledger is being prepared it
- * asks for itself again every two seconds.
+ * asks for itself again every two seconds. Only a screen that has just arrived moves in.
  */
-public record AppView(Tab tab, String chip, boolean preparing, View screen) implements View {
+public record AppView(Tab tab, String chip, boolean preparing, boolean entering, View screen) implements View {
 	public enum Tab {
 		DASHBOARD,
 		ACTIVITY

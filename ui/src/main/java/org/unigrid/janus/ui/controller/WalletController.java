@@ -84,6 +84,7 @@ public class WalletController {
 	private volatile Tab tab = Tab.DASHBOARD;
 	private volatile Filter filter = Filter.ALL;
 	private volatile String query = "";
+	private volatile String shown = "";
 
 	@Inject
 	public WalletController(final ChosenWallet chosen, final WalletChoice choice, final HedgehogService hedgehog,
@@ -105,6 +106,7 @@ public class WalletController {
 
 	/** What the window opens on: the wallet chosen on an earlier start, or else the welcome card. */
 	public View start() {
+		shown = "";
 		return chosen.remembered().isPresent() ? app() : new WelcomeView();
 	}
 
@@ -114,6 +116,7 @@ public class WalletController {
 
 		chosen.remember(backup);
 		ledger.reset();
+		shown = "";
 		tab = Tab.DASHBOARD;
 		filter = Filter.ALL;
 		query = "";
@@ -215,17 +218,25 @@ public class WalletController {
 		}
 
 		if (read.phase() == LedgerState.Phase.LOADED) {
-			return new AppView(tab, chip(read.funds()), false, tab == Tab.DASHBOARD
-				? dashboard(read.funds()) : activity(read.funds())
-			);
+			final View screen = tab == Tab.DASHBOARD ? dashboard(read.funds()) : activity(read.funds());
+
+			return new AppView(tab, chip(read.funds()), false, arriving(screen), screen);
 		}
 
 		final String failure = service.phase() == HedgehogState.Phase.FAILED ? service.reason()
 			: read.phase() == LedgerState.Phase.FAILED ? read.reason() : null;
+		final View screen = new PreparingView(steps(service, read), failure, read.unreadable());
 
-		return new AppView(tab, PREPARING, failure == null, new PreparingView(steps(service, read), failure,
-			read.unreadable()
-		));
+		return new AppView(tab, PREPARING, failure == null, arriving(screen), screen);
+	}
+
+	/* A screen drawn again where it already stood, by a poll or a filter, must not move in again. */
+	private boolean arriving(final View screen) {
+		final String now = tab + ":" + screen.getClass().getSimpleName();
+		final boolean arriving = !now.equals(shown);
+
+		shown = now;
+		return arriving;
 	}
 
 	private static List<Step> steps(final HedgehogState service, final LedgerState read) {

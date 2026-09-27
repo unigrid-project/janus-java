@@ -256,6 +256,21 @@ public class WalletControllerTest {
 	}
 
 	@Example
+	public void shouldMoveANewScreenInButNotARedrawnOne() throws Exception {
+		chooseTheFixture();
+
+		final AppView opened = controller.onClickContinue();
+
+		assertTrue(opened.entering());
+		settle(opened);
+		assertFalse(controller.onPoll().entering());
+		assertTrue(controller.onClickActivity(Form.parse("filter=ALL")).entering());
+		assertFalse(controller.onClickActivity(Form.parse("filter=SENT")).entering());
+		assertTrue(controller.onClickDashboard().entering());
+		assertTrue(assertInstanceOf(AppView.class, controller.start()).entering());
+	}
+
+	@Example
 	public void shouldForgetTheWalletWhenAnotherIsToBeChosen() throws Exception {
 		chooseTheFixture();
 		controller.onClickContinue();

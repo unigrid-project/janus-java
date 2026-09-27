@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<body>
-		<section th:fragment="app" id="app" class="app" hx-target="this" hx-swap="outerHTML"
+		<section th:fragment="app" id="app" class="app" th:classappend="${view.entering()} ? 'app--entering'"
+			hx-target="this" hx-swap="outerHTML"
 			th:attr="hx-post=${view.preparing()} ? '/action/wallet-status' : null,
 				hx-trigger=${view.preparing()} ? 'every 2s' : null">
 			<nav class="app__nav">

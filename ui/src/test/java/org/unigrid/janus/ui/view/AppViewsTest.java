@@ -42,7 +42,7 @@ public class AppViewsTest {
 
 	@Example
 	public void shouldPollWhilePreparingAndHoldTheTabsBack() {
-		final Document html = render(new AppView(Tab.DASHBOARD, "PREPARING", true,
+		final Document html = render(new AppView(Tab.DASHBOARD, "PREPARING", true, false,
 			new PreparingView(STARTING, null, false)
 		));
 
@@ -58,7 +58,7 @@ public class AppViewsTest {
 
 	@Example
 	public void shouldStopPollingOnceThereIsSomethingToShow() {
-		final Document html = render(new AppView(Tab.ACTIVITY, "LEDGER FROZEN", false,
+		final Document html = render(new AppView(Tab.ACTIVITY, "LEDGER FROZEN", false, false,
 			new PreparingView(STARTING, "Hedgehog is not installed on this computer", false)
 		));
 
@@ -71,10 +71,10 @@ public class AppViewsTest {
 
 	@Example
 	public void shouldOfferARetryAndAnotherWalletOnlyWhenTheWalletWasTheProblem() {
-		final Document retryOnly = render(new AppView(Tab.DASHBOARD, "PREPARING", false,
+		final Document retryOnly = render(new AppView(Tab.DASHBOARD, "PREPARING", false, false,
 			new PreparingView(STARTING, "Hedgehog stopped answering", false)
 		));
-		final Document both = render(new AppView(Tab.DASHBOARD, "PREPARING", false,
+		final Document both = render(new AppView(Tab.DASHBOARD, "PREPARING", false, false,
 			new PreparingView(STARTING, "wallet.dat is not a wallet.dat Janus can read", true)
 		));
 
@@ -86,7 +86,7 @@ public class AppViewsTest {
 
 	@Example
 	public void shouldShowTheLaterTabsWithoutLettingThemBeUsed() {
-		final Document html = render(new AppView(Tab.DASHBOARD, "LEDGER FROZEN", false,
+		final Document html = render(new AppView(Tab.DASHBOARD, "LEDGER FROZEN", false, false,
 			new PreparingView(STARTING, null, false)
 		));
 
@@ -94,5 +94,16 @@ public class AppViewsTest {
 			html.select(".app__tab[aria-disabled=true]").eachText()
 		);
 		assertTrue(html.select(".app__tab[aria-disabled=true][hx-post]").isEmpty());
+	}
+
+	/* The window is redrawn whole on every poll and every filter, and only a new screen should move in. */
+	@Example
+	public void shouldMoveInOnlyWhenEntering() {
+		final PreparingView panel = new PreparingView(STARTING, null, false);
+
+		assertTrue(render(new AppView(Tab.DASHBOARD, "PREPARING", true, true, panel)).selectFirst("#app")
+			.hasClass("app--entering"));
+		assertFalse(render(new AppView(Tab.DASHBOARD, "PREPARING", true, false, panel)).selectFirst("#app")
+			.hasClass("app--entering"));
 	}
 }
