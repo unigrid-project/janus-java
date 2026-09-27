@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<div th:fragment="rows" class="under-test">
+			<th:block th:each="row : ${view.rows()}">
+				<th:block th:replace="~{fragments/rows :: row(${row})}"></th:block>
+			</th:block>
+		</div>
+	</body>
+</html>

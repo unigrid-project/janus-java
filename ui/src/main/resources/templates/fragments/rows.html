@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<th:block th:fragment="row(row)">
+			<div class="ledger__month" th:if="${row.heading() != null}" th:text="${row.heading()}">March 2019</div>
+			<details class="ledger__row" th:classappend="'ledger__row--' + ${row.kind()}">
+				<summary class="ledger__summary">
+					<span class="ledger__icon" aria-hidden="true" th:text="${row.icon()}">↓</span>
+					<span class="ledger__what">
+						<span class="ledger__title" th:text="${row.title()}">Received</span>
+						<span class="ledger__party" th:text="${row.party()}">H6stkFpUvrJMqWigLfPwp3onsvzZzZuF7V</span>
+					</span>
+					<span class="ledger__figures">
+						<span class="ledger__amount" th:text="${row.amount()}">+120.00</span>
+						<span class="ledger__time" th:text="${row.time()}">1 Mar 2019, 10:00</span>
+					</span>
+					<span class="ledger__chevron" aria-hidden="true">▾</span>
+				</summary>
+				<dl class="ledger__details">
+					<div><dt>status</dt><dd class="ledger__confirmed">Confirmed</dd></div>
+					<div><dt>confirmations</dt><dd class="ledger__confirmations" th:text="${row.confirmations()}">142</dd></div>
+					<div><dt>block</dt><dd th:text="${row.block()}">4,182,559</dd></div>
+					<div class="ledger__wide"><dt>transaction</dt><dd class="ledger__txid" th:text="${row.txid()}">a7f4</dd></div>
+					<div class="ledger__wide">
+						<dt>addresses</dt>
+						<dd><span class="ledger__address" th:each="address : ${row.addresses()}" th:text="${address}">H</span></dd>
+					</div>
+				</dl>
+			</details>
+		</th:block>
+	</body>
+</html>
