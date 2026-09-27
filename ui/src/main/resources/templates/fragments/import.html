@@ -53,7 +53,8 @@
 
 			<div class="step__actions">
 				<button class="button" type="button" hx-post="/action/welcome">Back</button>
-				<button class="button button--primary" type="button" th:disabled="${!view.hasChosen()}">Continue →</button>
+				<button class="button button--primary" type="button" hx-post="/action/open-wallet"
+					th:disabled="${!view.hasChosen()}">Continue →</button>
 			</div>
 		</section>
 	</body>

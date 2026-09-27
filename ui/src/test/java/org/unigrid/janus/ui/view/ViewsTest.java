@@ -33,6 +33,8 @@ public class ViewsTest {
 	private static final String LIT_DOT = "steps__dot--lit";
 	private static final String FOUND_CHOICE = "type=\"button\" hx-post=\"/action/import-found\"";
 	private static final String FILE_CHOICE = "type=\"button\" data-choose-file";
+	private static final String CONTINUE = "class=\"button button--primary\" type=\"button\" "
+		+ "hx-post=\"/action/open-wallet\"";
 
 	private final Templates templates = new Templates(false);
 
@@ -110,7 +112,7 @@ public class ViewsTest {
 	public void shouldHoldTheContinueButtonBackUntilAWalletIsChosen() {
 		final String html = templates.render(new ImportView(DIRECTORY, FOUND, null, null));
 
-		assertTrue(html.contains("class=\"button button--primary\" type=\"button\" disabled=\"disabled\""), html);
+		assertTrue(html.contains(CONTINUE + " disabled=\"disabled\""), html);
 		assertFalse(html.contains("choice--selected"), html);
 	}
 
@@ -120,7 +122,7 @@ public class ViewsTest {
 
 		assertTrue(html.contains(selected(FOUND_CHOICE)), html);
 		assertTrue(html.contains(plain(FILE_CHOICE)), html);
-		assertTrue(html.contains("class=\"button button--primary\" type=\"button\">Continue"), html);
+		assertTrue(html.contains(CONTINUE + ">Continue"), html);
 	}
 
 	@Example
