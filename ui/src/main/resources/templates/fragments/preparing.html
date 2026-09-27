@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<div th:fragment="preparing" class="preparing">
+			<span class="step__label">Legacy ledger</span>
+			<h2 class="step__heading" th:text="${view.failed()} ? 'Your wallet could not be shown'
+				: 'Getting your wallet ready'">Getting your wallet ready</h2>
+			<ol class="preparing__steps">
+				<li th:each="step : ${view.steps()}" class="preparing__step"
+					th:classappend="'preparing__step--' + ${step.state().css()}">
+					<span class="preparing__mark" aria-hidden="true"></span>
+					<span th:text="${step.label()}">Starting Hedgehog</span>
+				</li>
+			</ol>
+			<th:block th:if="${view.failed()}">
+				<p class="preparing__failure" th:text="${view.failure()}">Hedgehog stopped answering</p>
+				<div class="step__actions">
+					<button class="button" type="button" hx-post="/action/choose-another"
+						th:if="${view.chooseAnother()}">Choose another wallet</button>
+					<button class="button button--primary" type="button" hx-post="/action/wallet-retry">Retry</button>
+				</div>
+			</th:block>
+		</div>
+	</body>
+</html>

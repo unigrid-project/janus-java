@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<section th:fragment="app" id="app" class="app" hx-target="this" hx-swap="outerHTML"
+			th:attr="hx-post=${view.preparing()} ? '/action/wallet-status' : null,
+				hx-trigger=${view.preparing()} ? 'every 2s' : null">
+			<nav class="app__nav">
+				<div class="app__brand">
+					<img class="app__mark" src="/static/images/unigrid-mark.svg" alt="">
+					<span class="app__name">Unigrid</span>
+				</div>
+				<button class="app__tab" type="button" hx-post="/action/dashboard" th:disabled="${view.preparing()}"
+					th:classappend="${view.on('DASHBOARD')} ? 'app__tab--active'">Dashboard</button>
+				<button class="app__tab" type="button" hx-post="/action/activity" th:disabled="${view.preparing()}"
+					th:classappend="${view.on('ACTIVITY')} ? 'app__tab--active'">Activity</button>
+				<button class="app__tab" type="button" disabled aria-disabled="true"
+					title="Coming in a later release">Gridnodes</button>
+				<button class="app__tab" type="button" disabled aria-disabled="true"
+					title="Coming in a later release">Domains</button>
+				<button class="app__tab" type="button" disabled aria-disabled="true"
+					title="Coming in a later release">Proxy</button>
+				<button class="app__tab" type="button" disabled aria-disabled="true"
+					title="Coming in a later release">Settings</button>
+				<span class="app__chip" th:classappend="${view.preparing()} ? 'app__chip--preparing'">
+					<span class="app__dot" aria-hidden="true"></span><span th:text="${view.chip()}">LEDGER FROZEN</span>
+				</span>
+			</nav>
+			<div class="app__screen" id="screen">
+				<th:block th:with="view=${view.screen()}">
+					<div th:replace="~{__${view.template()}__}"></div>
+				</th:block>
+			</div>
+		</section>
+	</body>
+</html>
