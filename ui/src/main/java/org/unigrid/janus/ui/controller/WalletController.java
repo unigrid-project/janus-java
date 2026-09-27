@@ -112,9 +112,12 @@ public class WalletController {
 
 	@Action("open-wallet")
 	public AppView onClickContinue() {
-		final Path backup = choice.backup().orElseThrow(() -> new IllegalStateException("No wallet was chosen"));
+		return open(choice.backup().orElseThrow(() -> new IllegalStateException("No wallet was chosen")));
+	}
 
-		chosen.remember(backup);
+	/** Opens on the wallet from now on, a wallet.dat backup or an EVM wallet alike, and shows it. */
+	public AppView open(final Path wallet) {
+		chosen.remember(wallet);
 		ledger.reset();
 		shown = "";
 		tab = Tab.DASHBOARD;
