@@ -109,6 +109,19 @@ public class PhraseFlowTest {
 	}
 
 	@Example
+	public void shouldGoBackFromVerifyingToTheSameWords() throws Exception {
+		final Screen screen = Screen.open(rig).click(CREATE);
+		final List<String> words = words(screen);
+
+		tap(screen.click(SAVED), words.get(0));
+		screen.click("[hx-post=/action/create-seed]");
+		assertEquals(words, words(screen));
+
+		screen.click(SAVED);
+		assertEquals("select below…", screen.find(".tray__hint").text());
+	}
+
+	@Example
 	public void shouldSealTheNewWalletAndOpenIt() throws Exception {
 		final Screen screen = Screen.open(rig).click(CREATE);
 		final List<String> words = words(screen);

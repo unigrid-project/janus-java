@@ -96,6 +96,13 @@ public class PhraseController {
 		return new WelcomeView();
 	}
 
+	/* The same words come back, so a phrase already written down stays the one to confirm. */
+	@Action("create-seed")
+	public synchronized SeedView onClickBackToPhrase() {
+		picked.clear();
+		return new SeedView(pending().words());
+	}
+
 	@Action("create-verify")
 	public VerifyView onClickSaved() {
 		return verify();

@@ -43,6 +43,7 @@
 			</div>
 
 			<div class="step__actions step__actions--centred">
+				<button class="button" type="button" hx-post="/action/create-seed">Back</button>
 				<button class="button" type="button" hx-post="/action/create-reset">Reset</button>
 				<span class="verify__status" th:classappend="${view.confirmed} ? 'verify__status--done'"
 					th:text="${view.status()}"></span>
