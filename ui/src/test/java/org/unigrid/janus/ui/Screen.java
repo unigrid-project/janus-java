@@ -16,10 +16,14 @@
 
 package org.unigrid.janus.ui;
 
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
@@ -38,6 +42,8 @@ public final class Screen {
 	private static final String OUTER = "outerHTML";
 	private static final String INNER = "innerHTML";
 	private static final String CLICK = "click";
+	private static final String SCRIPTED = "js:";
+	private static final Jsonb JSON = JsonbBuilder.create();
 
 	private final Client client;
 	private final Document document;
@@ -87,7 +93,11 @@ public final class Screen {
 			throw new AssertionError(css + " is not sent by a click but by " + trigger);
 		}
 
-		if (element.hasAttr("hx-vals")) {
+		if (element.hasAttr("disabled")) {
+			throw new AssertionError(css + " is disabled and cannot be clicked");
+		}
+
+		if (element.attr("hx-vals").startsWith(SCRIPTED)) {
 			throw new UnsupportedOperationException(css + " works out values of its own; trigger it with them");
 		}
 
@@ -106,7 +116,7 @@ public final class Screen {
 		refuseWhatIsNotPlayedOut(element);
 
 		final Element target = target(element);
-		final HttpResponse<String> response = client.submit(element.attr("hx-post"), encode(values));
+		final HttpResponse<String> response = client.submit(element.attr("hx-post"), encode(sent(element, values)));
 
 		status = response.statusCode();
 
@@ -117,12 +127,29 @@ public final class Screen {
 		return this;
 	}
 
+	/* htmx sends the control's own value and its fixed values, and what its script works out on top. */
+	private static Map<String, String> sent(final Element element, final Map<String, String> values) {
+		final Map<String, String> sent = new LinkedHashMap<>();
+
+		if (element.hasAttr("name")) {
+			sent.put(element.attr("name"), element.attr("value"));
+		}
+
+		if (element.hasAttr("hx-vals") && !element.attr("hx-vals").startsWith(SCRIPTED)) {
+			JSON.fromJson(element.attr("hx-vals"), Map.class)
+				.forEach((key, value) -> sent.put(String.valueOf(key), String.valueOf(value)));
+		}
+
+		sent.putAll(values);
+		return sent;
+	}
+
 	private static void refuseWhatIsNotPlayedOut(final Element element) {
 		if (!element.hasAttr("hx-post")) {
 			throw new AssertionError("Nothing is sent by " + element.cssSelector());
 		}
 
-		if (element.hasAttr("name") || element.closest("form") != null) {
+		if (element.closest("form") != null) {
 			throw new UnsupportedOperationException("Values carried by forms are not played out");
 		}
 
@@ -144,8 +171,16 @@ public final class Screen {
 			return element;
 		}
 
-		if (!"this".equals(carrier.attr("hx-target"))) {
-			throw new UnsupportedOperationException("Only hx-target=\"this\" is played out");
+		final String named = carrier.attr("hx-target");
+
+		if (named.startsWith("#")) {
+			return Objects.requireNonNull(carrier.ownerDocument().getElementById(named.substring(1)),
+				() -> "Nothing on screen is " + named
+			);
+		}
+
+		if (!"this".equals(named)) {
+			throw new UnsupportedOperationException("Only hx-target=\"this\" and \"#id\" are played out");
 		}
 
 		return carrier;
