@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<div th:fragment="dashboard" class="dashboard">
+			<div class="dashboard__top">
+				<div class="dashboard__balance">
+					<div class="dashboard__glass">
+						<span class="screen__label">Total balance</span>
+						<div class="dashboard__figure">
+							<span class="dashboard__total" th:text="${view.total()}">1,234.50</span>
+							<span class="dashboard__unit gradient-text">UGD</span>
+						</div>
+						<p class="dashboard__awaiting" th:if="${view.awaitingMint() != null}"
+							th:text="'Includes ' + ${view.awaitingMint()} + ' UGD awaiting mint'">Includes 25.00 UGD awaiting mint</p>
+						<div class="dashboard__bars" aria-hidden="true">
+							<span class="dashboard__bar" th:each="bar : ${view.bars()}" th:style="${bar.style()}"
+								th:title="${bar.title()}"></span>
+						</div>
+						<div class="dashboard__months" th:if="${!view.bars().isEmpty()}">
+							<span th:text="${view.firstMonth()}">Feb 2019</span><span th:text="${view.lastMonth()}">Mar 2019</span>
+						</div>
+						<p class="dashboard__frozen" th:text="'Ledger frozen at block ' + ${view.tip()}
+							+ ' · signed by the Unigrid Foundation'">Ledger frozen at block 3,172,666</p>
+					</div>
+				</div>
+				<div class="dashboard__addresses">
+					<span class="screen__label">Addresses</span>
+					<div class="dashboard__ring" th:style="'background:' + ${view.ring()}">
+						<span class="dashboard__ring-hole"><span class="dashboard__ring-count" th:text="${view.addresses()}">106</span></span>
+					</div>
+					<ul class="dashboard__legend">
+						<li><span class="dashboard__key dashboard__key--funded"></span>Holding funds
+							<span class="dashboard__legend-count" th:text="${view.funded()}">2</span></li>
+						<li><span class="dashboard__key dashboard__key--history"></span>History only
+							<span class="dashboard__legend-count" th:text="${view.historyOnly()}">3</span></li>
+						<li><span class="dashboard__key dashboard__key--unused"></span>Never used
+							<span class="dashboard__legend-count" th:text="${view.neverUsed()}">101</span></li>
+					</ul>
+				</div>
+			</div>
+			<div class="dashboard__stats">
+				<button class="stat" type="button" hx-post="/action/activity" th:hx-vals="${view.allVals()}">
+					<span class="stat__label">Transactions</span><span class="stat__value" th:text="${view.transactions()}">17</span>
+				</button>
+				<button class="stat" type="button" hx-post="/action/activity" th:hx-vals="${view.allVals()}">
+					<span class="stat__label">Active</span><span class="stat__value stat__value--small" th:text="${view.active()}">1 Feb 2019 – 1 Mar 2019</span>
+				</button>
+				<button class="stat" type="button" hx-post="/action/activity" th:hx-vals="${view.allVals()}">
+					<span class="stat__label">Funded addresses</span><span class="stat__value" th:text="${view.funded()}">2</span>
+				</button>
+			</div>
+			<div class="ledger dashboard__recent">
+				<div class="dashboard__recent-head">
+					<span>Recent activity</span>
+					<button class="dashboard__all" type="button" hx-post="/action/activity" th:hx-vals="${view.allVals()}">view all →</button>
+				</div>
+				<th:block th:each="row : ${view.recent()}">
+					<th:block th:replace="~{fragments/rows :: row(${row})}"></th:block>
+				</th:block>
+				<p class="ledger__empty" th:if="${view.recent().isEmpty()}">This wallet has no transactions.</p>
+			</div>
+		</div>
+	</body>
+</html>

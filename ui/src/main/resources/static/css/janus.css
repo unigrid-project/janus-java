@@ -854,6 +854,249 @@ main:has(> .app) {
 	color: var(--text-faint);
 }
 
+.screen__label {
+	font-family: var(--font-mono);
+	font-size: 11px;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.screen__heading {
+	margin: 6px 0 0;
+	font-size: 24px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+.dashboard__top {
+	display: grid;
+	grid-template-columns: 1.6fr 1fr;
+	gap: 16px;
+	animation: rise 0.5s ease both;
+}
+
+.dashboard__balance {
+	padding: 2px;
+	border-radius: 20px;
+	background: linear-gradient(135deg, rgba(254, 116, 22, 0.5), rgba(255, 47, 142, 0.5));
+}
+
+.dashboard__glass {
+	height: 100%;
+	padding: 26px 28px;
+	border-radius: 18px;
+	background: var(--glass);
+	backdrop-filter: blur(24px);
+}
+
+.dashboard__figure {
+	display: flex;
+	align-items: baseline;
+	gap: 11px;
+	margin-top: 12px;
+}
+
+.dashboard__total {
+	font-size: 48px;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard__unit {
+	font-size: 19px;
+	font-weight: 600;
+}
+
+.dashboard__awaiting,
+.dashboard__frozen {
+	margin: 8px 0 0;
+	font-family: var(--font-mono);
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.dashboard__bars {
+	display: flex;
+	align-items: flex-end;
+	gap: 4px;
+	height: 42px;
+	margin-top: 18px;
+}
+
+.dashboard__bar {
+	flex: 1;
+	min-height: 2px;
+	border-radius: 3px;
+	background: linear-gradient(180deg, var(--accent), rgba(255, 47, 142, 0.12));
+}
+
+.dashboard__months {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 6px;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	color: var(--text-faint);
+}
+
+.dashboard__addresses {
+	display: flex;
+	flex-direction: column;
+	padding: 22px;
+	border: 1px solid var(--border);
+	border-radius: 20px;
+	background: var(--glass);
+	backdrop-filter: blur(24px);
+}
+
+.dashboard__ring {
+	display: grid;
+	place-items: center;
+	width: 118px;
+	height: 118px;
+	margin: 14px auto;
+	border-radius: 50%;
+}
+
+.dashboard__ring-hole {
+	display: grid;
+	place-items: center;
+	width: 78px;
+	height: 78px;
+	border-radius: 50%;
+	background: var(--surface-raised);
+	font-family: var(--font-mono);
+	font-size: 14px;
+}
+
+.dashboard__legend {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 11.5px;
+	color: var(--text-muted);
+}
+
+.dashboard__legend li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.dashboard__legend-count {
+	margin-left: auto;
+	font-family: var(--font-mono);
+	color: var(--text);
+}
+
+.dashboard__key {
+	width: 8px;
+	height: 8px;
+	border-radius: 2px;
+}
+
+.dashboard__key--funded {
+	background: var(--up);
+}
+
+.dashboard__key--history {
+	background: var(--accent);
+}
+
+.dashboard__key--unused {
+	background: var(--border-strong);
+}
+
+.dashboard__stats {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 14px;
+	margin-top: 16px;
+	animation: rise 0.5s ease both 0.09s;
+}
+
+.stat {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 18px 20px;
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	background: var(--glass);
+	color: var(--text);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.stat:hover {
+	border-color: var(--border-strong);
+	filter: brightness(1.13);
+}
+
+.stat__label {
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.stat__value {
+	font-size: 25px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.stat__value--small {
+	font-size: 15px;
+}
+
+.dashboard__recent {
+	margin-top: 16px;
+	animation: rise 0.5s ease both 0.18s;
+}
+
+.dashboard__recent-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 15px 20px;
+	border-bottom: 1px solid var(--border);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.dashboard__all {
+	border: 0;
+	background: none;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--accent-2);
+	cursor: pointer;
+}
+
+.ledger__empty {
+	margin: 0;
+	padding: 56px 20px;
+	text-align: center;
+	font-size: 13.5px;
+	color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dashboard__top,
+	.dashboard__stats,
+	.dashboard__recent {
+		animation: none;
+	}
+}
+
 @keyframes spin {
 	to {
 		transform: rotate(360deg);
