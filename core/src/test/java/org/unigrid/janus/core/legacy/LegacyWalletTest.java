@@ -59,7 +59,7 @@ public class LegacyWalletTest {
 	}
 
 	@Example
-	public void shouldReadWalletsShapedLikeTheDaemonsOwn() throws IOException {
+	public void shouldReadWalletsShapedLikeTheLegacyDaemonsOwn() throws IOException {
 		for (final String name : List.of("plain-wallet", "encrypted-wallet")) {
 			final Path addresses = BerkeleyFileTest.fixture(name + ".addresses");
 			final Set<String> expected = Set.copyOf(Files.readAllLines(addresses));

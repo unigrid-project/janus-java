@@ -80,7 +80,7 @@ def own_key(name, n):
 	return b"\x04" + seed + hashlib.sha256(seed).digest()
 
 
-def daemon_records(name, encrypted, used, pool):
+def legacy_records(name, encrypted, used, pool):
 	yield key("version"), struct.pack("<i", 61000)
 	yield key("minversion"), struct.pack("<i", 61000 if encrypted else 60000)
 	yield key("defaultkey"), compact(used[0])
@@ -110,10 +110,10 @@ def daemon_records(name, encrypted, used, pool):
 		yield key("tx", hashlib.sha256(f"{name}/tx/{n}".encode()).digest()), b"\xee" * (3000 if n % 8 == 0 else 250)
 
 
-def daemon_wallet(name, encrypted):
+def legacy_wallet(name, encrypted):
 	used = [own_key(name, n) for n in range(6)]
 	pool = [own_key(name, n) for n in range(6, 106)]
-	load(f"{name}.dat", dump(4096, daemon_records(name, encrypted, used, pool)))
+	load(f"{name}.dat", dump(4096, legacy_records(name, encrypted, used, pool)))
 	(HERE / f"{name}.addresses").write_text("".join(f"{a}\n" for a in sorted(map(address, used + pool))))
 
 
@@ -135,5 +135,5 @@ load("wallet.dat", dump(512, records()))
 load("hash.dat", dump(512, records()).replace("type=btree", "type=hash"))
 load("encrypted-file.dat", dump(512, records()), "-P", "secret")
 load("short-key.dat", dump(512, records((key("key", compact(b"\x02" * 10)), b""))))
-daemon_wallet("plain-wallet", encrypted=False)
-daemon_wallet("encrypted-wallet", encrypted=True)
+legacy_wallet("plain-wallet", encrypted=False)
+legacy_wallet("encrypted-wallet", encrypted=True)

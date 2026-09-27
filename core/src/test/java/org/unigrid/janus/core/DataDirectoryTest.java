@@ -51,7 +51,7 @@ public class DataDirectoryTest {
 	}
 
 	@Example
-	public void shouldFindTheWalletTheDaemonLeftBehind() throws IOException {
+	public void shouldFindTheWalletLeftBehind() throws IOException {
 		final Path directory = Files.createTempDirectory("janus");
 		final Path wallet = Files.createFile(directory.resolve("wallet.dat"));
 

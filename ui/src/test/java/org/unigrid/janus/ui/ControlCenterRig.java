@@ -89,7 +89,7 @@ public class ControlCenterRig implements AutoCloseable {
 		return backups;
 	}
 
-	/** A wallet where the daemon would have left it. */
+	/** A wallet left behind in the data folder, where the legacy daemon kept it. */
 	public Path leaveWalletBehind() throws IOException {
 		return Files.createFile(data.resolve("wallet.dat"));
 	}

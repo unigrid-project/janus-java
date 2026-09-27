@@ -46,7 +46,7 @@ public class ActionHandlerTest extends ServedTest {
 
 		@Action("break-wallet")
 		public void onClickBreakWallet() {
-			throw new IllegalStateException("the daemon said no");
+			throw new IllegalStateException("Hedgehog said no");
 		}
 
 		@Action("misreport-wallet")
