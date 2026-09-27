@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<div th:fragment="activity" class="activity">
+			<header class="activity__head">
+				<div>
+					<span class="screen__label">Ledger</span>
+					<h2 class="screen__heading">Activity</h2>
+				</div>
+				<div class="activity__export">
+					<th:block th:with="view=${view.note()}">
+						<p th:replace="~{fragments/activity :: note}"></p>
+					</th:block>
+					<button class="button" type="button" data-save-file="Save the history as CSV"
+						data-file-name="unigrid-legacy-history.csv" hx-post="/action/export-csv" hx-trigger="file-chosen"
+						hx-vals="js:{path: event.detail.path}" hx-target="#export-note" hx-swap="outerHTML">Export CSV</button>
+				</div>
+			</header>
+			<div class="activity__summaries">
+				<button th:each="summary : ${view.summaries()}" class="summary" type="button" hx-post="/action/activity"
+					th:hx-vals="${summary.filter().vals()}"
+					th:classappend="${summary.filter() == view.filter()} ? 'summary--active'">
+					<span class="summary__label" th:text="${summary.label()}">Received</span>
+					<span class="summary__value" th:classappend="'summary__value--' + ${summary.kind()}"
+						th:text="${summary.value()}">+1,020.00</span>
+				</button>
+			</div>
+			<div class="activity__controls">
+				<div class="activity__filters">
+					<button th:each="choice : ${view.filters()}" class="filter" type="button" hx-post="/action/activity"
+						th:hx-vals="${choice.vals()}" th:classappend="${choice == view.filter()} ? 'filter--active'"
+						th:text="${choice.label()}">All</button>
+				</div>
+				<label class="search">
+					<span aria-hidden="true">⌕</span>
+					<input type="search" name="q" th:value="${view.query()}" placeholder="Search address or txid"
+						autocomplete="off" spellcheck="false" hx-post="/action/activity-rows"
+						hx-trigger="input changed delay:300ms, search" hx-target="#rows" hx-swap="outerHTML">
+				</label>
+			</div>
+			<th:block th:with="view=${view.rows()}">
+				<div th:replace="~{fragments/activity :: rows}"></div>
+			</th:block>
+		</div>
+
+		<div th:fragment="rows" id="rows" class="ledger">
+			<th:block th:each="row : ${view.rows()}">
+				<th:block th:replace="~{fragments/rows :: row(${row})}"></th:block>
+			</th:block>
+			<button th:replace="~{fragments/activity :: more-button}"></button>
+			<p class="ledger__empty" th:if="${view.rows().isEmpty()}"
+				th:text="${view.filtered()} ? 'No transactions match your filter.' : 'This wallet has no transactions.'">
+				This wallet has no transactions.</p>
+		</div>
+
+		<th:block th:fragment="more">
+			<th:block th:each="row : ${view.rows()}">
+				<th:block th:replace="~{fragments/rows :: row(${row})}"></th:block>
+			</th:block>
+			<button th:replace="~{fragments/activity :: more-button}"></button>
+		</th:block>
+
+		<button th:fragment="more-button" th:if="${view.nextOffset() != null}" class="ledger__more" type="button"
+			hx-post="/action/activity-more" th:hx-vals="${view.moreVals()}" hx-target="this"
+			hx-swap="outerHTML">Show more</button>
+
+		<p th:fragment="note" id="export-note" class="export-note" th:classappend="${view.failed()} ? 'export-note--failed'"
+			th:text="${view.message()}"></p>
+	</body>
+</html>
