@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<section th:fragment="seed" class="card" hx-target="this" hx-swap="outerHTML">
+			<div th:replace="~{fragments/card :: brand}"></div>
+			<div th:replace="~{fragments/card :: steps(1)}"></div>
+
+			<span class="step__label">Create wallet</span>
+			<h1 class="step__heading">Your recovery phrase</h1>
+			<p class="step__note">Write these 12 words down in order and store them somewhere safe.</p>
+
+			<ol class="phrase">
+				<li class="phrase__word" th:each="word, at : ${view.words}">
+					<span class="phrase__n" th:text="${at.count lt 10 ? '0' + at.count : at.count}">01</span>
+					<span th:text="${word}">harbor</span>
+				</li>
+			</ol>
+
+			<div class="step__actions">
+				<button class="button" type="button" hx-post="/action/create-back">Back</button>
+				<button class="button button--primary" type="button" hx-post="/action/create-verify">I saved it →</button>
+			</div>
+		</section>
+
+		<section th:fragment="verify" class="card" hx-target="this" hx-swap="outerHTML">
+			<div th:replace="~{fragments/card :: brand}"></div>
+			<div th:replace="~{fragments/card :: steps(2)}"></div>
+
+			<span class="step__label">Confirm</span>
+			<h1 class="step__heading">Verify your phrase</h1>
+			<p class="step__note">Tap the words in order to confirm you saved them.</p>
+
+			<div class="tray">
+				<span class="tile tile--picked" th:each="word, at : ${view.picked}"
+					th:text="${(at.count lt 10 ? '0' + at.count : at.count) + ' ' + word}">01 harbor</span>
+				<span class="tray__hint" th:if="${view.picked.isEmpty()}">select below…</span>
+			</div>
+
+			<div class="tiles">
+				<button class="tile" type="button" th:each="tile : ${view.tiles}" th:text="${tile.word}"
+					th:classappend="${tile.used} ? 'tile--used'" th:disabled="${tile.used}"
+					hx-post="/action/create-pick" th:hx-vals="${tile.vals()}">harbor</button>
+			</div>
+
+			<div class="step__actions step__actions--centred">
+				<button class="button" type="button" hx-post="/action/create-reset">Reset</button>
+				<span class="verify__status" th:classappend="${view.confirmed} ? 'verify__status--done'"
+					th:text="${view.status()}"></span>
+				<button class="button button--primary button--end" type="button" hx-post="/action/create-password"
+					th:disabled="${!view.confirmed}">Continue →</button>
+			</div>
+		</section>
+
+		<section th:fragment="restore" class="card" hx-target="this" hx-swap="outerHTML">
+			<div th:replace="~{fragments/card :: brand}"></div>
+			<div th:replace="~{fragments/card :: steps(1)}"></div>
+
+			<span class="step__label">Import wallet</span>
+			<h1 class="step__heading">Enter recovery phrase</h1>
+			<p class="step__note">Type your 12 words in order, or paste the whole phrase into the first box.</p>
+
+			<form hx-post="/action/restore-words" autocomplete="off">
+				<ol class="phrase">
+					<li class="phrase__word phrase__word--entry" th:each="word, at : ${view.words}">
+						<span class="phrase__n" th:text="${at.count lt 10 ? '0' + at.count : at.count}">01</span>
+						<input class="phrase__input" type="text" spellcheck="false" autocapitalize="off"
+							th:name="${'word' + at.count}" th:value="${word}" th:aria-label="${'Word ' + at.count}">
+					</li>
+				</ol>
+
+				<p class="step__error" th:if="${view.error != null}" th:text="${view.error}">
+					"unigrid" is not a word recovery phrases use
+				</p>
+
+				<div class="step__actions">
+					<button class="button" type="button" hx-post="/action/restore-back" hx-params="none">Back</button>
+					<button class="button button--primary" type="submit">Continue →</button>
+				</div>
+			</form>
+		</section>
+
+		<section th:fragment="password" class="card" hx-target="this" hx-swap="outerHTML">
+			<div th:replace="~{fragments/card :: brand}"></div>
+			<div th:replace="~{fragments/card :: steps(2)}"></div>
+
+			<span class="step__label">Protect</span>
+			<h1 class="step__heading">Choose a password</h1>
+			<p class="step__note">
+				Your recovery phrase is kept on this computer sealed with this password. Viewing your wallet
+				never asks for it; you will need it once Janus can send.
+			</p>
+
+			<form hx-post="/action/phrase-save" autocomplete="off">
+				<label class="field">
+					<span class="field__label">Password</span>
+					<input class="field__input" type="password" name="password" autocomplete="new-password"
+						minlength="8" required autofocus>
+				</label>
+				<label class="field">
+					<span class="field__label">Repeat password</span>
+					<input class="field__input" type="password" name="repeat" autocomplete="new-password"
+						minlength="8" required>
+				</label>
+
+				<p class="step__error" th:if="${view.error != null}" th:text="${view.error}">The two passwords differ</p>
+
+				<div class="step__actions">
+					<button class="button" type="button" hx-post="/action/phrase-back" hx-params="none">Back</button>
+					<button class="button button--primary" type="submit"
+						th:text="${view.restoring} ? 'Restore wallet →' : 'Create wallet →'">Create wallet →</button>
+				</div>
+			</form>
+		</section>
+	</body>
+</html>
