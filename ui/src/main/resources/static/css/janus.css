@@ -1035,9 +1035,12 @@ main:has(> .app) {
 	background: linear-gradient(135deg, rgba(254, 116, 22, 0.5), rgba(255, 47, 142, 0.5));
 }
 
+/* The 21px puts the first and last lines here level with those of the addresses card: its 22px and 1px border. */
 .dashboard__glass {
+	display: flex;
+	flex-direction: column;
 	height: 100%;
-	padding: 26px 28px;
+	padding: 21px 28px;
 	border-radius: 18px;
 	background: var(--glass);
 	backdrop-filter: blur(24px);
@@ -1068,6 +1071,11 @@ main:has(> .app) {
 	font-family: var(--font-mono);
 	font-size: 12px;
 	color: var(--text-muted);
+}
+
+.dashboard__frozen {
+	margin-top: auto;
+	padding-top: 8px;
 }
 
 .dashboard__bars {
@@ -1128,7 +1136,7 @@ main:has(> .app) {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
-	margin: 0;
+	margin: auto 0 0;
 	padding: 0;
 	list-style: none;
 	font-size: 11.5px;
