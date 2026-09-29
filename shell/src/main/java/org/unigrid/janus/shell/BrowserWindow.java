@@ -49,6 +49,7 @@ public class BrowserWindow {
 		   realised, which is why it happens here rather than alongside the sizing. */
 		frame.setUndecorated(true);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.setIconImages(WindowIcon.images());
 		fitShapeToFrame();
 	}
 
