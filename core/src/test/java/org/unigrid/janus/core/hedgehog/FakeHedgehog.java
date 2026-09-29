@@ -17,6 +17,7 @@
 package org.unigrid.janus.core.hedgehog;
 
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -42,6 +43,7 @@ public final class FakeHedgehog {
 	static final String STOP_REFUSED = "stop-refused";
 
 	private static final String PORT = "--restport=";
+	private static final String TOKEN_VARIABLE = "HEDGEHOG_REST_TOKEN";
 
 	private FakeHedgehog() {
 	}
@@ -99,11 +101,11 @@ public final class FakeHedgehog {
 		final InetSocketAddress address = new InetSocketAddress(InetAddress.getLoopbackAddress(), port);
 		final HttpServer server = HttpServer.create(address, 0);
 
-		server.createContext("/version",
+		server.createContext("/version", withToken(
 			exchange -> answer(exchange, 202, "{\"version\":\"fake\",\"protocols\":[]}")
-		);
-		server.createContext("/status", exchange -> answer(exchange, 200, status(home)));
-		server.createContext("/stop", exchange -> {
+		));
+		server.createContext("/status", withToken(exchange -> answer(exchange, 200, status(home))));
+		server.createContext("/stop", withToken(exchange -> {
 			if (Files.exists(home.resolve(STOP_REFUSED))) {
 				answer(exchange, 503, "");
 				return;
@@ -114,8 +116,8 @@ public final class FakeHedgehog {
 			} finally {
 				System.exit(0);
 			}
-		});
-		server.createContext("/bootstrap", exchange -> {
+		}));
+		server.createContext("/bootstrap", withToken(exchange -> {
 			final Path ledger = home.resolve(LEDGER);
 
 			if (Files.exists(ledger)) {
@@ -123,8 +125,22 @@ public final class FakeHedgehog {
 			} else {
 				answer(exchange, 503, "");
 			}
-		});
+		}));
 		server.start();
+	}
+
+	/* Like Hedgehog, it answers only a caller that presents the token it was started with, and none without one. */
+	private static HttpHandler withToken(final HttpHandler handler) {
+		final String token = System.getenv(TOKEN_VARIABLE);
+		final String credentials = "Bearer " + token;
+
+		return exchange -> {
+			if (token != null && credentials.equals(exchange.getRequestHeaders().getFirst("Authorization"))) {
+				handler.handle(exchange);
+			} else {
+				answer(exchange, 401, "");
+			}
+		};
 	}
 
 	private static void answer(final HttpExchange exchange, final int status, final String body) throws IOException {

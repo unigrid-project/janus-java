@@ -19,18 +19,22 @@ package org.unigrid.janus.core.hedgehog;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.ClientRequestFilter;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +55,8 @@ public class HedgehogClient implements AutoCloseable {
 	private static final int BAD_REQUEST = 400;
 	private static final int NOT_FOUND = 404;
 	private static final int UNAVAILABLE = 503;
+	private static final int TOKEN_BYTES = 32;
+	private static final SecureRandom RANDOM = new SecureRandom();
 	private static final GenericType<List<AddressTransaction>> TRANSACTIONS = new GenericType<>() {
 	};
 
@@ -72,6 +78,7 @@ public class HedgehogClient implements AutoCloseable {
 	public record MintData(Map<String, BigDecimal> mints) {
 	}
 
+	private final String token = newToken();
 	private final Client client;
 	private final WebTarget hedgehog;
 
@@ -87,9 +94,15 @@ public class HedgehogClient implements AutoCloseable {
 		client = ClientBuilder.newBuilder().sslContext(trustingContext())
 			.hostnameVerifier((host, session) -> LOOPBACK.equals(host))
 			.property(ClientProperties.FOLLOW_REDIRECTS, false)
+			.register(bearerToken())
 			.connectTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS)
 			.readTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS).build();
 		hedgehog = client.target(base);
+	}
+
+	/** The token Hedgehog has to be started with for it to answer this client. */
+	String token() {
+		return token;
 	}
 
 	public SnapshotInfo snapshot() {
@@ -161,6 +174,17 @@ public class HedgehogClient implements AutoCloseable {
 	/* The address is a template value, so a slash or a question mark in it stays inside its own segment. */
 	private WebTarget address(final String address) {
 		return hedgehog.path("bootstrap/address/{address}").resolveTemplate("address", address);
+	}
+
+	private ClientRequestFilter bearerToken() {
+		return request -> request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+	}
+
+	private static String newToken() {
+		final byte[] bytes = new byte[TOKEN_BYTES];
+
+		RANDOM.nextBytes(bytes);
+		return HexFormat.of().formatHex(bytes);
 	}
 
 	private static <T> T ask(final WebTarget target, final Function<Response, T> reader) {

@@ -270,8 +270,20 @@ public class HedgehogServiceTest {
 			"Hedgehog should leave when asked, well before it has to be forced"
 		);
 
-		try (HedgehogClient afterwards = new HedgehogClient(launchedAt, Duration.ofSeconds(1))) {
-			assertEquals(Optional.empty(), afterwards.version());
+		assertEquals(Optional.empty(), service.client().version());
+	}
+
+	@Example
+	public void shouldStartAHedgehogThatTurnsAwayEveryoneButItsClient() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
+
+		final HedgehogService service = launching();
+
+		service.prepare();
+		assertEquals(Phase.READY, settle(service).phase(), service.state().reason());
+
+		try (HedgehogClient stranger = new HedgehogClient(launchedAt, Duration.ofSeconds(2))) {
+			assertEquals(Optional.empty(), stranger.version());
 		}
 	}
 

@@ -30,6 +30,7 @@ import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -290,6 +291,29 @@ public class HedgehogClientTest {
 		try (HedgehogClient impatient = new HedgehogClient(hedgehog.uri(), Duration.ofSeconds(1))) {
 			assertThrows(HedgehogUnavailable.class, impatient::snapshot);
 		}
+	}
+
+	@Example
+	public void shouldPresentItsTokenToHedgehogAsBearerCredentials() {
+		hedgehog.answer("/version", 202, "{\"version\":\"0.0.8\",\"protocols\":[]}");
+		hedgehog.answer("/bootstrap", 200, SNAPSHOT);
+
+		client.version();
+		client.snapshot();
+
+		assertEquals(List.of("Bearer " + client.token(), "Bearer " + client.token()), hedgehog.authorizations());
+	}
+
+	@Example
+	public void shouldUseATokenNoOtherClientHas() {
+		try (HedgehogClient other = new HedgehogClient(hedgehog.uri(), Duration.ofSeconds(2))) {
+			assertNotEquals(client.token(), other.token());
+		}
+	}
+
+	@Example
+	public void shouldUseATokenTooLongToGuess() {
+		assertTrue(client.token().length() >= 32, client.token());
 	}
 
 	@Example

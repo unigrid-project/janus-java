@@ -42,6 +42,7 @@ public class HedgehogService {
 	private static final Duration START_TIMEOUT = Duration.ofSeconds(30);
 	private static final Duration POLL = Duration.ofMillis(200);
 	private static final Duration STOP_TIMEOUT = Duration.ofSeconds(5);
+	private static final String TOKEN_VARIABLE = "HEDGEHOG_REST_TOKEN";
 
 	private final HedgehogLocation location;
 	private final HedgehogInstaller installer;
@@ -166,17 +167,20 @@ public class HedgehogService {
 		return executable;
 	}
 
+	/* The token goes in the environment, as the arguments of a process can be read by every user of the computer. */
 	private Process launch(final Path executable) {
-		return run(executable.toString(), "daemon", "--restport=" + base.getPort());
-	}
+		final ProcessBuilder daemon = new ProcessBuilder(executable.toString(), "daemon",
+			"--restport=" + base.getPort()
+		);
 
-	private Process run(final String... command) {
+		daemon.environment().put(TOKEN_VARIABLE, client.token());
+
 		try {
 			Files.createDirectories(logFile.getParent());
-			return new ProcessBuilder(command).redirectErrorStream(true)
+			return daemon.redirectErrorStream(true)
 				.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile.toFile())).start();
 		} catch (IOException e) {
-			throw new UncheckedIOException("Hedgehog could not be run from " + command[0], e);
+			throw new UncheckedIOException("Hedgehog could not be run from " + executable, e);
 		}
 	}
 

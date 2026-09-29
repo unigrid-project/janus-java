@@ -51,6 +51,7 @@ class StubHedgehog implements AutoCloseable {
 	private final String scheme;
 	private final Map<String, Answer> answers = new ConcurrentHashMap<>();
 	private final List<URI> requests = new CopyOnWriteArrayList<>();
+	private final List<String> authorizations = new CopyOnWriteArrayList<>();
 
 	StubHedgehog() throws IOException {
 		this(HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0), "http");
@@ -121,12 +122,18 @@ class StubHedgehog implements AutoCloseable {
 		return requests;
 	}
 
+	/** The Authorization header of each request, in the order they came; null where a request had none. */
+	List<String> authorizations() {
+		return authorizations;
+	}
+
 	URI uri() {
 		return URI.create(scheme + "://127.0.0.1:" + server.getAddress().getPort());
 	}
 
 	private void handle(final HttpExchange exchange) throws IOException {
 		requests.add(exchange.getRequestURI());
+		authorizations.add(exchange.getRequestHeaders().getFirst("Authorization"));
 
 		final URI asked = exchange.getRequestURI();
 		final Answer answer = answers.getOrDefault(asked.getRawPath() + "?" + asked.getRawQuery(),
