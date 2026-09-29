@@ -19,6 +19,7 @@ package org.unigrid.janus.core;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,20 +41,34 @@ public class Release {
 	}
 
 	public String version() {
+		return property("version").orElse(UNKNOWN);
+	}
+
+	/** The Hedgehog release this build is made to run against. */
+	public Optional<String> hedgehogVersion() {
+		return property("hedgehog.version");
+	}
+
+	/** The checksum of that release's executable for the named platform, as lowercase hexadecimal. */
+	public Optional<String> hedgehogSha256(final String platform) {
+		return property("hedgehog.sha256." + platform);
+	}
+
+	private Optional<String> property(final String key) {
 		final Properties properties = new Properties();
 
 		/* Read through the class rather than the class loader, so the file is still found
 		   once the modules carry descriptors and resources stop being visible globally. */
 		try (InputStream in = Release.class.getResourceAsStream(file)) {
 			if (in == null) {
-				return UNKNOWN;
+				return Optional.empty();
 			}
 
 			properties.load(in);
-			return properties.getProperty("version", UNKNOWN);
+			return Optional.ofNullable(properties.getProperty(key)).filter(value -> !value.isBlank());
 		} catch (final IOException e) {
 			log.warn("Could not read {}", file, e);
-			return UNKNOWN;
+			return Optional.empty();
 		}
 	}
 }

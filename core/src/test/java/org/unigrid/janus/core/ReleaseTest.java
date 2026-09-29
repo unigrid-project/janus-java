@@ -32,4 +32,23 @@ public class ReleaseTest {
 	public void shouldAdmitNotKnowingRatherThanGuess() {
 		assertEquals("unknown", new Release("/org/unigrid/janus/core/nowhere.properties").version());
 	}
+
+	@Example
+	public void shouldPinTheHedgehogReleaseItIsMadeFor() {
+		final Release release = new Release();
+
+		assertTrue(release.hedgehogVersion().orElseThrow().matches("\\d+\\.\\d+\\.\\d+"));
+
+		for (final String platform : new String[] {"linux", "macos", "windows"}) {
+			assertTrue(release.hedgehogSha256(platform).orElseThrow().matches("[0-9a-f]{64}"), platform);
+		}
+	}
+
+	@Example
+	public void shouldKnowNoHedgehogWhenTheBuildPinsNone() {
+		final Release release = new Release("/org/unigrid/janus/core/nowhere.properties");
+
+		assertTrue(release.hedgehogVersion().isEmpty());
+		assertTrue(release.hedgehogSha256("linux").isEmpty());
+	}
 }

@@ -39,6 +39,10 @@
 		<yasson.version>3.0.4</yasson.version>
 		<slf4j.version>2.0.16</slf4j.version>
 		<logback.version>1.5.12</logback.version>
+		<hedgehog.version>0.0.8</hedgehog.version>
+		<hedgehog.sha256.linux>18f7036ed051ba78c336f737978ea0b823fcf46c8326284573ecd188ec8259c2</hedgehog.sha256.linux>
+		<hedgehog.sha256.macos>ab7cacbb4d027cfb2c0c1eabcf20d0fcc7e63ba750ac2b56cc3f3b3192feb41d</hedgehog.sha256.macos>
+		<hedgehog.sha256.windows>331341c58db0417055bb531731cc48c3a9a6c7b773097dfbaf93d0393e86c6fc</hedgehog.sha256.windows>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
