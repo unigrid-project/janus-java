@@ -14,12 +14,14 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.shell;
+package org.unigrid.janus.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -41,6 +43,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProv
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ReleaseKey {
 	private static final String RESOURCE = "/release-key.asc";
+	private static final int CHUNK = 1 << 16;
 	private static final JcaPGPContentVerifierBuilderProvider VERIFIERS =
 		new JcaPGPContentVerifierBuilderProvider().setProvider(new BouncyCastleProvider());
 
@@ -49,11 +52,12 @@ public final class ReleaseKey {
 	}
 
 	/** True only when one of the signatures in the armored block is a valid one by the release key. */
-	public static boolean verify(final byte[] data, final byte[] armoredSignature) {
+	public static boolean verify(final Path data, final byte[] armoredSignature) {
 		return verify(data, armoredSignature, getPublicKeyRing());
 	}
 
-	static boolean verify(final byte[] data, final byte[] armoredSignature, final PGPPublicKeyRingCollection ring) {
+	/** Like the above, but against the keys of the ring instead of the bundled release key. */
+	public static boolean verify(final Path data, final byte[] armoredSignature, final PGPPublicKeyRingCollection ring) {
 		try {
 			final Object packet = new JcaPGPObjectFactory(PGPUtil.getDecoderStream(
 				new ByteArrayInputStream(armoredSignature))).nextObject();
@@ -65,13 +69,8 @@ public final class ReleaseKey {
 			for (final PGPSignature signature : signatures) {
 				final PGPPublicKey key = ring.getPublicKey(signature.getKeyID());
 
-				if (Objects.nonNull(key)) {
-					signature.init(VERIFIERS, key);
-					signature.update(data);
-
-					if (signature.verify()) {
-						return true;
-					}
+				if (Objects.nonNull(key) && signedBy(signature, key, data)) {
+					return true;
 				}
 			}
 
@@ -79,6 +78,22 @@ public final class ReleaseKey {
 		} catch (IOException | PGPException e) {
 			return false;
 		}
+	}
+
+	private static boolean signedBy(final PGPSignature signature, final PGPPublicKey key, final Path data)
+		throws IOException, PGPException {
+
+		signature.init(VERIFIERS, key);
+
+		try (InputStream in = Files.newInputStream(data)) {
+			final byte[] chunk = new byte[CHUNK];
+
+			for (int read = in.read(chunk); read >= 0; read = in.read(chunk)) {
+				signature.update(chunk, 0, read);
+			}
+		}
+
+		return signature.verify();
 	}
 
 	private static final class Bundled {

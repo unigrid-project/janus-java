@@ -14,7 +14,7 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.shell;
+package org.unigrid.janus.core;
 
 import java.io.ByteArrayOutputStream;
 import java.security.KeyPairGenerator;
@@ -35,24 +35,24 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPKeyPair;
 
 /** A signing key made up for one test, so signatures exist without the foundation's secret key. */
-final class SigningKey {
+public final class SigningKey {
 	private static final BouncyCastleProvider PROVIDER = new BouncyCastleProvider();
 
 	private final PGPKeyPair pair;
 
 	@SneakyThrows
-	SigningKey() {
+	public SigningKey() {
 		pair = new JcaPGPKeyPair(PublicKeyPacket.VERSION_4, PublicKeyAlgorithmTags.EDDSA_LEGACY,
 			KeyPairGenerator.getInstance("Ed25519", PROVIDER).generateKeyPair(), new Date());
 	}
 
 	@SneakyThrows
-	PGPPublicKeyRingCollection ring() {
+	public PGPPublicKeyRingCollection ring() {
 		return new PGPPublicKeyRingCollection(List.of(new PGPPublicKeyRing(List.of(pair.getPublicKey()))));
 	}
 
 	@SneakyThrows
-	byte[] sign(final byte[] data) {
+	public byte[] sign(final byte[] data) {
 		final PGPSignatureGenerator generator = new PGPSignatureGenerator(
 			new JcaPGPContentSignerBuilder(pair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA256)
 				.setProvider(PROVIDER), pair.getPublicKey());
