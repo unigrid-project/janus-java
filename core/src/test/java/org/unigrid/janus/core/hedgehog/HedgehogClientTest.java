@@ -29,6 +29,7 @@ import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -201,6 +202,33 @@ public class HedgehogClientTest {
 	@Example
 	public void shouldGiveNoVersionWhenTheAnswerIsNotHedgehogs() {
 		assertEquals(Optional.empty(), client.version());
+	}
+
+	@Example
+	public void shouldSayHowFarADownloadHasGot() {
+		hedgehog.answer("/status", 200, "{\"status\":\"downloading\",\"progress\":42}");
+
+		assertEquals(Optional.of(new HedgehogClient.Status("downloading", 42)), client.status());
+		assertTrue(client.status().orElseThrow().downloading());
+	}
+
+	@Example
+	public void shouldSayNothingOfProgressWhileTheSizeOfADownloadIsUnknown() {
+		hedgehog.answer("/status", 200, "{\"status\":\"downloading\",\"progress\":null}");
+
+		assertEquals(Optional.of(new HedgehogClient.Status("downloading", null)), client.status());
+	}
+
+	@Example
+	public void shouldSayItIsRunningWhenNothingIsDownloading() {
+		hedgehog.answer("/status", 200, "{\"status\":\"running\",\"progress\":100}");
+
+		assertFalse(client.status().orElseThrow().downloading());
+	}
+
+	@Example
+	public void shouldGiveNoStatusFromAHedgehogThatDoesNotSayIt() {
+		assertEquals(Optional.empty(), client.status());
 	}
 
 	@Example

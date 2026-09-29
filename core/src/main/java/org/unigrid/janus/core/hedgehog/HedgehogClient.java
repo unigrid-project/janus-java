@@ -58,6 +58,13 @@ public class HedgehogClient implements AutoCloseable {
 	public record Version(String version) {
 	}
 
+	/** What Hedgehog is busy with: downloading, with the percentage done once it is known, or just running. */
+	public record Status(String status, Integer progress) {
+		public boolean downloading() {
+			return "downloading".equals(status);
+		}
+	}
+
 	/** The part of the mint storage spork Janus reads: every mint, keyed by its address and height. */
 	public record MintStorage(MintData data) {
 	}
@@ -124,6 +131,17 @@ public class HedgehogClient implements AutoCloseable {
 			return Optional.of(ask(hedgehog.path("version"),
 				response -> read(response, answer -> answer.readEntity(Version.class))
 			).version());
+		} catch (HedgehogUnavailable | SnapshotMissing | IllegalArgumentException | IllegalStateException e) {
+			return Optional.empty();
+		}
+	}
+
+	/** What Hedgehog is busy with, or empty when it does not say, as an older Hedgehog does not. */
+	public Optional<Status> status() {
+		try {
+			return Optional.of(ask(hedgehog.path("status"),
+				response -> read(response, answer -> answer.readEntity(Status.class))
+			));
 		} catch (HedgehogUnavailable | SnapshotMissing | IllegalArgumentException | IllegalStateException e) {
 			return Optional.empty();
 		}
