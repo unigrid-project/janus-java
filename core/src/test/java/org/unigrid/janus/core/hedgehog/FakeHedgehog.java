@@ -29,17 +29,15 @@ import java.nio.file.StandardOpenOption;
 
 /**
  * Plays Hedgehog's command line for the service tests: {@code daemon --restport=N} serves the REST calls
- * the service makes, and {@code bootstrap fetch} puts a ledger in place. Files in the folder named by
- * FAKE_HEDGEHOG_HOME steer it and record what it was asked to do.
+ * the service makes. Files in the folder named by FAKE_HEDGEHOG_HOME steer it and record what it was asked
+ * to do: a ledger appears when the test writes one, and while the test keeps a downloading file the daemon
+ * says it is downloading, with the progress the file holds.
  */
 public final class FakeHedgehog {
-	static final String SIGNATURE = "signature";
 	static final String LEDGER = "ledger";
-	static final String FETCH_FAILS = "fetch-fails";
-	static final String FETCH_HANGS = "fetch-hangs";
+	static final String DOWNLOADING = "downloading";
 	static final String DIES = "dies-at-start";
 	static final String STARTS = "starts";
-	static final String FETCH_PID = "fetch-pid";
 	static final String DAEMON_PID = "daemon-pid";
 	static final String STOP_REFUSED = "stop-refused";
 
@@ -51,11 +49,7 @@ public final class FakeHedgehog {
 	public static void main(final String[] args) throws IOException, InterruptedException {
 		final Path home = Path.of(System.getenv("FAKE_HEDGEHOG_HOME"));
 
-		if ("daemon".equals(args[0])) {
-			daemon(home, Integer.parseInt(args[1].substring(PORT.length())));
-		} else {
-			System.exit(fetch(home));
-		}
+		daemon(home, Integer.parseInt(args[1].substring(PORT.length())));
 	}
 
 	/** A launcher that runs this class in a JVM of its own, the way the real executable runs. */
@@ -69,35 +63,29 @@ public final class FakeHedgehog {
 	}
 
 	private static Path install(final Path home, final String exec) throws IOException {
-		final Path java = Path.of(System.getProperty("java.home"), "bin", "java");
 		final Path script = home.resolve("hedgehog");
 
-		Files.writeString(script, "#!/bin/sh\nFAKE_HEDGEHOG_HOME='" + home + "' " + exec + "'" + java + "' -cp '"
-			+ System.getProperty("java.class.path") + "' " + FakeHedgehog.class.getName() + " \"$@\"\n"
-		);
+		Files.writeString(script, script(home, exec));
 		script.toFile().setExecutable(true);
 		return script;
+	}
+
+	/** What the launcher is made of, for a test that has the service download it instead. */
+	static String script(final Path home) {
+		return script(home, "exec ");
+	}
+
+	private static String script(final Path home, final String exec) {
+		final Path java = Path.of(System.getProperty("java.home"), "bin", "java");
+
+		return "#!/bin/sh\nFAKE_HEDGEHOG_HOME='" + home + "' " + exec + "'" + java + "' -cp '"
+			+ System.getProperty("java.class.path") + "' " + FakeHedgehog.class.getName() + " \"$@\"\n";
 	}
 
 	static String snapshot(final String signature) {
 		return "{\"tipHash\":\"ab\",\"tipHeight\":3172666,\"addressCount\":1,\"entryCount\":1,"
 			+ "\"transactionCount\":1,\"totalUnspent\":1,\"zerocoinMinted\":0,"
 			+ "\"built\":\"2026-09-14T10:15:30Z\",\"signature\":\"" + signature + "\"}";
-	}
-
-	private static int fetch(final Path home) throws IOException, InterruptedException {
-		Files.writeString(home.resolve(FETCH_PID), Long.toString(ProcessHandle.current().pid()));
-
-		if (Files.exists(home.resolve(FETCH_HANGS))) {
-			Thread.sleep(60_000);
-		}
-
-		if (Files.exists(home.resolve(FETCH_FAILS))) {
-			return 2;
-		}
-
-		Files.writeString(home.resolve(LEDGER), Files.readString(home.resolve(SIGNATURE)));
-		return 0;
 	}
 
 	private static void daemon(final Path home, final int port) throws IOException {
@@ -114,6 +102,7 @@ public final class FakeHedgehog {
 		server.createContext("/version",
 			exchange -> answer(exchange, 202, "{\"version\":\"fake\",\"protocols\":[]}")
 		);
+		server.createContext("/status", exchange -> answer(exchange, 200, status(home)));
 		server.createContext("/stop", exchange -> {
 			if (Files.exists(home.resolve(STOP_REFUSED))) {
 				answer(exchange, 503, "");
@@ -149,5 +138,17 @@ public final class FakeHedgehog {
 				out.write(bytes);
 			}
 		}
+	}
+
+	private static String status(final Path home) throws IOException {
+		final Path downloading = home.resolve(DOWNLOADING);
+
+		if (!Files.exists(downloading)) {
+			return "{\"status\":\"running\",\"progress\":100}";
+		}
+
+		final String progress = Files.readString(downloading).trim();
+
+		return "{\"status\":\"downloading\",\"progress\":" + (progress.isEmpty() ? "null" : progress) + "}";
 	}
 }

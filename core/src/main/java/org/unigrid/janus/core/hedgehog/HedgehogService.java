@@ -27,10 +27,12 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.unigrid.janus.core.hedgehog.HedgehogClient.Status;
 import org.unigrid.janus.core.hedgehog.HedgehogState.Phase;
 
 /** Gets a Hedgehog ready to answer about the legacy ledger, and says how far along that is. */
@@ -42,6 +44,7 @@ public class HedgehogService {
 	private static final Duration STOP_TIMEOUT = Duration.ofSeconds(5);
 
 	private final HedgehogLocation location;
+	private final HedgehogInstaller installer;
 	private final HedgehogClient client;
 	private final URI base;
 	private final Path logFile;
@@ -55,20 +58,21 @@ public class HedgehogService {
 
 	private volatile HedgehogState state = HedgehogState.IDLE;
 	private volatile Process started;
-	private volatile Process fetching;
+	private volatile boolean downloadedHedgehog;
 	private boolean stopped;
 
 	@Inject
-	public HedgehogService(final HedgehogLocation location) {
-		this(location, new HedgehogClient(), HedgehogClient.LOCAL,
+	public HedgehogService(final HedgehogLocation location, final HedgehogInstaller installer) {
+		this(location, installer, new HedgehogClient(), HedgehogClient.LOCAL,
 			Path.of(System.getProperty("user.home"), ".janus", "hedgehog.log"), START_TIMEOUT
 		);
 	}
 
-	HedgehogService(final HedgehogLocation location, final HedgehogClient client, final URI base,
-		final Path logFile, final Duration startTimeout) {
+	HedgehogService(final HedgehogLocation location, final HedgehogInstaller installer, final HedgehogClient client,
+		final URI base, final Path logFile, final Duration startTimeout) {
 
 		this.location = location;
+		this.installer = installer;
 		this.client = client;
 		this.base = base;
 		this.logFile = logFile;
@@ -77,6 +81,11 @@ public class HedgehogService {
 
 	public HedgehogState state() {
 		return state;
+	}
+
+	/** Whether this run had to download Hedgehog, since the computer had none that is the release Janus needs. */
+	public boolean downloadedHedgehog() {
+		return downloadedHedgehog;
 	}
 
 	/** The client this service asks Hedgehog with, for callers that read the ledger once it is ready. */
@@ -105,7 +114,7 @@ public class HedgehogService {
 	private void bringUp() {
 		try {
 			if (client.version().isEmpty()) {
-				started = kept(launch());
+				started = kept(launch(location.find().orElseGet(this::install)));
 				awaitAnswer(started);
 			}
 
@@ -147,10 +156,17 @@ public class HedgehogService {
 		}
 	}
 
-	private Process launch() {
-		final Path executable = location.find()
-			.orElseThrow(() -> new IllegalStateException("Hedgehog is not installed on this computer"));
+	private Path install() {
+		downloadedHedgehog = true;
+		state = HedgehogState.downloadingHedgehog(null);
 
+		final Path executable = installer.install(percent -> state = HedgehogState.downloadingHedgehog(percent));
+
+		state = HedgehogState.STARTING;
+		return executable;
+	}
+
+	private Process launch(final Path executable) {
 		return run(executable.toString(), "daemon", "--restport=" + base.getPort());
 	}
 
@@ -225,54 +241,29 @@ public class HedgehogService {
 
 		worker.shutdownNow();
 
-		final Process fetch = fetching;
-
-		if (fetch != null) {
-			destroyAll(fetch);
-		}
-
 		end(started);
 		client.close();
 	}
 
+	/*
+	 * A Hedgehog with no ledger downloads one by itself and says how far it has got. Once it says it is not
+	 * downloading, the ledger is given a moment to be taken up, and after that there will be none.
+	 */
 	private SnapshotInfo ledger() {
-		try {
-			return client.snapshot();
-		} catch (SnapshotMissing e) {
-			state = HedgehogState.FETCHING;
-			fetch();
-			return awaitLedger();
-		}
-	}
-
-	private void fetch() {
-		final Path executable = location.find().orElseThrow(() -> new IllegalStateException(
-			"Hedgehog has no legacy ledger, and there is no Hedgehog here to fetch one"
-		));
-
-		fetching = kept(run(executable.toString(), "bootstrap", "fetch", "--force"));
-
-		try {
-			if (fetching.waitFor() != 0) {
-				throw new IllegalStateException("The legacy ledger could not be downloaded; see " + logFile);
-			}
-		} catch (InterruptedException e) {
-			destroyAll(fetching);
-			Thread.currentThread().interrupt();
-			throw new IllegalStateException("Janus is shutting down", e);
-		}
-	}
-
-	/* Hedgehog notices the new file by itself, but not necessarily on the very first request after it lands. */
-	private SnapshotInfo awaitLedger() {
-		final Instant deadline = Instant.now().plus(startTimeout);
+		Instant deadline = Instant.now().plus(startTimeout);
 
 		while (true) {
 			try {
 				return client.snapshot();
 			} catch (SnapshotMissing e) {
-				if (Instant.now().isAfter(deadline)) {
-					throw new IllegalStateException("Hedgehog did not take up the downloaded ledger", e);
+				final Optional<Status> busy = client.status().filter(Status::downloading);
+
+				if (busy.isPresent()) {
+					state = HedgehogState.fetching(busy.get().progress());
+					deadline = Instant.now().plus(startTimeout);
+				} else if (Instant.now().isAfter(deadline)) {
+					throw new IllegalStateException(
+						"The legacy ledger could not be downloaded; see " + logFile, e);
 				}
 
 				pause();

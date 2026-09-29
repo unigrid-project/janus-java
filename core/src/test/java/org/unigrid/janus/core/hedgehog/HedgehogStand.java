@@ -121,9 +121,12 @@ public final class HedgehogStand implements AutoCloseable {
 	public HedgehogService service() {
 		try {
 			final Path log = Files.createTempFile("hedgehog", ".log");
+			final HedgehogRelease release = Releases.unpinned(Files.createTempDirectory("hedgehog"));
+			final HedgehogLocation location = new HedgehogLocation(null, null, "", "Linux", release);
+			final HedgehogClient answering = new HedgehogClient(stub.uri(), Duration.ofSeconds(2));
 
-			return new HedgehogService(new HedgehogLocation(null, null, "", "Linux"),
-				new HedgehogClient(stub.uri(), Duration.ofSeconds(2)), stub.uri(), log, Duration.ofSeconds(5)
+			return new HedgehogService(location, new HedgehogInstaller(release), answering, stub.uri(), log,
+				Duration.ofSeconds(5)
 			);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);

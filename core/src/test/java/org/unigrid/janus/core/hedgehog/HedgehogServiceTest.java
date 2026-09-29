@@ -19,6 +19,7 @@ package org.unigrid.janus.core.hedgehog;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -32,12 +33,17 @@ import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
+import org.unigrid.janus.core.ReleaseKey;
+import org.unigrid.janus.core.SigningKey;
 import org.unigrid.janus.core.hedgehog.HedgehogState.Phase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HedgehogServiceTest {
 	private static final Set<Phase> SETTLED = Set.of(Phase.READY, Phase.FAILED);
+	private static final String ASSET = "hedgehog-0.0.8-x86_64-linux-gnu.bin";
+	private static final String NO_CHECKSUM = "This Janus knows no checksum of Hedgehog 0.0.8 for this platform";
 
 	private Path home;
 	private StubHedgehog running;
@@ -63,8 +69,14 @@ public class HedgehogServiceTest {
 	}
 
 	private HedgehogService service(final HedgehogClient client, final HedgehogLocation location) {
-		service = new HedgehogService(location, client, running.uri(), home.resolve("hedgehog.log"),
-			Duration.ofSeconds(20)
+		return service(client, location, new HedgehogInstaller(Releases.unpinned(home)), Duration.ofSeconds(20));
+	}
+
+	private HedgehogService service(final HedgehogClient client, final HedgehogLocation location,
+		final HedgehogInstaller installer, final Duration timeout) {
+
+		service = new HedgehogService(location, installer, client, running.uri(), home.resolve("hedgehog.log"),
+			timeout
 		);
 		return service;
 	}
@@ -73,8 +85,8 @@ public class HedgehogServiceTest {
 		return service(new HedgehogClient(running.uri(), Duration.ofSeconds(2)), nowhere());
 	}
 
-	static HedgehogLocation nowhere() {
-		return new HedgehogLocation(null, null, "", "Linux");
+	private HedgehogLocation nowhere() {
+		return new HedgehogLocation(null, null, "", "Linux", Releases.unpinned(home));
 	}
 
 	static HedgehogState settle(final HedgehogService service) {
@@ -125,7 +137,7 @@ public class HedgehogServiceTest {
 		running.answer("/version", 404, "");
 		service.recheck();
 		service.prepare();
-		assertEquals("Hedgehog is not installed on this computer", settle(service).reason());
+		assertEquals(NO_CHECKSUM, settle(service).reason());
 	}
 
 	@Example
@@ -173,13 +185,20 @@ public class HedgehogServiceTest {
 	}
 
 	private HedgehogService launching(final Path script) throws IOException {
+		return launching(new HedgehogLocation(script.toString(), null, "", "Linux", Releases.unpinned(home)),
+			new HedgehogInstaller(Releases.unpinned(home)), Duration.ofSeconds(20)
+		);
+	}
+
+	private HedgehogService launching(final HedgehogLocation location, final HedgehogInstaller installer,
+		final Duration timeout) throws IOException {
+
 		try (ServerSocket socket = new ServerSocket(0)) {
 			launchedAt = URI.create("http://127.0.0.1:" + socket.getLocalPort());
 		}
 
-		service = new HedgehogService(new HedgehogLocation(script.toString(), null, "", "Linux"),
-			new HedgehogClient(launchedAt, Duration.ofSeconds(2)), launchedAt, home.resolve("hedgehog.log"),
-			Duration.ofSeconds(20)
+		service = new HedgehogService(location, installer, new HedgehogClient(launchedAt, Duration.ofSeconds(2)),
+			launchedAt, home.resolve("hedgehog.log"), timeout
 		);
 		return service;
 	}
@@ -220,7 +239,7 @@ public class HedgehogServiceTest {
 		final HedgehogService service = service(new HedgehogClient(running.uri(), Duration.ofSeconds(2)), nowhere());
 
 		service.prepare();
-		assertEquals(HedgehogState.failed("Hedgehog is not installed on this computer"), settle(service));
+		assertEquals(HedgehogState.failed(NO_CHECKSUM), settle(service));
 	}
 
 	@Example
@@ -269,32 +288,38 @@ public class HedgehogServiceTest {
 		assertTrue(running.requests().stream().noneMatch(request -> "/stop".equals(request.getRawPath())));
 	}
 
+	/* The daemon fetches the ledger on its own; all Janus does is watch and say how far it has got. */
 	@Example
-	public void shouldFetchTheLedgerWhenHedgehogHasNone() throws IOException {
-		Files.writeString(home.resolve(FakeHedgehog.SIGNATURE), "SIGNED");
+	public void shouldSayHowFarTheLedgerHasGotWhileHedgehogDownloadsIt() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.DOWNLOADING), "40");
 
 		final HedgehogService service = launching();
 
 		service.prepare();
+		assertEquals(HedgehogState.fetching(40), await(service, HedgehogState.fetching(40)));
+
+		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
+		Files.delete(home.resolve(FakeHedgehog.DOWNLOADING));
 		assertEquals(Phase.READY, settle(service).phase(), service.state().reason());
-		assertTrue(Files.exists(home.resolve(FakeHedgehog.LEDGER)));
 	}
 
 	@Example
-	public void shouldRefuseAFetchedLedgerThatIsNotSigned() throws IOException {
-		Files.writeString(home.resolve(FakeHedgehog.SIGNATURE), "UNSIGNED");
+	public void shouldSayNothingOfProgressWhileTheSizeIsUnknown() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.DOWNLOADING), "");
 
 		final HedgehogService service = launching();
 
 		service.prepare();
-		assertEquals(HedgehogState.failed("The ledger is not signed by the Unigrid Foundation"), settle(service));
+		assertEquals(HedgehogState.fetching(null), await(service, HedgehogState.fetching(null)));
 	}
 
 	@Example
-	public void shouldFailWhenTheLedgerCannotBeFetched() throws IOException {
-		Files.createFile(home.resolve(FakeHedgehog.FETCH_FAILS));
-
-		final HedgehogService service = launching();
+	public void shouldFailWhenHedgehogEndsUpWithoutALedger() throws IOException {
+		final String script = FakeHedgehog.install(home).toString();
+		final HedgehogLocation location = new HedgehogLocation(script, null, "", "Linux", Releases.unpinned(home));
+		final HedgehogService service = launching(location, new HedgehogInstaller(Releases.unpinned(home)),
+			Duration.ofSeconds(5)
+		);
 
 		service.prepare();
 		assertTrue(settle(service).reason().startsWith("The legacy ledger could not be downloaded; see "),
@@ -303,37 +328,114 @@ public class HedgehogServiceTest {
 	}
 
 	@Example
-	public void shouldFailWhenThereIsNothingHereToFetchWith() {
+	public void shouldNotWaitForALedgerNothingIsDownloading() {
 		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
 		running.answer("/bootstrap", 503, "");
 
-		final HedgehogService service = reusing();
+		final HedgehogService service = service(new HedgehogClient(running.uri(), Duration.ofSeconds(2)),
+			nowhere(), new HedgehogInstaller(Releases.unpinned(home)), Duration.ofSeconds(1)
+		);
 
 		service.prepare();
-		final String reason = "Hedgehog has no legacy ledger, and there is no Hedgehog here to fetch one";
-
-		assertEquals(HedgehogState.failed(reason), settle(service));
+		assertTrue(settle(service).reason().startsWith("The legacy ledger could not be downloaded; see "));
 	}
 
 	@Example
-	public void shouldStopAFetchUnderWayWhenJanusCloses() throws IOException, InterruptedException {
-		Files.createFile(home.resolve(FakeHedgehog.FETCH_HANGS));
+	public void shouldKeepWaitingWhileTheLedgerIsStillComing() {
+		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
+		running.answer("/bootstrap", 503, "");
+		running.answer("/status", 200, "{\"status\":\"downloading\",\"progress\":10}");
 
-		final HedgehogService service = launching();
-		final Path pid = home.resolve(FakeHedgehog.FETCH_PID);
+		final HedgehogService service = service(new HedgehogClient(running.uri(), Duration.ofSeconds(2)),
+			nowhere(), new HedgehogInstaller(Releases.unpinned(home)), Duration.ofSeconds(1)
+		);
 
 		service.prepare();
+		assertEquals(HedgehogState.fetching(10), await(service, HedgehogState.fetching(10)));
+		assertEquals(Phase.FETCHING, service.state().phase());
+	}
 
-		for (int i = 0; i < 100 && !(Files.exists(pid) && Files.size(pid) > 0); i++) {
-			Thread.sleep(100);
+	private static HedgehogState await(final HedgehogService service, final HedgehogState wanted) {
+		final Instant deadline = Instant.now().plusSeconds(30);
+
+		try {
+			while (!wanted.equals(service.state()) && !SETTLED.contains(service.state().phase())
+				&& Instant.now().isBefore(deadline)) {
+
+				Thread.sleep(25);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 
-		assertEquals(Phase.FETCHING, service.state().phase());
-		service.stop();
-		Thread.sleep(500);
-		assertEquals(Optional.of(false), ProcessHandle.of(Long.parseLong(Files.readString(pid).trim()))
-			.map(ProcessHandle::isAlive).or(() -> Optional.of(false))
+		return service.state();
+	}
+
+	private HedgehogService downloading(final ReleaseServer page, final SigningKey trusted, final byte[] executable)
+		throws IOException {
+
+		final HedgehogRelease release = Releases.pinning(home, executable);
+		final HedgehogInstaller installer = new HedgehogInstaller(release, page.uri(),
+			(file, signature) -> ReleaseKey.verify(file, signature, trusted.ring())
 		);
+
+		return launching(new HedgehogLocation(null, null, "", "Linux", release), installer, Duration.ofSeconds(20));
+	}
+
+	@Example
+	public void shouldDownloadHedgehogWhenNoneIsTheReleaseAndThenStartIt() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
+
+		final byte[] executable = FakeHedgehog.script(home).getBytes(StandardCharsets.UTF_8);
+		final SigningKey key = new SigningKey();
+
+		try (ReleaseServer page = new ReleaseServer().serve(ASSET, executable)
+			.serve(ASSET + ".asc", key.sign(executable))) {
+
+			final HedgehogService service = downloading(page, key, executable);
+
+			service.prepare();
+			assertEquals(Phase.READY, settle(service).phase(), service.state().reason());
+			assertTrue(service.downloadedHedgehog());
+			assertEquals(1, starts().size());
+		}
+	}
+
+	@Example
+	public void shouldNotDownloadHedgehogWhenTheOneOnTheComputerIsTheRelease() throws IOException {
+		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
+
+		final byte[] executable = FakeHedgehog.script(home).getBytes(StandardCharsets.UTF_8);
+		final Path installed = Files.createDirectories(home.resolve(".janus/hedgehog/0.0.8")).resolve("hedgehog");
+
+		Files.write(installed, executable);
+		installed.toFile().setExecutable(true);
+
+		try (ReleaseServer page = new ReleaseServer()) {
+			final HedgehogService service = downloading(page, new SigningKey(), executable);
+
+			service.prepare();
+			assertEquals(Phase.READY, settle(service).phase(), service.state().reason());
+			assertFalse(service.downloadedHedgehog());
+		}
+	}
+
+	@Example
+	public void shouldFailWhenTheDownloadedHedgehogIsNotSignedByTheFoundation() throws IOException {
+		final byte[] executable = FakeHedgehog.script(home).getBytes(StandardCharsets.UTF_8);
+		final SigningKey key = new SigningKey();
+
+		try (ReleaseServer page = new ReleaseServer().serve(ASSET, executable)
+			.serve(ASSET + ".asc", new SigningKey().sign(executable))) {
+
+			final HedgehogService service = downloading(page, key, executable);
+
+			service.prepare();
+			assertEquals(HedgehogState.failed("The downloaded Hedgehog is not signed by the Unigrid Foundation"),
+				settle(service)
+			);
+			assertEquals(List.of(), starts());
+		}
 	}
 
 	static boolean gone(final Path pidFile) throws IOException {
@@ -367,23 +469,6 @@ public class HedgehogServiceTest {
 		settle(service);
 		service.stop();
 		assertTrue(gone(home.resolve(FakeHedgehog.DAEMON_PID)));
-	}
-
-	@Example
-	public void shouldEndAFetchALauncherStartedWhenJanusCloses() throws IOException, InterruptedException {
-		Files.createFile(home.resolve(FakeHedgehog.FETCH_HANGS));
-
-		final HedgehogService service = launching(FakeHedgehog.installAsLauncher(home));
-		final Path pid = home.resolve(FakeHedgehog.FETCH_PID);
-
-		service.prepare();
-
-		for (int i = 0; i < 100 && !(Files.exists(pid) && Files.size(pid) > 0); i++) {
-			Thread.sleep(100);
-		}
-
-		service.stop();
-		assertTrue(gone(pid));
 	}
 
 	@Example

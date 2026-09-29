@@ -16,25 +16,36 @@
 
 package org.unigrid.janus.core.hedgehog;
 
-/** How far Hedgehog is from answering about the ledger, and why not when it never will. */
-public record HedgehogState(Phase phase, String reason, SnapshotInfo snapshot) {
-	public static final HedgehogState IDLE = new HedgehogState(Phase.IDLE, null, null);
-	public static final HedgehogState STARTING = new HedgehogState(Phase.STARTING, null, null);
-	public static final HedgehogState FETCHING = new HedgehogState(Phase.FETCHING, null, null);
+/**
+ * How far Hedgehog is from answering about the ledger, and why not when it never will. While something is
+ * being downloaded the progress is its percentage, or null while its size is unknown.
+ */
+public record HedgehogState(Phase phase, String reason, SnapshotInfo snapshot, Integer progress) {
+	public static final HedgehogState IDLE = new HedgehogState(Phase.IDLE, null, null, null);
+	public static final HedgehogState STARTING = new HedgehogState(Phase.STARTING, null, null, null);
 
 	public enum Phase {
 		IDLE,
+		DOWNLOADING_HEDGEHOG,
 		STARTING,
 		FETCHING,
 		READY,
 		FAILED
 	}
 
+	public static HedgehogState downloadingHedgehog(final Integer progress) {
+		return new HedgehogState(Phase.DOWNLOADING_HEDGEHOG, null, null, progress);
+	}
+
+	public static HedgehogState fetching(final Integer progress) {
+		return new HedgehogState(Phase.FETCHING, null, null, progress);
+	}
+
 	public static HedgehogState failed(final String reason) {
-		return new HedgehogState(Phase.FAILED, reason, null);
+		return new HedgehogState(Phase.FAILED, reason, null, null);
 	}
 
 	public static HedgehogState ready(final SnapshotInfo snapshot) {
-		return new HedgehogState(Phase.READY, null, snapshot);
+		return new HedgehogState(Phase.READY, null, snapshot, null);
 	}
 }

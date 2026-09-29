@@ -18,6 +18,7 @@ package org.unigrid.janus.core.hedgehog;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -29,15 +30,20 @@ import net.jqwik.api.lifecycle.BeforeTry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HedgehogLocationTest {
+	private static final byte[] RELEASE = "the pinned release".getBytes(StandardCharsets.US_ASCII);
+	private static final byte[] STALE = "an older release".getBytes(StandardCharsets.US_ASCII);
+
 	private Path root;
 	private Path installation;
 	private Path onPath;
+	private Path downloads;
 
 	@BeforeTry
 	public void makeFolders() throws IOException {
 		root = Files.createTempDirectory("hedgehog");
 		installation = Files.createDirectory(root.resolve("installation"));
 		onPath = Files.createDirectory(root.resolve("bin"));
+		downloads = Files.createDirectories(root.resolve(".janus/hedgehog/0.0.8"));
 	}
 
 	@AfterTry
@@ -48,14 +54,24 @@ public class HedgehogLocationTest {
 	}
 
 	private static Path executable(final Path folder, final String name) throws IOException {
-		final Path file = Files.createFile(folder.resolve(name));
+		return executable(folder, name, RELEASE);
+	}
+
+	private static Path executable(final Path folder, final String name, final byte[] contents) throws IOException {
+		final Path file = Files.write(folder.resolve(name), contents);
 
 		file.toFile().setExecutable(true);
 		return file;
 	}
 
-	private HedgehogLocation location(final String configured) {
-		return new HedgehogLocation(configured, installation, "/nowhere" + File.pathSeparator + onPath, "Linux");
+	private HedgehogRelease release() throws IOException {
+		return Releases.pinning(root, RELEASE);
+	}
+
+	private HedgehogLocation location(final String configured) throws IOException {
+		return new HedgehogLocation(configured, installation, "/nowhere" + File.pathSeparator + onPath, "Linux",
+			release()
+		);
 	}
 
 	@Example
@@ -89,7 +105,7 @@ public class HedgehogLocationTest {
 
 	@Example
 	public void shouldPassOverAFileThatCannotBeRun() throws IOException {
-		Files.createFile(installation.resolve("hedgehog"));
+		Files.write(installation.resolve("hedgehog"), RELEASE);
 		assertEquals(Optional.empty(), location(null).find());
 	}
 
@@ -97,6 +113,50 @@ public class HedgehogLocationTest {
 	public void shouldLookForTheWindowsName() throws IOException {
 		final Path found = executable(onPath, "hedgehog.exe");
 
-		assertEquals(Optional.of(found), new HedgehogLocation(null, null, onPath.toString(), "Windows 11").find());
+		assertEquals(Optional.of(found), new HedgehogLocation(null, null, onPath.toString(), "Windows 11",
+			release()).find());
+	}
+
+	@Example
+	public void shouldPassOverAnExecutableThatIsNotThePinnedRelease() throws IOException {
+		executable(installation, "hedgehog", STALE);
+		executable(onPath, "hedgehog", STALE);
+		assertEquals(Optional.empty(), location(null).find());
+	}
+
+	@Example
+	public void shouldSkipAStaleOneBesideJanusForThePinnedOneOnThePath() throws IOException {
+		executable(installation, "hedgehog", STALE);
+
+		final Path found = executable(onPath, "hedgehog");
+
+		assertEquals(Optional.of(found), location(null).find());
+	}
+
+	@Example
+	public void shouldFindTheOneJanusDownloadedWhenNothingElseIsTheRelease() throws IOException {
+		executable(onPath, "hedgehog", STALE);
+
+		final Path downloaded = executable(downloads, "hedgehog");
+
+		assertEquals(Optional.of(downloaded), location(null).find());
+	}
+
+	@Example
+	public void shouldTakeAConfiguredExecutableWithoutAskingWhatItIs() throws IOException {
+		final Path configured = executable(root, "my-hedgehog", STALE);
+
+		assertEquals(Optional.of(configured), location(configured.toString()).find());
+	}
+
+	@Example
+	public void shouldTrustNoExecutableWhenTheBuildPinsNone() throws IOException {
+		executable(onPath, "hedgehog");
+
+		final HedgehogLocation unpinned = new HedgehogLocation(null, null, onPath.toString(), "Linux",
+			Releases.unpinned(root)
+		);
+
+		assertEquals(Optional.empty(), unpinned.find());
 	}
 }
