@@ -10,6 +10,7 @@
 					th:classappend="'preparing__step--' + ${step.state().css()}">
 					<span class="preparing__mark" aria-hidden="true"></span>
 					<span th:text="${step.label()}">Starting Hedgehog</span>
+					<span class="preparing__percent" th:if="${step.measured()}" th:text="${step.percent()} + ' %'">40 %</span>
 				</li>
 			</ol>
 			<th:block th:if="${view.failed()}">

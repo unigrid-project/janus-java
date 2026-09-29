@@ -57,6 +57,27 @@ public class AppViewsTest {
 	}
 
 	@Example
+	public void shouldShowHowFarADownloadHasGotOnlyWhileItIsUnderWay() {
+		final Document html = render(new AppView(Tab.DASHBOARD, "PREPARING", true, false,
+			new PreparingView(List.of(new Step("Downloading Hedgehog (~90 MB)", State.ACTIVE, 42),
+				new Step("Starting Hedgehog", State.PENDING),
+				new Step("Downloading the legacy ledger (~314 MB)", State.DONE, 100)
+			), null, false)
+		));
+
+		assertEquals(List.of("42 %"), html.select(".preparing__percent").eachText());
+	}
+
+	@Example
+	public void shouldShowNoPercentageWhenTheSizeOfADownloadIsUnknown() {
+		final Document html = render(new AppView(Tab.DASHBOARD, "PREPARING", true, false,
+			new PreparingView(List.of(new Step("Downloading Hedgehog (~90 MB)", State.ACTIVE)), null, false)
+		));
+
+		assertTrue(html.select(".preparing__percent").isEmpty());
+	}
+
+	@Example
 	public void shouldStopPollingOnceThereIsSomethingToShow() {
 		final Document html = render(new AppView(Tab.ACTIVITY, "LEDGER FROZEN", false, false,
 			new PreparingView(STARTING, "Hedgehog is not installed on this computer", false)

@@ -252,7 +252,7 @@ public class WalletControllerTest {
 			settle(controller.onClickRetry()).screen()
 		);
 
-		assertEquals("Hedgehog is not installed on this computer", retried.failure());
+		assertEquals("This Janus knows no checksum of Hedgehog 0.0.8 for this platform", retried.failure());
 	}
 
 	@Example

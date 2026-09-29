@@ -22,7 +22,16 @@ import org.unigrid.janus.web.action.View;
 
 /** How far the wallet is from being shown, and what went wrong when it cannot be. */
 public record PreparingView(List<Step> steps, String failure, boolean chooseAnother) implements View {
-	public record Step(String label, State state) {
+	/** One thing to get done, with how far it has got when it is a download whose progress is known. */
+	public record Step(String label, State state, Integer percent) {
+		public Step(final String label, final State state) {
+			this(label, state, null);
+		}
+
+		public boolean measured() {
+			return state == State.ACTIVE && percent != null;
+		}
+
 		public enum State {
 			DONE,
 			ACTIVE,

@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -228,7 +229,9 @@ public class WalletController {
 
 		final String failure = service.phase() == HedgehogState.Phase.FAILED ? service.reason()
 			: read.phase() == LedgerState.Phase.FAILED ? read.reason() : null;
-		final View screen = new PreparingView(steps(service, read), failure, read.unreadable());
+		final View screen = new PreparingView(steps(service, hedgehog.downloadedHedgehog(), read), failure,
+			read.unreadable()
+		);
 
 		return new AppView(tab, PREPARING, failure == null, arriving(screen), screen);
 	}
@@ -242,17 +245,31 @@ public class WalletController {
 		return arriving;
 	}
 
-	private static List<Step> steps(final HedgehogState service, final LedgerState read) {
+	/* Hedgehog is only a step of its own when this run had to download it. */
+	private static List<Step> steps(final HedgehogState service, final boolean hedgehogDownloaded,
+		final LedgerState read) {
+
+		final boolean installing = service.phase() == HedgehogState.Phase.DOWNLOADING_HEDGEHOG;
 		final boolean ready = service.phase() == HedgehogState.Phase.READY;
 		final boolean fetching = service.phase() == HedgehogState.Phase.FETCHING;
+		final State starting = ready || fetching ? State.DONE : installing ? State.PENDING : State.ACTIVE;
 		final State downloading = ready ? State.DONE : fetching ? State.ACTIVE : State.PENDING;
+		final List<Step> steps = new ArrayList<>();
 
-		return List.of(new Step("Starting Hedgehog", ready || fetching ? State.DONE : State.ACTIVE),
-			new Step("Downloading the legacy ledger (~314 MB)", downloading),
-			new Step("Reading wallet history", read.phase() == LedgerState.Phase.LOADED ? State.DONE
-				: ready ? State.ACTIVE : State.PENDING
-			)
-		);
+		if (hedgehogDownloaded) {
+			steps.add(new Step("Downloading Hedgehog (~90 MB)", installing ? State.ACTIVE : State.DONE,
+				installing ? service.progress() : null
+			));
+		}
+
+		steps.add(new Step("Starting Hedgehog", starting));
+		steps.add(new Step("Downloading the legacy ledger (~314 MB)", downloading,
+			fetching ? service.progress() : null
+		));
+		steps.add(new Step("Reading wallet history", read.phase() == LedgerState.Phase.LOADED ? State.DONE
+			: ready ? State.ACTIVE : State.PENDING
+		));
+		return steps;
 	}
 
 	private static String chip(final WalletFunds funds) {

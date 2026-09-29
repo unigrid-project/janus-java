@@ -831,6 +831,13 @@ main:has(> .app) {
 	background: var(--up);
 }
 
+.preparing__percent {
+	margin-left: auto;
+	font-family: var(--font-mono);
+	font-variant-numeric: tabular-nums;
+	color: var(--accent);
+}
+
 .preparing__failure {
 	margin: 20px 0 0;
 	font-size: 13.5px;
