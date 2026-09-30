@@ -17,6 +17,12 @@ Linux)
 	cp "$dist"/unigrid-*.rpm "$out/janus-$version-linux-x86_64.rpm"
 	tar -C "$dist" -czf "$out/janus-$version-linux-x86_64.tar.gz" Unigrid
 	;;
+Darwin)
+	cp "$dist"/Unigrid-*.dmg "$out/janus-$version-macos-arm64.dmg"
+	;;
+MINGW* | MSYS* | CYGWIN*)
+	cp "$dist"/Unigrid-*.msi "$out/janus-$version-windows-x64.msi"
+	;;
 esac
 
 ls -l "$out"
