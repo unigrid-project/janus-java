@@ -31,10 +31,10 @@ Building
 mvn clean install
 ```
 
-This builds the `core`, `web` and `shell` modules. Note that the modules are
-currently empty scaffolding: the JavaFX implementation has been removed and the
-replacement described under [Design documents](#design-documents) has not been
-written yet.
+This builds and tests the `core`, `web`, `ui` and `shell` modules: the Hedgehog
+client, the embedded web server, the server-rendered pages and the window that
+hosts them. The approach is described under
+[Design documents](#design-documents).
 
 The `desktop` module builds the native installers and is only part of the build
 with the `installer` profile. It needs JDK 17 and the platform's packaging tools
