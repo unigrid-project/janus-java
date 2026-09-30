@@ -10,9 +10,6 @@
 		<name>Stiftelsen The Unigrid Foundation</name>
 		<url>https://www.unigrid.org</url>
 	</organization>
-	<!-- desktop is intentionally outside the reactor until shell provides an
-	     entry point; its POM is retained and repointed, but jlink and jpackage
-	     cannot run against modules that hold no code. -->
 	<modules>
 		<module>core</module>
 		<module>web</module>
@@ -26,6 +23,14 @@
 			<id>browser</id>
 			<modules>
 				<module>e2e</module>
+			</modules>
+		</profile>
+		<profile>
+			<!-- Builds the native installers. It needs the platform's packaging tools and fetches the browser
+			     engine, so it stays out of the everyday build. -->
+			<id>installer</id>
+			<modules>
+				<module>desktop</module>
 			</modules>
 		</profile>
 	</profiles>
@@ -193,14 +198,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>3.2.0</version>
-				</plugin>
-				<plugin>
-					<!-- Thymeleaf and its dependencies ship as automatic modules,
-					     which jlink refuses to link. Version is pinned here so the
-					     descriptors can be generated once the modules carry code. -->
-					<groupId>org.moditect</groupId>
-					<artifactId>moditect-maven-plugin</artifactId>
-					<version>1.2.2.Final</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

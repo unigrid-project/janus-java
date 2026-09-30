@@ -1,32 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.unigrid.janus</groupId>
-	<artifactId>desktop</artifactId>
-	<packaging>jlink</packaging>
-	<name>Unigrid Janus Desktop Application</name>
-        <version>1.0.12</version>
-
-	<!-- Held outside the parent reactor until the shell module provides an
-	     entry point. The jlink and jpackage configuration below is retained
-	     and repointed, but cannot run until then. -->
-
 	<parent>
 		<groupId>org.unigrid.janus</groupId>
 		<artifactId>parent</artifactId>
 		<version>1.0.12</version>
 	</parent>
+	<artifactId>desktop</artifactId>
+	<packaging>jar</packaging>
+	<name>Unigrid Janus Desktop Application</name>
+	<description>Native installers: the application, its Java runtime and its browser engine in one package.</description>
 	<properties>
 		<mainClass>org.unigrid.janus.shell.Janus</mainClass>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jpackage.version>1.0.12</jpackage.version>
+		<input>${project.build.directory}/input</input>
+		<dist>${project.build.directory}/dist</dist>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.unigrid.janus</groupId>
 			<artifactId>shell</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>me.friwi</groupId>
+			<artifactId>jcefmaven</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
@@ -35,63 +33,57 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
-			<!--<plugin>
-			    <groupId>org.tentackle</groupId>
-			    <artifactId>tentackle-jlink-maven-plugin</artifactId>
-			    <version>17.9.0.0</version>
-			    <extensions>true</extensions>
-			    <configuration>
-				<verbosity>debug</verbosity>
-				<mainClass>org.unigrid.janus.shell.Janus</mainClass>
-				<mainModule>org.unigrid.janus.shell</mainModule>
-				<templateDir>src/main/templates</templateDir>
-				<stripDebug>false</stripDebug>
-				<excludeModules>jdk.jfr</excludeModules>
-				<variables>
-				    <images>${project.build.directory}/classes/org/unigrid/janus/view/images</images>
-				</variables>
-			    </configuration>
-			</plugin>-->
 			<plugin>
-				<groupId>org.tentackle</groupId>
-				<artifactId>tentackle-jlink-maven-plugin</artifactId>
-				<version>17.9.0.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<verbosity>debug</verbosity>
-					<mainClass>org.unigrid.janus.shell.Janus</mainClass>
-					<mainModule>org.unigrid.janus.shell</mainModule>
-					<addModules>jdk.crypto.ec</addModules>
-					<addModules>java.compiler</addModules>
-					<templateDir>src/main/templates</templateDir>
-					<stripDebug>false</stripDebug>
-					<excludeModules>jdk.jfr</excludeModules>
-					<variables>
-						<images>${project.build.directory}/classes/org/unigrid/janus/view/images</images>
-					</variables>
-				</configuration>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
 			</plugin>
 			<plugin>
-			    <groupId>com.coderplus.maven.plugins</groupId>
-			    <artifactId>copy-rename-maven-plugin</artifactId>
-			    <version>1.0.1</version>
-			    <executions>
-				<execution>
-				    <phase>package</phase>
-				    <goals>
-					<goal>rename</goal>
-				    </goals>
-				    <configuration>
-					<sourceFile>target/jlink/mp</sourceFile>
-					<destinationFile>target/mp</destinationFile>
-				    </configuration>
-				</execution>
-			    </executions>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.8.1</version>
+				<executions>
+					<execution>
+						<id>application-jars</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<outputDirectory>${input}</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>browser-engine</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>org.unigrid.janus.desktop.PrepareCef</mainClass>
+							<arguments>
+								<argument>${input}/jcef</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.panteleyev</groupId>
 				<artifactId>jpackage-maven-plugin</artifactId>
-				<version>1.5.2</version>
+				<version>1.8.0</version>
+				<configuration>
+					<name>Unigrid</name>
+					<vendor>Stiftelsen The Unigrid Foundation</vendor>
+					<appVersion>${project.version}</appVersion>
+					<destination>${dist}</destination>
+				</configuration>
 				<executions>
 					<execution>
 						<id>appimage</id>
@@ -100,170 +92,41 @@
 							<goal>jpackage</goal>
 						</goals>
 						<configuration>
-							<appVersion>${jpackage.version}</appVersion>
-							<vendor>org.unigrid</vendor>
-							<module>org.unigrid.janus.shell/org.unigrid.janus.shell.Janus</module>
-                                                        <modulePaths>
-                                                            <modulePath>target/mp</modulePath>
-                                                        </modulePaths>
-							<runtimeImage>target/jlink</runtimeImage>
 							<type>APP_IMAGE</type>
+							<removeDestination>true</removeDestination>
+							<input>${input}</input>
+							<mainJar>shell-${project.version}.jar</mainJar>
+							<mainClass>${mainClass}</mainClass>
 							<winConsole>false</winConsole>
+							<addModules>
+								<addModule>java.base</addModule>
+								<addModule>java.desktop</addModule>
+								<addModule>java.instrument</addModule>
+								<addModule>java.management</addModule>
+								<addModule>java.naming</addModule>
+								<addModule>java.net.http</addModule>
+								<addModule>java.sql</addModule>
+								<addModule>jdk.attach</addModule>
+								<addModule>jdk.compiler</addModule>
+								<addModule>jdk.crypto.ec</addModule>
+								<addModule>jdk.jdi</addModule>
+								<addModule>jdk.unsupported</addModule>
+							</addModules>
+							<jLinkOptions>
+								<jLinkOption>--strip-debug</jLinkOption>
+								<jLinkOption>--no-man-pages</jLinkOption>
+								<jLinkOption>--no-header-files</jLinkOption>
+								<jLinkOption>--compress=2</jLinkOption>
+							</jLinkOptions>
 							<javaOptions>
 								<option>--add-opens</option>
 								<option>java.base/java.lang=ALL-UNNAMED</option>
-								<option>-DAPPDIR=$APPDIR</option>
-								<option>-DAPPVER=${project.version}</option>
+								<option>-Djanus.jcef=$APPDIR/jcef</option>
 							</javaOptions>
 						</configuration>
 					</execution>
-					<execution>
-						<id>installer</id>
-						<goals>
-							<goal>jpackage</goal>
-						</goals>
-						<configuration>
-							<appVersion>${jpackage.version}</appVersion>
-							<appImage>target/dist/Unigrid</appImage>
-						</configuration>
-					</execution>
 				</executions>
-				<configuration>
-					<name>Unigrid</name>
-					<destination>target/dist</destination>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>pl.gdela</groupId>
-				<artifactId>socomo-maven</artifactId>
 			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<id>windows</id>
-			<activation>
-				<os>
-					<family>windows</family>
-				</os>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.panteleyev</groupId>
-						<artifactId>jpackage-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>appimage</id>
-								<configuration>
-									<icon>${project.basedir}/src/main/packaging/icons/unigrid-256-256.ico</icon>
-								</configuration>
-							</execution>
-							<execution>
-								<id>installer</id>
-								<configuration>
-									<type>MSI</type>
-									<winMenu>true</winMenu>
-									<winMenuGroup>Unigrid</winMenuGroup>
-									<winShortcut>true</winShortcut>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins> 
-			</build>
-		</profile>
-		<profile>
-			<id>mac</id>
-			<activation>
-				<os>
-					<family>mac</family>
-				</os>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.panteleyev</groupId>
-						<artifactId>jpackage-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>appimage</id>
-								<configuration>
-									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.icns</icon>
-									<macPackageIdentifier>org.unigrid.janus</macPackageIdentifier>
-									<macPackageName>"Unigrid"</macPackageName>
-									<macPackageSigningPrefix>"UnigridJanus"</macPackageSigningPrefix>
-									<macSigningKeyUserName>"Developer ID Application: ***"</macSigningKeyUserName>
-								</configuration>
-							</execution>
-							<execution>
-								<id>installer</id>
-								<configuration>
-									<type>DMG</type>
-									<appImage>target/dist/Unigrid.app</appImage>
-									<macSign>true</macSign>
-									<macPackageIdentifier>org.unigrid.janus</macPackageIdentifier>
-									<macPackageName>"Unigrid"</macPackageName>
-									<macPackageSigningPrefix>"UnigridJanus"</macPackageSigningPrefix>
-									<macSigningKeyUserName>"Developer ID Installer:***"</macSigningKeyUserName>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>linux</id>
-			<activation>
-				<os>
-					<family>linux</family>
-				</os>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.panteleyev</groupId>
-						<artifactId>jpackage-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>appimage</id>
-							</execution>
-							<execution>
-								<id>installer</id>
-								<configuration>
-									<type>DEB</type>
-									<linuxShortcut>true</linuxShortcut>
-									<linuxPackageName>unigrid</linuxPackageName>
-									<linuxAppCategory>Utilities</linuxAppCategory>
-									<linuxMenuGroup>Utilities</linuxMenuGroup>
-									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.png</icon>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.16.0</version>
-				<configuration>
-					<includeTests>true</includeTests>
-					<targetJdk>17</targetJdk>
-					<rulesets>
-						<ruleset>${project.basedir}/pmd.xml</ruleset>
-					</rulesets>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
 </project>
