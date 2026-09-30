@@ -284,6 +284,11 @@
 									<linuxAppCategory>Utilities</linuxAppCategory>
 									<linuxMenuGroup>Utilities</linuxMenuGroup>
 									<linuxShortcut>true</linuxShortcut>
+									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.png</icon>
+									<!-- jpackage only finds the libraries that dpkg knows by their real path, and on a
+									     merged /usr that misses the ones the browser engine and the window toolkit
+									     load, so they are named here. The t64 names are Ubuntu 24.04's. -->
+									<linuxPackageDeps>libnss3, libgbm1, libgtk-3-0 | libgtk-3-0t64, libasound2 | libasound2t64, libxss1, libxtst6, libxi6, libcups2 | libcups2t64, libatk-bridge2.0-0 | libatk-bridge2.0-0t64, libxkbcommon0, libx11-6</linuxPackageDeps>
 									<linuxDebMaintainer>info@unigridfoundation.se</linuxDebMaintainer>
 								</configuration>
 							</execution>
@@ -300,6 +305,8 @@
 									<linuxAppCategory>Utilities</linuxAppCategory>
 									<linuxMenuGroup>Utilities</linuxMenuGroup>
 									<linuxShortcut>true</linuxShortcut>
+									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.png</icon>
+									<linuxPackageDeps>nss, mesa-libgbm, gtk3, alsa-lib, libXScrnSaver, libXtst, libXi, cups-libs, at-spi2-atk, libxkbcommon, libX11</linuxPackageDeps>
 									<linuxRpmLicenseType>AGPLv3+</linuxRpmLicenseType>
 								</configuration>
 							</execution>
