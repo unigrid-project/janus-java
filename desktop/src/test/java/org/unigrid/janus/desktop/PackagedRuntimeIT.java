@@ -35,6 +35,21 @@ public class PackagedRuntimeIT {
 	private static final long SECONDS = 60;
 
 	@Test
+	public void shouldCarryTheModulesThatAreOnlyFoundThroughServiceLookup() throws Exception {
+		final Path java = IMAGE.resolve("lib").resolve("runtime").resolve("bin").resolve("java");
+
+		Assumptions.assumeTrue(Files.isExecutable(java), "No packaged runtime for this platform in " + IMAGE);
+
+		final Process process = new ProcessBuilder(java.toString(), "--list-modules")
+			.redirectErrorStream(true).start();
+		final String modules = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+		for (final String module : new String[] {"jdk.zipfs", "jdk.crypto.ec", "jdk.accessibility"}) {
+			assertTrue(modules.contains(module + "@"), "The runtime lacks " + module + ":\n" + modules);
+		}
+	}
+
+	@Test
 	public void shouldServeTheStylesheetAndScriptsFromThePackagedRuntime() throws Exception {
 		final Path java = IMAGE.resolve("lib").resolve("runtime").resolve("bin").resolve("java");
 
