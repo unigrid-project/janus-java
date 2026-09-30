@@ -42,6 +42,20 @@
 				<artifactId>maven-checkstyle-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.6.0</version>
+				<executions>
+					<execution>
+						<id>installer-version</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>parse-version</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>3.8.1</version>
@@ -85,7 +99,8 @@
 				<configuration>
 					<name>Unigrid</name>
 					<vendor>Stiftelsen The Unigrid Foundation</vendor>
-					<appVersion>${project.version}</appVersion>
+					<!-- Installers take a plain number, which a snapshot is not. -->
+					<appVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appVersion>
 					<destination>${dist}</destination>
 				</configuration>
 				<executions>
