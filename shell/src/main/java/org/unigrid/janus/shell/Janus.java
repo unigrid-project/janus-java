@@ -18,7 +18,9 @@ package org.unigrid.janus.shell;
 
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
+import java.awt.GraphicsEnvironment;
 import java.net.URI;
+import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unigrid.janus.ui.controller.WalletController;
@@ -55,6 +57,24 @@ public final class Janus {
 
 		/* The token rides on the first navigation only; the server swaps it for a cookie and
 		   redirects, so it does not linger in the address. */
-		window.open(uri.resolve("/?" + SessionToken.PARAMETER + "=" + token.value()));
+		try {
+			window.open(uri.resolve("/?" + SessionToken.PARAMETER + "=" + token.value()));
+		} catch (Exception | LinkageError e) {
+			giveUp(server, e);
+		}
+	}
+
+	/* The server's threads would keep the process alive with no window to reach it, and a launcher from
+	   a menu has no console to show the error in. */
+	private static void giveUp(final UiServer server, final Throwable cause) throws Exception {
+		LOG.error("Janus could not open its window", cause);
+		server.stop();
+
+		if (!GraphicsEnvironment.isHeadless()) {
+			JOptionPane.showMessageDialog(null, StartFailure.message(new CefLocation(), cause), TITLE,
+				JOptionPane.ERROR_MESSAGE);
+		}
+
+		System.exit(1);
 	}
 }
