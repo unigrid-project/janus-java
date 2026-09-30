@@ -17,10 +17,15 @@
 package org.unigrid.janus.desktop;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +38,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PackagedRuntimeIT {
 	private static final Path IMAGE = Path.of("target", "dist", "Unigrid").toAbsolutePath();
 	private static final long SECONDS = 60;
+
+	@Test
+	public void shouldCarryOnlyOneVersionOfEveryJar() throws IOException {
+		final Path app = IMAGE.resolve("lib").resolve("app");
+
+		Assumptions.assumeTrue(Files.isDirectory(app), "No application image in " + IMAGE);
+
+		try (Stream<Path> files = Files.list(app)) {
+			final Map<String, List<String>> versions = files.map(file -> file.getFileName().toString())
+				.filter(name -> name.endsWith(".jar"))
+				.collect(Collectors.groupingBy(name -> name.replaceFirst("-\\d.*\\.jar$", "")));
+
+			versions.forEach((artifact, names) -> assertEquals(1, names.size(),
+				"More than one version of " + artifact + " on the classpath: " + names));
+		}
+	}
 
 	@Test
 	public void shouldCarryTheModulesThatAreOnlyFoundThroughServiceLookup() throws Exception {
