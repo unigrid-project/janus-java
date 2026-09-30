@@ -23,7 +23,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.net.URI;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -36,7 +35,6 @@ import org.cef.browser.CefBrowser;
 import org.unigrid.janus.web.WindowControl;
 
 public class BrowserWindow {
-	private static final File INSTALL_DIR = new File(System.getProperty("user.home"), ".janus/jcef");
 	private static final Dimension SIZE = new Dimension(1240, 800);
 	private static final String TITLE = "Unigrid";
 
@@ -86,8 +84,13 @@ public class BrowserWindow {
 
 	public void open(final URI uri) throws Exception {
 		final CefAppBuilder builder = new CefAppBuilder();
+		final CefLocation location = new CefLocation();
 
-		builder.setInstallDir(INSTALL_DIR);
+		builder.setInstallDir(location.directory());
+
+		/* The folder of an installed application is not ours to write to, so a missing or damaged engine
+		   there has to fail with the engine's own error rather than trigger a download or a deletion. */
+		builder.setSkipInstallation(location.isBundled());
 		builder.setProgressHandler(new ConsoleProgressHandler());
 		builder.getCefSettings().windowless_rendering_enabled = false;
 
