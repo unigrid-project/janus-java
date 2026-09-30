@@ -110,8 +110,11 @@
 								<addModule>java.naming</addModule>
 								<addModule>java.net.http</addModule>
 								<addModule>java.sql</addModule>
+								<!-- jdeps cannot see modules that are found through service lookup: TLS needs
+								     jdk.crypto.ec, and Jetty reads its stylesheets out of the jar through jdk.zipfs. -->
 								<addModule>jdk.crypto.ec</addModule>
 								<addModule>jdk.unsupported</addModule>
+								<addModule>jdk.zipfs</addModule>
 							</addModules>
 							<jLinkOptions>
 								<jLinkOption>--strip-debug</jLinkOption>
