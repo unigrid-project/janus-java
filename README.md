@@ -36,11 +36,21 @@ currently empty scaffolding: the JavaFX implementation has been removed and the
 replacement described under [Design documents](#design-documents) has not been
 written yet.
 
-The `desktop` module holds the jlink and jpackage configuration that produces
-the native installers. It is deliberately kept outside the reactor until `shell`
-provides an application entry point, so no installer can be produced from this
-branch. The previous JavaFX implementation, together with its release
-workflows, remains available on the `legacy-javafx` branch.
+The `desktop` module builds the native installers and is only part of the build
+with the `installer` profile. It needs JDK 17 and the platform's packaging tools
+(`dpkg-deb`, `fakeroot` and `rpm` on Linux, WiX 3 on Windows, Xcode's command
+line tools on macOS):
+```
+mvn -Pinstaller verify -DskipTests
+desktop/collect-installers.sh <version>
+```
+
+The installers carry their own Java runtime and the browser engine, so an
+installed Janus starts without downloading anything but Hedgehog. The build
+fetches the engine once into `desktop/target/input/jcef`; `mvn clean` removes
+it. The installers end up in `desktop/target/release`. The previous JavaFX
+implementation, together with its release workflows, remains available on the
+`legacy-javafx` branch.
 
 Running
 -------
