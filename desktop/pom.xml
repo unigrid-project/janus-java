@@ -26,6 +26,10 @@
 			<groupId>me.friwi</groupId>
 			<artifactId>jcefmaven</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -267,7 +271,7 @@
 							</execution>
 							<execution>
 								<id>deb</id>
-								<phase>verify</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jpackage</goal>
 								</goals>
@@ -283,7 +287,7 @@
 							</execution>
 							<execution>
 								<id>rpm</id>
-								<phase>verify</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jpackage</goal>
 								</goals>
@@ -298,6 +302,11 @@
 								</configuration>
 							</execution>
 						</executions>
+					</plugin>
+					<plugin>
+						<!-- Runs the installed packages, so they have to exist before the integration phase. -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
 					</plugin>
 				</plugins>
 			</build>

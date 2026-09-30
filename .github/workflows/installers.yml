@@ -1,0 +1,56 @@
+name: Janus installers
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      - "desktop/**"
+      - "shell/**"
+      - "pom.xml"
+      - ".github/workflows/installers.yml"
+
+jobs:
+  installers:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-22.04, macos-14, windows-2022 ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Install the Linux packaging tools
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y rpm fakeroot
+
+    - name: Put WiX 3 on the path
+      if: runner.os == 'Windows'
+      run: |
+        choco install wixtoolset --version 3.14.1 -y --no-progress
+        echo "C:\Program Files (x86)\WiX Toolset v3.14\bin" >> $GITHUB_PATH
+      shell: bash
+
+    # On Linux this also installs the packages in clean containers and runs Janus from them.
+    - name: Build the installers
+      run: mvn -B -Pinstaller -pl desktop -am verify
+
+    - name: Collect the installers
+      run: desktop/collect-installers.sh "$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)"
+      shell: bash
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: installers-${{ runner.os }}
+        path: desktop/target/release/*
+        if-no-files-found: error
