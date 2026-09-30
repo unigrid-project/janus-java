@@ -110,10 +110,7 @@
 								<addModule>java.naming</addModule>
 								<addModule>java.net.http</addModule>
 								<addModule>java.sql</addModule>
-								<addModule>jdk.attach</addModule>
-								<addModule>jdk.compiler</addModule>
 								<addModule>jdk.crypto.ec</addModule>
-								<addModule>jdk.jdi</addModule>
 								<addModule>jdk.unsupported</addModule>
 							</addModules>
 							<jLinkOptions>
