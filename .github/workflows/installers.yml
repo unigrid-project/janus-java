@@ -8,6 +8,9 @@ on:
     paths:
       - "desktop/**"
       - "shell/**"
+      - "ui/**"
+      - "web/**"
+      - "core/**"
       - "pom.xml"
       - ".github/workflows/installers.yml"
 
