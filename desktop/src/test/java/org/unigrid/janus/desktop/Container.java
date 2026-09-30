@@ -53,8 +53,10 @@ final class Container implements AutoCloseable {
 	}
 
 	static Container start(final String image, final Path mount) throws IOException, InterruptedException {
+		/* Chromium keeps its renderers' memory in /dev/shm, and Docker's default 64 MB makes them crash now
+		   and then. */
 		final Result started = run(List.of(
-			"docker", "run", "-d", "--rm", "-v", mount + ":/r:ro", image, "sleep", "infinity"
+			"docker", "run", "-d", "--rm", "--shm-size=512m", "-v", mount + ":/r:ro", image, "sleep", "infinity"
 		), PULL_SECONDS);
 
 		if (started.exit() != 0) {

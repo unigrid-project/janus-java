@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Installs the packages the build produced into clean containers and lets the installed Janus do what it is
@@ -54,16 +53,19 @@ public class InstalledJanusIT {
 	private static final long WAIT_SECONDS = 120;
 	private static final long POLL_MILLIS = 2000;
 
+	/* Only what the test itself needs. The libraries Janus runs on have to come in through the package, which
+	   is what a person installing it depends on. */
 	private static final String DEBIAN_SETUP = """
 		apt-get update -qq
-		apt-get install -y -qq xvfb xauth procps curl xdotool imagemagick tesseract-ocr python3-xlib \
-			libgtk-3-0 libnss3 libgbm1 libasound2 libxss1 libxtst6 libxi6 libcups2 libatk-bridge2.0-0 \
-			libxkbcommon0 >/dev/null
+		apt-get install -y -qq xvfb xauth procps curl xdotool imagemagick tesseract-ocr python3-xlib >/dev/null
 		""";
 	private static final String FEDORA_SETUP = """
 		dnf install -y -q xorg-x11-server-Xvfb xorg-x11-xauth procps-ng curl which xdotool ImageMagick \
-			tesseract tesseract-langpack-eng python3-xlib gtk3 nss mesa-libgbm alsa-lib libXScrnSaver \
-			libXtst >/dev/null
+			tesseract tesseract-langpack-eng python3-xlib >/dev/null
+		""";
+	private static final String DEBIAN_LIBRARIES = """
+		apt-get install -y -qq libgtk-3-0 libnss3 libgbm1 libasound2 libxss1 libxtst6 libxi6 libcups2 \
+			libatk-bridge2.0-0 libxkbcommon0 >/dev/null
 		""";
 	private static final String PACKAGED = "/opt/unigrid";
 	private static final String PORTABLE = "/opt/with space/Unigrid";
@@ -88,8 +90,8 @@ public class InstalledJanusIT {
 
 	@Test
 	public void shouldRunFromAPortableFolderWhoseNameHasASpace() throws Exception {
-		verify("debian:12", DEBIAN_SETUP + "mkdir -p '/opt/with space' && cp -r /r/Unigrid '/opt/with space/'",
-			PORTABLE, "true");
+		verify("debian:12", DEBIAN_SETUP + DEBIAN_LIBRARIES
+			+ "mkdir -p '/opt/with space' && cp -r /r/Unigrid '/opt/with space/'", PORTABLE, "true");
 	}
 
 	private void verify(final String image, final String install, final String home, final String reinstall)
@@ -135,15 +137,16 @@ public class InstalledJanusIT {
 	private static void assertRunsTheBundledEngine(final Container container, final String engine)
 		throws IOException, InterruptedException {
 
-		assertTrue(asUser(container, "pgrep -af '[j]cef_helper'", "finding the engine").output().contains(engine),
-			"The browser engine must run from " + engine);
+		awaitOutput(container, "pgrep -af '[j]cef_helper' || true", output -> output.contains(engine),
+			"the browser engine running from " + engine);
 		asUser(container, "test ! -e ~/.janus/jcef", "checking that no second engine was downloaded");
 	}
 
 	private static void assertShowsTheFirstPage(final Container container)
 		throws IOException, InterruptedException {
 
-		asUser(container, SCREEN + " xdotool search --name '^" + WINDOW_TITLE + "$'", "finding the window");
+		awaitOutput(container, SCREEN + " xdotool search --name '^" + WINDOW_TITLE + "$'", output -> true,
+			"the window");
 		awaitOutput(container, SCREEN + " import -window root -resize 200% png:- | tesseract stdin stdout",
 			output -> output.toLowerCase().contains(FIRST_PAGE_TEXT), "the first page drawn in the window");
 	}
@@ -151,8 +154,10 @@ public class InstalledJanusIT {
 	private static void assertQuitsWhenTheWindowCloses(final Container container)
 		throws IOException, InterruptedException {
 
+		/* The launcher runs Java inside its own process, so what there is to look for is the launcher's name. */
+		asUser(container, "pgrep -x Unigrid", "finding Janus running before its window is closed");
 		asUser(container, SCREEN + " python3 /tmp/close-window.py " + WINDOW_TITLE, "closing the window");
-		awaitOutput(container, "pgrep -f '[l]ib/runtime/bin/java' || echo gone", "gone\n"::equals,
+		awaitOutput(container, "pgrep -x Unigrid || echo gone", "gone\n"::equals,
 			"Janus quitting after its window was closed");
 	}
 
