@@ -8,4 +8,7 @@
 	                query="//PLUS[./STRING_LITERAL]/.." />
 	<suppress-xpath checks="Indentation"
 	                query="//PLUS[./STRING_LITERAL]" />
+	<!-- Java 17 has no public way to release a mapped file, which Windows keeps locked until it is. -->
+	<suppress-xpath checks="IllegalImport"
+	                files="BerkeleyFile\.java" />
 </suppressions>
