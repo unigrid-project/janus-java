@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -39,6 +40,8 @@ import org.unigrid.janus.core.hedgehog.HedgehogState.Phase;
 @Slf4j
 @ApplicationScoped
 public class HedgehogService {
+	public static final String NETWORK_KEYS = "janus.hedgehog.network-keys";
+
 	private static final Duration START_TIMEOUT = Duration.ofSeconds(30);
 	private static final Duration POLL = Duration.ofMillis(200);
 	private static final Duration STOP_TIMEOUT = Duration.ofSeconds(5);
@@ -169,9 +172,9 @@ public class HedgehogService {
 
 	/* The token goes in the environment, as the arguments of a process can be read by every user of the computer. */
 	private Process launch(final Path executable) {
-		final ProcessBuilder daemon = new ProcessBuilder(executable.toString(), "daemon",
-			"--restport=" + base.getPort()
-		);
+		final ProcessBuilder daemon = new ProcessBuilder(command(executable, base.getPort(),
+			System.getProperty(NETWORK_KEYS)
+		));
 
 		daemon.environment().put(TOKEN_VARIABLE, client.token());
 
@@ -182,6 +185,18 @@ public class HedgehogService {
 		} catch (IOException e) {
 			throw new UncheckedIOException("Hedgehog could not be run from " + executable, e);
 		}
+	}
+
+	/* Hedgehog trusts only the foundation's keys for the ledger unless it is told otherwise, which the installer
+	   tests do to show the installed wallet a ledger of their own. */
+	static List<String> command(final Path executable, final int port, final String networkKeys) {
+		final List<String> command = new ArrayList<>(List.of(executable.toString(), "daemon", "--restport=" + port));
+
+		if (networkKeys != null) {
+			command.add("--network-keys=" + networkKeys);
+		}
+
+		return command;
 	}
 
 	private void awaitAnswer(final Process process) {

@@ -490,4 +490,18 @@ public class HedgehogServiceTest {
 		service.stop();
 		assertEquals(HedgehogState.IDLE, service.prepare());
 	}
+
+	@Example
+	public void shouldStartHedgehogTrustingItsOwnKeys() {
+		assertEquals(List.of("hedgehog", "daemon", "--restport=52884"),
+			HedgehogService.command(Path.of("hedgehog"), 52884, null)
+		);
+	}
+
+	@Example
+	public void shouldPassOnTheNetworkKeysItWasGiven() {
+		assertEquals(List.of("hedgehog", "daemon", "--restport=52884", "--network-keys=ab,cd"),
+			HedgehogService.command(Path.of("hedgehog"), 52884, "ab,cd")
+		);
+	}
 }
