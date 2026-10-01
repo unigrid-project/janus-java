@@ -141,9 +141,9 @@ public class HedgehogClient implements AutoCloseable {
 	 */
 	public Optional<String> version() {
 		try {
-			return Optional.of(ask(hedgehog.path("version"),
+			return Optional.ofNullable(ask(hedgehog.path("version"),
 				response -> read(response, answer -> answer.readEntity(Version.class))
-			).version());
+			)).map(Version::version);
 		} catch (HedgehogUnavailable | SnapshotMissing | IllegalArgumentException | IllegalStateException e) {
 			return Optional.empty();
 		}
