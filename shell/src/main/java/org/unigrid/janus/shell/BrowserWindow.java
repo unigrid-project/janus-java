@@ -32,11 +32,14 @@ import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
 import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.browser.CefBrowser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unigrid.janus.web.WindowControl;
 
 public class BrowserWindow {
 	public static final String DEBUGGING_PORT = "janus.remote-debugging-port";
 
+	private static final Logger LOG = LoggerFactory.getLogger(BrowserWindow.class);
 	private static final Dimension SIZE = new Dimension(1240, 800);
 	private static final String TITLE = "Unigrid";
 
@@ -108,6 +111,8 @@ public class BrowserWindow {
 		builder.setAppHandler(new MavenCefAppHandlerAdapter() {
 			@Override
 			public void stateHasChanged(final CefApp.CefAppState state) {
+				LOG.info("The browser engine is {}", state);
+
 				if (state == CefApp.CefAppState.TERMINATED) {
 					System.exit(0);
 				}
@@ -140,6 +145,7 @@ public class BrowserWindow {
 		return new WindowAdapter() {
 			@Override
 			public void windowClosing(final WindowEvent event) {
+				LOG.info("The window is closing");
 				frame.setVisible(false);
 				browser.setCloseAllowed();
 				CefApp.getInstance().dispose();
