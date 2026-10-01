@@ -129,10 +129,14 @@ public class BrowserWindow {
 		   stays empty. */
 		frame.getContentPane().add(browser.getUIComponent(), BorderLayout.CENTER);
 
+		/* The browser engine creates the browser the first time its component is painted. On Windows the
+		   engine's own native child covers the whole of the undecorated frame, which leaves Windows nothing
+		   to ask the frame to paint, so the component is asked to paint itself. */
 		SwingUtilities.invokeLater(() -> {
 			frame.setSize(SIZE);
 			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
+			browser.getUIComponent().repaint();
 		});
 	}
 
