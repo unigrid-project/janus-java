@@ -27,13 +27,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.security.GeneralSecurityException;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Plays Hedgehog's command line for the service tests: {@code daemon --restport=N} serves the REST calls
  * the service makes. Files in the folder named by FAKE_HEDGEHOG_HOME steer it and record what it was asked
  * to do: a ledger appears when the test writes one, and while the test keeps a downloading file the daemon
- * says it is downloading, with the progress the file holds.
+ * says it is downloading, with the progress the file holds. With a silent file it stays alive and answers
+ * nothing, with a tls file it serves over TLS, and the arguments it was started with are kept in a file of
+ * their own.
  */
 public final class FakeHedgehog {
 	static final String LEDGER = "ledger";
@@ -42,6 +46,9 @@ public final class FakeHedgehog {
 	static final String STARTS = "starts";
 	static final String DAEMON_PID = "daemon-pid";
 	static final String STOP_REFUSED = "stop-refused";
+	static final String SILENT = "silent";
+	static final String ARGUMENTS = "arguments";
+	static final String TLS = "tls";
 	private static final boolean WINDOWS = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win");
 
 	private static final String PORT = "--restport=";
@@ -70,6 +77,7 @@ public final class FakeHedgehog {
 	public static void main(final String[] args) throws IOException, InterruptedException {
 		final Path home = Path.of(System.getenv("FAKE_HEDGEHOG_HOME"));
 
+		Files.writeString(home.resolve(ARGUMENTS), String.join(" ", args));
 		daemon(home, Integer.parseInt(args[1].substring(PORT.length())));
 	}
 
@@ -145,7 +153,7 @@ public final class FakeHedgehog {
 			+ "\"built\":\"2026-09-14T10:15:30Z\",\"signature\":\"" + signature + "\"}";
 	}
 
-	private static void daemon(final Path home, final int port) throws IOException {
+	private static void daemon(final Path home, final int port) throws IOException, InterruptedException {
 		Files.writeString(home.resolve(STARTS), "started\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		Files.writeString(home.resolve(DAEMON_PID), Long.toString(ProcessHandle.current().pid()));
 
@@ -153,8 +161,12 @@ public final class FakeHedgehog {
 			System.exit(3);
 		}
 
+		if (Files.exists(home.resolve(SILENT))) {
+			new CountDownLatch(1).await();
+		}
+
 		final InetSocketAddress address = new InetSocketAddress(InetAddress.getLoopbackAddress(), port);
-		final HttpServer server = HttpServer.create(address, 0);
+		final HttpServer server = Files.exists(home.resolve(TLS)) ? tls(port) : HttpServer.create(address, 0);
 
 		server.createContext("/version", withToken(
 			exchange -> answer(exchange, 202, "{\"version\":\"fake\",\"protocols\":[]}")
@@ -182,6 +194,15 @@ public final class FakeHedgehog {
 			}
 		}));
 		server.start();
+	}
+
+	/* Hedgehog answers over TLS, with a certificate of its own, and the client Janus runs as a bean asks it so. */
+	private static HttpServer tls(final int port) throws IOException, InterruptedException {
+		try {
+			return StubHedgehog.httpsServer(port);
+		} catch (GeneralSecurityException e) {
+			throw new IOException("The stand-in for Hedgehog could not make a certificate", e);
+		}
 	}
 
 	/* Like Hedgehog, it answers only a caller that presents the token it was started with, and none without one. */

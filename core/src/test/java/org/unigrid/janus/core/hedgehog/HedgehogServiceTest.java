@@ -366,7 +366,7 @@ public class HedgehogServiceTest {
 		assertEquals(Phase.FETCHING, service.state().phase());
 	}
 
-	private static HedgehogState await(final HedgehogService service, final HedgehogState wanted) {
+	static HedgehogState await(final HedgehogService service, final HedgehogState wanted) {
 		final Instant deadline = Instant.now().plusSeconds(30);
 
 		try {

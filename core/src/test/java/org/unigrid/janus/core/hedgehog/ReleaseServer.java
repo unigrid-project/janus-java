@@ -25,12 +25,14 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /** The release page of Hedgehog, serving whatever files a test puts on it. */
 final class ReleaseServer implements AutoCloseable {
 	private final HttpServer server;
 	private final Map<String, byte[]> files = new ConcurrentHashMap<>();
 	private volatile boolean withoutLength;
+	private volatile CountDownLatch held = new CountDownLatch(0);
 
 	ReleaseServer() throws IOException {
 		server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
@@ -54,8 +56,20 @@ final class ReleaseServer implements AutoCloseable {
 		return this;
 	}
 
+	/** Keeps every answer back until the latch is counted down, so a test can look at a download under way. */
+	ReleaseServer holdingBack(final CountDownLatch latch) {
+		held = latch;
+		return this;
+	}
+
 	private void handle(final HttpExchange exchange) throws IOException {
 		final byte[] contents = files.get(exchange.getRequestURI().getPath());
+
+		try {
+			held.await();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 
 		try (exchange; OutputStream out = exchange.getResponseBody()) {
 			if (contents == null) {

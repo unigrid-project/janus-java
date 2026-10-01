@@ -67,6 +67,11 @@ class StubHedgehog implements AutoCloseable {
 
 	/** A stand-in behind a self-signed certificate made for it alone, the way Hedgehog makes one each start. */
 	static StubHedgehog secure() throws IOException, GeneralSecurityException, InterruptedException {
+		return new StubHedgehog(httpsServer(0), "https");
+	}
+
+	/** The server behind such a certificate, not yet answering anything. */
+	static HttpsServer httpsServer(final int port) throws IOException, GeneralSecurityException, InterruptedException {
 		final Path store = Files.createTempFile("hedgehog", ".p12");
 
 		Files.delete(store);
@@ -92,12 +97,13 @@ class StubHedgehog implements AutoCloseable {
 
 		final KeyManagerFactory factory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 		final SSLContext context = SSLContext.getInstance("TLS");
-		final HttpsServer server = HttpsServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+		final InetSocketAddress address = new InetSocketAddress(InetAddress.getLoopbackAddress(), port);
+		final HttpsServer server = HttpsServer.create(address, 0);
 
 		factory.init(keys, THROWAWAY.toCharArray());
 		context.init(factory.getKeyManagers(), null, null);
 		server.setHttpsConfigurator(new HttpsConfigurator(context));
-		return new StubHedgehog(server, "https");
+		return server;
 	}
 
 	void answer(final String rawPath, final int status, final String body) {
