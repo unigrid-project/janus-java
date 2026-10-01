@@ -52,6 +52,7 @@ class StubHedgehog implements AutoCloseable {
 	private final Map<String, Answer> answers = new ConcurrentHashMap<>();
 	private final List<URI> requests = new CopyOnWriteArrayList<>();
 	private final List<String> authorizations = new CopyOnWriteArrayList<>();
+	private final List<String> methods = new CopyOnWriteArrayList<>();
 
 	StubHedgehog() throws IOException {
 		this(HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0), "http");
@@ -115,7 +116,11 @@ class StubHedgehog implements AutoCloseable {
 
 	/* Sends the start of an answer and then goes quiet, the way a Hedgehog that hangs mid-answer would. */
 	void stallMidAnswer(final String rawPath, final Duration delay) {
-		answers.put(rawPath, new Answer(200, "{\"tipHash\":", delay, Map.of(), true));
+		stallMidAnswer(rawPath, "{\"tipHash\":", delay);
+	}
+
+	void stallMidAnswer(final String rawPath, final String start, final Duration delay) {
+		answers.put(rawPath, new Answer(200, start, delay, Map.of(), true));
 	}
 
 	List<URI> requests() {
@@ -127,12 +132,18 @@ class StubHedgehog implements AutoCloseable {
 		return authorizations;
 	}
 
+	/** The HTTP method of each request, in the order they came. */
+	List<String> methods() {
+		return methods;
+	}
+
 	URI uri() {
 		return URI.create(scheme + "://127.0.0.1:" + server.getAddress().getPort());
 	}
 
 	private void handle(final HttpExchange exchange) throws IOException {
 		requests.add(exchange.getRequestURI());
+		methods.add(exchange.getRequestMethod());
 		authorizations.add(exchange.getRequestHeaders().getFirst("Authorization"));
 
 		final URI asked = exchange.getRequestURI();
