@@ -334,6 +334,7 @@
 								<configuration>
 									<type>DEB</type>
 									<appImage>${dist}/Unigrid</appImage>
+									<resourceDir>${project.basedir}/src/main/packaging/linux</resourceDir>
 									<linuxPackageName>unigrid</linuxPackageName>
 									<linuxAppCategory>Utilities</linuxAppCategory>
 									<linuxMenuGroup>Utilities</linuxMenuGroup>

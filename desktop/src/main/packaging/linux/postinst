@@ -1,0 +1,24 @@
+#!/bin/sh
+# postinst script for APPLICATION_PACKAGE
+
+set -e
+
+case "$1" in
+    configure)
+        # A system without a desktop menu, such as a server or a container, has nowhere to put the entry,
+        # which is no reason to refuse the install.
+        (
+DESKTOP_COMMANDS_INSTALL
+        ) || echo "APPLICATION_PACKAGE is installed without a menu entry: this system has no desktop menu." >&2
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+exit 0
