@@ -21,8 +21,16 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclEntryPermission;
+import java.nio.file.attribute.AclEntryType;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
@@ -62,6 +70,21 @@ public class HedgehogLocationTest {
 
 		file.toFile().setExecutable(true);
 		return file;
+	}
+
+	/* Where a file system keeps no permissions, as on Windows, a file may be run unless its access list says not. */
+	private static void withoutRunning(final Path file) throws IOException {
+		if (file.getFileSystem().supportedFileAttributeViews().contains("posix")) {
+			Files.setPosixFilePermissions(file, PosixFilePermissions.fromString("rw-------"));
+			return;
+		}
+
+		final Set<AclEntryPermission> allButRunning = EnumSet.allOf(AclEntryPermission.class);
+
+		allButRunning.remove(AclEntryPermission.EXECUTE);
+		Files.getFileAttributeView(file, AclFileAttributeView.class).setAcl(List.of(AclEntry.newBuilder()
+			.setType(AclEntryType.ALLOW).setPrincipal(Files.getOwner(file)).setPermissions(allButRunning).build()
+		));
 	}
 
 	private HedgehogRelease release() throws IOException {
@@ -105,7 +128,7 @@ public class HedgehogLocationTest {
 
 	@Example
 	public void shouldPassOverAFileThatCannotBeRun() throws IOException {
-		Files.write(installation.resolve("hedgehog"), RELEASE);
+		withoutRunning(Files.write(installation.resolve("hedgehog"), RELEASE));
 		assertEquals(Optional.empty(), location(null).find());
 	}
 
