@@ -24,6 +24,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URI;
+import java.time.Duration;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import me.friwi.jcefmaven.CefAppBuilder;
@@ -41,6 +42,7 @@ public class BrowserWindow {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BrowserWindow.class);
 	private static final Dimension SIZE = new Dimension(1240, 800);
+	private static final Duration SHUTDOWN_GRACE = Duration.ofSeconds(10);
 	private static final String TITLE = "Unigrid";
 
 	private final JFrame frame = new JFrame(TITLE);
@@ -144,7 +146,8 @@ public class BrowserWindow {
 	   unless the browser has been told that closing is allowed, so without that permission
 	   the browser, and with it the process, lives on. The frame is hidden rather than
 	   disposed because the shutdown completes on the event thread, which AWT retires once
-	   the last window is gone. */
+	   the last window is gone. On macOS the engine now and then never finishes shutting
+	   down, which would leave Janus running with no window, so it gets a deadline. */
 	private WindowAdapter shutDownOnClose(final CefBrowser browser) {
 		return new WindowAdapter() {
 			@Override
@@ -153,6 +156,10 @@ public class BrowserWindow {
 				frame.setVisible(false);
 				browser.setCloseAllowed();
 				CefApp.getInstance().dispose();
+				ShutdownDeadline.start(SHUTDOWN_GRACE, () -> {
+					LOG.warn("The browser engine did not shut down in time; ending anyway");
+					System.exit(0);
+				});
 			}
 		};
 	}
