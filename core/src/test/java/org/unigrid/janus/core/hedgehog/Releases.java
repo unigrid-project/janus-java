@@ -20,7 +20,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 
-/** The Hedgehog releases the tests pin, always for Linux so that they do not depend on the computer running them. */
+/**
+ * The Hedgehog releases the tests pin, for Linux so that they do not depend on the computer running them, unless
+ * a test has to run what it downloads.
+ */
 final class Releases {
 	static final String VERSION = "0.0.8";
 
@@ -34,8 +37,18 @@ final class Releases {
 
 	/** A release whose executable is exactly the bytes given. */
 	static HedgehogRelease pinning(final Path home, final byte[] executable) throws IOException {
-		final Optional<String> checksum = Optional.of(Checksums.of(executable));
+		return pinning(home, executable, Platform.LINUX);
+	}
 
-		return new HedgehogRelease(VERSION, Optional.of(Platform.LINUX), checksum, home);
+	/** Like {@link #pinning(Path, byte[])}, for a platform of choice. */
+	static HedgehogRelease pinning(final Path home, final byte[] executable, final Platform platform)
+		throws IOException {
+
+		return new HedgehogRelease(VERSION, Optional.of(platform), Optional.of(Checksums.of(executable)), home);
+	}
+
+	/** The platform of the computer running the tests, for the ones that have to run what they download. */
+	static Platform here() {
+		return Platform.of(System.getProperty("os.name"), System.getProperty("os.arch")).orElseThrow();
 	}
 }

@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Locale;
 
 /**
  * Plays Hedgehog's command line for the service tests: {@code daemon --restport=N} serves the REST calls
@@ -41,8 +42,26 @@ public final class FakeHedgehog {
 	static final String STARTS = "starts";
 	static final String DAEMON_PID = "daemon-pid";
 	static final String STOP_REFUSED = "stop-refused";
+	private static final boolean WINDOWS = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win");
 
 	private static final String PORT = "--restport=";
+	private static final String PROGRAM = """
+		using System.Diagnostics;
+
+		class Hedgehog {
+			static int Main(string[] args) {
+				var start = new ProcessStartInfo(@"%s", @"-cp ""%s"" %s " + string.Join(" ", args));
+
+				start.UseShellExecute = false;
+				start.EnvironmentVariables["FAKE_HEDGEHOG_HOME"] = @"%s";
+
+				using (var java = Process.Start(start)) {
+					java.WaitForExit();
+					return java.ExitCode;
+				}
+			}
+		}
+		""";
 	private static final String TOKEN_VARIABLE = "HEDGEHOG_REST_TOKEN";
 
 	private FakeHedgehog() {
@@ -65,23 +84,59 @@ public final class FakeHedgehog {
 	}
 
 	private static Path install(final Path home, final String exec) throws IOException {
-		final Path script = home.resolve("hedgehog");
+		final Path launcher = Files.write(home.resolve(WINDOWS ? "hedgehog.exe" : "hedgehog"),
+			executable(home, exec)
+		);
 
-		Files.writeString(script, script(home, exec));
-		script.toFile().setExecutable(true);
-		return script;
+		launcher.toFile().setExecutable(true);
+		return launcher;
 	}
 
 	/** What the launcher is made of, for a test that has the service download it instead. */
-	static String script(final Path home) {
-		return script(home, "exec ");
+	static byte[] executable(final Path home) throws IOException {
+		return executable(home, "exec ");
 	}
 
-	private static String script(final Path home, final String exec) {
-		final Path java = Path.of(System.getProperty("java.home"), "bin", "java");
+	/* Windows runs no shell scripts, so there the launcher is a small program that starts this class as a child
+	   of its own, which also makes every launcher there one that runs the real Hedgehog rather than becoming it. */
+	private static byte[] executable(final Path home, final String exec) throws IOException {
+		final String classpath = System.getProperty("java.class.path");
 
-		return "#!/bin/sh\nFAKE_HEDGEHOG_HOME='" + home + "' " + exec + "'" + java + "' -cp '"
-			+ System.getProperty("java.class.path") + "' " + FakeHedgehog.class.getName() + " \"$@\"\n";
+		if (WINDOWS) {
+			final Path java = Path.of(System.getProperty("java.home"), "bin", "java.exe");
+
+			return compiled(PROGRAM.formatted(java, classpath, FakeHedgehog.class.getName(), home));
+		}
+
+		return ("#!/bin/sh\nFAKE_HEDGEHOG_HOME='" + home + "' " + exec + "'"
+			+ Path.of(System.getProperty("java.home"), "bin", "java") + "' -cp '" + classpath + "' "
+			+ FakeHedgehog.class.getName() + " \"$@\"\n").getBytes(StandardCharsets.UTF_8);
+	}
+
+	/* Compiled with the C# compiler that comes with every Windows. */
+	private static byte[] compiled(final String source) throws IOException {
+		final Path code = Files.writeString(Files.createTempFile("hedgehog", ".cs"), source);
+		final Path program = code.resolveSibling(code.getFileName() + ".exe");
+		final Path compiler = Path.of(System.getenv("WINDIR"), "Microsoft.NET", "Framework64", "v4.0.30319",
+			"csc.exe");
+
+		try {
+			final Process compiling = new ProcessBuilder(compiler.toString(), "/nologo", "/out:" + program,
+				code.toString()).redirectErrorStream(true).start();
+			final String said = new String(compiling.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+			if (compiling.waitFor() != 0) {
+				throw new IOException("The stand-in for Hedgehog could not be compiled:\n" + said);
+			}
+
+			return Files.readAllBytes(program);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IOException("Interrupted while compiling the stand-in for Hedgehog", e);
+		} finally {
+			Files.deleteIfExists(code);
+			Files.deleteIfExists(program);
+		}
 	}
 
 	static String snapshot(final String signature) {

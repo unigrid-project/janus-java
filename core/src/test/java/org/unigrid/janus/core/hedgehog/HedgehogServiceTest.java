@@ -19,7 +19,6 @@ package org.unigrid.janus.core.hedgehog;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -42,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HedgehogServiceTest {
 	private static final Set<Phase> SETTLED = Set.of(Phase.READY, Phase.FAILED);
-	private static final String ASSET = "hedgehog-0.0.8-x86_64-linux-gnu.bin";
+	private static final String ASSET = Releases.here().asset(Releases.VERSION);
 	private static final String NO_CHECKSUM = "This Janus knows no checksum of Hedgehog 0.0.8 for this platform";
 
 	private Path home;
@@ -386,19 +385,21 @@ public class HedgehogServiceTest {
 	private HedgehogService downloading(final ReleaseServer page, final SigningKey trusted, final byte[] executable)
 		throws IOException {
 
-		final HedgehogRelease release = Releases.pinning(home, executable);
+		final HedgehogRelease release = Releases.pinning(home, executable, Releases.here());
 		final HedgehogInstaller installer = new HedgehogInstaller(release, page.uri(),
 			(file, signature) -> ReleaseKey.verify(file, signature, trusted.ring())
 		);
 
-		return launching(new HedgehogLocation(null, null, "", "Linux", release), installer, Duration.ofSeconds(20));
+		return launching(new HedgehogLocation(null, null, "", System.getProperty("os.name"), release), installer,
+			Duration.ofSeconds(20)
+		);
 	}
 
 	@Example
 	public void shouldDownloadHedgehogWhenNoneIsTheReleaseAndThenStartIt() throws IOException {
 		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
 
-		final byte[] executable = FakeHedgehog.script(home).getBytes(StandardCharsets.UTF_8);
+		final byte[] executable = FakeHedgehog.executable(home);
 		final SigningKey key = new SigningKey();
 
 		try (ReleaseServer page = new ReleaseServer().serve(ASSET, executable)
@@ -417,8 +418,9 @@ public class HedgehogServiceTest {
 	public void shouldNotDownloadHedgehogWhenTheOneOnTheComputerIsTheRelease() throws IOException {
 		Files.writeString(home.resolve(FakeHedgehog.LEDGER), "SIGNED");
 
-		final byte[] executable = FakeHedgehog.script(home).getBytes(StandardCharsets.UTF_8);
-		final Path installed = Files.createDirectories(home.resolve(".janus/hedgehog/0.0.8")).resolve("hedgehog");
+		final byte[] executable = FakeHedgehog.executable(home);
+		final Path installed = Files.createDirectories(home.resolve(".janus/hedgehog/0.0.8"))
+			.resolve(Releases.here().executable());
 
 		Files.write(installed, executable);
 		installed.toFile().setExecutable(true);
@@ -434,7 +436,7 @@ public class HedgehogServiceTest {
 
 	@Example
 	public void shouldFailWhenTheDownloadedHedgehogIsNotSignedByTheFoundation() throws IOException {
-		final byte[] executable = FakeHedgehog.script(home).getBytes(StandardCharsets.UTF_8);
+		final byte[] executable = FakeHedgehog.executable(home);
 		final SigningKey key = new SigningKey();
 
 		try (ReleaseServer page = new ReleaseServer().serve(ASSET, executable)
