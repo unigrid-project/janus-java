@@ -35,6 +35,8 @@ import org.cef.browser.CefBrowser;
 import org.unigrid.janus.web.WindowControl;
 
 public class BrowserWindow {
+	public static final String DEBUGGING_PORT = "janus.remote-debugging-port";
+
 	private static final Dimension SIZE = new Dimension(1240, 800);
 	private static final String TITLE = "Unigrid";
 
@@ -93,6 +95,13 @@ public class BrowserWindow {
 		builder.setSkipInstallation(location.isBundled());
 		builder.setProgressHandler(new ConsoleProgressHandler());
 		builder.getCefSettings().windowless_rendering_enabled = false;
+
+		/* Lets the installer tests work the installed wallet's window; nothing listens unless a port is named. */
+		final Integer debuggingPort = Integer.getInteger(DEBUGGING_PORT);
+
+		if (debuggingPort != null) {
+			builder.getCefSettings().remote_debugging_port = debuggingPort;
+		}
 
 		/* Chromium keeps running after the last window closes, so the process has to be
 		   torn down explicitly or the wallet lingers with no way to reach it. */
