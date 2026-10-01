@@ -34,9 +34,10 @@ import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
-import org.jsoup.nodes.Element;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.unigrid.janus.ui.FlowSupport.tap;
+import static org.unigrid.janus.ui.FlowSupport.words;
 
 public class PhraseFlowTest {
 	private static final String ABANDON = "abandon abandon abandon abandon abandon abandon abandon abandon abandon "
@@ -207,16 +208,4 @@ public class PhraseFlowTest {
 		assertEquals("Bring your wallet", screen.click("[hx-post=/action/restore-back]").find(CARD + " h1").text());
 	}
 
-	private static List<String> words(final Screen screen) {
-		return screen.document().select(".phrase__word > span:not(.phrase__n)").eachText();
-	}
-
-	/* A word the phrase holds twice is two tiles, and either may be tapped first. */
-	private static void tap(final Screen screen, final String word) throws Exception {
-		final Element tile = screen.document().select("button.tile:not([disabled])").stream()
-			.filter(candidate -> candidate.text().equals(word)).findFirst()
-			.orElseThrow(() -> new AssertionError("No tile left for " + word));
-
-		screen.click(tile.cssSelector());
-	}
 }

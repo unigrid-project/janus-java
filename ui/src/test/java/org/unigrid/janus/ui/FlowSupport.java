@@ -20,7 +20,9 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Map;
+import org.jsoup.nodes.Element;
 import org.unigrid.janus.core.hedgehog.AddressTransaction;
 import org.unigrid.janus.core.hedgehog.EntryKind;
 
@@ -47,6 +49,24 @@ final class FlowSupport {
 		return new AddressTransaction(txid, day.atStartOfDay(ZoneOffset.UTC).toInstant(), 1,
 			new BigDecimal(amount), kind
 		);
+	}
+
+	/** The twelve words of the recovery phrase on a card that shows it, in the order they are written down. */
+	static List<String> words(final Screen screen) {
+		return words(screen.document());
+	}
+
+	static List<String> words(final Element card) {
+		return card.select(".phrase__word > span:not(.phrase__n)").eachText();
+	}
+
+	/* A word the phrase holds twice is two tiles, and either may be tapped first. */
+	static void tap(final Screen screen, final String word) throws Exception {
+		final Element tile = screen.document().select("button.tile:not([disabled])").stream()
+			.filter(candidate -> candidate.text().equals(word)).findFirst()
+			.orElseThrow(() -> new AssertionError("No tile left for " + word));
+
+		screen.click(tile.cssSelector());
 	}
 
 	/* The window asks again every two seconds; here it asks as often as it takes. */
