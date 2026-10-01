@@ -16,11 +16,9 @@
 
 package org.unigrid.janus.ui;
 
-import java.math.BigDecimal;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
@@ -38,9 +36,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.unigrid.janus.ui.FlowSupport.entry;
+import static org.unigrid.janus.ui.FlowSupport.settle;
 
 public class WalletFlowTest {
-	private static final String APP = "#app";
 	private static final String ACTIVITY = "button.app__tab[hx-post=/action/activity]";
 
 	private ControlCenterRig rig;
@@ -53,24 +52,6 @@ public class WalletFlowTest {
 	@AfterTry
 	public void stop() throws Exception {
 		rig.close();
-	}
-
-	private static AddressTransaction entry(final String txid, final int minutes, final String amount,
-		final EntryKind kind) {
-
-		return new AddressTransaction(txid, Instant.parse("2019-01-01T00:00:00Z").plusSeconds(minutes * 60L),
-			minutes, new BigDecimal(amount), kind
-		);
-	}
-
-	/* The window asks again every two seconds; here it asks as often as it takes. */
-	private static Screen settle(final Screen screen) throws Exception {
-		for (int i = 0; i < 200 && screen.find(APP).hasAttr("hx-trigger"); i++) {
-			Thread.sleep(25);
-			screen.trigger(APP, Map.of());
-		}
-
-		return screen;
 	}
 
 	private Screen continueWithTheWalletLeftBehind() throws Exception {

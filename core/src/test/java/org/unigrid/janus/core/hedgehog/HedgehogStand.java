@@ -106,6 +106,13 @@ public final class HedgehogStand implements AutoCloseable {
 		return List.copyOf(stub.requests());
 	}
 
+	/** Holds no ledger yet but says it is downloading one, that far along. */
+	public HedgehogStand fetching(final int percent) {
+		stub.answer("/bootstrap", 503, "");
+		stub.answer("/status", 200, "{\"status\":\"downloading\",\"progress\":" + percent + "}");
+		return this;
+	}
+
 	/** Stops answering as Hedgehog, the way one that died would. */
 	public HedgehogStand gone() {
 		stub.answer("/version", 404, "");

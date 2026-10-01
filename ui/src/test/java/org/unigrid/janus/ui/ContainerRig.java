@@ -16,85 +16,63 @@
 
 package org.unigrid.janus.ui;
 
+import jakarta.enterprise.inject.se.SeContainer;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.SecureRandom;
-import java.time.Clock;
-import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 import org.unigrid.janus.core.ChosenWallet;
 import org.unigrid.janus.core.DataDirectory;
-import org.unigrid.janus.core.Release;
-import org.unigrid.janus.core.WalletBackup;
-import org.unigrid.janus.core.WalletChoice;
-import org.unigrid.janus.core.evm.EvmWalletStore;
-import org.unigrid.janus.core.evm.SeedVault;
-import org.unigrid.janus.core.hedgehog.HedgehogService;
 import org.unigrid.janus.core.hedgehog.HedgehogStand;
-import org.unigrid.janus.core.wallet.WalletLedger;
-import org.unigrid.janus.ui.controller.AboutController;
-import org.unigrid.janus.ui.controller.ImportController;
-import org.unigrid.janus.ui.controller.PhraseController;
 import org.unigrid.janus.ui.controller.WalletController;
-import org.unigrid.janus.ui.controller.WelcomeController;
 import org.unigrid.janus.ui.view.IndexView;
 import org.unigrid.janus.web.RecordingWindow;
 import org.unigrid.janus.web.Routes;
 import org.unigrid.janus.web.SessionToken;
 import org.unigrid.janus.web.Templates;
 import org.unigrid.janus.web.UiServer;
+import org.unigrid.janus.web.action.ActionExtension;
 import org.unigrid.janus.web.action.Actions;
 
 /**
- * The Control Center served the way the shell serves it, but kept away from the person running the
- * tests: its files live in a folder of its own, its window only takes notes and its Hedgehog is a
- * stand-in. The controllers are handed their collaborators directly, because the container would look
- * for wallets in the real home.
+ * The Control Center put together the way the shell puts it together: the container builds every controller
+ * and finds every action, and only what reaches outside, Hedgehog and the window, is a stand-in. The home
+ * folder is a temporary one for as long as the rig lives, so everything the container keeps there is the
+ * rig's own.
  */
-public class ControlCenterRig implements AutoCloseable {
-	public static final String TITLE = "Unigrid Control Center";
+public class ContainerRig implements AutoCloseable {
+	private static final String HOME = "user.home";
 
-	/* Sealing at the standard scrypt cost takes a second and 256 MB, which no test needs to pay. */
-	private static final int CHEAP_SEAL = 16;
-
+	private final String realHome = System.getProperty(HOME);
 	private final SessionToken token = SessionToken.random();
 	private final RecordingWindow window = new RecordingWindow();
 	private final HedgehogStand stand = HedgehogStand.start().signed();
-	private final HedgehogService hedgehog = stand.service();
-	private final WalletLedger ledger = new WalletLedger(stand.client(), ZoneOffset.UTC);
 	private final Path home;
 	private final Path data;
-	private final Path backups;
-	private final ChosenWallet chosen;
 	private final List<String> addresses;
+	private final SeContainer container;
 	private final UiServer server;
 	private final URI base;
 
-	public ControlCenterRig() throws Exception {
-		home = Files.createTempDirectory("janus-rig");
+	public ContainerRig() throws Exception {
+		home = Files.createTempDirectory("janus-container");
 		data = Files.createDirectory(home.resolve("data"));
-		backups = home.resolve("backups");
-		chosen = new ChosenWallet(home.resolve("chosen"));
-
-		final WalletChoice choice = new WalletChoice(new WalletBackup(backups, Clock.systemUTC()));
-		final ImportController importer = new ImportController(new DataDirectory(data), choice);
-		final WalletController wallet = new WalletController(chosen, choice, hedgehog, ledger, importer,
-			ZoneOffset.UTC
-		);
-		final PhraseController phrase = new PhraseController(new EvmWalletStore(home.resolve("wallets")),
-			new SeedVault(new SecureRandom(), CHEAP_SEAL), wallet, importer, new SecureRandom()
-		);
-		final Actions actions = Actions.of(new WelcomeController(), new AboutController(new Release()), importer,
-			wallet, phrase
-		);
-
 		addresses = WalletFixture.addresses();
+
+		System.setProperty(HOME, home.toString());
+		RigBeans.provide(stand.service(), new DataDirectory(data));
+		container = SeContainerInitializer.newInstance().addBeanClasses(RigBeans.class)
+			.addExtensions(new RigBeans.Replacing()).initialize();
+
+		final Actions actions = Actions.discovered(container.getBeanManager().getExtension(ActionExtension.class));
+		final WalletController wallet = container.select(WalletController.class).get();
+
 		server = new UiServer(Routes.create(new Templates(false), token, window, actions,
-			() -> new IndexView(TITLE, wallet.start())
+			() -> new IndexView(ControlCenterRig.TITLE, wallet.start())
 		));
 		base = server.start();
 	}
@@ -103,9 +81,12 @@ public class ControlCenterRig implements AutoCloseable {
 		return base;
 	}
 
-	/** Where the shell first sends its window, carrying the token that is swapped for a cookie. */
 	public URI entrance() {
 		return base.resolve("/?" + SessionToken.PARAMETER + "=" + token.value());
+	}
+
+	public Screen open() throws Exception {
+		return Screen.open(base, entrance());
 	}
 
 	public RecordingWindow window() {
@@ -116,11 +97,14 @@ public class ControlCenterRig implements AutoCloseable {
 		return stand;
 	}
 
-	public ChosenWallet chosen() {
-		return chosen;
+	public SeContainer container() {
+		return container;
 	}
 
-	/** The addresses the legacy wallet the rig hands out holds keys for. */
+	public ChosenWallet chosen() {
+		return container.select(ChosenWallet.class).get();
+	}
+
 	public List<String> addresses() {
 		return addresses;
 	}
@@ -129,31 +113,34 @@ public class ControlCenterRig implements AutoCloseable {
 		return data;
 	}
 
-	public Path backups() {
-		return backups;
-	}
-
-	/** Where the EVM wallets made or restored in the rig are kept. */
+	/** Where the container keeps the EVM wallets made or restored in it. */
 	public Path wallets() {
-		return home.resolve("wallets");
+		return home.resolve(".janus").resolve("wallets");
 	}
 
-	/** A wallet left behind in the data folder, where the legacy daemon kept it. */
+	public Path home() {
+		return home;
+	}
+
+	/** A wallet left behind in the folder the legacy daemon used, where the import card finds it. */
 	public Path leaveWalletBehind() throws IOException {
 		return WalletFixture.copyTo(data.resolve("wallet.dat"));
 	}
 
-	/** A wallet somewhere the person would have to point at themselves. */
+	/** A wallet somewhere the person has to point at themselves. */
 	public Path keepWalletElsewhere() throws IOException {
 		return WalletFixture.copyTo(home.resolve("elsewhere.dat"));
 	}
 
 	@Override
 	public void close() throws Exception {
-		server.stop();
-		ledger.stop();
-		hedgehog.stop();
-		stand.close();
+		try {
+			server.stop();
+			container.close();
+			stand.close();
+		} finally {
+			System.setProperty(HOME, realHome);
+		}
 
 		try (Stream<Path> paths = Files.walk(home)) {
 			for (final Path path : paths.sorted(Comparator.reverseOrder()).toList()) {

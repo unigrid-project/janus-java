@@ -18,6 +18,7 @@ package org.unigrid.janus.ui;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -60,9 +61,13 @@ public final class Screen {
 
 	/** The page the shell opens, entered with the token as the window enters it. */
 	public static Screen open(final ControlCenterRig rig) throws Exception {
-		final Client client = new Client(rig.base());
+		return open(rig.base(), rig.entrance());
+	}
 
-		return new Screen(client, client.get(rig.entrance().toString()));
+	public static Screen open(final URI base, final URI entrance) throws Exception {
+		final Client client = new Client(base);
+
+		return new Screen(client, client.get(entrance.toString()));
 	}
 
 	public Client client() {
