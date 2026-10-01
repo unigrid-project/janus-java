@@ -23,8 +23,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,8 +31,6 @@ import java.time.format.DateTimeFormatter;
 @ApplicationScoped
 public class WalletBackup {
 	private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-	private static final String OWNER_ONLY_FOLDER = "rwx------";
-	private static final String OWNER_ONLY_FILE = "rw-------";
 
 	private final Path folder;
 	private final Clock clock;
@@ -51,7 +47,7 @@ public class WalletBackup {
 	/** Copies the wallet under a name of its own and answers where the copy is. */
 	public Path backup(final Path wallet) {
 		try {
-			Files.createDirectories(folder, ownerOnly(OWNER_ONLY_FOLDER));
+			OwnerOnly.createDirectories(folder);
 			return copy(wallet, claimName());
 		} catch (IOException e) {
 			throw new UncheckedIOException("The wallet at " + wallet + " could not be backed up", e);
@@ -67,9 +63,7 @@ public class WalletBackup {
 			final String suffix = attempt == 1 ? "" : "-" + attempt;
 
 			try {
-				return Files.createFile(folder.resolve("wallet-" + stamp + suffix + ".dat"),
-					ownerOnly(OWNER_ONLY_FILE)
-				);
+				return OwnerOnly.createFile(folder.resolve("wallet-" + stamp + suffix + ".dat"));
 			} catch (FileAlreadyExistsException e) {
 				continue;
 			}
@@ -84,16 +78,5 @@ public class WalletBackup {
 			Files.delete(target);
 			throw e;
 		}
-	}
-
-	/* A wallet holds private keys, so where permissions can be set, nobody else may read them. */
-	private FileAttribute<?>[] ownerOnly(final String permissions) {
-		if (!folder.getFileSystem().supportedFileAttributeViews().contains("posix")) {
-			return new FileAttribute<?>[0];
-		}
-
-		return new FileAttribute<?>[] {PosixFilePermissions.asFileAttribute(
-			PosixFilePermissions.fromString(permissions)
-		)};
 	}
 }

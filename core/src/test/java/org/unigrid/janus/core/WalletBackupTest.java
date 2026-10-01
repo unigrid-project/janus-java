@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -33,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.unigrid.janus.core.OwnerOnlyAssertions.assertOwnerOnly;
 
 public class WalletBackupTest {
 	private static final Clock NOON = Clock.fixed(Instant.parse("2026-09-22T12:30:05Z"), ZoneOffset.UTC);
@@ -85,10 +85,8 @@ public class WalletBackupTest {
 	public void shouldKeepTheCopiesFromOtherUsers() throws IOException {
 		final Path copy = backup.backup(wallet);
 
-		if (Files.getFileStore(root).supportsFileAttributeView("posix")) {
-			assertEquals("rwx------", PosixFilePermissions.toString(Files.getPosixFilePermissions(folder)));
-			assertEquals("rw-------", PosixFilePermissions.toString(Files.getPosixFilePermissions(copy)));
-		}
+		assertOwnerOnly(folder);
+		assertOwnerOnly(copy);
 	}
 
 	@Example

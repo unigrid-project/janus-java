@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.stream.Stream;
@@ -31,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.unigrid.janus.core.OwnerOnlyAssertions.assertOwnerOnly;
 
 public class EvmWalletStoreTest {
 	private Path home;
@@ -72,8 +72,8 @@ public class EvmWalletStoreTest {
 	public void shouldLetOnlyItsOwnerNear() throws IOException {
 		final Path saved = store.save(EvmWallet.create(EvmWalletTest.PHRASE, "pw", EvmWalletTest.VAULT));
 
-		assertEquals("rwx------", PosixFilePermissions.toString(Files.getPosixFilePermissions(folder)));
-		assertEquals("rw-------", PosixFilePermissions.toString(Files.getPosixFilePermissions(saved)));
+		assertOwnerOnly(folder);
+		assertOwnerOnly(saved);
 	}
 
 	@Example

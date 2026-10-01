@@ -26,16 +26,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermissions;
+import org.unigrid.janus.core.OwnerOnly;
 
 /** Where Janus keeps the EVM wallets it made or restored, one file each, named after its first address. */
 @ApplicationScoped
 public class EvmWalletStore {
 	public static final String EXTENSION = ".json";
 
-	private static final String OWNER_ONLY_FOLDER = "rwx------";
-	private static final String OWNER_ONLY_FILE = "rw-------";
 	private static final Jsonb JSON = JsonbBuilder.create();
 
 	private final Path folder;
@@ -57,9 +54,9 @@ public class EvmWalletStore {
 		final Path target = folder.resolve("evm-" + wallet.addresses().get(0) + EXTENSION);
 
 		try {
-			Files.createDirectories(folder, ownerOnly(OWNER_ONLY_FOLDER));
+			OwnerOnly.createDirectories(folder);
 
-			final Path written = Files.createTempFile(folder, "evm-", ".part", ownerOnly(OWNER_ONLY_FILE));
+			final Path written = OwnerOnly.createTempFile(folder, "evm-", ".part");
 
 			Files.writeString(written, JSON.toJson(wallet), StandardCharsets.UTF_8);
 			return Files.move(written, target, StandardCopyOption.REPLACE_EXISTING,
@@ -82,15 +79,5 @@ public class EvmWalletStore {
 
 	public static boolean holds(final Path file) {
 		return file.getFileName().toString().endsWith(EXTENSION);
-	}
-
-	private FileAttribute<?>[] ownerOnly(final String permissions) {
-		if (!folder.getFileSystem().supportedFileAttributeViews().contains("posix")) {
-			return new FileAttribute<?>[0];
-		}
-
-		return new FileAttribute<?>[] {PosixFilePermissions.asFileAttribute(
-			PosixFilePermissions.fromString(permissions)
-		)};
 	}
 }

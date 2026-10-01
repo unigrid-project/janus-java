@@ -23,8 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Optional;
 
 /**
@@ -33,8 +31,6 @@ import java.util.Optional;
  */
 @ApplicationScoped
 public class ChosenWallet {
-	private static final String OWNER_ONLY = "rw-------";
-
 	private final Path file;
 
 	public ChosenWallet() {
@@ -49,7 +45,7 @@ public class ChosenWallet {
 		try {
 			Files.createDirectories(file.getParent());
 			Files.deleteIfExists(file);
-			Files.writeString(Files.createFile(file, ownerOnly()), backup.toAbsolutePath().toString(),
+			Files.writeString(OwnerOnly.createFile(file), backup.toAbsolutePath().toString(),
 				StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING
 			);
 		} catch (IOException e) {
@@ -83,15 +79,5 @@ public class ChosenWallet {
 		} catch (IOException e) {
 			throw new UncheckedIOException("The chosen wallet could not be forgotten in " + file, e);
 		}
-	}
-
-	private FileAttribute<?>[] ownerOnly() {
-		if (!file.getFileSystem().supportedFileAttributeViews().contains("posix")) {
-			return new FileAttribute<?>[0];
-		}
-
-		return new FileAttribute<?>[] {PosixFilePermissions.asFileAttribute(
-			PosixFilePermissions.fromString(OWNER_ONLY)
-		)};
 	}
 }

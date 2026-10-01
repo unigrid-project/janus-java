@@ -19,7 +19,6 @@ package org.unigrid.janus.core;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -28,6 +27,7 @@ import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.unigrid.janus.core.OwnerOnlyAssertions.assertOwnerOnly;
 
 public class ChosenWalletTest {
 	private Path home;
@@ -66,7 +66,7 @@ public class ChosenWalletTest {
 	@Example
 	public void shouldKeepWhatItRemembersToItsOwner() throws IOException {
 		chosen.remember(backup);
-		assertEquals("rw-------", PosixFilePermissions.toString(Files.getPosixFilePermissions(file)));
+		assertOwnerOnly(file);
 	}
 
 	@Example

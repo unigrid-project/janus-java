@@ -66,6 +66,10 @@
 			<artifactId>jqwik</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.google.jimfs</groupId>
+			<artifactId>jimfs</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.tngtech.archunit</groupId>
 			<artifactId>archunit</artifactId>
 		</dependency>
