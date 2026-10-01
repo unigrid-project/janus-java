@@ -61,12 +61,14 @@ public class WindowHandlerTest extends ServedTest {
 
 	@Example
 	public void shouldAnswerWithTheFileTheHostChose() throws Exception {
-		window.picking(Path.of("/mnt/backup/wallet.dat"));
+		final Path wallet = Path.of("/mnt/backup/wallet.dat");
+
+		window.picking(wallet);
 
 		final HttpResponse<String> response = admitted().post("/window/choose-file?title=Pick+a+wallet");
 
 		assertEquals(200, response.statusCode());
-		assertEquals("/mnt/backup/wallet.dat", response.body());
+		assertEquals(wallet.toString(), response.body());
 		assertEquals(List.of("choose-file:Pick a wallet"), window.commands());
 	}
 
@@ -93,13 +95,15 @@ public class WindowHandlerTest extends ServedTest {
 
 	@Example
 	public void shouldAnswerWithWhereTheHostWillSave() throws Exception {
-		window.picking(Path.of("/home/ann/history.csv"));
+		final Path history = Path.of("/home/ann/history.csv");
+
+		window.picking(history);
 
 		final HttpResponse<String> response = admitted()
 			.post("/window/save-file?title=Save+the+history&name=history.csv");
 
 		assertEquals(200, response.statusCode());
-		assertEquals("/home/ann/history.csv", response.body());
+		assertEquals(history.toString(), response.body());
 		assertEquals(List.of("save-file:Save the history:history.csv"), window.commands());
 	}
 

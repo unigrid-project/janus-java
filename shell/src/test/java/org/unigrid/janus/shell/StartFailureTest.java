@@ -25,10 +25,11 @@ public class StartFailureTest {
 
 	@Test
 	public void shouldNameTheFolderTheEngineWasLoadedFrom() {
-		final String message = StartFailure.message(new CefLocation("/opt/unigrid/lib/app/jcef", HOME),
+		final CefLocation location = new CefLocation("/opt/unigrid/lib/app/jcef", HOME);
+		final String message = StartFailure.message(location,
 			new UnsatisfiedLinkError("libcef.so: cannot open shared object file"));
 
-		assertTrue(message.contains("/opt/unigrid/lib/app/jcef"), message);
+		assertTrue(message.contains(location.directory().toString()), message);
 	}
 
 	@Test
