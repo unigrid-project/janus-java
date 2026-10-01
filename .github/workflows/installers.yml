@@ -14,6 +14,17 @@ on:
       - "pom.xml"
       - ".github/workflows/installers.yml"
 
+  push:
+    branches: [ "master" ]
+    paths:
+      - "desktop/**"
+      - "shell/**"
+      - "ui/**"
+      - "web/**"
+      - "core/**"
+      - "pom.xml"
+      - ".github/workflows/installers.yml"
+
 jobs:
   installers:
 
@@ -35,18 +46,24 @@ jobs:
 
     - name: Install the Linux packaging tools
       if: runner.os == 'Linux'
-      run: sudo apt-get update && sudo apt-get install -y rpm fakeroot
+      run: sudo apt-get update && sudo apt-get install -y rpm fakeroot xvfb
 
     - name: Put WiX 3 on the path
       if: runner.os == 'Windows'
+      # Newer runner images come with it, and Chocolatey refuses to install the same release again.
       run: |
-        choco install wixtoolset --version 3.14.1 -y --no-progress
+        [ -x "/c/Program Files (x86)/WiX Toolset v3.14/bin/candle.exe" ] \
+          || choco install wixtoolset --version 3.14.1 -y --no-progress
         echo "C:\Program Files (x86)\WiX Toolset v3.14\bin" >> $GITHUB_PATH
       shell: bash
 
-    # On Linux this also installs the packages in clean containers and runs Janus from them.
-    - name: Build the installers
-      run: mvn -B -Pinstaller -pl desktop -am verify
+    # On Linux this also installs the packages in clean containers and runs Janus from them, and every OS
+    # installs its own package and walks the wallet through its journeys in the installed window.
+    - name: Build and test the installers
+      run: >-
+        ${{ runner.os == 'Linux' && 'xvfb-run -a ' || '' }}mvn -B -Pinstaller -pl desktop -am verify
+        -Djanus.installed-wallet=true
+      shell: bash
 
     - name: Collect the installers
       run: desktop/collect-installers.sh "$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)"
@@ -57,3 +74,11 @@ jobs:
         name: installers-${{ runner.os }}
         path: desktop/target/release/*
         if-no-files-found: error
+
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: installed-wallet-${{ runner.os }}
+        path: |
+          desktop/target/installed-wallet
+          desktop/target/failsafe-reports
