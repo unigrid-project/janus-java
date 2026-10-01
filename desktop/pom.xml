@@ -30,6 +30,11 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.microsoft.playwright</groupId>
+			<artifactId>playwright</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -175,6 +180,11 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<!-- Runs the installed packages, so they have to exist before the integration phase. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
@@ -198,8 +208,9 @@
 								</configuration>
 							</execution>
 							<execution>
+								<!-- Built before the integration phase, which installs it. -->
 								<id>msi</id>
-								<phase>verify</phase>
+								<phase>pre-integration-test</phase>
 								<goals>
 									<goal>jpackage</goal>
 								</goals>
@@ -251,8 +262,9 @@
 								</configuration>
 							</execution>
 							<execution>
+								<!-- Built before the integration phase, which installs it. -->
 								<id>dmg</id>
-								<phase>verify</phase>
+								<phase>pre-integration-test</phase>
 								<goals>
 									<goal>jpackage</goal>
 								</goals>
@@ -353,11 +365,6 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin>
-					<plugin>
-						<!-- Runs the installed packages, so they have to exist before the integration phase. -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-failsafe-plugin</artifactId>
 					</plugin>
 				</plugins>
 			</build>

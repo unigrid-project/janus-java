@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -33,8 +35,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * Installs the packages the build produced into clean containers and lets the installed Janus do what it is
  * for: open its window, serve its pages only to the browser it opened, draw the first page with the bundled
  * engine, and quit when the window is closed. It runs in the integration phase, after the packages exist,
- * and is skipped where Docker is not available.
+ * and is skipped where Docker is not available. Its containers are Linux ones, so it runs on Linux only.
  */
+@EnabledOnOs(OS.LINUX)
 @Timeout(value = 20, unit = TimeUnit.MINUTES)
 public class InstalledJanusIT {
 	private static final Path DIST = Path.of("target", "dist").toAbsolutePath();
