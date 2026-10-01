@@ -16,13 +16,21 @@
 
 package org.unigrid.janus.ui;
 
+import jakarta.json.Json;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
@@ -142,10 +150,25 @@ public class PhraseFlowTest {
 		screen.find(APP);
 
 		final Path wallet = rig.chosen().remembered().orElseThrow();
-		final String kept = Files.readString(wallet, StandardCharsets.UTF_8);
+		final Set<String> kept;
+
+		try (JsonReader reader = Json.createReader(Files.newBufferedReader(wallet, StandardCharsets.UTF_8))) {
+			kept = texts(reader.readValue()).collect(Collectors.toSet());
+		}
 
 		assertEquals(rig.wallets(), wallet.getParent());
-		assertTrue(words.stream().noneMatch(word -> kept.contains("\"" + word) || kept.contains(" " + word)));
+		assertTrue(words.stream().noneMatch(kept::contains), kept.toString());
+	}
+
+	/* A word counts as kept only where it stands on its own in a text the file holds, not where a field happens
+	   to be named after it or a string of hex digits happens to spell it. */
+	private static Stream<String> texts(final JsonValue value) {
+		return switch (value.getValueType()) {
+			case OBJECT -> value.asJsonObject().values().stream().flatMap(PhraseFlowTest::texts);
+			case ARRAY -> value.asJsonArray().stream().flatMap(PhraseFlowTest::texts);
+			case STRING -> Arrays.stream(((JsonString) value).getString().split("\\s+"));
+			default -> Stream.empty();
+		};
 	}
 
 	@Example
