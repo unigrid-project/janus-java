@@ -100,6 +100,31 @@ body {
 	color: #fff;
 }
 
+/* The page is always shown by Chromium, so its scrollbars are drawn in the colours of the theme rather than
+   left to the system, whose light bar stands out against the dark window. The border keeps the thumb slim. */
+::-webkit-scrollbar {
+	width: 14px;
+	height: 14px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	border: 4px solid transparent;
+	border-radius: 999px;
+	background: var(--border-strong);
+	background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+	background: var(--accent);
+	background-clip: content-box;
+}
+
 .glow {
 	position: fixed;
 	inset: 0;
