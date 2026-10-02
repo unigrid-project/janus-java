@@ -158,10 +158,9 @@
 								<addModule>java.net.http</addModule>
 								<addModule>java.sql</addModule>
 								<!-- jdeps cannot see modules that are found through service lookup: the window
-								     toolkit loads jdk.accessibility for screen readers, TLS needs jdk.crypto.ec,
-								     and Jetty reads its stylesheets out of the jar through jdk.zipfs. -->
+								     toolkit loads jdk.accessibility for screen readers, and Jetty reads its
+								     stylesheets out of the jar through jdk.zipfs. -->
 								<addModule>jdk.accessibility</addModule>
-								<addModule>jdk.crypto.ec</addModule>
 								<addModule>jdk.unsupported</addModule>
 								<addModule>jdk.zipfs</addModule>
 							</addModules>
@@ -169,11 +168,12 @@
 								<jLinkOption>--strip-debug</jLinkOption>
 								<jLinkOption>--no-man-pages</jLinkOption>
 								<jLinkOption>--no-header-files</jLinkOption>
-								<jLinkOption>--compress=2</jLinkOption>
+								<jLinkOption>--compress=zip-6</jLinkOption>
 							</jLinkOptions>
 							<javaOptions>
 								<option>--add-opens</option>
 								<option>java.base/java.lang=ALL-UNNAMED</option>
+								<option>--enable-native-access=ALL-UNNAMED</option>
 								<option>-Djanus.jcef=$APPDIR/jcef</option>
 							</javaOptions>
 						</configuration>
@@ -257,6 +257,7 @@
 										<option>java.desktop/sun.lwawt=ALL-UNNAMED</option>
 										<option>--add-exports</option>
 										<option>java.desktop/sun.lwawt.macosx=ALL-UNNAMED</option>
+										<option>--enable-native-access=ALL-UNNAMED</option>
 										<option>-Djanus.jcef=$APPDIR/jcef</option>
 									</javaOptions>
 								</configuration>

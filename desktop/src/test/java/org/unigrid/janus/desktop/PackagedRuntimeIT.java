@@ -65,7 +65,7 @@ public class PackagedRuntimeIT {
 			.redirectErrorStream(true).start();
 		final String modules = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
-		for (final String module : new String[] {"jdk.zipfs", "jdk.crypto.ec", "jdk.accessibility"}) {
+		for (final String module : new String[] {"jdk.zipfs", "jdk.accessibility"}) {
 			assertTrue(modules.contains(module + "@"), "The runtime lacks " + module + ":\n" + modules);
 		}
 	}
