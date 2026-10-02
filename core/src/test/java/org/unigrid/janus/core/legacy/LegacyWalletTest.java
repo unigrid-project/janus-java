@@ -59,51 +59,6 @@ public class LegacyWalletTest {
 	}
 
 	@Example
-	public void shouldImportAWalletDumpAsItDoesAWalletFile() throws IOException {
-		final Path addresses = BerkeleyFileTest.fixture("wallet.dump.addresses");
-
-		assertEquals(Set.copyOf(Files.readAllLines(addresses)),
-			LegacyWallet.addresses(BerkeleyFileTest.fixture("wallet.dump"))
-		);
-	}
-
-	@Example
-	public void shouldImportADumpWhoseCommentsWereStripped() throws IOException {
-		final List<String> keys = Files.readAllLines(BerkeleyFileTest.fixture("wallet.dump")).stream()
-			.filter(line -> !line.isBlank() && !line.startsWith("#")).toList();
-		final Path file = Files.createTempFile("stripped", ".dat");
-		final Path addresses = BerkeleyFileTest.fixture("wallet.dump.addresses");
-
-		file.toFile().deleteOnExit();
-		Files.write(file, keys);
-		assertEquals(Set.copyOf(Files.readAllLines(addresses)), LegacyWallet.addresses(file));
-	}
-
-	@Example
-	public void shouldReportWhatIsWrongWithADumpThatWasRecognised() throws IOException {
-		final Path file = Files.createTempFile("broken", ".dat");
-
-		file.toFile().deleteOnExit();
-		Files.writeString(file, "# Wallet dump created by UNIGRID 2.9.17\nnot-a-key 2018-01-02T10:00:00Z\n");
-
-		assertEquals(file + " is not a wallet dump Janus can read: line 2 holds no private key",
-			assertThrows(IllegalArgumentException.class, () -> LegacyWallet.addresses(file)).getMessage()
-		);
-	}
-
-	@Example
-	public void shouldTakeAFileThatIsNeitherAsAWalletFileItCannotRead() throws IOException {
-		final Path file = Files.createTempFile("neither", ".dat");
-
-		file.toFile().deleteOnExit();
-		Files.writeString(file, "this is no wallet");
-
-		assertEquals(file + " is not a wallet.dat Janus can read: it is not a Berkeley DB btree",
-			assertThrows(IllegalArgumentException.class, () -> LegacyWallet.addresses(file)).getMessage()
-		);
-	}
-
-	@Example
 	public void shouldReadWalletsShapedLikeTheLegacyDaemonsOwn() throws IOException {
 		for (final String name : List.of("plain-wallet", "encrypted-wallet")) {
 			final Path addresses = BerkeleyFileTest.fixture(name + ".addresses");

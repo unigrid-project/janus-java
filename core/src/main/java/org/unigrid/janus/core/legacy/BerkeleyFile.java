@@ -17,6 +17,7 @@
 package org.unigrid.janus.core.legacy;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.foreign.Arena;
 import java.nio.BufferUnderflowException;
@@ -25,6 +26,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayDeque;
@@ -33,6 +35,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Deque;
 import java.util.List;
+import java.util.Set;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -44,6 +47,7 @@ import java.util.stream.IntStream;
  */
 public final class BerkeleyFile {
 	private static final int MAGIC = 0x053162;
+	private static final Set<Integer> DATABASE_MAGICS = Set.of(MAGIC, 0x061561, 0x042253);
 	private static final int VERSION = 9;
 	private static final int NAMED_DATABASES = 0x20;
 	private static final int MINIMUM_PAGE_SIZE = 512;
@@ -102,6 +106,22 @@ public final class BerkeleyFile {
 
 		if ((file.getInt(META_FLAGS) & NAMED_DATABASES) == 0) {
 			throw refusal("it holds no named databases");
+		}
+	}
+
+	/**
+	 * Whether the file opens with the magic of a btree, hash or queue database. That is how a wallet.dat is told
+	 * from a wallet dump without reading the whole file; whether it is one Janus can read is {@link #read}'s to say.
+	 */
+	public static boolean holds(final Path path) {
+		try (InputStream in = Files.newInputStream(path)) {
+			final int size = META_MAGIC + Integer.BYTES;
+			final byte[] header = in.readNBytes(size);
+			final ByteBuffer first = ByteBuffer.wrap(header).order(ByteOrder.LITTLE_ENDIAN);
+
+			return header.length == size && DATABASE_MAGICS.contains(first.getInt(META_MAGIC));
+		} catch (IOException e) {
+			throw new UncheckedIOException("The wallet at " + path + " could not be read", e);
 		}
 	}
 

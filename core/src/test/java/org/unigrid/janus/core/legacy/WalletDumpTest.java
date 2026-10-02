@@ -25,9 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import net.jqwik.api.Example;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WalletDumpTest {
 	private static final String HEADER = "# Wallet dump created by UNIGRID 2.9.17 (2019-03-14 09:26:53 +0100)";
@@ -46,13 +44,16 @@ public class WalletDumpTest {
 		return file;
 	}
 
+	private static Set<String> addresses(final Path file) {
+		return WalletDump.keys(file).stream().map(LegacyKey::address).collect(Collectors.toSet());
+	}
+
 	private static Set<String> expected() throws IOException {
 		return Set.copyOf(Files.readAllLines(BerkeleyFileTest.fixture("wallet.dump.addresses")));
 	}
 
-	@Example
-	public void shouldFindTheAddressOfEveryKeyTheDumpHolds() throws IOException {
-		assertEquals(expected(), WalletDump.addresses(BerkeleyFileTest.fixture("wallet.dump")));
+	private static IllegalArgumentException refused(final Path file) {
+		return assertThrows(IllegalArgumentException.class, () -> WalletDump.keys(file));
 	}
 
 	@Example
@@ -69,7 +70,7 @@ public class WalletDumpTest {
 	@Example
 	public void shouldGiveACompressedKeyTheAddressOfItsCompressedForm() throws IOException {
 		assertEquals(Set.of(COMPRESSED_ADDRESS),
-			WalletDump.addresses(dump(HEADER, COMPRESSED_TWO + " 2018-01-02T10:00:00Z label="))
+			addresses(dump(HEADER, COMPRESSED_TWO + " 2018-01-02T10:00:00Z label="))
 		);
 	}
 
@@ -77,7 +78,7 @@ public class WalletDumpTest {
 	public void shouldGiveAnUncompressedKeyTheAddressOfItsUncompressedForm() throws IOException {
 		final Path file = dump(HEADER, UNCOMPRESSED_TWO + " 2018-01-02T10:00:00Z reserve=1 # addr=ignored");
 
-		assertEquals(Set.of(UNCOMPRESSED_ADDRESS), WalletDump.addresses(file));
+		assertEquals(Set.of(UNCOMPRESSED_ADDRESS), addresses(file));
 	}
 
 	@Example
@@ -86,9 +87,7 @@ public class WalletDumpTest {
 			UNCOMPRESSED_TWO + " 2018-01-02T10:00:00Z"
 		);
 
-		assertEquals(Set.of(COMPRESSED_ADDRESS, UNCOMPRESSED_ADDRESS),
-			WalletDump.addresses(file)
-		);
+		assertEquals(Set.of(COMPRESSED_ADDRESS, UNCOMPRESSED_ADDRESS), addresses(file));
 	}
 
 	@Example
@@ -98,52 +97,41 @@ public class WalletDumpTest {
 
 		file.toFile().deleteOnExit();
 		Files.writeString(file, text.replace("\n", "\r\n"), StandardCharsets.ISO_8859_1);
-		assertEquals(expected(), WalletDump.addresses(file));
+		assertEquals(expected(), addresses(file));
 	}
 
 	@Example
-	public void shouldRecogniseADumpByItsFirstLine() throws IOException {
-		assertTrue(WalletDump.holds(BerkeleyFileTest.fixture("wallet.dump")));
-		assertFalse(WalletDump.holds(BerkeleyFileTest.fixture("plain-wallet.dat")));
-		assertFalse(WalletDump.holds(dump("# A comment of some other file")));
-		assertFalse(WalletDump.holds(dump()));
+	public void shouldReadADumpWhoseCommentsWereStripped() throws IOException {
+		final List<String> keys = Files.readAllLines(BerkeleyFileTest.fixture("wallet.dump")).stream()
+			.filter(line -> !line.isBlank() && !line.startsWith("#")).toList();
+
+		assertEquals(expected(), addresses(dump(keys.toArray(String[]::new))));
 	}
 
 	@Example
 	public void shouldRefuseAKeyOfAnotherNetwork() throws IOException {
 		final Path file = dump(HEADER, "", COMPRESSED_TWO + " 2018-01-02T10:00:00Z label=", TESTNET_TWO + " 2018");
-		final IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-			() -> WalletDump.addresses(file)
-		);
 
-		assertEquals(file + REFUSAL + "line 4 holds no private key", thrown.getMessage());
+		assertEquals(file + REFUSAL + "line 4 holds no private key", refused(file).getMessage());
 	}
 
 	@Example
 	public void shouldRefuseAKeyWhoseChecksumIsWrongWithoutRepeatingIt() throws IOException {
 		final String damaged = COMPRESSED_TWO.substring(0, COMPRESSED_TWO.length() - 1) + "h";
 		final Path file = dump(HEADER, damaged + " 2018-01-02T10:00:00Z label=");
-		final IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-			() -> WalletDump.addresses(file)
-		);
 
-		assertEquals(file + REFUSAL + "line 2 holds no private key", thrown.getMessage());
+		assertEquals(file + REFUSAL + "line 2 holds no private key", refused(file).getMessage());
 	}
 
 	@Example
 	public void shouldRefuseAKeyOfTheWrongLength() throws IOException {
-		final Path file = dump(HEADER, "3QJmnh 2018-01-02T10:00:00Z label=");
-
-		assertThrows(IllegalArgumentException.class, () -> WalletDump.addresses(file));
+		refused(dump(HEADER, "3QJmnh 2018-01-02T10:00:00Z label="));
 	}
 
 	@Example
 	public void shouldRefuseADumpWithoutKeys() throws IOException {
 		final Path file = dump(HEADER, "", "# End of dump");
-		final IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-			() -> WalletDump.addresses(file)
-		);
 
-		assertEquals(file + REFUSAL + "it holds no private keys", thrown.getMessage());
+		assertEquals(file + REFUSAL + "it holds no private keys", refused(file).getMessage());
 	}
 }

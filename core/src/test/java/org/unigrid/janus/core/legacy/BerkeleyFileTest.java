@@ -33,6 +33,7 @@ import net.jqwik.api.Property;
 import net.jqwik.api.constraints.IntRange;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -66,6 +67,21 @@ public class BerkeleyFileTest {
 		);
 
 		assertTrue(thrown.getMessage().startsWith(file + REFUSAL), thrown.getMessage());
+	}
+
+	private static byte[] headerWithMagic(final int magic) {
+		return ByteBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN).putInt(12, magic).array();
+	}
+
+	@Example
+	public void shouldKnowABerkeleyFileByTheMagicOfItsFirstPage() throws IOException {
+		assertTrue(BerkeleyFile.holds(fixture("wallet.dat")));
+		assertTrue(BerkeleyFile.holds(copy(headerWithMagic(0x061561))), "a hash database is one too");
+		assertTrue(BerkeleyFile.holds(copy(headerWithMagic(0x042253))), "so is a queue database");
+		assertFalse(BerkeleyFile.holds(fixture("wallet.dump")));
+		assertFalse(BerkeleyFile.holds(copy(headerWithMagic(0))));
+		assertFalse(BerkeleyFile.holds(copy(new byte[8])), "shorter than a header");
+		assertFalse(BerkeleyFile.holds(copy(new byte[0])));
 	}
 
 	@Example

@@ -27,23 +27,7 @@ public final class LegacyWallet {
 	private LegacyWallet() {
 	}
 
-	/*
-	 * A wallet.dat first, and else a wallet dump. A file that is neither is reported as the format it looks
-	 * like, so a dump with one bad key line is not blamed on a missing Berkeley DB header.
-	 */
 	public static SortedSet<String> addresses(final Path wallet) {
-		try {
-			return walletFile(wallet);
-		} catch (IllegalArgumentException notWalletFile) {
-			try {
-				return WalletDump.addresses(wallet);
-			} catch (IllegalArgumentException notDump) {
-				throw WalletDump.holds(wallet) ? notDump : notWalletFile;
-			}
-		}
-	}
-
-	private static SortedSet<String> walletFile(final Path wallet) {
 		final List<BerkeleyFile.Entry> entries = BerkeleyFile.read(wallet, WalletRecords::needsValue);
 
 		try {

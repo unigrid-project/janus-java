@@ -23,40 +23,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The text file the legacy daemon's dumpwallet writes: a few comment lines, then a line per key that starts with
- * the private key and ends in a comment with the address. The address is worked out from the private key, as the
- * daemon's importwallet does, so an edited or stripped comment changes nothing.
+ * the private key and ends in a comment with the address. Only the private key is read, as the daemon's
+ * importwallet does, so an edited or stripped comment changes nothing.
  */
 public final class WalletDump {
-	private static final String FIRST_LINE = "# Wallet dump created by";
 	private static final String COMMENT = "#";
 
 	private WalletDump() {
-	}
-
-	/* A file that cannot be read is no dump; reading it as a wallet.dat then reports why it cannot be read. */
-	public static boolean holds(final Path wallet) {
-		try (Stream<String> lines = Files.lines(wallet, StandardCharsets.ISO_8859_1)) {
-			return lines.findFirst().filter(first -> first.startsWith(FIRST_LINE)).isPresent();
-		} catch (IOException | UncheckedIOException _) {
-			return false;
-		}
-	}
-
-	public static SortedSet<String> addresses(final Path wallet) {
-		final List<LegacyKey> keys = keys(wallet);
-
-		try {
-			return keys.stream().map(LegacyKey::address).collect(Collectors.toCollection(TreeSet::new));
-		} finally {
-			keys.forEach(LegacyKey::wipe);
-		}
 	}
 
 	/** The private keys of the dump. The caller wipes them; a refusal wipes the ones read before it. */
