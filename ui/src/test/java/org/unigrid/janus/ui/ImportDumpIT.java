@@ -17,6 +17,8 @@
 package org.unigrid.janus.ui;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -28,12 +30,15 @@ import net.jqwik.api.lifecycle.BeforeTry;
 import org.unigrid.janus.core.evm.EvmWallet;
 import org.unigrid.janus.core.evm.EvmWalletStore;
 import org.unigrid.janus.core.evm.LegacyVault;
+import org.unigrid.janus.core.evm.Mnemonic;
 import org.unigrid.janus.core.evm.SeedVault;
+import org.unigrid.janus.core.evm.WrongPassword;
 import org.unigrid.janus.core.hedgehog.EntryKind;
 import org.unigrid.janus.core.legacy.LegacyKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.unigrid.janus.ui.FlowSupport.entry;
 import static org.unigrid.janus.ui.FlowSupport.settle;
@@ -50,6 +55,7 @@ public class ImportDumpIT {
 	private static final String PASSWORD = "form[hx-post=/action/phrase-save]";
 	private static final String BACK = "[hx-post=/action/create-back]";
 	private static final String SECRET = "correct horse";
+	private static final List<String> ABANDON = List.of(("abandon ".repeat(11) + "about").split(" "));
 
 	private ContainerRig rig;
 	private Path dump;
@@ -95,6 +101,121 @@ public class ImportDumpIT {
 		try (Stream<Path> files = Files.list(rig.wallets())) {
 			return files.sorted().toList();
 		}
+	}
+
+	private static String enc(final String text) {
+		return URLEncoder.encode(text, StandardCharsets.UTF_8);
+	}
+
+	/** Imports the dump under the password and answers the words of the phrase made for it. */
+	private List<String> importedUnder(final String password) throws Exception {
+		final Screen seed = onTheNewPhrase();
+		final List<String> words = words(seed);
+
+		confirm(seed).click(CONFIRMED).submit(PASSWORD, Map.of("password", password, "repeat", password));
+		return words;
+	}
+
+	/** Restores the phrase from its words under a password and answers how the save went. */
+	private int restored(final List<String> words, final String password) throws Exception {
+		final Screen screen = rig.open();
+
+		assertEquals(200, screen.client().submit("/action/restore", "").statusCode());
+		assertEquals(200, screen.client().submit("/action/restore-words",
+			"word1=" + enc(String.join(" ", words))).statusCode()
+		);
+		final String sealed = "password=" + enc(password) + "&repeat=" + enc(password);
+
+		return screen.client().submit("/action/phrase-save", sealed).statusCode();
+	}
+
+	private EvmWallet saved() throws IOException {
+		return EvmWalletStore.read(savedWallets().get(0));
+	}
+
+	private List<String> addressesOf(final List<LegacyKey> keys) {
+		return keys.stream().map(LegacyKey::address).sorted().toList();
+	}
+
+	@Example
+	public void shouldRecoverTheLegacyKeysFromThePhraseAloneWhenThePasswordIsLost() throws Exception {
+		final List<String> words = importedUnder(SECRET);
+		final List<LegacyKey> keys = saved().legacyKeys(Mnemonic.parse(String.join(" ", words)), new LegacyVault());
+
+		assertEquals(rig.dumpAddresses().stream().sorted().toList(), addressesOf(keys));
+	}
+
+	@Example
+	public void shouldKeepEveryLegacyKeyWhenThePhraseIsRestoredUnderANewPassword() throws Exception {
+		final List<String> words = importedUnder(SECRET);
+		final EvmWallet before = saved();
+
+		assertEquals(200, restored(words, "a brand new password"));
+
+		final EvmWallet after = saved();
+
+		assertEquals(1, savedWallets().size());
+		assertEquals(before.legacy(), after.legacy());
+		assertEquals(rig.dumpAddresses().stream().sorted().toList(),
+			addressesOf(after.legacyKeys("a brand new password", new SeedVault(), new LegacyVault()))
+		);
+		assertThrows(WrongPassword.class, () -> after.legacyKeys(SECRET, new SeedVault(), new LegacyVault()));
+	}
+
+	@Example
+	public void shouldKeepEveryLegacyKeyWhenThePhraseIsRestoredUnderTheSamePassword() throws Exception {
+		final List<String> words = importedUnder(SECRET);
+
+		assertEquals(200, restored(words, SECRET));
+		assertEquals(6, saved().legacyKeys(SECRET, new SeedVault(), new LegacyVault()).size());
+	}
+
+	@Example
+	public void shouldKeepEveryLegacyKeyThroughSeveralRestoresInARow() throws Exception {
+		final List<String> words = importedUnder(SECRET);
+
+		assertEquals(200, restored(words, "second password"));
+		assertEquals(200, restored(words, "third password"));
+		assertEquals(rig.dumpAddresses().stream().sorted().toList(),
+			addressesOf(saved().legacyKeys("third password", new SeedVault(), new LegacyVault()))
+		);
+	}
+
+	@Example
+	public void shouldLeaveTheWalletAsItWasWhenARestoreIsRefused() throws Exception {
+		final List<String> words = importedUnder(SECRET);
+		final String before = Files.readString(savedWallets().get(0));
+		final Screen screen = rig.open();
+
+		screen.client().submit("/action/restore", "");
+		screen.client().submit("/action/restore-words", "word1=" + enc(String.join(" ", words)));
+		screen.client().submit("/action/phrase-save", "password=short&repeat=short");
+		screen.client().submit("/action/phrase-save", "password=" + enc(SECRET) + "&repeat=other+password");
+
+		assertEquals(before, Files.readString(savedWallets().get(0)));
+		assertEquals(6, saved().legacyKeys(SECRET, new SeedVault(), new LegacyVault()).size());
+	}
+
+	@Example
+	public void shouldNotCarryLegacyKeysToAWalletOfAnotherPhrase() throws Exception {
+		importedUnder(SECRET);
+
+		final Path imported = savedWallets().get(0);
+		final String before = Files.readString(imported);
+
+		assertEquals(200, restored(ABANDON, SECRET));
+		assertEquals(2, savedWallets().size());
+		assertEquals(before, Files.readString(imported));
+		assertNull(EvmWalletStore.read(savedWallets().stream().filter(file -> !file.equals(imported)).findFirst()
+			.orElseThrow()).legacy());
+	}
+
+	@Example
+	public void shouldNotInventLegacyKeysWhenAPlainWalletIsRestoredAgain() throws Exception {
+		assertEquals(200, restored(ABANDON, SECRET));
+		assertEquals(200, restored(ABANDON, "another password"));
+		assertEquals(1, savedWallets().size());
+		assertNull(saved().legacy());
 	}
 
 	@Example

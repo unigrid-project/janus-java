@@ -191,11 +191,21 @@ public class PhraseController {
 		}
 
 		final EvmWallet wallet = importing() ? EvmWallet.create(phrase, password, vault, legacyVault, imported)
-			: EvmWallet.create(phrase, password, vault);
+			: keepingLegacyKeys(EvmWallet.create(phrase, password, vault));
 		final AppView opened = wallets.open(store.save(wallet));
 
 		forget();
 		return opened;
+	}
+
+	/*
+	 * A wallet saved again from its phrase, under a new password perhaps, replaces the file it was kept in.
+	 * The legacy keys in it are sealed under a key the phrase gives, not the password, so the block is carried
+	 * over as it is and nothing is lost by recovering.
+	 */
+	private EvmWallet keepingLegacyKeys(final EvmWallet wallet) {
+		return store.find(wallet.addresses().getFirst()).map(EvmWallet::legacy).filter(Objects::nonNull)
+			.map(wallet::withLegacy).orElse(wallet);
 	}
 
 	private PasswordView password(final String error) {
