@@ -21,6 +21,7 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.TimeoutError;
 import com.microsoft.playwright.assertions.LocatorAssertions;
 import java.time.Duration;
 import java.util.List;
@@ -47,6 +48,8 @@ public abstract class BrowserTest {
 	private static final int FIRST_ERROR = 400;
 	private static final int SEARCH_ATTEMPTS = 3;
 	private static final double SEARCH_MILLIS = 4000;
+	private static final int CLICK_ATTEMPTS = 3;
+	private static final double CLICK_MILLIS = 5000;
 
 	private static Playwright playwright;
 	private static Browser browser;
@@ -131,6 +134,36 @@ public abstract class BrowserTest {
 				}
 			}
 		}
+	}
+
+	/*
+	 * Clicks and waits for the page to show what the click brings. A card is swapped for the next one by a
+	 * request, and on a loaded runner a click now and then falls between two swaps and does nothing, so it is
+	 * tried again; a button that really does nothing still fails, after the last try.
+	 */
+	protected void clickUntil(final String button, final String shown) {
+		for (int attempt = 1; ; attempt++) {
+			page().click(button);
+
+			try {
+				page().waitForSelector(shown, new Page.WaitForSelectorOptions().setTimeout(CLICK_MILLIS));
+				return;
+			} catch (TimeoutError e) {
+				if (attempt == CLICK_ATTEMPTS) {
+					System.out.println("Clicking " + button + " did not bring " + shown + ":\n"
+						+ page().locator("#app, main").first().innerHTML());
+					throw e;
+				}
+			}
+		}
+	}
+
+	/** Chooses the wallet the legacy daemon left behind, which the import card finds, ready to be continued. */
+	protected void pickTheWalletLeftBehind() {
+		final String found = "[hx-post='/action/import-found']";
+
+		clickUntil("[hx-post='/action/import']", found);
+		clickUntil(found, found + ".choice--selected");
 	}
 
 	protected ControlCenterRig rig() {

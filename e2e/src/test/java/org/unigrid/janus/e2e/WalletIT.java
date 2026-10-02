@@ -45,8 +45,7 @@ public class WalletIT extends BrowserTest {
 			entry("bb", 9, "-540", EntryKind.SENT)
 		);
 		rig().leaveWalletBehind();
-		page().click("[hx-post='/action/import']");
-		page().click("[hx-post='/action/import-found']");
+		pickTheWalletLeftBehind();
 		page().click("[hx-post='/action/open-wallet']");
 		page().waitForSelector(".dashboard__total", LOADED);
 	}
@@ -126,8 +125,7 @@ public class WalletIT extends BrowserTest {
 		}
 
 		rig().leaveWalletBehind();
-		page().click("[hx-post='/action/import']");
-		page().click("[hx-post='/action/import-found']");
+		pickTheWalletLeftBehind();
 		page().click("[hx-post='/action/open-wallet']");
 		page().waitForSelector(".dashboard__total", LOADED);
 		page().click(".stat:has-text('Funded addresses')");

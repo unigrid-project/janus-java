@@ -47,8 +47,7 @@ public class ActivityIT extends BrowserTest {
 	}
 
 	private void chooseTheWalletLeftBehind() {
-		page().click("[hx-post='/action/import']");
-		page().click("[hx-post='/action/import-found']");
+		pickTheWalletLeftBehind();
 		page().click("[hx-post='/action/open-wallet']");
 	}
 
@@ -195,9 +194,7 @@ public class ActivityIT extends BrowserTest {
 	@Example
 	public void shouldOfferAnotherWalletWhenTheOneChosenCannotBeRead() throws Exception {
 		rig().leaveWalletBehind();
-		page().click("[hx-post='/action/import']");
-		page().click("[hx-post='/action/import-found']");
-		page().waitForSelector("[hx-post='/action/import-found'].choice--selected");
+		pickTheWalletLeftBehind();
 		rig().damageTheBackup();
 		page().click("[hx-post='/action/open-wallet']");
 
