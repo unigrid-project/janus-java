@@ -33,7 +33,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WalletChoiceTest {
-	private static final byte[] KEYS = {1, 2, 3};
+	/* The magic of a Berkeley DB btree where a wallet.dat has it, then some bytes standing in for its keys. */
+	private static final byte[] KEYS = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x62, 0x31, 0x05, 0, 1, 2, 3};
+	private static final String DUMP = "# Wallet dump created by UNIGRID 2.9.17\n"
+		+ "PdiUUh8dnXB36B2XcbPdodUX5Ujoj2VDubJwcW1V8DJu6eQQxzNx 2018-01-02T10:00:00Z label=\n";
 
 	private Path root;
 	private Path backups;
@@ -80,6 +83,27 @@ public class WalletChoiceTest {
 	}
 
 	@Example
+	public void shouldRememberAWalletDumpButNeverCopyItsKeysIntoTheBackups() throws IOException {
+		final Path dump = Files.writeString(root.resolve("wallet.dump"), DUMP);
+
+		choice.choose(dump);
+		assertEquals(Optional.of(dump), choice.chosen());
+		assertEquals(Optional.empty(), choice.backup());
+		assertTrue(Files.notExists(backups));
+	}
+
+	@Example
+	public void shouldLetAWalletDumpTakeTheChoiceOfAWalletAndBack() throws IOException {
+		final Path dump = Files.writeString(root.resolve("wallet.dump"), DUMP);
+
+		choice.choose(wallet);
+		choice.choose(dump);
+		assertEquals(Optional.empty(), choice.backup());
+		choice.choose(wallet);
+		assertTrue(choice.backup().isPresent());
+	}
+
+	@Example
 	public void shouldNotBackUpTheSameChoiceTwice() throws IOException {
 		choice.choose(wallet);
 		choice.choose(wallet);
@@ -94,7 +118,7 @@ public class WalletChoiceTest {
 		choice.choose(wallet);
 
 		final Path copy = choice.backup().orElseThrow();
-		final Path other = Files.createFile(root.resolve("other.dat"));
+		final Path other = Files.write(root.resolve("other.dat"), KEYS);
 
 		Files.delete(copy);
 		Files.delete(backups);

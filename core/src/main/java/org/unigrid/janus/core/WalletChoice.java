@@ -21,6 +21,7 @@ import jakarta.inject.Inject;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import org.unigrid.janus.core.legacy.BerkeleyFile;
 
 /**
  * The wallet file the user has settled on. A wallet only counts as chosen once a copy of it has been made.
@@ -43,7 +44,7 @@ public class WalletChoice {
 		}
 
 		if (!chosen().equals(Optional.of(wallet))) {
-			chosen = new Chosen(wallet, backups.backup(wallet));
+			chosen = new Chosen(wallet, BerkeleyFile.holds(wallet) ? backups.backup(wallet) : null);
 		}
 	}
 
@@ -51,7 +52,10 @@ public class WalletChoice {
 		return Optional.ofNullable(chosen).map(Chosen::wallet);
 	}
 
-	/** Where the copy of the chosen wallet was put. */
+	/**
+	 * Where the copy of the chosen wallet was put. A wallet dump has none, since it holds its private keys in
+	 * plain text and they are sealed instead of copied.
+	 */
 	public Optional<Path> backup() {
 		return Optional.ofNullable(chosen).map(Chosen::backup);
 	}
