@@ -12,5 +12,7 @@ it runs one for the first time:
 
 - **macOS:** open the `.dmg`, drag Unigrid to Applications and open it once. When macOS refuses, go to
   System Settings > Privacy & Security and choose **Open Anyway**.
+  [Step by step, with screenshots](https://github.com/unigrid-project/janus-java/wiki/Installing-on-macOS).
 - **Windows:** when SmartScreen stops the installer, choose **More info** and then **Run anyway**.
+  [Step by step, with screenshots](https://github.com/unigrid-project/janus-java/wiki/Installing-on-Windows).
 - **Linux:** install the `.deb` or `.rpm` with the package manager, or unpack the `.tar.gz` anywhere.
