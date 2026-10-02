@@ -39,7 +39,7 @@ hosts them. The approach is described under
 [Design documents](#design-documents).
 
 The `desktop` module builds the native installers and is only part of the build
-with the `installer` profile. It needs JDK 17 and the platform's packaging tools
+with the `installer` profile. It needs JDK 25 and the platform's packaging tools
 (`dpkg-deb`, `fakeroot` and `rpm` on Linux, WiX 3 on Windows, Xcode's command
 line tools on macOS):
 ```
