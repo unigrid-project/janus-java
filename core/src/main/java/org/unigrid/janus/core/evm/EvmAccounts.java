@@ -21,6 +21,7 @@ import java.util.stream.IntStream;
 import org.web3j.crypto.Bip32ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.MnemonicUtils;
+import org.web3j.utils.Numeric;
 
 /**
  * The addresses a recovery phrase holds, derived along the BIP44 path Ethereum wallets share, so that
@@ -29,6 +30,7 @@ import org.web3j.crypto.MnemonicUtils;
 public final class EvmAccounts {
 	public static final String PATH = "m/44'/60'/0'/0";
 
+	private static final int PRIVATE_KEY_SIZE = 32;
 	private static final int[] ACCOUNT = {
 		44 | Bip32ECKeyPair.HARDENED_BIT, 60 | Bip32ECKeyPair.HARDENED_BIT, Bip32ECKeyPair.HARDENED_BIT, 0
 	};
@@ -38,10 +40,20 @@ public final class EvmAccounts {
 
 	/** The first addresses of the phrase, in EIP-55 checksummed form. */
 	public static List<String> addresses(final Mnemonic mnemonic, final int count) {
-		final byte[] seed = MnemonicUtils.generateSeed(mnemonic.phrase(), "");
-		final Bip32ECKeyPair account = Bip32ECKeyPair.deriveKeyPair(Bip32ECKeyPair.generateKeyPair(seed), ACCOUNT);
+		final Bip32ECKeyPair account = account(mnemonic);
 
 		return IntStream.range(0, count).mapToObj(index -> Bip32ECKeyPair.deriveKeyPair(account, new int[] {index}))
 			.map(key -> Keys.toChecksumAddress(Keys.getAddress(key))).toList();
+	}
+
+	/** The 32 bytes of the private key behind the address of the same index. The caller wipes them. */
+	public static byte[] privateKey(final Mnemonic mnemonic, final int index) {
+		final Bip32ECKeyPair key = Bip32ECKeyPair.deriveKeyPair(account(mnemonic), new int[] {index});
+		return Numeric.toBytesPadded(key.getPrivateKey(), PRIVATE_KEY_SIZE);
+	}
+
+	private static Bip32ECKeyPair account(final Mnemonic mnemonic) {
+		final byte[] seed = MnemonicUtils.generateSeed(mnemonic.phrase(), "");
+		return Bip32ECKeyPair.deriveKeyPair(Bip32ECKeyPair.generateKeyPair(seed), ACCOUNT);
 	}
 }
