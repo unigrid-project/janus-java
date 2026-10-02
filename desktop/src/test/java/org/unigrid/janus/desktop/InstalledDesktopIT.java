@@ -119,7 +119,7 @@ public class InstalledDesktopIT {
 		final String description = output("plutil", "-p", info.toString());
 
 		assertTrue(description.contains("\"CFBundleIdentifier\" => \"org.unigrid.janus\""), description);
-		assertTrue(description.contains("\"LSApplicationCategoryType\" => \"public.app-category.finance\""),
+		assertTrue(description.contains("\"LSApplicationCategoryType\" => \"public.app-category.utilities\""),
 			description);
 		assertTrue(description.contains("\"CFBundleIconFile\" => \"Unigrid.icns\""), description);
 	}

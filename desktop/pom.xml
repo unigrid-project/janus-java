@@ -253,7 +253,7 @@
 									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.icns</icon>
 									<macPackageIdentifier>org.unigrid.janus</macPackageIdentifier>
 									<macPackageName>Unigrid</macPackageName>
-									<macAppCategory>finance</macAppCategory>
+									<macAppCategory>utilities</macAppCategory>
 									<javaOptions>
 										<option>--add-opens</option>
 										<option>java.base/java.lang=ALL-UNNAMED</option>
