@@ -59,6 +59,15 @@ public class LegacyWalletTest {
 	}
 
 	@Example
+	public void shouldImportAWalletDumpAsItDoesAWalletFile() throws IOException {
+		final Path addresses = BerkeleyFileTest.fixture("wallet.dump.addresses");
+
+		assertEquals(Set.copyOf(Files.readAllLines(addresses)),
+			LegacyWallet.addresses(BerkeleyFileTest.fixture("wallet.dump"))
+		);
+	}
+
+	@Example
 	public void shouldReadWalletsShapedLikeTheLegacyDaemonsOwn() throws IOException {
 		for (final String name : List.of("plain-wallet", "encrypted-wallet")) {
 			final Path addresses = BerkeleyFileTest.fixture(name + ".addresses");

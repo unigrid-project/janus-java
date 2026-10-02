@@ -28,6 +28,10 @@ public final class LegacyWallet {
 	}
 
 	public static SortedSet<String> addresses(final Path wallet) {
+		if (WalletDump.holds(wallet)) {
+			return WalletDump.addresses(wallet);
+		}
+
 		final List<BerkeleyFile.Entry> entries = BerkeleyFile.read(wallet, WalletRecords::needsValue);
 
 		try {
