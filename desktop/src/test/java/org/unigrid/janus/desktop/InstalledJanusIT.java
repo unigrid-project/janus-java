@@ -46,6 +46,7 @@ public class InstalledJanusIT {
 	private static final String LOG = "/tmp/janus.log";
 	private static final String SCREEN = "DISPLAY=:99";
 	private static final String WINDOW_TITLE = "Unigrid";
+	private static final String WINDOW_CLASS = "org-unigrid-janus-shell-Janus";
 	private static final String FIRST_PAGE_TEXT = "wallet";
 	private static final Pattern SERVING = Pattern.compile("serving its interface at (http://\\S+)");
 	private static final Pattern BROKEN_ENGINE = Pattern.compile(
@@ -82,34 +83,44 @@ public class InstalledJanusIT {
 	@Test
 	public void shouldRunFromTheDebianPackage() throws Exception {
 		verify("debian:12", DEBIAN_SETUP + "apt-get install -y -qq /r/unigrid_*.deb >/dev/null", PACKAGED,
-			"apt-get install -y -qq --reinstall /r/unigrid_*.deb >/dev/null");
+			"apt-get install -y -qq --reinstall /r/unigrid_*.deb >/dev/null", "apt-get remove -y -qq unigrid");
 	}
 
 	@Test
 	public void shouldRunFromTheRpmPackage() throws Exception {
 		verify("fedora:40", FEDORA_SETUP + "dnf install -y -q /r/unigrid-*.rpm >/dev/null", PACKAGED,
-			"dnf reinstall -y -q /r/unigrid-*.rpm >/dev/null");
+			"dnf reinstall -y -q /r/unigrid-*.rpm >/dev/null", "dnf remove -y -q unigrid");
 	}
 
 	@Test
 	public void shouldRunFromAPortableFolderWhoseNameHasASpace() throws Exception {
 		verify("debian:12", DEBIAN_SETUP + DEBIAN_LIBRARIES
-			+ "mkdir -p '/opt/with space' && cp -r /r/Unigrid '/opt/with space/'", PORTABLE, "true");
+			+ "mkdir -p '/opt/with space' && cp -r /r/Unigrid '/opt/with space/'", PORTABLE, "true", null);
 	}
 
-	private void verify(final String image, final String install, final String home, final String reinstall)
-		throws Exception {
+	/* The removal command is null where nothing was installed by a package, which has no menu entry to look for. */
+	private void verify(final String image, final String install, final String home, final String reinstall,
+		final String removal) throws Exception {
 
 		try (Container container = Container.start(image, DIST)) {
 			succeeds(container, "root", INSTALL_SECONDS, install, "installing");
 			container.copyIn(CLOSE_SCRIPT, "/tmp/close-window.py");
 			succeeds(container, "root", SHORT_SECONDS, "useradd -m " + USER, "creating the user");
 
+			if (removal != null) {
+				assertIsInTheApplicationMenu(container);
+			}
+
 			start(container, home + "/bin/Unigrid");
 
 			assertRefusesRequestsWithoutTheToken(container, awaitAddress(container));
 			assertRunsTheBundledEngine(container, home + "/lib/app/jcef");
 			assertShowsTheFirstPage(container);
+
+			if (removal != null) {
+				assertWindowIsOfTheClassTheMenuEntryNames(container);
+			}
+
 			assertQuitsWhenTheWindowCloses(container);
 			final String log = asUser(container, "cat " + LOG, "reading the log").output();
 
@@ -117,7 +128,45 @@ public class InstalledJanusIT {
 
 			succeeds(container, "root", INSTALL_SECONDS, reinstall + "\ntest -x '" + home + "/bin/Unigrid'",
 				"installing the same package again");
+
+			if (removal != null) {
+				assertRemovalLeavesNothingBehind(container, removal, home);
+			}
 		}
+	}
+
+	/* The entry is filed under Network, opens the launcher and names the class of the window, so that a dock
+	   can tell which window belongs to it. */
+	private static void assertIsInTheApplicationMenu(final Container container)
+		throws IOException, InterruptedException {
+
+		succeeds(container, "root", SHORT_SECONDS, """
+			entry=$(grep -rl --include='*.desktop' '^StartupWMClass=%1$s$' /usr/share/applications \
+				/usr/local/share/applications)
+			test -n "$entry"
+			grep -q '^Categories=Network;$' "$entry"
+			grep -q '^Exec=%2$s/bin/Unigrid$' "$entry"
+			grep -q '^Icon=%2$s/lib/Unigrid.png$' "$entry"
+			test -f %2$s/lib/Unigrid.png
+			""".formatted(WINDOW_CLASS, PACKAGED), "finding the menu entry the package installed");
+	}
+
+	private static void assertWindowIsOfTheClassTheMenuEntryNames(final Container container)
+		throws IOException, InterruptedException {
+
+		awaitOutput(container, SCREEN + " xdotool search --class '^" + WINDOW_CLASS + "$'", output -> true,
+			"a window of the class " + WINDOW_CLASS);
+	}
+
+	private static void assertRemovalLeavesNothingBehind(final Container container, final String removal,
+		final String home) throws IOException, InterruptedException {
+
+		succeeds(container, "root", INSTALL_SECONDS, removal, "removing the package");
+		succeeds(container, "root", SHORT_SECONDS, """
+			test ! -e %s/bin/Unigrid
+			test -z "$(grep -rl --include='*.desktop' '^StartupWMClass=%s$' /usr/share/applications \
+				/usr/local/share/applications 2>/dev/null)"
+			""".formatted(home, WINDOW_CLASS), "checking that the removal took the program and its menu entry");
 	}
 
 	private static void start(final Container container, final String launcher)

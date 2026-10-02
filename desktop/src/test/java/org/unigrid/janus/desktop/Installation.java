@@ -70,6 +70,16 @@ final class Installation {
 		return launcher;
 	}
 
+	/** Takes an installed package off the computer again; a copy made from the disk image has nothing to remove. */
+	static void uninstall(final Path dist, final Path logs) throws IOException, InterruptedException {
+		if (WINDOWS) {
+			run("msiexec", "/x", one(dist, ".msi").toString(), "/qn", "/l*v",
+				logs.resolve("msiexec-remove.log").toString());
+		} else if (!MAC) {
+			run("sudo", "apt-get", "remove", "-y", "unigrid");
+		}
+	}
+
 	private static Path one(final Path dist, final String suffix) throws IOException {
 		try (Stream<Path> files = Files.list(dist)) {
 			final List<Path> found = files.filter(file -> file.getFileName().toString().endsWith(suffix))
