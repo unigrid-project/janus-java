@@ -36,8 +36,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * What the installed package does for the desktop it was installed on, looked for after a real install on this
  * computer: the menu entry and the programs list on Windows, the bundle description and icon on macOS, and the
- * menu entry on Linux. The removal comes last, and what it should take with it is looked for then. It installs
- * software, so it runs only where janus.installed-wallet is true, which only the workflow sets.
+ * menu entry the package ships on Linux. A runner has no desktop menu to register that entry with, so it is the
+ * file itself that is looked at. The removal comes last, and what it should take with it is looked for then. It
+ * installs software, so it runs only where janus.installed-wallet is true, which only the workflow sets.
  */
 @EnabledIfSystemProperty(named = "janus.installed-wallet", matches = "true")
 @Timeout(value = 20, unit = TimeUnit.MINUTES)
@@ -60,7 +61,7 @@ public class InstalledDesktopIT {
 		launcher = Installation.install(DIST, scratch, EVIDENCE);
 
 		if (!Installation.WINDOWS && !Installation.MAC) {
-			menuEntry = findMenuEntry();
+			menuEntry = launcher.getParent().getParent().resolve("lib").resolve("unigrid-Unigrid.desktop");
 		}
 	}
 
@@ -80,13 +81,6 @@ public class InstalledDesktopIT {
 		if (menuEntry != null) {
 			assertFalse(Files.exists(menuEntry), "The menu entry stayed after the removal");
 		}
-	}
-
-	private static Path findMenuEntry() throws IOException, InterruptedException {
-		final String found = output("sh", "-c", "grep -rl --include='*.desktop' '^StartupWMClass=" + WINDOW_CLASS
-			+ "$' /usr/share/applications").trim();
-
-		return found.isEmpty() ? null : Path.of(found.lines().findFirst().orElseThrow());
 	}
 
 	private static Path startMenuShortcut() {
@@ -146,8 +140,8 @@ public class InstalledDesktopIT {
 
 	@Test
 	@EnabledOnOs(OS.LINUX)
-	public void shouldFileTheMenuEntryUnderNetworkAndPointItAtTheProgram() throws Exception {
-		assertTrue(menuEntry != null, "The package put no menu entry in /usr/share/applications");
+	public void shouldShipAMenuEntryUnderNetworkThatPointsAtTheProgram() throws Exception {
+		assertTrue(Files.isRegularFile(menuEntry), "The package shipped no menu entry at " + menuEntry);
 
 		final String entry = Files.readString(menuEntry);
 

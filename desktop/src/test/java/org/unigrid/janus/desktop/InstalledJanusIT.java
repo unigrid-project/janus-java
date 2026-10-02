@@ -135,20 +135,20 @@ public class InstalledJanusIT {
 		}
 	}
 
-	/* The entry is filed under Network, opens the launcher and names the class of the window, so that a dock
-	   can tell which window belongs to it. */
+	/* A container has no desktop menu to register the entry with, which is why the install does not insist on
+	   it, so it is the entry the package ships that is looked at: filed under Network, opening the launcher and
+	   naming the class of the window, so that a dock can tell which window belongs to it. */
 	private static void assertIsInTheApplicationMenu(final Container container)
 		throws IOException, InterruptedException {
 
 		succeeds(container, "root", SHORT_SECONDS, """
-			entry=$(grep -rl --include='*.desktop' '^StartupWMClass=%1$s$' /usr/share/applications \
-				/usr/local/share/applications)
-			test -n "$entry"
+			entry=%1$s/lib/unigrid-Unigrid.desktop
 			grep -q '^Categories=Network;$' "$entry"
-			grep -q '^Exec=%2$s/bin/Unigrid$' "$entry"
-			grep -q '^Icon=%2$s/lib/Unigrid.png$' "$entry"
-			test -f %2$s/lib/Unigrid.png
-			""".formatted(WINDOW_CLASS, PACKAGED), "finding the menu entry the package installed");
+			grep -q '^Exec=%1$s/bin/Unigrid$' "$entry"
+			grep -q '^Icon=%1$s/lib/Unigrid.png$' "$entry"
+			grep -q '^StartupWMClass=%2$s$' "$entry"
+			test -f %1$s/lib/Unigrid.png
+			""".formatted(PACKAGED, WINDOW_CLASS), "finding the menu entry the package ships");
 	}
 
 	private static void assertWindowIsOfTheClassTheMenuEntryNames(final Container container)
@@ -163,10 +163,9 @@ public class InstalledJanusIT {
 
 		succeeds(container, "root", INSTALL_SECONDS, removal, "removing the package");
 		succeeds(container, "root", SHORT_SECONDS, """
-			test ! -e %s/bin/Unigrid
-			test -z "$(grep -rl --include='*.desktop' '^StartupWMClass=%s$' /usr/share/applications \
-				/usr/local/share/applications 2>/dev/null)"
-			""".formatted(home, WINDOW_CLASS), "checking that the removal took the program and its menu entry");
+			test ! -e %1$s/bin/Unigrid
+			test ! -e %1$s/lib/unigrid-Unigrid.desktop
+			""".formatted(home), "checking that the removal took the program and its menu entry");
 	}
 
 	private static void start(final Container container, final String launcher)
