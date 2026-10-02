@@ -24,14 +24,14 @@ import java.nio.file.Path;
 import java.util.List;
 
 /** The legacy wallet the rigs hand out, from the fixtures of core, and the addresses it holds keys for. */
-final class WalletFixture {
+public final class WalletFixture {
 	private static final String FIXTURE = "/org/unigrid/janus/core/legacy/plain-wallet";
 	private static final String DUMP = "/org/unigrid/janus/core/legacy/wallet.dump";
 
 	private WalletFixture() {
 	}
 
-	static Path copyTo(final Path to) throws IOException {
+	public static Path copyTo(final Path to) throws IOException {
 		return copy(FIXTURE + ".dat", to);
 	}
 
@@ -49,7 +49,7 @@ final class WalletFixture {
 	}
 
 	/** A wallet that opens with the Berkeley DB magic, as a wallet.dat does, and is cut short after it. */
-	static Path damagedTo(final Path to) throws IOException {
+	public static Path damagedTo(final Path to) throws IOException {
 		return Files.write(to, new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x62, 0x31, 0x05, 0, 1, 2, 3});
 	}
 

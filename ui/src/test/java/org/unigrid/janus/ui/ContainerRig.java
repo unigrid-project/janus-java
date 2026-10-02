@@ -127,9 +127,11 @@ public class ContainerRig implements AutoCloseable {
 		return WalletFixture.copyTo(data.resolve("wallet.dat"));
 	}
 
-	/** A wallet.dat in the folder the legacy daemon used that is cut short, so that it cannot be read. */
-	public Path leaveDamagedWalletBehind() throws IOException {
-		return WalletFixture.damagedTo(data.resolve("wallet.dat"));
+	/** Cuts the copy kept of the wallet chosen short, as a damaged disk would, so that it cannot be read. */
+	public void damageTheBackup() throws IOException {
+		try (Stream<Path> copies = Files.list(home.resolve(".janus").resolve("backups"))) {
+			WalletFixture.damagedTo(copies.findFirst().orElseThrow());
+		}
 	}
 
 	/** A wallet somewhere the person has to point at themselves. */

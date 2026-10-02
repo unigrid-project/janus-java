@@ -27,6 +27,7 @@ import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
@@ -35,6 +36,7 @@ import org.unigrid.janus.core.DataDirectory;
 import org.unigrid.janus.core.WalletBackup;
 import org.unigrid.janus.core.WalletChoice;
 import org.unigrid.janus.core.legacy.LegacyKey;
+import org.unigrid.janus.ui.WalletFixture;
 import org.unigrid.janus.ui.view.ImportView;
 import org.unigrid.janus.web.action.ActionExtension;
 import org.unigrid.janus.web.action.Actions;
@@ -49,8 +51,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ImportControllerTest {
-	/* The magic of a Berkeley DB btree where a wallet.dat has it, which is what makes a file a wallet. */
-	private static final byte[] WALLET = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x62, 0x31, 0x05, 0};
+	private static final String NEITHER = " is neither a wallet.dat nor a wallet dump Janus can read: "
+		+ "it does not start like a Berkeley DB file, and as a dump ";
 	private static final String DUMP = "# Wallet dump created by UNIGRID 2.9.17\n"
 		+ "PdiUUh8dnXB36B2XcbPdodUX5Ujoj2VDubJwcW1V8DJu6eQQxzNx 2018-01-02T10:00:00Z label=\n"
 		+ "68QtzUftP6UedWuuhgxsw4jV7TDsTjvyPnqUKvFA6G2LWUipq9J 2018-01-02T10:00:00Z reserve=1\n";
@@ -64,7 +66,7 @@ public class ImportControllerTest {
 	@BeforeTry
 	public void prepareAnEmptyDataDirectory() throws IOException {
 		directory = Files.createTempDirectory("janus");
-		elsewhere = Files.write(Files.createTempFile("backup", ".dat"), WALLET);
+		elsewhere = WalletFixture.copyTo(Files.createTempDirectory("backup").resolve("wallet.dat"));
 		backups = Files.createTempDirectory("backups");
 		choice = new WalletChoice(new WalletBackup(backups, Clock.systemUTC()));
 		controller = new ImportController(new DataDirectory(directory), choice);
@@ -75,6 +77,7 @@ public class ImportControllerTest {
 		Files.deleteIfExists(directory.resolve("wallet.dat"));
 		Files.delete(directory);
 		Files.delete(elsewhere);
+		Files.delete(elsewhere.getParent());
 
 		try (Stream<Path> paths = Files.walk(backups)) {
 			for (final Path path : paths.sorted(Comparator.reverseOrder()).toList()) {
@@ -84,7 +87,7 @@ public class ImportControllerTest {
 	}
 
 	private Path leaveAWalletBehind() throws IOException {
-		return Files.write(directory.resolve("wallet.dat"), WALLET);
+		return WalletFixture.copyTo(directory.resolve("wallet.dat"));
 	}
 
 	private Path pickADump(final String text) throws IOException {
@@ -177,7 +180,7 @@ public class ImportControllerTest {
 		final Path dump = pickADump(DUMP + "not-a-key 2018-01-02T10:00:00Z\n");
 		final ImportView view = controller.onChooseFile(form(dump));
 
-		assertEquals(dump + " is not a wallet dump Janus can read: line 4 holds no private key", view.error());
+		assertEquals(dump + NEITHER + "line 4 holds no private key", view.error());
 		assertFalse(view.hasChosen());
 		assertEquals(Optional.empty(), choice.chosen());
 	}
@@ -187,9 +190,53 @@ public class ImportControllerTest {
 		final Path found = Files.writeString(directory.resolve("wallet.dat"), "this is no wallet");
 		final ImportView view = controller.onClickUseFound();
 
-		assertEquals(found + " is not a wallet dump Janus can read: line 1 holds no private key", view.error());
+		assertEquals(found + NEITHER + "line 1 holds no private key", view.error());
 		assertFalse(view.hasChosen());
 		assertEquals(Optional.empty(), choice.chosen());
+	}
+
+	@Example
+	public void shouldRefuseMumboJumboOfWhateverSizeOrKindAndChooseNothing() throws IOException {
+		final byte[] noise = new byte[5000];
+		final byte[] text = "lorem ipsum dolor sit amet\n".repeat(200).getBytes(StandardCharsets.UTF_8);
+
+		new Random(7).nextBytes(noise);
+
+		for (final byte[] content : List.of(new byte[0], "x".getBytes(StandardCharsets.UTF_8), noise, text)) {
+			final Path file = Files.write(Files.createTempFile("junk", ".bin"), content);
+			final ImportView view = controller.onChooseFile(form(file));
+
+			file.toFile().deleteOnExit();
+			final String error = view.error();
+
+			assertTrue(error.startsWith(file + " is neither a wallet.dat nor a wallet dump"), error);
+			assertTrue(error.contains("does not start like a Berkeley DB file"), error);
+			assertFalse(view.hasChosen());
+		}
+
+		assertEquals(Optional.empty(), choice.chosen());
+		assertEquals(0, Files.list(backups).count());
+	}
+
+	@Example
+	public void shouldSayWhyAWalletFileThatIsDamagedCannotBeRead() throws IOException {
+		final Path folder = Files.createTempDirectory("damaged");
+		final Path damaged = WalletFixture.damagedTo(folder.resolve("wallet.dat"));
+		final ImportView view = controller.onChooseFile(form(damaged));
+
+		damaged.toFile().deleteOnExit();
+		assertEquals(damaged + " is not a wallet.dat Janus can read: it is cut short", view.error());
+		assertFalse(view.hasChosen());
+		assertEquals(0, Files.list(backups).count());
+	}
+
+	@Example
+	public void shouldTakeAWalletFileWithoutTryingItAsADump() throws IOException {
+		final ImportView view = controller.onChooseFile(form(elsewhere));
+
+		assertNull(view.error());
+		assertFalse(view.dumpChosen());
+		assertEquals(1, Files.list(backups).count());
 	}
 
 	@Example

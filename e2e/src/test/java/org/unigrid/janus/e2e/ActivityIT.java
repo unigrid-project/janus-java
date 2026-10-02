@@ -194,8 +194,12 @@ public class ActivityIT extends BrowserTest {
 
 	@Example
 	public void shouldOfferAnotherWalletWhenTheOneChosenCannotBeRead() throws Exception {
-		rig().leaveDamagedWalletBehind();
-		chooseTheWalletLeftBehind();
+		rig().leaveWalletBehind();
+		page().click("[hx-post='/action/import']");
+		page().click("[hx-post='/action/import-found']");
+		page().waitForSelector("[hx-post='/action/import-found'].choice--selected");
+		rig().damageTheBackup();
+		page().click("[hx-post='/action/open-wallet']");
 
 		page().waitForSelector("[hx-post='/action/choose-another']", LOADED);
 		page().click("[hx-post='/action/choose-another']");

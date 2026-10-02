@@ -21,10 +21,13 @@ import jakarta.inject.Inject;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import org.unigrid.janus.core.DataDirectory;
 import org.unigrid.janus.core.WalletChoice;
 import org.unigrid.janus.core.legacy.BerkeleyFile;
 import org.unigrid.janus.core.legacy.LegacyKey;
+import org.unigrid.janus.core.legacy.LegacyWallet;
+import org.unigrid.janus.core.legacy.UnreadableWallet;
 import org.unigrid.janus.core.legacy.WalletDump;
 import org.unigrid.janus.ui.view.ImportView;
 import org.unigrid.janus.web.action.Action;
@@ -64,19 +67,38 @@ public class ImportController {
 		return choose(Path.of(form.get(PATH)));
 	}
 
-	/* A file that is no Berkeley DB must be a wallet dump, and one that cannot be read as such is said so at
-	   once, leaving the earlier choice as it was. */
+	/* The file is read as the kind it opens as, and one that cannot be read is said so at once, leaving the
+	   earlier choice as it was. Only a Berkeley DB can be a wallet.dat and no Berkeley DB can be a dump, so
+	   reading it as the other kind as well could only fail. */
 	private ImportView choose(final Path file) {
-		if (Files.isRegularFile(file) && !BerkeleyFile.holds(file)) {
-			try {
-				WalletDump.keys(file).forEach(LegacyKey::wipe);
-			} catch (IllegalArgumentException e) {
-				return view(e.getMessage());
+		if (Files.isRegularFile(file)) {
+			final Optional<String> refusal = refusal(file);
+
+			if (refusal.isPresent()) {
+				return view(refusal.get());
 			}
 		}
 
 		choice.choose(file);
 		return view(null);
+	}
+
+	private static Optional<String> refusal(final Path file) {
+		final boolean walletFile = BerkeleyFile.holds(file);
+
+		try {
+			if (walletFile) {
+				LegacyWallet.addresses(file);
+			} else {
+				WalletDump.keys(file).forEach(LegacyKey::wipe);
+			}
+
+			return Optional.empty();
+		} catch (UnreadableWallet e) {
+			return Optional.of(walletFile ? e.getMessage() : file + " is neither a wallet.dat nor a wallet dump "
+				+ "Janus can read: it does not start like a Berkeley DB file, and as a dump " + e.reason()
+			);
+		}
 	}
 
 	/** The private keys of the wallet dump chosen, for the caller to seal and wipe. */

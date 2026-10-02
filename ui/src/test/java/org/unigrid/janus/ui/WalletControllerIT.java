@@ -112,9 +112,13 @@ public class WalletControllerIT {
 
 	@Example
 	public void shouldLetThePersonChooseAnotherWalletWhenTheOneChosenCannotBeRead() throws Exception {
-		rig.leaveDamagedWalletBehind();
+		rig.leaveWalletBehind();
 
-		final Screen screen = settle(rig.open().click(IMPORT).click(FOUND).click(OPEN));
+		final Screen chosen = rig.open().click(IMPORT).click(FOUND);
+
+		rig.damageTheBackup();
+
+		final Screen screen = settle(chosen.click(OPEN));
 
 		screen.click("[hx-post=/action/choose-another]");
 		assertEquals("Bring your wallet", screen.find("main > .card h1").text());
