@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Optional;
 import org.unigrid.janus.core.OwnerOnly;
 
 /** Where Janus keeps the EVM wallets it made or restored, one file each, named after its first address. */
@@ -64,6 +65,17 @@ public class EvmWalletStore {
 			);
 		} catch (IOException e) {
 			throw new UncheckedIOException("The wallet could not be saved to " + target, e);
+		}
+	}
+
+	/** The wallet kept for the address, if there is one that can be read; a file that cannot is not carried on. */
+	public Optional<EvmWallet> find(final String firstAddress) {
+		final Path file = folder.resolve("evm-" + firstAddress + EXTENSION);
+
+		try {
+			return Files.exists(file) ? Optional.of(read(file)) : Optional.empty();
+		} catch (IllegalArgumentException e) {
+			return Optional.empty();
 		}
 	}
 

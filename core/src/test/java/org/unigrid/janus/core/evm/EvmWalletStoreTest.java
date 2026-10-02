@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
@@ -100,6 +101,24 @@ public class EvmWalletStoreTest {
 		);
 
 		assertFalse(written.contains("legacy"));
+	}
+
+	@Example
+	public void shouldFindTheWalletKeptForAnAddressAndNothingWhenThereIsNone() throws IOException {
+		final EvmWallet wallet = withLegacyKeys();
+		final String address = wallet.addresses().get(0);
+
+		assertEquals(Optional.empty(), store.find(address));
+		store.save(wallet);
+		assertEquals(Optional.of(wallet), store.find(address));
+		assertEquals(Optional.empty(), store.find("0xSomeoneElse"));
+	}
+
+	@Example
+	public void shouldFindNothingInAFileThatIsNoWallet() throws IOException {
+		Files.createDirectories(folder);
+		Files.writeString(folder.resolve("evm-0xBroken.json"), "not json");
+		assertEquals(Optional.empty(), store.find("0xBroken"));
 	}
 
 	@Example

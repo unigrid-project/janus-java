@@ -91,6 +91,33 @@ public class EvmWalletTest {
 	}
 
 	@Example
+	public void shouldGiveBackTheLegacyKeysForThePhraseAloneWithoutThePassword() {
+		final List<LegacyKey> opened = withLegacyKeys().legacyKeys(PHRASE, new LegacyVault());
+
+		assertEquals(legacyKeys().stream().map(LegacyKey::address).toList(),
+			opened.stream().map(LegacyKey::address).toList()
+		);
+	}
+
+	@Example
+	public void shouldNotOpenTheLegacyKeysWithAnotherPhrase() {
+		final Mnemonic other = Mnemonic.generate(new SecureRandom());
+
+		assertThrows(WrongPassword.class, () -> withLegacyKeys().legacyKeys(other, new LegacyVault()));
+	}
+
+	@Example
+	public void shouldCarryTheLegacyBlockOverToAWalletOfTheSamePhraseUnderANewPassword() {
+		final EvmWallet restored = EvmWallet.create(PHRASE, "new password", VAULT)
+			.withLegacy(withLegacyKeys().legacy());
+
+		assertEquals(EvmWallet.LEGACY_VERSION, restored.version());
+		assertEquals(withLegacyKeys().addresses(), restored.addresses());
+		assertEquals(2, restored.legacyKeys("new password", VAULT, new LegacyVault()).size());
+		assertThrows(WrongPassword.class, () -> restored.legacyKeys("pw", VAULT, new LegacyVault()));
+	}
+
+	@Example
 	public void shouldKeepTheLegacyKeysFromAnotherPassword() {
 		final EvmWallet wallet = withLegacyKeys();
 

@@ -89,13 +89,26 @@ public record EvmWallet(int version, String path, List<String> addresses, Sealed
 		return Mnemonic.of(vault.open(crypto, password));
 	}
 
+	/** The same wallet carrying the legacy block of an earlier one made from the same phrase. */
+	public EvmWallet withLegacy(final LegacyBlock block) {
+		return new EvmWallet(LEGACY_VERSION, path, addresses, crypto, block);
+	}
+
 	/** The legacy private keys, opened with the password. The caller wipes them. */
 	public List<LegacyKey> legacyKeys(final String password, final SeedVault vault, final LegacyVault legacyVault) {
+		return legacyKeys(mnemonic(password, vault), legacyVault);
+	}
+
+	/**
+	 * The legacy private keys, opened with the phrase alone. They are sealed under a key the phrase gives, not
+	 * under the password, so the password lost does not lose them. The caller wipes them.
+	 */
+	public List<LegacyKey> legacyKeys(final Mnemonic phrase, final LegacyVault legacyVault) {
 		if (legacy == null) {
 			throw new IllegalStateException("This wallet holds no legacy keys");
 		}
 
-		final byte[] accountKey = EvmAccounts.privateKey(mnemonic(password, vault), FIRST_ACCOUNT);
+		final byte[] accountKey = EvmAccounts.privateKey(phrase, FIRST_ACCOUNT);
 
 		try {
 			return legacyVault.open(accountKey, legacy.keys(), legacy.addresses());
