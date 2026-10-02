@@ -83,8 +83,7 @@ public class WalletIT extends BrowserTest {
 		openTheWalletLeftBehind();
 		page().click("button.app__tab:has-text('Activity')");
 		assertThat(page().locator("#rows details")).hasCount(2);
-		page().locator("input[name=q]").pressSequentially("aa");
-		assertThat(page().locator("#rows details")).hasCount(1);
+		searchFor("aa", 1);
 		assertThat(page().locator("#rows .ledger__txid")).hasText("aa");
 	}
 

@@ -147,11 +147,8 @@ public class ActivityIT extends BrowserTest {
 		openActivityOf(entry("aa", 1, "10", EntryKind.RECEIVED), entry("bb", 2, "5", EntryKind.RECEIVED));
 
 		assertThat(page().locator(ROWS)).hasCount(2);
-		page().locator("input[name=q]").pressSequentially(rig().addresses().get(0).substring(2, 9).toLowerCase());
-		assertThat(page().locator(ROWS)).hasCount(2);
-
-		page().locator("input[name=q]").fill("");
-		page().locator("input[name=q]").pressSequentially("nothing like it");
+		searchFor(rig().addresses().get(0).substring(2, 9).toLowerCase(), 2);
+		searchFor("nothing like it", 0);
 		assertThat(page().locator("#rows .ledger__empty")).hasText("No transactions match your filter.");
 	}
 

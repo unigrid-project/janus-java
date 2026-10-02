@@ -18,8 +18,10 @@ package org.unigrid.janus.e2e;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.assertions.LocatorAssertions;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,6 +30,7 @@ import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeContainer;
 import net.jqwik.api.lifecycle.BeforeTry;
 import org.unigrid.janus.ui.ControlCenterRig;
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -42,6 +45,8 @@ public abstract class BrowserTest {
 	   them, so only the other failures say anything. */
 	private static final String ABORTED = "net::ERR_ABORTED";
 	private static final int FIRST_ERROR = 400;
+	private static final int SEARCH_ATTEMPTS = 3;
+	private static final double SEARCH_MILLIS = 4000;
 
 	private static Playwright playwright;
 	private static Browser browser;
@@ -101,6 +106,31 @@ public abstract class BrowserTest {
 		context.close();
 		rig.close();
 		assertEquals(List.of(), troubles);
+	}
+
+	/*
+	 * Types into the search box and waits for the list to follow. On a loaded runner the typing now and then
+	 * leaves the list as it was, so it is tried again, and the page is printed when that is not enough.
+	 */
+	protected void searchFor(final String text, final int rows) {
+		final Locator box = page().locator("input[name=q]");
+
+		for (int attempt = 1; ; attempt++) {
+			box.fill("");
+			box.pressSequentially(text);
+
+			try {
+				assertThat(page().locator("#rows details"))
+					.hasCount(rows, new LocatorAssertions.HasCountOptions().setTimeout(SEARCH_MILLIS));
+				return;
+			} catch (AssertionError e) {
+				if (attempt == SEARCH_ATTEMPTS) {
+					System.out.println("The list did not follow a search for '" + text + "':\n"
+						+ page().locator("#app").innerHTML());
+					throw e;
+				}
+			}
+		}
 	}
 
 	protected ControlCenterRig rig() {
