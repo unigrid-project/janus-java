@@ -88,8 +88,8 @@ public class HedgehogInstallerTest {
 	public void shouldReportTheProgressOfTheTransfer() throws IOException {
 		install(Releases.pinning(home, EXECUTABLE));
 
-		assertNull(progress.get(0), "nothing is known before the transfer starts");
-		assertEquals(100, progress.get(progress.size() - 1));
+		assertNull(progress.getFirst(), "nothing is known before the transfer starts");
+		assertEquals(100, progress.getLast());
 	}
 
 	@Example
@@ -126,7 +126,7 @@ public class HedgehogInstallerTest {
 	public void shouldFailWhenTheReleaseHasNoSuchFile() throws IOException {
 		try (ReleaseServer empty = new ReleaseServer()) {
 			final HedgehogRelease release = Releases.pinning(home, EXECUTABLE);
-			final HedgehogInstaller installer = new HedgehogInstaller(release, empty.uri(), (file, sig) -> true);
+			final HedgehogInstaller installer = new HedgehogInstaller(release, empty.uri(), (_, _) -> true);
 			final IllegalStateException failure = assertThrows(IllegalStateException.class,
 				() -> installer.install(progress::add)
 			);

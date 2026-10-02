@@ -64,7 +64,7 @@ public class WalletBackup {
 
 			try {
 				return OwnerOnly.createFile(folder.resolve("wallet-" + stamp + suffix + ".dat"));
-			} catch (FileAlreadyExistsException e) {
+			} catch (FileAlreadyExistsException _) {
 				continue;
 			}
 		}

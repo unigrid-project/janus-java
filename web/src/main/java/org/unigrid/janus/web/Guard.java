@@ -89,7 +89,7 @@ public class Guard extends Handler.Wrapper {
 	private List<HttpCookie> parse(final String header) {
 		try {
 			return HttpCookie.parse(header);
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException _) {
 			return List.of();
 		}
 	}

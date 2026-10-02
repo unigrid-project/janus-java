@@ -288,8 +288,8 @@ public class WalletController {
 		return new DashboardView(Amounts.plain(funds.total()),
 			funds.awaitingMint().signum() > 0 ? Amounts.plain(funds.awaitingMint()) : null,
 			months.stream().map(month -> bar(month, fullest)).toList(),
-			months.isEmpty() ? "" : Times.shortMonth(months.get(0).month()),
-			months.isEmpty() ? "" : Times.shortMonth(months.get(months.size() - 1).month()),
+			months.isEmpty() ? "" : Times.shortMonth(months.getFirst().month()),
+			months.isEmpty() ? "" : Times.shortMonth(months.getLast().month()),
 			Amounts.count(tip), funds.breakdown().withFunds(), funds.breakdown().historyOnly(),
 			funds.breakdown().neverUsed(), Amounts.count(transactions.size()), active(transactions),
 			LedgerRows.of(transactions, 0, Math.min(RECENT, transactions.size()), tip, zone, false)
@@ -318,8 +318,8 @@ public class WalletController {
 			return "—";
 		}
 
-		return Times.date(transactions.get(transactions.size() - 1).time(), zone) + " – "
-			+ Times.date(transactions.get(0).time(), zone);
+		return Times.date(transactions.getLast().time(), zone) + " – "
+			+ Times.date(transactions.getFirst().time(), zone);
 	}
 
 	private ActivityView activity(final WalletFunds funds) {

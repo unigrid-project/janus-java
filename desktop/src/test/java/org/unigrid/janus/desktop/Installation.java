@@ -79,7 +79,7 @@ final class Installation {
 				throw new IOException("Expected one " + suffix + " in " + dist + ", found " + found);
 			}
 
-			return found.get(0);
+			return found.getFirst();
 		}
 	}
 

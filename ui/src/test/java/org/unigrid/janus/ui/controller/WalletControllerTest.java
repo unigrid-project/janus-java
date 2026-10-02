@@ -53,6 +53,7 @@ import org.unigrid.janus.ui.view.WelcomeView;
 import org.unigrid.janus.web.action.ActionExtension;
 import org.unigrid.janus.web.action.Actions;
 import org.unigrid.janus.web.action.Form;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -85,7 +86,7 @@ public class WalletControllerTest {
 		);
 
 		try (InputStream in = getClass().getResourceAsStream(FIXTURE + ".addresses")) {
-			addresses = new String(in.readAllBytes()).lines().toList();
+			addresses = new String(in.readAllBytes(), UTF_8).lines().toList();
 		}
 	}
 

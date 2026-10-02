@@ -118,7 +118,7 @@ final class RunningJanus implements AutoCloseable {
 		family.addAll(process.descendants().toList());
 		page.evaluate("document.querySelector('[data-window=close]').click()");
 
-		if (process.waitFor(STOP.toSeconds(), TimeUnit.SECONDS)) {
+		if (process.waitFor(STOP)) {
 			return true;
 		}
 
@@ -139,7 +139,7 @@ final class RunningJanus implements AutoCloseable {
 
 			new ProcessBuilder(jcmd.toString(), Long.toString(candidate.pid()), "Thread.print")
 				.redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.appendTo(file.toFile()))
-				.start().waitFor(STOP.toSeconds(), TimeUnit.SECONDS);
+				.start().waitFor(STOP);
 		}
 	}
 
@@ -199,7 +199,7 @@ final class RunningJanus implements AutoCloseable {
 				if (http.send(request, HttpResponse.BodyHandlers.discarding()).statusCode() == OK) {
 					return;
 				}
-			} catch (IOException e) {
+			} catch (IOException _) {
 				/* Nothing listens until the browser engine is up. */
 			}
 

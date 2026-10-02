@@ -23,8 +23,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
@@ -40,12 +38,14 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProv
 * The Unigrid Foundation release key, the GPG key that signs every release download. Its public half is
 * the release-key.asc at the root of the repository, built into the jar unchanged.
 */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ReleaseKey {
 	private static final String RESOURCE = "/release-key.asc";
 	private static final int CHUNK = 1 << 16;
 	private static final JcaPGPContentVerifierBuilderProvider VERIFIERS =
 		new JcaPGPContentVerifierBuilderProvider().setProvider(new BouncyCastleProvider());
+
+	private ReleaseKey() {
+	}
 
 	public static PGPPublicKeyRingCollection getPublicKeyRing() {
 		return Bundled.RING;

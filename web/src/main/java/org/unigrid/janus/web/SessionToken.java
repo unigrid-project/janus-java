@@ -19,6 +19,7 @@ package org.unigrid.janus.web;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Proof that a request came from the interface this process opened, rather than from anything
@@ -54,6 +55,6 @@ public final class SessionToken {
 
 		/* Constant time, so that a caller cannot learn the token one character at a time
 		   by measuring how long the comparison takes. */
-		return MessageDigest.isEqual(candidate.getBytes(), value.getBytes());
+		return MessageDigest.isEqual(candidate.getBytes(UTF_8), value.getBytes(UTF_8));
 	}
 }

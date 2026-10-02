@@ -65,7 +65,7 @@ final class Container implements AutoCloseable {
 			throw new IOException("Could not start " + image + ": " + started.output());
 		}
 
-		return new Container(started.output().lines().reduce((first, last) -> last).orElseThrow().trim());
+		return new Container(started.output().lines().toList().getLast().trim());
 	}
 
 	Result exec(final String user, final long timeoutSeconds, final String script)

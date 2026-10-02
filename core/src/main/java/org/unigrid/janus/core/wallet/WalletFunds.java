@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,14 +82,14 @@ public record WalletFunds(BigDecimal total, BigDecimal historyNet, BigDecimal aw
 			return months;
 		}
 
-		final List<WalletTransaction> oldestFirst = new ArrayList<>(transactions);
-		final YearMonth last = month(transactions.get(0), zone);
+		final List<WalletTransaction> oldestFirst = transactions.reversed();
+		final YearMonth last = month(transactions.getFirst(), zone);
 		BigDecimal running = BigDecimal.ZERO;
 		int next = 0;
 
-		Collections.reverse(oldestFirst);
+		for (YearMonth month = month(oldestFirst.getFirst(), zone); !month.isAfter(last);
+			month = month.plusMonths(1)) {
 
-		for (YearMonth month = month(oldestFirst.get(0), zone); !month.isAfter(last); month = month.plusMonths(1)) {
 			while (next < oldestFirst.size() && !month(oldestFirst.get(next), zone).isAfter(month)) {
 				running = running.add(oldestFirst.get(next++).amount());
 			}

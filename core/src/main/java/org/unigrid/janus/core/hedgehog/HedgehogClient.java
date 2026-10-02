@@ -92,7 +92,7 @@ public class HedgehogClient implements AutoCloseable {
 		}
 
 		client = ClientBuilder.newBuilder().sslContext(trustingContext())
-			.hostnameVerifier((host, session) -> LOOPBACK.equals(host))
+			.hostnameVerifier((host, _) -> LOOPBACK.equals(host))
 			.property(ClientProperties.FOLLOW_REDIRECTS, false)
 			.register(bearerToken())
 			.connectTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS)

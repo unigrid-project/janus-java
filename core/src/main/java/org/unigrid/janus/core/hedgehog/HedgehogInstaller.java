@@ -85,18 +85,22 @@ public class HedgehogInstaller {
 		try {
 			Files.createDirectories(target.getParent());
 
-			final HttpClient http = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT)
-				.followRedirects(HttpClient.Redirect.NORMAL).build();
-			final byte[] signature = signature(http, release.url(releases, release.asset() + SIGNATURE));
+			try (HttpClient http = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT)
+				.followRedirects(HttpClient.Redirect.NORMAL).build()) {
 
-			if (!pinned.equals(download(http, release.url(releases, release.asset()), partial, progress))) {
-				throw new IllegalStateException(
-					"The downloaded Hedgehog is not the release this Janus is made for");
-			}
+				final byte[] signature = signature(http, release.url(releases, release.asset() + SIGNATURE));
 
-			if (!signed.test(partial, signature)) {
-				throw new IllegalStateException(
-					"The downloaded Hedgehog is not signed by the Unigrid Foundation");
+				final URI asset = release.url(releases, release.asset());
+
+				if (!pinned.equals(download(http, asset, partial, progress))) {
+					throw new IllegalStateException(
+						"The downloaded Hedgehog is not the release this Janus is made for");
+				}
+
+				if (!signed.test(partial, signature)) {
+					throw new IllegalStateException(
+						"The downloaded Hedgehog is not signed by the Unigrid Foundation");
+				}
 			}
 
 			partial.toFile().setExecutable(true);

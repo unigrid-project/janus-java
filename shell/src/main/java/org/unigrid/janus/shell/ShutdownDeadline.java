@@ -25,16 +25,13 @@ final class ShutdownDeadline {
 
 	/* A daemon, so a shutdown that does finish in time is never held up by the wait. */
 	static void start(final Duration grace, final Runnable end) {
-		final Thread deadline = new Thread(() -> {
+		Thread.ofPlatform().name("shutdown-deadline").daemon().start(() -> {
 			try {
-				Thread.sleep(grace.toMillis());
+				Thread.sleep(grace);
 				end.run();
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-		}, "shutdown-deadline");
-
-		deadline.setDaemon(true);
-		deadline.start();
+		});
 	}
 }

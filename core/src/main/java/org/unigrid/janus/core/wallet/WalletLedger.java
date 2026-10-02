@@ -55,12 +55,9 @@ public class WalletLedger {
 
 	private final HedgehogClient client;
 	private final ZoneId zone;
-	private final ExecutorService worker = Executors.newSingleThreadExecutor(work -> {
-		final Thread thread = new Thread(work, "wallet-ledger");
-
-		thread.setDaemon(true);
-		return thread;
-	});
+	private final ExecutorService worker = Executors.newSingleThreadExecutor(
+		Thread.ofPlatform().name("wallet-ledger").daemon().factory()
+	);
 
 	private volatile LedgerState state = LedgerState.IDLE;
 

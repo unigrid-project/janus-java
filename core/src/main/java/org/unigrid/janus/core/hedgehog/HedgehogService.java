@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.unigrid.janus.core.hedgehog.HedgehogClient.Status;
 import org.unigrid.janus.core.hedgehog.HedgehogState.Phase;
@@ -53,12 +52,9 @@ public class HedgehogService {
 	private final URI base;
 	private final Path logFile;
 	private final Duration startTimeout;
-	private final ExecutorService worker = Executors.newSingleThreadExecutor(work -> {
-		final Thread thread = new Thread(work, "hedgehog");
-
-		thread.setDaemon(true);
-		return thread;
-	});
+	private final ExecutorService worker = Executors.newSingleThreadExecutor(
+		Thread.ofPlatform().name("hedgehog").daemon().factory()
+	);
 
 	private volatile HedgehogState state = HedgehogState.IDLE;
 	private volatile Process started;
@@ -151,7 +147,7 @@ public class HedgehogService {
 		}
 
 		try {
-			if (!process.waitFor(STOP_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
+			if (!process.waitFor(STOP_TIMEOUT)) {
 				destroyAll(process);
 			}
 		} catch (InterruptedException e) {
