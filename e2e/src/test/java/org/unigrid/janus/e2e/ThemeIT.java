@@ -21,6 +21,7 @@ import net.jqwik.api.Example;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ThemeIT extends BrowserTest {
 	private static final String TOGGLE = "[data-theme-toggle]";
@@ -36,17 +37,36 @@ public class ThemeIT extends BrowserTest {
 			+ part + "')." + property);
 	}
 
-	/* Chromium answers for a pseudo-element without regard to the pointer, so the colour it reports is that of the
-	   last rule that matches, which is the theme's accent. What matters is that it is the theme's own. */
+	/* What a computed style says of a scrollbar's thumb depends on the Chromium asked and on where its pointer is,
+	   and its parsed rule has lost the variable it names, so the thumb's rules are read from the stylesheet as it
+	   is served, and the colours they name from the theme. */
+	private String thumbBackground(final boolean hovered) {
+		return (String) page().evaluate("async () => { const css = await (await fetch('/static/css/janus.css'))"
+			+ ".text(); return [...css.matchAll(/([^{}]*::-webkit-scrollbar-thumb[^{]*)\\{([^}]*)\\}/g)]"
+			+ ".filter(rule => rule[1].includes(':hover') === " + hovered + ")"
+			+ ".map(rule => rule[2]).join(' '); }");
+	}
+
+	private String colour(final String variable) {
+		return (String) page().evaluate("() => { const probe = document.createElement('div');"
+			+ " probe.style.color = 'var(" + variable + ")'; document.body.append(probe);"
+			+ " const colour = getComputedStyle(probe).color; probe.remove(); return colour; }");
+	}
+
 	@Example
 	public void shouldDrawTheScrollbarSlimAndInTheColoursOfTheTheme() {
-		final String dark = scrollbar("-thumb", "backgroundColor");
-
 		assertEquals("14px", scrollbar("", "width"));
-		assertEquals("rgb(254, 116, 22)", dark);
+		assertTrue(thumbBackground(false).contains("background: var(--border-strong)"), thumbBackground(false));
+		assertTrue(thumbBackground(true).contains("background: var(--accent)"), thumbBackground(true));
+
+		final String accent = colour("--accent");
+		final String idle = colour("--border-strong");
+
+		assertEquals("rgb(254, 116, 22)", accent);
 
 		page().click(TOGGLE);
-		assertNotEquals(dark, scrollbar("-thumb", "backgroundColor"));
+		assertNotEquals(accent, colour("--accent"));
+		assertNotEquals(idle, colour("--border-strong"));
 	}
 
 	@Example
