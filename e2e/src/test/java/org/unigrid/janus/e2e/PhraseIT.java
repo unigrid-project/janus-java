@@ -17,6 +17,7 @@
 package org.unigrid.janus.e2e;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.assertions.LocatorAssertions;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.jqwik.api.Example;
@@ -29,6 +30,10 @@ public class PhraseIT extends BrowserTest {
 	private static final String CARD = "main > .card";
 	private static final String CONTINUE = CARD + " .button--primary";
 	private static final String APP = "#app";
+
+	/* Deriving the keys of a new wallet and opening it takes seconds on a loaded CI runner, past the default five. */
+	private static final LocatorAssertions.IsVisibleOptions OPENED = new LocatorAssertions.IsVisibleOptions()
+		.setTimeout(20_000);
 
 	@Example
 	public void shouldMakeAWalletFromTheWordsTappedBackInOrder() {
@@ -50,7 +55,7 @@ public class PhraseIT extends BrowserTest {
 
 		page().click(CONTINUE);
 		seal("correct horse");
-		assertThat(page().locator(APP)).isVisible();
+		assertThat(page().locator(APP)).isVisible(OPENED);
 	}
 
 	@Example
@@ -62,7 +67,7 @@ public class PhraseIT extends BrowserTest {
 
 		assertThat(page().locator(CARD + " h1")).hasText("Choose a password");
 		seal("correct horse");
-		assertThat(page().locator(APP)).isVisible();
+		assertThat(page().locator(APP)).isVisible(OPENED);
 		assertEquals("evm-0x9858EfFD232B4033E47d90003D41EC34EcaEda94.json",
 			rig().chosen().remembered().orElseThrow().getFileName().toString()
 		);
