@@ -14,6 +14,7 @@ jobs:
   macos:
 
     runs-on: macos-15
+    timeout-minutes: 25
 
     steps:
     - name: Fetch the installer of an earlier installers run
@@ -35,19 +36,20 @@ jobs:
         xattr -l /Applications/Unigrid.app
 
     - name: Open it and photograph what macOS says
+      timeout-minutes: 6
       run: |
         mkdir shots
         screencapture -x shots/00-desktop.png
-        open /Applications/Unigrid.app || true
-        sleep 10
-        screencapture -x shots/01-blocked.png
-        open "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension" || true
+        (open /Applications/Unigrid.app > open.log 2>&1 &)
+        sleep 4
+        screencapture -x shots/01-blocked-4s.png
         sleep 8
-        screencapture -x shots/02-privacy-and-security.png
-        osascript -e 'tell application "System Events" to key code 119' || true
-        sleep 2
-        screencapture -x shots/03-privacy-and-security-end.png
+        screencapture -x shots/02-blocked-12s.png
+        (open "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension" > settings.log 2>&1 &)
+        sleep 10
+        screencapture -x shots/03-privacy-and-security.png
         ls -l shots
+        cat open.log settings.log || true
 
     - uses: actions/upload-artifact@v4
       if: always()
@@ -58,6 +60,7 @@ jobs:
   windows:
 
     runs-on: windows-2022
+    timeout-minutes: 25
 
     steps:
     - name: Fetch the installer of an earlier installers run
@@ -67,6 +70,7 @@ jobs:
       shell: bash
 
     - name: Open it the way a download leaves it and photograph what Windows says
+      timeout-minutes: 6
       shell: pwsh
       run: |
         Add-Type -AssemblyName System.Windows.Forms, System.Drawing
@@ -78,23 +82,19 @@ jobs:
           $canvas = [System.Drawing.Graphics]::FromImage($picture)
           $canvas.CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
           $picture.Save((Join-Path $PWD "shots\$name"))
+          Write-Host "saved $name"
         }
 
         $msi = Get-ChildItem download\*.msi
         Set-Content -Path $msi.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3`r`nHostUrl=https://github.com/"
-        Get-Content -Path $msi.FullName -Stream Zone.Identifier
+        Write-Host (Get-Content -Path $msi.FullName -Stream Zone.Identifier)
         Shot "00-desktop.png"
-        Start-Process $msi.FullName
-        Start-Sleep 12
+        Start-Process -FilePath "explorer.exe" -ArgumentList $msi.FullName
+        Write-Host "started"
+        Start-Sleep 10
         Shot "01-opened.png"
-
-        $steps = "02-next", "03-licence", "04-options", "05-progress", "06-done"
-        foreach ($step in $steps) {
-          [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
-          Start-Sleep 6
-          Shot "$step.png"
-        }
-        Get-ChildItem shots
+        Start-Sleep 10
+        Shot "02-opened-20s.png"
 
     - uses: actions/upload-artifact@v4
       if: always()
