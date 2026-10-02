@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.jqwik.api.Example;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -51,6 +53,17 @@ public class WalletDumpTest {
 	@Example
 	public void shouldFindTheAddressOfEveryKeyTheDumpHolds() throws IOException {
 		assertEquals(expected(), WalletDump.addresses(BerkeleyFileTest.fixture("wallet.dump")));
+	}
+
+	@Example
+	public void shouldGiveTheKeysOfEveryLineInTheOrderTheyAreWritten() throws IOException {
+		final List<LegacyKey> keys = WalletDump.keys(BerkeleyFileTest.fixture("wallet.dump"));
+
+		assertEquals(6, keys.size());
+		assertEquals(expected(), keys.stream().map(LegacyKey::address).collect(Collectors.toSet()));
+		assertEquals(List.of(true, true, false, true, false, true),
+			keys.stream().map(LegacyKey::compressed).toList()
+		);
 	}
 
 	@Example

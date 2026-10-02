@@ -21,13 +21,12 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.bitcoinj.base.Base58;
-import org.bitcoinj.crypto.ECKey;
 
 /**
  * The text file the legacy daemon's dumpwallet writes: a few comment lines, then a line per key that starts with
@@ -37,9 +36,6 @@ import org.bitcoinj.crypto.ECKey;
 public final class WalletDump {
 	private static final String FIRST_LINE = "# Wallet dump created by";
 	private static final String COMMENT = "#";
-	private static final int SECRET_VERSION = 153;
-	private static final int UNCOMPRESSED_SIZE = 1 + 32;
-	private static final int COMPRESSED_SIZE = UNCOMPRESSED_SIZE + 1;
 
 	private WalletDump() {
 	}
@@ -54,22 +50,38 @@ public final class WalletDump {
 	}
 
 	public static SortedSet<String> addresses(final Path wallet) {
+		final List<LegacyKey> keys = keys(wallet);
+
+		try {
+			return keys.stream().map(LegacyKey::address).collect(Collectors.toCollection(TreeSet::new));
+		} finally {
+			keys.forEach(LegacyKey::wipe);
+		}
+	}
+
+	/** The private keys of the dump. The caller wipes them; a refusal wipes the ones read before it. */
+	public static List<LegacyKey> keys(final Path wallet) {
 		final List<String> lines = read(wallet);
-		final SortedSet<String> addresses = new TreeSet<>();
+		final List<LegacyKey> keys = new ArrayList<>();
 
-		for (int number = 1; number <= lines.size(); number++) {
-			final String line = lines.get(number - 1);
+		try {
+			for (int number = 1; number <= lines.size(); number++) {
+				final String line = lines.get(number - 1);
 
-			if (!line.isBlank() && !line.startsWith(COMMENT)) {
-				addresses.add(address(wallet, number, line.split(" ", 2)[0]));
+				if (!line.isBlank() && !line.startsWith(COMMENT)) {
+					keys.add(key(wallet, number, line.split(" ", 2)[0]));
+				}
 			}
-		}
 
-		if (addresses.isEmpty()) {
-			throw refusal(wallet, "it holds no private keys");
-		}
+			if (keys.isEmpty()) {
+				throw refusal(wallet, "it holds no private keys");
+			}
 
-		return addresses;
+			return keys;
+		} catch (IllegalArgumentException e) {
+			keys.forEach(LegacyKey::wipe);
+			throw e;
+		}
 	}
 
 	private static List<String> read(final Path wallet) {
@@ -81,27 +93,11 @@ public final class WalletDump {
 	}
 
 	/* The refusal names the line but never the key, and leaves out the cause, which may quote a character of it. */
-	private static String address(final Path wallet, final int number, final String key) {
+	private static LegacyKey key(final Path wallet, final int number, final String text) {
 		try {
-			return LegacyAddress.of(publicKey(key));
+			return LegacyKey.parse(text);
 		} catch (IllegalArgumentException _) {
 			throw refusal(wallet, "line " + number + " holds no private key");
-		}
-	}
-
-	private static byte[] publicKey(final String key) {
-		final byte[] decoded = Base58.decodeChecked(key);
-
-		try {
-			final boolean compressed = decoded.length == COMPRESSED_SIZE && decoded[COMPRESSED_SIZE - 1] == 1;
-
-			if (decoded.length != UNCOMPRESSED_SIZE && !compressed || decoded[0] != (byte) SECRET_VERSION) {
-				throw new IllegalArgumentException("Not a private key of this network");
-			}
-
-			return ECKey.fromPrivate(Arrays.copyOfRange(decoded, 1, UNCOMPRESSED_SIZE), compressed).getPubKey();
-		} finally {
-			Arrays.fill(decoded, (byte) 0);
 		}
 	}
 
