@@ -18,11 +18,10 @@ package org.unigrid.janus.core.legacy;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Field;
+import java.lang.foreign.Arena;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +36,6 @@ import java.util.List;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
-import sun.misc.Unsafe;
 
 /**
  * The key and value pairs in the {@code main} database of a Berkeley DB 4.8 btree file, the format the
@@ -80,8 +78,6 @@ public final class BerkeleyFile {
 	private static final int OUT_OF_LINE_ITEM_SIZE = 12;
 	private static final int INTERNAL_ITEM_HEADER = 12;
 
-	private static final Unsafe UNSAFE = unsafe();
-
 	public record Entry(byte[] key, byte[] value) {
 	}
 
@@ -114,21 +110,19 @@ public final class BerkeleyFile {
 	 * an empty one elsewhere, so values such as private keys are never copied out of the file.
 	 */
 	public static List<Entry> read(final Path path, final Predicate<byte[]> valueWanted) {
-		try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
+		/* Windows will not delete or replace a file while it is mapped, and a mapping made without an arena is
+		   only let go of when its buffer is collected, which may be never. Everything read out of it is a copy,
+		   so closing the arena releases the mapping as soon as the reading is done. */
+		try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ);
+			Arena arena = Arena.ofConfined()) {
+
 			if (channel.size() > Integer.MAX_VALUE) {
 				throw refusal(path, "it is larger than 2 GB", null);
 			}
 
-			final MappedByteBuffer file = channel.map(MapMode.READ_ONLY, 0, channel.size());
+			final ByteBuffer file = channel.map(MapMode.READ_ONLY, 0, channel.size(), arena).asByteBuffer();
 
-			/* Windows will not delete or replace a file while it is mapped, and Java lets go of a mapping
-			   only when the buffer is collected, which may be never. Everything read out of it is a copy,
-			   so the mapping is released as soon as the reading is done. */
-			try {
-				return new BerkeleyFile(path, file.order(ByteOrder.LITTLE_ENDIAN)).main(valueWanted);
-			} finally {
-				UNSAFE.invokeCleaner(file);
-			}
+			return new BerkeleyFile(path, file.order(ByteOrder.LITTLE_ENDIAN)).main(valueWanted);
 		} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 			/* A damaged file points past its own end sooner or later, and the buffer says so by throwing. */
 			throw refusal(path, "it is cut short", e);
@@ -313,16 +307,5 @@ public final class BerkeleyFile {
 
 	private static IllegalArgumentException refusal(final Path path, final String reason, final Throwable cause) {
 		return new IllegalArgumentException(path + " is not a wallet.dat Janus can read: " + reason, cause);
-	}
-
-	private static Unsafe unsafe() {
-		try {
-			final Field field = Unsafe.class.getDeclaredField("theUnsafe");
-
-			field.setAccessible(true);
-			return (Unsafe) field.get(null);
-		} catch (ReflectiveOperationException e) {
-			throw new IllegalStateException("Every Java platform Janus runs on provides sun.misc.Unsafe", e);
-		}
 	}
 }
