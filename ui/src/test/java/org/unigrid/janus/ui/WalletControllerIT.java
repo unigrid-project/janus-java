@@ -18,6 +18,7 @@ package org.unigrid.janus.ui;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
@@ -293,5 +294,24 @@ public class WalletControllerIT {
 
 		assertEquals("30 %", step.select(".preparing__percent").text());
 		assertTrue(step.text().startsWith("Downloading the legacy ledger"), step.text());
+	}
+
+	@Example
+	public void shouldSayHowFarTheReadingOfTheWalletHistoryHasGot() throws Exception {
+		rig.hedgehog().slowedBy(Duration.ofMillis(60));
+
+		final Screen screen = openedWithTheWalletLeftBehind();
+		Element reading = null;
+
+		for (int i = 0; i < 400 && reading == null; i++) {
+			Thread.sleep(25);
+			screen.trigger("#app", Map.of());
+			reading = screen.document().select(".preparing__step").stream()
+				.filter(step -> step.text().startsWith("Reading wallet history"))
+				.filter(step -> !step.select(".preparing__percent").isEmpty()).findFirst().orElse(null);
+		}
+
+		assertTrue(reading != null, "The step showed no percentage");
+		assertTrue(reading.select(".preparing__percent").text().matches("\\d{1,3} %"), reading.text());
 	}
 }

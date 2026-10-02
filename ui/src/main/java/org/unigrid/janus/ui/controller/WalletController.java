@@ -267,7 +267,7 @@ public class WalletController {
 			fetching ? service.progress() : null
 		));
 		steps.add(new Step("Reading wallet history", read.phase() == LedgerState.Phase.LOADED ? State.DONE
-			: ready ? State.ACTIVE : State.PENDING
+			: ready ? State.ACTIVE : State.PENDING, read.progress()
 		));
 		return steps;
 	}
