@@ -1,0 +1,98 @@
+name: Janus release
+
+# Started by hand only. It builds and tests the installers of the chosen commit on every platform and
+# then leaves a draft release with them, which nobody sees until it is published from the Releases page.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version to release, such as 2.0.0, without a leading v"
+        type: string
+        required: true
+      prerelease:
+        description: "Mark the release as a pre-release"
+        type: boolean
+        default: false
+
+jobs:
+  check:
+
+    runs-on: ubuntu-22.04
+
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+    - name: Check what is about to be released
+      env:
+        GH_TOKEN: ${{ github.token }}
+        VERSION: ${{ inputs.version }}
+        REPOSITORY: ${{ github.repository }}
+      run: |
+        if [ "$GITHUB_REF" != "refs/heads/master" ]; then
+          echo "Releases are made from master, not from $GITHUB_REF" >&2
+          exit 1
+        fi
+
+        if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+          echo "The version must look like 2.0.0, not '$VERSION'" >&2
+          exit 1
+        fi
+
+        if git ls-remote --exit-code --tags "https://github.com/$REPOSITORY" "refs/tags/v$VERSION" > /dev/null; then
+          echo "v$VERSION is already tagged" >&2
+          exit 1
+        fi
+
+        passed=$(gh run list --repo "$REPOSITORY" --workflow maven.yml --commit "$GITHUB_SHA" \
+          --status success --json databaseId --jq length)
+
+        if [ "$passed" -eq 0 ]; then
+          echo "The build checks have not passed for $GITHUB_SHA" >&2
+          exit 1
+        fi
+
+  installers:
+
+    needs: check
+    uses: ./.github/workflows/installers.yml
+    with:
+      version: ${{ inputs.version }}
+
+  draft:
+
+    needs: installers
+
+    runs-on: ubuntu-22.04
+
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: installers-*
+        merge-multiple: true
+        path: dist
+
+    - name: Write the checksums
+      working-directory: dist
+      run: sha256sum janus-* > SHA256SUMS
+
+    - name: Leave a draft release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        VERSION: ${{ inputs.version }}
+        PRERELEASE: ${{ inputs.prerelease }}
+      run: |
+        flags=""
+
+        if [ "$PRERELEASE" = "true" ]; then
+          flags="--prerelease"
+        fi
+
+        gh release create "v$VERSION" dist/* --draft $flags --target "$GITHUB_SHA" \
+          --title "Janus $VERSION" --notes-file .github/release-notes.md --generate-notes

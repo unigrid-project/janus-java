@@ -3,6 +3,14 @@ name: Janus installers
 on:
   workflow_dispatch:
 
+  # The release workflow builds its installers through this one, so they are built and tested the same way.
+  workflow_call:
+    inputs:
+      version:
+        description: "The version the installers are made for; the version of the build when left empty"
+        type: string
+        default: ''
+
   pull_request:
     branches: [ "master" ]
     paths:
@@ -43,6 +51,14 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+
+    # Only in this working copy: the version is never committed.
+    - name: Set the version to release
+      if: inputs.version
+      env:
+        VERSION: ${{ inputs.version }}
+      run: mvn -B versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+      shell: bash
 
     - name: Install the Linux packaging tools
       if: runner.os == 'Linux'
