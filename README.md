@@ -7,24 +7,20 @@ The Janus Wallet © Stiftelsen The Unigrid Foundation
 [![Test coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Funigrid-project%2Fjanus-java%2Fbadges%2Fcoverage.json)](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml)
 
 
-About Unigrid
--------------
+### About Unigrid
 For more information, as well as an immediately useable, binary version of the Unigrid software, see https://www.unigrid.org
 
-License
--------
+### License
 Janus is released under the terms of an addended GNU Affero GPL license version 3. See [COPYING](COPYING) and [COPYING.addendum](COPYING.addendum) for more information.
 
-Development process
--------------------
+### Development process
 Developers work in their own trees, then submit pull requests when they think their feature or bug fix is ready.
 
 The patch will be accepted if there is broad consensus. Developers should expect to rework and resubmit patches if the code doesn't match the coding conventions or level of quality of the project.
 
 The `master` branch is regularly built and tested, but is not guaranteed to be completely stable. [Tags](https://github.com/unigrid-project/janus-java/tags) are created regularly to indicate new official, stable release versions.
 
-Building
---------
+### Building
 ```
 mvn clean install
 ```
@@ -49,16 +45,14 @@ it. The installers end up in `desktop/target/release`. The previous JavaFX
 implementation, together with its release workflows, remains available on the
 `legacy-javafx` branch.
 
-Releasing
----------
+### Releasing
 On an up to date `master` whose build checks have passed, run `./create-release.sh [version [next]]`. It makes
 one commit that sets the release version, tags it, and makes one more that moves on to the next snapshot. The
 version defaults to the current snapshot without its suffix, and the next one to the following patch number.
 Nothing is pushed. When the commits look right, `git push --atomic origin master v<version>` starts the
 release workflow, which builds and tests the installers and leaves a draft release to review and publish.
 
-Running
--------
+## Running
 ```
 mvn install -DskipTests
 mvn -pl shell exec:java
@@ -74,9 +68,7 @@ Templates are resolved from the classpath with caching disabled, so running
 from a development classpath picks up an edited template on the next request
 without a restart.
 
-
-Automated Testing
------------------
+### Automated Testing
 Developers are strongly encouraged to write unit tests for new code, and to submit new unit tests for old code.
 
 `mvn install` runs the unit tests together with the flow tests in `ui`, which
