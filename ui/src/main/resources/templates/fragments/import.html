@@ -26,13 +26,13 @@
 					</span>
 					<span class="choice__arrow" th:text="${view.foundChosen()} ? '✓' : '→'">→</span>
 				</button>
-				<button class="choice" type="button" data-choose-file="Choose a wallet.dat"
+				<button class="choice" type="button" data-choose-file="Choose a wallet.dat or wallet dump"
 					th:classappend="${view.otherChosen() ? 'choice--selected' : (view.recommendsFile() ? 'choice--primary' : '')}"
 					hx-post="/action/import-file" hx-trigger="file-chosen" hx-vals="js:{path: event.detail.path}">
 					<span class="choice__icon">⌕</span>
 					<span class="choice__text">
-						<span class="choice__title">Choose a wallet.dat file</span>
-						<span class="choice__note" th:unless="${view.otherChosen()}">A backup, or a wallet from another computer</span>
+						<span class="choice__title">Choose a wallet.dat or wallet dump</span>
+						<span class="choice__note" th:unless="${view.otherChosen()}">A backup, a dumpwallet file, or a wallet from another computer</span>
 						<span class="choice__note path" th:if="${view.otherChosen()}" th:text="${view.chosen}">/mnt/backup/wallet.dat</span>
 					</span>
 					<span class="choice__arrow" th:text="${view.otherChosen()} ? '✓' : '→'">→</span>

@@ -64,7 +64,7 @@ public class ImportIT extends BrowserTest {
 		assertThat(page().locator(CHOOSE_FILE + " .choice__note")).hasText(wallet.toString());
 		assertThat(page().locator(CARD + " > .step__note").last()).containsText(rig().backups().toString());
 		assertEquals(false, page().evaluate("document.body.inert"));
-		assertEquals(List.of("choose-file:Choose a wallet.dat"), rig().window().commands());
+		assertEquals(List.of("choose-file:Choose a wallet.dat or wallet dump"), rig().window().commands());
 	}
 
 	/* The page is inert while the dialog is open, and must come back to life however it closed. */
