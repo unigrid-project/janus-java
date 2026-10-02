@@ -16,8 +16,10 @@
 
 package org.unigrid.janus.e2e;
 
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
@@ -28,10 +30,12 @@ import org.unigrid.janus.core.hedgehog.EntryKind;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/** The wallet dump the legacy daemon's dumpwallet writes, picked in the dialog of the host and opened. */
+/** The wallet dump the legacy daemon's dumpwallet writes, picked in the host's dialog and sealed behind a new phrase. */
 public class DumpIT extends BrowserTest {
-	private static final Page.WaitForSelectorOptions LOADED = new Page.WaitForSelectorOptions().setTimeout(15_000);
+	private static final Page.WaitForSelectorOptions LOADED = new Page.WaitForSelectorOptions().setTimeout(20_000);
+	private static final String CARD = "main > .card";
 	private static final String CHOOSE_FILE = "[data-choose-file]";
+	private static final String CONTINUE = CARD + " .button--primary";
 	private static final Pattern SELECTED = Pattern.compile("\\bchoice--selected\\b");
 
 	private static AddressTransaction received(final String txid, final int minutes, final String amount) {
@@ -40,35 +44,64 @@ public class DumpIT extends BrowserTest {
 		);
 	}
 
-	private Path pickTheDump() throws Exception {
-		final Path dump = rig().keepDumpElsewhere();
-
-		rig().window().picking(dump);
+	private Path pick(final Path file) {
+		rig().window().picking(file);
 		page().click("[hx-post='/action/import']");
 		page().click(CHOOSE_FILE);
-		return dump;
+		return file;
+	}
+
+	private void tapTheWordsBack(final List<String> words) {
+		for (final String word : words) {
+			final Locator tile = page().locator("button.tile:not([disabled])")
+				.filter(new Locator.FilterOptions().setHasText(Pattern.compile("^" + word + "$"))).first();
+
+			tile.click();
+			assertThat(page().locator(".tray .tile--picked").last()).containsText(word);
+		}
 	}
 
 	@Example
-	public void shouldTakeTheDumpPickedInTheDialogOfTheHost() throws Exception {
-		final Path dump = pickTheDump();
+	public void shouldTakeTheDumpPickedInTheDialogOfTheHostAndWarnAboutIt() throws Exception {
+		final Path dump = pick(rig().keepDumpElsewhere());
 
 		assertThat(page().locator(CHOOSE_FILE)).hasClass(SELECTED);
 		assertThat(page().locator(CHOOSE_FILE + " .choice__note")).hasText(dump.toString());
-		assertThat(page().locator("main > .card .button--primary")).isEnabled();
+		assertThat(page().locator(CARD + " > .step__note").last()).containsText("private keys unprotected");
+		assertThat(page().locator(CONTINUE)).hasAttribute("hx-post", "/action/import-dump");
 		assertEquals(List.of("choose-file:Choose a wallet.dat or wallet dump"), rig().window().commands());
+		assertEquals(false, Files.exists(rig().backups()));
 	}
 
 	@Example
-	public void shouldReachTheDashboardWithTheFundsOfTheKeysInTheDump() throws Exception {
+	public void shouldReachTheDashboardThroughANewPhraseWithTheFundsOfTheKeys() throws Exception {
 		final List<String> addresses = rig().dumpAddresses();
 
 		rig().hedgehog().address(addresses.get(0), "30", received("aa", 1, "30"))
 			.address(addresses.get(5), "12", received("bb", 2, "12"));
-		pickTheDump();
-		page().click("[hx-post='/action/open-wallet']");
+		pick(rig().keepDumpElsewhere());
+		page().click(CONTINUE);
+		assertThat(page().locator(".phrase__word")).hasCount(12);
+
+		final List<String> words = page().locator(".phrase__word > span:not(.phrase__n)").allTextContents();
+
+		page().click("[hx-post='/action/create-verify']");
+		tapTheWordsBack(words);
+		page().click(CONTINUE);
+		assertThat(page().locator(CARD + " .step__note")).containsText("imported keys");
+		page().fill("[name=password]", "correct horse");
+		page().fill("[name=repeat]", "correct horse");
+		page().click(CONTINUE);
 		page().waitForSelector(".dashboard__total", LOADED);
 
 		assertThat(page().locator(".dashboard__total")).hasText("42.00");
+	}
+
+	@Example
+	public void shouldSayWhatIsWrongWithAFileThatIsNoWallet() throws Exception {
+		pick(Files.writeString(rig().keepDumpElsewhere().resolveSibling("notes.txt"), "no keys here"));
+
+		assertThat(page().locator(CARD + " .step__error")).containsText("line 1 holds no private key");
+		assertThat(page().locator(CONTINUE)).isDisabled();
 	}
 }
