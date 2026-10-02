@@ -77,7 +77,7 @@ public final class WalletDump {
 		}
 	}
 
-	private static IllegalArgumentException refusal(final Path wallet, final String reason) {
-		return new IllegalArgumentException(wallet + " is not a wallet dump Janus can read: " + reason);
+	private static UnreadableWallet refusal(final Path wallet, final String reason) {
+		return new UnreadableWallet(wallet, "wallet dump", reason, null);
 	}
 }

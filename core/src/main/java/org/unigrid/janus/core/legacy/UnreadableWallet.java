@@ -12,29 +12,23 @@
 
     You should have received an addended copy of the GNU Affero General Public License with this program.
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
- */
+*/
 
 package org.unigrid.janus.core.legacy;
 
 import java.nio.file.Path;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
-/** The addresses a legacy wallet.dat holds keys for, read without its passphrase. */
-public final class LegacyWallet {
-	private LegacyWallet() {
+/** A file that is not a wallet of the kind it was read as, with the reason kept apart from the sentence around it. */
+public class UnreadableWallet extends IllegalArgumentException {
+	private final String reason;
+
+	public UnreadableWallet(final Path file, final String kind, final String reason, final Throwable cause) {
+		super(file + " is not a " + kind + " Janus can read: " + reason, cause);
+		this.reason = reason;
 	}
 
-	public static SortedSet<String> addresses(final Path wallet) {
-		final List<BerkeleyFile.Entry> entries = BerkeleyFile.read(wallet, WalletRecords::needsValue);
-
-		try {
-			return WalletRecords.publicKeys(entries).stream().map(LegacyAddress::of)
-				.collect(Collectors.toCollection(TreeSet::new));
-		} catch (IllegalArgumentException e) {
-			throw new UnreadableWallet(wallet, "wallet.dat", e.getMessage(), e);
-		}
+	/** What is wrong with the file, as a phrase that carries on after "because". */
+	public String reason() {
+		return reason;
 	}
 }

@@ -49,13 +49,12 @@ public class LegacyWalletTest {
 	@Example
 	public void shouldNameTheWalletWhoseRecordsItCannotRead() {
 		final Path wallet = BerkeleyFileTest.fixture("short-key.dat");
-		final IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-			() -> LegacyWallet.addresses(wallet)
-		);
+		final UnreadableWallet thrown = assertThrows(UnreadableWallet.class, () -> LegacyWallet.addresses(wallet));
 
 		assertEquals(wallet + " is not a wallet.dat Janus can read: a public key is 10 bytes",
 			thrown.getMessage()
 		);
+		assertEquals("a public key is 10 bytes", thrown.reason());
 	}
 
 	@Example

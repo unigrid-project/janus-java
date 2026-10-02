@@ -124,6 +124,14 @@ public class WalletDumpTest {
 	}
 
 	@Example
+	public void shouldKeepTheReasonOfARefusalApartFromTheSentenceAroundIt() throws IOException {
+		final Path file = dump(HEADER, TESTNET_TWO + " 2018");
+		final UnreadableWallet thrown = assertThrows(UnreadableWallet.class, () -> WalletDump.keys(file));
+
+		assertEquals("line 2 holds no private key", thrown.reason());
+	}
+
+	@Example
 	public void shouldRefuseAKeyOfTheWrongLength() throws IOException {
 		refused(dump(HEADER, "3QJmnh 2018-01-02T10:00:00Z label="));
 	}

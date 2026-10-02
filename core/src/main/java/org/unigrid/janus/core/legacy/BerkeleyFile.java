@@ -321,11 +321,11 @@ public final class BerkeleyFile {
 		return page * pageSize;
 	}
 
-	private IllegalArgumentException refusal(final String reason) {
+	private UnreadableWallet refusal(final String reason) {
 		return refusal(path, reason, null);
 	}
 
-	private static IllegalArgumentException refusal(final Path path, final String reason, final Throwable cause) {
-		return new IllegalArgumentException(path + " is not a wallet.dat Janus can read: " + reason, cause);
+	private static UnreadableWallet refusal(final Path path, final String reason, final Throwable cause) {
+		return new UnreadableWallet(path, "wallet.dat", reason, cause);
 	}
 }
