@@ -89,12 +89,27 @@ public class DumpIT extends BrowserTest {
 		tapTheWordsBack(words);
 		page().click(CONTINUE);
 		assertThat(page().locator(CARD + " .step__note")).containsText("imported keys");
+		assertThat(page().locator("input[type=password][name=password]")).hasCount(1);
+		assertThat(page().locator("input[type=password][name=repeat]")).hasCount(1);
 		page().fill("[name=password]", "correct horse");
 		page().fill("[name=repeat]", "correct horse");
 		page().click(CONTINUE);
 		page().waitForSelector(".dashboard__total", LOADED);
 
 		assertThat(page().locator(".dashboard__total")).hasText("42.00");
+	}
+
+	@Example
+	public void shouldNotAskForAPasswordWhenAWalletDatIsImported() throws Exception {
+		rig().hedgehog().address(rig().addresses().get(0), "30", received("aa", 1, "30"));
+		pick(rig().keepWalletElsewhere());
+		assertThat(page().locator(CONTINUE)).hasAttribute("hx-post", "/action/open-wallet");
+		page().click(CONTINUE);
+		page().waitForSelector(".dashboard__total", LOADED);
+
+		assertThat(page().locator(".dashboard__total")).hasText("30.00");
+		assertThat(page().locator("input[type=password]")).hasCount(0);
+		assertEquals(false, Files.exists(rig().wallets()));
 	}
 
 	@Example

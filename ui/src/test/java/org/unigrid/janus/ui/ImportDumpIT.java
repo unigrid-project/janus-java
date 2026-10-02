@@ -142,6 +142,40 @@ public class ImportDumpIT {
 	}
 
 	@Example
+	public void shouldAskForAPasswordTwiceAndSealNothingUntilBothAreRight() throws Exception {
+		final Screen screen = confirm(onTheNewPhrase()).click(CONFIRMED);
+
+		assertEquals(1, screen.document().select(PASSWORD + " input[type=password][name=password]").size());
+		assertEquals(1, screen.document().select(PASSWORD + " input[type=password][name=repeat]").size());
+
+		screen.submit(PASSWORD, Map.of("password", SECRET, "repeat", "correct hose"));
+		assertEquals("The two passwords differ", screen.find(".step__error").text());
+		screen.submit(PASSWORD, Map.of("password", "short", "repeat", "short"));
+		assertEquals("Use at least 8 characters", screen.find(".step__error").text());
+		assertEquals(List.of(), savedWallets());
+
+		screen.submit(PASSWORD, Map.of("password", SECRET, "repeat", SECRET));
+		assertEquals(1, savedWallets().size());
+	}
+
+	@Example
+	public void shouldNotAskForAPasswordWhenAWalletFileIsImported() throws Exception {
+		rig.hedgehog().address(rig.addresses().get(0), "30", entry("aa", 1, "30", EntryKind.RECEIVED));
+
+		final Path wallet = rig.keepWalletElsewhere();
+		final Screen screen = rig.open().click(IMPORT).trigger(CHOOSE_FILE, Map.of("path", wallet.toString()));
+
+		assertEquals("/action/open-wallet", screen.find(".step__actions .button--primary").attr("hx-post"));
+
+		final Screen opened = settle(screen.click("[hx-post=/action/open-wallet]"));
+
+		assertEquals("30.00", opened.find(".dashboard__total").text());
+		assertTrue(opened.document().select("input[type=password]").isEmpty());
+		assertEquals(List.of(), savedWallets());
+		assertEquals(500, opened.client().submit("/action/phrase-save", "password=a&repeat=a").statusCode());
+	}
+
+	@Example
 	public void shouldGoBackFromTheNewPhraseToTheImportCardAndForgetTheKeys() throws Exception {
 		final Screen screen = onTheNewPhrase().click(BACK);
 
