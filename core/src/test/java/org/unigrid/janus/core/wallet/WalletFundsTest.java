@@ -82,6 +82,7 @@ public class WalletFundsTest {
 		same("35", funds.total());
 		same("25", funds.awaitingMint());
 		assertEquals(new AddressBreakdown(2, 0, 0), funds.breakdown());
+		assertEquals(List.of("Hmint", "Hone"), funds.funded().stream().map(AddressBalance::address).toList());
 	}
 
 	@Example
@@ -97,6 +98,7 @@ public class WalletFundsTest {
 
 		assertEquals(new AddressBreakdown(1, 1, 2), funds.breakdown());
 		assertEquals(4, funds.breakdown().total());
+		assertEquals(List.of("Hfunded"), funds.funded().stream().map(AddressBalance::address).toList());
 		assertEquals(List.of(), funds.monthly());
 	}
 

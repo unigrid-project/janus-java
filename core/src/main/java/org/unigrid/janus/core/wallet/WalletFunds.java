@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,8 +35,8 @@ import org.unigrid.janus.core.wallet.WalletTransaction.Kind;
  * whatever the two disagree by is money awaiting its mint.
  */
 public record WalletFunds(BigDecimal total, BigDecimal historyNet, BigDecimal awaitingMint, BigDecimal received,
-	BigDecimal sent, BigDecimal rewards, AddressBreakdown breakdown, List<WalletTransaction> transactions,
-	List<MonthlyBalance> monthly, SnapshotInfo snapshot) {
+	BigDecimal sent, BigDecimal rewards, AddressBreakdown breakdown, List<AddressBalance> funded,
+	List<WalletTransaction> transactions, List<MonthlyBalance> monthly, SnapshotInfo snapshot) {
 
 	public static WalletFunds of(final Map<String, Optional<AddressBalance>> balances,
 		final List<WalletTransaction> transactions, final SnapshotInfo snapshot, final ZoneId zone) {
@@ -46,9 +47,14 @@ public record WalletFunds(BigDecimal total, BigDecimal historyNet, BigDecimal aw
 
 		return new WalletFunds(total, historyNet, total.subtract(historyNet).max(BigDecimal.ZERO),
 			sum(transactions, of(Kind.RECEIVED)), sum(transactions, of(Kind.SENT)).negate(),
-			sum(transactions, of(Kind.MINED).or(of(Kind.STAKED))), breakdown(balances), transactions,
-			monthly(transactions, zone), snapshot
+			sum(transactions, of(Kind.MINED).or(of(Kind.STAKED))), breakdown(balances), funded(balances),
+			transactions, monthly(transactions, zone), snapshot
 		);
+	}
+
+	private static List<AddressBalance> funded(final Map<String, Optional<AddressBalance>> balances) {
+		return balances.values().stream().flatMap(Optional::stream).filter(known -> known.balance().signum() > 0)
+			.sorted(Comparator.comparing(AddressBalance::balance).reversed()).toList();
 	}
 
 	private static Predicate<WalletTransaction> of(final Kind kind) {
