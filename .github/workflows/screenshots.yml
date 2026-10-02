@@ -20,7 +20,7 @@ jobs:
     - name: Fetch the installer of an earlier installers run
       env:
         GH_TOKEN: ${{ github.token }}
-      run: gh run download 36953666841 --repo "$GITHUB_REPOSITORY" --name installers-macOS --dir download
+      run: gh run download 36985951936 --repo "$GITHUB_REPOSITORY" --name installers-macOS --dir download
 
     - name: Put the app in Applications the way a download leaves it
       run: |
@@ -45,11 +45,19 @@ jobs:
         screencapture -x shots/01-blocked-4s.png
         sleep 8
         screencapture -x shots/02-blocked-12s.png
-        killall CoreServicesUIAgent || true
-        sleep 2
+        # Scripting the interface may be refused, so each try is left to run on its own and put an end to.
+        (osascript -e 'tell application "System Events" to click button "Done" of window 1 of process "CoreServicesUIAgent"' > done.log 2>&1 &)
+        sleep 8
+        pkill osascript || true
+        screencapture -x shots/03-after-done.png
         (open "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Security" > settings.log 2>&1 &)
         sleep 10
-        screencapture -x shots/03-security-section.png
+        screencapture -x shots/04-security-section.png
+        (osascript -e 'tell application "System Events" to key code 119' > end.log 2>&1 &)
+        sleep 5
+        pkill osascript || true
+        screencapture -x shots/05-security-section-end.png
+        cat done.log end.log || true
         ls -l shots
         cat open.log settings.log || true
 
@@ -68,7 +76,7 @@ jobs:
     - name: Fetch the installer of an earlier installers run
       env:
         GH_TOKEN: ${{ github.token }}
-      run: gh run download 36953666841 --repo "$GITHUB_REPOSITORY" --name installers-Windows --dir download
+      run: gh run download 36985951936 --repo "$GITHUB_REPOSITORY" --name installers-Windows --dir download
       shell: bash
 
     - name: Open it the way a download leaves it and photograph what Windows says
@@ -115,6 +123,17 @@ jobs:
         [Mouse]::Click(298, 228)
         Start-Sleep 3
         Shot "02-more-info.png"
+
+        [Mouse]::Click(581, 555)
+        Start-Sleep 10
+        Shot "03-installer-opens.png"
+
+        $pages = "04-next", "05-next", "06-next", "07-next", "08-next"
+        foreach ($page in $pages) {
+          [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+          Start-Sleep 6
+          Shot "$page.png"
+        }
 
     - uses: actions/upload-artifact@v4
       if: always()
