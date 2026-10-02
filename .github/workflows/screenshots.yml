@@ -45,9 +45,11 @@ jobs:
         screencapture -x shots/01-blocked-4s.png
         sleep 8
         screencapture -x shots/02-blocked-12s.png
-        (open "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension" > settings.log 2>&1 &)
+        killall CoreServicesUIAgent || true
+        sleep 2
+        (open "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Security" > settings.log 2>&1 &)
         sleep 10
-        screencapture -x shots/03-privacy-and-security.png
+        screencapture -x shots/03-security-section.png
         ls -l shots
         cat open.log settings.log || true
 
@@ -85,16 +87,34 @@ jobs:
           Write-Host "saved $name"
         }
 
+        Add-Type -TypeDefinition @"
+        using System;
+        using System.Runtime.InteropServices;
+        public class Mouse {
+          [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
+          [DllImport("user32.dll")] public static extern void mouse_event(uint flags, uint dx, uint dy, uint data, UIntPtr extra);
+          public static void Click(int x, int y) {
+            SetCursorPos(x, y);
+            mouse_event(2, 0, 0, 0, UIntPtr.Zero);
+            mouse_event(4, 0, 0, 0, UIntPtr.Zero);
+          }
+        }
+        "@
+
+        # The runner's own console is in the way, so everything is put out of sight first.
+        (New-Object -ComObject Shell.Application).MinimizeAll()
+        Start-Sleep 2
+
         $msi = Get-ChildItem download\*.msi
         Set-Content -Path $msi.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3`r`nHostUrl=https://github.com/"
-        Write-Host (Get-Content -Path $msi.FullName -Stream Zone.Identifier)
         Shot "00-desktop.png"
         Start-Process -FilePath "explorer.exe" -ArgumentList $msi.FullName
-        Write-Host "started"
         Start-Sleep 10
-        Shot "01-opened.png"
-        Start-Sleep 10
-        Shot "02-opened-20s.png"
+        Shot "01-windows-protected-your-pc.png"
+
+        [Mouse]::Click(298, 228)
+        Start-Sleep 3
+        Shot "02-more-info.png"
 
     - uses: actions/upload-artifact@v4
       if: always()
