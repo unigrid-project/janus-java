@@ -15,6 +15,9 @@ case "$(uname -s)" in
 Linux)
 	cp "$dist"/unigrid_*.deb "$out/janus-$version-linux-x86_64.deb"
 	cp "$dist"/unigrid-*.rpm "$out/janus-$version-linux-x86_64.rpm"
+	# A copy unpacked from the tar.gz has no package to put it in the menu, so it brings what does that.
+	cp "$here/src/main/packaging/linux/Unigrid.desktop" "$dist/Unigrid/lib/Unigrid.desktop.in"
+	install -m 755 "$here/src/main/packaging/linux/install-desktop.sh" "$dist/Unigrid/install-desktop.sh"
 	tar -C "$dist" -czf "$out/janus-$version-linux-x86_64.tar.gz" Unigrid
 	;;
 Darwin)
