@@ -148,6 +148,15 @@ public class ControlCenterRig implements AutoCloseable {
 		return WalletFixture.copyTo(home.resolve("elsewhere.dat"));
 	}
 
+	/** A wallet dump somewhere the person would have to point at themselves, and the addresses it holds. */
+	public Path keepDumpElsewhere() throws IOException {
+		return WalletFixture.copyDumpTo(home.resolve("elsewhere.dump"));
+	}
+
+	public List<String> dumpAddresses() throws IOException {
+		return WalletFixture.dumpAddresses();
+	}
+
 	@Override
 	public void close() throws Exception {
 		server.stop();

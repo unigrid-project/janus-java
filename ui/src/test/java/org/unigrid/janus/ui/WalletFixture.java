@@ -26,19 +26,37 @@ import java.util.List;
 /** The legacy wallet the rigs hand out, from the fixtures of core, and the addresses it holds keys for. */
 final class WalletFixture {
 	private static final String FIXTURE = "/org/unigrid/janus/core/legacy/plain-wallet";
+	private static final String DUMP = "/org/unigrid/janus/core/legacy/wallet.dump";
 
 	private WalletFixture() {
 	}
 
 	static Path copyTo(final Path to) throws IOException {
-		try (InputStream in = WalletFixture.class.getResourceAsStream(FIXTURE + ".dat")) {
+		return copy(FIXTURE + ".dat", to);
+	}
+
+	static List<String> addresses() throws IOException {
+		return lines(FIXTURE + ".addresses");
+	}
+
+	/** The same kind of wallet as a dumpwallet text file, with keys of its own. */
+	static Path copyDumpTo(final Path to) throws IOException {
+		return copy(DUMP, to);
+	}
+
+	static List<String> dumpAddresses() throws IOException {
+		return lines(DUMP + ".addresses");
+	}
+
+	private static Path copy(final String resource, final Path to) throws IOException {
+		try (InputStream in = WalletFixture.class.getResourceAsStream(resource)) {
 			Files.copy(in, to);
 			return to;
 		}
 	}
 
-	static List<String> addresses() throws IOException {
-		try (InputStream in = WalletFixture.class.getResourceAsStream(FIXTURE + ".addresses")) {
+	private static List<String> lines(final String resource) throws IOException {
+		try (InputStream in = WalletFixture.class.getResourceAsStream(resource)) {
 			return new String(in.readAllBytes(), StandardCharsets.UTF_8).lines().toList();
 		}
 	}
