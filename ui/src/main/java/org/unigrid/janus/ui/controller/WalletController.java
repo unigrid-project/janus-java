@@ -51,9 +51,11 @@ import org.unigrid.janus.ui.view.AppView;
 import org.unigrid.janus.ui.view.AppView.Tab;
 import org.unigrid.janus.ui.view.DashboardView;
 import org.unigrid.janus.ui.view.DashboardView.Bar;
+import org.unigrid.janus.ui.view.DashboardView.FundedPage;
 import org.unigrid.janus.ui.view.DashboardView.Holding;
 import org.unigrid.janus.ui.view.ExportNoteView;
 import org.unigrid.janus.ui.view.Filter;
+import org.unigrid.janus.ui.view.FundedBodyView;
 import org.unigrid.janus.ui.view.ImportView;
 import org.unigrid.janus.ui.view.PreparingView;
 import org.unigrid.janus.ui.view.PreparingView.Step;
@@ -89,6 +91,8 @@ public class WalletController {
 	private volatile Filter filter = Filter.ALL;
 	private volatile String query = "";
 	private volatile boolean listingFunded;
+	private volatile int fundedPage = 1;
+	private volatile String fundedQuery = "";
 	private volatile String shown = "";
 
 	@Inject
@@ -158,9 +162,26 @@ public class WalletController {
 
 		if (form.has("funded")) {
 			listingFunded = Boolean.parseBoolean(form.get("funded"));
+			fundedPage = 1;
+			fundedQuery = "";
 		}
 
 		return app();
+	}
+
+	/* A filter starts again at the first page, a page keeps the filter. */
+	@Action("funded")
+	public FundedBodyView onFundedPage(final Form form) {
+		if (form.get("fq") != null) {
+			fundedQuery = form.get("fq").strip();
+			fundedPage = 1;
+		}
+
+		if (form.has("page")) {
+			fundedPage = Integer.parseInt(form.get("page"));
+		}
+
+		return new FundedBodyView(FundedPage.of(holdings(loaded()), fundedQuery, fundedPage));
 	}
 
 	@Action("activity")
@@ -297,16 +318,22 @@ public class WalletController {
 		final List<WalletTransaction> transactions = funds.transactions();
 		final int tip = funds.snapshot().tipHeight();
 
+		final List<Holding> holdings = holdings(funds);
+
 		return new DashboardView(Amounts.plain(funds.total()),
 			funds.awaitingMint().signum() > 0 ? Amounts.plain(funds.awaitingMint()) : null,
 			months.stream().map(month -> bar(month, fullest)).toList(),
 			months.isEmpty() ? "" : Times.shortMonth(months.getFirst().month()),
 			months.isEmpty() ? "" : Times.shortMonth(months.getLast().month()),
-			Amounts.count(tip), funds.funded().stream().map(funded -> holding(funded, funds)).toList(),
-			funds.breakdown().historyOnly(), funds.breakdown().neverUsed(), Amounts.count(transactions.size()),
-			active(transactions), LedgerRows.of(transactions, 0, Math.min(RECENT, transactions.size()), tip,
-				zone, false), listingFunded
+			Amounts.count(tip), holdings, funds.breakdown().historyOnly(), funds.breakdown().neverUsed(),
+			Amounts.count(transactions.size()), active(transactions),
+			LedgerRows.of(transactions, 0, Math.min(RECENT, transactions.size()), tip, zone, false),
+			listingFunded, FundedPage.of(holdings, fundedQuery, fundedPage)
 		);
+	}
+
+	private List<Holding> holdings(final WalletFunds funds) {
+		return funds.funded().stream().map(funded -> holding(funded, funds)).toList();
 	}
 
 	/* An address still awaiting its mint holds funds but has no history to have a last month in. */

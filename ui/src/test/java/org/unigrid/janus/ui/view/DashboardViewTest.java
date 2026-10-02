@@ -17,14 +17,17 @@
 package org.unigrid.janus.ui.view;
 
 import java.util.List;
+import java.util.stream.IntStream;
 import net.jqwik.api.Example;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.unigrid.janus.ui.view.DashboardView.Bar;
+import org.unigrid.janus.ui.view.DashboardView.FundedPage;
 import org.unigrid.janus.ui.view.DashboardView.Holding;
 import org.unigrid.janus.web.Templates;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DashboardViewTest {
@@ -37,10 +40,25 @@ public class DashboardViewTest {
 	);
 
 	private static DashboardView view(final String awaiting, final boolean listingFunded) {
+		return view(awaiting, listingFunded, FUNDED, FundedPage.of(FUNDED, "", 1));
+	}
+
+	private static DashboardView view(final String awaiting, final boolean listingFunded,
+		final List<Holding> funded, final FundedPage page) {
+
 		return new DashboardView("1,234.50", awaiting, List.of(new Bar(40, "Feb 2019: 500.00 UGD"),
-			new Bar(100, "Mar 2019: 1,234.50 UGD")), "Feb 2019", "Mar 2019", "3,172,666", FUNDED, 3, 101, "17",
-			"1 Feb 2019 – 1 Mar 2019", List.of(ROW), listingFunded
+			new Bar(100, "Mar 2019: 1,234.50 UGD")), "Feb 2019", "Mar 2019", "3,172,666", funded, 3, 101, "17",
+			"1 Feb 2019 – 1 Mar 2019", List.of(ROW), listingFunded, page
 		);
+	}
+
+	private static List<Holding> holdings(final int count) {
+		return IntStream.rangeClosed(1, count)
+			.mapToObj(n -> new Holding("Haddr" + n, n + ".00", "1.0%", "1", "Mar 2019")).toList();
+	}
+
+	private static Element opened(final List<Holding> funded, final String query, final int page) {
+		return render(view(null, true, funded, FundedPage.of(funded, query, page))).selectFirst(".funded");
 	}
 
 	private static DashboardView view(final String awaiting) {
@@ -111,6 +129,96 @@ public class DashboardViewTest {
 		assertEquals("{\"funded\":\"false\"}", dialog.selectFirst(".funded__close").attr("hx-vals"));
 		assertEquals("{\"funded\":\"false\"}", dialog.attr("hx-vals"));
 		assertEquals("click target:.funded, keyup[key=='Escape'] from:body", dialog.attr("hx-trigger"));
+	}
+
+	@Example
+	public void shouldShowFiveFundedAddressesAtATime() {
+		final Element dialog = opened(holdings(12), "", 1);
+
+		assertEquals(List.of("Haddr1", "Haddr2", "Haddr3", "Haddr4", "Haddr5"),
+			dialog.select(".funded__text").eachText()
+		);
+		assertEquals("12 of 116 hold funds", dialog.selectFirst(".funded__heading").text());
+		assertEquals("1–5 of 12", dialog.selectFirst(".funded__range").text());
+	}
+
+	@Example
+	public void shouldPageForwardAndBackThroughTheFundedAddresses() {
+		final Element middle = opened(holdings(12), "", 2);
+		final Element last = opened(holdings(12), "", 3);
+		final Element first = opened(holdings(12), "", 1);
+
+		assertEquals(List.of("Haddr6", "Haddr7", "Haddr8", "Haddr9", "Haddr10"),
+			middle.select(".funded__text").eachText()
+		);
+		assertEquals("6–10 of 12", middle.selectFirst(".funded__range").text());
+		assertEquals("{\"page\":\"1\"}", middle.selectFirst(".funded__previous").attr("hx-vals"));
+		assertEquals("{\"page\":\"3\"}", middle.selectFirst(".funded__next").attr("hx-vals"));
+		assertEquals(List.of("Haddr11", "Haddr12"), last.select(".funded__text").eachText());
+		assertEquals("11–12 of 12", last.selectFirst(".funded__range").text());
+		assertTrue(last.selectFirst(".funded__next").hasAttr("disabled"));
+		assertFalse(last.selectFirst(".funded__previous").hasAttr("disabled"));
+		assertTrue(first.selectFirst(".funded__previous").hasAttr("disabled"));
+	}
+
+	@Example
+	public void shouldReplaceOnlyTheListWhenPaging() {
+		final Element dialog = opened(holdings(12), "", 2);
+
+		for (final String button : List.of(".funded__previous", ".funded__next")) {
+			assertEquals("/action/funded", dialog.selectFirst(button).attr("hx-post"));
+			assertEquals("#funded-body", dialog.selectFirst(button).attr("hx-target"));
+			assertEquals("outerHTML", dialog.selectFirst(button).attr("hx-swap"));
+		}
+
+		assertEquals(1, dialog.select("#funded-body.funded__body").size());
+		assertTrue(dialog.select("#funded-body .funded__search").isEmpty());
+	}
+
+	@Example
+	public void shouldNotPageAFewFundedAddresses() {
+		final Element dialog = opened(holdings(5), "", 1);
+
+		assertEquals(5, dialog.select(".funded__text").size());
+		assertTrue(dialog.select(".funded__previous, .funded__next").isEmpty());
+	}
+
+	@Example
+	public void shouldFilterTheFundedAddressesByWhatTheirAddressHolds() {
+		final Element dialog = opened(holdings(12), "ADDR1", 1);
+
+		assertEquals(List.of("Haddr1", "Haddr10", "Haddr11", "Haddr12"), dialog.select(".funded__text").eachText());
+		assertEquals("1–4 of 4", dialog.selectFirst(".funded__range").text());
+		assertEquals("12 of 116 hold funds", dialog.selectFirst(".funded__heading").text());
+	}
+
+	@Example
+	public void shouldOfferAFilterThatSendsWhatIsTypedAndStartsAtTheFirstPage() {
+		final Element search = opened(holdings(12), "Haddr1", 1).selectFirst(".funded__search input[name=fq]");
+
+		assertEquals("Haddr1", search.attr("value"));
+		assertEquals("/action/funded", search.attr("hx-post"));
+		assertEquals("#funded-body", search.attr("hx-target"));
+		assertEquals("outerHTML", search.attr("hx-swap"));
+		assertEquals("input changed delay:300ms, search", search.attr("hx-trigger"));
+	}
+
+	@Example
+	public void shouldSayWhenNoFundedAddressMatchesTheFilter() {
+		final Element dialog = opened(holdings(12), "zzz", 1);
+
+		assertTrue(dialog.select(".funded__address").isEmpty());
+		assertEquals("No address matches", dialog.selectFirst(".funded__none").text());
+		assertTrue(dialog.select(".funded__range, .funded__previous, .funded__next").isEmpty());
+	}
+
+	@Example
+	public void shouldStayWithinTheFirstAndLastPageWhateverPageIsAskedFor() {
+		assertEquals(3, FundedPage.of(holdings(12), "", 99).number());
+		assertEquals(1, FundedPage.of(holdings(12), "", 0).number());
+		assertEquals(1, FundedPage.of(holdings(12), "", -4).number());
+		assertEquals(1, FundedPage.of(List.of(), "", 5).number());
+		assertEquals(1, FundedPage.of(List.of(), "", 5).pages());
 	}
 
 	@Example

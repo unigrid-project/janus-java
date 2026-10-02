@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
@@ -44,6 +45,7 @@ import org.unigrid.janus.core.wallet.WalletLedger;
 import org.unigrid.janus.ui.view.ActivityView;
 import org.unigrid.janus.ui.view.AppView;
 import org.unigrid.janus.ui.view.DashboardView;
+import org.unigrid.janus.ui.view.DashboardView.FundedPage;
 import org.unigrid.janus.ui.view.DashboardView.Holding;
 import org.unigrid.janus.ui.view.ExportNoteView;
 import org.unigrid.janus.ui.view.ImportView;
@@ -218,6 +220,74 @@ public class WalletControllerTest {
 		assertEquals("", assertInstanceOf(ActivityView.class,
 			controller.onClickActivity(Form.parse("filter=ALL&q=")).screen()
 		).query());
+	}
+
+	private DashboardView dashboardOf(final String form) {
+		return assertInstanceOf(DashboardView.class, controller.onClickDashboard(Form.parse(form)).screen());
+	}
+
+	private List<String> shown(final DashboardView view) {
+		return view.fundedPage().shown().stream().map(Holding::address).toList();
+	}
+
+	@Example
+	public void shouldListTheFundedAddressesFiveAtATimeFullestFirstAndKeepToTheLastPage() throws Exception {
+		chooseTheFixture();
+
+		for (int i = 0; i < 12; i++) {
+			final String balance = String.valueOf((i + 1) * 10);
+
+			stand.address(addresses.get(i), balance, entry("t" + i, i, balance, EntryKind.RECEIVED));
+		}
+
+		settle(controller.onClickContinue());
+
+		final List<String> fullestFirst = IntStream.rangeClosed(1, 12).map(n -> 12 - n).mapToObj(addresses::get)
+			.toList();
+
+		assertEquals(fullestFirst.subList(0, 5), shown(dashboardOf("funded=true")));
+		assertEquals(fullestFirst.subList(5, 10), controller.onFundedPage(Form.parse("page=2")).fundedPage().shown()
+			.stream().map(Holding::address).toList()
+		);
+		assertEquals(fullestFirst.subList(10, 12), controller.onFundedPage(Form.parse("page=3")).fundedPage().shown()
+			.stream().map(Holding::address).toList()
+		);
+		assertEquals(3, controller.onFundedPage(Form.parse("page=99")).fundedPage().number());
+		assertEquals(3, dashboardOf("funded=true").fundedPage().pages());
+	}
+
+	@Example
+	public void shouldFilterTheFundedAddressesStartOverAtTheFirstPageAndForgetThemOnClosing() throws Exception {
+		chooseTheFixture();
+
+		for (int i = 0; i < 12; i++) {
+			stand.address(addresses.get(i), "10", entry("t" + i, i, "10", EntryKind.RECEIVED));
+		}
+
+		settle(controller.onClickContinue());
+
+		final String part = addresses.get(3).substring(8, 16);
+
+		dashboardOf("funded=true");
+		assertEquals(3, controller.onFundedPage(Form.parse("page=3")).fundedPage().number());
+
+		final FundedPage filtered = controller.onFundedPage(Form.parse("fq=" + part)).fundedPage();
+
+		assertEquals(List.of(addresses.get(3)), filtered.shown().stream().map(Holding::address).toList());
+		assertEquals(1, filtered.number());
+		assertEquals(part, filtered.query());
+		assertEquals(1, controller.onFundedPage(Form.parse("page=1")).fundedPage().matches());
+		assertEquals(1, controller.onFundedPage(Form.parse("fq=" + part.toLowerCase())).fundedPage().matches());
+		assertEquals(12, controller.onFundedPage(Form.parse("fq=")).fundedPage().matches());
+
+		dashboardOf("funded=false");
+		assertEquals("", dashboardOf("funded=true").fundedPage().query());
+		assertEquals(1, dashboardOf("funded=true").fundedPage().number());
+	}
+
+	@Example
+	public void shouldHaveNoFundedAddressesToPageThroughBeforeTheWalletIsLoaded() {
+		assertThrows(IllegalStateException.class, () -> controller.onFundedPage(Form.parse("page=2")));
 	}
 
 	@Example

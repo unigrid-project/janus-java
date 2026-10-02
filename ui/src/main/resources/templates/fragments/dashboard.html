@@ -71,24 +71,43 @@
 						<button class="funded__close" type="button" hx-post="/action/dashboard" hx-vals='{"funded":"false"}'
 							aria-label="Close">✕</button>
 					</header>
-					<div class="funded__list">
-						<div class="funded__address" th:each="holding : ${view.funded()}">
-							<div class="funded__line">
-								<span class="funded__dot" aria-hidden="true"></span>
-								<span class="funded__text" th:text="${holding.address()}">H6stkFpUvrJMqWigLfPwp3onsvzZzZuF7V</span>
-								<button class="funded__activity" type="button" hx-post="/action/activity"
-									th:hx-vals="${holding.vals()}">View activity →</button>
-							</div>
-							<div class="funded__figures">
-								<span class="funded__balance"><th:block th:replace="~{fragments/amount :: amount(${holding.balance()})}">23,815.40</th:block> <small class="funded__unit">UGD</small></span>
-								<span><span class="funded__key">share </span><th:block th:text="${holding.share()}">96.0%</th:block></span>
-								<span><span class="funded__key">txs </span><th:block th:text="${holding.transactions()}">11</th:block></span>
-								<span><span class="funded__key">last </span><th:block th:text="${holding.last()}">Jan 2019</th:block></span>
-							</div>
-						</div>
-					</div>
+					<label class="search funded__search">
+						<span aria-hidden="true">⌕</span>
+						<input type="search" name="fq" th:value="${view.fundedPage().query()}" placeholder="Filter by address"
+							autocomplete="off" spellcheck="false" hx-post="/action/funded" hx-trigger="input changed delay:300ms, search"
+							hx-target="#funded-body" hx-swap="outerHTML">
+					</label>
+					<div th:replace="~{fragments/dashboard :: funded-body}"></div>
 					<p class="funded__foot" th:text="'Balances as of frozen block ' + ${view.tip()}">Balances as of frozen block 3,172,666</p>
 				</div>
+			</div>
+		</div>
+		<div th:fragment="funded-body" id="funded-body" class="funded__body">
+			<div class="funded__list">
+				<div class="funded__address" th:each="holding : ${view.fundedPage().shown()}">
+					<div class="funded__line">
+						<span class="funded__dot" aria-hidden="true"></span>
+						<span class="funded__text" th:text="${holding.address()}">H6stkFpUvrJMqWigLfPwp3onsvzZzZuF7V</span>
+						<button class="funded__activity" type="button" hx-post="/action/activity"
+							th:hx-vals="${holding.vals()}">View activity →</button>
+					</div>
+					<div class="funded__figures">
+						<span class="funded__balance"><th:block th:replace="~{fragments/amount :: amount(${holding.balance()})}">23,815.40</th:block> <small class="funded__unit">UGD</small></span>
+						<span><span class="funded__key">share </span><th:block th:text="${holding.share()}">96.0%</th:block></span>
+						<span><span class="funded__key">txs </span><th:block th:text="${holding.transactions()}">11</th:block></span>
+						<span><span class="funded__key">last </span><th:block th:text="${holding.last()}">Jan 2019</th:block></span>
+					</div>
+				</div>
+				<p class="funded__none" th:if="${view.fundedPage().none()}">No address matches</p>
+			</div>
+			<div class="funded__pager" th:unless="${view.fundedPage().none()}">
+				<button class="button funded__previous" type="button" hx-post="/action/funded"
+					th:hx-vals="${view.fundedPage().previousVals()}" hx-target="#funded-body" hx-swap="outerHTML"
+					th:if="${view.fundedPage().paged()}" th:disabled="${!view.fundedPage().hasPrevious()}">‹ Previous</button>
+				<span class="funded__range" th:text="${view.fundedPage().range()}">1–5 of 12</span>
+				<button class="button funded__next" type="button" hx-post="/action/funded"
+					th:hx-vals="${view.fundedPage().nextVals()}" hx-target="#funded-body" hx-swap="outerHTML"
+					th:if="${view.fundedPage().paged()}" th:disabled="${!view.fundedPage().hasNext()}">Next ›</button>
 			</div>
 		</div>
 	</body>
