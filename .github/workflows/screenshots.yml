@@ -1,0 +1,103 @@
+name: Install screenshots
+
+# Photographs what a person sees when they open the unsigned installers from a download, on the runners that
+# have a desktop. Runs on this branch only and keeps the pictures as artifacts.
+on:
+  push:
+    branches: [ "screenshots" ]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  macos:
+
+    runs-on: macos-15
+
+    steps:
+    - name: Fetch the installer of an earlier installers run
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh run download 36953666841 --repo "$GITHUB_REPOSITORY" --name installers-macOS --dir download
+
+    - name: Put the app in Applications the way a download leaves it
+      run: |
+        spctl --status || true
+        sw_vers
+        stamp="0083;$(printf '%x' "$(date +%s)");Safari;"
+        dmg=$(ls download/*.dmg)
+        xattr -w com.apple.quarantine "$stamp" "$dmg"
+        hdiutil attach -nobrowse -mountpoint /Volumes/UnigridInstaller "$dmg"
+        cp -R /Volumes/UnigridInstaller/Unigrid.app /Applications/
+        hdiutil detach /Volumes/UnigridInstaller
+        xattr -w com.apple.quarantine "$stamp" /Applications/Unigrid.app
+        xattr -l /Applications/Unigrid.app
+
+    - name: Open it and photograph what macOS says
+      run: |
+        mkdir shots
+        screencapture -x shots/00-desktop.png
+        open /Applications/Unigrid.app || true
+        sleep 10
+        screencapture -x shots/01-blocked.png
+        open "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension" || true
+        sleep 8
+        screencapture -x shots/02-privacy-and-security.png
+        osascript -e 'tell application "System Events" to key code 119' || true
+        sleep 2
+        screencapture -x shots/03-privacy-and-security-end.png
+        ls -l shots
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: screenshots-macos
+        path: shots
+
+  windows:
+
+    runs-on: windows-2022
+
+    steps:
+    - name: Fetch the installer of an earlier installers run
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh run download 36953666841 --repo "$GITHUB_REPOSITORY" --name installers-Windows --dir download
+      shell: bash
+
+    - name: Open it the way a download leaves it and photograph what Windows says
+      shell: pwsh
+      run: |
+        Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+        New-Item shots -ItemType Directory | Out-Null
+
+        function Shot($name) {
+          $screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+          $picture = New-Object System.Drawing.Bitmap $screen.Width, $screen.Height
+          $canvas = [System.Drawing.Graphics]::FromImage($picture)
+          $canvas.CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
+          $picture.Save((Join-Path $PWD "shots\$name"))
+        }
+
+        $msi = Get-ChildItem download\*.msi
+        Set-Content -Path $msi.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3`r`nHostUrl=https://github.com/"
+        Get-Content -Path $msi.FullName -Stream Zone.Identifier
+        Shot "00-desktop.png"
+        Start-Process $msi.FullName
+        Start-Sleep 12
+        Shot "01-opened.png"
+
+        $steps = "02-next", "03-licence", "04-options", "05-progress", "06-done"
+        foreach ($step in $steps) {
+          [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+          Start-Sleep 6
+          Shot "$step.png"
+        }
+        Get-ChildItem shots
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: screenshots-windows
+        path: shots
