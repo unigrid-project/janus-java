@@ -22,10 +22,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
+import org.unigrid.janus.core.legacy.LegacyKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -33,6 +35,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.unigrid.janus.core.OwnerOnlyAssertions.assertOwnerOnly;
 
 public class EvmWalletStoreTest {
+	private static final String COMPRESSED_WIF = "PdiUUh8dnXB36B2XcbPdodUX5Ujoj2VDubJwcW1V8DJu6eQQxzNx";
+
 	private Path home;
 	private Path folder;
 	private EvmWalletStore store;
@@ -58,6 +62,44 @@ public class EvmWalletStoreTest {
 		final EvmWallet wallet = EvmWallet.create(EvmWalletTest.PHRASE, "pw", EvmWalletTest.VAULT);
 
 		assertEquals(wallet, EvmWalletStore.read(store.save(wallet)));
+	}
+
+	private static EvmWallet withLegacyKeys() {
+		final List<LegacyKey> keys = List.of(LegacyKey.parse(COMPRESSED_WIF),
+			LegacyKey.parse("68QtzUftP6UedWuuhgxsw4jV7TDsTjvyPnqUKvFA6G2LWUipq9J")
+		);
+
+		return EvmWallet.create(EvmWalletTest.PHRASE, "pw", EvmWalletTest.VAULT, new LegacyVault(), keys);
+	}
+
+	@Example
+	public void shouldReadBackTheLegacyBlockItSaved() {
+		final EvmWallet wallet = withLegacyKeys();
+		final EvmWallet read = EvmWalletStore.read(store.save(wallet));
+
+		assertEquals(wallet, read);
+		assertEquals(2, read.legacy().addresses().size());
+		assertEquals(2, read.legacyKeys("pw", EvmWalletTest.VAULT, new LegacyVault()).size());
+	}
+
+	@Example
+	public void shouldKeepNoLegacyPrivateKeyInTheClear() throws IOException {
+		final byte[] secret = new byte[32];
+		final String written = Files.readString(store.save(withLegacyKeys()), StandardCharsets.UTF_8);
+
+		secret[31] = 2;
+		assertFalse(written.contains(COMPRESSED_WIF));
+		assertFalse(written.contains(HexFormat.of().formatHex(secret)));
+		assertTrue(written.contains("H78V5Mwegfjmemi2rMuVg93c8AwjirUdQH"));
+	}
+
+	@Example
+	public void shouldWriteAPlainWalletWithoutALegacyBlock() throws IOException {
+		final String written = Files.readString(
+			store.save(EvmWallet.create(EvmWalletTest.PHRASE, "pw", EvmWalletTest.VAULT)), StandardCharsets.UTF_8
+		);
+
+		assertFalse(written.contains("legacy"));
 	}
 
 	@Example

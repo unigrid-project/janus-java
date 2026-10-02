@@ -18,14 +18,29 @@ package org.unigrid.janus.core.evm;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import org.unigrid.janus.core.legacy.LegacyKey;
 
 /**
  * An EVM wallet as Janus keeps it: the addresses in the clear, so that it can be shown without a password,
- * and the recovery phrase sealed, so that nothing on disk can spend from it.
+ * and the recovery phrase sealed, so that nothing on disk can spend from it. A wallet made from an imported
+ * legacy dump also carries the addresses of those keys in the clear and the keys sealed under the first
+ * account of the phrase, so the phrase and its password open them too.
  */
-public record EvmWallet(int version, String path, List<String> addresses, Sealed crypto) {
+public record EvmWallet(int version, String path, List<String> addresses, Sealed crypto, LegacyBlock legacy) {
+	/** The legacy addresses in the clear and their private keys sealed. */
+	public record LegacyBlock(List<String> addresses, LegacyVault.Locked keys) {
+		public LegacyBlock {
+			addresses = List.copyOf(addresses);
+		}
+	}
+
 	public static final int VERSION = 1;
+	public static final int LEGACY_VERSION = 2;
 	public static final int ADDRESSES = 10;
+
+	private static final int FIRST_ACCOUNT = 0;
 
 	public EvmWallet {
 		addresses = List.copyOf(addresses);
@@ -36,14 +51,56 @@ public record EvmWallet(int version, String path, List<String> addresses, Sealed
 
 		try {
 			return new EvmWallet(VERSION, EvmAccounts.PATH, EvmAccounts.addresses(mnemonic, ADDRESSES),
-				vault.seal(entropy, password)
+				vault.seal(entropy, password), null
 			);
 		} finally {
 			Arrays.fill(entropy, (byte) 0);
 		}
 	}
 
+	/**
+	 * The keys stay the caller's to wipe. Each address is kept once, whatever the keys repeat, and the keys are
+	 * sealed in the order of the sorted addresses.
+	 */
+	public static EvmWallet create(final Mnemonic mnemonic, final String password, final SeedVault vault,
+		final LegacyVault legacyVault, final List<LegacyKey> keys) {
+
+		final EvmWallet plain = create(mnemonic, password, vault);
+		final SortedMap<String, LegacyKey> byAddress = new TreeMap<>();
+		final byte[] accountKey = EvmAccounts.privateKey(mnemonic, FIRST_ACCOUNT);
+
+		keys.forEach(key -> byAddress.putIfAbsent(key.address(), key));
+
+		try {
+			final List<String> legacyAddresses = List.copyOf(byAddress.keySet());
+			final LegacyVault.Locked locked = legacyVault.seal(accountKey, List.copyOf(byAddress.values()),
+				legacyAddresses
+			);
+
+			return new EvmWallet(LEGACY_VERSION, plain.path(), plain.addresses(), plain.crypto(),
+				new LegacyBlock(legacyAddresses, locked)
+			);
+		} finally {
+			Arrays.fill(accountKey, (byte) 0);
+		}
+	}
+
 	public Mnemonic mnemonic(final String password, final SeedVault vault) {
 		return Mnemonic.of(vault.open(crypto, password));
+	}
+
+	/** The legacy private keys, opened with the password. The caller wipes them. */
+	public List<LegacyKey> legacyKeys(final String password, final SeedVault vault, final LegacyVault legacyVault) {
+		if (legacy == null) {
+			throw new IllegalStateException("This wallet holds no legacy keys");
+		}
+
+		final byte[] accountKey = EvmAccounts.privateKey(mnemonic(password, vault), FIRST_ACCOUNT);
+
+		try {
+			return legacyVault.open(accountKey, legacy.keys(), legacy.addresses());
+		} finally {
+			Arrays.fill(accountKey, (byte) 0);
+		}
 	}
 }
