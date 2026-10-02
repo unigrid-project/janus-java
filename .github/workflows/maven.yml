@@ -1,8 +1,10 @@
 name: Janus build status
 
 on:
-  #push:
-    #branches: [ "*" ]
+  workflow_dispatch:
+
+  push:
+    branches: [ "master" ]
 
   pull_request:
     branches: [ "master" ]
