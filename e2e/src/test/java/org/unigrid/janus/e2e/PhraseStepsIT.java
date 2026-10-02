@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import net.jqwik.api.Example;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** The steps of making and restoring a wallet that go wrong or turn back, as a person meets them in a browser. */
 public class PhraseStepsIT extends BrowserTest {
@@ -110,6 +111,56 @@ public class PhraseStepsIT extends BrowserTest {
 		page().fill("[name=repeat]", "correct hose");
 		page().click(CONTINUE);
 		assertThat(page().locator(ERROR)).hasText("The two passwords differ");
+	}
+
+	private void copy(final String text) {
+		page().context().grantPermissions(List.of("clipboard-read", "clipboard-write"));
+		page().evaluate("text => navigator.clipboard.writeText(text)", text);
+	}
+
+	@Example
+	public void shouldRefuseToPasteIntoEitherPasswordField() {
+		restoreWith(ABANDON);
+		copy("pasted password");
+
+		for (final String field : List.of("password", "repeat")) {
+			for (final String keys : List.of("Control+V", "Shift+Insert")) {
+				page().click("[name=" + field + "]");
+				page().keyboard().press(keys);
+				assertThat(page().locator("[name=" + field + "]")).hasValue("");
+			}
+		}
+	}
+
+	@Example
+	public void shouldCancelWhatPastesRightClicksOrDropsOnAPasswordField() {
+		restoreWith(ABANDON);
+		assertThat(page().locator(CARD + " h1")).hasText("Choose a password");
+
+		for (final String field : List.of("password", "repeat")) {
+			assertEquals(true, page().evaluate("field => ['paste', 'drop', 'contextmenu'].every("
+				+ "type => !document.querySelector('[name=' + field + ']')"
+				+ ".dispatchEvent(new Event(type, {bubbles: true, cancelable: true})))", field
+			));
+		}
+	}
+
+	@Example
+	public void shouldStillTypeIntoAPasswordField() {
+		restoreWith(ABANDON);
+		page().click("[name=password]");
+		page().keyboard().type("typed by hand");
+		assertThat(page().locator("[name=password]")).hasValue("typed by hand");
+	}
+
+	@Example
+	public void shouldStillPasteTheWholePhraseIntoTheFirstWordBox() {
+		page().click("[hx-post='/action/import']");
+		page().click("[hx-post='/action/restore']");
+		copy(ABANDON);
+		page().click("[name=word1]");
+		page().keyboard().press("Control+V");
+		assertThat(page().locator("[name=word1]")).hasValue(ABANDON);
 	}
 
 	@Example
