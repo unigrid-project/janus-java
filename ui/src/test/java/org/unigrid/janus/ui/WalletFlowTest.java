@@ -20,6 +20,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
@@ -109,6 +110,51 @@ public class WalletFlowTest {
 		assertEquals(List.of("t128", "t126", "t124", "t122", "t120", "t12"),
 			screen.document().select("#rows .ledger__txid").eachText()
 		);
+	}
+
+	@Example
+	public void shouldPageThroughTheFundedAddressesFiveAtATimeAndFilterThem() throws Exception {
+		final List<String> fullestFirst = new ArrayList<>();
+
+		for (int i = 0; i < 12; i++) {
+			final String balance = String.valueOf((i + 1) * 10);
+			final String address = rig.addresses().get(i);
+
+			rig.hedgehog().address(address, balance, entry("t" + i, i, balance, EntryKind.RECEIVED));
+			fullestFirst.addFirst(address);
+		}
+
+		final Screen screen = settle(continueWithTheWalletLeftBehind()).click(FUNDED);
+
+		assertEquals(fullestFirst.subList(0, 5), screen.document().select(".funded__text").eachText());
+		assertEquals("1–5 of 12", screen.find(".funded__range").text());
+		assertTrue(screen.find(".funded__previous").hasAttr("disabled"));
+
+		screen.click(".funded__next");
+		assertEquals(fullestFirst.subList(5, 10), screen.document().select(".funded__text").eachText());
+		assertEquals("6–10 of 12", screen.find(".funded__range").text());
+
+		screen.click(".funded__next");
+		assertEquals(fullestFirst.subList(10, 12), screen.document().select(".funded__text").eachText());
+		assertTrue(screen.find(".funded__next").hasAttr("disabled"));
+
+		screen.click(".funded__previous");
+		assertEquals("6–10 of 12", screen.find(".funded__range").text());
+
+		final String part = rig.addresses().get(3).substring(8, 16);
+
+		screen.trigger(".funded__search input[name=fq]", Map.of("fq", part));
+		assertEquals(List.of(rig.addresses().get(3)), screen.document().select(".funded__text").eachText());
+		assertEquals("1–1 of 1", screen.find(".funded__range").text());
+		assertTrue(screen.document().select(".funded__previous, .funded__next").isEmpty());
+
+		screen.trigger(".funded__search input[name=fq]", Map.of("fq", "no such address"));
+		assertEquals("No address matches", screen.find(".funded__none").text());
+
+		screen.trigger(".funded__search input[name=fq]", Map.of("fq", ""));
+		assertEquals("1–5 of 12", screen.find(".funded__range").text());
+		assertTrue(screen.click(".funded__close").document().select(".funded").isEmpty());
+		assertEquals("1–5 of 12", screen.click(FUNDED).find(".funded__range").text());
 	}
 
 	@Example

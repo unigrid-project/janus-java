@@ -118,6 +118,40 @@ public class WalletIT extends BrowserTest {
 	}
 
 	@Example
+	public void shouldPageAndFilterTheFundedAddressesWithoutLosingTheCursorInTheFilter() throws Exception {
+		for (int i = 0; i < 12; i++) {
+			rig().hedgehog().address(rig().addresses().get(i), String.valueOf(i + 1),
+				entry("t" + i, i, String.valueOf(i + 1), EntryKind.RECEIVED)
+			);
+		}
+
+		rig().leaveWalletBehind();
+		page().click("[hx-post='/action/import']");
+		page().click("[hx-post='/action/import-found']");
+		page().click("[hx-post='/action/open-wallet']");
+		page().waitForSelector(".dashboard__total", LOADED);
+		page().click(".stat:has-text('Funded addresses')");
+
+		assertThat(page().locator(".funded__text")).hasCount(5);
+		assertThat(page().locator(".funded__range")).hasText("1–5 of 12");
+		assertThat(page().locator(".funded__previous")).isDisabled();
+		page().click(".funded__next");
+		assertThat(page().locator(".funded__range")).hasText("6–10 of 12");
+		page().click(".funded__next");
+		assertThat(page().locator(".funded__text")).hasCount(2);
+		assertThat(page().locator(".funded__next")).isDisabled();
+
+		final String part = rig().addresses().get(3).substring(8, 16);
+
+		page().locator(".funded__search input").pressSequentially(part);
+		assertThat(page().locator(".funded__text")).hasCount(1);
+		assertThat(page().locator(".funded__search input")).hasValue(part);
+		assertThat(page().locator(".funded__search input")).isFocused();
+		page().locator(".funded__search input").fill("");
+		assertThat(page().locator(".funded__range")).hasText("1–5 of 12");
+	}
+
+	@Example
 	public void shouldSearchTheActivityForTheFundedAddressChosen() throws Exception {
 		openTheWalletLeftBehind();
 		page().click(".stat:has-text('Funded addresses')");
