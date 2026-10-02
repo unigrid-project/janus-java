@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 import net.jqwik.api.Example;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** The steps of making and restoring a wallet that go wrong or turn back, as a person meets them in a browser. */
 public class PhraseStepsIT extends BrowserTest {
@@ -31,6 +30,7 @@ public class PhraseStepsIT extends BrowserTest {
 	private static final String CONTINUE = CARD + " .button--primary";
 	private static final String ERROR = CARD + " .step__error";
 	private static final String STATUS = ".verify__status";
+	private static final double SERVER_WOULD_HAVE_ANSWERED_MILLIS = 1500;
 
 	private void restoreWith(final String typed) {
 		page().click("[hx-post='/action/import']");
@@ -39,9 +39,14 @@ public class PhraseStepsIT extends BrowserTest {
 		page().click(CONTINUE);
 	}
 
+	/* The next tile is only tapped once this one is in the tray, as a tile tapped during the redraw is lost. */
 	private void tap(final String word) {
+		final Locator picked = page().locator(".tray .tile--picked");
+		final int before = picked.count();
+
 		page().locator("button.tile:not([disabled])")
 			.filter(new Locator.FilterOptions().setHasText(Pattern.compile("^" + word + "$"))).first().click();
+		assertThat(picked).hasCount(before + 1);
 	}
 
 	private List<String> writtenDown() {
@@ -95,8 +100,11 @@ public class PhraseStepsIT extends BrowserTest {
 		page().fill("[name=password]", "1234567");
 		page().fill("[name=repeat]", "1234567");
 		page().click(CONTINUE);
-		assertEquals(true, page().locator("[name=password]").evaluate("field => field.validity.tooShort"));
+
+		/* Had the browser let the short password through, the server would have answered with its own message. */
+		page().waitForTimeout(SERVER_WOULD_HAVE_ANSWERED_MILLIS);
 		assertThat(page().locator(ERROR)).hasCount(0);
+		assertThat(page().locator(CARD + " h1")).hasText("Choose a password");
 
 		page().fill("[name=password]", "correct horse");
 		page().fill("[name=repeat]", "correct hose");
