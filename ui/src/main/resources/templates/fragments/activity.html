@@ -21,8 +21,7 @@
 					th:hx-vals="${summary.filter().vals()}"
 					th:classappend="${summary.filter() == view.filter()} ? 'summary--active'">
 					<span class="summary__label" th:text="${summary.label()}">Received</span>
-					<span class="summary__value" th:classappend="'summary__value--' + ${summary.kind()}"
-						th:text="${summary.value()}">+1,020.00</span>
+					<span class="summary__value" th:classappend="'summary__value--' + ${summary.kind()}"><th:block th:replace="~{fragments/amount :: amount(${summary.value()})}">+1,020.00</th:block></span>
 				</button>
 			</div>
 			<div class="activity__controls">

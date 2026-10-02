@@ -1331,6 +1331,12 @@ main:has(> .app) {
 	color: var(--text-muted);
 }
 
+/* What follows the point of an amount, in every place an amount is shown. */
+.amount__fraction {
+	font-size: 0.78em;
+	font-weight: inherit;
+}
+
 .summary__value {
 	font-size: 22px;
 	font-weight: 600;

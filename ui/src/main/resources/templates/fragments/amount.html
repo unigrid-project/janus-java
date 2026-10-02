@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<body>
+		<!-- An amount with what follows its point set smaller, so that eight decimals do not crowd the figure. -->
+		<th:block th:fragment="amount(value)"><th:block th:text="${#strings.contains(value, '.') ? #strings.substringBefore(value, '.') : value}"></th:block><small class="amount__fraction" th:if="${#strings.contains(value, '.')}" th:text="'.' + ${#strings.substringAfter(value, '.')}"></small></th:block>
+	</body>
+</html>

@@ -7,7 +7,7 @@
 					<div class="dashboard__glass">
 						<span class="screen__label">Total balance</span>
 						<div class="dashboard__figure">
-							<span class="dashboard__total" th:text="${view.total()}">1,234.50</span>
+							<span class="dashboard__total"><th:block th:replace="~{fragments/amount :: amount(${view.total()})}">1,234.50</th:block></span>
 							<span class="dashboard__unit gradient-text">UGD</span>
 						</div>
 						<p class="dashboard__awaiting" th:if="${view.awaitingMint() != null}"

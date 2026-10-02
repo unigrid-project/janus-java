@@ -64,6 +64,18 @@ public class ActivityViewTest {
 	}
 
 	@Example
+	public void shouldSetWhatFollowsThePointOfAnAmountApartAndKeepTheFigureWhole() {
+		final Document html = render(new ActivityView(Filter.ALL, "", List.of(
+			new Summary(Filter.RECEIVED, "Received", "+161,194.62000401", "received"),
+			new Summary(Filter.ALL, "Net", "+3", "net")
+		), new RowsView(List.of(ROW), null, false, false), ExportNoteView.NONE));
+
+		assertEquals(List.of("+161,194.62000401", "+3"), html.select(".summary__value").eachText());
+		assertEquals(List.of(".62000401"), html.select(".summary__value .amount__fraction").eachText());
+		assertEquals(List.of(".00"), html.select(".ledger__amount .amount__fraction").eachText());
+	}
+
+	@Example
 	public void shouldOfferMoreWhenThereIsMore() {
 		final Document html = render(new ActivityView(Filter.ALL, "", SUMMARIES,
 			new RowsView(List.of(ROW), 100, false, false), ExportNoteView.NONE
