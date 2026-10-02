@@ -131,7 +131,8 @@
 				<configuration>
 					<name>Unigrid</name>
 					<vendor>Stiftelsen The Unigrid Foundation</vendor>
-					<!-- Installers take a plain number, which a snapshot is not. -->
+					<description>The Unigrid Control Center: a desktop frontend to the Hedgehog network and the Unigrid network.</description>
+					<copyright>Copyright © 2021-2026 Stiftelsen The Unigrid Foundation</copyright>					<!-- Installers take a plain number, which a snapshot is not. -->
 					<appVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</appVersion>
 					<destination>${dist}</destination>
 				</configuration>
@@ -217,10 +218,14 @@
 								<configuration>
 									<type>MSI</type>
 									<appImage>${dist}/Unigrid</appImage>
+									<licenseFile>${project.basedir}/../COPYING</licenseFile>
+									<aboutUrl>https://www.unigrid.org</aboutUrl>
+									<winHelpUrl>https://github.com/unigrid-project/janus-java</winHelpUrl>
 									<winPerUserInstall>true</winPerUserInstall>
 									<winMenu>true</winMenu>
 									<winMenuGroup>Unigrid</winMenuGroup>
 									<winShortcut>true</winShortcut>
+									<winShortcutPrompt>true</winShortcutPrompt>
 									<winUpgradeUuid>81b39b16-62e0-46a8-bad8-8bf97d21e19b</winUpgradeUuid>
 								</configuration>
 							</execution>
@@ -248,6 +253,7 @@
 									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.icns</icon>
 									<macPackageIdentifier>org.unigrid.janus</macPackageIdentifier>
 									<macPackageName>Unigrid</macPackageName>
+									<macAppCategory>public.app-category.finance</macAppCategory>
 									<javaOptions>
 										<option>--add-opens</option>
 										<option>java.base/java.lang=ALL-UNNAMED</option>
@@ -335,10 +341,11 @@
 								<configuration>
 									<type>DEB</type>
 									<appImage>${dist}/Unigrid</appImage>
+									<licenseFile>${project.basedir}/../COPYING</licenseFile>
 									<resourceDir>${project.basedir}/src/main/packaging/linux</resourceDir>
 									<linuxPackageName>unigrid</linuxPackageName>
-									<linuxAppCategory>Utilities</linuxAppCategory>
-									<linuxMenuGroup>Utilities</linuxMenuGroup>
+									<linuxAppCategory>net</linuxAppCategory>
+									<linuxMenuGroup>Network</linuxMenuGroup>
 									<linuxShortcut>true</linuxShortcut>
 									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.png</icon>
 									<!-- jpackage only finds the libraries that dpkg knows by their real path, and on a
@@ -357,9 +364,11 @@
 								<configuration>
 									<type>RPM</type>
 									<appImage>${dist}/Unigrid</appImage>
+									<licenseFile>${project.basedir}/../COPYING</licenseFile>
+									<resourceDir>${project.basedir}/src/main/packaging/linux</resourceDir>
 									<linuxPackageName>unigrid</linuxPackageName>
-									<linuxAppCategory>Utilities</linuxAppCategory>
-									<linuxMenuGroup>Utilities</linuxMenuGroup>
+									<linuxAppCategory>Applications/Internet</linuxAppCategory>
+									<linuxMenuGroup>Network</linuxMenuGroup>
 									<linuxShortcut>true</linuxShortcut>
 									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.png</icon>
 									<linuxPackageDeps>nss, mesa-libgbm, gtk3, alsa-lib, libXScrnSaver, libXtst, libXi, cups-libs, at-spi2-atk, libxkbcommon, libX11</linuxPackageDeps>
