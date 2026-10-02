@@ -167,17 +167,21 @@ class StubHedgehog implements AutoCloseable {
 		return mostAtOnce.get();
 	}
 
+	/*
+	 * A request counts while it waits to be answered and stops counting before the answer goes out, as the asker
+	 * is free to send the next one the moment it has the answer, and one that is still being written out would
+	 * count beside it.
+	 */
 	private void handle(final HttpExchange exchange) throws IOException {
-		final int now = atOnce.incrementAndGet();
-
-		mostAtOnce.accumulateAndGet(now, Math::max);
+		mostAtOnce.accumulateAndGet(atOnce.incrementAndGet(), Math::max);
 
 		try {
 			pause(slowdown);
-			answer(exchange);
 		} finally {
 			atOnce.decrementAndGet();
 		}
+
+		answer(exchange);
 	}
 
 	private void answer(final HttpExchange exchange) throws IOException {
