@@ -75,11 +75,6 @@ from a development classpath picks up an edited template on the next request
 without a restart.
 
 
-Troubleshooting
----------------
-If you are running into issues starting the wallet a good place to look is our [documentation](https://docs.unigrid.org/) page.
-
-
 Automated Testing
 -----------------
 Developers are strongly encouraged to write unit tests for new code, and to submit new unit tests for old code.
