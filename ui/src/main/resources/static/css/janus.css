@@ -1567,6 +1567,51 @@ main:has(> .app) {
 	font-size: 12px;
 }
 
+/* After .search, whose width and margin it gives up for the width of the dialog. */
+.funded__search {
+	width: auto;
+	margin: 14px 24px;
+}
+
+.funded__body {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.funded__none {
+	margin: 0;
+	padding: 36px 24px;
+	text-align: center;
+	font-size: 13.5px;
+	color: var(--text-muted);
+}
+
+.funded__pager {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 24px;
+}
+
+.funded__pager .button {
+	padding: 7px 14px;
+	font-size: 12px;
+}
+
+.funded__pager .button:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.funded__range {
+	margin: 0 auto;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--text-faint);
+}
+
 .ledger__more {
 	display: block;
 	width: 100%;
