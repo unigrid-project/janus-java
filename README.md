@@ -23,10 +23,6 @@ The patch will be accepted if there is broad consensus. Developers should expect
 
 The `master` branch is regularly built and tested, but is not guaranteed to be completely stable. [Tags](https://github.com/unigrid-project/janus-java/tags) are created regularly to indicate new official, stable release versions.
 
-Design documents
-----------------
-* [Frontend migration](documentation/frontend-migration.md) — proposal to replace the JavaFX user interface with server-rendered HTML and CSS in an embedded browser.
-
 Building
 --------
 ```
@@ -35,8 +31,7 @@ mvn clean install
 
 This builds and tests the `core`, `web`, `ui` and `shell` modules: the Hedgehog
 client, the embedded web server, the server-rendered pages and the window that
-hosts them. The approach is described under
-[Design documents](#design-documents).
+hosts them.
 
 The `desktop` module builds the native installers and is only part of the build
 with the `installer` profile. It needs JDK 25 and the platform's packaging tools
