@@ -54,6 +54,14 @@ it. The installers end up in `desktop/target/release`. The previous JavaFX
 implementation, together with its release workflows, remains available on the
 `legacy-javafx` branch.
 
+Releasing
+---------
+On an up to date `master` whose build checks have passed, run `./create-release.sh [version [next]]`. It makes
+one commit that sets the release version, tags it, and makes one more that moves on to the next snapshot. The
+version defaults to the current snapshot without its suffix, and the next one to the following patch number.
+Nothing is pushed. When the commits look right, `git push --atomic origin master v<version>` starts the
+release workflow, which builds and tests the installers and leaves a draft release to review and publish.
+
 Running
 -------
 ```

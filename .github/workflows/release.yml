@@ -71,11 +71,16 @@ jobs:
           fi
         fi
 
-        passed=$(gh run list --repo "$REPOSITORY" --workflow maven.yml --commit "$GITHUB_SHA" \
-          --status success --json databaseId --jq length)
+        # The release commit only sets the version, so the checks that passed on the commit before it count.
+        passed=0
+
+        for commit in "$GITHUB_SHA" "$(git rev-parse "$GITHUB_SHA^")"; do
+          passed=$((passed + $(gh run list --repo "$REPOSITORY" --workflow maven.yml --commit "$commit" \
+            --status success --json databaseId --jq length)))
+        done
 
         if [ "$passed" -eq 0 ]; then
-          echo "The build checks have not passed for $GITHUB_SHA" >&2
+          echo "The build checks have passed neither for $GITHUB_SHA nor for the commit before it" >&2
           exit 1
         fi
 
