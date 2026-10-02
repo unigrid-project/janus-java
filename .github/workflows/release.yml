@@ -128,15 +128,14 @@ jobs:
         fi
 
         # Pull requests are all that GitHub's own notes credit, and most of the work is pushed to master, so
-        # whoever authored a commit since the last release is named here, with how many.
+        # everyone who has committed is named here, with how many commits.
         previous=$(gh release list --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName')
 
         {
           cat .github/release-notes.md
           printf '\n## Contributors\n\n'
-          gh api --paginate "repos/$GITHUB_REPOSITORY/compare/$previous...$GITHUB_SHA" \
-            --jq '.commits[] | (.author.login // .commit.author.name)' | sort | uniq -c | sort -rn \
-            | awk '{ count = $1; $1 = ""; sub(/^ /, ""); printf "- @%s (%d commits)\n", $0, count }'
+          gh api --paginate "repos/$GITHUB_REPOSITORY/contributors" \
+            --jq '.[] | select(.type == "User") | "- @\(.login) (\(.contributions) commits)"'
         } > notes.md
 
         gh release create "v$VERSION" dist/* --draft $flags --target "$GITHUB_SHA" \
