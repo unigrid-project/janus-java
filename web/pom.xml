@@ -65,6 +65,10 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
 				<!-- The served test harness is shared with the modules that build on this one,
 				     which bring their own logging setup. -->
 				<groupId>org.apache.maven.plugins</groupId>
