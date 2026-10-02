@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import net.jqwik.api.Example;
@@ -33,6 +34,7 @@ import net.jqwik.api.lifecycle.BeforeTry;
 import org.unigrid.janus.core.DataDirectory;
 import org.unigrid.janus.core.WalletBackup;
 import org.unigrid.janus.core.WalletChoice;
+import org.unigrid.janus.core.legacy.LegacyKey;
 import org.unigrid.janus.ui.view.ImportView;
 import org.unigrid.janus.web.action.ActionExtension;
 import org.unigrid.janus.web.action.Actions;
@@ -41,10 +43,18 @@ import org.unigrid.janus.web.action.View;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ImportControllerTest {
+	/* The magic of a Berkeley DB btree where a wallet.dat has it, which is what makes a file a wallet. */
+	private static final byte[] WALLET = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x62, 0x31, 0x05, 0};
+	private static final String DUMP = "# Wallet dump created by UNIGRID 2.9.17\n"
+		+ "PdiUUh8dnXB36B2XcbPdodUX5Ujoj2VDubJwcW1V8DJu6eQQxzNx 2018-01-02T10:00:00Z label=\n"
+		+ "68QtzUftP6UedWuuhgxsw4jV7TDsTjvyPnqUKvFA6G2LWUipq9J 2018-01-02T10:00:00Z reserve=1\n";
+
 	private Path directory;
 	private Path elsewhere;
 	private Path backups;
@@ -54,7 +64,7 @@ public class ImportControllerTest {
 	@BeforeTry
 	public void prepareAnEmptyDataDirectory() throws IOException {
 		directory = Files.createTempDirectory("janus");
-		elsewhere = Files.createTempFile("backup", ".dat");
+		elsewhere = Files.write(Files.createTempFile("backup", ".dat"), WALLET);
 		backups = Files.createTempDirectory("backups");
 		choice = new WalletChoice(new WalletBackup(backups, Clock.systemUTC()));
 		controller = new ImportController(new DataDirectory(directory), choice);
@@ -74,7 +84,14 @@ public class ImportControllerTest {
 	}
 
 	private Path leaveAWalletBehind() throws IOException {
-		return Files.createFile(directory.resolve("wallet.dat"));
+		return Files.write(directory.resolve("wallet.dat"), WALLET);
+	}
+
+	private Path pickADump(final String text) throws IOException {
+		final Path dump = Files.writeString(Files.createTempFile("wallet", ".dump"), text);
+
+		dump.toFile().deleteOnExit();
+		return dump;
 	}
 
 	@Example
@@ -134,6 +151,75 @@ public class ImportControllerTest {
 
 		assertEquals(choice.backup().orElseThrow(), view.backup());
 		assertEquals(backups, view.backup().getParent());
+	}
+
+	@Example
+	public void shouldTakeAWalletDumpWithoutCopyingIt() throws IOException {
+		final Path dump = pickADump(DUMP);
+		final ImportView view = controller.onChooseFile(form(dump));
+
+		assertEquals(Optional.of(dump), choice.chosen());
+		assertEquals(dump, view.chosen());
+		assertTrue(view.dumpChosen());
+		assertNull(view.backup());
+		assertNull(view.error());
+		assertTrue(view.otherChosen());
+		assertEquals(0, Files.list(backups).count());
+	}
+
+	@Example
+	public void shouldNotCallAWalletFileADump() throws IOException {
+		assertFalse(controller.onChooseFile(form(elsewhere)).dumpChosen());
+	}
+
+	@Example
+	public void shouldSayWhatIsWrongWithADumpAndChooseNothing() throws IOException {
+		final Path dump = pickADump(DUMP + "not-a-key 2018-01-02T10:00:00Z\n");
+		final ImportView view = controller.onChooseFile(form(dump));
+
+		assertEquals(dump + " is not a wallet dump Janus can read: line 4 holds no private key", view.error());
+		assertFalse(view.hasChosen());
+		assertEquals(Optional.empty(), choice.chosen());
+	}
+
+	@Example
+	public void shouldSayWhenTheWalletFoundHereIsNeitherAWalletNorADump() throws IOException {
+		final Path found = Files.writeString(directory.resolve("wallet.dat"), "this is no wallet");
+		final ImportView view = controller.onClickUseFound();
+
+		assertEquals(found + " is not a wallet dump Janus can read: line 1 holds no private key", view.error());
+		assertFalse(view.hasChosen());
+		assertEquals(Optional.empty(), choice.chosen());
+	}
+
+	@Example
+	public void shouldKeepTheEarlierChoiceWhenADumpIsRefused() throws IOException {
+		controller.onChooseFile(form(elsewhere));
+
+		final ImportView view = controller.onChooseFile(form(pickADump("no keys here")));
+
+		assertNotNull(view.error());
+		assertEquals(elsewhere, view.chosen());
+		assertEquals(Optional.of(elsewhere), choice.chosen());
+	}
+
+	@Example
+	public void shouldHandOverTheKeysOfTheDumpChosen() throws IOException {
+		controller.onChooseFile(form(pickADump(DUMP)));
+
+		final List<LegacyKey> keys = controller.dumpKeys();
+
+		assertEquals(List.of("H78V5Mwegfjmemi2rMuVg93c8AwjirUdQH", "HS6ofefYfBjXjqaKM4pb54a1SEmAxvGKTi"),
+			keys.stream().map(LegacyKey::address).toList()
+		);
+	}
+
+	@Example
+	public void shouldHaveNoKeysToHandOverWhenNoDumpWasChosen() throws IOException {
+		assertThrows(IllegalStateException.class, () -> controller.dumpKeys());
+
+		controller.onChooseFile(form(elsewhere));
+		assertThrows(IllegalStateException.class, () -> controller.dumpKeys());
 	}
 
 	@Example

@@ -47,14 +47,22 @@
 				</button>
 			</div>
 
+			<p class="step__error" th:if="${view.hasError()}" th:text="${view.error}">The file holds no private key</p>
+
 			<p class="step__note" th:if="${view.backup != null}">
 				A copy was saved to <code class="path" th:text="${view.backup}">~/.janus/backups/wallet.dat</code>
+			</p>
+			<p class="step__note" th:if="${view.dumpChosen()}">
+				Your dump holds your private keys unprotected. Next you get a recovery phrase and a password that
+				seal them. Keep the dump until your wallet is saved, then delete it.
 			</p>
 
 			<div class="step__actions">
 				<button class="button" type="button" hx-post="/action/welcome">Back</button>
 				<button class="button button--primary" type="button" hx-post="/action/open-wallet"
-					th:disabled="${!view.hasChosen()}">Continue →</button>
+					th:unless="${view.dumpChosen()}" th:disabled="${!view.hasChosen()}">Continue →</button>
+				<button class="button button--primary" type="button" hx-post="/action/import-dump"
+					th:if="${view.dumpChosen()}">Continue →</button>
 			</div>
 		</section>
 	</body>

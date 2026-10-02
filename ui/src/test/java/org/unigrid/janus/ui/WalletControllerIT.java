@@ -112,7 +112,7 @@ public class WalletControllerIT {
 
 	@Example
 	public void shouldLetThePersonChooseAnotherWalletWhenTheOneChosenCannotBeRead() throws Exception {
-		Files.writeString(rig.data().resolve("wallet.dat"), "this is no wallet");
+		rig.leaveDamagedWalletBehind();
 
 		final Screen screen = settle(rig.open().click(IMPORT).click(FOUND).click(OPEN));
 

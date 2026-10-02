@@ -20,14 +20,26 @@ import java.nio.file.Path;
 import org.unigrid.janus.web.action.View;
 
 /**
- * The import step: where a wallet was looked for, the one found there, the one settled on and
- * where that one was copied. Any of the last three is absent as {@code null}, which is what the
- * template tests for.
+ * The import step: where a wallet was looked for, the one found there, the one settled on, where that one
+ * was copied and what was wrong with a file just picked. Any of the last four is absent as {@code null},
+ * which is what the template tests for. A wallet dump has no copy, since its keys are sealed, not copied.
  */
-public record ImportView(Path directory, Path found, Path chosen, Path backup) implements View {
+public record ImportView(Path directory, Path found, Path chosen, Path backup, String error) implements View {
+	public ImportView(final Path directory, final Path found, final Path chosen, final Path backup) {
+		this(directory, found, chosen, backup, null);
+	}
+
 	@Override
 	public String template() {
 		return "fragments/import :: import";
+	}
+
+	public boolean dumpChosen() {
+		return hasChosen() && backup == null;
+	}
+
+	public boolean hasError() {
+		return error != null;
 	}
 
 	public boolean hasFound() {

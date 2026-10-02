@@ -48,6 +48,11 @@ final class WalletFixture {
 		return lines(DUMP + ".addresses");
 	}
 
+	/** A wallet that opens with the Berkeley DB magic, as a wallet.dat does, and is cut short after it. */
+	static Path damagedTo(final Path to) throws IOException {
+		return Files.write(to, new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x62, 0x31, 0x05, 0, 1, 2, 3});
+	}
+
 	private static Path copy(final String resource, final Path to) throws IOException {
 		try (InputStream in = WalletFixture.class.getResourceAsStream(resource)) {
 			Files.copy(in, to);

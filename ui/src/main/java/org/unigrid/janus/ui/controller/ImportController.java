@@ -18,9 +18,14 @@ package org.unigrid.janus.ui.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import org.unigrid.janus.core.DataDirectory;
 import org.unigrid.janus.core.WalletChoice;
+import org.unigrid.janus.core.legacy.BerkeleyFile;
+import org.unigrid.janus.core.legacy.LegacyKey;
+import org.unigrid.janus.core.legacy.WalletDump;
 import org.unigrid.janus.ui.view.ImportView;
 import org.unigrid.janus.web.action.Action;
 import org.unigrid.janus.web.action.Form;
@@ -47,8 +52,7 @@ public class ImportController {
 	   again says that nothing was found. */
 	@Action("import-found")
 	public ImportView onClickUseFound() {
-		directory.wallet().ifPresent(choice::choose);
-		return view();
+		return directory.wallet().map(this::choose).orElseGet(this::view);
 	}
 
 	@Action("import-file")
@@ -57,13 +61,38 @@ public class ImportController {
 			throw new IllegalArgumentException("No file was named");
 		}
 
-		choice.choose(Path.of(form.get(PATH)));
-		return view();
+		return choose(Path.of(form.get(PATH)));
+	}
+
+	/* A file that is no Berkeley DB must be a wallet dump, and one that cannot be read as such is said so at
+	   once, leaving the earlier choice as it was. */
+	private ImportView choose(final Path file) {
+		if (Files.isRegularFile(file) && !BerkeleyFile.holds(file)) {
+			try {
+				WalletDump.keys(file).forEach(LegacyKey::wipe);
+			} catch (IllegalArgumentException e) {
+				return view(e.getMessage());
+			}
+		}
+
+		choice.choose(file);
+		return view(null);
+	}
+
+	/** The private keys of the wallet dump chosen, for the caller to seal and wipe. */
+	public List<LegacyKey> dumpKeys() {
+		return WalletDump.keys(choice.chosen().filter(file -> choice.backup().isEmpty())
+			.orElseThrow(() -> new IllegalStateException("No wallet dump has been chosen"))
+		);
 	}
 
 	private ImportView view() {
+		return view(null);
+	}
+
+	private ImportView view(final String error) {
 		return new ImportView(directory.path(), directory.wallet().orElse(null), choice.chosen().orElse(null),
-			choice.backup().orElse(null)
+			choice.backup().orElse(null), error
 		);
 	}
 }

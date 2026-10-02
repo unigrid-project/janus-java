@@ -127,9 +127,24 @@ public class ContainerRig implements AutoCloseable {
 		return WalletFixture.copyTo(data.resolve("wallet.dat"));
 	}
 
+	/** A wallet.dat in the folder the legacy daemon used that is cut short, so that it cannot be read. */
+	public Path leaveDamagedWalletBehind() throws IOException {
+		return WalletFixture.damagedTo(data.resolve("wallet.dat"));
+	}
+
 	/** A wallet somewhere the person has to point at themselves. */
 	public Path keepWalletElsewhere() throws IOException {
 		return WalletFixture.copyTo(home.resolve("elsewhere.dat"));
+	}
+
+	/** A wallet dump somewhere the person has to point at themselves. */
+	public Path keepDumpElsewhere() throws IOException {
+		return WalletFixture.copyDumpTo(home.resolve("elsewhere.dump"));
+	}
+
+	/** The addresses the keys of that dump give. */
+	public List<String> dumpAddresses() throws IOException {
+		return WalletFixture.dumpAddresses();
 	}
 
 	@Override

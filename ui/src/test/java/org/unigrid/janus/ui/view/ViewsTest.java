@@ -28,6 +28,7 @@ public class ViewsTest {
 	private static final Path DIRECTORY = Path.of("/data/unigrid");
 	private static final Path FOUND = DIRECTORY.resolve("wallet.dat");
 	private static final Path PICKED = Path.of("/mnt/backup/wallet.dat");
+	private static final Path DUMP = Path.of("/mnt/backup/wallet.dump");
 	private static final Path BACKUP = Path.of("/home/ann/.janus/backups/wallet-20260922-123005.dat");
 	private static final String BACKUP_NOTE = "A copy was saved to";
 	private static final String LIT_DOT = "steps__dot--lit";
@@ -35,6 +36,8 @@ public class ViewsTest {
 	private static final String FILE_CHOICE = "type=\"button\" data-choose-file";
 	private static final String CONTINUE = "class=\"button button--primary\" type=\"button\" "
 		+ "hx-post=\"/action/open-wallet\"";
+	private static final String DUMP_CONTINUE = "class=\"button button--primary\" type=\"button\" "
+		+ "hx-post=\"/action/import-dump\"";
 
 	private final Templates templates = new Templates(false);
 
@@ -132,6 +135,37 @@ public class ViewsTest {
 		assertTrue(html.contains(selected(FILE_CHOICE)), html);
 		assertTrue(html.contains(PICKED.toString()), html);
 		assertTrue(html.contains(plain(FOUND_CHOICE)), "only the choice made should stand out: " + html);
+	}
+
+	@Example
+	public void shouldLeadAWalletDumpToTheNewPhraseInsteadOfOpeningIt() {
+		final String html = templates.render(new ImportView(DIRECTORY, FOUND, DUMP, null));
+
+		assertTrue(html.contains(selected(FILE_CHOICE)), html);
+		assertTrue(html.contains(DUMP.toString()), html);
+		assertTrue(html.contains(DUMP_CONTINUE), html);
+		assertFalse(html.contains("/action/open-wallet"), html);
+		assertFalse(html.contains(BACKUP_NOTE), html);
+		assertTrue(html.contains("Your dump holds your private keys unprotected"), html);
+		assertTrue(html.contains("then delete it"), html);
+	}
+
+	@Example
+	public void shouldOpenAWalletFileAsBeforeAndSayNothingOfDumps() {
+		final String html = templates.render(new ImportView(DIRECTORY, FOUND, PICKED, BACKUP));
+
+		assertTrue(html.contains(CONTINUE + ">Continue"), html);
+		assertFalse(html.contains("/action/import-dump"), html);
+		assertFalse(html.contains("private keys unprotected"), html);
+	}
+
+	@Example
+	public void shouldSayWhatWasWrongWithAFilePicked() {
+		final String reason = "/home/ann/a.dump is not a wallet dump Janus can read: line 3 holds no private key";
+		final String html = templates.render(new ImportView(DIRECTORY, FOUND, null, null, reason));
+
+		assertTrue(html.contains("<p class=\"step__error\">" + reason + "</p>"), html);
+		assertFalse(templates.render(new ImportView(DIRECTORY, FOUND, null, null)).contains("step__error"));
 	}
 
 	@Example
