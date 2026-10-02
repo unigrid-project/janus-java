@@ -44,6 +44,7 @@ import org.unigrid.janus.core.wallet.WalletLedger;
 import org.unigrid.janus.ui.view.ActivityView;
 import org.unigrid.janus.ui.view.AppView;
 import org.unigrid.janus.ui.view.DashboardView;
+import org.unigrid.janus.ui.view.DashboardView.Holding;
 import org.unigrid.janus.ui.view.ExportNoteView;
 import org.unigrid.janus.ui.view.ImportView;
 import org.unigrid.janus.ui.view.PreparingView;
@@ -188,6 +189,49 @@ public class WalletControllerTest {
 	}
 
 	@Example
+	public void shouldListTheFundedAddressesAndCloseThemOnTheWayToTheActivityOfOne() throws Exception {
+		chooseTheFixture();
+		stand.address(addresses.get(0), "60", entry("aa", 1, "60", EntryKind.RECEIVED))
+			.address(addresses.get(1), "480", entry("bb", 2, "1020", EntryKind.RECEIVED),
+				entry("cc", 40, "-540", EntryKind.SENT)
+			);
+		settle(controller.onClickContinue());
+
+		final DashboardView listing = assertInstanceOf(DashboardView.class,
+			controller.onClickDashboard(Form.parse("funded=true")).screen()
+		);
+
+		assertTrue(listing.listingFunded());
+		assertEquals(List.of(new Holding(addresses.get(1), "480.00", "88.9%", "2", "Jan 2019"),
+			new Holding(addresses.get(0), "60.00", "11.1%", "1", "Jan 2019")), listing.funded()
+		);
+
+		final ActivityView activity = assertInstanceOf(ActivityView.class,
+			controller.onClickActivity(Form.parse("filter=ALL&q=" + addresses.get(0))).screen()
+		);
+
+		assertEquals(addresses.get(0), activity.query());
+		assertEquals(List.of("aa"), activity.rows().rows().stream().map(RowView::txid).toList());
+		assertFalse(assertInstanceOf(DashboardView.class, controller.onClickDashboard(Form.parse("")).screen())
+			.listingFunded()
+		);
+		assertEquals("", assertInstanceOf(ActivityView.class,
+			controller.onClickActivity(Form.parse("filter=ALL&q=")).screen()
+		).query());
+	}
+
+	@Example
+	public void shouldListAnAddressAwaitingItsMintWithoutALastMonth() throws Exception {
+		chooseTheFixture();
+		stand.address(addresses.get(0), "25");
+		settle(controller.onClickContinue());
+
+		assertEquals(List.of(new Holding(addresses.get(0), "25.00", "100.0%", "0", "—")), assertInstanceOf(
+			DashboardView.class, controller.onClickDashboard(Form.parse("funded=true")).screen()
+		).funded());
+	}
+
+	@Example
 	public void shouldHandTheLedgerOutAHundredAtATimeWithoutRepeatingAMonth() throws Exception {
 		final AddressTransaction[] many = new AddressTransaction[250];
 
@@ -267,7 +311,8 @@ public class WalletControllerTest {
 		assertFalse(controller.onPoll().entering());
 		assertTrue(controller.onClickActivity(Form.parse("filter=ALL")).entering());
 		assertFalse(controller.onClickActivity(Form.parse("filter=SENT")).entering());
-		assertTrue(controller.onClickDashboard().entering());
+		assertTrue(controller.onClickDashboard(Form.parse("")).entering());
+		assertFalse(controller.onClickDashboard(Form.parse("funded=true")).entering());
 		assertTrue(assertInstanceOf(AppView.class, controller.start()).entering());
 	}
 

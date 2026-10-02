@@ -22,6 +22,7 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -33,6 +34,7 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.unigrid.janus.core.ChosenWallet;
 import org.unigrid.janus.core.WalletChoice;
+import org.unigrid.janus.core.hedgehog.AddressBalance;
 import org.unigrid.janus.core.hedgehog.HedgehogService;
 import org.unigrid.janus.core.hedgehog.HedgehogState;
 import org.unigrid.janus.core.wallet.LedgerState;
@@ -49,6 +51,7 @@ import org.unigrid.janus.ui.view.AppView;
 import org.unigrid.janus.ui.view.AppView.Tab;
 import org.unigrid.janus.ui.view.DashboardView;
 import org.unigrid.janus.ui.view.DashboardView.Bar;
+import org.unigrid.janus.ui.view.DashboardView.Holding;
 import org.unigrid.janus.ui.view.ExportNoteView;
 import org.unigrid.janus.ui.view.Filter;
 import org.unigrid.janus.ui.view.ImportView;
@@ -85,6 +88,7 @@ public class WalletController {
 	private volatile Tab tab = Tab.DASHBOARD;
 	private volatile Filter filter = Filter.ALL;
 	private volatile String query = "";
+	private volatile boolean listingFunded;
 	private volatile String shown = "";
 
 	@Inject
@@ -124,6 +128,7 @@ public class WalletController {
 		tab = Tab.DASHBOARD;
 		filter = Filter.ALL;
 		query = "";
+		listingFunded = false;
 		return app();
 	}
 
@@ -148,19 +153,26 @@ public class WalletController {
 	}
 
 	@Action("dashboard")
-	public AppView onClickDashboard() {
+	public AppView onClickDashboard(final Form form) {
 		tab = Tab.DASHBOARD;
+
+		if (form.has("funded")) {
+			listingFunded = Boolean.parseBoolean(form.get("funded"));
+		}
+
 		return app();
 	}
 
 	@Action("activity")
 	public AppView onClickActivity(final Form form) {
 		tab = Tab.ACTIVITY;
+		listingFunded = false;
 
 		if (form.has("filter")) {
 			filter = Filter.valueOf(form.get("filter"));
 		}
 
+		query = Objects.requireNonNullElse(form.get("q"), query).strip();
 		return app();
 	}
 
@@ -290,9 +302,23 @@ public class WalletController {
 			months.stream().map(month -> bar(month, fullest)).toList(),
 			months.isEmpty() ? "" : Times.shortMonth(months.getFirst().month()),
 			months.isEmpty() ? "" : Times.shortMonth(months.getLast().month()),
-			Amounts.count(tip), funds.breakdown().withFunds(), funds.breakdown().historyOnly(),
-			funds.breakdown().neverUsed(), Amounts.count(transactions.size()), active(transactions),
-			LedgerRows.of(transactions, 0, Math.min(RECENT, transactions.size()), tip, zone, false)
+			Amounts.count(tip), funds.funded().stream().map(funded -> holding(funded, funds)).toList(),
+			funds.breakdown().historyOnly(), funds.breakdown().neverUsed(), Amounts.count(transactions.size()),
+			active(transactions), LedgerRows.of(transactions, 0, Math.min(RECENT, transactions.size()), tip,
+				zone, false), listingFunded
+		);
+	}
+
+	/* An address still awaiting its mint holds funds but has no history to have a last month in. */
+	private Holding holding(final AddressBalance funded, final WalletFunds funds) {
+		final BigDecimal share = funded.balance().multiply(BigDecimal.valueOf(100))
+			.divide(funds.total(), 1, RoundingMode.HALF_UP);
+		final String last = funds.transactions().stream()
+			.filter(transaction -> transaction.addresses().contains(funded.address())).findFirst()
+			.map(transaction -> Times.shortMonth(YearMonth.from(transaction.time().atZone(zone)))).orElse("—");
+
+		return new Holding(funded.address(), Amounts.plain(funded.balance()), share.toPlainString() + "%",
+			Amounts.count(funded.transactionCount()), last
 		);
 	}
 

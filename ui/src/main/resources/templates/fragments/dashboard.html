@@ -30,7 +30,7 @@
 					</div>
 					<ul class="dashboard__legend">
 						<li><span class="dashboard__key dashboard__key--funded"></span>Holding funds
-							<span class="dashboard__legend-count" th:text="${view.funded()}">2</span></li>
+							<span class="dashboard__legend-count" th:text="${view.funded().size()}">2</span></li>
 						<li><span class="dashboard__key dashboard__key--history"></span>History only
 							<span class="dashboard__legend-count" th:text="${view.historyOnly()}">3</span></li>
 						<li><span class="dashboard__key dashboard__key--unused"></span>Never used
@@ -45,8 +45,8 @@
 				<button class="stat" type="button" hx-post="/action/activity" th:hx-vals="${view.allVals()}">
 					<span class="stat__label">Active</span><span class="stat__value stat__value--small" th:text="${view.active()}">1 Feb 2019 – 1 Mar 2019</span>
 				</button>
-				<button class="stat" type="button" hx-post="/action/activity" th:hx-vals="${view.allVals()}">
-					<span class="stat__label">Funded addresses</span><span class="stat__value" th:text="${view.funded()}">2</span>
+				<button class="stat" type="button" hx-post="/action/dashboard" hx-vals='{"funded":"true"}'>
+					<span class="stat__label">Funded addresses</span><span class="stat__value" th:text="${view.funded().size()}">2</span>
 				</button>
 			</div>
 			<div class="ledger dashboard__recent">
@@ -58,6 +58,37 @@
 					<th:block th:replace="~{fragments/rows :: row(${row})}"></th:block>
 				</th:block>
 				<p class="ledger__empty" th:if="${view.recent().isEmpty()}">This wallet has no transactions.</p>
+			</div>
+			<div class="funded" th:if="${view.listingFunded()}" hx-post="/action/dashboard" hx-vals='{"funded":"false"}'
+				hx-trigger="click target:.funded, keyup[key=='Escape'] from:body">
+				<div class="funded__dialog" role="dialog" aria-modal="true" aria-labelledby="funded-heading">
+					<header class="funded__head">
+						<div>
+							<span class="screen__label">Funded addresses</span>
+							<h3 class="funded__heading" id="funded-heading"
+								th:text="${view.funded().size()} + ' of ' + ${view.addresses()} + ' hold funds'">2 of 106 hold funds</h3>
+						</div>
+						<button class="funded__close" type="button" hx-post="/action/dashboard" hx-vals='{"funded":"false"}'
+							aria-label="Close">✕</button>
+					</header>
+					<div class="funded__list">
+						<div class="funded__address" th:each="holding : ${view.funded()}">
+							<div class="funded__line">
+								<span class="funded__dot" aria-hidden="true"></span>
+								<span class="funded__text" th:text="${holding.address()}">H6stkFpUvrJMqWigLfPwp3onsvzZzZuF7V</span>
+								<button class="funded__activity" type="button" hx-post="/action/activity"
+									th:hx-vals="${holding.vals()}">View activity →</button>
+							</div>
+							<div class="funded__figures">
+								<span class="funded__balance"><th:block th:replace="~{fragments/amount :: amount(${holding.balance()})}">23,815.40</th:block> <small class="funded__unit">UGD</small></span>
+								<span><span class="funded__key">share </span><th:block th:text="${holding.share()}">96.0%</th:block></span>
+								<span><span class="funded__key">txs </span><th:block th:text="${holding.transactions()}">11</th:block></span>
+								<span><span class="funded__key">last </span><th:block th:text="${holding.last()}">Jan 2019</th:block></span>
+							</div>
+						</div>
+					</div>
+					<p class="funded__foot" th:text="'Balances as of frozen block ' + ${view.tip()}">Balances as of frozen block 3,172,666</p>
+				</div>
 			</div>
 		</div>
 	</body>

@@ -21,10 +21,13 @@ import java.math.RoundingMode;
 import java.util.List;
 import org.unigrid.janus.web.action.View;
 
-/** The wallet at a glance: what it holds, how that grew, how its addresses stand and what happened last. */
+/**
+ * The wallet at a glance: what it holds, how that grew, how its addresses stand and what happened last.
+ * The addresses holding its funds open over it on request.
+ */
 public record DashboardView(String total, String awaitingMint, List<Bar> bars, String firstMonth, String lastMonth,
-	String tip, int funded, int historyOnly, int neverUsed, String transactions, String active, List<RowView> recent)
-	implements View {
+	String tip, List<Holding> funded, int historyOnly, int neverUsed, String transactions, String active,
+	List<RowView> recent, boolean listingFunded) implements View {
 
 	/** One month of the balance history, as a share of the fullest month. */
 	public record Bar(int percent, String title) {
@@ -33,20 +36,28 @@ public record DashboardView(String total, String awaitingMint, List<Bar> bars, S
 		}
 	}
 
+	/** An address holding funds, whose activity is the history searched for it. */
+	public record Holding(String address, String balance, String share, String transactions, String last) {
+		public String vals() {
+			return Filter.ALL.vals(address);
+		}
+	}
+
 	public int addresses() {
-		return funded + historyOnly + neverUsed;
+		return funded.size() + historyOnly + neverUsed;
 	}
 
 	public String ring() {
-		final String funds = share(funded);
-		final String used = share(funded + historyOnly);
+		final String funds = share(funded.size());
+		final String used = share(funded.size() + historyOnly);
 
 		return "conic-gradient(var(--up) 0 " + funds + "%, var(--accent) " + funds + "% " + used
 			+ "%, var(--border-strong) " + used + "% 100%)";
 	}
 
+	/* The whole history, so a search left behind by a funded address must not narrow it. */
 	public String allVals() {
-		return Filter.ALL.vals();
+		return Filter.ALL.vals("");
 	}
 
 	private String share(final int count) {

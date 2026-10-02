@@ -37,4 +37,9 @@ public enum Filter {
 	public String vals() {
 		return "{\"filter\":\"" + name() + "\"}";
 	}
+
+	/** The same, narrowed to what mentions the query; a wallet address needs no escaping in it. */
+	public String vals(final String query) {
+		return "{\"filter\":\"" + name() + "\",\"q\":\"" + query + "\"}";
+	}
 }
