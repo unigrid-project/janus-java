@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
@@ -53,6 +56,12 @@ class StubHedgehog implements AutoCloseable {
 	private final List<URI> requests = new CopyOnWriteArrayList<>();
 	private final List<String> authorizations = new CopyOnWriteArrayList<>();
 	private final List<String> methods = new CopyOnWriteArrayList<>();
+	private final AtomicInteger atOnce = new AtomicInteger();
+	private final AtomicInteger mostAtOnce = new AtomicInteger();
+	private final ExecutorService handlers = Executors.newCachedThreadPool(
+		Thread.ofPlatform().name("stub-hedgehog-", 1).daemon().factory()
+	);
+	private volatile Duration slowdown = Duration.ZERO;
 
 	StubHedgehog() throws IOException {
 		this(HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0), "http");
@@ -62,6 +71,7 @@ class StubHedgehog implements AutoCloseable {
 		this.server = server;
 		this.scheme = scheme;
 		server.createContext("/", this::handle);
+		server.setExecutor(handlers);
 		server.start();
 	}
 
@@ -147,7 +157,30 @@ class StubHedgehog implements AutoCloseable {
 		return URI.create(scheme + "://127.0.0.1:" + server.getAddress().getPort());
 	}
 
+	/** Makes every answer wait this long, so that requests asked for at once can be seen to overlap. */
+	void slowdown(final Duration delay) {
+		slowdown = delay;
+	}
+
+	/** The most requests that were being answered at the same moment. */
+	int mostAtOnce() {
+		return mostAtOnce.get();
+	}
+
 	private void handle(final HttpExchange exchange) throws IOException {
+		final int now = atOnce.incrementAndGet();
+
+		mostAtOnce.accumulateAndGet(now, Math::max);
+
+		try {
+			pause(slowdown);
+			answer(exchange);
+		} finally {
+			atOnce.decrementAndGet();
+		}
+	}
+
+	private void answer(final HttpExchange exchange) throws IOException {
 		requests.add(exchange.getRequestURI());
 		methods.add(exchange.getRequestMethod());
 		authorizations.add(exchange.getRequestHeaders().getFirst("Authorization"));
@@ -187,5 +220,6 @@ class StubHedgehog implements AutoCloseable {
 	@Override
 	public void close() {
 		server.stop(0);
+		handlers.shutdownNow();
 	}
 }

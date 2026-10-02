@@ -106,6 +106,17 @@ public final class HedgehogStand implements AutoCloseable {
 		return List.copyOf(stub.requests());
 	}
 
+	/** Makes every answer wait this long, so that requests asked for at once can be seen to overlap. */
+	public HedgehogStand slowedBy(final Duration delay) {
+		stub.slowdown(delay);
+		return this;
+	}
+
+	/** The most requests the stand was answering at the same moment. */
+	public int mostAtOnce() {
+		return stub.mostAtOnce();
+	}
+
 	/** Holds no ledger yet but says it is downloading one, that far along. */
 	public HedgehogStand fetching(final int percent) {
 		stub.answer("/bootstrap", 503, "");

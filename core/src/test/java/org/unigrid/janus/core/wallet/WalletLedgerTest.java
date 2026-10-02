@@ -23,8 +23,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -102,6 +104,64 @@ public class WalletLedgerTest {
 		assertEquals(List.of("bb", "aa"), funds.transactions().stream().map(WalletTransaction::txid).toList());
 		assertEquals(new AddressBreakdown(2, 0, addresses.size() - 2), funds.breakdown());
 		assertEquals(3172666, funds.snapshot().tipHeight());
+	}
+
+	@Example
+	public void shouldAskHedgehogAboutSeveralAddressesAtOnceButNeverMoreThanFour() {
+		stand.address(addresses.get(0), "480", entry("aa", 5, "480", EntryKind.RECEIVED))
+			.slowedBy(Duration.ofMillis(15));
+
+		final WalletFunds funds = ledger.read(WALLET);
+
+		assertEquals(0, new BigDecimal("480").compareTo(funds.total()));
+		assertTrue(stand.mostAtOnce() > 1, "Hedgehog was asked one thing at a time");
+		assertTrue(stand.mostAtOnce() <= 4, "Hedgehog was asked " + stand.mostAtOnce() + " things at once");
+	}
+
+	@Example
+	public void shouldKeepTheAddressesInTheOrderOfTheWalletWhateverOrderTheAnswersCome() {
+		stand.address(addresses.get(3), "1", entry("aa", 1, "1", EntryKind.RECEIVED))
+			.address(addresses.get(40), "2", entry("bb", 2, "2", EntryKind.RECEIVED))
+			.slowedBy(Duration.ofMillis(5));
+
+		final WalletFunds funds = ledger.read(WALLET);
+
+		assertEquals(new AddressBreakdown(2, 0, addresses.size() - 2), funds.breakdown());
+		assertEquals(List.of("bb", "aa"), funds.transactions().stream().map(WalletTransaction::txid).toList());
+	}
+
+	@Example
+	public void shouldSayHowFarTheReadHasGotWhileItIsUnderWay() throws InterruptedException {
+		stand.slowedBy(Duration.ofMillis(10));
+		ledger.load(WALLET);
+
+		final List<Integer> seen = new ArrayList<>();
+		final Instant deadline = Instant.now().plusSeconds(30);
+
+		while (ledger.state().phase() == Phase.LOADING && Instant.now().isBefore(deadline)) {
+			final Integer progress = ledger.state().progress();
+
+			if (progress != null && (seen.isEmpty() || !progress.equals(seen.getLast()))) {
+				seen.add(progress);
+			}
+
+			Thread.sleep(5);
+		}
+
+		assertEquals(Phase.LOADED, ledger.state().phase());
+		assertNull(ledger.state().progress());
+		assertTrue(seen.size() > 1, "The progress was seen " + seen.size() + " times: " + seen);
+		assertEquals(seen.stream().sorted().toList(), seen, "The progress went backwards: " + seen);
+		assertTrue(seen.stream().allMatch(percent -> percent >= 0 && percent <= 100), seen.toString());
+	}
+
+	@Example
+	public void shouldFailTheWholeReadWhenHedgehogFailsOnOneOfTheAddresses() throws InterruptedException {
+		stand.address(addresses.get(5), "1", entry("aa", 1, "1", EntryKind.RECEIVED)).broken(addresses.get(5));
+		ledger.load(WALLET);
+
+		assertEquals(Phase.FAILED, settle().phase());
+		assertEquals("Hedgehog stopped answering", ledger.state().reason());
 	}
 
 	@Example

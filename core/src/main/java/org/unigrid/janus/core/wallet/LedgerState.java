@@ -16,10 +16,14 @@
 
 package org.unigrid.janus.core.wallet;
 
-/** How far the wallet's ledger is from being shown, and why it never will be when it failed. */
-public record LedgerState(Phase phase, String reason, boolean unreadable, WalletFunds funds) {
-	public static final LedgerState IDLE = new LedgerState(Phase.IDLE, null, false, null);
-	public static final LedgerState LOADING = new LedgerState(Phase.LOADING, null, false, null);
+/**
+ * How far the wallet's ledger is from being shown, and why it never will be when it failed. While it loads, the
+ * progress is the percentage of the addresses Hedgehog has answered for, or null while the wallet file is still
+ * being read and there is nothing to count yet.
+ */
+public record LedgerState(Phase phase, String reason, boolean unreadable, WalletFunds funds, Integer progress) {
+	public static final LedgerState IDLE = new LedgerState(Phase.IDLE, null, false, null, null);
+	public static final LedgerState LOADING = loading(null);
 
 	public enum Phase {
 		IDLE,
@@ -28,11 +32,15 @@ public record LedgerState(Phase phase, String reason, boolean unreadable, Wallet
 		FAILED
 	}
 
+	public static LedgerState loading(final Integer progress) {
+		return new LedgerState(Phase.LOADING, null, false, null, progress);
+	}
+
 	public static LedgerState loaded(final WalletFunds funds) {
-		return new LedgerState(Phase.LOADED, null, false, funds);
+		return new LedgerState(Phase.LOADED, null, false, funds, null);
 	}
 
 	public static LedgerState failed(final String reason, final boolean unreadable) {
-		return new LedgerState(Phase.FAILED, reason, unreadable, null);
+		return new LedgerState(Phase.FAILED, reason, unreadable, null, null);
 	}
 }

@@ -31,8 +31,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.unigrid.janus.core.hedgehog.AddressBalance;
 import org.unigrid.janus.core.evm.EvmWalletStore;
@@ -52,6 +56,7 @@ import org.unigrid.janus.core.wallet.LedgerState.Phase;
 @ApplicationScoped
 public class WalletLedger {
 	private static final int PAGE = 1000;
+	private static final int SIMULTANEOUS = 4;
 
 	private final HedgehogClient client;
 	private final ZoneId zone;
@@ -138,21 +143,84 @@ public class WalletLedger {
 		return WalletFunds.of(balances, List.of(), client.snapshot(), zone);
 	}
 
+	/** What Hedgehog said of one address: its balance, and its history when it has any. */
+	private record Answer(Optional<AddressBalance> balance, List<AddressTransaction> history) {
+	}
+
+	/*
+	 * A wallet can hold hundreds of thousands of addresses and Hedgehog is asked about each, so a few askers share
+	 * the work, each taking the next address that has not been asked about. Every answer lands at the place of its
+	 * address, which keeps the result in the order of the wallet however the answers arrive.
+	 */
 	private WalletFunds read(final Collection<String> addresses) {
+		final List<String> asked = List.copyOf(addresses);
+		final Answer[] answers = new Answer[asked.size()];
+		final AtomicInteger next = new AtomicInteger();
+		final AtomicInteger answered = new AtomicInteger();
+
+		try (ExecutorService askers = Executors.newFixedThreadPool(SIMULTANEOUS,
+			Thread.ofPlatform().name("hedgehog-asker-", 1).daemon().factory())) {
+
+			final Runnable asker = () -> {
+				for (int i = next.getAndIncrement(); i < answers.length; i = next.getAndIncrement()) {
+					answers[i] = ask(asked.get(i));
+					progress(answered.incrementAndGet(), answers.length);
+				}
+			};
+
+			await(IntStream.range(0, SIMULTANEOUS).<Future<?>>mapToObj(n -> askers.submit(asker)).toList(),
+				next);
+		}
+
 		final Map<String, Optional<AddressBalance>> balances = new LinkedHashMap<>();
 		final Map<String, List<AddressTransaction>> entries = new LinkedHashMap<>();
 
-		for (final String address : addresses) {
-			final Optional<AddressBalance> balance = client.balance(address);
+		for (int i = 0; i < answers.length; i++) {
+			balances.put(asked.get(i), answers[i].balance());
 
-			balances.put(address, balance);
-
-			if (balance.map(known -> known.transactionCount() > 0).orElse(false)) {
-				entries.put(address, history(address));
+			if (answers[i].history() != null) {
+				entries.put(asked.get(i), answers[i].history());
 			}
 		}
 
 		return WalletFunds.of(balances, WalletHistory.of(entries), client.snapshot(), zone);
+	}
+
+	private Answer ask(final String address) {
+		final Optional<AddressBalance> balance = client.balance(address);
+		final boolean used = balance.map(known -> known.transactionCount() > 0).orElse(false);
+
+		return new Answer(balance, used ? history(address) : null);
+	}
+
+	/* The first failure stops the others from taking another address, and is the one that is reported. */
+	private static void await(final List<Future<?>> running, final AtomicInteger next) {
+		try {
+			for (final Future<?> asker : running) {
+				asker.get();
+			}
+		} catch (ExecutionException e) {
+			next.set(Integer.MAX_VALUE);
+
+			if (e.getCause() instanceof RuntimeException failure) {
+				throw failure;
+			}
+
+			throw new IllegalStateException(e.getCause());
+		} catch (InterruptedException e) {
+			next.set(Integer.MAX_VALUE);
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException("Janus is shutting down", e);
+		}
+	}
+
+	/* Only a change of the whole percent is worth saying, which is a few hundred times for any wallet. */
+	private void progress(final int answered, final int total) {
+		final int percent = (int) (100L * answered / total);
+
+		if (state.phase() == Phase.LOADING && !Integer.valueOf(percent).equals(state.progress())) {
+			state = LedgerState.loading(percent);
+		}
 	}
 
 	private List<AddressTransaction> history(final String address) {
