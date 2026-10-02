@@ -1,8 +1,13 @@
 name: Janus release
 
-# Started by hand only. It builds and tests the installers of the chosen commit on every platform and
-# then leaves a draft release with them, which nobody sees until it is published from the Releases page.
+# Started by pushing a tag such as v2.0.0, or by hand with a version. Either way it builds and tests the
+# installers of that commit on every platform and then leaves a draft release with them, which nobody
+# sees until it is published from the Releases page.
 on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
   workflow_dispatch:
     inputs:
       version:
@@ -23,26 +28,47 @@ jobs:
       actions: read
       contents: read
 
+    outputs:
+      version: ${{ steps.what.outputs.version }}
+
     steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: Check what is about to be released
+      id: what
       env:
         GH_TOKEN: ${{ github.token }}
-        VERSION: ${{ inputs.version }}
+        EVENT: ${{ github.event_name }}
+        INPUT_VERSION: ${{ inputs.version }}
         REPOSITORY: ${{ github.repository }}
       run: |
-        if [ "$GITHUB_REF" != "refs/heads/master" ]; then
-          echo "Releases are made from master, not from $GITHUB_REF" >&2
-          exit 1
-        fi
+        if [ "$EVENT" = "push" ]; then
+          version="${GITHUB_REF_NAME#v}"
 
-        if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-          echo "The version must look like 2.0.0, not '$VERSION'" >&2
-          exit 1
-        fi
+          # A tag can be pushed from any branch; only what master holds is ever released.
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
+            echo "$GITHUB_REF_NAME is not on master" >&2
+            exit 1
+          fi
+        else
+          version="$INPUT_VERSION"
 
-        if git ls-remote --exit-code --tags "https://github.com/$REPOSITORY" "refs/tags/v$VERSION" > /dev/null; then
-          echo "v$VERSION is already tagged" >&2
-          exit 1
+          if [ "$GITHUB_REF" != "refs/heads/master" ]; then
+            echo "Releases are made from master, not from $GITHUB_REF" >&2
+            exit 1
+          fi
+
+          if ! echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "The version must look like 2.0.0, not '$version'" >&2
+            exit 1
+          fi
+
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" > /dev/null; then
+            echo "v$version is already tagged" >&2
+            exit 1
+          fi
         fi
 
         passed=$(gh run list --repo "$REPOSITORY" --workflow maven.yml --commit "$GITHUB_SHA" \
@@ -53,16 +79,18 @@ jobs:
           exit 1
         fi
 
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+
   installers:
 
     needs: check
     uses: ./.github/workflows/installers.yml
     with:
-      version: ${{ inputs.version }}
+      version: ${{ needs.check.outputs.version }}
 
   draft:
 
-    needs: installers
+    needs: [check, installers]
 
     runs-on: ubuntu-22.04
 
@@ -85,7 +113,7 @@ jobs:
     - name: Leave a draft release
       env:
         GH_TOKEN: ${{ github.token }}
-        VERSION: ${{ inputs.version }}
+        VERSION: ${{ needs.check.outputs.version }}
         PRERELEASE: ${{ inputs.prerelease }}
       run: |
         flags=""
