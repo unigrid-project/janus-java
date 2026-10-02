@@ -41,6 +41,7 @@ import static org.unigrid.janus.ui.FlowSupport.settle;
 
 public class WalletFlowTest {
 	private static final String ACTIVITY = "button.app__tab[hx-post=/action/activity]";
+	private static final String FUNDED = ".stat[hx-post=/action/dashboard]";
 
 	private ControlCenterRig rig;
 
@@ -108,6 +109,29 @@ public class WalletFlowTest {
 		assertEquals(List.of("t128", "t126", "t124", "t122", "t120", "t12"),
 			screen.document().select("#rows .ledger__txid").eachText()
 		);
+	}
+
+	@Example
+	public void shouldGoFromAFundedAddressToItsActivityAndBackToTheWholeOfIt() throws Exception {
+		final String funded = rig.addresses().get(1);
+
+		rig.hedgehog().address(rig.addresses().get(0), "0", entry("aa", 1, "5", EntryKind.RECEIVED),
+			entry("bb", 2, "-5", EntryKind.SENT)
+		).address(funded, "7", entry("cc", 3, "7", EntryKind.RECEIVED));
+
+		final Screen screen = settle(continueWithTheWalletLeftBehind()).click(FUNDED);
+
+		assertEquals(List.of(funded), screen.document().select(".funded__text").eachText());
+		assertTrue(screen.click(".funded__close").document().select(".funded").isEmpty());
+		screen.click(FUNDED).click(".funded__activity");
+		assertEquals(funded, screen.find("input[name=q]").val());
+		assertEquals(List.of("cc"), screen.document().select("#rows .ledger__txid").eachText());
+
+		screen.click("button.app__tab[hx-post=/action/dashboard]");
+		assertTrue(screen.document().select(".funded").isEmpty());
+		screen.click(".stat[hx-post=/action/activity]");
+		assertEquals("", screen.find("input[name=q]").val());
+		assertEquals(3, screen.document().select("#rows details").size());
 	}
 
 	@Example

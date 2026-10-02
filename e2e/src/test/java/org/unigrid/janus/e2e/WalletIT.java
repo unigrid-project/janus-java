@@ -103,6 +103,30 @@ public class WalletIT extends BrowserTest {
 	}
 
 	@Example
+	public void shouldCloseTheFundedAddressesByEscapeOrTheBackdropButNotByTheDialog() throws Exception {
+		final String funded = ".funded";
+
+		openTheWalletLeftBehind();
+		page().click(".stat:has-text('Funded addresses')");
+		page().click(".funded__heading");
+		assertThat(page().locator(funded)).isVisible();
+		page().keyboard().press("Escape");
+		assertThat(page().locator(funded)).hasCount(0);
+		page().click(".stat:has-text('Funded addresses')");
+		page().mouse().click(5, page().viewportSize().height - 5);
+		assertThat(page().locator(funded)).hasCount(0);
+	}
+
+	@Example
+	public void shouldSearchTheActivityForTheFundedAddressChosen() throws Exception {
+		openTheWalletLeftBehind();
+		page().click(".stat:has-text('Funded addresses')");
+		page().click(".funded__activity");
+		assertThat(page().locator("input[name=q]")).hasValue(rig().addresses().get(0));
+		assertThat(page().locator("#rows details")).hasCount(2);
+	}
+
+	@Example
 	public void shouldLeaveTheLaterTabsAlone() throws Exception {
 		openTheWalletLeftBehind();
 		assertThat(page().locator("button.app__tab:has-text('Gridnodes')")).isDisabled();
