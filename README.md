@@ -3,6 +3,8 @@ The Janus Wallet © Stiftelsen The Unigrid Foundation
 <img align="right" width="300px" height="auto" src="documentation/janus-logo.png" alt="Janus">
 
 [![Janus build status](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml/badge.svg)](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml)
+[![Latest release](https://img.shields.io/github/v/release/unigrid-project/janus-java)](https://github.com/unigrid-project/janus-java/releases/latest)
+[![Test coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Funigrid-project%2Fjanus-java%2Fbadges%2Fcoverage.json)](https://github.com/unigrid-project/janus-java/actions/workflows/maven.yml)
 
 
 About Unigrid
