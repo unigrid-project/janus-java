@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.unigrid.janus.core.hedgehog.AddressBalance;
+import org.unigrid.janus.core.evm.EvmWallet;
 import org.unigrid.janus.core.evm.EvmWalletStore;
 import org.unigrid.janus.core.hedgehog.AddressTransaction;
 import org.unigrid.janus.core.hedgehog.HedgehogClient;
@@ -102,18 +103,26 @@ public class WalletLedger {
 	 * wallet file itself can be unreadable; anything after it is Hedgehog's doing.
 	 */
 	private LedgerState attempt(final Path wallet) {
-		final boolean evm = EvmWalletStore.holds(wallet);
+		final boolean promised;
 		final Collection<String> addresses;
 
 		try {
-			addresses = evm ? EvmWalletStore.read(wallet).addresses() : LegacyWallet.addresses(wallet);
+			if (EvmWalletStore.holds(wallet)) {
+				final EvmWallet evm = EvmWalletStore.read(wallet);
+
+				promised = evm.legacy() == null;
+				addresses = promised ? evm.addresses() : evm.legacy().addresses();
+			} else {
+				promised = false;
+				addresses = LegacyWallet.addresses(wallet);
+			}
 		} catch (IllegalArgumentException | UncheckedIOException e) {
 			log.warn("The wallet at {} could not be read", wallet, e);
 			return LedgerState.failed(e.getMessage(), true);
 		}
 
 		try {
-			return LedgerState.loaded(evm ? promised(addresses) : read(addresses));
+			return LedgerState.loaded(promised ? promised(addresses) : read(addresses));
 		} catch (RuntimeException e) {
 			log.warn("The ledger of the wallet at {} could not be read", wallet, e);
 			return LedgerState.failed("Hedgehog stopped answering", false);

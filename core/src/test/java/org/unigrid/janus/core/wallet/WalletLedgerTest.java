@@ -36,11 +36,14 @@ import net.jqwik.api.lifecycle.AfterTry;
 import net.jqwik.api.lifecycle.BeforeTry;
 import org.unigrid.janus.core.evm.EvmWallet;
 import org.unigrid.janus.core.evm.EvmWalletStore;
+import org.unigrid.janus.core.evm.LegacyVault;
 import org.unigrid.janus.core.evm.Mnemonic;
 import org.unigrid.janus.core.evm.SeedVault;
 import org.unigrid.janus.core.hedgehog.AddressTransaction;
 import org.unigrid.janus.core.hedgehog.EntryKind;
 import org.unigrid.janus.core.hedgehog.HedgehogStand;
+import org.unigrid.janus.core.legacy.LegacyKey;
+import org.unigrid.janus.core.legacy.WalletDump;
 import org.unigrid.janus.core.wallet.LedgerState.Phase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -271,6 +274,37 @@ public class WalletLedgerTest {
 			assertEquals(0, new BigDecimal("1525").compareTo(funds.awaitingMint()));
 			assertEquals(List.of(), funds.transactions());
 			assertEquals(new AddressBreakdown(2, 0, EvmWallet.ADDRESSES - 2), funds.breakdown());
+		} finally {
+			try (Stream<Path> files = Files.walk(folder)) {
+				for (final Path path : files.sorted(Comparator.reverseOrder()).toList()) {
+					Files.delete(path);
+				}
+			}
+		}
+	}
+
+	@Example
+	public void shouldReadTheLegacyAddressesOfAnEvmWalletThatHoldsLegacyKeys() throws InterruptedException, IOException {
+		final Path folder = Files.createTempDirectory("wallets");
+		final List<String> dumped = Files.readAllLines(fixture("wallet.dump.addresses"));
+		final List<LegacyKey> keys = WalletDump.keys(fixture("wallet.dump"));
+		final EvmWallet wallet = EvmWallet.create(Mnemonic.parse("abandon abandon abandon abandon abandon abandon "
+			+ "abandon abandon abandon abandon abandon about"), "pw", new SeedVault(new SecureRandom(), 16),
+			new LegacyVault(), keys
+		);
+
+		stand.address(dumped.get(0), "30", entry("aa", 1, "30", EntryKind.RECEIVED))
+			.address(dumped.get(5), "12", entry("bb", 2, "12", EntryKind.RECEIVED))
+			.mint(wallet.addresses().get(0), 3200000, "1000");
+
+		try {
+			ledger.load(new EvmWalletStore(folder).save(wallet));
+
+			final WalletFunds funds = settle().funds();
+
+			assertEquals(0, new BigDecimal("42").compareTo(funds.total()));
+			assertEquals(new AddressBreakdown(2, 0, dumped.size() - 2), funds.breakdown());
+			assertEquals(2, funds.transactions().size());
 		} finally {
 			try (Stream<Path> files = Files.walk(folder)) {
 				for (final Path path : files.sorted(Comparator.reverseOrder()).toList()) {
