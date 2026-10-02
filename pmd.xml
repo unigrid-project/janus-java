@@ -1,20 +1,19 @@
 <?xml version="1.0"?>
-<ruleset xmlns="http://pmd.sourceforge.net/ruleset/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd"
-	 xsi:noNamespaceSchemaLocation="http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+<ruleset name="janus" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+	<description>Every PMD rule, less the ones that do not suit this code, for PMD 7. PMD only reports; nothing fails on it.</description>
 	<rule ref="rulesets/internal/all-java.xml">
 		<exclude name="AvoidCatchingGenericException" />
 		<exclude name="AvoidLiteralsInIfCondition" />
 		<exclude name="AvoidSynchronizedAtMethodLevel" />
 		<exclude name="AvoidUsingVolatile" />
 		<exclude name="AtLeastOneConstructor" />
-		<exclude name="BeanMembersShouldSerialize" />
+		<exclude name="AvoidFieldNameMatchingMethodName" />
+		<exclude name="CommentDefaultAccessModifier" />
 		<exclude name="CommentRequired" />
 		<exclude name="CommentSize" />
 		<exclude name="GuardLogStatement" />
 		<exclude name="UnnecessaryImport" />
-		<exclude name="ImmutableField" />
-		<exclude name="JUnitAssertionsShouldIncludeMessage" />
 		<exclude name="LawOfDemeter" />
 		<exclude name="LocalVariableCouldBeFinal" />
 		<exclude name="ProperLogger" />
@@ -25,65 +24,46 @@
 		<exclude name="ShortClassName" />
 		<exclude name="ShortVariable" />
 		<exclude name="SignatureDeclareThrowsException" />
-		<exclude name="SingularField" />
 		<exclude name="TestClassWithoutTestCases" />
-		<exclude name="UnusedPrivateField" />
+		<exclude name="UnitTestAssertionsShouldIncludeMessage" />
 		<exclude name="UnusedPrivateMethod" />
 		<exclude name="UseConcurrentHashMap" />
-		<exclude name="UseUtilityClass" />
 		<exclude name="DoNotTerminateVM" />
 		<exclude name="DoNotUseThreads" />
 	</rule>
-	<rule ref="rulesets/internal/all-java.xml/ImmutableField">
-		<!-- Project Lombok -->
+	<rule ref="category/java/codestyle.xml/ConfusingTernary">
 		<properties>
-			<property name="violationSuppressXPath" value="../../..[Annotation//Name[@Image='Setter']]"/>
+			<property name="ignoreElseIf" value="true" />
 		</properties>
 	</rule>
-	<rule ref="rulesets/internal/all-java.xml/LocalVariableCouldBeFinal">
+	<rule ref="category/java/design.xml/CognitiveComplexity">
 		<properties>
-			<property name="violationSuppressXPath" value="../../ForStatement"/>
+			<property name="reportLevel" value="10" />
 		</properties>
 	</rule>
-	<rule ref="rulesets/internal/all-java.xml/ProperLogger">
+	<rule ref="category/java/design.xml/SignatureDeclareThrowsException">
+		<!-- Tests, with jqwik beside JUnit, declare what their set-up and the code they call throw -->
 		<properties>
-			<property name="violationSuppressXPath" value="../..[Annotation//Name[@Image='Inject']]"/>
+			<property name="IgnoreJUnitCompletely" value="true" />
+			<property name="violationSuppressXPath" value="ancestor-or-self::MethodDeclaration/ModifierList/Annotation[@SimpleName = ('Example', 'Property', 'BeforeTry', 'AfterTry', 'BeforeProperty', 'AfterProperty', 'BeforeContainer', 'AfterContainer')]" />
 		</properties>
 	</rule>
-	<rule ref="rulesets/internal/all-java.xml/SignatureDeclareThrowsException">
-		<!-- JUnit tests -->
+	<rule ref="category/java/codestyle.xml/LocalVariableCouldBeFinal">
+		<!-- A loop variable is rarely final -->
 		<properties>
-			<property name="violationSuppressXPath" value="../../..[Annotation//Name[@Image='Test']]"/>
+			<property name="violationSuppressXPath" value="./parent::ForInit" />
 		</properties>
 	</rule>
-	<rule ref="rulesets/internal/all-java.xml/SingularField">
-		<!-- Project Lombok -->
+	<rule ref="category/java/errorprone.xml/ProperLogger">
+		<!-- A logger that is injected is not static -->
 		<properties>
-			<property name="violationSuppressXPath" value="..[Annotation//Name[@Image='Getter']]" />
+			<property name="violationSuppressXPath" value="./ModifierList/Annotation[@SimpleName = 'Inject']" />
 		</properties>
 	</rule>
-	<rule ref="rulesets/internal/all-java.xml/TestClassWithoutTestCases">
-		<!-- Support for extending test classes -->
-		<properties>
-			<property name="violationSuppressXPath" value="//Annotation//Name[@Image='Test']"/>
-		</properties>
-	</rule>
-	<rule ref="rulesets/internal/all-java.xml/UnusedPrivateField">
-		<!-- Project Lombok -->
-		<properties>
-			<property name="violationSuppressXPath" value="../../..[Annotation//Name[(@Image='Getter') or (@Image='Setter') or (@Image='Drone')]]" />
-		</properties>
-	</rule>
-	<rule ref="rulesets/internal/all-java.xml/UnusedPrivateMethod">
+	<rule ref="category/java/bestpractices.xml/UnusedPrivateMethod">
 		<!-- CDI observer -->
 		<properties>
-			<property name="violationSuppressXPath" value="//MethodDeclaration//MarkerAnnotation/Name[@Image='Observes']" />
-		</properties>
-	</rule>
-	<rule ref="rulesets/internal/all-java.xml/UseUtilityClass">
-		<!-- Project Lombok -->
-		<properties>
-			<property name="violationSuppressXPath" value="((../..[Annotation//Name[(@Image='NoArgsConstructor') or (@Image='RequiredArgsConstructor') or (@Image='AllArgsConstructor')]]) and //PrimaryPrefix//Name[@Image='AccessLevel.PRIVATE']) or //PrimaryPrefix//Name[@Image='AccessLevel.PUBLIC'] or //Annotation//Name[(@Image='Getter') or (@Image='Setter')]" />
+			<property name="violationSuppressXPath" value=".//FormalParameter/ModifierList/Annotation[@SimpleName = 'Observes']" />
 		</properties>
 	</rule>
 </ruleset>

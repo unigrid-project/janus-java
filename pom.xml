@@ -249,6 +249,26 @@
 					<version>3.6.0</version>
 				</plugin>
 				<plugin>
+					<!-- Reports only: it is pmd:pmd that runs, never pmd:check, so nothing fails on a finding. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-pmd-plugin</artifactId>
+					<version>3.28.0</version>
+					<configuration>
+						<includeTests>true</includeTests>
+						<rulesets>
+							<ruleset>${maven.multiModuleProjectDirectory}/pmd.xml</ruleset>
+						</rulesets>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>verify</phase>
+							<goals>
+								<goal>pmd</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<version>3.5.5</version>
@@ -336,6 +356,10 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
 			</plugin>
 		</plugins>
 		<resources>
