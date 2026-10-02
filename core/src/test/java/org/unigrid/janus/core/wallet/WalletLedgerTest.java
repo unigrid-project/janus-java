@@ -235,6 +235,21 @@ public class WalletLedgerTest {
 	}
 
 	@Example
+	public void shouldLoadTheFundsOfAWalletDumpAsOfAWalletFile() throws IOException, InterruptedException {
+		final List<String> dumped = Files.readAllLines(fixture("wallet.dump.addresses"));
+
+		stand.address(dumped.get(0), "30", entry("aa", 1, "30", EntryKind.RECEIVED))
+			.address(dumped.get(5), "12", entry("bb", 2, "12", EntryKind.RECEIVED));
+		ledger.load(fixture("wallet.dump"));
+
+		final LedgerState loaded = settle();
+
+		assertEquals(Phase.LOADED, loaded.phase());
+		assertEquals(0, new BigDecimal("42").compareTo(loaded.funds().total()));
+		assertEquals(new AddressBreakdown(2, 0, dumped.size() - 2), loaded.funds().breakdown());
+	}
+
+	@Example
 	public void shouldFailWhenHedgehogStopsAnsweringAndStartOverOnRetry() throws InterruptedException {
 		stand.address(addresses.get(0), "1", entry("aa", 1, "1", EntryKind.RECEIVED)).broken(addresses.get(0));
 		ledger.load(WALLET);
