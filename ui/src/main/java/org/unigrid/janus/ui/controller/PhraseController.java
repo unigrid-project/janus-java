@@ -27,8 +27,10 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import org.unigrid.janus.core.evm.EvmWallet;
 import org.unigrid.janus.core.evm.EvmWalletStore;
+import org.unigrid.janus.core.evm.LegacyVault;
 import org.unigrid.janus.core.evm.Mnemonic;
 import org.unigrid.janus.core.evm.SeedVault;
+import org.unigrid.janus.core.legacy.LegacyKey;
 import org.unigrid.janus.ui.view.AppView;
 import org.unigrid.janus.ui.view.ImportView;
 import org.unigrid.janus.ui.view.PasswordView;
@@ -53,11 +55,13 @@ public class PhraseController {
 
 	private final EvmWalletStore store;
 	private final SeedVault vault;
+	private final LegacyVault legacyVault = new LegacyVault();
 	private final WalletController wallets;
 	private final ImportController importer;
 	private final SecureRandom random;
 
 	private volatile Mnemonic pending;
+	private volatile List<LegacyKey> imported = List.of();
 	private volatile boolean restoring;
 	private volatile List<Integer> order = List.of();
 	private final List<Integer> picked = new ArrayList<>();
@@ -81,19 +85,26 @@ public class PhraseController {
 
 	@Action("create")
 	public SeedView onClickCreate() {
-		final List<Integer> shuffled = new ArrayList<>(IntStream.range(0, Mnemonic.WORDS).boxed().toList());
+		forget();
+		return begin();
+	}
+
+	/* The keys of the chosen wallet dump wait in memory beside the new phrase, which is theirs to seal. */
+	@Action("import-dump")
+	public SeedView onClickImportDump() {
+		final List<LegacyKey> keys = importer.dumpKeys();
 
 		forget();
-		Collections.shuffle(shuffled, random);
-		pending = Mnemonic.generate(random);
-		order = List.copyOf(shuffled);
-		return new SeedView(pending.words());
+		imported = keys;
+		return begin();
 	}
 
 	@Action("create-back")
-	public WelcomeView onClickBackToWelcome() {
+	public View onClickBackToWelcome() {
+		final boolean importing = importing();
+
 		forget();
-		return new WelcomeView();
+		return importing ? importer.onClickImport() : new WelcomeView();
 	}
 
 	/* The same words come back, so a phrase already written down stays the one to confirm. */
@@ -131,7 +142,7 @@ public class PhraseController {
 			throw new IllegalStateException("The phrase has not been confirmed");
 		}
 
-		return new PasswordView(false, null);
+		return password(null);
 	}
 
 	@Action("restore")
@@ -155,7 +166,7 @@ public class PhraseController {
 
 		try {
 			pending = Mnemonic.parse(typed);
-			return new PasswordView(true, null);
+			return password(null);
 		} catch (IllegalArgumentException e) {
 			return new RestoreView(boxes(typed), e.getMessage());
 		}
@@ -172,17 +183,36 @@ public class PhraseController {
 		final String password = Objects.requireNonNullElse(form.get(PASSWORD), "");
 
 		if (password.length() < MINIMUM_PASSWORD) {
-			return new PasswordView(restoring, "Use at least " + MINIMUM_PASSWORD + " characters");
+			return password("Use at least " + MINIMUM_PASSWORD + " characters");
 		}
 
 		if (!password.equals(form.get(REPEAT))) {
-			return new PasswordView(restoring, "The two passwords differ");
+			return password("The two passwords differ");
 		}
 
-		final AppView opened = wallets.open(store.save(EvmWallet.create(phrase, password, vault)));
+		final EvmWallet wallet = importing() ? EvmWallet.create(phrase, password, vault, legacyVault, imported)
+			: EvmWallet.create(phrase, password, vault);
+		final AppView opened = wallets.open(store.save(wallet));
 
 		forget();
 		return opened;
+	}
+
+	private PasswordView password(final String error) {
+		return new PasswordView(restoring, importing(), error);
+	}
+
+	private boolean importing() {
+		return !imported.isEmpty();
+	}
+
+	private SeedView begin() {
+		final List<Integer> shuffled = new ArrayList<>(IntStream.range(0, Mnemonic.WORDS).boxed().toList());
+
+		Collections.shuffle(shuffled, random);
+		pending = Mnemonic.generate(random);
+		order = List.copyOf(shuffled);
+		return new SeedView(pending.words());
 	}
 
 	private synchronized VerifyView verify() {
@@ -208,6 +238,8 @@ public class PhraseController {
 	}
 
 	private synchronized void forget() {
+		imported.forEach(LegacyKey::wipe);
+		imported = List.of();
 		pending = null;
 		restoring = false;
 		order = List.of();

@@ -18,8 +18,11 @@ package org.unigrid.janus.ui.view;
 
 import org.unigrid.janus.web.action.View;
 
-/** The password the recovery phrase is sealed with before it is kept, and why the last one was refused. */
-public record PasswordView(boolean restoring, String error) implements View {
+/**
+ * The password the recovery phrase is sealed with before it is kept, whether the keys of an imported wallet
+ * dump are sealed with it as well, and why the last password was refused.
+ */
+public record PasswordView(boolean restoring, boolean importing, String error) implements View {
 	@Override
 	public String template() {
 		return "fragments/phrase :: password";

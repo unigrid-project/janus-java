@@ -86,7 +86,11 @@
 
 			<span class="step__label">Protect</span>
 			<h1 class="step__heading">Choose a password</h1>
-			<p class="step__note">
+			<p class="step__note" th:if="${view.importing}">
+				Your recovery phrase and your imported keys are kept on this computer sealed with this password.
+				Viewing your wallet never asks for it; you will need it once Janus can send.
+			</p>
+			<p class="step__note" th:unless="${view.importing}">
 				Your recovery phrase is kept on this computer sealed with this password. Viewing your wallet
 				never asks for it; you will need it once Janus can send.
 			</p>
