@@ -46,6 +46,7 @@ public class PhraseStepsIT extends BrowserTest {
 
 	private List<String> writtenDown() {
 		page().click("[hx-post='/action/create']");
+		assertThat(page().locator(".phrase__word")).hasCount(12);
 		return page().locator(".phrase__word > span:not(.phrase__n)").allTextContents();
 	}
 
