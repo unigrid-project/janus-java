@@ -217,9 +217,7 @@ jobs:
         sleep 5
         xdotool key ctrl+h
         sleep 1
-        xdotool type --delay 100 wallet
-        sleep 1
-        xdotool key Escape
+        xdotool mousemove 230 235 click 1
         sleep 1
         shot 01-thunar-wallet-selected.png
         pkill thunar || true
