@@ -28,6 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -60,6 +62,7 @@ public class InstalledJanusIT {
 	/* Only what the test itself needs. The libraries Janus runs on have to come in through the package, which
 	   is what a person installing it depends on. */
 	private static final String DEBIAN_SETUP = """
+		export DEBIAN_FRONTEND=noninteractive
 		apt-get update -qq
 		apt-get install -y -qq xvfb xauth procps curl xdotool imagemagick tesseract-ocr python3-xlib >/dev/null
 		""";
@@ -80,9 +83,12 @@ public class InstalledJanusIT {
 		Assumptions.assumeTrue(DIST.resolve("Unigrid").toFile().isDirectory(), "No application image in " + DIST);
 	}
 
-	@Test
-	public void shouldRunFromTheDebianPackage() throws Exception {
-		verify("debian:12", DEBIAN_SETUP + "apt-get install -y -qq /r/unigrid_*.deb >/dev/null", PACKAGED,
+	/* The package is built on one release, and has to install on the releases around it whose libraries were
+	   renamed in the meantime. */
+	@ParameterizedTest
+	@ValueSource(strings = { "debian:12", "debian:13", "ubuntu:22.04", "ubuntu:24.04" })
+	public void shouldRunFromTheDebianPackage(final String image) throws Exception {
+		verify(image, DEBIAN_SETUP + "apt-get install -y -qq /r/unigrid_*.deb >/dev/null", PACKAGED,
 			"apt-get install -y -qq --reinstall /r/unigrid_*.deb >/dev/null", "apt-get remove -y -qq unigrid");
 	}
 

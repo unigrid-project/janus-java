@@ -348,10 +348,10 @@
 									<linuxMenuGroup>Network</linuxMenuGroup>
 									<linuxShortcut>true</linuxShortcut>
 									<icon>${project.basedir}/src/main/packaging/icons/unigrid-1024x1024.png</icon>
-									<!-- jpackage only finds the libraries that dpkg knows by their real path, and on a
-									     merged /usr that misses the ones the browser engine and the window toolkit
-									     load, so they are named here. The t64 names are Ubuntu 24.04's. -->
-									<linuxPackageDeps>libnss3, libgbm1, libgtk-3-0 | libgtk-3-0t64, libasound2 | libasound2t64, libxss1, libxtst6, libxi6, libcups2 | libcups2t64, libatk-bridge2.0-0 | libatk-bridge2.0-0t64, libxkbcommon0, libx11-6</linuxPackageDeps>
+									<!-- The control file in the resource folder names the dependencies itself. Those
+									     jpackage finds are the exact packages of the computer that builds, and the
+									     libraries renamed since, such as Ubuntu 24.04's t64 ones and libunistring5,
+									     would make the package impossible to install on newer releases. -->
 									<linuxDebMaintainer>info@unigridfoundation.se</linuxDebMaintainer>
 								</configuration>
 							</execution>
