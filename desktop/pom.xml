@@ -351,7 +351,9 @@
 									<!-- The control file in the resource folder names the dependencies itself. Those
 									     jpackage finds are the exact packages of the computer that builds, and the
 									     libraries renamed since, such as Ubuntu 24.04's t64 ones and libunistring5,
-									     would make the package impossible to install on newer releases. -->
+									     would make the package impossible to install on newer releases. The t64 names
+									     come first: on Ubuntu 24.04 the old name libasound2 is only provided by an OSS
+									     shim that lacks symbols the browser engine needs. -->
 									<linuxDebMaintainer>info@unigridfoundation.se</linuxDebMaintainer>
 								</configuration>
 							</execution>
