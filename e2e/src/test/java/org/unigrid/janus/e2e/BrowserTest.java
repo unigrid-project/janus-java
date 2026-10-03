@@ -158,6 +158,16 @@ public abstract class BrowserTest {
 		}
 	}
 
+	/*
+	 * The password card focuses its first field once it has settled, and text meant for the second field that is
+	 * typed before then lands in the first, so both are filled only after the focus has moved there.
+	 */
+	protected void choosePassword(final String password, final String repeat) {
+		page().waitForSelector("[name=password]:focus");
+		page().fill("[name=password]", password);
+		page().fill("[name=repeat]", repeat);
+	}
+
 	/** Chooses the wallet the legacy daemon left behind, which the import card finds, ready to be continued. */
 	protected void pickTheWalletLeftBehind() {
 		final String found = "[hx-post='/action/import-found']";

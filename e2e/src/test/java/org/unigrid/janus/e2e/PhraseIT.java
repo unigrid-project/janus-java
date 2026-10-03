@@ -86,8 +86,7 @@ public class PhraseIT extends BrowserTest {
 	}
 
 	private void seal(final String password) {
-		page().fill("[name=password]", password);
-		page().fill("[name=repeat]", password);
+		choosePassword(password, password);
 		page().click(CONTINUE);
 	}
 }

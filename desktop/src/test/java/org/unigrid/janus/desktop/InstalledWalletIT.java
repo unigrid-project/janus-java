@@ -215,7 +215,10 @@ public class InstalledWalletIT {
 		assertThat(page.locator(TOTAL)).hasText(total, LOADED);
 	}
 
+	/* The card focuses its first field once it has settled, and text typed for the second field before then lands
+	   in the first. */
 	private static void seal(final Page page) {
+		page.waitForSelector("[name=password]:focus");
 		page.fill("[name=password]", PASSWORD);
 		page.fill("[name=repeat]", PASSWORD);
 		page.click(CONTINUE);

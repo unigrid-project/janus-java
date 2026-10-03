@@ -91,8 +91,7 @@ public class DumpIT extends BrowserTest {
 		assertThat(page().locator(CARD + " .step__note")).containsText("imported keys");
 		assertThat(page().locator("input[type=password][name=password]")).hasCount(1);
 		assertThat(page().locator("input[type=password][name=repeat]")).hasCount(1);
-		page().fill("[name=password]", "correct horse");
-		page().fill("[name=repeat]", "correct horse");
+		choosePassword("correct horse", "correct horse");
 		page().click(CONTINUE);
 		page().waitForSelector(".dashboard__total", LOADED);
 

@@ -98,8 +98,7 @@ public class PhraseStepsIT extends BrowserTest {
 	public void shouldHoldBackAShortPasswordInTheBrowserAndRefuseTwoThatDiffer() {
 		restoreWith(ABANDON);
 
-		page().fill("[name=password]", "1234567");
-		page().fill("[name=repeat]", "1234567");
+		choosePassword("1234567", "1234567");
 		page().click(CONTINUE);
 
 		/* Had the browser let the short password through, the server would have answered with its own message. */
@@ -107,8 +106,7 @@ public class PhraseStepsIT extends BrowserTest {
 		assertThat(page().locator(ERROR)).hasCount(0);
 		assertThat(page().locator(CARD + " h1")).hasText("Choose a password");
 
-		page().fill("[name=password]", "correct horse");
-		page().fill("[name=repeat]", "correct hose");
+		choosePassword("correct horse", "correct hose");
 		page().click(CONTINUE);
 		assertThat(page().locator(ERROR)).hasText("The two passwords differ");
 	}
