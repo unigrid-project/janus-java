@@ -192,7 +192,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends xvfb xfwm4 xfconf thunar xfce4-terminal xdotool \
-          imagemagick dbus-x11 adwaita-icon-theme-full fonts-dejavu-core
+          imagemagick dbus-x11 x11-xserver-utils adwaita-icon-theme-full fonts-dejavu-core
         sudo apt-get install -y ./download/*.deb
         mkdir -p ~/.janus/wallets ~/.janus/backups ~/.janus/hedgehog/$HEDGEHOG
         echo '{}' > ~/.janus/wallets/$EVM_WALLET
