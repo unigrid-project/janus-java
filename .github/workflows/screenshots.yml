@@ -1,7 +1,8 @@
-name: Install screenshots
+name: Reset screenshots
 
-# Photographs what a person sees when they open the unsigned installers from a download, on the runners that
-# have a desktop. Runs on this branch only and keeps the pictures as artifacts.
+# Photographs resetting the wallet by hand on each desktop: the .janus folder with the file that names the
+# chosen wallet, removing that file, and Unigrid opening on its start screen again. Runs on this branch only and
+# keeps the pictures as artifacts.
 on:
   push:
     branches: [ "screenshots" ]
@@ -10,6 +11,12 @@ permissions:
   actions: read
   contents: read
 
+env:
+  RELEASE_RUN: 37044054104
+  EVM_WALLET: evm-0x9858EfFD232B4033E47d90003D41EC34EcaEda94.json
+  BACKUP: wallet-20261002-191512.dat
+  HEDGEHOG: 0.0.8
+
 jobs:
   macos:
 
@@ -17,54 +24,67 @@ jobs:
     timeout-minutes: 25
 
     steps:
-    - name: Fetch the installer of an earlier installers run
+    - name: Fetch the release installer
       env:
         GH_TOKEN: ${{ github.token }}
-      run: gh run download 36985951936 --repo "$GITHUB_REPOSITORY" --name installers-macOS --dir download
+      run: gh run download "$RELEASE_RUN" --repo "$GITHUB_REPOSITORY" --name installers-macOS --dir download
 
-    - name: Put the app in Applications the way a download leaves it
+    - name: Install Unigrid and give it a wallet to forget
       run: |
-        spctl --status || true
-        sw_vers
-        stamp="0083;$(printf '%x' "$(date +%s)");Safari;"
-        dmg=$(ls download/*.dmg)
-        xattr -w com.apple.quarantine "$stamp" "$dmg"
-        hdiutil attach -nobrowse -mountpoint /Volumes/UnigridInstaller "$dmg"
+        hdiutil attach -nobrowse -mountpoint /Volumes/UnigridInstaller download/*.dmg
         cp -R /Volumes/UnigridInstaller/Unigrid.app /Applications/
         hdiutil detach /Volumes/UnigridInstaller
-        xattr -w com.apple.quarantine "$stamp" /Applications/Unigrid.app
-        xattr -l /Applications/Unigrid.app
+        mkdir -p ~/.janus/wallets ~/.janus/backups ~/.janus/hedgehog/$HEDGEHOG
+        echo '{}' > ~/.janus/wallets/$EVM_WALLET
+        : > ~/.janus/backups/$BACKUP
+        : > ~/.janus/hedgehog.log
+        printf '%s' ~/.janus/wallets/$EVM_WALLET > ~/.janus/wallet
+        system_profiler SPDisplaysDataType | grep -i resolution || true
 
-    - name: Open it and photograph what macOS says
-      timeout-minutes: 6
+    - name: Photograph the reset
+      timeout-minutes: 8
       run: |
         mkdir shots
-        screencapture -x shots/00-desktop.png
-        (open /Applications/Unigrid.app > open.log 2>&1 &)
+        defaults write com.apple.finder AppleShowAllFiles -bool true
+        killall Finder || true
         sleep 4
-        screencapture -x shots/01-blocked-4s.png
-        sleep 8
-        screencapture -x shots/02-blocked-12s.png
-        # Scripting the interface may be refused, so each try is left to run on its own and put an end to.
-        (osascript -e 'tell application "System Events" to click button "Done" of window 1 of process "CoreServicesUIAgent"' > done.log 2>&1 &)
-        sleep 8
-        pkill osascript || true
-        screencapture -x shots/03-after-done.png
-        (open "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Security" > settings.log 2>&1 &)
-        sleep 10
-        screencapture -x shots/04-security-section.png
-        (osascript -e 'tell application "System Events" to key code 119' > end.log 2>&1 &)
+        screencapture -x shots/00-desktop.png
+        open -R ~/.janus/wallet
         sleep 5
-        pkill osascript || true
-        screencapture -x shots/05-security-section-end.png
-        cat done.log end.log || true
+        screencapture -x shots/01-finder-wallet-selected.png
+
+        cat > ~/reset.command <<'EOF'
+        #!/bin/bash
+        clear
+        run() { printf '\033[1m%s\033[0m\n' "$ $1"; eval "$1"; }
+        run 'cp -a ~/.janus ~/janus-copy'
+        run 'rm ~/.janus/wallet'
+        run 'ls ~/.janus'
+        EOF
+        chmod +x ~/reset.command
+        open -a Terminal ~/reset.command
+        sleep 8
+        screencapture -x shots/02-terminal-reset.png
+
+        killall Terminal || true
+        open ~/.janus
+        sleep 5
+        screencapture -x shots/03-finder-wallet-gone.png
+
+        killall Finder || true
+        sleep 3
+        (open /Applications/Unigrid.app > open.log 2>&1 &)
+        sleep 20
+        screencapture -x shots/04-start-screen-20s.png
+        sleep 20
+        screencapture -x shots/05-start-screen-40s.png
         ls -l shots
-        cat open.log settings.log || true
+        cat open.log || true
 
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: screenshots-macos
+        name: reset-macos
         path: shots
 
   windows:
@@ -73,14 +93,26 @@ jobs:
     timeout-minutes: 25
 
     steps:
-    - name: Fetch the installer of an earlier installers run
+    - name: Fetch the release installer
       env:
         GH_TOKEN: ${{ github.token }}
-      run: gh run download 36985951936 --repo "$GITHUB_REPOSITORY" --name installers-Windows --dir download
+      run: gh run download "$RELEASE_RUN" --repo "$GITHUB_REPOSITORY" --name installers-Windows --dir download
       shell: bash
 
-    - name: Open it the way a download leaves it and photograph what Windows says
-      timeout-minutes: 6
+    - name: Install Unigrid and give it a wallet to forget
+      shell: pwsh
+      run: |
+        $msi = (Get-ChildItem download\*.msi).FullName
+        Start-Process msiexec -ArgumentList "/i", "`"$msi`"", "/qn" -Wait
+        $janus = Join-Path $env:USERPROFILE ".janus"
+        New-Item -ItemType Directory -Force "$janus\wallets", "$janus\backups", "$janus\hedgehog\$env:HEDGEHOG" | Out-Null
+        Set-Content "$janus\wallets\$env:EVM_WALLET" '{}'
+        New-Item "$janus\backups\$env:BACKUP", "$janus\hedgehog.log" | Out-Null
+        Set-Content "$janus\wallet" "$janus\wallets\$env:EVM_WALLET" -NoNewline
+        try { Set-DisplayResolution -Width 1600 -Height 1000 -Force } catch { Write-Host "resolution: $_" }
+
+    - name: Photograph the reset
+      timeout-minutes: 8
       shell: pwsh
       run: |
         Add-Type -AssemblyName System.Windows.Forms, System.Drawing
@@ -92,51 +124,132 @@ jobs:
           $canvas = [System.Drawing.Graphics]::FromImage($picture)
           $canvas.CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
           $picture.Save((Join-Path $PWD "shots\$name"))
-          Write-Host "saved $name"
+          Write-Host "saved $name ($($screen.Width)x$($screen.Height))"
         }
 
-        Add-Type -TypeDefinition @"
-        using System;
-        using System.Runtime.InteropServices;
-        public class Mouse {
-          [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
-          [DllImport("user32.dll")] public static extern void mouse_event(uint flags, uint dx, uint dy, uint data, UIntPtr extra);
-          public static void Click(int x, int y) {
-            SetCursorPos(x, y);
-            mouse_event(2, 0, 0, 0, UIntPtr.Zero);
-            mouse_event(4, 0, 0, 0, UIntPtr.Zero);
-          }
+        function CloseExplorers {
+          (New-Object -ComObject Shell.Application).Windows() | ForEach-Object { $_.Quit() }
+          Start-Sleep 2
         }
-        "@
 
-        # The runner's own console is in the way, so everything is put out of sight first.
+        $janus = Join-Path $env:USERPROFILE ".janus"
         (New-Object -ComObject Shell.Application).MinimizeAll()
         Start-Sleep 2
-
-        $msi = Get-ChildItem download\*.msi
-        Set-Content -Path $msi.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3`r`nHostUrl=https://github.com/"
         Shot "00-desktop.png"
-        Start-Process -FilePath "explorer.exe" -ArgumentList $msi.FullName
-        Start-Sleep 10
-        Shot "01-windows-protected-your-pc.png"
 
-        [Mouse]::Click(298, 228)
-        Start-Sleep 3
-        Shot "02-more-info.png"
+        Start-Process explorer.exe "/select,`"$janus\wallet`""
+        Start-Sleep 6
+        Shot "01-explorer-wallet-selected.png"
+        CloseExplorers
 
-        [Mouse]::Click(581, 555)
-        Start-Sleep 10
-        Shot "03-installer-opens.png"
-
-        $pages = "04-next", "05-next", "06-next", "07-next", "08-next"
-        foreach ($page in $pages) {
-          [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
-          Start-Sleep 6
-          Shot "$page.png"
+        $reset = Join-Path $env:RUNNER_TEMP "reset.ps1"
+        Set-Content $reset @'
+        function Run($command) {
+          Write-Host "PS $HOME> " -NoNewline
+          Write-Host $command
+          Invoke-Expression $command
         }
+        Set-Location $HOME
+        Clear-Host
+        Run 'Copy-Item -Recurse "$env:USERPROFILE\.janus" "$env:USERPROFILE\Desktop\janus-copy"'
+        Run 'Remove-Item "$env:USERPROFILE\.janus\wallet"'
+        Run 'Get-ChildItem "$env:USERPROFILE\.janus"'
+        '@
+        $shell = Start-Process powershell -ArgumentList "-NoExit", "-NoLogo", "-File", $reset -PassThru
+        Start-Sleep 8
+        Shot "02-powershell-reset.png"
+        Stop-Process -Id $shell.Id
+
+        Start-Process explorer.exe "`"$janus`""
+        Start-Sleep 6
+        Shot "03-explorer-wallet-gone.png"
+        CloseExplorers
+
+        Start-Process (Join-Path $env:LOCALAPPDATA "Unigrid\Unigrid.exe")
+        Start-Sleep 20
+        Shot "04-start-screen-20s.png"
+        Start-Sleep 20
+        Shot "05-start-screen-40s.png"
 
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: screenshots-windows
+        name: reset-windows
+        path: shots
+
+  linux:
+
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+    - name: Fetch the release installer
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh run download "$RELEASE_RUN" --repo "$GITHUB_REPOSITORY" --name installers-Linux --dir download
+
+    - name: Install a desktop, Unigrid and a wallet to forget
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends xvfb xfwm4 xfconf thunar xfce4-terminal xdotool \
+          imagemagick dbus-x11 adwaita-icon-theme-full fonts-dejavu-core
+        sudo apt-get install -y ./download/*.deb
+        mkdir -p ~/.janus/wallets ~/.janus/backups ~/.janus/hedgehog/$HEDGEHOG
+        echo '{}' > ~/.janus/wallets/$EVM_WALLET
+        : > ~/.janus/backups/$BACKUP
+        : > ~/.janus/hedgehog.log
+        printf '%s' ~/.janus/wallets/$EVM_WALLET > ~/.janus/wallet
+
+    - name: Photograph the reset
+      timeout-minutes: 8
+      run: |
+        mkdir shots
+        export DISPLAY=:99
+        Xvfb :99 -screen 0 1600x1000x24 &
+        sleep 2
+        eval "$(dbus-launch --sh-syntax)"
+        xfwm4 &
+        sleep 2
+        xsetroot -solid '#3a5a7a'
+        shot() { import -window root "shots/$1"; echo "saved $1"; }
+
+        thunar ~/.janus &
+        sleep 5
+        xdotool key ctrl+h
+        sleep 1
+        xdotool type --delay 100 wallet
+        sleep 1
+        xdotool key Escape
+        sleep 1
+        shot 01-thunar-wallet-selected.png
+        pkill thunar || true
+
+        cat > ~/reset.sh <<'EOF'
+        clear
+        run() { printf '\033[1m%s\033[0m\n' "$ $1"; eval "$1"; }
+        run 'cp -a ~/.janus ~/janus-copy'
+        run 'rm ~/.janus/wallet'
+        run 'ls ~/.janus'
+        EOF
+        xfce4-terminal --geometry=100x24 -x bash --rcfile ~/reset.sh &
+        sleep 5
+        shot 02-terminal-reset.png
+        pkill xfce4-terminal || true
+
+        thunar ~/.janus &
+        sleep 5
+        shot 03-thunar-wallet-gone.png
+        pkill thunar || true
+
+        /opt/unigrid/bin/Unigrid > unigrid.log 2>&1 &
+        sleep 20
+        shot 04-start-screen-20s.png
+        sleep 20
+        shot 05-start-screen-40s.png
+        tail -50 unigrid.log || true
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: reset-linux
         path: shots
