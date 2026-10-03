@@ -57,6 +57,9 @@ final class RunningJanus implements AutoCloseable {
 	private static final Duration POLL = Duration.ofSeconds(1);
 	private static final int OK = 200;
 
+	/** What Playwright said to the browser of the latest start, written next to the logs. */
+	static final String PROTOCOL = "playwright.protocol";
+
 	private final Process process;
 	private final Playwright playwright;
 	private final Page page;
@@ -90,9 +93,12 @@ final class RunningJanus implements AutoCloseable {
 		try {
 			awaitDebugging(process);
 
-			/* Playwright only attaches to the browser Janus runs, so it needs none of its own. */
+			/* Playwright only attaches to the browser Janus runs, so it needs none of its own. What it says to
+			   that browser is kept beside the log, the only way to see where an attach that never ends stops.
+			   Its driver keeps the environment of the first start, so each start writes the same file afresh. */
 			final Playwright playwright = Playwright.create(new Playwright.CreateOptions()
-				.setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
+				.setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1", "DEBUG", "pw:protocol", "DEBUG_FILE",
+					log.resolveSibling(PROTOCOL).toString())));
 
 			final Browser browser = playwright.chromium().connectOverCDP(ADDRESS);
 

@@ -226,14 +226,9 @@ public class InstalledWalletIT {
 
 	/* The log is kept first and on its own, since the screenshot fails exactly when Janus has died. */
 	private void keepEvidence(final String test, final Throwable failure) {
-		final Path log = JANUS.resolve("hedgehog.log");
-
 		try {
-			if (Files.exists(log)) {
-				Files.copy(log, EVIDENCE.resolve(test + "-hedgehog.log"),
-					StandardCopyOption.REPLACE_EXISTING);
-			}
-
+			keep(JANUS.resolve("hedgehog.log"), test + "-hedgehog.log");
+			keep(EVIDENCE.resolve(RunningJanus.PROTOCOL), test + "-" + RunningJanus.PROTOCOL);
 			keepBrowserLogs(test);
 		} catch (IOException e) {
 			failure.addSuppressed(e);
@@ -245,6 +240,12 @@ public class InstalledWalletIT {
 			}
 		} catch (RuntimeException e) {
 			failure.addSuppressed(e);
+		}
+	}
+
+	private static void keep(final Path file, final String name) throws IOException {
+		if (Files.exists(file)) {
+			Files.copy(file, EVIDENCE.resolve(name), StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 
