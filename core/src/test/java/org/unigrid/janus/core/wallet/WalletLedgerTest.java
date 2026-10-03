@@ -255,6 +255,26 @@ public class WalletLedgerTest {
 	}
 
 	@Example
+	public void shouldReadTheNextWalletWhenResetWhileTheLastOneIsStillBeingRead() throws InterruptedException,
+		IOException {
+
+		final Path next = fixture("encrypted-wallet.dat");
+
+		stand.address(Files.readAllLines(fixture("encrypted-wallet.addresses")).get(0), "9",
+			entry("aa", 1, "9", EntryKind.RECEIVED)
+		).slowedBy(Duration.ofMillis(10));
+
+		assertEquals(Phase.LOADING, ledger.load(WALLET).phase());
+		ledger.reset();
+		ledger.load(next);
+
+		final LedgerState loaded = settle();
+
+		assertEquals(Phase.LOADED, loaded.phase());
+		assertEquals(0, new BigDecimal("9").compareTo(loaded.funds().total()));
+	}
+
+	@Example
 	public void shouldOweAnEvmWalletWhatTheSporkPromisesIt() throws InterruptedException, IOException {
 		final Path folder = Files.createTempDirectory("wallets");
 		final EvmWallet wallet = EvmWallet.create(Mnemonic.parse("abandon abandon abandon abandon abandon abandon "

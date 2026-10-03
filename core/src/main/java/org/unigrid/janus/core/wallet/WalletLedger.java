@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,6 +59,7 @@ import org.unigrid.janus.core.wallet.LedgerState.Phase;
 public class WalletLedger {
 	private static final int PAGE = 1000;
 	private static final int SIMULTANEOUS = 4;
+	private static final int UNTRACKED = -1;
 
 	private final HedgehogClient client;
 	private final ZoneId zone;
@@ -66,6 +68,8 @@ public class WalletLedger {
 	);
 
 	private volatile LedgerState state = LedgerState.IDLE;
+	private Future<?> reading = CompletableFuture.completedFuture(null);
+	private int generation;
 
 	@Inject
 	public WalletLedger(final HedgehogService hedgehog) {
@@ -84,17 +88,28 @@ public class WalletLedger {
 	/** Starts reading the wallet unless that is under way or done; after a failure it reads again. */
 	public synchronized LedgerState load(final Path wallet) {
 		if (state.phase() == Phase.IDLE || state.phase() == Phase.FAILED) {
+			final int read = ++generation;
+
 			state = LedgerState.LOADING;
-			worker.execute(() -> state = attempt(wallet));
+			reading = worker.submit(() -> settle(read, attempt(wallet, read)));
 		}
 
 		return state;
 	}
 
-	/** Drops what was read, so that the next load reads the wallet afresh. */
+	/**
+	 * Drops what was read and stops a read under way, so that the next load reads afresh, whichever wallet it
+	 * is given. A read stopped halfway would otherwise land later and stand in for the wallet chosen since.
+	 */
 	public synchronized void reset() {
-		if (state.phase() != Phase.LOADING) {
-			state = LedgerState.IDLE;
+		reading.cancel(true);
+		generation++;
+		state = LedgerState.IDLE;
+	}
+
+	private synchronized void settle(final int read, final LedgerState outcome) {
+		if (read == generation) {
+			state = outcome;
 		}
 	}
 
@@ -102,7 +117,7 @@ public class WalletLedger {
 	 * Whatever goes wrong ends as FAILED, so a view waiting on the ledger never waits forever. Only the
 	 * wallet file itself can be unreadable; anything after it is Hedgehog's doing.
 	 */
-	private LedgerState attempt(final Path wallet) {
+	private LedgerState attempt(final Path wallet, final int read) {
 		final boolean promised;
 		final Collection<String> addresses;
 
@@ -122,15 +137,18 @@ public class WalletLedger {
 		}
 
 		try {
-			return LedgerState.loaded(promised ? promised(addresses) : read(addresses));
+			return LedgerState.loaded(promised ? promised(addresses) : read(addresses, read));
 		} catch (RuntimeException e) {
-			log.warn("The ledger of the wallet at {} could not be read", wallet, e);
+			if (!Thread.currentThread().isInterrupted()) {
+				log.warn("The ledger of the wallet at {} could not be read", wallet, e);
+			}
+
 			return LedgerState.failed("Hedgehog stopped answering", false);
 		}
 	}
 
 	WalletFunds read(final Path backup) {
-		return read(LegacyWallet.addresses(backup));
+		return read(LegacyWallet.addresses(backup), UNTRACKED);
 	}
 
 	/*
@@ -161,7 +179,7 @@ public class WalletLedger {
 	 * the work, each taking the next address that has not been asked about. Every answer lands at the place of its
 	 * address, which keeps the result in the order of the wallet however the answers arrive.
 	 */
-	private WalletFunds read(final Collection<String> addresses) {
+	private WalletFunds read(final Collection<String> addresses, final int read) {
 		final List<String> asked = List.copyOf(addresses);
 		final Answer[] answers = new Answer[asked.size()];
 		final AtomicInteger next = new AtomicInteger();
@@ -173,7 +191,7 @@ public class WalletLedger {
 			final Runnable asker = () -> {
 				for (int i = next.getAndIncrement(); i < answers.length; i = next.getAndIncrement()) {
 					answers[i] = ask(asked.get(i));
-					progress(answered.incrementAndGet(), answers.length);
+					progress(read, answered.incrementAndGet(), answers.length);
 				}
 			};
 
@@ -219,15 +237,15 @@ public class WalletLedger {
 		} catch (InterruptedException e) {
 			next.set(Integer.MAX_VALUE);
 			Thread.currentThread().interrupt();
-			throw new IllegalStateException("Janus is shutting down", e);
+			throw new IllegalStateException("The read was stopped", e);
 		}
 	}
 
 	/* Only a change of the whole percent is worth saying, which is a few hundred times for any wallet. */
-	private void progress(final int answered, final int total) {
+	private synchronized void progress(final int read, final int answered, final int total) {
 		final int percent = (int) (100L * answered / total);
 
-		if (state.phase() == Phase.LOADING && !Integer.valueOf(percent).equals(state.progress())) {
+		if (read == generation && !Integer.valueOf(percent).equals(state.progress())) {
 			state = LedgerState.loading(percent);
 		}
 	}
