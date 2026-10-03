@@ -32,6 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Installs the packages the build produced into clean containers and lets the installed Janus do what it is
@@ -237,8 +238,15 @@ public class InstalledJanusIT {
 
 		final Container.Result result = container.exec(user, seconds, script);
 
-		assertEquals(0, result.exit(), "Failed " + doing + ":\n" + result.output());
+		if (result.exit() != 0) {
+			fail("Failed " + doing + ":\n" + result.output() + "\nJanus log:\n" + log(container));
+		}
+
 		return result;
+	}
+
+	private static String log(final Container container) throws IOException, InterruptedException {
+		return container.exec(USER, SHORT_SECONDS, "cat " + LOG + " || true").output();
 	}
 
 	private static String awaitOutput(final Container container, final String script, final Predicate<String> expected,
@@ -258,8 +266,7 @@ public class InstalledJanusIT {
 			Thread.sleep(POLL_MILLIS);
 		}
 
-		final String log = container.exec(USER, SHORT_SECONDS, "cat " + LOG + " || true").output();
 		throw new AssertionError("Timed out waiting for " + what + ". Last output:\n" + output
-			+ "\nJanus log:\n" + log);
+			+ "\nJanus log:\n" + log(container));
 	}
 }
