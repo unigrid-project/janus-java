@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.unigrid.janus.shell.BrowserWindow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -80,16 +81,32 @@ public class InstalledJanusIT {
 	private static final String PACKAGED = "/opt/unigrid";
 	private static final String PORTABLE = "/opt/with space/Unigrid";
 
-	/* GNOME on Wayland, the default session of Ubuntu and of the distributions built on it. GTK 4 comes with
-	   every GNOME desktop, and the browser engine loads it there when it is left to run on Wayland. */
-	private static final String WAYLAND_SETUP = """
-		apt-get install -y -qq weston xwayland libgtk-4-1 python3-websocket >/dev/null
-		mkdir -p -m 1777 /tmp/.X11-unix
-		""";
-	private static final String WAYLAND_DESKTOP = "ubuntu:24.04";
 	private static final String XWAYLAND_SCREEN = "DISPLAY=:$(ls /tmp/.X11-unix | sed s/^X//)";
 	private static final Path CLICK_SCRIPT = Path.of("src", "test", "resources", "click.py").toAbsolutePath();
 	private static final String PICKER_TITLE = "Choose a wallet.dat or wallet dump";
+
+	/* GNOME on Wayland, the default session of Ubuntu, Fedora and the distributions built on them. GTK 4 comes
+	   with every GNOME desktop, and the browser engine loads it there when it is left to run on Wayland. */
+	private enum WaylandDesktop {
+		UBUNTU("ubuntu:24.04", DEBIAN_SETUP + """
+			apt-get install -y -qq weston xwayland libgtk-4-1 python3-websocket >/dev/null
+			apt-get install -y -qq /r/unigrid_*.deb >/dev/null
+			""", "ubuntu:GNOME"),
+		FEDORA("fedora:40", FEDORA_SETUP + """
+			dnf install -y -q weston xorg-x11-server-Xwayland gtk4 python3-websocket-client >/dev/null
+			dnf install -y -q /r/unigrid-*.rpm >/dev/null
+			""", "GNOME");
+
+		private final String image;
+		private final String install;
+		private final String currentDesktop;
+
+		WaylandDesktop(final String image, final String install, final String currentDesktop) {
+			this.image = image;
+			this.install = install;
+			this.currentDesktop = currentDesktop;
+		}
+	}
 
 	@BeforeAll
 	static void needDockerAndPackages() {
@@ -121,9 +138,10 @@ public class InstalledJanusIT {
 	/* The window itself is an X11 one even on Wayland, drawn through Xwayland, and the page has to show up
 	   inside it rather than in a window of the browser engine's own. What the engine runs on is printed as
 	   well, since that is what decides it. */
-	@Test
-	public void shouldDrawThePageInsideItsWindowOnAWaylandDesktop() throws Exception {
-		try (Container container = startOnWayland()) {
+	@ParameterizedTest
+	@EnumSource(WaylandDesktop.class)
+	public void shouldDrawThePageInsideItsWindowOnAWaylandDesktop(final WaylandDesktop desktop) throws Exception {
+		try (Container container = startOnWayland(desktop)) {
 			awaitOutput(container, """
 				pgrep -af '[j]cef_helper' | grep -o -- '--ozone-platform=[a-z0-9]*' | sort -u || true
 				window=$(%s xdotool search --name '^%s$' | head -1)
@@ -134,9 +152,10 @@ public class InstalledJanusIT {
 		}
 	}
 
-	@Test
-	public void shouldOpenTheFilePickerOnAWaylandDesktop() throws Exception {
-		try (Container container = startOnWayland()) {
+	@ParameterizedTest
+	@EnumSource(WaylandDesktop.class)
+	public void shouldOpenTheFilePickerOnAWaylandDesktop(final WaylandDesktop desktop) throws Exception {
+		try (Container container = startOnWayland(desktop)) {
 			asUser(container, "python3 /tmp/click.py \"[hx-post='/action/import']\" '[data-choose-file]'",
 				"asking for the file picker");
 			awaitOutput(container, XWAYLAND_SCREEN + " xdotool search --name '^" + PICKER_TITLE + "$'",
@@ -144,12 +163,12 @@ public class InstalledJanusIT {
 		}
 	}
 
-	private static Container startOnWayland() throws IOException, InterruptedException {
-		final Container container = Container.start(WAYLAND_DESKTOP, DIST);
+	private static Container startOnWayland(final WaylandDesktop desktop) throws IOException, InterruptedException {
+		final Container container = Container.start(desktop.image, DIST);
 
 		try {
-			succeeds(container, "root", INSTALL_SECONDS, DEBIAN_SETUP + WAYLAND_SETUP
-				+ "apt-get install -y -qq /r/unigrid_*.deb >/dev/null", "installing");
+			succeeds(container, "root", INSTALL_SECONDS, desktop.install + "mkdir -p -m 1777 /tmp/.X11-unix",
+				"installing");
 			container.copyIn(CLICK_SCRIPT, "/tmp/click.py");
 			succeeds(container, "root", SHORT_SECONDS, "useradd -m " + USER, "creating the user");
 			asUser(container, """
@@ -159,9 +178,10 @@ public class InstalledJanusIT {
 					--width=1600 --height=1000 >/tmp/weston.log 2>&1 &
 				for second in $(seq 30); do ls /tmp/.X11-unix/X* >/dev/null 2>&1 && break; sleep 1; done
 				ls /tmp/.X11-unix/X* >/dev/null 2>&1 || { cat /tmp/weston.log; exit 1; }
-				%2$s XDG_SESSION_TYPE=wayland WAYLAND_DISPLAY=wayland-1 XDG_CURRENT_DESKTOP=ubuntu:GNOME \
-					JAVA_TOOL_OPTIONS=-D%3$s=9222 setsid nohup %4$s/bin/Unigrid >%5$s 2>&1 &
-				""".formatted(USER, XWAYLAND_SCREEN, BrowserWindow.DEBUGGING_PORT, PACKAGED, LOG),
+				%2$s XDG_SESSION_TYPE=wayland WAYLAND_DISPLAY=wayland-1 XDG_CURRENT_DESKTOP=%3$s \
+					JAVA_TOOL_OPTIONS=-D%4$s=9222 setsid nohup %5$s/bin/Unigrid >%6$s 2>&1 &
+				""".formatted(USER, XWAYLAND_SCREEN, desktop.currentDesktop, BrowserWindow.DEBUGGING_PORT,
+					PACKAGED, LOG),
 				"starting Janus on Wayland");
 			awaitAddress(container);
 			return container;
