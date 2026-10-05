@@ -265,6 +265,11 @@
 										<option>java.desktop/sun.lwawt.macosx=ALL-UNNAMED</option>
 										<option>--enable-native-access=ALL-UNNAMED</option>
 										<option>-Djanus.jcef=$APPDIR/jcef</option>
+										<!-- The Metal pipeline reads freed memory when it disposes the graphics
+										     configuration of a display that went away, which crashes the wallet
+										     after a monitor sleeps or is unplugged. The browser draws the window
+										     itself, so the OpenGL pipeline costs nothing noticeable. -->
+										<option>-Dsun.java2d.metal=false</option>
 									</javaOptions>
 								</configuration>
 							</execution>
