@@ -1,7 +1,6 @@
 ---
 name: Issue Report
-about: Please make sure to provide the following information when submitting an issue,
-  which will help us better understand and resolve the problem.
+about: Report a problem with the Janus wallet, with the details needed to reproduce it.
 title: ''
 labels: bug
 assignees: ''
@@ -9,7 +8,7 @@ assignees: ''
 ---
 
 <!--
-Thank you for reporting an issue! Please make sure to provide the following information when submitting an issue, which will help us better understand and resolve the problem.
+Thank you for reporting an issue! Never paste your wallet.dat, recovery phrase, passwords or private keys here.
 -->
 
 ### Operating System
@@ -20,37 +19,46 @@ Thank you for reporting an issue! Please make sure to provide the following info
 
 ### Operating System Version
 
-Please specify the version of your operating system (e.g., Windows 11, Ubuntu 20.04, macOS 12).
+The version of your operating system (e.g. Windows 11, Ubuntu 24.04, macOS 15).
 
-### Janus version
+On Linux, also paste the output of:
 
-1. Installer version:
-2. FX version (shown during the startup): 
+```
+echo $XDG_SESSION_TYPE $XDG_CURRENT_DESKTOP
+```
+
+### Janus Version
+
+1. Janus version (e.g. 2.0.0, from the installer's file name or `dpkg -s unigrid` / `rpm -q unigrid`):
+2. Installed from (.deb, .rpm, .tar.gz, .msi or .dmg):
 
 ### Description
 
-Please provide a clear and concise description of the issue you are experiencing.
+A clear and concise description of the problem.
 
 ### Steps to Reproduce
 
-Please list the steps to reproduce the issue, if applicable:
-
 1. Step 1
-4. Step 2
-5. Step 3
+2. Step 2
+3. Step 3
 
 ### Expected Behavior
 
-Please describe what you expected to happen.
+What you expected to happen.
 
 ### Actual Behavior
 
-Please describe what actually happened.
+What actually happened.
 
 ### Screenshots
 
-If applicable, add screenshots to help explain your issue. You can simply drag and drop the images here.
+If applicable, add screenshots. You can drag and drop the images here.
 
-### Additional Information
+### Logs
 
-Please provide any additional information that might help us understand the issue, such as error messages, logs, or hardware specifications.
+On Linux and macOS, start Janus from a terminal and paste what it prints:
+
+- Linux: `/opt/unigrid/bin/Unigrid`, or `Unigrid/bin/Unigrid` in the folder unpacked from the .tar.gz
+- macOS: `/Applications/Unigrid.app/Contents/MacOS/Unigrid`
+
+If the problem involves syncing or balances, also attach `~/.janus/hedgehog.log`.
