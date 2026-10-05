@@ -20,6 +20,7 @@ import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import java.awt.GraphicsEnvironment;
 import java.net.URI;
+import java.util.Optional;
 import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,21 +32,37 @@ import org.unigrid.janus.web.action.Actions;
 import org.unigrid.janus.web.SessionToken;
 import org.unigrid.janus.web.Templates;
 import org.unigrid.janus.web.UiServer;
+import picocli.CommandLine;
 
 public final class Janus {
 	private static final Logger LOG = LoggerFactory.getLogger(Janus.class);
 	private static final String TITLE = "Unigrid Control Center";
+	private static final int USAGE_ERROR = 2;
 
 	private Janus() {
 	}
 
 	public static void main(final String[] args) throws Exception {
+		try {
+			final Optional<LaunchOptions> options = LaunchOptions.of(args);
+
+			if (options.isPresent()) {
+				start(options.get());
+			}
+		} catch (CommandLine.ParameterException e) {
+			System.err.println(e.getMessage());
+			e.getCommandLine().usage(System.err);
+			System.exit(USAGE_ERROR);
+		}
+	}
+
+	private static void start(final LaunchOptions options) throws Exception {
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
 		final Actions actions = Actions.discovered(
 			container.getBeanManager().getExtension(ActionExtension.class)
 		);
 
-		final BrowserWindow window = new BrowserWindow();
+		final BrowserWindow window = new BrowserWindow(options.windowSystem());
 		final SessionToken token = SessionToken.random();
 		final WalletController wallet = container.select(WalletController.class).get();
 		final UiServer server = new UiServer(Routes.create(new Templates(false), token, window.control(), actions,

@@ -44,11 +44,15 @@ public class BrowserWindow {
 	private static final Dimension SIZE = new Dimension(1240, 800);
 	private static final Duration SHUTDOWN_GRACE = Duration.ofSeconds(10);
 	private static final String TITLE = "Unigrid";
+	private static final boolean LINUX = System.getProperty("os.name").startsWith("Linux");
 
 	private final JFrame frame = new JFrame(TITLE);
 	private final FrameControl control = new FrameControl(frame);
+	private final WindowSystem windowSystem;
 
-	public BrowserWindow() {
+	public BrowserWindow(final WindowSystem windowSystem) {
+		this.windowSystem = windowSystem;
+
 		/* The title bar and its buttons are drawn by the page, so the frame contributes
 		   nothing but its outline. Decoration has to be settled before the frame is
 		   realised, which is why it happens here rather than alongside the sizing. */
@@ -100,6 +104,10 @@ public class BrowserWindow {
 		builder.setSkipInstallation(location.isBundled());
 		builder.setProgressHandler(new ConsoleProgressHandler());
 		builder.getCefSettings().windowless_rendering_enabled = false;
+
+		if (LINUX) {
+			builder.addJcefArgs(windowSystem.engineSwitch());
+		}
 
 		/* Lets the installer tests work the installed wallet's window; nothing listens unless a port is named. */
 		final Integer debuggingPort = Integer.getInteger(DEBUGGING_PORT);
