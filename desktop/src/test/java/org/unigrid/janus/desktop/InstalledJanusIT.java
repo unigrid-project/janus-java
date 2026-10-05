@@ -30,6 +30,7 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.unigrid.janus.shell.BrowserWindow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -37,8 +38,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Installs the packages the build produced into clean containers and lets the installed Janus do what it is
  * for: open its window, serve its pages only to the browser it opened, draw the first page with the bundled
- * engine, and quit when the window is closed. It runs in the integration phase, after the packages exist,
- * and is skipped where Docker is not available. Its containers are Linux ones, so it runs on Linux only.
+ * engine, and quit when the window is closed. On a Wayland desktop it also has to draw the page inside its own
+ * window and open the file picker. It runs in the integration phase, after the packages exist, and is skipped
+ * where Docker is not available. Its containers are Linux ones, so it runs on Linux only.
  */
 @EnabledOnOs(OS.LINUX)
 @Timeout(value = 20, unit = TimeUnit.MINUTES)
@@ -78,6 +80,17 @@ public class InstalledJanusIT {
 	private static final String PACKAGED = "/opt/unigrid";
 	private static final String PORTABLE = "/opt/with space/Unigrid";
 
+	/* GNOME on Wayland, the default session of Ubuntu and of the distributions built on it. GTK 4 comes with
+	   every GNOME desktop, and the browser engine loads it there when it is left to run on Wayland. */
+	private static final String WAYLAND_SETUP = """
+		apt-get install -y -qq weston xwayland libgtk-4-1 python3-websocket >/dev/null
+		mkdir -p -m 1777 /tmp/.X11-unix
+		""";
+	private static final String WAYLAND_DESKTOP = "ubuntu:24.04";
+	private static final String XWAYLAND_SCREEN = "DISPLAY=:$(ls /tmp/.X11-unix | sed s/^X//)";
+	private static final Path CLICK_SCRIPT = Path.of("src", "test", "resources", "click.py").toAbsolutePath();
+	private static final String PICKER_TITLE = "Choose a wallet.dat or wallet dump";
+
 	@BeforeAll
 	static void needDockerAndPackages() {
 		Assumptions.assumeTrue(Container.dockerAvailable(), "Docker is not available");
@@ -103,6 +116,59 @@ public class InstalledJanusIT {
 	public void shouldRunFromAPortableFolderWhoseNameHasASpace() throws Exception {
 		verify("debian:12", DEBIAN_SETUP + DEBIAN_LIBRARIES
 			+ "mkdir -p '/opt/with space' && cp -r /r/Unigrid '/opt/with space/'", PORTABLE, "true", null);
+	}
+
+	/* The window itself is an X11 one even on Wayland, drawn through Xwayland, and the page has to show up
+	   inside it rather than in a window of the browser engine's own. What the engine runs on is printed as
+	   well, since that is what decides it. */
+	@Test
+	public void shouldDrawThePageInsideItsWindowOnAWaylandDesktop() throws Exception {
+		try (Container container = startOnWayland()) {
+			awaitOutput(container, """
+				pgrep -af '[j]cef_helper' | grep -o -- '--ozone-platform=[a-z0-9]*' | sort -u || true
+				window=$(%s xdotool search --name '^%s$' | head -1)
+				%s import -window "$window" -resize 200%% png:- | tesseract stdin stdout
+				""".formatted(XWAYLAND_SCREEN, WINDOW_TITLE, XWAYLAND_SCREEN),
+				output -> output.toLowerCase().contains(FIRST_PAGE_TEXT),
+				"the first page drawn in the window");
+		}
+	}
+
+	@Test
+	public void shouldOpenTheFilePickerOnAWaylandDesktop() throws Exception {
+		try (Container container = startOnWayland()) {
+			asUser(container, "python3 /tmp/click.py \"[hx-post='/action/import']\" '[data-choose-file]'",
+				"asking for the file picker");
+			awaitOutput(container, XWAYLAND_SCREEN + " xdotool search --name '^" + PICKER_TITLE + "$'",
+				output -> true, "the file picker");
+		}
+	}
+
+	private static Container startOnWayland() throws IOException, InterruptedException {
+		final Container container = Container.start(WAYLAND_DESKTOP, DIST);
+
+		try {
+			succeeds(container, "root", INSTALL_SECONDS, DEBIAN_SETUP + WAYLAND_SETUP
+				+ "apt-get install -y -qq /r/unigrid_*.deb >/dev/null", "installing");
+			container.copyIn(CLICK_SCRIPT, "/tmp/click.py");
+			succeeds(container, "root", SHORT_SECONDS, "useradd -m " + USER, "creating the user");
+			asUser(container, """
+				export XDG_RUNTIME_DIR=/tmp/runtime-%1$s
+				mkdir -p -m 0700 "$XDG_RUNTIME_DIR"
+				setsid weston --backend=headless --renderer=pixman --xwayland --socket=wayland-1 \
+					--width=1600 --height=1000 >/tmp/weston.log 2>&1 &
+				for second in $(seq 30); do ls /tmp/.X11-unix/X* >/dev/null 2>&1 && break; sleep 1; done
+				ls /tmp/.X11-unix/X* >/dev/null 2>&1 || { cat /tmp/weston.log; exit 1; }
+				%2$s XDG_SESSION_TYPE=wayland WAYLAND_DISPLAY=wayland-1 XDG_CURRENT_DESKTOP=ubuntu:GNOME \
+					JAVA_TOOL_OPTIONS=-D%3$s=9222 setsid nohup %4$s/bin/Unigrid >%5$s 2>&1 &
+				""".formatted(USER, XWAYLAND_SCREEN, BrowserWindow.DEBUGGING_PORT, PACKAGED, LOG),
+				"starting Janus on Wayland");
+			awaitAddress(container);
+			return container;
+		} catch (IOException | InterruptedException | RuntimeException | Error e) {
+			container.close();
+			throw e;
+		}
 	}
 
 	/* The removal command is null where nothing was installed by a package, which has no menu entry to look for. */
