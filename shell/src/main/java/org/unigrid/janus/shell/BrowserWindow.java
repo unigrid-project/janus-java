@@ -44,7 +44,6 @@ public class BrowserWindow {
 	private static final Dimension SIZE = new Dimension(1240, 800);
 	private static final Duration SHUTDOWN_GRACE = Duration.ofSeconds(10);
 	private static final String TITLE = "Unigrid";
-	private static final boolean LINUX = System.getProperty("os.name").startsWith("Linux");
 
 	private final JFrame frame = new JFrame(TITLE);
 	private final FrameControl control = new FrameControl(frame);
@@ -105,7 +104,7 @@ public class BrowserWindow {
 		builder.setProgressHandler(new ConsoleProgressHandler());
 		builder.getCefSettings().windowless_rendering_enabled = false;
 
-		if (LINUX) {
+		if (WindowSystem.CHOOSABLE) {
 			builder.addJcefArgs(windowSystem.engineSwitch());
 		}
 

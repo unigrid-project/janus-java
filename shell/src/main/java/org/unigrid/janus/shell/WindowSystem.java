@@ -27,6 +27,9 @@ public enum WindowSystem {
 	WAYLAND("--ozone-platform=wayland"),
 	AUTO("--ozone-platform-hint=auto");
 
+	/** Only a Linux desktop session leaves the engine a window system to choose. */
+	static final boolean CHOOSABLE = System.getProperty("os.name").startsWith("Linux");
+
 	private final String engineSwitch;
 
 	WindowSystem(final String engineSwitch) {

@@ -16,13 +16,19 @@
 
 package org.unigrid.janus.shell;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LaunchOptionsTest {
+	private static final String WINDOW_SYSTEM = "--window-system";
+
 	@Test
 	public void shouldDrawOnX11WhenNothingIsSaid() {
 		assertEquals(WindowSystem.X11, LaunchOptions.of().orElseThrow().windowSystem());
@@ -47,5 +53,36 @@ public class LaunchOptionsTest {
 	@Test
 	public void shouldStartNothingWhenAskedForHelp() {
 		assertTrue(LaunchOptions.of("--help").isEmpty());
+	}
+
+	@Test
+	public void shouldOfferTheWindowSystemWhereItCanBeChosen() {
+		final String help = help(true);
+
+		assertTrue(help.contains(WINDOW_SYSTEM), help);
+	}
+
+	@Test
+	public void shouldKeepTheWindowSystemOutOfTheHelpWhereItCannotBeChosen() {
+		final String help = help(false);
+
+		assertFalse(help.contains(WINDOW_SYSTEM), help);
+		assertEquals(WindowSystem.WAYLAND, LaunchOptions.of(false, WINDOW_SYSTEM + "=wayland").orElseThrow()
+			.windowSystem());
+	}
+
+	private static String help(final boolean windowSystemChoosable) {
+		final PrintStream stdout = System.out;
+		final ByteArrayOutputStream printed = new ByteArrayOutputStream();
+
+		System.setOut(new PrintStream(printed, true, StandardCharsets.UTF_8));
+
+		try {
+			LaunchOptions.of(windowSystemChoosable, "--help");
+		} finally {
+			System.setOut(stdout);
+		}
+
+		return printed.toString(StandardCharsets.UTF_8);
 	}
 }
