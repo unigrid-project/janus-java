@@ -19,6 +19,7 @@ package org.unigrid.janus.shell;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
@@ -142,8 +143,10 @@ public class BrowserWindow {
 		   engine's own native child covers the whole of the undecorated frame, which leaves Windows nothing
 		   to ask the frame to paint, so the component is asked to paint itself. */
 		SwingUtilities.invokeLater(() -> {
-			frame.setSize(SIZE);
-			frame.setLocationRelativeTo(null);
+			/* The work area leaves out the taskbar, and on a scaled display it is counted in the same
+			   logical pixels as the size, so a small or scaled screen still shows the whole window. */
+			frame.setBounds(OpeningBounds.centred(SIZE,
+				GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds()));
 			frame.setVisible(true);
 			browser.getUIComponent().repaint();
 		});
