@@ -20,6 +20,7 @@ import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import java.awt.GraphicsEnvironment;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Optional;
 import javax.swing.JOptionPane;
 import org.slf4j.Logger;
@@ -35,6 +36,11 @@ import org.unigrid.janus.web.UiServer;
 import picocli.CommandLine;
 
 public final class Janus {
+	/* Logging starts when the logger below is made, and writes its files to the folder this makes. */
+	static {
+		LogFolder.prepare(Path.of(System.getProperty("user.home")));
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(Janus.class);
 	private static final String TITLE = "Unigrid Control Center";
 	private static final int USAGE_ERROR = 2;
