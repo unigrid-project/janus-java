@@ -71,7 +71,8 @@ public final class OwnerOnly {
 	}
 
 	/* An access list given while creating is merged with the ones the folder above hands down, so the list is
-	   set afterwards, before anything is written, which replaces it whole. */
+	   set afterwards, before anything is written, which replaces it whole. The owner is taken from the file
+	   itself: the user name the JVM reports does not always resolve to the account that made it on Windows. */
 	private static Path restricted(final Path path, final Set<AclEntryFlag> handedDown) throws IOException {
 		final AclFileAttributeView view = Files.getFileAttributeView(path, AclFileAttributeView.class);
 
@@ -80,8 +81,7 @@ public final class OwnerOnly {
 		}
 
 		view.setAcl(List.of(AclEntry.newBuilder().setType(AclEntryType.ALLOW)
-			.setPrincipal(path.getFileSystem().getUserPrincipalLookupService()
-				.lookupPrincipalByName(System.getProperty("user.name")))
+			.setPrincipal(Files.getOwner(path))
 			.setPermissions(EnumSet.allOf(AclEntryPermission.class)).setFlags(handedDown).build()
 		));
 

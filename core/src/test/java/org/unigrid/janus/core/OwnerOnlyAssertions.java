@@ -42,8 +42,7 @@ public final class OwnerOnlyAssertions {
 			return;
 		}
 
-		final UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
-			.lookupPrincipalByName(System.getProperty("user.name"));
+		final UserPrincipal user = Files.getOwner(path);
 		final List<AclEntry> acl = Files.getFileAttributeView(path, AclFileAttributeView.class).getAcl();
 
 		assertFalse(acl.isEmpty(), path + " lets everyone near it");
