@@ -6,10 +6,23 @@
 		</encoder>
 	</appender>
 
+	<!-- The installed wallet has no console on Windows, so this is the only record of what went wrong. -->
+	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${user.home}/.janus/logs/janus.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${user.home}/.janus/logs/janus.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>7</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
 	<logger name="org.eclipse.jetty" level="WARN"/>
 	<logger name="org.thymeleaf" level="WARN"/>
 
 	<root level="INFO">
 		<appender-ref ref="console"/>
+		<appender-ref ref="file"/>
 	</root>
 </configuration>
