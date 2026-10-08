@@ -55,6 +55,7 @@ public abstract class BrowserTest {
 	private static Browser browser;
 
 	private final List<String> troubles = new CopyOnWriteArrayList<>();
+	private boolean expectingTroubles;
 	private ControlCenterRig rig;
 	private BrowserContext context;
 	private Page page;
@@ -108,7 +109,15 @@ public abstract class BrowserTest {
 	public void close() throws Exception {
 		context.close();
 		rig.close();
-		assertEquals(List.of(), troubles);
+
+		if (!expectingTroubles) {
+			assertEquals(List.of(), troubles);
+		}
+	}
+
+	/** For a test that causes a failure on purpose and so takes what the page reports of it as expected. */
+	protected void expectTroubles() {
+		expectingTroubles = true;
 	}
 
 	/*

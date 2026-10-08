@@ -16,11 +16,16 @@
 
 package org.unigrid.janus.web;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import net.jqwik.api.Example;
 import org.eclipse.jetty.server.Handler;
+import org.slf4j.LoggerFactory;
 import org.unigrid.janus.web.action.Action;
 import org.unigrid.janus.web.action.Actions;
 import org.unigrid.janus.web.action.Form;
@@ -102,6 +107,26 @@ public class ActionHandlerTest extends ServedTest {
 	@Example
 	public void shouldReportAFailedActionRatherThanPretendItWorked() throws Exception {
 		assertEquals(500, admitted().post("/action/break-wallet").statusCode());
+	}
+
+	@Example
+	public void shouldLogWhyAnActionFailed() throws Exception {
+		final Logger logger = (Logger) LoggerFactory.getLogger(ActionHandler.class);
+		final ListAppender<ILoggingEvent> logged = new ListAppender<>();
+
+		logged.start();
+		logger.addAppender(logged);
+
+		try {
+			admitted().post("/action/break-wallet");
+		} finally {
+			logger.detachAppender(logged);
+		}
+
+		assertEquals(1, logged.list.size());
+		assertEquals(Level.ERROR, logged.list.get(0).getLevel());
+		assertTrue(logged.list.get(0).getFormattedMessage().contains("break-wallet"));
+		assertEquals("Hedgehog said no", logged.list.get(0).getThrowableProxy().getMessage());
 	}
 
 	@Example

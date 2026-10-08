@@ -67,6 +67,18 @@ public class ImportIT extends BrowserTest {
 		assertEquals(List.of("choose-file:Choose a wallet.dat or wallet dump"), rig().window().commands());
 	}
 
+	@Example
+	public void shouldSayThatAnActionFailedRatherThanLookIgnored() {
+		expectTroubles();
+		page().click(IMPORT);
+		assertThat(page().locator(CARD + " h1")).hasText("Bring your wallet");
+
+		page().evaluate("() => htmx.ajax('POST', '/action/open-wallet', {target: 'main > .card'})");
+
+		assertThat(page().locator(CARD + " [data-failure]")).containsText("That did not work");
+		assertThat(page().locator(CARD + " h1")).hasText("Bring your wallet");
+	}
+
 	/* The page is inert while the dialog is open, and must come back to life however it closed. */
 	@Example
 	public void shouldLeaveTheCardAsItWasWhenTheDialogIsDismissed() throws Exception {

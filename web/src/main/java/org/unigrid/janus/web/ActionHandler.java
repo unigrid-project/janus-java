@@ -19,6 +19,7 @@ package org.unigrid.janus.web;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.io.Content;
@@ -26,10 +27,12 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
+import org.unigrid.janus.web.action.ActionFailed;
 import org.unigrid.janus.web.action.Actions;
 import org.unigrid.janus.web.action.Form;
 import org.unigrid.janus.web.action.View;
 
+@Slf4j
 public class ActionHandler extends Handler.Abstract {
 	private static final String HTML = "text/html;charset=utf-8";
 
@@ -55,7 +58,17 @@ public class ActionHandler extends Handler.Abstract {
 			return true;
 		}
 
-		final Optional<View> shown = actions.invoke(name, Form.parse(Content.Source.asString(request)));
+		final Optional<View> shown;
+
+		try {
+			shown = actions.invoke(name, Form.parse(Content.Source.asString(request)));
+		} catch (ActionFailed e) {
+			/* The page only learns that something failed. Why is kept here, where it can be found afterwards. */
+			log.error("The action {} failed", name, e.getCause());
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+			callback.succeeded();
+			return true;
+		}
 
 		if (shown.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT_204);
