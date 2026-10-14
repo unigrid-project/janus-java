@@ -8,3 +8,6 @@ target/
 
 .jqwik-database
 .idea/
+
+graphify-out/
+.gitattributes
