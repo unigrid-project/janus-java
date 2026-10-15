@@ -9,5 +9,5 @@ target/
 .jqwik-database
 .idea/
 
-graphify-out/
+.graphify-out/
 .gitattributes
