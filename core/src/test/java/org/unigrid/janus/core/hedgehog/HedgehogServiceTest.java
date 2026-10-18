@@ -366,6 +366,23 @@ public class HedgehogServiceTest {
 		assertEquals(Phase.FETCHING, service.state().phase());
 	}
 
+	@Example
+	public void shouldGiveUpOnADownloadThatStopsMoving() {
+		running.answer("/version", 202, "{\"version\":\"0.0.8\"}");
+		running.answer("/bootstrap", 503, "");
+		running.answer("/status", 200, "{\"status\":\"downloading\",\"progress\":92}");
+
+		service = new HedgehogService(nowhere(), new HedgehogInstaller(Releases.unpinned(home)),
+			new HedgehogClient(running.uri(), Duration.ofSeconds(2)), running.uri(),
+			home.resolve("hedgehog.log"), Duration.ofSeconds(20), Duration.ofSeconds(1)
+		);
+
+		service.prepare();
+		assertTrue(settle(service).reason().startsWith("The ledger download stalled at 92%; see "),
+			service.state().reason()
+		);
+	}
+
 	static HedgehogState await(final HedgehogService service, final HedgehogState wanted) {
 		final Instant deadline = Instant.now().plusSeconds(30);
 

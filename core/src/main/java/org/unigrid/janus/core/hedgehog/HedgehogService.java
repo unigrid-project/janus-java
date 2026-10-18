@@ -42,6 +42,7 @@ public class HedgehogService {
 	public static final String NETWORK_KEYS = "janus.hedgehog.network-keys";
 
 	private static final Duration START_TIMEOUT = Duration.ofSeconds(30);
+	private static final Duration STALL_TIMEOUT = Duration.ofMinutes(5);
 	private static final Duration POLL = Duration.ofMillis(200);
 	private static final Duration STOP_TIMEOUT = Duration.ofSeconds(5);
 	private static final String TOKEN_VARIABLE = "HEDGEHOG_REST_TOKEN";
@@ -52,6 +53,7 @@ public class HedgehogService {
 	private final URI base;
 	private final Path logFile;
 	private final Duration startTimeout;
+	private final Duration stallTimeout;
 	private final ExecutorService worker = Executors.newSingleThreadExecutor(
 		Thread.ofPlatform().name("hedgehog").daemon().factory()
 	);
@@ -71,12 +73,19 @@ public class HedgehogService {
 	HedgehogService(final HedgehogLocation location, final HedgehogInstaller installer, final HedgehogClient client,
 		final URI base, final Path logFile, final Duration startTimeout) {
 
+		this(location, installer, client, base, logFile, startTimeout, STALL_TIMEOUT);
+	}
+
+	HedgehogService(final HedgehogLocation location, final HedgehogInstaller installer, final HedgehogClient client,
+		final URI base, final Path logFile, final Duration startTimeout, final Duration stallTimeout) {
+
 		this.location = location;
 		this.installer = installer;
 		this.client = client;
 		this.base = base;
 		this.logFile = logFile;
 		this.startTimeout = startTimeout;
+		this.stallTimeout = stallTimeout;
 	}
 
 	public HedgehogState state() {
@@ -262,10 +271,13 @@ public class HedgehogService {
 
 	/*
 	 * A Hedgehog with no ledger downloads one by itself and says how far it has got. Once it says it is not
-	 * downloading, the ledger is given a moment to be taken up, and after that there will be none.
+	 * downloading, the ledger is given a moment to be taken up, and after that there will be none. A download
+	 * whose percentage stops moving is given up on, since Hedgehog would otherwise be waited on forever.
 	 */
 	private SnapshotInfo ledger() {
 		Instant deadline = Instant.now().plus(startTimeout);
+		Instant moved = Instant.now();
+		Integer reached = null;
 
 		while (true) {
 			try {
@@ -274,7 +286,18 @@ public class HedgehogService {
 				final Optional<Status> busy = client.status().filter(Status::downloading);
 
 				if (busy.isPresent()) {
-					state = HedgehogState.fetching(busy.get().progress());
+					final Integer progress = busy.get().progress();
+
+					if (progress == null || !progress.equals(reached)) {
+						reached = progress;
+						moved = Instant.now();
+					} else if (Instant.now().isAfter(moved.plus(stallTimeout))) {
+						throw new IllegalStateException(
+							"The ledger download stalled at " + progress + "%; see " + logFile, e
+						);
+					}
+
+					state = HedgehogState.fetching(progress);
 					deadline = Instant.now().plus(startTimeout);
 				} else if (Instant.now().isAfter(deadline)) {
 					throw new IllegalStateException(
