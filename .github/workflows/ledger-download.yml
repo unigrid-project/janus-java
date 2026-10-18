@@ -1,0 +1,60 @@
+name: Janus ledger download
+
+on:
+  workflow_dispatch:
+
+  # The download moves hundreds of megabytes from the real sources, so it runs weekly instead of on every push.
+  schedule:
+    - cron: "17 4 * * 1"
+
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      - ".github/workflows/ledger-download.yml"
+      - "core/src/main/java/org/unigrid/janus/core/hedgehog/**"
+      - "core/src/test/java/org/unigrid/janus/core/hedgehog/RealLedgerDownloadIT.java"
+
+jobs:
+  download:
+
+    runs-on: windows-2022
+    timeout-minutes: 45
+
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up JDK 25
+      uses: actions/setup-java@v6
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: maven
+
+    # The ledger is a large file written by a daemon, which is where Defender can get in the way, so its
+    # real-time protection is on for the whole download, and its state is shown for the record.
+    - name: Switch Windows Defender real-time protection on
+      shell: pwsh
+      run: |
+        Set-MpPreference -DisableRealtimeMonitoring $false
+        Get-MpComputerStatus | Select-Object AMServiceEnabled, RealTimeProtectionEnabled, AntivirusEnabled,
+          AntivirusSignatureVersion | Format-List
+
+    - name: Download Hedgehog and the legacy ledger
+      run: >-
+        mvn -B -pl core -am verify -Djanus.real-ledger=true -Dit.test=RealLedgerDownloadIT
+        -Dtest=NoTest -Dsurefire.failIfNoSpecifiedTests=false -Dfailsafe.failIfNoSpecifiedTests=false
+
+    - name: Show what Defender did
+      if: always()
+      shell: pwsh
+      run: |
+        Get-MpComputerStatus | Select-Object RealTimeProtectionEnabled, QuickScanEndTime | Format-List
+        Get-MpThreatDetection | Format-List
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ledger-download
+        path: |
+          core/target/it-home/.janus/hedgehog.log
+          core/target/failsafe-reports
+        if-no-files-found: warn
