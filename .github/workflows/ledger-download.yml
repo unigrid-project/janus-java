@@ -30,15 +30,21 @@ jobs:
         cache: maven
 
     # The ledger is a large file written by a daemon, which is where Defender can get in the way, so its
-    # real-time protection is on for the whole download, and its state is shown for the record.
+    # real-time protection is on for the whole download. It takes effect a little after it is asked for.
     - name: Switch Windows Defender real-time protection on
       shell: pwsh
       run: |
         Set-MpPreference -DisableRealtimeMonitoring $false
+        $deadline = (Get-Date).AddMinutes(2)
+        while (-not (Get-MpComputerStatus).RealTimeProtectionEnabled -and (Get-Date) -lt $deadline) {
+          Start-Sleep -Seconds 2
+        }
         Get-MpComputerStatus | Select-Object AMServiceEnabled, RealTimeProtectionEnabled, AntivirusEnabled,
           AntivirusSignatureVersion | Format-List
+        if (-not (Get-MpComputerStatus).RealTimeProtectionEnabled) { throw "Real-time protection is off" }
 
     - name: Download Hedgehog and the legacy ledger
+      shell: bash
       run: >-
         mvn -B -pl core -am verify -Djanus.real-ledger=true -Dit.test=RealLedgerDownloadIT
         -Dtest=NoTest -Dsurefire.failIfNoSpecifiedTests=false -Dfailsafe.failIfNoSpecifiedTests=false
