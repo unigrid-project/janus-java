@@ -18,6 +18,8 @@ package org.unigrid.janus.ui.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -83,7 +85,15 @@ public class ImportController {
 		return view(null);
 	}
 
+	/* An empty file is what a copy that failed leaves behind, so it is called that rather than a file of some
+	   other kind. */
 	private static Optional<String> refusal(final Path file) {
+		if (empty(file)) {
+			return Optional.of(file + " is empty, so it holds no wallet. A copy that failed leaves a file "
+				+ "like this; copy the wallet again"
+			);
+		}
+
 		final boolean walletFile = BerkeleyFile.holds(file);
 
 		try {
@@ -98,6 +108,14 @@ public class ImportController {
 			return Optional.of(walletFile ? e.getMessage() : file + " is neither a wallet.dat nor a wallet dump "
 				+ "Janus can read: it does not start like a Berkeley DB file, and as a dump " + e.reason()
 			);
+		}
+	}
+
+	private static boolean empty(final Path file) {
+		try {
+			return Files.size(file) == 0;
+		} catch (IOException e) {
+			throw new UncheckedIOException("The wallet at " + file + " could not be read", e);
 		}
 	}
 

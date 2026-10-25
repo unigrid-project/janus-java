@@ -53,6 +53,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ImportControllerTest {
 	private static final String NEITHER = " is neither a wallet.dat nor a wallet dump Janus can read: "
 		+ "it does not start like a Berkeley DB file, and as a dump ";
+	private static final String EMPTY = " is empty, so it holds no wallet. A copy that failed leaves a file "
+		+ "like this; copy the wallet again";
 	private static final String DUMP = "# Wallet dump created by UNIGRID 2.9.17\n"
 		+ "PdiUUh8dnXB36B2XcbPdodUX5Ujoj2VDubJwcW1V8DJu6eQQxzNx 2018-01-02T10:00:00Z label=\n"
 		+ "68QtzUftP6UedWuuhgxsw4jV7TDsTjvyPnqUKvFA6G2LWUipq9J 2018-01-02T10:00:00Z reserve=1\n";
@@ -196,13 +198,24 @@ public class ImportControllerTest {
 	}
 
 	@Example
+	public void shouldSayThatAnEmptyFileIsEmptyAndChooseNothing() throws IOException {
+		final Path found = Files.write(directory.resolve("wallet.dat"), new byte[0]);
+		final Path picked = pickADump("");
+
+		assertEquals(found + EMPTY, controller.onClickUseFound().error());
+		assertEquals(picked + EMPTY, controller.onChooseFile(form(picked)).error());
+		assertEquals(Optional.empty(), choice.chosen());
+		assertEquals(0, Files.list(backups).count());
+	}
+
+	@Example
 	public void shouldRefuseMumboJumboOfWhateverSizeOrKindAndChooseNothing() throws IOException {
 		final byte[] noise = new byte[5000];
 		final byte[] text = "lorem ipsum dolor sit amet\n".repeat(200).getBytes(StandardCharsets.UTF_8);
 
 		new Random(7).nextBytes(noise);
 
-		for (final byte[] content : List.of(new byte[0], "x".getBytes(StandardCharsets.UTF_8), noise, text)) {
+		for (final byte[] content : List.of("x".getBytes(StandardCharsets.UTF_8), noise, text)) {
 			final Path file = Files.write(Files.createTempFile("junk", ".bin"), content);
 			final ImportView view = controller.onChooseFile(form(file));
 
