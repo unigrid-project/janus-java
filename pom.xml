@@ -12,7 +12,6 @@
 	</organization>
 	<modules>
 		<module>core</module>
-		<module>web</module>
 		<module>ui</module>
 		<module>shell</module>
 	</modules>
@@ -39,8 +38,12 @@
 		<maven.compiler.release>25</maven.compiler.release>
 		<lombok.version>1.18.48</lombok.version>
 		<jetty.version>12.0.21</jetty.version>
-		<thymeleaf.version>3.1.3.RELEASE</thymeleaf.version>
-		<jcef.version>146.0.10</jcef.version>
+		<thymeleaf.version>3.1.5.RELEASE</thymeleaf.version>
+		<!-- Oriel comes from JitPack, which builds it from its tags. A local build of Oriel is used instead with
+		     -Doriel.groupId=org.unigrid.oriel -Doriel.version=0.0.2-SNAPSHOT, the name and version it installs as. -->
+		<oriel.groupId>com.github.unigrid-project.oriel</oriel.groupId>
+		<oriel.version>v0.0.1</oriel.version>
+		<jcef.version>152.0.6</jcef.version>
 		<picocli.version>4.7.7</picocli.version>
 		<weld.version>5.1.2.Final</weld.version>
 		<jersey.version>3.1.9</jersey.version>
@@ -102,6 +105,23 @@
 				<version>${jetty.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>${oriel.groupId}</groupId>
+				<artifactId>oriel-server</artifactId>
+				<version>${oriel.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${oriel.groupId}</groupId>
+				<artifactId>oriel-server</artifactId>
+				<version>${oriel.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>${oriel.groupId}</groupId>
+				<artifactId>oriel-window</artifactId>
+				<version>${oriel.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
@@ -197,6 +217,12 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<repositories>
+		<repository>
+			<id>jitpack</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
 	<build>
 		<pluginManagement>
 			<plugins>

@@ -17,7 +17,7 @@
 package org.unigrid.janus.ui.view;
 
 import java.util.List;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /**
  * Proof that the phrase was written down: its words, shuffled into tiles, tapped back in order. A tile

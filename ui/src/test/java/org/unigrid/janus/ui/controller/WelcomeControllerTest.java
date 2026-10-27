@@ -20,10 +20,10 @@ import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
 import net.jqwik.api.Example;
 import org.unigrid.janus.ui.view.WelcomeView;
-import org.unigrid.janus.web.action.ActionExtension;
-import org.unigrid.janus.web.action.Actions;
-import org.unigrid.janus.web.action.Form;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.ActionExtension;
+import org.unigrid.oriel.server.action.Actions;
+import org.unigrid.oriel.server.action.Form;
+import org.unigrid.oriel.server.action.View;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WelcomeControllerTest {

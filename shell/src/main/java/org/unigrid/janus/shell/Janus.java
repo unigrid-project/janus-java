@@ -18,6 +18,7 @@ package org.unigrid.janus.shell;
 
 import jakarta.enterprise.inject.se.SeContainer;
 import jakarta.enterprise.inject.se.SeContainerInitializer;
+import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.net.URI;
 import java.nio.file.Path;
@@ -27,13 +28,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unigrid.janus.ui.controller.WalletController;
 import org.unigrid.janus.ui.view.IndexView;
-import org.unigrid.janus.web.Routes;
-import org.unigrid.janus.web.action.ActionExtension;
-import org.unigrid.janus.web.action.Actions;
-import org.unigrid.janus.web.SessionToken;
-import org.unigrid.janus.web.Templates;
-import org.unigrid.janus.web.UiServer;
+import org.unigrid.oriel.server.AppId;
+import org.unigrid.oriel.server.Routes;
+import org.unigrid.oriel.server.SessionToken;
+import org.unigrid.oriel.server.UiServer;
+import org.unigrid.oriel.server.action.ActionExtension;
+import org.unigrid.oriel.server.action.Actions;
+import org.unigrid.oriel.server.template.Templates;
+import org.unigrid.oriel.window.Application;
+import org.unigrid.oriel.window.BrowserWindow;
+import org.unigrid.oriel.window.WindowIcon;
+import org.unigrid.oriel.window.launch.LaunchOptions;
 import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 public final class Janus {
 	/* Logging starts when the logger below is made, and writes its files to the folder this makes. */
@@ -49,30 +57,57 @@ public final class Janus {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		try {
-			final Optional<LaunchOptions> options = LaunchOptions.of(args);
+		final Optional<LaunchOptions> options = options(args);
 
-			if (options.isPresent()) {
-				start(options.get());
-			}
-		} catch (CommandLine.ParameterException e) {
-			System.err.println(e.getMessage());
-			e.getCommandLine().usage(System.err);
-			System.exit(USAGE_ERROR);
+		if (options.isPresent()) {
+			start(application(), options.get());
 		}
 	}
 
-	private static void start(final LaunchOptions options) throws Exception {
+	/*
+	 * The command line is Janus's: Oriel takes out the window system and Janus reads what is left, refusing what
+	 * it does not know so that a mistyped option is never quietly ignored. Empty when the help was asked for.
+	 */
+	private static Optional<LaunchOptions> options(final String... args) {
+		final CommandLine command = new CommandLine(new Arguments());
+
+		LaunchOptions.help().ifPresent(line -> command.getCommandSpec().usageMessage().footer("", "Window:",
+			"  " + line));
+
+		try {
+			final LaunchOptions options = LaunchOptions.of(args);
+
+			if (command.parseArgs(options.remaining().toArray(String[]::new)).isUsageHelpRequested()) {
+				LOG.info("{}", command.getUsageMessage());
+				return Optional.empty();
+			}
+
+			return Optional.of(options);
+		} catch (IllegalArgumentException | CommandLine.ParameterException e) {
+			LOG.error("{}{}{}", e.getMessage(), System.lineSeparator(), command.getUsageMessage());
+			System.exit(USAGE_ERROR);
+			return Optional.empty();
+		}
+	}
+
+	/* The window and the message shown when it cannot open both go by this name. */
+	private static Application application() {
+		return new Application(AppId.of("janus"), "Unigrid", WindowIcon.images(Janus.class, "icons/unigrid-%d.png"),
+			new Dimension(1240, 800), new Dimension(900, 640)
+		);
+	}
+
+	private static void start(final Application application, final LaunchOptions options) throws Exception {
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
 		final Actions actions = Actions.discovered(
 			container.getBeanManager().getExtension(ActionExtension.class)
 		);
 
-		final BrowserWindow window = new BrowserWindow(options.windowSystem());
+		final BrowserWindow window = new BrowserWindow(application, options.windowSystem());
 		final SessionToken token = SessionToken.random();
 		final WalletController wallet = container.select(WalletController.class).get();
-		final UiServer server = new UiServer(Routes.create(new Templates(false), token, window.control(), actions,
-			() -> new IndexView(TITLE, wallet.start())
+		final UiServer server = new UiServer(Routes.create(application.id(), new Templates(false), token,
+			window.control(), actions, () -> new IndexView(TITLE, wallet.start())
 		));
 		final URI uri = server.start();
 
@@ -83,21 +118,31 @@ public final class Janus {
 		try {
 			window.open(uri.resolve("/?" + SessionToken.PARAMETER + "=" + token.value()));
 		} catch (Exception | LinkageError e) {
-			giveUp(server, e);
+			giveUp(application, server, e);
 		}
 	}
 
 	/* The server's threads would keep the process alive with no window to reach it, and a launcher from
 	   a menu has no console to show the error in. */
-	private static void giveUp(final UiServer server, final Throwable cause) throws Exception {
+	private static void giveUp(final Application application, final UiServer server, final Throwable cause)
+		throws Exception {
+
 		LOG.error("Janus could not open its window", cause);
 		server.stop();
 
 		if (!GraphicsEnvironment.isHeadless()) {
-			JOptionPane.showMessageDialog(null, StartFailure.message(new CefLocation(), cause), TITLE,
-				JOptionPane.ERROR_MESSAGE);
+			final String message = EngineFailure.message(application, cause);
+
+			JOptionPane.showMessageDialog(null, message, TITLE, JOptionPane.ERROR_MESSAGE);
 		}
 
 		System.exit(1);
+	}
+
+	/** What Janus itself takes on the command line, besides the window system Oriel takes. */
+	@Command(name = "Unigrid", description = "The Unigrid Control Center.")
+	private static final class Arguments {
+		@Option(names = { "-h", "--help" }, usageHelp = true, description = "Show this help and exit.")
+		private boolean help;
 	}
 }

@@ -23,7 +23,7 @@ import org.jsoup.nodes.Document;
 import org.unigrid.janus.ui.view.AppView.Tab;
 import org.unigrid.janus.ui.view.PreparingView.Step;
 import org.unigrid.janus.ui.view.PreparingView.Step.State;
-import org.unigrid.janus.web.Templates;
+import org.unigrid.oriel.server.template.Templates;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

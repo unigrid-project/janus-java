@@ -17,7 +17,7 @@
 package org.unigrid.janus.ui.view;
 
 import java.util.List;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /** The recovery phrase of a wallet being made, shown once so it can be written down. */
 public record SeedView(List<String> words) implements View {

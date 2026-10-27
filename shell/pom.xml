@@ -9,7 +9,7 @@
 	<artifactId>shell</artifactId>
 	<packaging>jar</packaging>
 	<name>Unigrid Janus Shell</name>
-	<description>Desktop window hosting the embedded browser, the system tray and the application lifecycle.</description>
+	<description>Starts Janus: the container, the interface server and the window that shows it.</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.unigrid.janus</groupId>
@@ -22,8 +22,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>me.friwi</groupId>
-			<artifactId>jcefmaven</artifactId>
+			<groupId>${oriel.groupId}</groupId>
+			<artifactId>oriel-window</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>info.picocli</groupId>

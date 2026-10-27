@@ -18,7 +18,7 @@ package org.unigrid.janus.ui.view;
 
 import java.util.List;
 import java.util.Locale;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /** How far the wallet is from being shown, and what went wrong when it cannot be. */
 public record PreparingView(List<Step> steps, String failure, boolean chooseAnother) implements View {

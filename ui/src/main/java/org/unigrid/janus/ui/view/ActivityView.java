@@ -17,7 +17,7 @@
 package org.unigrid.janus.ui.view;
 
 import java.util.List;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /** Every transaction of the wallet, narrowed by kind and by what was searched for. */
 public record ActivityView(Filter filter, String query, List<Summary> summaries, RowsView rows, ExportNoteView note)

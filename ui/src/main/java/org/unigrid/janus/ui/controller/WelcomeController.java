@@ -18,7 +18,7 @@ package org.unigrid.janus.ui.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.unigrid.janus.ui.view.WelcomeView;
-import org.unigrid.janus.web.action.Action;
+import org.unigrid.oriel.server.action.Action;
 
 @ApplicationScoped
 public class WelcomeController {

@@ -38,9 +38,9 @@ import org.unigrid.janus.ui.view.RestoreView;
 import org.unigrid.janus.ui.view.SeedView;
 import org.unigrid.janus.ui.view.VerifyView;
 import org.unigrid.janus.ui.view.WelcomeView;
-import org.unigrid.janus.web.action.Action;
-import org.unigrid.janus.web.action.Form;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.Action;
+import org.unigrid.oriel.server.action.Form;
+import org.unigrid.oriel.server.action.View;
 
 /**
  * Making an EVM wallet from a new recovery phrase, or from one the user already has. The phrase lives in

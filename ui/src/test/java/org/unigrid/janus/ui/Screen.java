@@ -31,7 +31,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.unigrid.janus.web.Client;
+import org.unigrid.oriel.server.Client;
 
 /**
  * The page as the window holds it, changed the way htmx would change it when a control is used.

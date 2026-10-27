@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.ui.view;
 
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /**
  * The wallet's own window: its tabs, the state of the ledger and the screen being shown. It is drawn and

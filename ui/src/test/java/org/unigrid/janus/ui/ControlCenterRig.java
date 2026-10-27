@@ -42,12 +42,13 @@ import org.unigrid.janus.ui.controller.PhraseController;
 import org.unigrid.janus.ui.controller.WalletController;
 import org.unigrid.janus.ui.controller.WelcomeController;
 import org.unigrid.janus.ui.view.IndexView;
-import org.unigrid.janus.web.RecordingWindow;
-import org.unigrid.janus.web.Routes;
-import org.unigrid.janus.web.SessionToken;
-import org.unigrid.janus.web.Templates;
-import org.unigrid.janus.web.UiServer;
-import org.unigrid.janus.web.action.Actions;
+import org.unigrid.oriel.server.AppId;
+import org.unigrid.oriel.server.Routes;
+import org.unigrid.oriel.server.SessionToken;
+import org.unigrid.oriel.server.UiServer;
+import org.unigrid.oriel.server.action.Actions;
+import org.unigrid.oriel.server.template.Templates;
+import org.unigrid.oriel.server.window.RecordingWindow;
 
 /**
  * The Control Center served the way the shell serves it, but kept away from the person running the
@@ -93,7 +94,7 @@ public class ControlCenterRig implements AutoCloseable {
 		);
 
 		addresses = WalletFixture.addresses();
-		server = new UiServer(Routes.create(new Templates(false), token, window, actions,
+		server = new UiServer(Routes.create(AppId.of("janus"), new Templates(false), token, window, actions,
 			() -> new IndexView(TITLE, wallet.start())
 		));
 		base = server.start();

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<body>
-		<section th:fragment="seed" class="card" hx-target="this" hx-swap="outerHTML">
+		<section th:fragment="seed" class="card" data-failure-host hx-target="this" hx-swap="outerHTML">
 			<div th:replace="~{fragments/card :: brand}"></div>
 			<div th:replace="~{fragments/card :: steps(1)}"></div>
 
@@ -22,7 +22,7 @@
 			</div>
 		</section>
 
-		<section th:fragment="verify" class="card" hx-target="this" hx-swap="outerHTML">
+		<section th:fragment="verify" class="card" data-failure-host hx-target="this" hx-swap="outerHTML">
 			<div th:replace="~{fragments/card :: brand}"></div>
 			<div th:replace="~{fragments/card :: steps(2)}"></div>
 
@@ -52,7 +52,7 @@
 			</div>
 		</section>
 
-		<section th:fragment="restore" class="card" hx-target="this" hx-swap="outerHTML">
+		<section th:fragment="restore" class="card" data-failure-host hx-target="this" hx-swap="outerHTML">
 			<div th:replace="~{fragments/card :: brand}"></div>
 			<div th:replace="~{fragments/card :: steps(1)}"></div>
 
@@ -80,7 +80,7 @@
 			</form>
 		</section>
 
-		<section th:fragment="password" class="card" hx-target="this" hx-swap="outerHTML">
+		<section th:fragment="password" class="card" data-failure-host hx-target="this" hx-swap="outerHTML">
 			<div th:replace="~{fragments/card :: brand}"></div>
 			<div th:replace="~{fragments/card :: steps(2)}"></div>
 
