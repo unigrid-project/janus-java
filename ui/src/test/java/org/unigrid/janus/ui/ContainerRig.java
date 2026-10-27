@@ -30,13 +30,14 @@ import org.unigrid.janus.core.DataDirectory;
 import org.unigrid.janus.core.hedgehog.HedgehogStand;
 import org.unigrid.janus.ui.controller.WalletController;
 import org.unigrid.janus.ui.view.IndexView;
-import org.unigrid.janus.web.RecordingWindow;
-import org.unigrid.janus.web.Routes;
-import org.unigrid.janus.web.SessionToken;
-import org.unigrid.janus.web.Templates;
-import org.unigrid.janus.web.UiServer;
-import org.unigrid.janus.web.action.ActionExtension;
-import org.unigrid.janus.web.action.Actions;
+import org.unigrid.oriel.server.AppId;
+import org.unigrid.oriel.server.Routes;
+import org.unigrid.oriel.server.SessionToken;
+import org.unigrid.oriel.server.UiServer;
+import org.unigrid.oriel.server.action.ActionExtension;
+import org.unigrid.oriel.server.action.Actions;
+import org.unigrid.oriel.server.template.Templates;
+import org.unigrid.oriel.server.window.RecordingWindow;
 
 /**
  * The Control Center put together the way the shell puts it together: the container builds every controller
@@ -71,7 +72,7 @@ public class ContainerRig implements AutoCloseable {
 		final Actions actions = Actions.discovered(container.getBeanManager().getExtension(ActionExtension.class));
 		final WalletController wallet = container.select(WalletController.class).get();
 
-		server = new UiServer(Routes.create(new Templates(false), token, window, actions,
+		server = new UiServer(Routes.create(AppId.of("janus"), new Templates(false), token, window, actions,
 			() -> new IndexView(ControlCenterRig.TITLE, wallet.start())
 		));
 		base = server.start();

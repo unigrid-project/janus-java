@@ -25,7 +25,7 @@ import org.jsoup.nodes.Element;
 import org.unigrid.janus.ui.view.DashboardView.Bar;
 import org.unigrid.janus.ui.view.DashboardView.FundedPage;
 import org.unigrid.janus.ui.view.DashboardView.Holding;
-import org.unigrid.janus.web.Templates;
+import org.unigrid.oriel.server.template.Templates;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

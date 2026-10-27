@@ -20,7 +20,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.unigrid.janus.core.Release;
 import org.unigrid.janus.ui.view.AboutView;
-import org.unigrid.janus.web.action.Action;
+import org.unigrid.oriel.server.action.Action;
 
 @ApplicationScoped
 public class AboutController {

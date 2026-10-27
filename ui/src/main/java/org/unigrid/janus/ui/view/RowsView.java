@@ -17,7 +17,7 @@
 package org.unigrid.janus.ui.view;
 
 import java.util.List;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /**
  * A page of the ledger. The first page is the list itself; the pages after it take the place of the

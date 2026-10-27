@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.ui.view;
 
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /** What became of the last export, shown next to the button that made it. */
 public record ExportNoteView(String message, boolean failed) implements View {

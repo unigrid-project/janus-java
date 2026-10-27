@@ -25,9 +25,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.unigrid.janus</groupId>
-			<artifactId>web</artifactId>
-			<version>${project.version}</version>
+			<groupId>${oriel.groupId}</groupId>
+			<artifactId>oriel-server</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>

@@ -31,7 +31,7 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.unigrid.janus.shell.BrowserWindow;
+import org.unigrid.oriel.window.BrowserWindow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -180,8 +180,8 @@ public class InstalledJanusIT {
 				ls /tmp/.X11-unix/X* >/dev/null 2>&1 || { cat /tmp/weston.log; exit 1; }
 				%2$s XDG_SESSION_TYPE=wayland WAYLAND_DISPLAY=wayland-1 XDG_CURRENT_DESKTOP=%3$s \
 					JAVA_TOOL_OPTIONS=-D%4$s=9222 setsid nohup %5$s/bin/Unigrid >%6$s 2>&1 &
-				""".formatted(USER, XWAYLAND_SCREEN, desktop.currentDesktop, BrowserWindow.DEBUGGING_PORT,
-					PACKAGED, LOG),
+				""".formatted(USER, XWAYLAND_SCREEN, desktop.currentDesktop,
+					BrowserWindow.DEBUGGING_PORT, PACKAGED, LOG),
 				"starting Janus on Wayland");
 			awaitAddress(container);
 			return container;

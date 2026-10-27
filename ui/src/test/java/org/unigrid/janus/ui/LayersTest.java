@@ -45,7 +45,7 @@ public class LayersTest {
 	@Example
 	public void shouldKeepTheModelUnawareOfTheInterface() {
 		noClasses().that().resideInAPackage("..janus.core..")
-			.should().dependOnClassesThat().resideInAnyPackage("..janus.web..", "..janus.ui..")
+			.should().dependOnClassesThat().resideInAnyPackage("org.unigrid.oriel..", "..janus.ui..")
 			.check(CLASSES);
 	}
 }

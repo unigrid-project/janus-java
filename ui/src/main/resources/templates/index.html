@@ -7,12 +7,12 @@
 		<link rel="stylesheet" href="/static/css/janus.css">
 		<!-- Runs before the first paint, so a stored light theme never flashes dark. -->
 		<script>document.documentElement.dataset.theme = localStorage.getItem("theme") || "dark";</script>
-		<script src="/static/js/htmx.min.js" defer></script>
-		<script src="/static/js/window.js" defer></script>
+		<script src="/oriel/htmx.min.js" defer></script>
+		<script src="/oriel/window.js" defer></script>
 		<script src="/static/js/password.js" defer></script>
-		<script src="/static/js/failure.js" defer></script>
+		<script src="/oriel/failure.js" defer></script>
 	</head>
-	<body>
+	<body data-failure-message="That did not work. The reason is in the log in the logs folder inside .janus in your home folder.">
 		<div class="glow" aria-hidden="true">
 			<span class="glow__blob glow__blob--warm"></span>
 			<span class="glow__blob glow__blob--cool"></span>
@@ -44,7 +44,7 @@
 			</div>
 		</header>
 
-		<main>
+		<main data-failure-host>
 			<th:block th:with="view=${view.content()}">
 				<section th:replace="~{__${view.template()}__}"></section>
 			</th:block>

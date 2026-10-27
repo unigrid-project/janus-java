@@ -25,9 +25,10 @@ The `master` branch is regularly built and tested, but is not guaranteed to be c
 mvn clean install
 ```
 
-This builds and tests the `core`, `web`, `ui` and `shell` modules: the Hedgehog
-client, the embedded web server, the server-rendered pages and the window that
-hosts them.
+This builds and tests the `core`, `ui` and `shell` modules: the Hedgehog
+client, the server-rendered pages and the start of the application. The embedded web
+server and the window that hosts it come from Oriel, which has to be installed
+into the local Maven repository first, with `mvn install` in its own checkout.
 
 The `desktop` module builds the native installers and is only part of the build
 with the `installer` profile. It needs JDK 25 and the platform's packaging tools

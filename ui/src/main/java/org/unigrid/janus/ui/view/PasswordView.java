@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.ui.view;
 
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /**
  * The password the recovery phrase is sealed with before it is kept, whether the keys of an imported wallet

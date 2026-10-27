@@ -43,7 +43,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import org.unigrid.janus.core.hedgehog.HedgehogService;
-import org.unigrid.janus.shell.BrowserWindow;
+import org.unigrid.oriel.window.BrowserWindow;
 
 /**
  * The installed Janus with its window open to a debugging connection, so a test can work it the way a person

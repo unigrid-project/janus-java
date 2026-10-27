@@ -17,7 +17,7 @@
 package org.unigrid.janus.ui.view;
 
 import java.nio.file.Path;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /**
  * The import step: where a wallet was looked for, the one found there, the one settled on, where that one

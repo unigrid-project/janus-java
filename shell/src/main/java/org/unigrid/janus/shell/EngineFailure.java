@@ -14,24 +14,19 @@
     If not, see <http://www.gnu.org/licenses/> and <https://github.com/unigrid-project/janus-java>.
  */
 
-package org.unigrid.janus.web.action;
+package org.unigrid.janus.shell;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.unigrid.oriel.window.Application;
+import org.unigrid.oriel.window.StartFailure;
+import org.unigrid.oriel.window.engine.CefLocation;
 
-/**
- * Binds a method to something the interface can ask for by name, so that markup naming an action
- * and the method carrying it out can be read against each other.
- *
- * <p>The method takes either nothing or a {@link Form}. Returning a {@link View} renders it for
- * the page to swap in; returning nothing tells the page that there is nothing to change.
- */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Action {
-	String value();
+/* What Janus tells a person whose browser engine would not start. It names the folder the engine was looked for
+   in: the installer's when Janus was installed, the home folder when it was not. */
+final class EngineFailure {
+	private EngineFailure() {
+	}
+
+	static String message(final Application application, final Throwable cause) {
+		return StartFailure.message(application, new CefLocation(application.id()).directory(), cause);
+	}
 }

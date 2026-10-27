@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<body>
-		<section th:fragment="welcome" class="card" hx-target="this" hx-swap="outerHTML">
+		<section th:fragment="welcome" class="card" data-failure-host hx-target="this" hx-swap="outerHTML">
 			<div th:replace="~{fragments/card :: brand}"></div>
 			<div th:replace="~{fragments/card :: steps(0)}"></div>
 

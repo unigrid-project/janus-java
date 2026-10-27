@@ -32,8 +32,8 @@ import org.unigrid.janus.core.legacy.LegacyWallet;
 import org.unigrid.janus.core.legacy.UnreadableWallet;
 import org.unigrid.janus.core.legacy.WalletDump;
 import org.unigrid.janus.ui.view.ImportView;
-import org.unigrid.janus.web.action.Action;
-import org.unigrid.janus.web.action.Form;
+import org.unigrid.oriel.server.action.Action;
+import org.unigrid.oriel.server.action.Form;
 
 @ApplicationScoped
 public class ImportController {

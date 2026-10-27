@@ -20,8 +20,8 @@ import java.util.List;
 import net.jqwik.api.Example;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.unigrid.janus.web.Templates;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
+import org.unigrid.oriel.server.template.Templates;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

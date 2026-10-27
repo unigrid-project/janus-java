@@ -19,7 +19,7 @@ package org.unigrid.janus.ui.view;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 import net.jqwik.api.Example;
-import org.unigrid.janus.web.Templates;
+import org.unigrid.oriel.server.template.Templates;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

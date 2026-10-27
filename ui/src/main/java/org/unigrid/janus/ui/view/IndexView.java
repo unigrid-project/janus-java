@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.ui.view;
 
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /** The page the window opens on, and the view inside it: the welcome card, or the wallet once one is chosen. */
 public record IndexView(String title, View content) implements View {

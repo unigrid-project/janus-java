@@ -23,13 +23,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.function.Supplier;
-import org.unigrid.janus.web.Routes;
-import org.unigrid.janus.web.SessionToken;
-import org.unigrid.janus.web.Templates;
-import org.unigrid.janus.web.UiServer;
-import org.unigrid.janus.web.WindowControl;
-import org.unigrid.janus.web.action.Actions;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.AppId;
+import org.unigrid.oriel.server.Routes;
+import org.unigrid.oriel.server.SessionToken;
+import org.unigrid.oriel.server.UiServer;
+import org.unigrid.oriel.server.action.Actions;
+import org.unigrid.oriel.server.action.View;
+import org.unigrid.oriel.server.template.Templates;
+import org.unigrid.oriel.server.window.WindowControl;
 
 /**
  * Serves the interface from whatever Java runs it, asks for the files the pages are drawn with, and prints the
@@ -38,7 +39,7 @@ import org.unigrid.janus.web.action.View;
  */
 public final class StaticFilesProbe {
 	static final List<String> ASSETS = List.of(
-		"/static/css/janus.css", "/static/js/htmx.min.js", "/static/fonts/sora-latin.woff2"
+		"/static/css/janus.css", "/oriel/htmx.min.js", "/static/fonts/sora-latin.woff2"
 	);
 
 	private StaticFilesProbe() {
@@ -49,8 +50,8 @@ public final class StaticFilesProbe {
 			throw new IllegalStateException("The request reached the page instead of being served as a file");
 		};
 		final SessionToken token = SessionToken.random();
-		final URI base = new UiServer(Routes.create(new Templates(false), token, WindowControl.NONE, Actions.of(),
-			noPage)).start();
+		final URI base = new UiServer(Routes.create(AppId.of("janus"), new Templates(false), token,
+			WindowControl.NONE, Actions.of(), noPage)).start();
 		final HttpClient http = HttpClient.newBuilder().cookieHandler(new CookieManager())
 			.followRedirects(HttpClient.Redirect.NORMAL).build();
 

@@ -17,7 +17,7 @@
 package org.unigrid.janus.ui.view;
 
 import java.util.List;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /** Twelve boxes for a recovery phrase, holding what was typed and why it was refused, if it was. */
 public record RestoreView(List<String> words, String error) implements View {

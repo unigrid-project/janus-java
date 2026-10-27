@@ -17,7 +17,7 @@
 package org.unigrid.janus.ui.view;
 
 import org.unigrid.janus.ui.view.DashboardView.FundedPage;
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 /**
  * The list of funded addresses and its pager without the dialog around them, so that a page or a filter

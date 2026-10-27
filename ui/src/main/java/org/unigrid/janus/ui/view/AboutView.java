@@ -16,7 +16,7 @@
 
 package org.unigrid.janus.ui.view;
 
-import org.unigrid.janus.web.action.View;
+import org.unigrid.oriel.server.action.View;
 
 public record AboutView(String version) implements View {
 	@Override

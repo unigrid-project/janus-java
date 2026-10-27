@@ -541,7 +541,8 @@ main {
 	align-items: center;
 }
 
-.step__error {
+.step__error,
+[data-failure] {
 	margin: 14px 0 0;
 	font-size: 13px;
 	color: var(--danger);
