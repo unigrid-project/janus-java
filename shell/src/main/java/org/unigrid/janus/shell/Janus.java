@@ -60,7 +60,7 @@ public final class Janus {
 		final Optional<LaunchOptions> options = options(args);
 
 		if (options.isPresent()) {
-			start(options.get());
+			start(application(), options.get());
 		}
 	}
 
@@ -97,13 +97,8 @@ public final class Janus {
 		);
 	}
 
-	private static void start(final LaunchOptions options) throws Exception {
+	private static void start(final Application application, final LaunchOptions options) throws Exception {
 		final SeContainer container = SeContainerInitializer.newInstance().initialize();
-
-		/* The icons are read once the container is up, the order the window was made in before it moved
-		   to Oriel; on Linux the browser engine never finished starting when they were read first. */
-		final Application application = application();
-
 		final Actions actions = Actions.discovered(
 			container.getBeanManager().getExtension(ActionExtension.class)
 		);
