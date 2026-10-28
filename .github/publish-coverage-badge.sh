@@ -3,7 +3,7 @@
 # shields.io reads, on the badges branch so that no outside service or secret is needed.
 set -eu
 
-reports="core/target/site/jacoco/jacoco.csv web/target/site/jacoco/jacoco.csv ui/target/site/jacoco/jacoco.csv"
+reports="core/target/site/jacoco/jacoco.csv ui/target/site/jacoco/jacoco.csv"
 # Columns four and five of a JaCoCo csv are the instructions missed and covered; the first line is the header.
 percent=$(awk -F, 'FNR > 1 { missed += $4; covered += $5 } END { printf "%d", 100 * covered / (missed + covered) }' $reports)
 
