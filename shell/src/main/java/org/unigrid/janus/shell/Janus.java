@@ -57,7 +57,16 @@ public final class Janus {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		final Optional<LaunchOptions> options = options(args);
+		final CommandLine command = command();
+		final Optional<LaunchOptions> options;
+
+		try {
+			options = options(command, args);
+		} catch (IllegalArgumentException | CommandLine.ParameterException e) {
+			refuse(command, e);
+			System.exit(USAGE_ERROR);
+			return;
+		}
 
 		if (options.isPresent()) {
 			start(application(), options.get());
@@ -66,28 +75,36 @@ public final class Janus {
 
 	/*
 	 * The command line is Janus's: Oriel takes out the window system and Janus reads what is left, refusing what
-	 * it does not know so that a mistyped option is never quietly ignored. Empty when the help was asked for.
+	 * it does not know so that a mistyped option is never quietly ignored. Empty when the help was asked for,
+	 * which is printed plainly on the command's own output; an option Janus or Oriel does not take is thrown,
+	 * so that main alone decides how Janus ends.
 	 */
-	private static Optional<LaunchOptions> options(final String... args) {
+	static Optional<LaunchOptions> options(final CommandLine command, final String... args) {
+		final LaunchOptions options = LaunchOptions.of(args);
+
+		if (command.parseArgs(options.remaining().toArray(String[]::new)).isUsageHelpRequested()) {
+			command.usage(command.getOut());
+			command.getOut().flush();
+			return Optional.empty();
+		}
+
+		return Optional.of(options);
+	}
+
+	/* A refused command line is answered on the command's error output, the way picocli answers it itself. */
+	static void refuse(final CommandLine command, final RuntimeException refused) {
+		command.getErr().println(refused.getMessage());
+		command.usage(command.getErr());
+		command.getErr().flush();
+	}
+
+	/* What Janus takes, with the window system Oriel takes listed in the help where it can be chosen. */
+	static CommandLine command() {
 		final CommandLine command = new CommandLine(new Arguments());
 
 		LaunchOptions.help().ifPresent(line -> command.getCommandSpec().usageMessage().footer("", "Window:",
 			"  " + line));
-
-		try {
-			final LaunchOptions options = LaunchOptions.of(args);
-
-			if (command.parseArgs(options.remaining().toArray(String[]::new)).isUsageHelpRequested()) {
-				LOG.info("{}", command.getUsageMessage());
-				return Optional.empty();
-			}
-
-			return Optional.of(options);
-		} catch (IllegalArgumentException | CommandLine.ParameterException e) {
-			LOG.error("{}{}{}", e.getMessage(), System.lineSeparator(), command.getUsageMessage());
-			System.exit(USAGE_ERROR);
-			return Optional.empty();
-		}
+		return command;
 	}
 
 	/* The window and the message shown when it cannot open both go by this name. */
