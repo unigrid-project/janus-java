@@ -27,8 +27,15 @@ mvn clean install
 
 This builds and tests the `core`, `ui` and `shell` modules: the Hedgehog
 client, the server-rendered pages and the start of the application. The embedded web
-server and the window that hosts it come from Oriel, which has to be installed
-into the local Maven repository first, with `mvn install` in its own checkout.
+server and the window that hosts it come from [Oriel](https://github.com/unigrid-project/oriel),
+which the build fetches from JitPack at the release `oriel.version` names in the root pom.
+
+To build against a checkout of Oriel instead, such as a change that is not released
+yet, run `mvn install` in that checkout and name the coordinates it installs as, with
+the version from Oriel's own pom:
+```
+mvn clean install -Doriel.groupId=org.unigrid.oriel -Doriel.version=0.0.2-SNAPSHOT
+```
 
 The `desktop` module builds the native installers and is only part of the build
 with the `installer` profile. It needs JDK 25 and the platform's packaging tools
