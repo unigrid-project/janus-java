@@ -33,9 +33,12 @@ public class JanusTest {
 	private final StringWriter err = new StringWriter();
 	private CommandLine command;
 
+	/* picocli colours the help where it takes the console to understand colours, as on the Windows runners, which
+	   puts escape codes inside the text, so the tests read it without them. */
 	@BeforeEach
 	public void captureWhatJanusPrints() {
 		command = Janus.command();
+		command.setColorScheme(CommandLine.Help.defaultColorScheme(CommandLine.Help.Ansi.OFF));
 		command.setOut(new PrintWriter(out));
 		command.setErr(new PrintWriter(err));
 	}
