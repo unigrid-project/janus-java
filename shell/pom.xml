@@ -17,11 +17,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>${oriel.groupId}</groupId>
 			<artifactId>oriel-window</artifactId>
 		</dependency>
