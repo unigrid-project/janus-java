@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -39,10 +40,12 @@ import org.unigrid.janus.core.evm.EvmWalletStore;
 import org.unigrid.janus.core.evm.LegacyVault;
 import org.unigrid.janus.core.evm.Mnemonic;
 import org.unigrid.janus.core.evm.SeedVault;
+import org.unigrid.janus.core.hedgehog.AddressBalance;
 import org.unigrid.janus.core.hedgehog.AddressTransaction;
 import org.unigrid.janus.core.hedgehog.EntryKind;
 import org.unigrid.janus.core.hedgehog.HedgehogStand;
 import org.unigrid.janus.core.legacy.LegacyKey;
+import org.unigrid.janus.core.legacy.LegacyWallet;
 import org.unigrid.janus.core.legacy.WalletDump;
 import org.unigrid.janus.core.wallet.LedgerState.Phase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -131,6 +134,49 @@ public class WalletLedgerTest {
 
 		assertEquals(new AddressBreakdown(2, 0, addresses.size() - 2), funds.breakdown());
 		assertEquals(List.of("bb", "aa"), funds.transactions().stream().map(WalletTransaction::txid).toList());
+	}
+
+	/* An address the snapshot knows stays on the list after it was emptied; one it does not know never gets there. */
+	@Example
+	public void shouldListTheSnapshotAddressesFundedAndEmptyInTheOrderOfTheWallet() {
+		final String emptied = addresses.get(40);
+		final String funded = addresses.get(3);
+
+		stand.address(emptied, "0", entry("aa", 1, "5", EntryKind.RECEIVED), entry("bb", 2, "-5", EntryKind.SENT))
+			.address(funded, "60", entry("cc", 3, "60", EntryKind.RECEIVED)).slowedBy(Duration.ofMillis(5));
+
+		final List<AddressBalance> first = ledger.read(WALLET).snapshotAddresses();
+		final List<AddressBalance> second = ledger.read(WALLET).snapshotAddresses();
+
+		assertEquals(inWalletOrder(LegacyWallet.addresses(WALLET), funded, emptied), addressesOf(first));
+		assertEquals(0, new BigDecimal("60").compareTo(first.get(addressesOf(first).indexOf(funded)).balance()));
+		assertEquals(0, BigDecimal.ZERO.compareTo(first.get(addressesOf(first).indexOf(emptied)).balance()));
+		assertEquals(first, second);
+	}
+
+	/*
+	 * An address that never appeared on the chain but is owed a pending mint is known to Hedgehog all the same:
+	 * it answers with what is owed and no transactions, and the address goes on the list with that balance.
+	 */
+	@Example
+	public void shouldListAnAddressThatIsOnlyOwedAPendingMint() {
+		final String owed = addresses.get(7);
+
+		stand.address(owed, "25");
+
+		final List<AddressBalance> listed = ledger.read(WALLET).snapshotAddresses();
+
+		assertEquals(List.of(owed), addressesOf(listed));
+		assertEquals(0, new BigDecimal("25").compareTo(listed.getFirst().balance()));
+		assertEquals(0, listed.getFirst().transactionCount());
+	}
+
+	private static List<String> addressesOf(final List<AddressBalance> balances) {
+		return balances.stream().map(AddressBalance::address).toList();
+	}
+
+	private static List<String> inWalletOrder(final Collection<String> wallet, final String... these) {
+		return wallet.stream().filter(List.of(these)::contains).toList();
 	}
 
 	@Example
@@ -294,6 +340,7 @@ public class WalletLedgerTest {
 			assertEquals(0, new BigDecimal("1525").compareTo(funds.awaitingMint()));
 			assertEquals(List.of(), funds.transactions());
 			assertEquals(new AddressBreakdown(2, 0, EvmWallet.ADDRESSES - 2), funds.breakdown());
+			assertEquals(List.of(), funds.snapshotAddresses());
 		} finally {
 			try (Stream<Path> files = Files.walk(folder)) {
 				for (final Path path : files.sorted(Comparator.reverseOrder()).toList()) {
@@ -325,6 +372,9 @@ public class WalletLedgerTest {
 			assertEquals(0, new BigDecimal("42").compareTo(funds.total()));
 			assertEquals(new AddressBreakdown(2, 0, dumped.size() - 2), funds.breakdown());
 			assertEquals(2, funds.transactions().size());
+			assertEquals(inWalletOrder(wallet.legacy().addresses(), dumped.get(0), dumped.get(5)),
+				addressesOf(funds.snapshotAddresses())
+			);
 		} finally {
 			try (Stream<Path> files = Files.walk(folder)) {
 				for (final Path path : files.sorted(Comparator.reverseOrder()).toList()) {
