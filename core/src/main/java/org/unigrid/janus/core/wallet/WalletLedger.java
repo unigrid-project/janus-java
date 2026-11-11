@@ -167,7 +167,7 @@ public class WalletLedger {
 			owed.get(address.toLowerCase(Locale.ROOT))).map(amount -> new AddressBalance(address, amount, 0))
 		));
 
-		return WalletFunds.of(balances, List.of(), client.snapshot(), zone);
+		return WalletFunds.promised(balances, client.snapshot(), zone);
 	}
 
 	/** What Hedgehog said of one address: its balance, and its history when it has any. */

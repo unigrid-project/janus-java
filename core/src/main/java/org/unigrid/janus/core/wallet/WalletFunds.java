@@ -32,14 +32,52 @@ import org.unigrid.janus.core.wallet.WalletTransaction.Kind;
 /**
  * Everything the wallet's views show, worked out once. The total comes from the balances Hedgehog
  * reports, which include mints the chain has not made yet; the history cannot know about those, so
- * whatever the two disagree by is money awaiting its mint.
+ * whatever the two disagree by is money awaiting its mint. The snapshot addresses are every legacy address of
+ * the wallet Hedgehog knows, in the order of the wallet: those in the snapshot, funded or empty, and those owed
+ * a pending mint, each with its snapshot balance plus what it is owed. A request for verification lists all of
+ * them, so the board sees the holder's whole past on the chain and not only what is left of it.
  */
 public record WalletFunds(BigDecimal total, BigDecimal historyNet, BigDecimal awaitingMint, BigDecimal received,
 	BigDecimal sent, BigDecimal rewards, AddressBreakdown breakdown, List<AddressBalance> funded,
-	List<WalletTransaction> transactions, List<MonthlyBalance> monthly, SnapshotInfo snapshot) {
+	List<AddressBalance> snapshotAddresses, List<WalletTransaction> transactions, List<MonthlyBalance> monthly,
+	SnapshotInfo snapshot) {
 
+	/**
+	 * Works out the funds of a legacy wallet from what Hedgehog said of each of its addresses.
+	 *
+	 * @param balances every address of the wallet in its order, with the balance Hedgehog reported, or empty when
+	 *	Hedgehog knows nothing of the address
+	 * @param transactions the wallet's history, newest first
+	 * @param snapshot the snapshot the balances come from
+	 * @param zone the zone the months of the history are counted in
+	 * @return the wallet's funds, with every address Hedgehog knows as a snapshot address
+	 */
 	public static WalletFunds of(final Map<String, Optional<AddressBalance>> balances,
 		final List<WalletTransaction> transactions, final SnapshotInfo snapshot, final ZoneId zone) {
+
+		return build(balances, known(balances), transactions, snapshot, zone);
+	}
+
+	/**
+	 * Works out the funds of an EVM wallet from the mints the mint storage spork promises its addresses. Those
+	 * addresses were never on the legacy chain, so the wallet has no snapshot addresses, whatever it is owed.
+	 *
+	 * @param balances every address of the wallet in its order, with what it is owed, or empty when it is owed
+	 *	nothing
+	 * @param snapshot the snapshot Hedgehog holds
+	 * @param zone the zone the months of the history are counted in
+	 * @return the wallet's funds, with no history and no snapshot addresses
+	 */
+	public static WalletFunds promised(final Map<String, Optional<AddressBalance>> balances,
+		final SnapshotInfo snapshot, final ZoneId zone) {
+
+		return build(balances, List.of(), List.of(), snapshot, zone);
+	}
+
+	/** Works out the funds from the balances and history, with the snapshot addresses as they were found. */
+	private static WalletFunds build(final Map<String, Optional<AddressBalance>> balances,
+		final List<AddressBalance> snapshotAddresses, final List<WalletTransaction> transactions,
+		final SnapshotInfo snapshot, final ZoneId zone) {
 
 		final BigDecimal total = balances.values().stream().flatMap(Optional::stream).map(AddressBalance::balance)
 			.reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -48,8 +86,16 @@ public record WalletFunds(BigDecimal total, BigDecimal historyNet, BigDecimal aw
 		return new WalletFunds(total, historyNet, total.subtract(historyNet).max(BigDecimal.ZERO),
 			sum(transactions, of(Kind.RECEIVED)), sum(transactions, of(Kind.SENT)).negate(),
 			sum(transactions, of(Kind.MINED).or(of(Kind.STAKED))), breakdown(balances), funded(balances),
-			transactions, monthly(transactions, zone), snapshot
+			snapshotAddresses, transactions, monthly(transactions, zone), snapshot
 		);
+	}
+
+	/**
+	 * Every address Hedgehog knows, in the order of the wallet. Hedgehog answers for an address that is in the
+	 * snapshot or owed a pending mint, and for no other, and the map keeps the order the wallet gave.
+	 */
+	private static List<AddressBalance> known(final Map<String, Optional<AddressBalance>> balances) {
+		return balances.values().stream().flatMap(Optional::stream).toList();
 	}
 
 	private static List<AddressBalance> funded(final Map<String, Optional<AddressBalance>> balances) {

@@ -103,6 +103,35 @@ public class WalletFundsTest {
 	}
 
 	@Example
+	public void shouldListEveryAddressHedgehogKnowsFundedEmptyOrOwedAMintInTheOrderOfTheWallet() {
+		final Map<String, Optional<AddressBalance>> balances = new LinkedHashMap<>();
+
+		balances.put("Hspent", balance("Hspent", "0", 4));
+		balances.put("Hpool", Optional.empty());
+		balances.put("Hfunded", balance("Hfunded", "1", 2));
+		balances.put("Hunknown", Optional.empty());
+		balances.put("Hmint", balance("Hmint", "25", 0));
+
+		final WalletFunds funds = WalletFunds.of(balances, List.of(), SNAPSHOT, ZoneOffset.UTC);
+
+		assertEquals(List.of("Hspent", "Hfunded", "Hmint"),
+			funds.snapshotAddresses().stream().map(AddressBalance::address).toList()
+		);
+	}
+
+	/* What the mint storage spork promises an EVM address counts as funds, but no EVM address is in the snapshot. */
+	@Example
+	public void shouldListNoSnapshotAddressesForAWalletOnlyPromisedMints() {
+		final WalletFunds funds = WalletFunds.promised(Map.of("0xabc", balance("0xabc", "25", 0)), SNAPSHOT,
+			ZoneOffset.UTC
+		);
+
+		same("25", funds.total());
+		same("25", funds.awaitingMint());
+		assertEquals(List.of(), funds.snapshotAddresses());
+	}
+
+	@Example
 	public void shouldCarryTheBalanceThroughMonthsWithoutTransactions() {
 		final WalletFunds funds = WalletFunds.of(Map.of("Hone", balance("Hone", "70", 2)), List.of(
 			tx("b", "2019-04-20T00:00:00Z", "-30", Kind.SENT),
