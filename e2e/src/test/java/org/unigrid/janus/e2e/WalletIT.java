@@ -40,8 +40,9 @@ public class WalletIT extends BrowserTest {
 		);
 	}
 
+	/* The address is searched too, and no Base58 address holds a 0, so a search for "0a" finds its row alone. */
 	private void openTheWalletLeftBehind() throws Exception {
-		rig().hedgehog().address(rig().addresses().get(0), "480", entry("aa", 1, "1020", EntryKind.RECEIVED),
+		rig().hedgehog().address(rig().addresses().get(0), "480", entry("0a", 1, "1020", EntryKind.RECEIVED),
 			entry("bb", 9, "-540", EntryKind.SENT)
 		);
 		rig().leaveWalletBehind();
@@ -82,8 +83,8 @@ public class WalletIT extends BrowserTest {
 		openTheWalletLeftBehind();
 		page().click("button.app__tab:has-text('Activity')");
 		assertThat(page().locator("#rows details")).hasCount(2);
-		searchFor("aa", 1);
-		assertThat(page().locator("#rows .ledger__txid")).hasText("aa");
+		searchFor("0a", 1);
+		assertThat(page().locator("#rows .ledger__txid")).hasText("0a");
 	}
 
 	@Example
