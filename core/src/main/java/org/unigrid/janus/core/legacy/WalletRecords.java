@@ -30,7 +30,7 @@ import java.util.Set;
  * in an encrypted wallet, so none of this needs the passphrase.
  */
 public final class WalletRecords {
-	private static final Set<String> KEY_RECORDS = Set.of("key", "wkey", "ckey");
+	static final Set<String> KEY_RECORDS = Set.of("key", "wkey", "ckey");
 	private static final String POOL_RECORD = "pool";
 	private static final byte[] POOL_PREFIX = {4, 'p', 'o', 'o', 'l'};
 	private static final int POOL_VERSION_AND_TIME = Integer.BYTES + Long.BYTES;
@@ -55,7 +55,7 @@ public final class WalletRecords {
 		try {
 			for (final BerkeleyFile.Entry entry : entries) {
 				final ByteBuffer key = littleEndian(entry.key());
-				final String type = new String(lengthPrefixed(key), StandardCharsets.US_ASCII);
+				final String type = type(key);
 
 				if (KEY_RECORDS.contains(type)) {
 					keys.add(publicKey(key));
@@ -70,11 +70,16 @@ public final class WalletRecords {
 		return keys;
 	}
 
-	private static ByteBuffer littleEndian(final byte[] bytes) {
+	/** The kind of a record, which every record's key starts with. */
+	static String type(final ByteBuffer key) {
+		return new String(lengthPrefixed(key), StandardCharsets.US_ASCII);
+	}
+
+	static ByteBuffer littleEndian(final byte[] bytes) {
 		return ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	private static byte[] publicKey(final ByteBuffer record) {
+	static byte[] publicKey(final ByteBuffer record) {
 		final byte[] key = lengthPrefixed(record);
 
 		if (!PUBLIC_KEY_SIZES.contains(key.length)) {
@@ -84,7 +89,7 @@ public final class WalletRecords {
 		return key;
 	}
 
-	private static byte[] lengthPrefixed(final ByteBuffer buffer) {
+	static byte[] lengthPrefixed(final ByteBuffer buffer) {
 		final int first = Byte.toUnsignedInt(buffer.get());
 		final long length = switch (first) {
 			case SHORT_LENGTH -> Short.toUnsignedInt(buffer.getShort());

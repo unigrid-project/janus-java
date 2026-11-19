@@ -75,6 +75,43 @@ public class LegacyKeyTest {
 	}
 
 	@Example
+	public void shouldReadTheDerAPlainWalletKeepsAKeyIn() {
+		final String twoInHex = HexFormat.of().formatHex(TWO);
+		final byte[] der = HexFormat.of().parseHex("3081250201010420" + twoInHex + "a08185");
+		final LegacyKey key = LegacyKey.fromDer(der, true);
+
+		assertArrayEquals(TWO, key.secret());
+		assertEquals("H78V5Mwegfjmemi2rMuVg93c8AwjirUdQH", key.address());
+	}
+
+	@Example
+	public void shouldPadAShortSecretOnTheLeftAsTheDaemonDoes() {
+		assertArrayEquals(TWO, LegacyKey.fromDer(HexFormat.of().parseHex("308106020101040102"), true).secret());
+	}
+
+	@Example
+	public void shouldRefuseWhatIsNotTheDerTheLegacyWalletWrites() {
+		for (final String der : new String[] {
+			"3006020101040102", "308106020102040102", "308106020101030102", "3081ff020101040102",
+			"30810602010104", "3081230201010421" + "01".repeat(33), "308106020101040100"
+		}) {
+			final byte[] bytes = HexFormat.of().parseHex(der);
+			assertThrows(IllegalArgumentException.class, () -> LegacyKey.fromDer(bytes, true), der);
+		}
+	}
+
+	@Example
+	public void shouldGiveThePublicKeyItsAddressIsMadeFrom() {
+		final LegacyKey compressed = LegacyKey.parse(COMPRESSED_TWO);
+		final LegacyKey uncompressed = LegacyKey.parse(UNCOMPRESSED_TWO);
+
+		assertEquals(33, compressed.publicKey().length);
+		assertEquals(65, uncompressed.publicKey().length);
+		assertEquals(compressed.address(), LegacyAddress.of(compressed.publicKey()));
+		assertEquals(uncompressed.address(), LegacyAddress.of(uncompressed.publicKey()));
+	}
+
+	@Example
 	public void shouldZeroTheSecretWhenWiped() {
 		final LegacyKey key = LegacyKey.parse(COMPRESSED_TWO);
 
